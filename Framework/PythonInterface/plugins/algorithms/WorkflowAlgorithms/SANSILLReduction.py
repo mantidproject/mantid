@@ -329,7 +329,8 @@ class SANSILLReduction(PythonAlgorithm):
             @param beam_ws: empty beam workspace
         """
         self._check_distances_match(mtd[ws], beam_ws)
-        self._check_wavelengths_match(mtd[ws], beam_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], beam_ws)
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
         radius = self.getProperty('BeamRadius').value
         shapeXML = self._cylinder(radius)
@@ -425,7 +426,8 @@ class SANSILLReduction(PythonAlgorithm):
             @ref_ws : reference workspace (water)
         """
         self._check_distances_match(mtd[ws], ref_ws)
-        self._check_wavelengths_match(mtd[ws], ref_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], ref_ws)
         sample_l2 = mtd[ws].getRun().getLogData('L2').value
         ref_l2 = ref_ws.getRun().getLogData('L2').value
         flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
@@ -457,7 +459,8 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
         self._check_distances_match(mtd[ws], beam_ws)
-        self._check_wavelengths_match(mtd[ws], beam_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], beam_ws)
 
     def _apply_transmission(self, ws, transmission_ws):
         """
@@ -493,7 +496,8 @@ class SANSILLReduction(PythonAlgorithm):
         if not self._check_processed_flag(container_ws, 'Container'):
             self.log().warning('Container input workspace is not processed as container.')
         self._check_distances_match(mtd[ws], container_ws)
-        self._check_wavelengths_match(mtd[ws], container_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], container_ws)
         Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
 
     def _apply_parallax(self, ws):
