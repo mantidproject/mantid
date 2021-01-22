@@ -56,8 +56,33 @@ In the reduction workflows this option is deprecated.
 Wedges
 ######
 
-For unisotropic scatterer, the *I(Q)* can be calculated for different angular sectors (or wedges).
-This can be done in two ways: symmetric wedges (default) or asymmetric wedges.
+For anisotropic scatterer, the *I(Q)* can be calculated for different angular sectors (or wedges).
+
+These sectors can be defined in two different ways : either by drawing them, or by defining them.
+There are also two integration mode: symmetric wedges (default) or asymmetric wedges.
+
+Defining wedges
+~~~~~~~~~~~~~~~
+
+Wedges are defined by the ``NumberOfWedges``, ``WedgeAngle`` and ``WedgeOffset`` parameters.
+The trigonometrical circle is split in ``NumberOfWedges`` sectors, equally spaced, spanning a range of ``WedgeAngle``.
+
+Drawing sectors
+~~~~~~~~~~~~~~~
+
+It is also possible to use the instrument viewer to draw the shape of the angular sector. Only sector shapes are currently supported,
+and they must be drawn in the Full 3D, Z- projection, without any rotation (translation and zoom are supported). Once the shapes are
+drawn, they must be saved using the ``Save shapes to table`` button.
+
+.. figure:: /images/Q1DWeightedShapeIntegration.png
+    :align: center
+    :width: 1000
+
+Contrary to the wedges defined in the previous manner, the sectors don't need to be regularly placed, centered or even symmetrical.
+
+When running ``Q1DWeighted``, the created table workspace - generally named `MaskShapes` - can be provided
+as an argument to the ``ShapeTable`` field. The algorithm will then use the drawn shapes as wedges, and ignore ``NumberOfWedges``,
+``WedgeAngle`` and ``WedgeOffset`` fields.
 
 Symmetric
 ~~~~~~~~~
@@ -68,6 +93,11 @@ The wedges output group will have two workspaces: one for the red region, one fo
 .. figure:: /images/wedge_symm.png
   :align: center
   :width: 600
+
+In the case of drawn sectors, the symmetric computation will happen only if the pair of sectors has been provided,
+and if they are perfectly symmetrical around their centers. Copy pasting the sectors using Ctrl+C - Ctrl+V or editing
+the values directly in the instrument viewer is thus recommended to ensure perfect alignment.
+A sector without its symmetrical counterpart will be integrated asymmetrically.
 
 Asymmetric
 ~~~~~~~~~~
