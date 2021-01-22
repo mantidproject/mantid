@@ -101,8 +101,7 @@ splitConstraintString(const QString &constraint) {
     try // find position of the parameter name in expression
     {
       boost::lexical_cast<double>(expr[1].name());
-    }
-    catch (...) {
+    } catch (...) {
       paramPos = 1;
     }
     std::string op = expr[1].operator_name();
