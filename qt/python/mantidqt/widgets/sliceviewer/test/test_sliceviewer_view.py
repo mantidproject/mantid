@@ -10,9 +10,10 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from numpy import hstack
 
 import matplotlib as mpl
+from numpy import hstack
+
 mpl.use('Agg')
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
@@ -24,7 +25,6 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
-from qtpy.QtGui import QCloseEvent  # noqa: E402
 from math import inf  # noqa: E402
 
 
