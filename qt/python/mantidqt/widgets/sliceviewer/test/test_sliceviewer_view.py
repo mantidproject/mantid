@@ -30,25 +30,31 @@ from math import inf  # noqa: E402
 
 @start_qapplication
 class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
-    @classmethod
-    def setUpClass(cls):
-        cls.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                              Extents='-3,3,-10,10,-1,1',
-                                              SignalInput=range(100),
-                                              ErrorInput=range(100),
-                                              NumberOfBins='5,5,4',
-                                              Names='Dim1,Dim2,Dim3',
-                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                              OutputWorkspace='ws_MD_2d')
-        cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                       Extents='-10,10,-10,10,-10,10',
-                                       Names='A,B,C',
-                                       Units='r.l.u.,r.l.u.,r.l.u.',
-                                       Frames='HKL,HKL,HKL',
-                                       OutputWorkspace='hkl_ws')
+    def setUp(self):
+        self.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
+                                               Extents='-3,3,-10,10,-1,1',
+                                               SignalInput=range(100),
+                                               ErrorInput=range(100),
+                                               NumberOfBins='5,5,4',
+                                               Names='Dim1,Dim2,Dim3',
+                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                               OutputWorkspace='ws_MD_2d')
+        self.hkl_ws = CreateMDWorkspace(Dimensions=3,
+                                        Extents='-10,10,-10,10,-10,10',
+                                        Names='A,B,C',
+                                        Units='r.l.u.,r.l.u.,r.l.u.',
+                                        Frames='HKL,HKL,HKL',
+                                        OutputWorkspace='hkl_ws')
         expt_info = CreateSampleWorkspace()
-        cls.hkl_ws.addExperimentInfo(expt_info)
+        self.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
+
+    def tearDown(self):
+        for ii in QApplication.topLevelWidgets():
+            ii.close()
+        QApplication.sendPostedEvents()
+        QApplication.sendPostedEvents()
+        self.assert_no_toplevel_widgets()
 
     def test_deleted_on_close(self):
         pres = SliceViewer(self.histo_ws)
@@ -244,7 +250,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_created()
         pres.clear_observer = mock.MagicMock()
 
-        pres.view.closeEvent(QCloseEvent())
+        pres.view.close()
 
         pres.clear_observer.assert_called_once()
 

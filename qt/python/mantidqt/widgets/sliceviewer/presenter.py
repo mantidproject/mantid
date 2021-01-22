@@ -69,6 +69,8 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
+        self.view.destroyed.connect(self._on_view_destroyed)
+
     def new_plot_MDH(self):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
@@ -449,3 +451,6 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def _on_view_destroyed(self):
+        self.clear_observer()

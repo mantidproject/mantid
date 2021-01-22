@@ -526,7 +526,7 @@ class SliceViewerDataView(QWidget):
             self.conf.set(POWERSCALE, exponent)
 
 
-class SliceViewerView(ObservingView, QWidget):
+class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
     close_signal = Signal()
     rename_signal = Signal(str)
