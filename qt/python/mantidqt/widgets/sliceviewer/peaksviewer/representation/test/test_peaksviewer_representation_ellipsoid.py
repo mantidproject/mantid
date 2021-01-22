@@ -185,7 +185,8 @@ class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCa
         c = 1
         zp = 0
 
-        slice_transform = lambda x: (x[1], x[0], x[2])
+        def slice_transform(x):
+            return (x[1], x[0], x[2])
 
         expected_slice_origin = (0, 0, 0)
         expected_major_radius = 2

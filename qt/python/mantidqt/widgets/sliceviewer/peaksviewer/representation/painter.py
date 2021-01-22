@@ -24,7 +24,8 @@ class EllipticalShell(Patch):
     """
 
     def __str__(self):
-        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, frac_thick={self.frac_thick}, angle={self.angle})"
+        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, " \
+               f"frac_thick={self.frac_thick}, angle={self.angle})"
 
     def __init__(self, center, width, height, frac_thick, angle=0.0, **kwargs):
         """
