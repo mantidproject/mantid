@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -8,7 +9,6 @@
 import io
 import sys
 import unittest
-from unittest import mock
 from unittest.mock import patch
 
 import matplotlib as mpl
@@ -244,15 +244,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
-
-    def test_close_event(self):
-        pres = SliceViewer(self.histo_ws)
-        self.assert_widget_created()
-        pres.clear_observer = mock.MagicMock()
-
-        pres.view.close()
-
-        pres.clear_observer.assert_called_once()
 
     def test_plot_matrix_xlimits_ignores_monitors(self):
         xmin = 5000
