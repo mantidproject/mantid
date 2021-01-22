@@ -171,10 +171,10 @@ class GenerateLogbook(PythonAlgorithm):
         data_path = os.path.join(self._data_directory, data_array[0] + '.nxs')
         with h5py.File(data_path, 'r') as f:
             for entry in self._metadata_entries:
-                data = f.get(entry)[0]
-                if data is None:
-                    self.log().error("The requested entry", entry, "is not present in the raw data. \
-                        Please provide correct instrument corresponding to the data.")
+                try:
+                    f.get(entry)[0]
+                except TypeError:
+                    self.log().error("The requested entry: {}, is not present in the raw data. ".format(entry))
                     raise RuntimeError("The requested entry is not present in the raw data.")
 
     def _prepare_logbook_ws(self):
