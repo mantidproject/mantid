@@ -582,9 +582,12 @@ class AbinsAlgorithm:
         return atom.neutron()[scattering_keys[scattering]]
 
     @staticmethod
-    def set_workspace_units(wrk, layout='1D'):
+    def set_workspace_units(wrk, layout='1D', energy_units='cm-1'):
         """
         Sets x and y units for a workspace.
+
+        :param wrk: workspace which units should be set
+        :type Workspace2D:
 
         :param layout: layout of data in Workspace2D.
             - '1D' is a typical indirect spectrum, with energy transfer on Axis
@@ -593,19 +596,27 @@ class AbinsAlgorithm:
               S on Axis 1 and energy transfer on Axis 2
         :type str:
 
-        :param wrk: workspace which units should be set
-        :type Workspace2D:
+        :param energy_units:
+            Preferred units in user-friendly notation. ('cm-1' or 'meV')
+        :type str:
         """
 
+        energy_units_map = {'cm-1': 'DeltaE_inWavenumber',
+                            'mev': 'DeltaE'}
+        energy_units_str = energy_units_map.get(energy_units.lower(), '')
+
+        if not energy_units_str:
+            raise ValueError(f"Energy unit {energy_units} not recognised.")
+
         if layout == '1D':
-            mtd[wrk].getAxis(0).setUnit("DeltaE_inWavenumber")
+            mtd[wrk].getAxis(0).setUnit(energy_units_str)
             mtd[wrk].setYUnitLabel("S / Arbitrary Units")
             mtd[wrk].setYUnit("Arbitrary Units")
         elif layout == '2D':
             mtd[wrk].getAxis(0).setUnit("MomentumTransfer")
             mtd[wrk].setYUnitLabel("S / Arbitrary Units")
             mtd[wrk].setYUnit("Arbitrary Units")
-            mtd[wrk].getAxis(1).setUnit("DeltaE_inWavenumber")
+            mtd[wrk].getAxis(1).setUnit(energy_units_str)
         else:
             raise ValueError('Unknown data/units layout "{}"'.format(layout))
 

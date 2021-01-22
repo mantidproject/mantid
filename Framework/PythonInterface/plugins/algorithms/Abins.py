@@ -12,8 +12,8 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import GroupWorkspaces, Load
-from mantid.kernel import Direction
+from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
+from mantid.kernel import Direction, StringListValidator
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -36,6 +36,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
+    _energy_units = None
 
     def category(self) -> str:
         return "Simulation"
@@ -58,11 +59,18 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
+        self.declareProperty(name="EnergyUnits",
+                             defaultValue="cm-1",
+                             direction=Direction.Input,
+                             validator=StringListValidator(["cm-1", "meV"]),
+                             doc="Energy units for output workspace and experimental file")
+
         # Declare Instrument-related properties
         self.declare_instrument_properties(
             default="TOSCA", choices=ONE_DIMENSIONAL_INSTRUMENTS,
             multiple_choice_settings=[('Setting', 'settings',
-                                       'Setting choice for this instrument (e.g. monochromator)')])
+                                       'Setting choice for this instrument (e.g. monochromator)')],
+                )
 
     def validateInputs(self) -> Dict[str,str]:
         issues = dict()
@@ -138,7 +146,11 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             workspaces.insert(0, self._create_experimental_data_workspace().name())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
-        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+        gws = GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+
+        # 7b) Convert units
+        if self._energy_units == 'meV':
+            ConvertUnits(InputWorkspace=gws, OutputWorkspace=gws, EMode='Indirect', Target='DeltaE')
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
@@ -220,7 +232,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         :returns: workspace with experimental data
         """
         experimental_wrk = Load(self._experimental_file)
-        self.set_workspace_units(experimental_wrk.name())
+        self.set_workspace_units(experimental_wrk.name(), energy_units=self._energy_units)
 
         return experimental_wrk
 
@@ -279,6 +291,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
+        self._energy_units = self.getProperty("EnergyUnits").value
 
         # Sampling mesh is determined by
         # abins.parameters.sampling['min_wavenumber']
