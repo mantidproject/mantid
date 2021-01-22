@@ -24,7 +24,7 @@ class GenerateLogbook(PythonAlgorithm):
     _facility = None
     _instrument = None
     _numor_range = None
-    _metadata_headlines = None
+    _metadata_headers = None
     _metadata_entries = None
 
     def category(self):
@@ -80,11 +80,15 @@ class GenerateLogbook(PythonAlgorithm):
                                           action=FileAction.OptionalSave),
                              doc='Comma-separated output file.')
 
-        self.declareProperty('MetadataEntries', '',
-                             doc='Nexus paths for additional metadata to be included in the logbook.')
+        self.declareProperty('OptionalHeaders', '',
+                             doc='Names of optional metadata to be included in the logbook. Entries need to be specified'
+                                 'in the instrument IPF.')
 
-        self.declareProperty('MetadataHeaders', '',
-                             doc='Names of those additional entries.')
+        self.declareProperty('CustomEntries', '',
+                             doc='Custom NeXus paths for additional metadata to be included in the logbook.')
+
+        self.declareProperty('CustomHeaders', '',
+                             doc='Names of those additional custom entries.')
 
     def _prepare_file_array(self):
         facility_name_len = 0
@@ -96,7 +100,7 @@ class GenerateLogbook(PythonAlgorithm):
 
     def _get_default_entries(self):
         self._metadata_entries = []
-        self._metadata_headlines = ['run_number']
+        self._metadata_headers = ['run_number']
         tmp_instr = self._instrument + '_tmp'
         LoadEmptyInstrument(InstrumentName=self._instrument, OutputWorkspace=tmp_instr)
         parameters = mtd[tmp_instr].getInstrument()
@@ -105,7 +109,7 @@ class GenerateLogbook(PythonAlgorithm):
             # logbook_optional_entries = parameters.getStringParameter('logbook_default_entries')[0]
             logbook_headers = parameters.getStringParameter('logbook_default_headers')[0]
             self._metadata_entries += logbook_entries.split(',')
-            self._metadata_headlines += logbook_headers.split(',')
+            self._metadata_headers += logbook_headers.split(',')
         except IndexError:
             raise RuntimeError("The logbook entries and headers are not defined for {}".format(self._instrument))
         if not self.getProperty('MetadataEntries').isDefault:
@@ -130,13 +134,13 @@ class GenerateLogbook(PythonAlgorithm):
     def _prepare_logbook_ws(self):
         logbook_ws = self.getPropertyValue('OutputWorkspace')
         CreateEmptyTableWorkspace(OutputWorkspace=logbook_ws)
-        for headline in self._metadata_headlines:
+        for headline in self._metadata_headers:
             mtd[logbook_ws].addColumn("str", headline)
         return logbook_ws
 
     def _fill_logbook(self, logbook_ws, data_array):
         """Fills out the logbook with the requested meta-data."""
-        n_entries = len(self._metadata_headlines)
+        n_entries = len(self._metadata_headers)
         for file_name in data_array:
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
