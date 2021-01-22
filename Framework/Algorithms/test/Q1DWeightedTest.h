@@ -314,14 +314,88 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
     TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("AsymmetricWedges", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("TableShape", "MaskShapes"))
+
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
+
+    WorkspaceGroup_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = std::dynamic_pointer_cast<WorkspaceGroup>(
+            AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
+    TS_ASSERT_EQUALS(result->getNumberOfEntries(), 2)
+  }
+
+  void testTableShapeResults() {
+    // test the results computed by the table shape method against those from
+    // the usual method
+
+    createShapeTable(true);
+
+    std::string outputWS = "q1d_shapes";
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("WedgeWorkspace", outputWS + "_wedges"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("AsymmetricWedges", "0"))
+    TS_ASSERT_THROWS_NOTHING(
         radial_average.setPropertyValue("TableShape", "MaskShapes"))
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
-    MatrixWorkspace_sptr result;
+    std::string refWS = "q1d_wedges";
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWS)))
-    //    TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
+        radial_average.setPropertyValue("InputWorkspace", m_inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputWorkspace", refWS))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("OutputBinning", "0.001,0.001,0.08"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("NumberOfWedges", "2"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("WedgeAngle", "90"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("WedgeOffset", "0"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("AsymmetricWedges", "0"))
+    TS_ASSERT_THROWS_NOTHING(
+        radial_average.setPropertyValue("WedgeWorkspace", refWS + "_wedges"))
+
+    TS_ASSERT_THROWS_NOTHING(radial_average.execute())
+
+    WorkspaceGroup_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = std::dynamic_pointer_cast<WorkspaceGroup>(
+            AnalysisDataService::Instance().retrieve(outputWS + "_wedges")))
+
+    WorkspaceGroup_sptr ref = std::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve(refWS + "_wedges"));
+
+    auto wedge1 =
+        std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
+    auto wedge2 =
+        std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
+    TS_ASSERT(wedge1)
+    TS_ASSERT(wedge2)
+
+    auto ref1 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(0));
+    auto ref2 = std::dynamic_pointer_cast<MatrixWorkspace>(result->getItem(1));
+
+    double tolerance = 1e-12;
+
+    for (size_t i = 0; i < wedge1->y(0).size(); ++i) {
+      TS_ASSERT_DELTA(ref1->y(0)[i], wedge1->y(0)[i], tolerance);
+    }
+    for (size_t i = 0; i < wedge2->y(0).size(); ++i) {
+      TS_ASSERT_DELTA(ref2->y(0)[i], wedge2->y(0)[i], tolerance);
+    }
   }
 
 private:
@@ -354,7 +428,7 @@ private:
     mover.execute();
   }
 
-  void createShapeTable() {
+  void createShapeTable(bool alignWithWedges = false) {
     // since the instrument viewer mostly lacks an API, we create a dummy
     // MaskShapes table
 
@@ -363,17 +437,46 @@ private:
     table->addColumn("str", "Index");
     table->addColumn("str", "Parameters");
 
-    std::string sector = createDummySector(0.1, 0.5, 230, 10, 0.2, -0.1);
-    TableRow row = table->appendRow();
-    row << std::to_string(1) << sector;
+    std::string sector;
+    std::string viewport;
+    if (!alignWithWedges) {
+      sector = createDummySector(0.1, 0.5, 230, 10, 0.2, -0.1);
+      TableRow row = table->appendRow();
+      row << std::to_string(1) << sector;
 
-    sector = createDummySector(0, 10, 0, 15, -0.2, 0);
-    row = table->appendRow();
-    row << std::to_string(2) << sector;
+      sector = createDummySector(0, 10, 0, 15, -0.2, 0);
+      row = table->appendRow();
+      row << std::to_string(2) << sector;
 
-    std::string viewport = createDummyViewport(0.2, 0.1, 1.2, 0, 0, 1, 0);
-    row = table->appendRow();
-    row << std::to_string(-1) << viewport;
+      viewport = createDummyViewport(0.2, 0.1, 1.2, 0, 0, 1, 0);
+      row = table->appendRow();
+      row << std::to_string(-1) << viewport;
+    } else {
+      double centerXOffset = 0.5;
+      double centerYOffset = -0.3;
+
+      double zoom = 1.2;
+      double innerRadius = 0;
+      double outerRadius = 100;
+      double startAngle = 7 * M_PI / 4;
+      double endAngle = M_PI / 4;
+
+      for (size_t i = 0; i < 4; ++i) {
+
+        sector = createDummySector(innerRadius * zoom, outerRadius * zoom,
+                                   startAngle, endAngle, centerXOffset * zoom,
+                                   centerYOffset * zoom);
+        TableRow row = table->appendRow();
+        row << std::to_string(i) << sector;
+        startAngle = fmod(startAngle + M_PI / 2, 2 * M_PI);
+        endAngle = fmod(endAngle + M_PI / 2, 2 * M_PI);
+      }
+
+      viewport = createDummyViewport(centerXOffset * zoom, centerYOffset * zoom,
+                                     zoom, 0, 0, 1, 0);
+      TableRow row = table->appendRow();
+      row << std::to_string(-1) << viewport;
+    }
 
     AnalysisDataService::Instance().addOrReplace("MaskShapes", table);
   }
@@ -382,10 +485,9 @@ private:
                                 double startAngle, double endAngle,
                                 double centerX, double centerY) {
     std::stringstream ss;
-    ss << "Type"
-       << "sector\n";
-    ss << "Parameters" << innerRadius << outerRadius << startAngle << endAngle
-       << centerX << centerY;
+    ss << "Type\tsector" << std::endl;
+    ss << "Parameters\t" << innerRadius << "\t" << outerRadius << "\t"
+       << startAngle << "\t" << endAngle << "\t" << centerX << "\t" << centerY;
     // the other parameters are omitted, since they are not useful for us
     return ss.str();
   }
@@ -394,10 +496,10 @@ private:
                                   double rotation0, double rotation1,
                                   double rotation2, double rotation3) {
     std::stringstream ss;
-    ss << "Translation" << transX << " " << transY << std::endl;
-    ss << "Zoom" << zoom << std::endl;
-    ss << "Rotation" << rotation0 << rotation1 << rotation2 << rotation3;
-
+    ss << "Translation\t" << transX << "\t" << transY << std::endl;
+    ss << "Zoom\t" << zoom << std::endl;
+    ss << "Rotation\t" << rotation0 << "\t" << rotation1 << "\t" << rotation2
+       << "\t" << rotation3;
     return ss.str();
   }
 
