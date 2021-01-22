@@ -14,9 +14,6 @@ import numpy.linalg as linalg
 from .alpha import compute_alpha
 from .painter import Painted
 
-import pydevd_pycharm
-pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
-
 
 class EllipsoidalIntergratedPeakRepresentation():
     """Provide methods to display a representation of a slice through an
@@ -196,7 +193,7 @@ def calculate_ellipsoid_matrix(axis_a, axis_b, axis_c, a, b, c, transform):
     # transformation matrix (inverse gives transform from MD to view basis)
     R = np.vstack((transform((1, 0, 0)), transform((0, 1, 0)), transform((0, 0, 1))))
     # matrix with eigenvectors (in view basis) in columns
-    axes_dir = linalg.inv(R) @ np.hstack((axis_a[:,None], axis_b[:,None], axis_c[:,None]))
+    axes_dir = linalg.inv(R) @ np.hstack((axis_a[:, None], axis_b[:, None], axis_c[:, None]))
 
     return axes_dir @ axes_lengths @ np.transpose(axes_dir)
 
