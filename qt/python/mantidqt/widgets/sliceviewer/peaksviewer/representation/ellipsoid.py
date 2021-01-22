@@ -118,11 +118,15 @@ def _bkgd_ellipsoid_info(shape_info):
     """
     a, b, c = float(shape_info["background_outer_radius0"]), float(
         shape_info["background_outer_radius1"]), float(shape_info["background_outer_radius2"])
-    inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
-        shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
-    width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional width of shell
+    if min([a, b, c]) > 1e-15:
+        inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
+            shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
+        width = (max((a, b, c)) - max((inner_a, inner_b, inner_c))) / max((a, b, c))  # fractional width of shell
+    else:
+        # no background specified (inner bg defaults to peak radius) assign unphysical width
+        width = -1
 
-    return (a, b, c, width)
+    return a, b, c, width
 
 
 def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp, transform):
