@@ -111,7 +111,7 @@ configure_file(
 )
 
 # Package version
-if(WIN32 OR (APPLE AND ENABLE_MANTIDPLOT))
+if(WIN32)
   # NeXus library is in the same place relative to the Python library
   get_filename_component(NEXUSLIB_FILE ${NEXUSLIB} NAME)
   set(NEXUSLIB ../../${NEXUSLIB_FILE})
