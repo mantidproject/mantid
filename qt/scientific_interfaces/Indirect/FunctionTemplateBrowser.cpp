@@ -38,12 +38,12 @@ FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
     : QWidget(parent), m_decimals(6) {}
 
 FunctionTemplateBrowser::~FunctionTemplateBrowser() {
-  // m_browser->unsetFactoryForManager(m_stringManager);
-  // m_browser->unsetFactoryForManager(m_doubleManager);
-  // m_browser->unsetFactoryForManager(m_intManager);
-  // m_browser->unsetFactoryForManager(m_boolManager);
-  // m_browser->unsetFactoryForManager(m_enumManager);
-  // m_browser->unsetFactoryForManager(m_parameterManager);
+  m_browser->unsetFactoryForManager(m_stringManager);
+  m_browser->unsetFactoryForManager(m_doubleManager);
+  m_browser->unsetFactoryForManager(m_intManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
+  m_browser->unsetFactoryForManager(m_enumManager);
+  m_browser->unsetFactoryForManager(m_parameterManager);
 }
 
 void FunctionTemplateBrowser::createBrowser() {

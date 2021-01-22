@@ -4,6 +4,9 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
+  FqFitDataPresenterTest.h
+  FqFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
   IndirectDataValidationHelperTest.h
   IndirectDataTablePresenterTest.h
   IndirectFitAnalysisTabTest.h
@@ -22,9 +25,6 @@ set(
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
-  FqFitDataPresenterTest.h
-  FqFitModelTest.h
-  IDAFunctionParameterEstimationTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
