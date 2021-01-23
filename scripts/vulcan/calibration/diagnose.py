@@ -2,8 +2,156 @@
 from mantid.simpleapi import mtd
 from mantid.simpleapi import Load, CreateGroupingWorkspace, FitPeaks
 import numpy as np
-from typing import Tuple, Any
+from typing import Tuple, Any, Union
 from matplotlib import pyplot as plt
+
+
+class DiagnosticData(object):
+    """
+    Class to hold various diagnostic data for visualization
+    """
+    def __init__(self, diamond_ws, pixels,
+                 expected_peak_pos_d: float,
+                 peak_range_d: Tuple[float, float],
+                 tag: str):
+        """Init
+
+        Parameters
+        ----------
+        diamond_ws:
+            diamond MatrixWorkspace
+        pixels: ~numpy.ndarray
+            array of pixels (workspace indexed in consecutive order)
+        expected_peak_pos_d: float
+            expected peak position in dSpacing
+        peak_range_d: ~tuple
+            lower and upper boundary
+        tag: str
+            like prefix for output workspace
+        """
+        # workspace in D
+        self.diamond_ws = diamond_ws
+        # pixels (workspace indexes)
+        self.pixels = pixels
+        # expected peak position
+        self.expected_peak_pos_d = expected_peak_pos_d
+        # peak range
+        self.peak_range_d = peak_range_d
+        # peak centers
+        self.peak_centers_fit = None
+        self.peak_centers_max = None
+        # tag
+        self.tag = tag
+
+    def find_peaks_centers(self):
+        # get peak center by find out maximum value inside given range
+        _,  self.peak_centers_max = observe_peak_centers(self.diamond_ws,
+                                                         (self.pixels[0], self.pixels[-1]),
+                                                         self.expected_peak_pos_d,
+                                                         self.peak_range_d,
+                                                         'max')
+        # get peak center by fitting Gaussian
+        print(f'{self.diamond_ws}')
+        print(f'{self.pixels}')
+        print(f'{self.expected_peak_pos_d}')
+        print(f'{self.peak_range_d}')
+        _, self.peak_centers_fit = get_peak_centers(self.diamond_ws,
+                                                    (self.pixels[0], self.pixels[-1]),
+                                                    self.expected_peak_pos_d,
+                                                    self.peak_range_d,
+                                                    self.tag)
+
+
+class DiagnosticPlot(object):
+    """
+    Class to handle data structure and methods to plot
+    """
+    def __init__(self, num_rows: int, num_cols: int):
+        """
+
+        Parameters
+        ----------
+        num_rows: int
+            number of rows in the output figure
+        num_cols: int
+            number of columns in the output figure
+        """
+        self._num_rows = num_rows
+        self._num_cols = num_cols
+
+        self._matrix = dict()  # key = cell location such as (0, 0), (0, 1) for row 0, column 1 and etc
+        self._title = dict()
+
+    def set_cell(self, row: int, column: int,
+                 diagnostic_data: DiagnosticData,
+                 title: str):
+        self._matrix[(row, column)] = diagnostic_data
+        self._title[(row, column)] = title
+
+    def plot(self, center_find_method, png_name: Union[None, str], relative_position=True):
+        """Plot
+
+        Parameters
+        ----------
+        center_find_method: str
+            method how peak centers are found: max or fit
+        png_name: None, str
+            if specified, then save the figure rather than plot
+
+        Returns
+        -------
+
+        """
+        # Clear canvas
+        # plt.cla()
+
+        # Protype multiple plots
+        fig = plt.figure()
+
+        # ax1 = fig.add_subplot(221)
+        # ax1.plot([(1, 2), (3, 4)], [(4, 3), (2, 3)])
+        #
+        # ax2 = fig.add_subplot(224)
+        # ax2.plot([(7, 2), (5, 3)], [(1, 6), (9, 5)])
+        #
+        # plt.show()
+
+        for index, row_col in enumerate(self._matrix.keys()):
+            # get row and columun
+            row, column = row_col
+
+            # get raw data
+            vec_pixels = self._matrix[(row, column)].pixels
+            vec_peak_pos = self._matrix[(row, column)].peak_centers_fit
+
+            print(f'Number of NaN in peak positions: {len(np.where(np.isnan(vec_peak_pos))[0])}')
+
+            # process
+            if relative_position:
+                vec_peak_pos = 2 * (
+                        vec_peak_pos - self._matrix[(row, column)].expected_peak_pos_d) / (
+                        vec_peak_pos + self._matrix[(row, column)].expected_peak_pos_d)
+                vec_peak_pos = 1 - vec_peak_pos
+
+            # set up plot
+            plot_index = self._num_rows * 100 + self._num_cols * 10 + (index + 1)
+            print(f'subplot index = {plot_index}')
+
+            ax_i = fig.add_subplot(plot_index)
+            ax_i.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
+                      label=self._title[(row, column)])
+
+            # Legend setup
+            plt.legend()
+
+            # plt.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
+            #          label=self._title[(row, column)])
+
+        # Save or show
+        if png_name:
+            plt.savefig(png_name)
+        else:
+            plt.show()
 
 
 def get_peak_centers(diamond_ws,
@@ -42,8 +190,8 @@ def get_peak_centers(diamond_ws,
     # Default to Gaussian and Linear background
     FitPeaks(InputWorkspace=diamond_ws,
              OutputWorkspace=out_peak_pos_ws,
-             StartWorkspaceIndex=first_ws_index,
-             StopWorkspaceIndex=last_ws_index - 1,
+             StartWorkspaceIndex=int(first_ws_index),
+             StopWorkspaceIndex=int(last_ws_index),
              PeakCenters=f'{peak_center}',
              FitWindowBoundaryList=f'{min_d}, {max_d}',
              FittedPeaksWorkspace=f'{tag}_model',
@@ -84,7 +232,6 @@ def observe_peak_centers(diamond_ws,
 
     """
     # TODO FIXME - assumption: Diamond Workspace is NOT ragged
-
     first_ws_index, last_ws_index = ws_index_range
 
     # Get X and Y arrays
@@ -106,7 +253,6 @@ def observe_peak_centers(diamond_ws,
             # maximum value
             # max_y_i = np.max(y_array[index][min_d_index:max_d_index])
             max_y_index = np.argmax(y_array[index][min_d_index:max_d_index]) + min_d_index
-            # print(f'Max Y = {max_y_i} @ {max_y_index} ... x = {x_array[index][max_y_index]}')
             pos_x = x_array[index][max_y_index]
         elif method == 'com':
             # center of mass
@@ -135,15 +281,14 @@ def create_groups():
     return group_ws
 
 
-def test_main():
+def test_main_old():
     """Test main for prototyping
     """
     # Inputs
     diamond_file = 'VULCAN_164960_matrix.nxs'
     peak_pos = 1.076
     peak_range = 1.00, 1.15
-    bank_id = 1
-    ref_spec_index = 100
+    bank_id = 3
 
     # Load data
     diamond_ws = Load(Filename=diamond_file, OutputWorkspace='VULCAN_164960_matrix')
@@ -165,7 +310,44 @@ def test_main():
     plt.legend()
     plt.show()
 
-    # workspace
+    return
+
+
+def test_main():
+    """Test main for prototyping
+    """
+    # Inputs
+    diamond_file = 'VULCAN_164960_matrix.nxs'
+    peak_pos = 1.076
+    peak_range = 1.00, 1.15
+    bank_id = 3
+
+    # Load data
+    diamond_ws = Load(Filename=diamond_file, OutputWorkspace='VULCAN_164960_matrix')
+
+    # dictionary for bank
+    bank_pixel_dict = {1: (0, 3234), 2: (3234, 6468), 3: (6468, 24900)}
+
+    # workflow
+
+    # Init diagnostic instance
+    bank_id = 1
+    spec_range = bank_pixel_dict[bank_id]
+    diagnostic_bank1_peak1 = DiagnosticData(diamond_ws, np.arange(spec_range[0], spec_range[1]),
+                                            peak_pos, peak_range, f'bank{bank_id}_peak1')
+    diagnostic_bank1_peak1.find_peaks_centers()
+
+    bank_id = 3
+    spec_range = bank_pixel_dict[bank_id]
+    diagnostic_bank1_peak3 = DiagnosticData(diamond_ws, np.arange(spec_range[0], spec_range[1]),
+                                            peak_pos, peak_range, f'bank{bank_id}_peak1')
+    diagnostic_bank1_peak3.find_peaks_centers()
+
+    # Plot
+    diagnostic_plot = DiagnosticPlot(2, 1)
+    diagnostic_plot.set_cell(0, 0, diagnostic_bank1_peak1, 'Bank 1, Peak 1.076')
+    diagnostic_plot.set_cell(1, 0, diagnostic_bank1_peak3, 'Bank 3, Peak 1.076')
+    diagnostic_plot.plot('fit', None)
 
     return
 
