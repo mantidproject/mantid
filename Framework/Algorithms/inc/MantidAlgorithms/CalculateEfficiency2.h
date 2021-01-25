@@ -79,18 +79,22 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
+  bool processGroups() override;
+
+  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr &);
+
   /// Sum all detectors, excluding monitors and masked detectors
   SummedResults sumUnmaskedAndDeadPixels(const API::MatrixWorkspace &workspace);
 
   void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
                                  const SummedResults &results);
 
-  const std::string mergeMeasurementsWithOffset();
+  API::MatrixWorkspace_sptr mergeGroup(API::WorkspaceGroup_sptr &);
 
   /// Minimum efficiency. Pixels with lower efficiency will be masked
   double m_minThreshold{0.};
   /// Maximum efficiency. Pixels with higher efficiency will be masked
-  double m_maxThreshold{0.};
+  double m_maxThreshold{2.};
 };
 
 } // namespace Algorithms

@@ -27,11 +27,10 @@ using namespace DataObjects;
 /// A private namespace for property names.
 namespace PropertyNames {
 const static std::string INPUT_WORKSPACE{"InputWorkspace"};
-const static std::string INPUT_WORKSPACE_GROUP{"InputWorkspaceGroup"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string MIN_THRESHOLD{"MinThreshold"};
 const static std::string MAX_THRESHOLD{"MaxThreshold"};
-const static std::string MERGE_OFFSETS{"MergeOffsets"};
+const static std::string MERGE_GROUP{"MergeGroup"};
 } // namespace PropertyNames
 
 namespace { // anonymous
@@ -70,18 +69,13 @@ static void applyBadPixelThreshold(MatrixWorkspace &outputWS,
  *
  */
 void CalculateEfficiency2::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
-                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      PropertyNames::INPUT_WORKSPACE, "", Direction::Input),
                   "The workspace containing the flood data");
   declareProperty(
-      std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>(
-          PropertyNames::INPUT_WORKSPACE_GROUP, "", Direction::Input,
-          PropertyMode::Optional),
-      "The workspace group containing the flood data that will be merged");
-  declareProperty(
       std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WORKSPACE, "",
-                                            Direction::Output),
+                                            Direction::Output,
+                                            PropertyMode::Optional),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
@@ -90,38 +84,28 @@ void CalculateEfficiency2::init() {
                   "Minimum threshold for a pixel to be considered");
   declareProperty(PropertyNames::MAX_THRESHOLD, 2.0, positiveDouble->clone(),
                   "Maximum threshold for a pixel to be considered");
+
+  declareProperty(
+      PropertyNames::MERGE_GROUP, false,
+      "Whether to merge entries when WorkspaceGroup is specified as input.");
 }
 
 std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
   std::map<std::string, std::string> result;
 
-  if (isDefault(PropertyNames::INPUT_WORKSPACE) &&
-      isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
+  // Files from time-of-flight instruments must be integrated in Lambda before
+  // using this algorithm
+  Workspace_const_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
+  MatrixWorkspace_const_sptr inputWS =
+      std::static_pointer_cast<const MatrixWorkspace>(ws1);
+  getProperty(PropertyNames::INPUT_WORKSPACE);
+  if (inputWS->blocksize() > 1)
     result[PropertyNames::INPUT_WORKSPACE] =
-        "Either the InputWorkspace or input workspace group must be defined";
-    result[PropertyNames::INPUT_WORKSPACE_GROUP] =
-        result[PropertyNames::INPUT_WORKSPACE];
-  } else {
-    auto oneBinErrMsg = "Input workspace must have only one bin";
-    if (!isDefault(PropertyNames::INPUT_WORKSPACE)) {
-      // Files from time-of-flight instruments must be integrated in Lambda
-      // before using this algorithm
-      MatrixWorkspace_const_sptr inputWS =
-          getProperty(PropertyNames::INPUT_WORKSPACE);
-      if (inputWS->blocksize() > 1)
-        result[PropertyNames::INPUT_WORKSPACE] = oneBinErrMsg;
-    } else {
-      WorkspaceGroup_sptr inputWSGroup =
-          getProperty(PropertyNames::INPUT_WORKSPACE_GROUP);
-      auto nEntries = inputWSGroup->getNumberOfEntries();
-      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
-        MatrixWorkspace_sptr workspace =
-            std::static_pointer_cast<API::MatrixWorkspace>(
-                inputWSGroup->getItem(entryNo));
-        if (workspace->blocksize() > 1)
-          result[PropertyNames::INPUT_WORKSPACE_GROUP] = oneBinErrMsg;
-      }
-    }
+        "Input workspace must have only one bin";
+
+  if (getPropertyValue(PropertyNames::OUTPUT_WORKSPACE) == "") {
+    result[PropertyNames::OUTPUT_WORKSPACE] =
+        "The output workspace name must be specified.";
   }
 
   // get the thresholds once to error check and use in the main function
@@ -140,14 +124,16 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
  *
  */
 void CalculateEfficiency2::exec() {
-  // in case the provided workspace is a group of workspaces measured with
-  // different offsets, it can be merged to remove the beam stop
+  Workspace_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
+  auto inputWS = std::static_pointer_cast<MatrixWorkspace>(ws1);
+  auto outputWS = calculateEfficiency(inputWS);
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
+  progress(1.0, "Done!");
+}
 
-  std::string inputWorkspaceName =
-      getPropertyValue(PropertyNames::INPUT_WORKSPACE);
-  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP)) {
-    inputWorkspaceName = mergeMeasurementsWithOffset();
-  }
+API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(
+    MatrixWorkspace_sptr &inputWorkspace) {
+
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
   childAlg->setPropertyValue("WorkspaceToRebin", inputWorkspaceName);
@@ -270,10 +256,8 @@ void CalculateEfficiency2::averageAndNormalizePixels(
  *  masking of the beam stop by checking the counts from measurements collected
  *  at different offsets.
  */
-const std::string CalculateEfficiency2::mergeMeasurementsWithOffset() {
-  std::string inputWorkspaceName =
-      getPropertyValue(PropertyNames::INPUT_WORKSPACE_GROUP);
-  WorkspaceGroup_sptr input = getProperty(PropertyNames::INPUT_WORKSPACE_GROUP);
+API::MatrixWorkspace_sptr
+CalculateEfficiency2::mergeGroup(API::WorkspaceGroup_sptr &input) {
   auto nEntries = input->getNumberOfEntries();
   std::string tmpName = inputWorkspaceName + "_tmp";
   auto mergeRuns = createChildAlgorithm("MergeRuns");
