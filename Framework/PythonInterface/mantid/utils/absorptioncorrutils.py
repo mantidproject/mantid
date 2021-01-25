@@ -74,23 +74,26 @@ def _getCacheName(wkspname, cache_dir, abs_method):
         }.items()
     ]
 
-    rst = CreateCacheFilename(Prefix=prefix, OtherProperties=propert_string, CacheDir=cache_dir)
+    cache_path, signature = CreateCacheFilename(Prefix=prefix,
+                                                OtherProperties=propert_string,
+                                                CacheDir=cache_dir)
 
-    return rst.OutputFilename, rst.OutputSignature
+    return cache_path, signature
 
 
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
     """
     With a given absorption workspace name, check both memory and disk to see if we can locate the cache
     """
-    wsn_as = None  # absorption workspace sample
-    wsn_ac = None  # absorption workspace container
+    wsn_as = ""  # absorption workspace sample
+    wsn_ac = ""  # absorption workspace container
     found_as = False
     found_ac = False
 
     # step_0: depending on the abs_method, suffix will be different
     if abs_method == "SampleOnly":
         wsn_as = f"{absName}_ass"
+        found_ac = True
     elif abs_method == "SampleAndContainer":
         wsn_as = f"{absName}_ass"
         wsn_ac = f"{absName}_acc"
@@ -105,7 +108,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
     # NOTE: The new attribute absSHA1 should be there.
     if mtd.doesExist(wsn_as):
         found_as = mtd[wsn_as].run()["absSHA1"] == sha1
-    if (wsn_ac is not None) and (mtd.doesExist(wsn_ac)):
+    if mtd.doesExist(wsn_ac):
         found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
 
     # step_2: try to load from cache_file provided
@@ -114,6 +117,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
         LoadNexus(Filename=cache_file_name, OutputWorkspace="__tmp")
         # if the file contains only one workspace, then it must be from
         # a previous run using SampleOnly
+        # TODO: use ws.id to check type
         if isinstance(mtd["__tmp"], EventWorkspace):
             RenameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
         else:
@@ -124,18 +128,19 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
             #  added.
             #  However, the previous memory check ensures that similar one does not
             #  exist, therefore a simple ungroup should be sufficient here.
+            # TODO: check name clash with https://docs.mantidproject.org/nightly/api/python/mantid/api/WorkspaceGroup.html#mantid.api.WorkspaceGroup.getNames
             UnGroupWorkspace(InputWorkspace="__tmp")
         # now check the memory again
         # -- wsn_as exist for all three methods
         # NOTE: The new attribute absSHA1 should be there.
         if mtd.doesExist(wsn_as):
             found_as = mtd[wsn_as].run()["absSHA1"] == sha1
-        if (wsn_ac is not None) and (mtd.doesExist(wsn_ac)):
+        if mtd.doesExist(wsn_ac):
             found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
 
     # step_3: if we did not find the cache, set both to None
-    wsn_as = wsn_as if found_as else None
-    wsn_ac = wsn_ac if found_ac else None
+    wsn_as = wsn_as if found_as else ""
+    wsn_ac = wsn_ac if found_ac else ""
 
     return wsn_as, wsn_ac
 
@@ -217,7 +222,7 @@ def calculate_absorption_correction(
 
     absName = '__{}_abs_correction'.format(_getBasename(filename))
 
-    if cache_dir is None:
+    if bool(cache_dir):
         # no caching activity if no cache directory is provided
         return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
     else:
@@ -239,7 +244,7 @@ def calculate_absorption_correction(
         #    to make the code cleaner, also the current design will most likely leads
         #    to severe headache down the line
         log.information(f"For current analysis using {abs_method}")
-        if (abs_method == "SampleOnly") and (wsn_as is not None):
+        if (abs_method == "SampleOnly") and (wsn_as != ""):
             # first deal with special case where we only care about the sample absorption
             log.information(f"-- Located cached workspace, {wsn_as}")
             # NOTE:
@@ -247,7 +252,7 @@ def calculate_absorption_correction(
             #  - wsn_as is already loaded by _getCachedData
             #  - wsn_ac is already set to None by _getCachedData.
         else:
-            if (wsn_as is None) or (wsn_ac is None):
+            if (wsn_as == "") or (wsn_ac == ""):
                 log.information(f"-- Cannot locate all necessary cache, start from scrach")
                 wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
                                                                 absName)
