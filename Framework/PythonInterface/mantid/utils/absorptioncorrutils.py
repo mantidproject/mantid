@@ -7,10 +7,10 @@
 from typing import ValuesView
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
-from mantid.simpleapi import (AbsorptionCorrection, CreateCacheFilename, DeleteWorkspace, Divide,
-                              Load, LoadNexus, Multiply, PaalmanPingsAbsorptionCorrection,
-                              PreprocessDetectorsToMD, RenameWorkspace, SetSample,
-                              SaveNexusProcessed, UnGroupWorkspace, mtd)
+from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
+                              PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
+                              RenameWorkspace, SetSample, SaveNexusProcessed, UnGroupWorkspace, mtd)
+import mantid.simpleapi
 import numpy as np
 import os
 
@@ -42,6 +42,8 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     
     return fileName(full path), sha1
     """
+    log = Logger('GetCacheName')
+
     # fix up the workspace name
     prefix = wkspname.replace('__', '')
 
@@ -60,7 +62,7 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     # NOTE:
     #  - The query for height is tied to a beamline, which is not a good design as it
     #    will break for other beamlines
-    propert_string = [
+    property_string = [
         f"{key}={val}" for key, val in {
             'wavelength_min': ws.readX(0).min(),
             'wavelength_max': ws.readX(0).max(),
@@ -74,7 +76,18 @@ def _getCacheName(wkspname, cache_dir, abs_method):
         }.items()
     ]
 
-    return CreateCacheFilename(Prefix=prefix, OtherProperties=propert_string, CacheDir=cache_dir)
+    log.notice(prefix)
+    log.notice("\t".join(property_string))
+    log.notice(cache_dir)
+
+    cache_path, signature = mantid.simpleapi.CreateCacheFilename(
+        Prefix=prefix,
+        OtherProperties=property_string,
+        CacheDir=cache_dir,
+    )
+    log.notice(cache_path)
+
+    return cache_path, signature
 
 
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
@@ -110,16 +123,21 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
     # step_2: try to load from cache_file provided
     if (not found_as) or (not found_ac):
         # disk -> memory
-        LoadNexus(Filename=cache_file_name, OutputWorkspace="__tmp")
-        wstype = mtd["__tmp"].id()
-        if wstype == "EventWorkspace":
-            RenameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
-        elif wstype == "WorkspaceGroup":
-            # there should be exactly two workspaces inside, ungroup them will
-            # restore them with the orignal name (wsn_as, wsn_ac)
-            UnGroupWorkspace(InputWorkspace="__tmp")
-        else:
-            raise ValueError(f"Unsupported caching type: {wstype}")
+        if os.path.exists(cache_file_name):
+            # LoadNexus(Filename=cache_file_name, OutputWorkspace=wsn_as)
+            # if mtd[wsn_as].id() == "WorkspaceGroup":
+            #     UnGroupWorkspace(InputWorkspace=wsn_as)
+            wsntmp = f"{wsn_as}_wsg"
+            Load(Filename=cache_file_name, OutputWorkspace=wsntmp)
+            wstype = mtd[wsntmp].id()
+            if wstype == "EventWorkspace":
+                RenameWorkspace(InputWorkspace=wsntmp, OutputWorkspace=wsn_as)
+            elif wstype == "WorkspaceGroup":
+                # there should be exactly two workspaces inside, ungroup them will
+                # restore them with the orignal name (wsn_as, wsn_ac)
+                UnGroupWorkspace(InputWorkspace=wsntmp)
+            else:
+                raise ValueError(f"Unsupported caching type: {wstype}")
 
         # now check the memory again
         # -- wsn_as exist for all three methods
@@ -211,7 +229,7 @@ def calculate_absorption_correction(
                                       environment=environment,
                                       metaws=metaws)
 
-    absName = '__{}_abs_correction'.format(_getBasename(filename))
+    absName = '{}_abs_correction'.format(_getBasename(filename))
 
     if cache_dir == "":
         # no caching activity if no cache directory is provided
