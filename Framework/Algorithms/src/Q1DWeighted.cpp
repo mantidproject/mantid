@@ -98,7 +98,7 @@ void Q1DWeighted::init() {
 
   declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "TableShape", "", Direction::Input, PropertyMode::Optional),
+          "ShapeTable", "", Direction::Input, PropertyMode::Optional),
       "Table containing the shapes for integration. Only sectors supported. If "
       "provided, wedges properties defined above are not taken into account.");
 }
@@ -152,7 +152,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_wedgesIsAsymmetric = std::vector<bool>();
   m_asymmWedges = getProperty("AsymmetricWedges");
 
-  if (getPropertyValue("TableShape").empty()) {
+  if (getPropertyValue("ShapeTable").empty()) {
     const int wedges = getProperty("NumberOfWedges");
     m_nWedges = static_cast<size_t>(wedges);
 
@@ -213,7 +213,7 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
  * viewport and the sector shapes
  */
 void Q1DWeighted::getTableShapes() {
-  ITableWorkspace_sptr shapeWs = getProperty("TableShape");
+  ITableWorkspace_sptr shapeWs = getProperty("ShapeTable");
   size_t rowCount = shapeWs->rowCount();
 
   std::map<std::string, std::vector<double>> viewportParams;

@@ -303,7 +303,7 @@ public:
     TS_ASSERT_DELTA(result->y(0)[6], 251.052, 0.001);
   }
 
-  void testTableShape() {
+  void testShapeTable() {
     createShapeTable();
 
     std::string outputWS = "q1d_shapes";
@@ -318,7 +318,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         radial_average.setPropertyValue("AsymmetricWedges", "1"))
     TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("TableShape", "MaskShapes"))
+        radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
 
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
@@ -329,7 +329,7 @@ public:
     TS_ASSERT_EQUALS(result->getNumberOfEntries(), 2)
   }
 
-  void testTableShapeResults() {
+  void testShapeTableResults() {
     // test the results computed by the table shape method against those from
     // the usual method
 
@@ -347,7 +347,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         radial_average.setPropertyValue("AsymmetricWedges", "0"))
     TS_ASSERT_THROWS_NOTHING(
-        radial_average.setPropertyValue("TableShape", "MaskShapes"))
+        radial_average.setPropertyValue("ShapeTable", "MaskShapes"))
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
     std::string refWS = "q1d_wedges";
