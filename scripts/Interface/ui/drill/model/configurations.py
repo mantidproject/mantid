@@ -186,7 +186,7 @@ class RundexSettings(object):
                 "DeltaQ",
                 "IQxQyLogBinning",
                 "OutputPanels",
-                "WavelengthRange"
+                "WavelengthRange",
                 "ShapeTable"
                 ],
             SANS_PSCAN : [
