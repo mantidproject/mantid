@@ -24,6 +24,7 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.difference_table_widget.difference_table_widget_presenter import DifferenceTablePresenter
 from Muon.GUI.Common.difference_table_widget.difference_table_widget_view import DifferenceTableView
 
+
 def pair_name():
     name = []
     for i in range(21):
