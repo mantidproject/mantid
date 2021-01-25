@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="FIGARO" valid-from="2017-01-31 23:59:59">
+<parameter-file instrument="FIGARO">
 
 	<component-link name="FIGARO">
 		<parameter name="deltaE-mode" type="string">
@@ -24,7 +24,7 @@
 		<parameter name="sample_logs_fail_tolerances" type="string">
 			<value val="0, 0, 0, 0" />
 		</parameter>
-                <!-- ConjoinXRuns behavior when merging sample logs when using Stitch1D or Stitch1DMany. -->
+    <!-- ConjoinXRuns behavior when merging sample logs when using Stitch1D or Stitch1DMany. -->
 		<parameter name="conjoin_sample_logs_sum" type="string">
 			<value val="" />
 		</parameter>
@@ -42,6 +42,14 @@
 		</parameter>
 		<parameter name="conjoin_sample_logs_fail_tolerances" type="string">
 			<value val="" />
-		</parameter>        
+		</parameter>
+		<parameter name="DH1Z">
+		 <!-- The sample to first height motor position along Z [m]-->
+ 		 	<value val="1.135" />
+ 	  </parameter>
+		<parameter name="DH2Z">
+		 <!-- The sample to second height motor position along Z [m]-->
+ 		 	<value val="2.077" />
+ 	  </parameter>
 	</component-link>
 </parameter-file>

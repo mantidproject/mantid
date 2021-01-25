@@ -43,5 +43,16 @@
 		<parameter name="sample_logs_fail_tolerances" type="string">
 			<value val="0, 0, 0" />
 		</parameter>
+		<parameter name="chopper_window_opening">
+		<!-- Chopper opening window [degrees]-->
+			<value val="45.0" valid-to="2020-07-31T23:59:59"/>
+			<value val="20.0" valid-from="2020-08-01T00:00:00"/>
+		</parameter>
+		<parameter name="chopper_gap_unit" type="string">
+		<!-- The unit of the chopper gap -->
+			<value val="cm" valid-to="2020-07-31T23:59:59"/>
+			<value val="m" valid-from="2020-07-31T23:59:59" valid-to="2020-07-31T23:59:59"/>
+			<value val="mm" valid-from="2020-08-01T00:00:00"/>
+		</parameter>
 	</component-link>
 </parameter-file>
