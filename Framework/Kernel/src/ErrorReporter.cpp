@@ -13,7 +13,6 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
 #include <json/json.h>
@@ -97,12 +96,8 @@ std::string ErrorReporter::generateErrorMessage() const {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-#if defined(MAKE_VATES)
-  // paraview
-  message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-#else
+  // legacy interface requires paraview version
   message["ParaView"] = 0;
-#endif
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();

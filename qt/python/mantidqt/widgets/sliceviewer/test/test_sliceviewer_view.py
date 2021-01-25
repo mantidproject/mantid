@@ -8,6 +8,8 @@
 import io
 import sys
 import unittest
+from unittest.mock import patch
+from numpy import hstack
 
 import matplotlib as mpl
 
@@ -205,6 +207,8 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         renamed = RenameWorkspace(ws)  # noqa F841
 
+        QApplication.sendPostedEvents()
+
         # View didn't close
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
         self.assertNotEqual(pres.ads_observer, None)
@@ -234,6 +238,30 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
+
+    def test_plot_matrix_xlimits_ignores_monitors(self):
+        xmin = 5000
+        xmax = 10000
+        ws = CreateSampleWorkspace(NumBanks=1, NumMonitors=1, BankPixelWidth=1, XMin=xmin, XMax=xmax)
+        ws.setX(0, 2 * ws.readX(0))  # change x limits of monitor spectrum
+        pres = SliceViewer(ws)
+
+        pres.view.data_view.plot_matrix(ws)
+
+        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
+
+    @patch("mantidqt.widgets.sliceviewer.dimensionwidget.Dimension.update_slider")
+    def test_plot_matrix_xlimits_ignores_nans(self, mock_update_slider):
+        # need to mock update slider as doesn't handle inf when initialising SliceViewer in this manner
+        xmin = 5000
+        xmax = 10000
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XMin=xmin, XMax=xmax)  # two non-monitor spectra
+        ws.setX(0, hstack([2 * ws.readX(0)[0:-1], inf]))  # change x limits of spectrum and put inf in last element
+        pres = SliceViewer(ws)
+
+        pres.view.data_view.plot_matrix(ws)
+
+        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
 
 
 # private helper functions

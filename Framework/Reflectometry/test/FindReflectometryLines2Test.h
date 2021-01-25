@@ -157,9 +157,9 @@ public:
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", 1.))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e,
-                            e.what(),
-                            std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error const &e, e.what(),
+        std::string("Some invalid Properties found: [ RangeUpper ]"))
   }
 
   void test_invalidEndAndStartIndicesThrows() {
@@ -176,9 +176,9 @@ public:
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", 1))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e,
-                            e.what(),
-                            std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error const &e, e.what(),
+        std::string("Some invalid Properties found: [ EndWorkspaceIndex ]"))
   }
 
 private:

@@ -9,6 +9,8 @@ import mantid.simpleapi as mantid
 from mantid.kernel import Logger
 from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from copy import copy
+from mantid.kernel import PhysicalConstants as const
+
 
 muon_logger = Logger('Muon-Algs')
 
@@ -237,7 +239,7 @@ def convert_to_field(workspace_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", workspace_name)
-    alg.setProperty("Formula", 'x * 1.e3 / 13.55')
+    alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
     alg.execute()

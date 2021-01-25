@@ -20,7 +20,7 @@ from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None, legend_tab=None):
+    def __init__(self, fig, view=None, parent_view=None, parent_presenter=None, legend_tab=None):
         self.fig = fig
 
         # The legend tab is passed in so that it can be removed if all curves are removed.
@@ -28,7 +28,7 @@ class CurvesTabWidgetPresenter:
         self.legend_props = None
 
         if not view:
-            self.view = CurvesTabWidgetView(parent)
+            self.view = CurvesTabWidgetView(parent_view)
         else:
             self.view = view
 
@@ -58,6 +58,8 @@ class CurvesTabWidgetPresenter:
             self.on_curves_selection_changed
         )
 
+        self.parent_presenter = parent_presenter
+
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
         ax = self.get_selected_ax()
@@ -80,6 +82,7 @@ class CurvesTabWidgetPresenter:
 
     def close_tab(self):
         """Close the tab and set the view to None"""
+        self.parent_presenter.forget_tab_from_presenter(self)
         self.view.close()
         self.view = None
 
@@ -219,7 +222,7 @@ class CurvesTabWidgetPresenter:
         on the axes remove the axes entry from the 'select_axes_combo_box'. If
         no axes with curves remain close the tab and return True
         """
-        with block_signals(self.view.select_curve_list):
+        with block_signals(self.view.select_curve_list), block_signals(self.view.select_axes_combo_box):
             self.view.remove_select_curve_list_selected_items()
             if self.view.select_curve_list.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
@@ -350,14 +353,14 @@ class CurvesTabWidgetPresenter:
         """
         Applies the settings in the line tab for the current curve to all other curves.
         """
-        current_curve_index = self.view.select_curve_list.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentRow()
 
         line_style = self.view.line.get_style()
         draw_style = self.view.line.get_draw_style()
         width = self.view.line.get_width()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_list.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentRow(i)
 
             self.view.line.set_style(line_style)
             self.view.line.set_draw_style(draw_style)
@@ -366,16 +369,16 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_list.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentRow(current_curve_index)
 
     def marker_apply_to_all(self):
-        current_curve_index = self.view.select_curve_list.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentRow()
 
         marker_style = self.view.marker.get_style()
         marker_size = self.view.marker.get_size()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_list.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentRow(i)
 
             self.view.marker.set_style(marker_style)
             self.view.marker.set_size(marker_size)
@@ -383,10 +386,10 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_list.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentRow(current_curve_index)
 
     def errorbars_apply_to_all(self):
-        current_curve_index = self.view.select_curve_list.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentRow()
 
         checked = self.view.errorbars.get_hide()
 
@@ -397,7 +400,7 @@ class CurvesTabWidgetPresenter:
             error_every = self.view.errorbars.get_error_every()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_list.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentRow(i)
 
             self.view.errorbars.set_hide(checked)
 
@@ -410,10 +413,11 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_list.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentRow(current_curve_index)
 
     def on_curves_selection_changed(self):
         if len(self.view.select_curve_list.selectedItems()) > 1:
             self.view.enable_curve_config(False)
         else:
             self.view.enable_curve_config(True)
+            self.set_errorbars_tab_enabled()

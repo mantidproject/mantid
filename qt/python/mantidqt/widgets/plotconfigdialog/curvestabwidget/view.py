@@ -64,6 +64,7 @@ class CurvesTabWidgetView(QWidget):
 
     def remove_select_curve_list_selected_items(self):
         selection = self.select_curve_list.selectionModel().selectedIndexes()
+        selection.sort(reverse=True)
         for index in selection:
             _ = self.select_curve_list.takeItem(index.row())
 

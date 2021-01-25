@@ -168,7 +168,7 @@ class FitType(Enum):
     LINEAR = "Linear"
     LOGARITHMIC = "Logarithmic"
     POLYNOMIAL = "Polynomial"
-    NO_FIT = "NotFit"
+    NO_FIT = "NoFit"
 
 
 @json_serializable

@@ -408,6 +408,8 @@ class MuonContext(object):
         if self.gui_context['DeadTimeSource'] == 'FromADS':
             return self.gui_context['DeadTimeTable']
         elif self.gui_context['DeadTimeSource'] == 'FromFile':
+            if isinstance(run, str):
+                run = wsName.get_first_run_from_run_string(run)
             return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None

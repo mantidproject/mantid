@@ -7,7 +7,8 @@
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis, ITableWorkspaceProperty
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
-    IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator
+    IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator, FloatArrayOrderedPairsValidator, \
+    FloatArrayLengthValidator, CompositeValidator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
 import numpy as np
@@ -20,6 +21,7 @@ class SANSILLIntegration(PythonAlgorithm):
     _output_type = ''
     _resolution = ''
     _masking_criterion = ''
+    _lambda_range = []
 
     def category(self):
         return 'ILL\\SANS'
@@ -162,37 +164,49 @@ class SANSILLIntegration(PythonAlgorithm):
         self.setPropertyGroup('MaxQxy', 'I(Qx,Qy) Options')
         self.setPropertyGroup('DeltaQ', 'I(Qx,Qy) Options')
         self.setPropertyGroup('IQxQyLogBinning', 'I(Qx,Qy) Options')
-
-        self.declareProperty(name='BinMaskingCriteria', defaultValue='',
-                             doc='Criteria to mask bins, used for TOF mode,'
-                                 ' for example to discard high and low lambda ranges;'
-                                 'see MaskBinsIf algorithm for details.')
-
         self.declareProperty(WorkspaceGroupProperty('PanelOutputWorkspaces', '',
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
-                             doc='The name of the output workspace group for detector panels (D33).')
+                             doc='The name of the output workspace group for detector panels.')
         self.declareProperty(ITableWorkspaceProperty('ShapeTable', '', direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
+                                                     optional=PropertyMode.Optional),
                              doc='The name opf the table workspace containing drawn shapes on which to integrate. '
                                  'If provided, NumberOfWedges, WedgeOffset and WedgeAngle arguments are ignored. ')
 
         self.setPropertyGroup('PanelOutputWorkspaces', 'I(Q) Options')
         self.setPropertyGroup('ShapeTable', 'I(Q) Options')
 
+        lambda_range_validator = CompositeValidator()
+        lambda_range_validator.add(FloatArrayOrderedPairsValidator())
+        lambda_range_validator.add(FloatArrayLengthValidator(2))
+        self.declareProperty(FloatArrayProperty('WavelengthRange', [1., 10.], validator=lambda_range_validator),
+                             doc='Wavelength range [Angstrom] to be used in integration (TOF only).')
+
     def PyExec(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._output_type = self.getPropertyValue('OutputType')
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        self._masking_criterion = self.getPropertyValue('BinMaskingCriteria')
-        if self._masking_criterion:
-            MaskBinsIf(InputWorkspace=self._input_ws, OutputWorkspace=self._input_ws+'_masked', Criterion=self._masking_criterion)
-            self._input_ws = self._input_ws+'_masked'
+        self._lambda_range = self.getProperty('WavelengthRange').value
+        is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' # D33 only
+        if is_tof:
+            cut_input_ws = self._input_ws+'_cut'
+            CropWorkspaceRagged(InputWorkspace=self._input_ws,
+                                OutputWorkspace=cut_input_ws,
+                                XMin=self._lambda_range[0],
+                                XMax=self._lambda_range[1])
+            self._input_ws = cut_input_ws
+            # re-calculate the Q-range after lambda cut
+            CalculateDynamicRange(Workspace=self._input_ws,
+                                  ComponentNames=['back_detector',
+                                                  'front_detector_right',
+                                                  'front_detector_left',
+                                                  'front_detector_top',
+                                                  'front_detector_bottom'])
         self._integrate(self._input_ws, self._output_ws)
         self.setProperty('OutputWorkspace', self._output_ws)
         panels_out_ws = self.getPropertyValue('PanelOutputWorkspaces')
-        if mtd[self._output_ws].getInstrument().getName() == 'D33' and panels_out_ws:
+        if mtd[self._output_ws].getInstrument().getName() in ['D33', 'D11B', 'D22B'] and panels_out_ws:
             panel_names = mtd[self._output_ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
             panel_outputs = []
             for panel in panel_names:
@@ -205,6 +219,8 @@ class SANSILLIntegration(PythonAlgorithm):
                 panel_outputs.append(out_ws)
             GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
+        if is_tof:
+            DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
@@ -309,8 +325,12 @@ class SANSILLIntegration(PythonAlgorithm):
         wavelength = run.getLogData('wavelength').value
         l1 = run.getLogData('collimation.actual_position').value
         l2 = run.getLogData('L2').value
-        x3 = run.getLogData('pixel_width').value
-        y3 = run.getLogData('pixel_height').value
+        instrument = mtd[self._input_ws].getInstrument()
+        if instrument.hasParameter("x-pixel-size") and instrument.hasParameter("y-pixel-size"):
+            x3 = instrument.getNumberParameter('x-pixel-size')[0] / 1000
+            y3 = instrument.getNumberParameter('y-pixel-size')[0] / 1000
+        else:
+            raise RuntimeError('Unable to calculate resolution, missing pixel size.')
         delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
         if run.hasProperty('collimation.sourceAperture'):
             source_aperture = run.getLogData('collimation.sourceAperture').value
@@ -388,8 +408,10 @@ class SANSILLIntegration(PythonAlgorithm):
         q_min = run.getLogData(q_min_name).value
         q_max = run.getLogData(q_max_name).value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
-        pixel_height = run.getLogData('pixel_height').value
-        pixel_width = run.getLogData('pixel_width').value
+        instrument = mtd[self._input_ws].getInstrument()
+        pixel_width = instrument.getNumberParameter('x-pixel-size')[0] / 1000
+        pixel_height = instrument.getNumberParameter('y-pixel-size')[0] / 1000
+
         pixel_size = pixel_height if pixel_height >= pixel_width else pixel_width
         binning_factor = self.getProperty('BinningFactor').value
         wavelength = 0.  # for TOF mode there is no wavelength

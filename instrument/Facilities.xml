@@ -26,7 +26,7 @@
       <connection name="histo" address="NDXALF:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="ARGUS">
     <zeropadding size="7" startRunNumber="1"/>
     <zeropadding size="8" startRunNumber="57942"/>
@@ -36,7 +36,7 @@
       <connection name="histo" address="NDXARGUS:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="CHRONUS">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
@@ -53,7 +53,7 @@
       <connection name="histo" address="NDXCRISP:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="EMU">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
@@ -93,7 +93,7 @@
       <connection name="histo" address="NDXHET:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="HIFI">
     <zeropadding size="8"/>
     <technique>Muon level crossing resonance</technique>
@@ -151,7 +151,7 @@
       <connection name="histo" address="NDXLARMOR:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="LET">
     <zeropadding size="8"/>
     <technique>Neutron Spectroscopy</technique>
@@ -212,7 +212,7 @@
       <connection name="event" address="NDXMERLIN:10000" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="MUSR">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
@@ -235,7 +235,7 @@
       <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="NIMROD">
     <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
@@ -288,7 +288,7 @@
       <connection name="histo" address="NDXPOLARIS:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="POLREF">
     <zeropadding size="8"/>
     <technique>Reflectometry</technique>
@@ -304,7 +304,7 @@
       <connection name="histo" address="NDXSANDALS:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="SANS2D">
     <zeropadding size="8"/>
     <technique>Small Angle Scattering</technique>
@@ -684,11 +684,19 @@
     <technique>SANS</technique>
   </instrument>
 
+  <instrument name="D11B">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D16">
     <technique>SANS</technique>
   </instrument>
 
   <instrument name="D22">
+    <technique>SANS</technique>
+  </instrument>
+
+  <instrument name="D22B">
     <technique>SANS</technique>
   </instrument>
 
@@ -737,7 +745,6 @@
     <technique>Polarized spectroscopy</technique>
     <technique>Diffuse Scattering</technique>
   </instrument>
-
 
 </facility>
 

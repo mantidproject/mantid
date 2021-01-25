@@ -231,6 +231,7 @@ class FigureInteractionTest(unittest.TestCase):
 
     def test_add_error_bars_menu(self):
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+        self.ax.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
         main_menu = QMenu()
         self.interactor.add_error_bars_menu(main_menu, self.ax)
 
@@ -278,6 +279,7 @@ class FigureInteractionTest(unittest.TestCase):
     def test_context_menu_added_for_scripted_plot_with_errors(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+        self.ax.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
 
         main_menu = QMenu()
         # QMenu always seems to have 1 child when empty,
@@ -328,6 +330,7 @@ class FigureInteractionTest(unittest.TestCase):
     def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+        self.ax.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
 
         anonymous_menu = QMenu()
         # this initialises some of the class internals

@@ -61,6 +61,7 @@ set(EXPORT_FILES
     src/Exports/StringContainsValidator.cpp
     src/Exports/PropertyFactory.cpp
     src/Exports/RebinParamsValidator.cpp
+    src/Exports/PhysicalConstants.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
@@ -110,7 +111,7 @@ configure_file(
 )
 
 # Package version
-if(WIN32 OR (APPLE AND ENABLE_MANTIDPLOT))
+if(WIN32)
   # NeXus library is in the same place relative to the Python library
   get_filename_component(NEXUSLIB_FILE ${NEXUSLIB} NAME)
   set(NEXUSLIB ../../${NEXUSLIB_FILE})

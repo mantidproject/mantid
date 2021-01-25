@@ -49,6 +49,7 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
@@ -573,8 +574,11 @@ class SliceViewerView(QWidget, ObservingView):
 
     def delayed_refresh(self):
         """Post an event to the event loop that causes the view to
-        update on the next cycle"""
-        QTimer.singleShot(0, self.presenter.refresh_view)
+        update on the next cycle
+
+        A 1 msec delay is added to appease RHEL7 where in some cases
+        it fails"""
+        QTimer.singleShot(1, self.presenter.refresh_view)
 
     def peaks_overlay_clicked(self):
         """Peaks overlay button has been toggled

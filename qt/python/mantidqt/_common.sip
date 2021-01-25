@@ -470,6 +470,7 @@ public:
     auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
     sipRes = sipCpp->findHandler(function);
     %End
+    QString functionName() const;
 };
 
 // ---------------------------------
@@ -545,6 +546,7 @@ SIP_PYOBJECT defaultBackgroundType();
     QStringList registeredOthers() const;
     QStringList getPeakPrefixes() const;
     QString addFunction(QString);
+    PropertyHandler *getPeakHandler(const QString &prefix);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);
     double getPeakHeightOf(QString);
@@ -592,7 +594,7 @@ signals:
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
     void removePlotSignal(PropertyHandler *);
-
+    void fitResultsChanged(const QString &);
 };
 
 // ---------------------------------

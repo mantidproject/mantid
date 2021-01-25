@@ -19,6 +19,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
@@ -827,11 +828,21 @@ bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
 }
 
 //------------------------------------------------------------------------------------------------
-/// Checks that the instruments match
-/// @param ws1 :: the first workspace
-/// @param ws2 :: the second workspace
-/// @retval true The instruments match
-/// @retval false The instruments do not match
+/* @brief Checks that the instruments match
+ *
+ * @details the following checks are performed:
+ * - instrument name
+ * - positions and rotations of detectors
+ * - mask of detectors
+ * - position of the source and sample
+ * - instrument parameters
+ *
+ * @param ws1 :: the first workspace
+ * @param ws2 :: the second workspace
+ * @retval true The instruments match
+ *
+ * @retval false The instruments do not match
+ */
 bool CompareWorkspaces::checkInstrument(
     const API::MatrixWorkspace_const_sptr &ws1,
     const API::MatrixWorkspace_const_sptr &ws2) {
@@ -847,6 +858,18 @@ bool CompareWorkspaces::checkInstrument(
   if (!ws1->detectorInfo().isEquivalent(ws2->detectorInfo())) {
     recordMismatch("DetectorInfo mismatch (position differences larger than "
                    "1e-9 m or other difference found)");
+    return false;
+  }
+
+  if (!ws1->componentInfo().hasEquivalentSource(ws2->componentInfo())) {
+    recordMismatch("Source mismatch: either one workspace has a source and the "
+                   "other does not, or the sources are at different positions");
+    return false;
+  }
+
+  if (!ws1->componentInfo().hasEquivalentSample(ws2->componentInfo())) {
+    recordMismatch("Sample mismatch: either one workspace has a sample and the "
+                   "other does not, or the samples are at different positions");
     return false;
   }
 
@@ -867,7 +890,7 @@ bool CompareWorkspaces::checkInstrument(
 }
 
 //------------------------------------------------------------------------------------------------
-/// Checks that the masking matches
+/// Checks that the bin masking matches
 /// @param ws1 :: the first workspace
 /// @param ws2 :: the second workspace
 /// @retval true The masking matches

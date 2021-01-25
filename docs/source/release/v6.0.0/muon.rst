@@ -20,6 +20,7 @@ Improvements
 - Phasequads are now available for analysis in both GUI's.
 - Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
 - Added some input validation to First and Last good Data in the Phase Table tab
+- When using co-add and creating a phasequad, the deadtime table will be taken from the first file only
 
 Bug fixes
 #########
@@ -34,6 +35,7 @@ Bug fixes
 - Fixed a crash when trying to do a simultaneous fit with no data loaded after pressing clear all.
 - Fixed a bug where changing rebin wouldn't update the plot in the GUI
 - Fixed a bug where the plot would update incorrectly when changing plot raw and plot difference
+- Fixed a crash when pressing autoscale y without any data loaded
 
 ALC
 ---
@@ -57,6 +59,7 @@ Elemental Analysis
 New Features
 ############
 - Added a new XrayAbsorptionCorrection algorithm. See :ref:`XrayAbsorptionCorrection <algm-XrayAbsorptionCorrection>`
+- Fixed bug in GUI where minor peaks wouldn't be added to a new detector subplot
 
 Bug fixes
 #########
@@ -68,5 +71,10 @@ Algorithms
 - The functions RemoveExpDecay and EstimateMuonAsymmetryFromCounts were modified to use point data instead of bin edges for removing the exponential.
 - LoadPSIMuonBin and LoadMuonNexusV2 can now return a table of time zeros
 - MuonPreProcess has a new input 'TimeZeroTable' which requires a TableWorkspace of time zero values
+
+Fit Functions
+-------------
+
+- :ref:`StandardSC <func-StandardSC>` fixed a conversion factor for field.
 
 :ref:`Release 6.0.0 <v6.0.0>`
