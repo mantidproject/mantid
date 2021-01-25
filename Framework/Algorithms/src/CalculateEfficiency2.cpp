@@ -136,8 +136,8 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(
 
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
-  childAlg->setPropertyValue("WorkspaceToRebin", inputWorkspaceName);
-  childAlg->setPropertyValue("WorkspaceToMatch", inputWorkspaceName);
+  childAlg->setProperty("WorkspaceToRebin", inputWorkspace);
+  childAlg->setProperty("WorkspaceToMatch", inputWorkspace);
   childAlg->setPropertyValue("OutputWorkspace",
                              getPropertyValue(PropertyNames::OUTPUT_WORKSPACE));
   childAlg->setProperty("PreserveEvents", false);
@@ -169,17 +169,45 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(
   progress(0.9, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
 
-  // clean-up
-  if (!isDefault(PropertyNames::INPUT_WORKSPACE_GROUP) &&
-      API::AnalysisDataService::Instance().doesExist(inputWorkspaceName)) {
-    API::AnalysisDataService::Instance().remove(inputWorkspaceName);
-  }
-
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
-  progress(1.0, "Done!");
+  return outputWS;
 }
 
-/*
+/**
+ * Process groups and merge entries if MergeGroup property is set.
+ *
+ * @return A boolean true if execution was sucessful, false otherwise
+ */
+bool CalculateEfficiency2::processGroups() {
+  m_minThreshold = getProperty("MinThreshold");
+  m_maxThreshold = getProperty("MaxThreshold");
+
+  Workspace_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
+  WorkspaceGroup_sptr inputWS = std::static_pointer_cast<WorkspaceGroup>(ws1);
+
+  bool mergeGroups = getProperty(PropertyNames::MERGE_GROUP);
+  if (mergeGroups) {
+    auto mergedWS = mergeGroup(inputWS);
+    auto outputWS = calculateEfficiency(mergedWS);
+    setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
+    progress(1.0, "Done!");
+    return true;
+  } else {
+    auto outputGroup = std::make_shared<WorkspaceGroup>();
+    for (auto entryNo = 0; entryNo < inputWS->getNumberOfEntries(); entryNo++) {
+      auto entryWS = std::static_pointer_cast<API::MatrixWorkspace>(
+          inputWS->getItem(entryNo));
+      auto outputWS = calculateEfficiency(entryWS);
+      outputGroup->addWorkspace(outputWS);
+    }
+    std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+    AnalysisDataService::Instance().addOrReplace(groupName, outputGroup);
+    setProperty(PropertyNames::OUTPUT_WORKSPACE, outputGroup);
+    progress(1.0, "Done!");
+    return true;
+  }
+}
+
+/**
  *  Sum up all the unmasked detector pixels.
  *
  * @param workspace: workspace where all the wavelength bins have been grouped
@@ -251,37 +279,35 @@ void CalculateEfficiency2::averageAndNormalizePixels(
                 << "; error = " << averageE << "\n";
 }
 
-/*
- *  Merges the input workspace group and tries to remove the shadow coming from
- *  masking of the beam stop by checking the counts from measurements collected
- *  at different offsets.
+/**
+ *  Merges the input workspace group and tries to remove masked spectra
+ *  and replace the masked value with an average of counts from non-masked
+ *  entries.
+ *
+ *  @param input: workspace group to be merged
+ *
+ *  @returns merged workspace group
  */
 API::MatrixWorkspace_sptr
 CalculateEfficiency2::mergeGroup(API::WorkspaceGroup_sptr &input) {
   auto nEntries = input->getNumberOfEntries();
-  std::string tmpName = inputWorkspaceName + "_tmp";
   auto mergeRuns = createChildAlgorithm("MergeRuns");
-  mergeRuns->setPropertyValue("InputWorkspaces", inputWorkspaceName);
-  mergeRuns->setPropertyValue("OutputWorkspace", tmpName);
+  mergeRuns->setProperty("InputWorkspaces", input->getName());
   mergeRuns->executeAsChildAlg();
   Workspace_sptr mergedWs = mergeRuns->getProperty("OutputWorkspace");
 
-  auto normWsName = tmpName + "_normalisation";
   auto createSingleAlg = createChildAlgorithm("CreateSingleValuedWorkspace");
   createSingleAlg->setProperty("DataValue", static_cast<double>(nEntries));
-  createSingleAlg->setPropertyValue("OutputWorkspace", normWsName);
   createSingleAlg->executeAsChildAlg();
   MatrixWorkspace_sptr normWs = createSingleAlg->getProperty("OutputWorkspace");
 
-  auto mergedNormalisedWsName = "mergedNormalisedWs";
   auto divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", mergedWs);
   divideAlg->setProperty("RHSWorkspace", normWs);
   divideAlg->executeAsChildAlg();
   MatrixWorkspace_sptr mergedNormalisedWs =
       divideAlg->getProperty("OutputWorkspace");
-  API::AnalysisDataService::Instance().addOrReplace(mergedNormalisedWsName,
-                                                    mergedNormalisedWs);
+
   auto spectrumInfo = mergedNormalisedWs->spectrumInfo();
   for (std::size_t spectrumNo = 0;
        spectrumNo < mergedNormalisedWs->getNumberHistograms(); spectrumNo++) {
@@ -303,13 +329,14 @@ CalculateEfficiency2::mergeGroup(API::WorkspaceGroup_sptr &input) {
         }
       }
       if (nonMaskedEntries != 0) {
+
         spectrumInfo.setMasked(spectrumNo, false);
         detDataY.front() = dataY / nonMaskedEntries;
         detDataErr.front() = sqrt(dataE) / nonMaskedEntries;
       }
     }
   }
-  return mergedNormalisedWs->getName();
+  return mergedNormalisedWs;
 }
 
 } // namespace Algorithms
