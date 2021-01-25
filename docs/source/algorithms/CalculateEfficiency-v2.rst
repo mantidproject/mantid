@@ -63,7 +63,7 @@ Usage
    workspace_group = Load('D22_mask_central.nxs,D22_mask_offset.nxs')
 
    # Compute the detector sensitivity
-   sensitivity = CalculateEfficiency(InputWorkspaceGroup='workspace_group', MinThreshold=0.5, MaxThreshold=1.5)
+   sensitivity = CalculateEfficiency(InputWorkspace='workspace_group', MergeGroup=True, MinThreshold=0.5, MaxThreshold=1.5)
 
 .. categories::
 
