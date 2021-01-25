@@ -36,7 +36,7 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_that_save_and_load_grouping_xml_correctly_stores_and_reads_period_data(self, mock_file_parse):
         groups = [MuonGroup('fwd', [1,2,3], [1,3]), MuonGroup('bwd', [4,5,6], [2,4])]
         pairs = [MuonPair('long', 'fwd', 'bwd')]
-        diffs = [] 
+        diffs = []
         xml_tree = save_grouping_to_XML(groups, diffs, pairs, 'filename.xml', save=False, description='Bespoke grouping')
         mock_file_parse.return_value = xml_tree
 
