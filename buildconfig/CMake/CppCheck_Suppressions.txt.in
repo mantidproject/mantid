@@ -43,9 +43,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp
 
 // ---------- Individual suppressions -----------------
 
-// Mantid Plot specific ones we probably won't fix before removal
-
-
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.cpp
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
 
@@ -93,4 +90,3 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/GSoap/*
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat3/GSoapGenerated/*
 *:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat4/GSoapGenerated/*
-${MANTIDPLOT_CPPCHECK_SUPPRESSIONS}
