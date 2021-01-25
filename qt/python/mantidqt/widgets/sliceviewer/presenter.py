@@ -120,7 +120,8 @@ class SliceViewer(ObservingPresenter):
         """
         self.view.data_view.update_plot_data(
             self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_MDE(self):
         """
@@ -131,7 +132,8 @@ class SliceViewer(ObservingPresenter):
             self.model.get_data(self.get_slicepoint(),
                                 bin_params=data_view.dimensions.get_bin_params(),
                                 limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change

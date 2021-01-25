@@ -352,7 +352,7 @@ class SliceViewerDataView(QWidget):
         """
         self.presenter.export_region(limits, cut)
 
-    def update_plot_data(self, data):
+    def update_plot_data(self, data, transposed=False):
         """
         This just updates the plot data without creating a new plot. The extents
         can change if the data has been rebinned.
@@ -360,7 +360,14 @@ class SliceViewerDataView(QWidget):
         if self.nonortho_transform:
             self.image.set_array(data.T.ravel())
         else:
+            # need to update extent and limits of orthog axes when transposed (non orthog limits reset anyway)
+            extent = self.image.get_extent()
             self.image.set_data(data.T)
+            if transposed:
+                extent = (extent[2], extent[3], extent[0], extent[1])
+                self.image.set_extent(extent)
+                self.ax.set_xlim((extent[0], extent[1]))
+                self.ax.set_ylim((extent[2], extent[3]))
         self.colorbar.update_clim()
 
     def on_track_cursor_state_change(self, state):
