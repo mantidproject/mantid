@@ -270,17 +270,6 @@ def observe_peak_centers(diamond_ws,
     return vec_pid, peak_pos_vec
 
 
-def create_groups():
-    """Create group workspace
-    """
-    # create group workspace
-    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
-                                       GroupDetectorsBy='Group',
-                                       OutputWorkspace='VULCAN_3Bank_Groups')
-
-    return group_ws
-
-
 def test_main_old():
     """Test main for prototyping
     """

@@ -1,6 +1,7 @@
 from typing import Union
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (ConvertUnits, CreateWorkspace, LoadNexusLogs, Load, LoadEventNexus,
+                              LoadDiffCal,
                               LoadDetectorsGroupingFile)
 import os
 
@@ -55,9 +56,8 @@ def mtd_convert_units(ws_name: str,
 
 def load_calibration_file(calib_file_name: str,
                           output_name: str,
-                          ref_ws_name: str,
-                          load_cal=False):
-    """
+                          ref_ws_name: Union[None, str]):
+    """Load calibration diffraction file
 
     Note:
     - output_name:  this is NOT calibration workspace name but a base name for multiple calibration-related
@@ -68,8 +68,8 @@ def load_calibration_file(calib_file_name: str,
     calib_file_name
     output_name: str
         base name for calib, mask and group
-    ref_ws_name
-    load_cal
+    ref_ws_name: str, None
+        reference VULCAN file
 
     Returns
     -------
@@ -88,18 +88,9 @@ def load_calibration_file(calib_file_name: str,
                            ''.format(calib_file_name))
 
     # Load files: new diff calib file
-    outputs = mantidapi.LoadDiffCal(InputWorkspace=ref_ws_name,
-                                    Filename=diff_cal_file,
-                                    WorkspaceName=output_name)
-
-    # # set up output
-    # if outputs is None:
-    #     outputs = outputs_cal
-    #     offset_ws = outputs_cal.OutputOffsetsWorkspace
-    # elif outputs_cal is not None:
-    #     offset_ws = outputs_cal.OutputOffsetsWorkspace
-    # else:
-    #     offset_ws = None
+    outputs = LoadDiffCal(InputWorkspace=ref_ws_name,
+                          Filename=diff_cal_file,
+                          WorkspaceName=output_name)
 
     return outputs
 
@@ -150,11 +141,13 @@ def load_nexus(data_file_name, output_ws_name, meta_data_only, max_time=None):
             elif max_time is None:
                 out_ws = LoadEventNexus(Filename=data_file_name,
                                         OutputWorkspace=output_ws_name,
-                                        MetaDataOnly=False)
+                                        MetaDataOnly=False,
+                                        NumberOfBins=1)
             else:
                 out_ws = LoadEventNexus(Filename=data_file_name,
                                         OutputWorkspace=output_ws_name,
-                                        FilterByTimeStop=max_time)
+                                        FilterByTimeStop=max_time,
+                                        NumberOfBins=1)
 
         except RuntimeError as e:
             return False, 'Unable to load Nexus file %s due to %s' % (data_file_name, str(e))

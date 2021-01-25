@@ -1,156 +1,155 @@
-def analyze_outputs(cross_correlation_ws_dict, getdetoffset_result_ws_dict):
+# Zoo of methods that are develooped for analyze the calibration
+from mantid.simpleapi import AlignDetectors
+from mantid.simpleapi import mtd
+import numpy as np
+
+
+class FindDiamondPeaks(object):
+
+    def __init(self):
+
+        self._diamond_ws_name = None
+
+
+    def find_peak(self, peak_name, exp_pos, d_min, d_max, start_ws_index, end_ws_index):
+
+        # fit peaks
+        peak_pos_ws_name = self.fit_peaks(exp_pos, d_min, d_max)
+
+        # separate good fit/bad fit/no fit
+        self.analyze_fitted_peaks(peak_pos_ws_name)
+
+        # do statistics on fit result (average, standard deviation)
+
+        # ...
+
+        pass
+
+    def fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index):
+        # Default to Gaussian and Linear background
+        FitPeaks(InputWorkspace=self._diamond_ws_name,
+                 OutputWorkspace=out_peak_pos_ws,
+                 StartWorkspaceIndex=int(start_ws_index),
+                 StopWorkspaceIndex=int(end_ws_index),
+                 PeakCenters=f'{expected_peak_pos}',
+                 FitWindowBoundaryList=f'{min_d}, {max_d}',
+                 FittedPeaksWorkspace=f'{tag}_model',
+                 OutputPeakParametersWorkspace=f'{tag}_params',
+                 OutputParameterFitErrorsWorkspace=f'{tag}_errors')
+
+        return peak_pos_ws_name
+
+    def analyze_fitted_peaks(self, peak_pos_ws_name: str,
+                             start_ws_index: int,
+                             end_ws_index: int):
+        # . -1 for data is zero;
+        # -2 for maximum value is smaller than specified minimum value.and
+        # -3 for non-converged fitting.
+
+        peak_pos_ws = mtd[peak_pos_ws_name]
+
+        ws_index_vec = np.arange(start_ws_index, end_ws_index)
+
+        # peak positions
+        peak_pos_ws = mtd['Bank3_Peak1_Pos']
+        peak_center_vec = peak_pos_ws.extractY().flatten()
+        ws_index_vec = np.arange(6468, 24900)
+        assert ws_index_vec.shape == peak_center_vec.shape
+
+        zero_counts_pixels = np.where(np.abs(peak_center_vec + 1) < 1E-5)[0]
+        print(f'Zero counts = {len(zero_counts_pixels)}')
+        # print(f'  they are ... {zero_counts_pixels + 6468}')
+
+        low_counts_pixels = np.where(np.abs(peak_center_vec + 2) < 1E-5)[0]
+        print(f'Low counts = {len(low_counts_pixels)}')
+
+        bad_fit_pixels = np.where(np.abs(peak_center_vec + 3) < 1E-5)[0]
+        print(f'Type 1 bad counts = {len(bad_fit_pixels)}')
+        print(f'  they are ... {bad_fit_pixels + 6468}')
+
+        bad_fit_pixels = np.where(np.abs(peak_center_vec + 4) < 1E-5)[0]
+        print(f'Type 2 bad counts = {len(bad_fit_pixels)}')
+        print(f'  they are ... {bad_fit_pixels + 6468}')
+
+        for index in bad_fit_pixels:
+            print(f'{peak_center_vec[index]}  counts = {counts_vec[index + 6468]}')
+
+    def get_peak_height_max_y():
+        # Get peak height as maximum Y value by removing background
+
+        FindPeakBackground(InputWorkspace='VULCAN_164960_matrix', WorkspaceIndex=10000, FitWindow='1,1.2',
+                           OutputWorkspace='allmultiple')
+
+        ws_index = cell(0, 0)
+        peak_min_index = cell(0, 1)
+        peak_max_index = cell(0, 2)
+        bgkd_0 = cell(0, 3)
+        bkgd_1 = cell(0, 4)
+        bkgd_2 = cell(0, 5)
+
+
+def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
+    """Generate a report for all masked pixels
+
+    Parameters
+    ----------
+    data_workspace: str, MatrixWorkspace
+        A diamond workspace.  It can be either the raw EventWorkspace or a Workspace2D with 1 bin (count)
+    mask_ws: str, MaskWorkspace
+        Mask workspace
+    wi_start: int, None
+        starting workspace index
+    wi_stop: int, None
+        stopping workspace index (excluded)
+
+    Returns
+    -------
+
     """
-    evaluate (by matching the fitted cross-correlation peaks to those calculated from
-    CrossCorrelation) the peak fitting result from GetDetectorOffsets in order to create
-    list of spectra to be masked.
-    :param cross_correlation_ws_dict:
-    :param getdetoffset_result_ws_dict:
-    :return:
-    """
-    cost_ws_dict = dict()
-    for bank_name in ['west', 'east', 'high angle']:
-        cc_diamond_ws_name = cross_correlation_ws_dict[bank_name]
-        fit_result_table_name = getdetoffset_result_ws_dict[bank_name]
+    # Get input
+    if isinstance(data_workspace, str):
+        data_workspace = mtd[data_workspace]
+    if isinstance(mask_ws, str):
+        mask_ws = mtd[mask_ws]
+    if wi_start is None:
+        wi_start = 0
+    if wi_stop is None:
+        wi_stop = mask_ws.getNumberHistograms()
 
-        # create the workspaces
-        cost_list = evaluate_cc_quality(cc_diamond_ws_name, fit_result_table_name)
-        cost_array = numpy.array(cost_list).transpose()
-        cost_ws_name_i = '{0}_cost'.format(bank_name)
-        CreateWorkspace(DataX=cost_array[0], DataY=cost_array[1], NSpec=1,
-                        OutputWorkspace=cost_ws_name_i)
+    # Check input
+    assert mask_ws.getNumberHistograms() == data_workspace.getNumberHistograms(), 'blabla'
+    assert data_workspace.extractY().shape[1] == 1, f'Only 1 bin allowed but not {data_workspace.extractY()}'
 
-        cost_ws_dict[bank_name] = cost_ws_name_i
-    # END-FOR
-
-    return cost_ws_dict
-
-
-def calculate_difc(ws, ws_index):
-    """ Calculate DIFC of one spectrum
-    :param ws:
-    :param ws_index:
-    :return:
-    """
-    # det_id = ws.getDetector(i).getID()
-    det_pos = ws.getDetector(ws_index).getPos()
-    source_pos = ws.getInstrument().getSource().getPos()
-    sample_pos = ws.getInstrument().getSample().getPos()
-
-    source_sample = sample_pos - source_pos
-    det_sample = det_pos - sample_pos
-    angle = det_sample.angle(source_sample)
-
-    L1 = source_sample.norm()
-    L2 = det_sample.norm()
-
-    # theta = angle * 180/3.14
-    # print theta
-
-    difc = 252.816 * 2 * math.sin(angle * 0.5) * (L1 + L2)  # math.sqrt(L1+L2) #\sqrt{L1+L2}
-
-    return difc
-
-
-def check_and_correct_difc(ws_name, cal_table_name, mask_ws_name):
-    """
-    check and correct DIFCs if necessary: it is for 3 banks
-
-    Renamed from check_correct_difcs_3banks
-
-    :param ws_name:
-    :param cal_table_name: name of Calibration workspace (a TableWorkspace)
-    :return:
-    """
-    # west bank
-    diamond_event_ws = mtd[ws_name]   # ['vulcan_diamond']
-    cal_table_ws = mtd[cal_table_name]
-    difc_col_index = 1
-    # west_spec_vec = numpy.arange(0, 3234)
-    west_idf_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    west_cal_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    for irow in range(0, 3234):
-        west_idf_vec[irow] = calculate_difc(diamond_event_ws, irow)
-        west_cal_vec[irow] = cal_table_ws.cell(irow, difc_col_index)
-    # CreateWorkspace(DataX=west_spec_vec, DataY=west_difc_vec, NSpec=1, OutputWorkspace='west_idf_difc')
-
-    # east bank
-    # east_spec_vec = numpy.arange(3234, 6468)
-    east_idf_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    east_cal_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    for irow in range(3234, 6468):
-        east_idf_vec[irow - 3234] = calculate_difc(diamond_event_ws, irow)
-        east_cal_vec[irow - 3234] = cal_table_ws.cell(irow, difc_col_index)
-
-    # high angle bank
-    # highangle_spec_vec = numpy.arange(6468, 24900)
-    highangle_idf_vec = numpy.ndarray(shape=(24900 - 6468,), dtype='float')
-    highangle_cal_vec = numpy.ndarray(shape=(24900 - 6468,), dtype='float')
-    for irow in range(6468, 24900):
-        highangle_idf_vec[irow - 6468] = calculate_difc(diamond_event_ws, irow)
-        highangle_cal_vec[irow - 6468] = cal_table_ws.cell(irow, difc_col_index)
-
-    mask_ws = mtd[mask_ws_name]
-
-    # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
-    correct_difc_to_default(west_idf_vec, west_cal_vec, cal_table_ws, 0, 20, 1, mask_ws)
-    correct_difc_to_default(east_idf_vec, east_cal_vec, cal_table_ws, 3234, 20, 1, mask_ws)
-    correct_difc_to_default(highangle_idf_vec, highangle_idf_vec, cal_table_ws, 6468, 20, 1, mask_ws)
-
-    return
-
-
-# TODO - NIGHT - Implement!
-def analyze_mask(event_ws, mask_ws, wi_start, wi_stop, output_dir):
-    """ analyze mask workspace
-    """
-    assert mask_ws.getNumberHistograms() == event_ws.getNumberHistograms(), 'blabla'
+    # Set initial value for statistics
+    events_number_vec = data_workspace.extractY().flatten()
 
     num_masked = 0
-    num_masked_is_masked = 0
     zero_masked = 0
-    zero_masked_is_masked = 0
     event_spectrum_list = list()
     for ws_index in range(wi_start, wi_stop+1):
+        # skip non-masked pixels
         if mask_ws.readY(ws_index)[0] < 0.1:
             continue
-
-        num_masked += 1
+        else:
+            num_masked += 1
 
         # analyze masking information
-        num_events_i = event_ws.getSpectrum(ws_index).getNumberEvents()
-        if event_ws.getSpectrum(ws_index).getNumberEvents() == 0:
+        if events_number_vec[ws_index] == 0:
             zero_masked += 1
         else:
-            event_spectrum_list.append((num_events_i, ws_index))
-    
-    # method 2: shall be same result as method 1
-    for ws_index in range(wi_start, wi_stop+1):
-        if not mask_ws.getDetector(ws_index).isMasked():
-            continue
+            event_spectrum_list.append((events_number_vec[ws_index], ws_index))
 
-        num_masked_is_masked += 1
-        mask_ws.dataY(ws_index)[0] = 1.0
-
-        # analyze masking information
-        if event_ws.getSpectrum(ws_index).getNumberEvents() == 0:
-            case_i = 1  # no event
-            zero_masked_is_masked += 1
-        elif event_ws.getSpectrum:
-            pass
-
-    # 2. For each bank, sort the masked workspace from highest ban
-
-    print ('[REPORT] From {} to {}: Masked = {} including (1) zero counts = {}'
-           ''.format(wi_start, wi_stop-1, num_masked, zero_masked))
-    print ('[REPORT] From {} to {}: Masked = {} including (1) zero counts = {}'
-           ''.format(wi_start, wi_stop-1, num_masked_is_masked, zero_masked_is_masked))
-
+    # Make report
+    report = '[REPORT]'
+    report += '\nFrom {} to {}: Number of masked pixels = {}, including '.format(wi_start, wi_stop-1, num_masked)
+    report += f'\n  (1) {zero_masked} pixels with zero counts'
+    report += f'\n  (2) {num_masked - zero_masked} pixels with non-zero counts and they are ... '
     event_spectrum_list.sort(reverse=True)
-    for i in range(min(10, len(event_spectrum_list))):
+    for i in range(min(100, len(event_spectrum_list))):
         num_events_i, ws_index = event_spectrum_list[i]
-        print ('[REPORT] ws-index = {}, num events = {}, masked!'.format(ws_index, num_events_i))
+        print('      ws-index = {}, num of events = {}'.format(ws_index, num_events_i))
 
-    return None, None, None
+    return report
 
 
 def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
@@ -158,13 +157,20 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     overwrite the input
     """
 
-    AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
-                   CalibrationWorkspace=calib_ws_name)
+    # Align detector
+    if calib_ws_name:
+        AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
+                       CalibrationWorkspace=calib_ws_name)
+
+    # Get units
+    event_ws = mtd[event_ws_name]
+    assert event_ws.getAxis(0).getUnit().unitID() == 'dSpacing', f'Expecting {event_ws_name} to be dSpacing but ' \
+                                                                 f'it is {event_ws.getAxis(0).getUnit().unitID()}'
 
     DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                          GroupingWorkspace=group_ws_name)
 
-    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.5,-0.0003,3')
+    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
 
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
 
@@ -208,3 +214,59 @@ def reduced_powder_data(ipts_number, run_number, calib_file_name, event_ws_name=
 
 
 
+def get_masked_ws_indexes(mask_ws):
+    """
+    get the workspace indexes that are masked
+    :param mask_ws:
+    :return:
+    """
+    if isinstance(mask_ws, str):
+        mask_ws = mtd[mask_ws]
+
+    masked_list = list()
+    for iws in range(mask_ws.getNumberHistograms()):
+        if mask_ws.readY(iws)[0] > 0.5:
+            masked_list.append(iws)
+
+    return masked_list
+
+
+def load_calibration_file(ref_ws_name, calib_file_name, calib_ws_base_name=None):
+    """
+    load calibration file
+    :param ref_ws_name:
+    :param calib_file_name:
+    :param calib_ws_base_name:
+    :return:
+    """
+    if calib_ws_base_name is None:
+        calib_ws_base_name = 'vulcan'
+
+    # load data file
+    r = LoadDiffCal(InputWorkspace=ref_ws_name,
+                Filename=calib_file_name, WorkspaceName=calib_ws_base_name)
+
+    calib_ws_name = '{}_cal'.format(calib_ws_base_name)
+    mask_ws_name = '{}_mask'.format(calib_ws_base_name)
+    group_ws_name = '{}_group'.format(calib_ws_base_name)
+
+    return calib_ws_name, mask_ws_name, group_ws_name
+
+
+
+def load_raw_nexus(file_name=None, ipts=None, run_number=None, output_ws_name=None):
+    """ Reduced: aligned detector and diffraction focus, powder data
+    :param file_name:
+    :param ipts:
+    :param run_number:
+    :return:
+    """
+    if file_name is None:
+        file_name = '/SNS/VULCAN/IPTS-{}/nexus/VULCAN_{}.nxs.h5'.format(ipts, run_number)
+
+    if output_ws_name is None:
+        output_ws_name = 'vulcan_diamond'
+
+    Load(Filename=file_name, OutputWorkspace=output_ws_name)
+
+    return output_ws_name
