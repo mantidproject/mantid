@@ -5,19 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency2.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <cmath>
 #include <limits>
