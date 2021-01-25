@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="NexusPeaksReader"
-    extensions="nxs"
-    file_description="Mantid Nexus Peaks File">
-  </Reader>
-</ParaViewReaders>

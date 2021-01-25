@@ -30,6 +30,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
         LoadNexus(Filename='CORELLI_124036_banks42_87.nxs', OutputWorkspace='LaB6')
         CorelliPowderCalibrationCreate(InputWorkspace='LaB6',
                                        OutputWorkspacesPrefix='LaB6_',
+                                       SourceToSampleDistance=19.991,
                                        TubeDatabaseDir='/tmp',
                                        TofBinning=[3000, -0.001, 16660],
                                        PeakFunction='Gaussian',
@@ -40,7 +41,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
                                        ComponentMaxRotation=3.0)
         table = mtd['LaB6_adjustments']
         # Check position of the moderator
-        assert_allclose(table.row(0)['Zposition'], -19.991, atol=0.002)
+        assert_allclose(table.row(0)['Zposition'], -20, atol=0.02)
         # Check position of bank42
         assert_allclose([table.row(1)[x] for x in ('Xposition', 'Yposition', 'Zposition')],
                         [2.577, 0.063, 0.082], atol=0.04)

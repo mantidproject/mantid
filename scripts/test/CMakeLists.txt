@@ -26,30 +26,12 @@ set(TEST_PY_FILES
     VesuvioFittingTest.py
     VesuvioProfileTest.py)
 
-# these are gui tests that currently only work in pyqt4
-set(TEST_PYQT4_FILES
-    SANSBatchModeTest.py
-    SANSCentreFinderTest.py
-    SANSCommandInterfaceTest.py
-    SansIsisGuiSettings.py
-    SANSReducerTest.py
-    SANSReductionStepsUserFileTest.py
-    pythonTSVTest.py)
-
 if (ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts
     ${TEST_PY_FILES})
   unset(PYUNITTEST_QT_API)
 endif()
-
-if(ENABLE_MANTIDPLOT)
-  set(PYUNITTEST_QT_API pyqt) # force to use qt4
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scriptsQt4
-                        ${TEST_PYQT4_FILES})
-  unset(PYUNITTEST_QT_API)
-endif()
-
 
 # Additional tests
 add_subdirectory(Abins)

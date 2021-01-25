@@ -186,7 +186,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
                             std::string(e.what()),
-                            "Some invalid Properties found")
+                            "Some invalid Properties found: [ DataType ]")
   }
 
   void test_D20_scan() {
