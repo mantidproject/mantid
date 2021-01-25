@@ -7,6 +7,7 @@
 # pylint: disable=C0111
 from Muon.GUI.Common.muon_base import MuonBase
 
+
 class MuonBasePair(MuonBase):
     def __init__(self, pair_name):
         super(MuonBasePair,self).__init__(pair_name)
