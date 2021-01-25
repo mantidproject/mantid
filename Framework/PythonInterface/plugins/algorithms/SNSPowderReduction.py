@@ -392,7 +392,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
             self._elementSize,  # Size of one side of the integration element cube in mm
             metaws,  # Optional workspace containing metadata
-            self.getProperty("CacheDir"),  # Cache dir for absoption correction workspace
+            self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
         )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
