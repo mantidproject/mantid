@@ -652,11 +652,11 @@ class SANSILLReduction(PythonAlgorithm):
                         if self._instrument in ['D22', 'D22lr', 'D33', 'D11B', 'D22B']:
                             self._apply_parallax(ws)
                         progress.report()
-                        self._process_sample(ws)
-                        self._set_sample_title(ws)
                         sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
                         if sensitivity_out:
                             self._process_sensitivity(ws, sensitivity_out)
+                        self._process_sample(ws)
+                        self._set_sample_title(ws)
                         progress.report()
         self._finalize(ws, process)
 
