@@ -1,20 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Objects/IObject.h"
-
 // STL
-#include <memory>
-#include <string>
-#include <vector>
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

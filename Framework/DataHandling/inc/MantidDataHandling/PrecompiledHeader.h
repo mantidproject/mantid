@@ -7,12 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/System.h"
 
 // STL
 
@@ -21,3 +18,9 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 // clang-format on
+
+// Poco
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/NodeList.h>
