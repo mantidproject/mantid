@@ -388,9 +388,8 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
-  for (int index = 0; index < static_cast<int>(m_nSpec); ++index) {
+  for (size_t i = 0; i < m_nSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    const auto i = static_cast<size_t>(index);
     // skip spectra with no detectors, monitors or masked spectra
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
         spectrumInfo.isMasked(i)) {
