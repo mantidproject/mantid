@@ -322,7 +322,7 @@ def cross_correlate_calibrate(ws_name: str,
     # TODO - NIGHT - Make it better
     # it returns full set of spectra
     print('[INFO] OffsetsWorkspace {}: spectra number = {}'.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
-    report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1], None)
+    report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
     # TODO - FUTURE NEXT - consider whether the cross correlate workspace shall be removed or not
@@ -332,7 +332,6 @@ def cross_correlate_calibrate(ws_name: str,
     return offset_ws_name, mask_ws_name
 
 
-# TODO - when and how to use?
 def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, difc_tol, difc_col_index, mask_ws):
     """ Compare the DIFC calculated from the IDF and calibration.
     If the difference is beyond tolerance, using the IDF-calculated DIFC instead and report verbally
@@ -347,6 +346,9 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
     """
     # difference between IDF and calibrated DIFC
     difc_diff_vec = idf_difc_vec - cal_difc_vec
+
+    print(f'[INFO] DIFC tolerance = {difc_tol}: Calibrated DIFC with difference to engineered DIFC with beyond tolerance will be reset.')
+    print(f'[INFO] DIFC number = {cal_difc_vec.shape}')
 
     # go over all the DIFCs
     num_corrected = 0
@@ -363,8 +365,8 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
                        ''.format(index, index + row_shift, difc_diff_vec[index], mask_sig)
         # END-IF
     # END-FOR
+    print (f'[INFO] Number of corrected DIFC = {num_corrected} out of {cal_difc_vec.shape}')
     print (message)
-    print ('Number of corrected DIFC = {0}'.format(num_corrected))
 
     return
 
