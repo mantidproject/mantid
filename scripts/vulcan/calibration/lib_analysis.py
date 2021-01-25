@@ -1,5 +1,5 @@
 # Zoo of methods that are develooped for analyze the calibration
-from mantid.simpleapi import AlignDetectors
+from mantid.simpleapi import AlignDetectors, FitPeaks
 from mantid.simpleapi import mtd
 import numpy as np
 
@@ -25,7 +25,14 @@ class FindDiamondPeaks(object):
 
         pass
 
-    def fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index):
+    def fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index, suffix):
+
+        # base workspace name (output)
+        tag = f'{self._diamond_ws_name}_{suffix}'
+
+        # output workspace names
+        peak_pos_ws_name = f'{tag}_peak_positions'
+
         # Default to Gaussian and Linear background
         FitPeaks(InputWorkspace=self._diamond_ws_name,
                  OutputWorkspace=out_peak_pos_ws,
@@ -49,32 +56,36 @@ class FindDiamondPeaks(object):
         peak_pos_ws = mtd[peak_pos_ws_name]
 
         ws_index_vec = np.arange(start_ws_index, end_ws_index)
+        # ws_index_vec = np.arange(6468, 24900)
 
+        # Sanity check
+        print(f'Number of histograms in {peak_pos_ws_name} = {peak_pos_ws.getNumberHistograms()}, '
+              f'Spectrum vector shape = {ws_index_vec.shape}')
         # peak positions
-        peak_pos_ws = mtd['Bank3_Peak1_Pos']
         peak_center_vec = peak_pos_ws.extractY().flatten()
-        ws_index_vec = np.arange(6468, 24900)
         assert ws_index_vec.shape == peak_center_vec.shape
 
-        zero_counts_pixels = np.where(np.abs(peak_center_vec + 1) < 1E-5)[0]
+        # Type 1: zero counts
+        zero_counts_pixels = np.where(np.abs(peak_center_vec - (-1)) < 1E-5)[0]
         print(f'Zero counts = {len(zero_counts_pixels)}')
-        # print(f'  they are ... {zero_counts_pixels + 6468}')
 
-        low_counts_pixels = np.where(np.abs(peak_center_vec + 2) < 1E-5)[0]
+        # Type 2: low counts
+        low_counts_pixels = np.where(np.abs(peak_center_vec - (-2)) < 1E-5)[0]
         print(f'Low counts = {len(low_counts_pixels)}')
 
-        bad_fit_pixels = np.where(np.abs(peak_center_vec + 3) < 1E-5)[0]
+        bad_fit_pixels = np.where(np.abs(peak_center_vec - (-3)) < 1E-5)[0]
         print(f'Type 1 bad counts = {len(bad_fit_pixels)}')
-        print(f'  they are ... {bad_fit_pixels + 6468}')
+        # print(f'  they are ... {bad_fit_pixels + 6468}')
 
-        bad_fit_pixels = np.where(np.abs(peak_center_vec + 4) < 1E-5)[0]
+        bad_fit_pixels = np.where(np.abs(peak_center_vec - (-4)) < 1E-5)[0]
         print(f'Type 2 bad counts = {len(bad_fit_pixels)}')
-        print(f'  they are ... {bad_fit_pixels + 6468}')
+        # print(f'  they are ... {bad_fit_pixels + 6468}')
 
-        for index in bad_fit_pixels:
-            print(f'{peak_center_vec[index]}  counts = {counts_vec[index + 6468]}')
+        # Check again with counts
+        diamond_ws = mtd[self._diamond_ws_name]
+        counts_vec = diamond_ws.extractY().sum(axis=1)[start_ws_index:end_ws_index]
 
-    def get_peak_height_max_y():
+    def get_peak_height_max_y(self):
         # Get peak height as maximum Y value by removing background
 
         FindPeakBackground(InputWorkspace='VULCAN_164960_matrix', WorkspaceIndex=10000, FitWindow='1,1.2',
