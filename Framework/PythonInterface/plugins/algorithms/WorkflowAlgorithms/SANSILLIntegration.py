@@ -102,28 +102,38 @@ class SANSILLIntegration(PythonAlgorithm):
         self.declareProperty('NPixelDivision', 1, IntBoundedValidator(lower=1), 'Number of subpixels to split the pixel (NxN)')
         self.setPropertySettings('NPixelDivision', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
 
+        iq_without_shapes = EnabledWhenProperty(EnabledWhenProperty("ShapeTable", PropertyCriterion.IsDefault),
+                                                EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or),
+                                                LogicOperator.And)
+
         self.declareProperty(name='NumberOfWedges', defaultValue=0, validator=IntBoundedValidator(lower=0),
                              doc='Number of wedges to integrate separately.')
-        self.setPropertySettings('NumberOfWedges', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
+        self.setPropertySettings('NumberOfWedges', iq_without_shapes)
 
         iq_with_wedges = EnabledWhenProperty(output_iq,
                                              EnabledWhenProperty('NumberOfWedges',
                                                                  PropertyCriterion.IsNotDefault), LogicOperator.And)
+        iq_with_wedges_or_shapes = EnabledWhenProperty(iq_with_wedges,
+                                                       EnabledWhenProperty("ShapeTable", PropertyCriterion.IsNotDefault),
+                                                       LogicOperator.Or)
+        iq_with_wedges_but_no_shapes = EnabledWhenProperty(iq_with_wedges,
+                                                           EnabledWhenProperty("ShapeTable", PropertyCriterion.IsDefault),
+                                                           LogicOperator.And)
 
         self.declareProperty(WorkspaceGroupProperty('WedgeWorkspace', '', direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='WorkspaceGroup containing I(Q) for each azimuthal wedge.')
-        self.setPropertySettings('WedgeWorkspace', iq_with_wedges)
+        self.setPropertySettings('WedgeWorkspace', iq_with_wedges_or_shapes)
 
         self.declareProperty(name='WedgeAngle', defaultValue=30., validator=FloatBoundedValidator(lower=0.),
                              doc='Wedge opening angle [degrees].')
-        self.setPropertySettings('WedgeAngle', iq_with_wedges)
+        self.setPropertySettings('WedgeAngle', iq_with_wedges_but_no_shapes)
 
         self.declareProperty(name='WedgeOffset', defaultValue=0., validator=FloatBoundedValidator(lower=0.),
                              doc='Wedge offset angle from x+ axis.')
-        self.setPropertySettings('WedgeOffset', iq_with_wedges)
+        self.setPropertySettings('WedgeOffset', iq_with_wedges_but_no_shapes)
 
         self.declareProperty(name='AsymmetricWedges', defaultValue=False, doc='Whether to have asymmetric wedges.')
-        self.setPropertySettings('AsymmetricWedges', iq_with_wedges)
+        self.setPropertySettings('AsymmetricWedges', iq_with_wedges_or_shapes)
 
         self.setPropertyGroup('DefaultQBinning', 'I(Q) Options')
         self.setPropertyGroup('BinningFactor', 'I(Q) Options')
@@ -382,7 +392,7 @@ class SANSILLIntegration(PythonAlgorithm):
         pixel_width = run.getLogData('pixel_width').value
         pixel_size = pixel_height if pixel_height >= pixel_width else pixel_width
         binning_factor = self.getProperty('BinningFactor').value
-        wavelength = 0. # for TOF mode there is no wavelength
+        wavelength = 0.  # for TOF mode there is no wavelength
         if run.hasProperty('wavelength'):
             wavelength = run.getLogData('wavelength').value
         l2 = run.getLogData('l2').value
@@ -408,14 +418,17 @@ class SANSILLIntegration(PythonAlgorithm):
                         WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
                         AsymmetricWedges=asymm_wedges,
                         NPixelDivision=pixel_division, ShapeTable=shape_table)
+            if shape_table:
+                # if there is a shape table, the final number of wedges cannot be known beforehand
+                # (because of possible symmetry issues)
+                n_wedges = mtd[wedge_ws].size()
             if self._resolution == 'MildnerCarpenter':
                 x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
                 mtd[ws_out].setDx(0, res)
-                if n_wedges != 0:
-                    for wedge in range(n_wedges):
-                        mtd[wedge_ws].getItem(wedge).setDx(0, res)
+                for wedge in range(n_wedges):
+                    mtd[wedge_ws].getItem(wedge).setDx(0, res)
             if n_wedges != 0:
                 self.setProperty('WedgeWorkspace', mtd[wedge_ws])
         elif self._output_type == 'I(Phi,Q)':
