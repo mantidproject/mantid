@@ -217,54 +217,58 @@ def calculate_absorption_correction(
 
     absName = '__{}_abs_correction'.format(_getBasename(filename))
 
-    # -- Caching -- #
-    # -- Generate the cache file name based on
-    #    - input filename (embedded in donorWS)
-    #    - SNSPowderReduction Options (mostly passed in as args)
-    cache_filename, sha1 = _getCacheName(donorWS, cache_dir, abs_method)
-    # -- Try to use cache
-    #    - if cache is found, wsn_as and wsn_ac will be valid string (workspace name)
-    #      - already exist in memory
-    #      - load from cache nxs file
-    #    - if cache is not found, wsn_as and wsn_ac will both be None
-    #      - standard calculation will be kicked off as before
-    wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename)
-
-    # NOTE:
-    # -- one algorithm with three very different behavior, why not split them to
-    #    to make the code cleaner, also the current design will most likely leads
-    #    to severe headache down the line
-    log.information(f"For current analysis using {abs_method}")
-    if (abs_method == "SampleOnly") and (wsn_as is not None):
-        # first deal with special case where we only care about the sample absorption
-        log.information(f"-- Located cached workspace, {wsn_as}")
-        # NOTE:
-        #  Nothing to do here, since
-        #  - wsn_as is already loaded by _getCachedData
-        #  - wsn_ac is already set to None by _getCachedData.
+    if cache_dir is None:
+        # no caching activity if no cache directory is provided
+        return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
     else:
-        if (wsn_as is None) or (wsn_ac is None):
-            log.information(f"-- Cannot locate all necessary cache, start from scrach")
-            wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
-                                                             absName)
+        # -- Caching -- #
+        # -- Generate the cache file name based on
+        #    - input filename (embedded in donorWS)
+        #    - SNSPowderReduction Options (mostly passed in as args)
+        cache_filename, sha1 = _getCacheName(donorWS, cache_dir, abs_method)
+        # -- Try to use cache
+        #    - if cache is found, wsn_as and wsn_ac will be valid string (workspace name)
+        #      - already exist in memory
+        #      - load from cache nxs file
+        #    - if cache is not found, wsn_as and wsn_ac will both be None
+        #      - standard calculation will be kicked off as before
+        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename)
+
+        # NOTE:
+        # -- one algorithm with three very different behavior, why not split them to
+        #    to make the code cleaner, also the current design will most likely leads
+        #    to severe headache down the line
+        log.information(f"For current analysis using {abs_method}")
+        if (abs_method == "SampleOnly") and (wsn_as is not None):
+            # first deal with special case where we only care about the sample absorption
+            log.information(f"-- Located cached workspace, {wsn_as}")
             # NOTE:
-            #  We need to set the SHA1 first, then save.
-            #  Because the final check is always comparing SHA1 of given
-            #  workspace.
-            # set the SHA1 to workspace in memory (for in-memory cache search)
-            mtd[wsn_as].mutableRun()["absSHA1"] = sha1
-            # case SampleOnly is the annoying one
-            if wsn_ac is not None:
-                mtd[wsn_ac].mutableRun()["absSHA1"] = sha1
-            # save the cache to file (for hard-disk cache)
-            SaveNexusProcessed(InputWorkspace=wsn_as, Filename=cache_filename)
-            # case SampleOnly is the annoying one
-            if wsn_ac is not None:
-                SaveNexusProcessed(InputWorkspace=wsn_ac, Filename=cache_filename, Append=True)
+            #  Nothing to do here, since
+            #  - wsn_as is already loaded by _getCachedData
+            #  - wsn_ac is already set to None by _getCachedData.
         else:
-            # found the cache, let's use the cache instead
-            log.information(f"-- Locate cached sample absorption correction: {wsn_as}")
-            log.infomration(f"-- Locate cached container absorption correction: {wsn_ac}")
+            if (wsn_as is None) or (wsn_ac is None):
+                log.information(f"-- Cannot locate all necessary cache, start from scrach")
+                wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
+                                                                absName)
+                # NOTE:
+                #  We need to set the SHA1 first, then save.
+                #  Because the final check is always comparing SHA1 of given
+                #  workspace.
+                # set the SHA1 to workspace in memory (for in-memory cache search)
+                mtd[wsn_as].mutableRun()["absSHA1"] = sha1
+                # case SampleOnly is the annoying one
+                if wsn_ac is not None:
+                    mtd[wsn_ac].mutableRun()["absSHA1"] = sha1
+                # save the cache to file (for hard-disk cache)
+                SaveNexusProcessed(InputWorkspace=wsn_as, Filename=cache_filename)
+                # case SampleOnly is the annoying one
+                if wsn_ac is not None:
+                    SaveNexusProcessed(InputWorkspace=wsn_ac, Filename=cache_filename, Append=True)
+            else:
+                # found the cache, let's use the cache instead
+                log.information(f"-- Locate cached sample absorption correction: {wsn_as}")
+                log.infomration(f"-- Locate cached container absorption correction: {wsn_ac}")
 
     return wsn_as, wsn_ac
 
