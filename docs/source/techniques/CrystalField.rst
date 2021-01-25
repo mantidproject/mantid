@@ -1,10 +1,10 @@
-.. Crystal Field:
+.. _Crystal_Field_Examples:
 
-=============
-Crystal Field
-=============
+======================
+Crystal Field Examples
+======================
 
-Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the :ref:`concept page <Crystal structure and reflections>` whilst the syntax of the Python commands used is described in the :ref:`interface page <Crystal Field Python Interface>`
+Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the :ref:`concept page <Crystal Field Theory>` whilst the syntax of the Python commands used is described in the :ref:`interface page <Crystal Field Python Interface>`
 
 This page contains specific worked examples. The data files can be found `here <https://github.com/mducle/cf_examples/raw/master/cf_examples_data.zip>`_. Please download and unzip this into a folder which is on your Mantid path (set using the "Manage User Directories" menu item).
 
@@ -269,3 +269,5 @@ Tying Background Parameters
 
    # Ties some of the parameters in the Gaussian to different values.
    cf.background.functions[1].ties(PeakCentre=9.0, Height=2.0)
+
+.. categories:: Techniques
