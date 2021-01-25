@@ -11,7 +11,23 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+############
+
 - New algorithm :ref:`RebinRagged <algm-RebinRagged>` which can rebin a workspace with different binning parameters for each spectrum
+- :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum).
+
+Improvements
+############
+
+- :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
+
+Bugfixes
+########
+
+- Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
+- Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
+
 
 Engineering Diffraction
 -----------------------
