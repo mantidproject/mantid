@@ -20,7 +20,7 @@ The Crystal Field Potential
 
 The crystal field (or in older terminology, *crystalline electric field*)
 is the potential acting on a particular magnetic ion :math:`i` at position :math:`\mathbf{r}_i` in a solid or molecule.
-When first proposed by Van Vleck, it was thought to be an electrostatic effect due the charges 
+When first proposed by Van Vleck, it was thought to be an electrostatic effect due to the charges 
 :math:`q_j` of neighbouring ions, located at :math:`\mathbf{r}_j`, of the magnetic ion (hence the original name).
 This leads to an approximation in which the surrounding ions are treated as point charges,
 so that the electric potential acting on the magnetic ion is
@@ -30,7 +30,7 @@ so that the electric potential acting on the magnetic ion is
   :label: cfpot
 
 This potential satisfies Laplace's equation, :math:`\nabla^2 V(\mathbf{r}) = 0`,
-and so can expanded in terms of spherical harmonic functions
+and so can be expanded in terms of spherical harmonic functions
 
 .. math::
     V_{\mathrm{CF}}(\mathbf{r}_i) = \sum_{lm} A_l^m r^l Y_{lm}(\mathbf{r}_i),
@@ -45,7 +45,7 @@ where the radial part is
 The above equations define the *point charge model* `[Hutchings64]`_.
 In many solids, though, the point charge approximation breaks down,
 because the ligand electrons may be involved in bonding or charge transfer processes,
-and thus may have a spatial extent and may no longer be treated as point charges situated at the atomic sites.
+and thus have a spatial extent and may no longer be treated as point charges situated at the atomic sites.
 The formulism detailed above, however, was still found to be applicable to a wide variety of materials,
 *if* the radial part :math:`A_l^m r^l` is treated as a variable *crystal field parameter*.
 This is because the spherical harmonic functions form a complete orthogonal basis set,
@@ -53,7 +53,7 @@ so that any function may be expressed as an expansion in them.
 Values obtained from equation :eq:`alm`, however, do not generally match experimentally determined crystal field parameters,
 except for some insulators and if the point charges :math:`q_j` are scaled from their nominal valences.
 
-Mantid contain routines which can calculate the :math:`A_l^m` parameters
+Mantid contains routines which can calculate the :math:`A_l^m` parameters
 which may be used as starting parameters for a fit to inelastic neutron scattering data.
 
 
@@ -73,12 +73,12 @@ as the population of the levels change.
 Because different magnetic materials have different crystal structures and hence a different local crystalline
 environment around the magnetic ions, they will also have different susceptibilities,
 which is determined in part by the crystal field.
-An applied magnetic field will change the energies of the levels with respects to each other (the Zeeman splitting)
+An applied magnetic field will change the energies of the levels with respect to each other (the Zeeman splitting)
 so the crystal field will also affect the magnetisation (the magnetic moment as a function of applied magnetic field).
 
 Inelastic neutron spectroscopy can measure the energy difference between these crystal field energy levels
-as neutrons may excited or de-excited electrons occupying one level to another.
-Finally, the spin-orbit interaction also means that the preffered spin orientation is coupled to the
+as neutrons may excite or de-excite electrons occupying one level to another.
+Finally, the spin-orbit interaction also means that the preferred spin orientation is coupled to the
 orbital state and hence is affected by the crystal field, leading in some cases to a preferred ("easy") direction.
 
 In the rare earth ions, the spin-orbit interaction is strong enough in mixing the spin and orbital angular momentum
@@ -125,7 +125,7 @@ These `Stevens operators <http://www.mcphase.de/manual/node124.html>`_ are used 
 from the :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators expressed as a matrix
 using the :math:`J_z` basis states.
 
-In Steven's original work `[Stevens52]`_, attention was paid to how the crystal field parameters determined for one magnetic
+In Stevens' original work `[Stevens52]`_, attention was paid to how the crystal field parameters determined for one magnetic
 ion might be transfered to another ion in the same crystalline environment.
 In order to account for the different electronic configurations of the ions,
 the crystal field parameters are additionally weighted by the *Stevens factor*
@@ -133,7 +133,7 @@ the crystal field parameters are additionally weighted by the *Stevens factor*
 element which depends on quantum numbers :math:`\nu` other than the angular momentum quantum numbers.
 The values of :math:`\theta_k` are tabulated in `Table 1`_,
 or may be calculated using the techniques in `[Judd63]`_.
-Thus Steven's Hamiltonian is
+Thus Stevens' Hamiltonian is
 
 .. math::
     \mathcal{H}_{\mathrm{CEF}}^{\mathrm{Stevens}} = \sum_{k=0,2,4,6} \sum_{q=-k}^k A_q^k \langle r^k\rangle \theta_k O_q^{(k)},
@@ -144,7 +144,7 @@ In principle, the parameter :math:`A_q^k` is intrinsic to a particular crystalli
 whilst the :math:`\langle r^k \rangle \theta_k` parts depend on the magnetic ion within that environment and may be factored out.
 In practice, however, it was found that although in some cases the parameters may be transfered between ions, this often fails.
 
-Instead, in the neutron spectroscopy literatures, the full product
+Instead, in the neutron spectroscopy literature, the full product
 
 .. math::
     B_q^k = A_q^k \langle r^k\rangle \theta_k
@@ -157,7 +157,7 @@ An alternative formulation of the crystal field Hamiltonian developed by Wybourn
 the spherical tensor operators :math:`T_q^{(k)}` instead of the Stevens operators.
 The matrix elements of the :math:`T_q^{(k)}` are then calculated directly using the Wigner-Eckart theorem.
 This is a faster calculation but results in different Hamiltonian matrix elements for a given set of crystal field parameter values.
-There are thus different "normalisation" of crystal field parameters depending on the formulism used to define the operators in the Hamiltonian.
+There is therefore a different "normalisation" of crystal field parameters depending on the formulism used to define the operators in the Hamiltonian.
 The "Stevens normalisation" is commonly used in neutron scattering and by physicists and is used in Mantid.
 The "Wybourne normalisation" is commonly used in the optical spectroscopy community and in chemistry.
 The difference between the two are discussed in more detail in the appendix__.
@@ -181,8 +181,8 @@ Thus only terms with :math:`m` being an integer multiple of :math:`n` will be no
 A mirror plane perpendicular to :math:`x` will map :math:`x` to :math:`-x`, or :math:`\cos\phi\rightarrow-\cos\phi=\cos(\phi+\pi)`
 and so is equivalent to a rotation by :math:`180^\circ`.
 Thus any point group with a mirror plane must have only even :math:`m` terms,
-because we can always chose the crystal field coordinate system such that the mirror plane is the :math:`yz` plane
-(if there are no other symmetry in the system).
+because we can always choose the crystal field coordinate system such that the mirror plane is the :math:`yz` plane
+(if there are no other symmetries in the system).
 
 The roto-inversion operation :math:`S_n` is an :math:`n`-fold rotation followed by mirroring in the plane perpendicular to the rotation axis.
 This mirroring is actually equivalent to an inversion about the origin,
@@ -192,7 +192,7 @@ Thus the presence of a centre of inversion implies that only terms with even pow
 (e.g. terms with even :math:`l`) are allowed. 
 
 In fact, though, odd :math:`l` terms are always forbidden because the Stevens factor, :math:`\theta_l`, is zero for odd :math:`l` [#]_.
-This implies that, as far as the crystal field is concerned, all magnetic ions lies on centres of inversion.
+This implies that, as far as the crystal field is concerned, all magnetic ions lie on centres of inversion.
 
 `Table 2`_ summarises all the allowed crystal field parameters for the crystallographic point groups.
 The negative terms in this table relate to the negative :math:`m` tesseral harmonics, defined in equation :eq:`zlm`.
@@ -231,10 +231,11 @@ has some details of how these calculations may be accomplished, and further deta
 The :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators may be identified with the :math:`\hat{C}_q^{(k)}` operators for :math:`k=1`
 with :math:`x`, :math:`y` and :math:`z` corresponding to :math:`q=1,-1` and 0 respectively [#]_.
 
-The magnetisation then may be calculated from the expectation value of the magnetic moment operator :math:`\mathbf{J} = \mathbf{L} + 2\mathbf{S}`
+The magnetisation may then be calculated from the expectation value of the magnetic moment operator 
+:math:`\hat{\mathbf{J}} = \hat{\mathbf{L}} + 2\hat{\mathbf{S}} = (\hat{J}_x, \hat{J}_y, \hat{J}_z)`
 
 .. math::
-    M(H,T) = \frac{1}{Z} \sum_n \langle \psi_n(\mathbf{H}) | \mathbf{J} | \psi_n(\mathbf{H}) \rangle \exp \left(\frac{-E_n(H)}{k_B T}\right),
+    M(H,T) = \frac{1}{Z} \sum_n \langle \psi_n(\mathbf{H}) | \hat{\mathbf{J}} | \psi_n(\mathbf{H}) \rangle \exp \left(\frac{-E_n(H)}{k_B T}\right),
   :label: magnetisation
 
 where :math:`| \psi_n(\mathbf{H}) \rangle` is the wavefunction or eigenvector of the Hamiltonian containing both crystal and
@@ -259,13 +260,13 @@ Thus the heat capacity is
 
 where :math:`\beta = 1/k_B T`.
 
-Finally, the single-ion neutron scattering transition may also be calculated using the :math:`J_{\alpha}` (:math:`\alpha=x,y,z`)
+Finally, the single-ion neutron scattering transition may also be calculated using the :math:`\hat{J}_{\alpha}` (:math:`\alpha=x,y,z`)
 operators as:
 
 .. math::
     I_{n\rightarrow m} = \left(\frac{g_{\mathrm{n}} r_e}{2}\right)^2 
             \frac{\exp\left(\frac{-E_n}{k_B T}\right)}{Z} \frac{2}{3} 
-               \sum_{\alpha} \left| \langle \psi_n |  J_{\alpha} | \psi_m \rangle \right|^2,
+               \sum_{\alpha} \left| \langle \psi_n |  \hat{J}_{\alpha} | \psi_m \rangle \right|^2,
   :label: neutcf
 
 :math:`I_{n\rightarrow m}` is the intensity in barns per steradian, :math:`g_{\mathrm{n}}` is the neutron's :math:`g`-factor
@@ -301,7 +302,7 @@ the interaction of the neutron's moment with the electrons in the sample. The in
        Note also that the above term is not calculated in Mantid or for the splitting of the ground state multiplet.
        This is because it only contributes to the Stevens factor which, as per equation :eq:`bkq`,
        is usually absorbed into the crystal field parameter :math:`B_q^k`.
-       Thus, equation :eq:`redmat1e` implies that, as far as the crystal field is concerned, all magnetic ions lies on centres of inversion.
+       Thus, equation :eq:`redmat1e` implies that, as far as the crystal field is concerned, all magnetic ions lie on centres of inversion.
 
 .. [#] The Mantid crystal field code is a port to C++ of the FOCUS Fortran 77 code by Peter Fabi.
 
@@ -311,7 +312,7 @@ the interaction of the neutron's moment with the electrons in the sample. The in
 Appendix A: Wybourne Normalisation
 ----------------------------------
 
-It turns out that the spherical harmonic functions :math:`Y_{lm}` is not the most convenient form in which to express the
+It turns out that the spherical harmonic functions :math:`Y_{lm}` are not the most convenient form in which to express the
 expansion of the crystal field potential when we want to transform it into a Hamiltonian operator matrix.
 Instead, an alternative *normalisation* convention, called the *Wybourne* normalisation after `[Wybourne65]`_,
 is used, where the crystal field potential is expressed in terms of the functions
@@ -364,7 +365,7 @@ Note that the :math:`D_q^k` parameters are complex numbers.
 We can also construct the Hermitian operators :math:`\hat{C}_q^{(k)}` analogous to the tesseral harmonic functions:
 
 .. math::
-    \hat{C}_q^{(k)} = \sqrt{\frac{4\pi}{2k+1}} \left\{ \begin{array}{ll} 
+    \hat{C}_q^{(k)} = \left\{ \begin{array}{ll} 
             \frac{i}{\sqrt{2}} \left[ T_q^{(k)} - (-1)^q T_{-q}^{(k)} \right] & q<0 \\
                                       T_q^{(k)} & q=0 \\
             \frac{1}{\sqrt{2}} \left[ T_{-q}^{(k)} + (-1)^q T_q^{(k)} \right] & q>0 \\
@@ -387,7 +388,7 @@ where the :math:`L_q^k` parameters are real and related to the :math:`D_q^k` par
     \end{array} \right.,
   :label: real2imagwy
 
-Note that the operators :math:`\hat{C}_q^{(k)}` are *not* the Stevens operators :math:`O_q^(k)`.
+Note that the operators :math:`\hat{C}_q^{(k)}` are *not* the Stevens operators :math:`O_q^{(k)}`.
 This is because although Stevens constructed his operators from the tesseral harmonics functions,
 he omits the prefactors of those equations using only the parts containing the :math:`x`, :math:`y`, :math:`z` coordinates.
 The :math:`\hat{C}_q^{(k)}` *does* contain the prefactors, so are related to the Stevens operators by:
@@ -396,7 +397,7 @@ The :math:`\hat{C}_q^{(k)}` *does* contain the prefactors, so are related to the
     O_q^{(k)} = \lambda_{k,|q|} \hat{C}_q^{(k)}
   :label: wy2stev
 
-where the ratio :math:`\lambda_{k,|q|}` are summarised in `Table 3`_.
+where the ratios :math:`\lambda_{k,|q|}` are summarised in `Table 3`_.
 
 The crystal field in Stevens normalisation used in Mantid is then defined by:
 
@@ -408,8 +409,8 @@ so the Stevens :math:`A_q^k` and :math:`B_q^k` parameters are related to the rea
 
 .. math::
     \begin{eqnarray}
-    A_q^k &=& \lambda_{k,|q|} L_k^q / \langle r^k \rangle \\
-    B_q^k &=& \lambda_{k,|q|} \theta_k L_k^q
+    A_q^k &=& \lambda_{k,|q|} L_q^k / \langle r^k \rangle \\
+    B_q^k &=& \lambda_{k,|q|} \theta_k L_q^k
     \end{eqnarray}
 
 where :math:`\theta_k` are the Stevens operator equivalent factors tabulated in `Table 1`_.
