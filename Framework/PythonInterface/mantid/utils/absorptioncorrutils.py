@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import ValuesView
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.dataobjects import EventWorkspace
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, CreateCacheFilename, DeleteWorkspace, Divide,
                               Load, LoadNexus, Multiply, PaalmanPingsAbsorptionCorrection,
@@ -113,23 +113,18 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
 
     # step_2: try to load from cache_file provided
     if (not found_as) or (not found_ac):
-        # load from file
+        # disk -> memory
         LoadNexus(Filename=cache_file_name, OutputWorkspace="__tmp")
-        # if the file contains only one workspace, then it must be from
-        # a previous run using SampleOnly
-        # TODO: use ws.id to check type
-        if isinstance(mtd["__tmp"], EventWorkspace):
+        wstype = mtd["__tmp"].id()
+        if wstype == "EventWorkspace":
             RenameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
-        else:
+        elif wstype == "WorkspaceGroup":
             # there should be exactly two workspaces inside, ungroup them will
             # restore them with the orignal name (wsn_as, wsn_ac)
-            # NOTE:
-            #  If the original one is still in memory, a suffix of "_1" will be
-            #  added.
-            #  However, the previous memory check ensures that similar one does not
-            #  exist, therefore a simple ungroup should be sufficient here.
-            # TODO: check name clash with https://docs.mantidproject.org/nightly/api/python/mantid/api/WorkspaceGroup.html#mantid.api.WorkspaceGroup.getNames
             UnGroupWorkspace(InputWorkspace="__tmp")
+        else:
+            raise ValueError(f"Unsupported caching type: {wstype}")
+
         # now check the memory again
         # -- wsn_as exist for all three methods
         # NOTE: The new attribute absSHA1 should be there.
@@ -255,7 +250,7 @@ def calculate_absorption_correction(
             if (wsn_as == "") or (wsn_ac == ""):
                 log.information(f"-- Cannot locate all necessary cache, start from scrach")
                 wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
-                                                                absName)
+                                                                 absName)
                 # NOTE:
                 #  We need to set the SHA1 first, then save.
                 #  Because the final check is always comparing SHA1 of given
