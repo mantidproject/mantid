@@ -186,13 +186,8 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.dataPlot->setCurveStyle("Data", -1);
-  m_ui.dataPlot->setCurveSymbol("Data", 0);
-#else
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
 
   m_ui.dataPlot->clear();
   auto _log = log();
