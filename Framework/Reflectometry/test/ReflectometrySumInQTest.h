@@ -262,7 +262,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
-                            std::string("Some invalid Properties found"))
+                            std::string("Some invalid Properties found: [ "
+                                        "BeamCentre InputWorkspaceIndexSet ]"))
   }
 
   void test_monitorInIndexSetThrows() {
@@ -284,7 +285,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             e.what(),
-                            std::string("Some invalid Properties found"))
+                            std::string("Some invalid Properties found: [ "
+                                        "BeamCentre InputWorkspaceIndexSet ]"))
   }
 
   void test_BeamCentreNotInIndexSetThrows() {
@@ -302,9 +304,9 @@ public:
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
-                            e.what(),
-                            std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), const std::runtime_error &e, e.what(),
+        std::string("Some invalid Properties found: [ BeamCentre ]"))
   }
 
 private:

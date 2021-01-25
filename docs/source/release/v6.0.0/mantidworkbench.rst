@@ -43,10 +43,13 @@ Improvements
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
 - In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 - Support for D16 sample scan mode in DrILL.
+- A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
+- Improved plot generated scripts to better support major and minor tick settings at time of generation.
 
 Bugfixes
 ########
 
+- Fix bug in determining axes limits in sliceviewer - it now ignores monitor spectra and spectra with nan or inf.
 - Only display slice viewer widget for MDEventWorkspaces with 2 or more dimensions.
 - Fix Workbench crashes upon deleting rows or columns in a TableWorkspace.
 - Fix crash on second call to ManageUserDirectories after pressing Esc to close it.
@@ -55,13 +58,23 @@ Bugfixes
 - Show spectrum numbers instead of workspace index in plotBin
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
+- Fixed a number of issues with displaying ellipsoid peak shapes.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
 - Fix replot of colorfill image after a workspace is replaced.
 - Fixed a bug in generating plot scripts for figures containing data for a particular bin.
 - Fixed a bug causing an error when double clicking a ragged workspace.
 - Fixed a bug which caused a terminate dialogue to be raised if the user zoomed in far enough while using the SliceViewer on MDE workspaces.
 - Fixed a crash in the plot config when removing the last curve on a plot
+- Fixed a bug with editing legends in-situ on Linux platforms.
 - Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
 - Fixed bug supplying rebin arguments for non-orthogonal data in sliceviewer that meant that not all the availible data within the axes limits were being plotted.
+- Fixed bug in supplying display indices when viewinng axes changed in non-orthog view.
+- Fixed a crash in SliceViewer when hovering the cursor over Direct or Indirect data.
+- Fixed a crash when using broken e notation for axis limits in plot settings
+- Fixed bug in plotting elliptical shell of integrated peaks in sliceviewer - the inner background radius is now correct.
+- Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
+- Fixed a bug where the fit action (Fit > Fit) in the fit browser wasn't disabled if all the functions were individually removed.
+- Fixed a bug in sliveviewer that wasn't transforming ellipsoid axes of integrated peaks correctly when axes swapped.
+
 
 :ref:`Release 6.0.0 <v6.0.0>`

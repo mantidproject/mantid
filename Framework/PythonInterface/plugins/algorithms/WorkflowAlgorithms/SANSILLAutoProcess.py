@@ -78,7 +78,7 @@ def needs_loading(property_value, loading_reduction_type):
 
 class SANSILLAutoProcess(DataProcessorAlgorithm):
     """
-    Performs complete treatment of ILL SANS data; instruments D11, D16, D22, D33.
+    Performs complete treatment of ILL SANS data; instruments D11, D11B, D16, D22, D22B, D33.
     """
     progress = None
     reduction_type = None
@@ -353,7 +353,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              'DefaultQBinning', 'BinningFactor',
                              'OutputBinning', 'NPixelDivision',
                              'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'IQxQyLogBinning'])
+                             'AsymmetricWedges', 'IQxQyLogBinning', 'WavelengthRange'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -684,7 +684,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 DeltaQ=(self.deltaq[i]
                         if len(self.deltaq) == self.dimensionality
                         else self.deltaq[0]),
-                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value
+                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
+                WavelengthRange=self.getProperty('WavelengthRange').value
                 )
 
         # wedges ungrouping and renaming

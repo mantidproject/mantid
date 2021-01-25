@@ -60,7 +60,9 @@ class FittingPlotPresenterTest(unittest.TestCase):
         in_fun_str = iter(fun_str_list[0:-1])
         self.view.read_fitprop_from_browser.return_value = {'properties': {'Function': next(in_fun_str)}}
         mock_fit_output = [mock.MagicMock(), mock.MagicMock()]
+        mock_fit_output[0].OutputStatus = "sucess"
         mock_fit_output[0].Function.fun = fun_str_list[1]
+        mock_fit_output[1].OutputStatus = "fail"
         mock_fit_output[1].Function.fun = fun_str_list[2]
         mock_fit.side_effect = mock_fit_output
         mock_notifier = mock.MagicMock()
@@ -69,14 +71,17 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.do_sequential_fit(ws_list)
 
         self.assertEqual(mock_fit.call_count, len(ws_list))
+        fitprop_list = []
         for iws, ws in enumerate(ws_list):
-            print(iws)
             # check calls to fit
             _, _, kwargs = mock_fit.mock_calls[iws]
             self.assertEquals(kwargs, {'Function': fun_str_list[iws], 'InputWorkspace': ws, 'Output': ws})
             # check update browser with fit results
-            _, args, _ = self.view.update_browser_setup.mock_calls[iws]
-            self.assertEquals(args, (fun_str_list[iws + 1], ws))
+            _, args, _ = self.view.update_browser.mock_calls[iws]
+            self.assertEquals(args, (mock_fit_output[iws].OutputStatus, fun_str_list[iws + 1], ws))
+            # collect all fitprop dicts together to test notifier
+            fitprop_list.append({'properties': {'Function': fun_str_list[iws + 1], 'InputWorkspace': ws, 'Output': ws}})
+        mock_notifier.notify_subscribers.assert_called_once_with(fitprop_list)
 
 
 if __name__ == '__main__':

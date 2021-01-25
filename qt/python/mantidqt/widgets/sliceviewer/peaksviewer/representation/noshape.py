@@ -11,7 +11,7 @@ from .alpha import compute_alpha
 from .painter import Painted
 
 
-class NonIntegratedPeakRepresentation(object):
+class NonIntegratedPeakRepresentation():
     """Create a collection of PeakDrawable objects for a non-integrated Peak"""
     VIEW_FRACTION = 0.015
 

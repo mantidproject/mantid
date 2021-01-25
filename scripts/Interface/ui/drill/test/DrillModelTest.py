@@ -577,9 +577,9 @@ class DrillModelTest(unittest.TestCase):
 
     def test_addSample(self):
         self.assertEqual(self.model.samples, [])
-        self.model.addSample(0)
+        self.model.addSample(0, mock.Mock())
         self.assertEqual(len(self.model.samples), 1)
-        self.model.addSample(0)
+        self.model.addSample(0, mock.Mock())
         self.assertEqual(len(self.model.samples), 2)
 
     def test_deleteSample(self):

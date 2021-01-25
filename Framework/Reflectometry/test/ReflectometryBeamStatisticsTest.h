@@ -191,9 +191,16 @@ private:
         alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", slit2))
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(),
-                            std::string("Some invalid Properties found"))
+        alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"));
+    if (slit == 1) {
+      TS_ASSERT_THROWS_EQUALS(
+          alg.execute(), std::runtime_error & e, e.what(),
+          std::string("Some invalid Properties found: [ FirstSlitName ]"));
+    } else if (slit == 2) {
+      TS_ASSERT_THROWS_EQUALS(
+          alg.execute(), std::runtime_error & e, e.what(),
+          std::string("Some invalid Properties found: [ SecondSlitName ]"));
+    }
     TS_ASSERT(!alg.isExecuted())
   }
 
