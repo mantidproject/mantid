@@ -710,7 +710,7 @@ public:
         rad *= ellipsoidRadii[0];
       }
 
-      int ind = isort[ivect];
+      size_t ind = isort[ivect];
       if (ellipsoidRadii.size() == 3) {
         ind = ivect;
       }
