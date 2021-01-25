@@ -1,5 +1,6 @@
 # Zoo of methods that are develooped for analyze the calibration
 from mantid.simpleapi import AlignDetectors, FitPeaks
+from mantid.simpleapi import DiffractionFocussing, Rebin, ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed
 from mantid.simpleapi import mtd
 import numpy as np
 
@@ -128,12 +129,11 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
         wi_stop = mask_ws.getNumberHistograms()
 
     # Check input
-    assert mask_ws.getNumberHistograms() == data_workspace.getNumberHistograms(), 'blabla'
-    assert data_workspace.extractY().shape[1] == 1, f'Only 1 bin allowed but not {data_workspace.extractY()}'
+    # get the number of events per spectrum
+    events_number_vec = data_workspace.extractY().sum(axis=1).flatten()
+    assert mask_ws.getNumberHistograms() == events_number_vec.shape[0], f'Number of histograms does not match.  counts vector shape = {events_number_vec.shape}'
 
     # Set initial value for statistics
-    events_number_vec = data_workspace.extractY().flatten()
-
     num_masked = 0
     zero_masked = 0
     event_spectrum_list = list()
@@ -169,9 +169,17 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     """
 
     # Align detector
+    print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
+
     if calib_ws_name:
         AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                        CalibrationWorkspace=calib_ws_name)
+   
+        matrix_ws_name = f'{event_ws_name}_matrix'
+        Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
+        ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
+        SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=f'{event_ws_name}_aligned.nxs')
+        print(f'[CHECK] saved aligned workspace size: {mtd[matrix_ws_name].extractY().shape}')
 
     # Get units
     event_ws = mtd[event_ws_name]
@@ -181,13 +189,13 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                          GroupingWorkspace=group_ws_name)
 
-    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
-
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
 
     EditInstrumentGeometry(Workspace=event_ws_name, PrimaryFlightPath=42, SpectrumIDs='1-3', L2='2,2,2',
                            Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
                            InstrumentName='vulcan_3bank')
+
+    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}_3banks.nxs')
 
     return event_ws_name
 
@@ -242,26 +250,27 @@ def get_masked_ws_indexes(mask_ws):
     return masked_list
 
 
-def load_calibration_file(ref_ws_name, calib_file_name, calib_ws_base_name=None):
-    """
-    load calibration file
-    :param ref_ws_name:
-    :param calib_file_name:
-    :param calib_ws_base_name:
-    :return:
-    """
-    if calib_ws_base_name is None:
-        calib_ws_base_name = 'vulcan'
-
-    # load data file
-    r = LoadDiffCal(InputWorkspace=ref_ws_name,
-                Filename=calib_file_name, WorkspaceName=calib_ws_base_name)
-
-    calib_ws_name = '{}_cal'.format(calib_ws_base_name)
-    mask_ws_name = '{}_mask'.format(calib_ws_base_name)
-    group_ws_name = '{}_group'.format(calib_ws_base_name)
-
-    return calib_ws_name, mask_ws_name, group_ws_name
+# TODO NOTE: Clean... This is very confusing with the same method in mantid_helper
+# def load_calibration_file(ref_ws_name, calib_file_name, calib_ws_base_name=None):
+#     """
+#     load calibration file
+#     :param ref_ws_name:
+#     :param calib_file_name:
+#     :param calib_ws_base_name:
+#     :return:
+#     """
+#     if calib_ws_base_name is None:
+#         calib_ws_base_name = 'vulcan'
+# 
+#     # load data file
+#     r = LoadDiffCal(InputWorkspace=ref_ws_name,
+#                 Filename=calib_file_name, WorkspaceName=calib_ws_base_name)
+# 
+#     calib_ws_name = '{}_cal'.format(calib_ws_base_name)
+#     mask_ws_name = '{}_mask'.format(calib_ws_base_name)
+#     group_ws_name = '{}_group'.format(calib_ws_base_name)
+# 
+#     return calib_ws_name, mask_ws_name, group_ws_name
 
 
 

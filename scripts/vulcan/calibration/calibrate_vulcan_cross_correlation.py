@@ -1,7 +1,8 @@
 from mantid_helper import mtd_convert_units, load_nexus, load_grouping_file, load_calibration_file
 from lib_cross_correlation import (cross_correlate_vulcan_data,
+                                   check_and_correct_difc,
                                    save_calibration, export_difc, merge_detector_calibration)
-from lib_analysis import check_and_correct_difc
+from lib_analysis import (align_focus_event_ws)
 import os
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import (CreateGroupingWorkspace,
@@ -13,7 +14,8 @@ from typing import Union
 
 def load_event_data(nexus_path,
                     cutoff_time: int = 300,
-                    counts_nxs_name: Union[str, None] = None) -> str:
+                    counts_nxs_name: Union[str, None] = None,
+                    unit_dspace: bool = True) -> str:
     """Load event file
 
     Parameters
@@ -47,7 +49,8 @@ def load_event_data(nexus_path,
                **test_arg)
 
     # convert to d-Spacing
-    mtd_convert_units(diamond_ws_name, 'dSpacing')
+    if unit_dspace:
+        mtd_convert_units(diamond_ws_name, 'dSpacing')
 
     # Save counts
     if counts_nxs_name:
@@ -124,10 +127,12 @@ def calibrate_vulcan(diamond_nexus: str,
     calib_ws_name, offset_ws, mask_ws = rt
 
     # Correct obviously erroneous DIFC
-    # check the difference between DIFCs
-    check_and_correct_difc(ws_name=diamond_ws_name,
-                           cal_table_name=calib_ws_name,
-                           mask_ws_name=str(mask_ws))
+    # TODO FIXME - Disabled for testing purpose
+    if False:
+        # check the difference between DIFCs
+        check_and_correct_difc(ws_name=diamond_ws_name,
+                               cal_table_name=calib_ws_name,
+                               mask_ws_name=str(mask_ws))
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
@@ -137,13 +142,13 @@ def calibrate_vulcan(diamond_nexus: str,
     save_calibration(calib_ws_name=calib_ws_name,
                      mask_ws_name=str(mask_ws),
                      group_ws_name=grouping_ws_name,
-                     calib_file_prefix='test_pre_x')
+                     calib_file_prefix='vulcan_cc_1fit')
 
 
 def test_main_calibrate():
     calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5',
-                     load_cutoff_time=300,
-                     difc_file_name='testout.h5')
+                     load_cutoff_time=None,
+                     difc_file_name='vulcan_cc_21356.h5')
 
 
 def test_main_report_calibration():
@@ -164,6 +169,9 @@ def test_main_report_calibration():
                     'high angle': (6468, None)}
 
     # Report offsets
+    check_and_correct_difc(ws_name=diamond_ws_name,
+                           cal_table_name=calib_ws_name,
+                           mask_ws_name=str(mask_ws))
 
     # Report masks
     from .lib_analysis import report_masked_pixels
@@ -173,8 +181,26 @@ def test_main_report_calibration():
 
 def test_main_apply_calibration():
     # Load raw workspace
+    # Load data
+    diamond_nexus = '/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5'
+    load_cutoff_time = None   # seconds
+    diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time, unit_dspace=False)
+
+    calib_file_name = 'vulcan_cc_1fit.h5'
+
+    calib_tuple = load_calibration_file(calib_file_name, 'Vulcan_Testing_Calib', diamond_ws_name)
+    calib_cal_ws = calib_tuple.OutputCalWorkspace
+    calib_group_ws = calib_tuple.OutputGroupingWorkspace
+    calib_mask_ws = calib_tuple.OutputMaskWorkspace
+    # print(f'Type: {type(calib_tuple)}')
+    # print(f'Function: {dir(calib_tuple)}')
+
+    ws_names = mtd.getObjectNames()
+    for ws_name in ws_names:
+        print(ws_name)
 
     # Align
+    align_focus_event_ws(diamond_ws_name, str(calib_cal_ws), str(calib_group_ws))
 
     # Convert to TOF
 
@@ -186,12 +212,12 @@ def test_main_apply_calibration():
 
 
 if __name__ == '__main__':
-    choice = '1'
+    choice = '3'
     if choice == '1':
         test_main_calibrate()
     elif choice == '2':
         test_main_report_calibration()
     elif choice == '3':
-        test_main_apply_calibraiton()
+        test_main_apply_calibration()
     else:
         raise NotImplementedError(f'Workspace choice {choice} is not supported')

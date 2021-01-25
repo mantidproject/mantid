@@ -164,19 +164,6 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endforeach()
   endif()
 
-  if(APPLE AND "${pkg_name}" STREQUAL "mantidqt")
-    # Horrible hack to get mantidqt into the MantidPlot.app bundle too. Remove
-    # this when MantidPlot is removed!! Registers the "installed" components
-    # with CMake so it will carry them over
-    install(
-      DIRECTORY ${_setup_py_build_root}/install/lib/
-      DESTINATION ${BIN_DIR}
-      PATTERN
-        "test"
-        EXCLUDE
-    )
-  endif()
-
   # install the generated executable
   if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
       install(

@@ -19,6 +19,11 @@ This algorithm adjusts the position of the moderator as well as the position and
 of detector pixels. The goal of these adjustments is to produce neutron paths and scattering angles that lead
 to optimal comparison between observed and reference lattice plane spacings
 
+It is recommended *not* to adjust the position of the moderator, but only that of the banks. By setting
+all calibrations at a fixed source-to-sample distance, calibrations taken at different times
+and with different samples can be combined. the default value (`SourceSampleDistance=20.004`) is
+the result of adjusting the position of the moderator with three different samples (Si, LaB6, and CsLaNb2O7).
+
 The execution workflow is as follows:
 
 .. diagram:: CorelliPowderCalibrationCreate-v1_wkflw.dot

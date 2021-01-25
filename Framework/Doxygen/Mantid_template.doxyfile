@@ -110,33 +110,10 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../TestHelpers/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../WorkflowAlgorithms/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/analysis \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../MantidPlot/src/Mantid \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/factory/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/factory/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/algorithm_dialogs/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/algorithm_dialogs/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/designer/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/designer/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/DynamicPDF \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/General \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISReflectometry \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISSANS \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/MultiDatasetFit \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/Muon \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/sliceviewer/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/sliceviewer/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/spectrumviewer/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/spectrumviewer/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/refdetectorview/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/inc \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesAPI/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/QtWidgets \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/VatesSimpleGui/ViewWidgets
+        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/algorithm_dialogs/src
 
 
 INPUT_ENCODING         = UTF-8
@@ -157,7 +134,6 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src/GSoapGenerated \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src/ANN_complete.cpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser \
                          @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/common/src/QtPropertyBrowser \
-                         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/paraview_ext/PVPlugins \
                          @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc/MantidKernel/span.hpp
 
 EXCLUDE_SYMLINKS       = NO

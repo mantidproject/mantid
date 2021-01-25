@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/VatesSimpleGuiQtWidgets/icons">
-        <file>standard_view.png</file>
-        <file>multislice_view.png</file>
-        <file>threeslice_view.png</file>
-    </qresource>
-</RCC>

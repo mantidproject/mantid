@@ -122,7 +122,8 @@ private:
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+      std::vector<std::vector<double>> &lastGoodPeakParameters);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
@@ -206,9 +207,9 @@ private:
                         size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
-  double observePeakWidth(const HistogramData::Histogram &histogram,
-                          API::FunctionValues &bkgd_values, size_t ipeak,
-                          size_t istart, size_t istop);
+  double observePeakFwhm(const HistogramData::Histogram &histogram,
+                         API::FunctionValues &bkgd_values, size_t ipeak,
+                         size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
   void processSinglePeakFitResult(
