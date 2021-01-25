@@ -86,7 +86,7 @@ public:
 
     wsName = inputWS + "_2";
     Mantid::DataObjects::Workspace2D_sptr ws2 =
-            SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(wsName);
+        SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(wsName);
     toGroup.emplace_back(wsName);
 
     // Set up the X bin for the monitor channels
