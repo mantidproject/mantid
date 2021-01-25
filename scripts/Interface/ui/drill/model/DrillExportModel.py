@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import mtd
-from mantid.kernel import config
+from mantid.kernel import config, logger
 from mantid.api import WorkspaceGroup
 
 from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
+
+import os
 
 
 class DrillExportModel:
@@ -89,6 +91,10 @@ class DrillExportModel:
             workspaceName (str): name of the workspace
         """
         exportPath = config.getString("defaultsave.directory")
+        if not os.path.isdir(exportPath):
+            logger.error("Default save directory ({}) does not exist. The data "
+                         "cannot be exported.".format(exportPath))
+            return
         tasks = list()
         for wsName in mtd.getObjectNames():
             if ((workspaceName in wsName)
