@@ -103,7 +103,7 @@ def load_grouping_from_XML(filename):
     """
     tree = ET.parse(filename)
     root = tree.getroot()
-
+    print("hinfhsfdahfds")
     description = root.get('description')
     if not description:
         description = filename

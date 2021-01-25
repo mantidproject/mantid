@@ -18,7 +18,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         directory = ConfigService['instrumentDefinition.directory']
         filename = os.path.join(directory, 'Grouping', 'EMU_Detector_Grouping_LF_96.xml')
 
-        groups, pairs, description, default = load_grouping_from_XML(filename)
+        groups, diffs, pairs, description, default = load_grouping_from_XML(filename)
 
         self.assertEquals(description, 'emu longitudinal (96 detectors)')
         self.assertEquals(default, 'long')
@@ -36,8 +36,8 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_that_save_and_load_grouping_xml_correctly_stores_and_reads_period_data(self, mock_file_parse):
         groups = [MuonGroup('fwd', [1,2,3], [1,3]), MuonGroup('bwd', [4,5,6], [2,4])]
         pairs = [MuonPair('long', 'fwd', 'bwd')]
-
-        xml_tree = save_grouping_to_XML(groups, pairs, 'filename.xml', save=False, description='Bespoke grouping')
+        diffs = [] 
+        xml_tree = save_grouping_to_XML(groups, diffs, pairs, 'filename.xml', save=False, description='Bespoke grouping')
         mock_file_parse.return_value = xml_tree
 
         loaded_groups, diffs, loaded_pairs, loaded_description, loaded_default = load_grouping_from_XML('filename.xml')
