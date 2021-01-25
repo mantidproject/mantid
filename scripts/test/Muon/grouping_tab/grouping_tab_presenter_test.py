@@ -21,7 +21,8 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
-
+from Muon.GUI.Common.difference_table_widget.difference_table_widget_presenter import DifferenceTablePresenter
+from Muon.GUI.Common.difference_table_widget.difference_table_widget_view import DifferenceTableView
 
 def pair_name():
     name = []
@@ -64,16 +65,19 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.pairing_table_view = PairingTableView()
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
 
+        self.diff_view = DifferenceTableView()
+        self.diff_widget = DifferenceTablePresenter(self.diff_view, self.model)
+
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
 
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, self.diff_view)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
-                                              self.pairing_table_widget)
+                                              self.pairing_table_widget, self.diff_widget)
 
         self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.presenter.pairing_table_widget.handle_add_pair_button_clicked = mock.MagicMock()
