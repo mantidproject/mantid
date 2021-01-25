@@ -147,7 +147,8 @@ private:
   void updateParameterValuesWithGlobalTieTo(FitDomainIndex domainIndex,
                                             std::string const &fullParameter,
                                             double newValue);
-  void updateParameterValueInGlobalTie(GlobalTie const &globalTie,
+  void updateParameterValueInGlobalTie(FitDomainIndex domainIndex,
+                                       GlobalTie const &globalTie,
                                        double newValue);
 
   [[nodiscard]] double
