@@ -74,11 +74,7 @@ def _getCacheName(wkspname, cache_dir, abs_method):
         }.items()
     ]
 
-    cache_path, signature = CreateCacheFilename(Prefix=prefix,
-                                                OtherProperties=propert_string,
-                                                CacheDir=cache_dir)
-
-    return cache_path, signature
+    return CreateCacheFilename(Prefix=prefix, OtherProperties=propert_string, CacheDir=cache_dir)
 
 
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
@@ -154,7 +150,7 @@ def calculate_absorption_correction(
     num_wl_bins=1000,
     element_size=1,
     metaws=None,
-    cache_dir=None,
+    cache_dir="",
 ):
     """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
 
@@ -217,7 +213,7 @@ def calculate_absorption_correction(
 
     absName = '__{}_abs_correction'.format(_getBasename(filename))
 
-    if bool(cache_dir):
+    if cache_dir == "":
         # no caching activity if no cache directory is provided
         return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
     else:
