@@ -41,7 +41,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
                                               OutputWorkspace='ws_MD_2d')
         cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                       Extents='-10,10,-10,10,-10,10',
+                                       Extents='-10,10,-9,9,-8,8',
                                        Names='A,B,C',
                                        Units='r.l.u.,r.l.u.,r.l.u.',
                                        Frames='HKL,HKL,HKL',
@@ -122,6 +122,25 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
+
+        pres.view.close()
+
+    def test_update_plot_data_updates_axes_limits_when_orthog_data_tranposed(self):
+        pres = SliceViewer(self.hkl_ws)
+
+        # not transpose
+        pres.view.data_view.dimensions.transpose = False
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+
+        # transpose
+        pres.view.data_view.dimensions.transpose = True
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))  # this is now a tuple
+        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
+        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
 
         pres.view.close()
 
