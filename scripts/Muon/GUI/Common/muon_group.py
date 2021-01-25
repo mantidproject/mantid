@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.muon_base import MuonRun, MuonBase
 from typing import List
 import itertools
+
 
 class MuonDiff(MuonBase):
     def __init__(self,diff_name,backward_group_name,forward_group_name):
@@ -24,6 +24,7 @@ class MuonDiff(MuonBase):
     @property
     def backward_group(self):
         return self._negative
+
 
 class MuonGroup(object):
     """

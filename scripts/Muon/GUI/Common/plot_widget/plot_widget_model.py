@@ -129,7 +129,7 @@ class PlotWidgetModel(object):
 
     def create_tiled_keys(self, tiled_by):
         if tiled_by == TILED_BY_GROUP_TYPE:
-            keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs + self.context.group_pair_context.selected_diffs
+            keys = self.context.group_pair_context.selected_groups_and_pairs
         else:
             keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
         return keys

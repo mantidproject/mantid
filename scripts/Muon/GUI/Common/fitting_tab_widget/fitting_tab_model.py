@@ -715,7 +715,7 @@ class FittingTabModel(object):
             return 0
 
     def _get_selected_groups_and_pairs(self):
-        return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs + self.context.group_pair_context.selected_diffs
+        return self.context.group_pair_context.selected_groups_and_pairs
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):

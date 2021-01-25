@@ -100,14 +100,11 @@ class DifferenceTableView(QtWidgets.QWidget):
         vertical_headers.setVisible(True)
 
         self.diff_table.horizontalHeaderItem(0).setToolTip("The name of the diff :"
-                                                              "\n    - The name must be unique across all groups/diffs"
-                                                              "\n    - The name can only use digits, characters and _")
+                                                           "\n    - The name must be unique across all groups/diffs"
+                                                           "\n    - The name can only use digits, characters and _")
         self.diff_table.horizontalHeaderItem(2).setToolTip("Group 1 of the diff, selected from the grouping table")
         self.diff_table.horizontalHeaderItem(3).setToolTip("Group 2 of the diff, selected from the grouping table")
-
-
         self.diff_table.horizontalHeaderItem(1).setToolTip("Whether to include this diff in the analysis")
-
 
     def num_rows(self):
         return self.diff_table.rowCount()

@@ -40,6 +40,7 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
         pair_nodes += [child]
     return pair_nodes
 
+
 def _create_XML_subElement_for_diffs(root_node, diffs):
     diff_nodes = []
     for diff in diffs:
@@ -50,6 +51,7 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
         child.extend(bwd_group)
         diff_nodes += [child]
     return diff_nodes
+
 
 def save_grouping_to_XML(groups, diffs, pairs, filename, save=True, description=''):
     """
@@ -122,7 +124,7 @@ def load_grouping_from_XML(filename):
 
     for i, diff_name in enumerate(diff_names):
         diffs +=[MuonDiff(diff_name,diff_groups[i][0],
-                           diff_groups[i][1])]
+                          diff_groups[i][1])]
 
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
@@ -145,6 +147,7 @@ def _get_groups_from_XML(root):
                 pass
     return names, ids, periods
 
+
 def _get_diffs_from_XML(root):
     names, groups = [], []
     for child in root:
@@ -152,6 +155,7 @@ def _get_diffs_from_XML(root):
             names += [child.attrib['name']]
             groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val']]]
     return names, groups
+
 
 def _get_pairs_from_XML(root):
     names, groups, alphas = [], [], []

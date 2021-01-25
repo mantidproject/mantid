@@ -53,6 +53,7 @@ def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
     name += context.workspace_suffix
     return name
 
+
 def get_diff_asymmetry_name(context, diff_name, run,  rebin):
     name = context.data_context._base_run_name(run) + DIFF_STR + diff_name + "; Asymmetry;"
 
@@ -61,6 +62,7 @@ def get_diff_asymmetry_name(context, diff_name, run,  rebin):
 
     name += context.workspace_suffix
     return name
+
 
 def get_pair_asymmetry_name(context, pair_name, run, rebin):
     name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"

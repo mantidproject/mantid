@@ -156,6 +156,7 @@ class MuonContext(object):
 
                         self.group_pair_context[group_name].show_rebin(run, directory + name, directory + asym_name,
                                                                        asym_name_unnorm)
+
     def show_all_diffs(self):
         self.calculate_all_diffs()
         for run in self._data_context.current_runs:
@@ -182,7 +183,6 @@ class MuonContext(object):
                             rebin=True)
                         self.group_pair_context[
                             diff_name].show_rebin(run, directory + name)
-
 
     def show_all_pairs(self):
         self.calculate_all_pairs()

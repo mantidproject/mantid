@@ -17,6 +17,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import Groupin
 from Muon.GUI.Common.difference_table_widget.difference_table_widget_presenter import DifferenceTablePresenter
 from Muon.GUI.Common.difference_table_widget.difference_table_widget_view import DifferenceTableView
 
+
 class GroupingTabWidget(object):
     def __init__(self, context):
 
