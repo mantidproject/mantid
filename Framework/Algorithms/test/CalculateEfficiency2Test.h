@@ -10,6 +10,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CalculateEfficiency2.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadSpice2D.h"
@@ -20,7 +22,6 @@
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -69,6 +70,69 @@ public:
       convertToEvents->setProperty("OutputWorkspace", inputWS);
       convertToEvents->execute();
     }
+  }
+  /*
+   * Generate fake data workspace group for which we know what the result should
+   * be
+   */
+  void setUpWorkspaceGroup() {
+    inputWS = "sampledata";
+
+    std::vector<std::string> toGroup;
+    auto wsName = inputWS + "_1";
+    Mantid::DataObjects::Workspace2D_sptr ws1 =
+        SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(wsName);
+    toGroup.emplace_back(wsName);
+
+    wsName = inputWS + "_2";
+    Mantid::DataObjects::Workspace2D_sptr ws2 =
+            SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(wsName);
+    toGroup.emplace_back(wsName);
+
+    // Set up the X bin for the monitor channels
+    for (int i = 0; i < SANSInstrumentCreationHelper::nMonitors; i++) {
+      auto &X = ws1->mutableX(i);
+      X[0] = 1;
+      X[1] = 2;
+      auto &X2 = ws2->mutableX(i);
+      X2 = X;
+    }
+
+    for (int ix = 0; ix < SANSInstrumentCreationHelper::nBins; ix++) {
+      for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
+        int i = ix * SANSInstrumentCreationHelper::nBins + iy +
+                SANSInstrumentCreationHelper::nMonitors;
+        auto &X = ws1->mutableX(i);
+        auto &Y = ws1->mutableY(i);
+        auto &E = ws1->mutableE(i);
+        X[0] = 1;
+        X[1] = 2;
+        Y[0] = 1.5;
+        E[0] = 0.1;
+        auto &X2 = ws2->mutableX(i);
+        auto &Y2 = ws2->mutableY(i);
+        auto &E2 = ws2->mutableE(i);
+        X2 = X;
+        Y2[0] = 1.0;
+        E2[0] = 0.2;
+      }
+    }
+    // mask certain spectra to test merging
+    auto info1 = ws1->spectrumInfo();
+    auto info2 = ws2->spectrumInfo();
+    info1.setMasked(0, true);
+    info2.setMasked(0, true);
+    info1.setMasked(1, true);
+    info2.setMasked(2, true);
+    info1.setMasked(4, true);
+    info2.setMasked(4, true);
+
+    auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setAlwaysStoreInADS(true);
+    groupAlg->setProperty("InputWorkspaces", toGroup);
+    groupAlg->setProperty("OutputWorkspace", inputWS);
+    groupAlg->execute();
   }
 
   void testName() { TS_ASSERT_EQUALS(correction.name(), "CalculateEfficiency") }
@@ -226,69 +290,99 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
-  void testExecInputWorkspaceGroup() {
-    // Tests merging input and calculating efficiencies based on workspace
-    // without beam mask shadow using ILL D22 data.
-
-    ConfigService::Instance().setFacility("ILL");
-    Mantid::DataHandling::Load loader;
-    loader.initialize();
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue(
-        "Filename",
-        "ILL/D22/D22_mask_central.nxs,ILL/D22/D22_mask_offset.nxs"));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT(loader.isExecuted());
-
+  void testProcessGroupsMerge() {
+    setUpWorkspaceGroup();
     if (!correction.isInitialized())
       correction.initialize();
 
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("InputWorkspace", ""));
     TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("InputWorkspaceGroup", inputWS));
+        correction.setPropertyValue("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(
         correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty("MergeGroup", true))
     TS_ASSERT_THROWS_NOTHING(correction.execute())
     TS_ASSERT(correction.isExecuted())
 
-    Mantid::API::Workspace_sptr ws_out;
+    Mantid::API::Workspace_const_sptr ws_out;
     TS_ASSERT_THROWS_NOTHING(
         ws_out =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
-    Mantid::DataObjects::Workspace2D_sptr ws2d_out =
-        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_out);
-    std::cout << ws2d_out->getName() << std::endl;
+    auto ws2d_out = std::static_pointer_cast<const MatrixWorkspace>(ws_out);
 
     double tolerance(1e-02);
-    // monitors
-    TS_ASSERT_DELTA(ws2d_out->x(32768)[0], 5.7, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->x(32768)[1], 6.3, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->y(32768)[0], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->y(32768)[0], 1.0, tolerance);
+    const auto &oSpecInfo = ws2d_out->spectrumInfo();
+    // spectrum not masked in any input
+    TS_ASSERT_DELTA(ws2d_out->x(3)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->x(3)[1], 2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->y(3)[0], 1.0, tolerance);
+    TS_ASSERT(!oSpecInfo.isMasked(3));
 
-    const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
-    // spectrum masked by beam stop in the central input
-    TS_ASSERT_DELTA(ws2d_out->y(16000)[0], 1.01, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(16000)[0], 0.02, tolerance);
-    TS_ASSERT(!oSpecInfo2.isMasked(16000));
-    TS_ASSERT_DELTA(ws2d_out->y(16005)[0], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(16005)[0], 0.02, tolerance);
-    TS_ASSERT(!oSpecInfo2.isMasked(16005));
+    // spectra masked in one but not the other
+    TS_ASSERT_DELTA(ws2d_out->y(1)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(1)[0], 0.0, tolerance);
+    TS_ASSERT(!oSpecInfo.isMasked(1));
+    TS_ASSERT_DELTA(ws2d_out->y(2)[0], 1.5, tolerance);
+    TS_ASSERT_DELTA(ws2d_out->e(2)[0], 0.1, tolerance);
+    TS_ASSERT(!oSpecInfo.isMasked(2));
 
-    // spectrum masked by beam stop in the input with horizontal offset
-    TS_ASSERT_DELTA(ws2d_out->y(5000)[0], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(5000)[0], 0.02, tolerance);
-    TS_ASSERT(!oSpecInfo2.isMasked(5000));
-    TS_ASSERT_DELTA(ws2d_out->y(5005)[0], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d_out->e(5005)[0], 0.02, tolerance);
-    TS_ASSERT(!oSpecInfo2.isMasked(5005));
+    // the first and last spectra should stay masked
+    TS_ASSERT(oSpecInfo.isMasked(0));
+    TS_ASSERT(oSpecInfo.isMasked(4));
 
-    // the detector edge should stay masked
-    TS_ASSERT(oSpecInfo2.isMasked(0));
-    TS_ASSERT(oSpecInfo2.isMasked(32767));
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
 
+  void testProcessGroupsIndividual() {
+    setUpWorkspaceGroup();
+    if (!correction.isInitialized())
+      correction.initialize();
+
+    const std::string outputWS("result");
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setProperty("MergeGroup", false))
+    TS_ASSERT_THROWS_NOTHING(correction.execute())
+    TS_ASSERT(correction.isExecuted())
+
+    Mantid::API::Workspace_const_sptr ws_out;
+    TS_ASSERT_THROWS_NOTHING(
+        ws_out =
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS));
+    auto wsGroup_out = std::static_pointer_cast<const WorkspaceGroup>(ws_out);
+
+    double tolerance(1e-02);
+    auto nEntries = wsGroup_out->getNumberOfEntries();
+    TS_ASSERT_EQUALS(nEntries, 2)
+    for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+      auto entry = std::static_pointer_cast<const MatrixWorkspace>(
+          wsGroup_out->getItem(entryNo));
+      const auto &oSpecInfo = entry->spectrumInfo();
+      // spectrum not masked in any input
+      TS_ASSERT_DELTA(entry->x(3)[0], 1, tolerance);
+      TS_ASSERT_DELTA(entry->x(3)[1], 2, tolerance);
+      TS_ASSERT_DELTA(entry->y(3)[0], 1.0, tolerance);
+      TS_ASSERT(!oSpecInfo.isMasked(3));
+
+      // spectra masked in one but not the other, should stay masked
+      if (entryNo == 0) {
+        TS_ASSERT(oSpecInfo.isMasked(1));
+        TS_ASSERT_DELTA(entry->y(2)[0], 1.0, tolerance);
+        TS_ASSERT_DELTA(entry->e(2)[0], 0.067, tolerance);
+        TS_ASSERT(!oSpecInfo.isMasked(2));
+      } else {
+        TS_ASSERT_DELTA(entry->y(1)[0], 1.0, tolerance);
+        TS_ASSERT_DELTA(entry->e(1)[0], 0.0, tolerance);
+        TS_ASSERT(!oSpecInfo.isMasked(1));
+        TS_ASSERT(oSpecInfo.isMasked(2));
+      }
+      // the first and last spectra should stay masked
+      TS_ASSERT(oSpecInfo.isMasked(0));
+      TS_ASSERT(oSpecInfo.isMasked(4));
+    }
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
