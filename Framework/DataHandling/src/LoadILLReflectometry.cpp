@@ -214,18 +214,6 @@ void LoadILLReflectometry::init() {
                   "X unit of the OutputWorkspace");
 }
 
-<<<<<<< HEAD
-/// Validate the inputs
-std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
-  std::map<std::string, std::string> issues;
-  if (getPropertyValue("Measurement") == "ReflectedBeam" && isDefault("BraggAngle")) {
-    issues["BraggAngle"] = "Bragg angle is mandatory for reflected beam";
-  }
-  return issues;
-}
-
-=======
->>>>>>> cleanup of some hardcoded values in the loader
 /// Execute the algorithm.
 void LoadILLReflectometry::exec() {
   NeXus::NXRoot root(getPropertyValue("Filename"));
@@ -295,14 +283,14 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
-    NXInt firstChopper =
-        entry.openNXInt("instrument/ChopperSetting/firstChopper");
+    NXFloat firstChopper =
+        entry.openNXFloat("instrument/ChopperSetting/firstChopper");
     firstChopper.load();
-    NXInt secondChopper =
-        entry.openNXInt("instrument/ChopperSetting/secondChopper");
+    NXFloat secondChopper =
+        entry.openNXFloat("instrument/ChopperSetting/secondChopper");
     secondChopper.load();
-    m_chopper1Name = "chopper" + std::to_string(firstChopper[0]);
-    m_chopper2Name = "chopper" + std::to_string(secondChopper[0]);
+    m_chopper1Name = "CH" + std::to_string(int(firstChopper[0]));
+    m_chopper2Name = "CH" + std::to_string(int(secondChopper[0]));
   }
   // get acquisition mode
   NXInt acqMode = entry.openNXInt("acquisition_mode");
@@ -311,11 +299,10 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
 }
 
-/** Call child algorithm ConvertUnits for conversion from TOF to wavelength
-* Note that DAN calibration is done in preprocess, since it needs information
-* also from the direct beam so converting to wavelength in the loader will not
-* be accurate
-*/
+/// Call child algorithm ConvertUnits for conversion from TOF to wavelength
+/// Note that DAN calibration is done in preprocess, since it needs information
+/// also from the direct beam so converting to wavelength in the loader will not
+/// be accurate
 void LoadILLReflectometry::convertTofToWavelength() {
   if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
     auto convertToWavelength =
@@ -346,10 +333,17 @@ void LoadILLReflectometry::initWorkspace(
                     << monitorsData[i].size() << '\n';
   }
   // create the workspace
-  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
-      m_numberOfHistograms + monitorsData.size(),
-      HistogramData::BinEdges(m_numberOfChannels + 1));
-
+  try {
+    m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+        m_numberOfHistograms + monitorsData.size(),
+        HistogramData::BinEdges(m_numberOfChannels + 1));
+  } catch (std::out_of_range &) {
+    throw std::runtime_error(
+        "Workspace2D cannot be created, check number of histograms (" +
+        std::to_string(m_numberOfHistograms) + "), monitors (" +
+        std::to_string(monitorsData.size()) + "), and channels (" +
+        std::to_string(m_numberOfChannels) + '\n');
+  }
   if (m_acqMode)
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
@@ -382,18 +376,6 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   NXInt nChannels = entry.openNXInt("instrument/PSD/detsize");
   nChannels.load();
   m_numberOfHistograms = nChannels[0];
-<<<<<<< HEAD
-
-  g_log.debug() << "Please note that ILL reflectometry instruments have "
-                   "several tubes, after integration one "
-                   "tube remains in the Nexus file.\n Number of tubes (banks): 1\n";
-  g_log.debug() << "Number of pixels per tube (number of detectors and number "
-                   "of histograms): "
-                << m_numberOfHistograms << '\n';
-  g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
-  g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
-=======
->>>>>>> cleanup of some hardcoded values in the loader
 }
 
 /**
@@ -452,33 +434,92 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  */
 std::vector<double> LoadILLReflectometry::getXValues() {
   const auto &instrument = m_localWorkspace->getInstrument();
-  const auto &run = m_localWorkspace->run();
   std::vector<double> xVals;             // no initialisation
   xVals.reserve(m_numberOfChannels + 1); // reserve memory
-  if (m_acqMode) {
-    if (m_instrument == Supported::FIGARO) {
-      if (run.hasProperty("Distance.edelay_delay"))
-        m_tofDelay += doubleFromRun("Distance.edelay_delay");
-      else if (run.hasProperty("Theta.edelay_delay"))
-        m_tofDelay += doubleFromRun("Theta.edelay_delay");
-      else if (run.hasProperty("MainParameters.edelay_delay")) {
-        m_tofDelay += doubleFromRun("MainParameters.edelay_delay");
-      } else {
-        g_log.warning() << "Unable to find edelay_delay from the file\n";
+  try {
+    if (m_acqMode) {
+      if (m_instrument == Supported::FIGARO) {
+        if (m_localWorkspace->run().hasProperty(
+                "Distance.edelay_delay")) // Valid from 2018.
+          m_tofDelay += doubleFromRun("Distance.edelay_delay");
+        else // Valid before 2018.
+          m_tofDelay += doubleFromRun("Theta.edelay_delay");
       }
-    }
-    g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
-    std::string chopper{"Chopper"};
-    double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
-    if (m_instrument == Supported::D17) {
-      chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-      chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
-      chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
-      chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
-      if (chop1Phase > 360.) {
-        // Pre-2018 D17 files which have chopper 1 phase and chopper 2 speed
-        // swapped.
-        std::swap(chop1Phase, chop2Speed);
+      g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
+      std::string chopper{"Chopper"};
+      double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
+      if (m_instrument == Supported::D17) {
+        chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
+        chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
+        chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
+        chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
+        if (chop1Phase > 360.) {
+          // This is an ugly workaround for pre-2018 D17 files which have
+          // chopper 1 phase and chopper 2 speed swapped.
+          std::swap(chop1Phase, chop2Speed);
+        }
+      } else if (m_instrument == Supported::FIGARO) {
+        chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
+        // Chopper 1 phase on FIGARO is set to an arbitrary value (999.9)
+        if (chop1Phase > 360.0)
+          chop1Phase = 0.0;
+      }
+      double POFF;
+      try {
+        POFF = doubleFromRun(m_offsetFrom + ".poff");
+      } catch (std::runtime_error &) {
+        try {
+          POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
+        } catch (std::runtime_error &) {
+          throw std::runtime_error(
+              "Unable to find VirtualChopper pickup offset");
+        }
+      }
+      double openOffset;
+      if (m_localWorkspace->run().hasProperty(
+              m_offsetFrom + ".open_offset")) // Valid from 2018.
+        openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
+      else // Figaro 2017 / 2018
+        openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
+      if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
+          chop2Speed != 0.0 && chop2Phase != 0.0) {
+        // virtual chopper entries are valid
+        chopper = "Virtual chopper";
+      } else {
+        // use chopper values
+        chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
+        chop2Speed = doubleFromRun(m_chopper2Name + ".rotation_speed");
+        chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
+      }
+      // logging
+      g_log.debug() << "Poff: " << POFF << '\n';
+      g_log.debug() << "Open offset: " << openOffset << '\n';
+      g_log.debug() << "Chopper 1 phase: " << chop1Phase << '\n';
+      g_log.debug() << chopper << " 1 speed: " << chop1Speed << '\n';
+      g_log.debug() << chopper << " 2 phase: " << chop2Phase << '\n';
+      g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
+
+      if (chop1Speed <= 0.0) {
+        g_log.error() << "First chopper velocity " << chop1Speed
+                      << ". Check you NeXus file.\n";
+      }
+
+      const double chopWindow = instrument->getNumberParameter("chopper_window_opening")[0];
+      m_localWorkspace->mutableRun().addProperty("ChopperWindow", chopWindow,
+                                                 "degree", true);
+      g_log.debug() << "Chopper Opening Window [degrees]" << chopWindow << '\n';
+
+      const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
+                                             (POFF - chopWindow + chop2Phase -
+                                              chop1Phase + openOffset) /
+                                             (2.0 * 360 * chop1Speed);
+      g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
+      // compute tof values
+      for (int channelIndex = 0;
+           channelIndex < static_cast<int>(m_numberOfChannels) + 1;
+           ++channelIndex) {
+        const double t_TOF1 = channelIndex * m_channelWidth;
+        xVals.emplace_back(t_TOF1 + t_TOF2);
       }
     } else if (m_instrument == Supported::FIGARO) {
       chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
@@ -492,61 +533,13 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     } else if (run.hasProperty(m_offsetFrom + ".pickup_offset")) {
       POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
     } else {
-      throw std::runtime_error("Unable to find chopper pickup offset");
+      g_log.debug("Time channel index for axis description \n");
+      for (size_t t = 0; t <= m_numberOfChannels; ++t)
+        xVals.emplace_back(static_cast<double>(t));
     }
-    double openOffset;
-    if (run.hasProperty(m_offsetFrom + ".open_offset")) {
-      openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
-    } else if (run.hasProperty(m_offsetFrom + ".openOffset")) {
-      openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
-    } else {
-      throw std::runtime_error("Unable to find chopper open offset");
-    }
-    if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
-        chop2Speed != 0.0 && chop2Phase != 0.0) {
-      // virtual chopper entries are valid
-      chopper = "Virtual chopper";
-    } else {
-      // use chopper values
-      chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
-      chop2Speed = doubleFromRun(m_chopper2Name + ".rotation_speed");
-      chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
-    }
-    // logging
-    g_log.debug() << "Poff: " << POFF << '\n';
-    g_log.debug() << "Open offset: " << openOffset << '\n';
-    g_log.debug() << "Chopper 1 phase: " << chop1Phase << '\n';
-    g_log.debug() << chopper << " 1 speed: " << chop1Speed << '\n';
-    g_log.debug() << chopper << " 2 phase: " << chop2Phase << '\n';
-    g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
-
-    if (chop1Speed <= 0.0) {
-      g_log.error() << "First chopper velocity " << chop1Speed
-                    << ". Check you NeXus file.\n";
-    }
-
-    const double chopWindow =
-        instrument->getNumberParameter("chopper_window_opening")[0];
-    m_localWorkspace->mutableRun().addProperty("ChopperWindow", chopWindow,
-                                               "degree", true);
-    g_log.debug() << "Chopper Opening Window [degrees]" << chopWindow << '\n';
-
-    const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
-                                           (POFF - chopWindow + chop2Phase -
-                                            chop1Phase + openOffset) /
-                                           (2.0 * 360 * chop1Speed);
-    g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
-    // compute tof values
-    for (int channelIndex = 0;
-         channelIndex < static_cast<int>(m_numberOfChannels) + 1;
-         ++channelIndex) {
-      const double t_TOF1 = channelIndex * m_channelWidth;
-      xVals.emplace_back(t_TOF1 + t_TOF2);
-    }
-  } else {
-    g_log.debug("Time channel index for axis description \n");
-    for (size_t t = 0; t <= m_numberOfChannels; ++t)
-      xVals.emplace_back(static_cast<double>(t));
+  } catch (std::runtime_error &e) {
+    g_log.information() << "Unable to access NeXus file entry: " << e.what()
+                        << '\n';
   }
 
   return xVals;
@@ -724,13 +717,13 @@ double LoadILLReflectometry::detectorRotation() {
   return two_theta;
 }
 
-/** Sets the sample angle (i.e. bragg angle) [degrees]
- * Used when measurement type is reflected beam (otherwise must be zero)
+/** Returns the sample angle (i.e. bragg angle) [degrees]
+ * Used when measurement type is reflecteed beam (otherwise must be zero)
  * Note that DAN calibration needs information also from the corresponding
- * direct beam, hence it cannot be done in the loader, but it is done in
- * preprocessing algorithm. However loader should still support loading
- * reflected beams standalone, hence sample angle is the only option if
- * BraggAngle is not manually specified.
+ * direct beam, hence it cannot be done in the loader, but is done in
+ * preprocessing algorithm. However loader should still support loading reflected
+ * beams standalone, hence sample angle is taken if BraggAngle is not manually
+ * specified.
  */
 void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
   if (m_instrument == Supported::D17) {
@@ -746,20 +739,35 @@ void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
   }
 }
 
-/// Initialize m_pixelWidth from the IDF as the step of rectangular detector
+/// Initialize m_pixelWidth from the IDF and check for NeXus consistency.
 void LoadILLReflectometry::initPixelWidth() {
-  const auto &instrument = m_localWorkspace->getInstrument();
-  const auto &detectorPanels = instrument->getAllComponentsWithName("detector");
+  auto instrument = m_localWorkspace->getInstrument();
+  auto detectorPanels = instrument->getAllComponentsWithName("detector");
   if (detectorPanels.size() != 1) {
     throw std::runtime_error("IDF should have a single 'detector' component.");
   }
-  const auto &detector =
+  auto detector =
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(
           detectorPanels.front());
-  if (m_instrument == Supported::D17) {
+  double widthInLogs;
+  if (m_instrument != Supported::FIGARO) {
     m_pixelWidth = std::abs(detector->xstep());
+    widthInLogs = mmToMeter(
+        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
+    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
+      m_log.information() << "NeXus pixel width (mppx) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
+    }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
+    widthInLogs = mmToMeter(
+        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
+    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
+      m_log.information() << "NeXus pixel width (mppy) " << widthInLogs
+                          << " differs from the IDF. Using the IDF value "
+                          << m_pixelWidth << '\n';
+    }
   }
 }
 
@@ -790,32 +798,35 @@ void LoadILLReflectometry::placeSlits() {
   if (m_instrument == Supported::FIGARO) {
     const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     const double offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
-    if (run.hasProperty("Distance.S2_Sample")) {
-      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
-    } else {
-      throw std::runtime_error("Unable to find slit 2 to sample distance");
-    }
-    if (run.hasProperty("Distance.S3_Sample")) {
-      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
-    } else {
-      throw std::runtime_error("Unable to find slit 3 to sample distance");
-    }
-    slit2ToSample += offset;
-    slit1ToSample += offset;
+    // For the moment, the position information for S3 is missing in the
+    // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
+    // when the NeXus files are
+    double slitSeparation;
+    if (m_localWorkspace->run().hasProperty(
+            "Distance.inter-slit_distance")) // Valid from 2018.
+      slitSeparation = mmToMeter(doubleFromRun("Distance.inter-slit_distance"));
+    else // Valid before 2018.
+      slitSeparation = mmToMeter(doubleFromRun("Theta.inter-slit_distance"));
+    slit2ToSample = 0.368 + offset;
+    slit1ToSample = slit2ToSample + slitSeparation;
   } else {
-    if (run.hasProperty("Distance.S2toSample")) {
+    try {
       slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
-    } else if (run.hasProperty("Distance.S2_Sample")) {
-      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
-    } else {
-      throw std::runtime_error("Unable to find slit 2 to sample distance");
+    } catch (std::runtime_error &) {
+      try {
+        slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 1 to sample distance");
+      }
     }
-    if (run.hasProperty("Distance.S3toSample")) {
+    try {
       slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
-    } else if (run.hasProperty("Distance.S3_Sample")) {
-      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
-    } else {
-      throw std::runtime_error("Unable to find slit 3 to sample distance");
+    } catch (std::runtime_error &) {
+      try {
+        slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 2 to sample distance");
+      }
     }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
@@ -870,6 +881,7 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
 }
 
 /** Return the sample to detector distance for the current instrument.
+ *  Valid before 2018.
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
@@ -905,46 +917,25 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
 /// Return the horizontal offset along the z axis.
 void LoadILLReflectometry::sampleHorizontalOffset() {
   if (m_instrument == Supported::FIGARO) {
-    std::string offsetEntry;
-    const auto &run = m_localWorkspace->run();
-    if (run.hasProperty("Theta.sampleHorizontalOffset"))
-      offsetEntry = "Theta.sampleHorizontalOffset";
-    else if (run.hasProperty("Distance.sampleHorizontalOffset")) {
-      offsetEntry = "Distance.sampleHorizontalOffset";
-    } else if (run.hasProperty("Distance.sample_changer_horizontal_offset")) {
-      offsetEntry = "Distance.sample_changer_horizontal_offset";
-    } else {
-      throw std::runtime_error(
-          "Unable to find sample horizontal offset in the file");
-    }
-    m_sampleZOffset = mmToMeter(doubleFromRun(offsetEntry));
+    m_sampleZOffset = mmToMeter(doubleFromRun("Distance.sample_changer_horizontal_offset"));
   }
-<<<<<<< HEAD
-  if (m_localWorkspace->run().hasProperty("Distance.sampleHorizontalOffset")) // Valid from 2018.
-    return mmToMeter(doubleFromRun("Distance.sampleHorizontalOffset"));
-  else // Valid before 2018.
-    return mmToMeter(doubleFromRun("Theta.sampleHorizontalOffset"));
-=======
->>>>>>> cleanup of some hardcoded values in the loader
 }
 
 /** Return the source to sample distance for the current instrument.
+ *  Valid before 2018.
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument == Supported::D17) {
-    const std::string chopperGapUnit =
-        m_localWorkspace->getInstrument()->getStringParameter(
-            "chopper_gap_unit")[0];
-    const double scale =
-        (chopperGapUnit == "cm") ? 0.01 : (chopperGapUnit == "mm") ? 0.001 : 1.;
-    const auto &run = m_localWorkspace->run();
+    // the Distance.ChopperGap in the nexus file was initially in cm, then in m,
+    // now in mm between the first two generations we can flag on the
+    // dist_chop_samp vs MidChopper_Sample_distance however between the 2nd and
+    // 3rd we have to check the time, since all the rest is consistent
     double pairCentre;
     double pairSeparation;
-    if (run.hasProperty("VirtualChopper.dist_chop_samp")) {
-      // This is valid up to cycle 191 included
+    try {
       pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp"); // in [m]
-      // It is in meter, just restate its unit
+      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
       pairSeparation =
@@ -952,17 +943,21 @@ double LoadILLReflectometry::sourceSampleDistance() const {
       // Here it's the first chopper to sample, so we need to subtract half of
       // the gap
       pairCentre -= 0.5 * pairSeparation;
-    } else if (run.hasProperty("VirtualChopper.MidChopper_Sample_distance")) {
-      // Valid from cycle 192 onwards, here it's directly the mid-chopper to
-      // sample, but in mm
-      pairCentre = mmToMeter(doubleFromRun(
-          "VirtualChopper.MidChopper_Sample_distance")); // [mm] to [m]
-      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale; // in [m]
-      m_localWorkspace->mutableRun().addProperty(
-          "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
-          true);
-    } else {
-      throw std::runtime_error("Unable to extract chopper to sample distance");
+    } catch (std::runtime_error &) {
+      try {
+        pairCentre = mmToMeter(doubleFromRun(
+            "VirtualChopper.MidChopper_Sample_distance"));     // in [m]
+        pairSeparation = doubleFromRun("Distance.ChopperGap"); // in [m]
+        //if (m_startTime > CYCLE203TIME) {
+        //  pairSeparation = mmToMeter(pairSeparation);
+        //}
+        m_localWorkspace->mutableRun().addProperty(
+            "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+            true);
+      } catch (std::runtime_error &) {
+        throw std::runtime_error(
+            "Unable to extract chopper to sample distance");
+      }
     }
     // in any case we overwrite the chopper gap now in meters, so that the
     // reduction code works universally
