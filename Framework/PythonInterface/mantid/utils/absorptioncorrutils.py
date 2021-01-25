@@ -9,7 +9,7 @@ from mantid.dataobjects import EventWorkspace
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, CreateCacheFilename, DeleteWorkspace, Divide,
                               Load, LoadNexus, Multiply, PaalmanPingsAbsorptionCorrection,
-                              PreprocessDetectorsToMD, ReNameWorkspace, SetSample,
+                              PreprocessDetectorsToMD, RenameWorkspace, SetSample,
                               SaveNexusProcessed, UnGroupWorkspace, mtd)
 import numpy as np
 import os
@@ -115,7 +115,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
         # if the file contains only one workspace, then it must be from
         # a previous run using SampleOnly
         if isinstance(mtd["__tmp"], EventWorkspace):
-            ReNameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
+            RenameWorkspace(InputWorkspace="__tmp", OutputWorkspace=wsn_as)
         else:
             # there should be exactly two workspaces inside, ungroup them will
             # restore them with the orignal name (wsn_as, wsn_ac)
