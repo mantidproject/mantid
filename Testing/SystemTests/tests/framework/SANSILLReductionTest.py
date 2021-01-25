@@ -23,7 +23,8 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D11_IQ.nxs']
 
@@ -83,7 +84,8 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D22_IQ_v2.nxs']
 
@@ -210,7 +212,8 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_VTOF_IQ.nxs']
 
@@ -235,8 +238,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
@@ -254,7 +256,8 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_LTOF_IQ.nxs']
 
@@ -280,8 +283,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
@@ -300,6 +302,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_IQ.nxs']
 
