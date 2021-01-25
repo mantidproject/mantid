@@ -307,7 +307,7 @@ class MuonGroupPairContext(object):
             self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
-        for item in self._groups + self.pairs:
+        for item in self._groups + self.pairs + self.diffs:
             if item.name == name:
                 return False
         return True
@@ -384,7 +384,7 @@ class MuonGroupPairContext(object):
             self._selected_pairs.remove(str(pair))
 
     def remove_workspace_by_name(self, workspace_name):
-        for item in self.groups + self.pairs:
+        for item in self.groups + self.pairs + self.diffs:
             item.remove_workspace_by_name(workspace_name)
 
     def get_unormalisised_workspace_list(self, workspace_list):
@@ -397,7 +397,7 @@ class MuonGroupPairContext(object):
                 return unnormalised_workspace
 
     def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
-        for group_pair in self.groups + self.pairs:
+        for group_pair in self.groups + self.pairs +self.diffs:
             run = group_pair.get_run_for_workspace(workspace_name)
             if(run):
                 return group_pair.name, str(run)

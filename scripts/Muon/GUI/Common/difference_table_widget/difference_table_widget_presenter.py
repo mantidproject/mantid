@@ -53,6 +53,7 @@ class DifferenceTablePresenter(object):
         changed_item_text = self._view.get_table_item_text(row, col)
         diff_name = self._view.get_table_item_text(row, 0)
         update_model = True
+        print("waa", diff_name,changed_item_text, row, col )
         if diff_columns[col] == 'diff_name' and not self.validate_diff_name(changed_item_text):
             update_model = False
         if diff_columns[col] == 'group_1':
@@ -78,8 +79,8 @@ class DifferenceTablePresenter(object):
         self._model.clear_diffs()
         for entry in table:
             diff = MuonDiff(diff_name=str(entry[0]),
-                            backward_group_name=str(entry[3]),
-                            forward_group_name=str(entry[2]))
+                            backward_group_name=str(entry[2]),
+                            forward_group_name=str(entry[3]))
             self._model.add_diff(diff)
 
     def update_view_from_model(self):

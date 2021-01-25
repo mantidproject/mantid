@@ -72,15 +72,16 @@ class PlotWidgetModel(object):
         """
         currently_selected_groups = self.context.group_pair_context.selected_groups
         currently_selected_pairs = self.context.group_pair_context.selected_pairs
+        currently_selected_diffs = self.context.group_pair_context.selected_diffs
         workspace_list = []
 
         if FREQ_PLOT_TYPE in plot_type:
-            for grouppair in currently_selected_groups + currently_selected_pairs:
+            for grouppair in currently_selected_groups + currently_selected_pairs+currently_selected_diffs:
                 workspace_list += self.get_freq_workspaces_to_plot(grouppair, plot_type)
             workspace_list = list(set(workspace_list))
             return workspace_list
         else:
-            for grouppair in currently_selected_groups + currently_selected_pairs:
+            for grouppair in currently_selected_groups + currently_selected_pairs+currently_selected_diffs:
                 workspace_list += self.get_time_workspaces_to_plot(grouppair, is_raw, plot_type)
             return workspace_list
 
@@ -128,7 +129,7 @@ class PlotWidgetModel(object):
 
     def create_tiled_keys(self, tiled_by):
         if tiled_by == TILED_BY_GROUP_TYPE:
-            keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+            keys = self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs + self.context.group_pair_context.selected_diffs
         else:
             keys = [run_list_to_string(item) for item in self.context.data_context.current_runs]
         return keys

@@ -268,6 +268,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if self._view.is_tiled_plot() and self._view.tiled_by() == self._model.tiled_by_group:
             tiled_by = self._view.tiled_by()
             keys = self._model.create_tiled_keys(tiled_by)
+            print("fff",keys, group_or_pair_name)
             self._figure_presenter.create_tiled_plot(keys, tiled_by)
             self.plot_all_selected_data(autoscale=False, hold_on=False)
             return
@@ -364,6 +365,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._view.setEnabled(True)
         else:
             self._view.setEnabled(False)
+        print("DAS", workspace_list, indices)
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=hold_on, autoscale=autoscale)
 
     def _check_if_counts_and_groups_selected(self):
