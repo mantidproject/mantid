@@ -19,13 +19,14 @@ field.  At present, the standard samples used for measuring the flood field
 are H2O in a 1 mm path length cell for GP-SANS and Bio-SANS, and a 1 mm sheet
 of PMMA for EQ-SANS.
 
-In case the input is a :ref:`WorkspaceGroup <WorkspaceGroup>` provided through
-the `InputWorkspaceGroup` property, the group is going to be merged and counts
-will be averaged. In addition, counts in spectra that are masked in one
-of the entries of the group but not the other will be replaced with values
-from the entry that has this spectrum not masked. This allows for removal
-of the holes in the efficiency map caused by masking the beam stop, provided
-at least two measurements are done at different, e.g. horizontal, offsets.
+In case the input is a :ref:`WorkspaceGroup <WorkspaceGroup>`, it is processed
+entry-by-entry if the `MergeGroup` property is set to False. Otherwise, the input
+group is going to be merged and counts will be averaged. In addition, counts
+in spectra that are masked in one of the entries of the group but not the other
+will be replaced with values from the entry that has this spectrum not masked.
+This allows, for example, for removal of the holes in the efficiency map caused
+by masking the beam stop, provided at least two measurements are done at different,
+e.g. horizontal, offsets.
 
 The relative detector sensitivity is computed the following way
 
