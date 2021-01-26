@@ -91,29 +91,31 @@ class AdvancedSetupScript(BaseScriptElement):
     def createParametersList(self):
         """ Create a list of parameter names for SNSPowderReductionPlus()
         """
-        self.parnamelist = []
-        self.parnamelist.append("UnwrapRef")
-        self.parnamelist.append("LowResRef")
-        self.parnamelist.append("CropWavelengthMin")
-        self.parnamelist.append('CropWavelengthMax')
-        self.parnamelist.append("RemovePromptPulseWidth")
-        self.parnamelist.append("MaxChunkSize")
-        self.parnamelist.append("StripVanadiumPeaks")
-        self.parnamelist.append("VanadiumFWHM")
-        self.parnamelist.append("VanadiumPeakTol")
-        self.parnamelist.append("VanadiumSmoothParams")
-        self.parnamelist.append("VanadiumRadius")
-        self.parnamelist.append("FilterBadPulses")
-        self.parnamelist.append("BackgroundSmoothParams")
-        self.parnamelist.append("PushDataPositive")
-        self.parnamelist.append("PreserveEvents")
-        self.parnamelist.append("OutputFilePrefix")
-        self.parnamelist.append("ScaleData")
-        self.parnamelist.append("TypeOfCorrection")
-        self.parnamelist.append("SampleFormula")
-        self.parnamelist.append("MeasuredMassDensity")
-        self.parnamelist.append("SampleNumberDensity")
-        self.parnamelist.append("ContainerShape")
+        self.parnamelist = ['UnwrapRef',
+                            'LowResRef',
+                            'CropWavelengthMin',
+                            'CropWavelengthMax',
+                            'RemovePromptPulseWidth',
+                            'MaxChunkSize',
+                            'StripVanadiumPeaks',
+                            'VanadiumFWHM',
+                            'VanadiumPeakTol',
+                            'VanadiumSmoothParams',
+                            'VanadiumRadius',
+                            'FilterBadPulses',
+                            'BackgroundSmoothParams',
+                            'PushDataPositive',
+                            'PreserveEvents',
+                            'OutputFilePrefix',
+                            'ScaleData',
+                            'TypeOfCorrection',
+                            'SampleFormula',
+                            'MeasuredMassDensity',
+                            'SampleNumberDensity',
+                            'ContainerShape',
+                            # Optimization options
+                            'CacheDir',
+                            'CleanCache']
 
     def set_default_pars(self, inst_name):
         """ Set default values
