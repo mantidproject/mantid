@@ -7,7 +7,7 @@
 
 from mantid import config
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
-    ITableWorkspaceProperty, PythonAlgorithm
+    ITableWorkspaceProperty, Progress, PythonAlgorithm
 from mantid.kernel import Direction, IntArrayOrderedPairsValidator, \
     StringListValidator
 from mantid.simpleapi import *
@@ -184,10 +184,13 @@ class GenerateLogbook(PythonAlgorithm):
             mtd[logbook_ws].addColumn("str", headline)
         return logbook_ws
 
-    def _fill_logbook(self, logbook_ws, data_array):
+    def _fill_logbook(self, logbook_ws, data_array, progress):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
-        for file_name in data_array:
+        for file_no, file_name in enumerate(data_array):
+            # reporting progress each 10% of the data
+            if file_no % (len(data_array)/10) == 0:
+                progress.report("Filling logbook table...")
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
                 rowData = numpy.empty(n_entries, dtype=object)
@@ -212,12 +215,19 @@ class GenerateLogbook(PythonAlgorithm):
             self._numor_range = [0, float('inf')]
         else:
             self._numor_range = self.getProperty('NumorRange').value
+        nreports = 15
+        progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+        progress.report("Preparing file list")
         data_array = self._prepare_file_array()
+        progress.report("Verifying conformity")
         self._verify_contains_metadata(data_array)
+        progress.report("Preparing logbook table")
         logbook_ws = self._prepare_logbook_ws()
-        self._fill_logbook(logbook_ws, data_array)
+        self._fill_logbook(logbook_ws, data_array, progress)
         if not self.getProperty('OutputFile').isDefault:
+            progress.report("Saving logbook as CSV")
             self._store_logbook_as_csv(logbook_ws)
+        progress.report("Done")
         self.setProperty('OutputWorkspace', mtd[logbook_ws])
 
 
