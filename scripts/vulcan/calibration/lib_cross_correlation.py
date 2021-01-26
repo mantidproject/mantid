@@ -44,7 +44,7 @@ def verify_vulcan_difc(ws_name: str,
         raise NotImplementedError('Bank information dictionary is out of date')
 
     # Init file
-    difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'r')
+    difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'w')
 
     for bank_name in ['west', 'east', 'high angle']:
         # pixel range
@@ -61,7 +61,7 @@ def verify_vulcan_difc(ws_name: str,
         bank_entry = difc_h5.create_group(bank_name)
         # data
         h5_data = np.array([bank_cal_vec, bank_idf_vec, difc_diff_vec]).transpose()
-        bank_entry.create_dataset('DIFC_cal_raw_diff', h5_data)
+        bank_entry.create_dataset('DIFC_cal_raw_diff', data=h5_data)
 
         # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
         if correct:
@@ -600,6 +600,10 @@ def apply_masks(mask_ws):
         if mask_ws.readY(iws)[0] > 0.5:
             mask_wsindex_list.append(iws)
 
+    mask_bits = mask_ws.extractY().flatten()
+    print(f'[DEBUG MASK] {mask_ws}: {len(np.where(mask_bits > 0.1)[0])}')
+
+
     # mask all detectors explicitly
     mask_ws_name = mask_ws.name()
     mask_ws.maskDetectors(WorkspaceIndexList=mask_wsindex_list)
@@ -618,11 +622,13 @@ def merge_2_masks(lhs_mask_name, rhs_mask_name, output_mask_name):
     :param output_mask_name:
     :return:
     """
-    print('[INFO] MaskWorkspace operation: {} + {} ---> {}'.format(lhs_mask_name, rhs_mask_name, output_mask_name))
+    print('[MERGING MASK] {} + {} = {}'.format(lhs_mask_name, rhs_mask_name, output_mask_name))
 
     # Plus 2 workspaces
     Plus(LHSWorkspace=lhs_mask_name, RHSWorkspace=rhs_mask_name,
          OutputWorkspace=output_mask_name)
+    for mask_ws_name in [lhs_mask_name, rhs_mask_name, output_mask_name]:
+        print(f'{mask_ws_name}: sum(Y) = {np.sum(mtd[mask_ws_name].extractY().flatten())}')
 
     # now time to set everything right
     # lhs_mask = mtd[lhs_mask_name]
@@ -669,6 +675,7 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name
     Plus(LHSWorkspace=offset_ws_name, RHSWorkspace=partial_offset_ws_name,
          OutputWorkspace=offset_ws_name)
 
+    print('[MERGING MASK] Partial: Number of masked spectra = {0} in {1} ... Sum(Y) = {2}'.format(mtd[partial_mask_ws_name].getNumberMasked(), partial_mask_ws_name, np.sum(mtd[partial_mask_ws_name].extractY().flatten())))
     # Mask:
     # Make sure mask_ws_name is a string for workspace name
     mask_ws_name = str(mask_ws_name)
@@ -682,7 +689,7 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name
     # - rename merged mask workspace to target MaskWorkspace
     DeleteWorkspace(Workspace=mask_ws_name)
     RenameWorkspace(InputWorkspace=temp_mask_ws_name, OutputWorkspace=mask_ws_name)
-    print('Number of masked spectra = {0} in {1}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name))
+    print('[MERGING MASK] Summed:  Number of masked spectra = {0} in {1} ... sum[Y] = {2}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name, np.sum(mtd[mask_ws_name].extractY().flatten())))
 
     return offset_ws_name, mask_ws_name
 
@@ -713,6 +720,8 @@ def save_calibration(calib_ws_name: str,
     out_file_name = os.path.join(os.getcwd(), calib_file_prefix + '.h5')
     if os.path.exists(out_file_name):
         os.unlink(out_file_name)
+
+    print(f'[SAVING CAL] Mask {mask_ws_name} Y = {np.sum(mtd[mask_ws_name].extractY().flatten())} Masked = {mtd[mask_ws_name].getNumberMasked()}') 
 
     # Save for Mantid diffraction calibration file
     SaveDiffCal(CalibrationWorkspace=calib_ws_name,

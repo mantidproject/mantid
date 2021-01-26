@@ -128,11 +128,11 @@ def calibrate_vulcan(diamond_nexus: str,
 
     # Correct obviously erroneous DIFC
     # TODO FIXME - Disabled for testing purpose
-    if False:
+    if True:
         # check the difference between DIFCs
         verify_vulcan_difc(ws_name=diamond_ws_name,
                            cal_table_name=calib_ws_name,
-                           mask_ws_name=str(mask_ws))
+                           mask_ws_name=str(mask_ws), correct=False)
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
@@ -147,7 +147,7 @@ def calibrate_vulcan(diamond_nexus: str,
 
 def test_main_calibrate():
     calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5',
-                     load_cutoff_time=None,
+                     load_cutoff_time=300,   #None,
                      difc_file_name='vulcan_cc_21356.h5')
 
 
@@ -201,20 +201,14 @@ def test_main_apply_calibration():
     for ws_name in ws_names:
         print(ws_name)
 
-    # Align
+    # Align, focus and export
     align_focus_event_ws(diamond_ws_name, str(calib_cal_ws), str(calib_group_ws))
-
-    # Convert to TOF
-
-    # Rebin
-
-    # Export by SaveNexusProcessed
 
     return
 
 
 if __name__ == '__main__':
-    choice = '3'
+    choice = '1'
     if choice == '1':
         test_main_calibrate()
     elif choice == '2':
