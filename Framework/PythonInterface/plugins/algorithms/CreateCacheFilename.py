@@ -61,7 +61,9 @@ class CreateCacheFilename(PythonAlgorithm):
 
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
 
-        self.declareProperty("OutputSignature", "", "Calculated sha1 hash", Direction.Output)
+        self.declareProperty("OutputSignature", "",
+                             "Comma-separated sorted list of key=values pairs used to create the sha1 hash",
+                             Direction.Output)
         return
 
     def validateInputs(self):
