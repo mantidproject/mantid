@@ -240,8 +240,7 @@ void FitScriptGeneratorModel::updateParameterValue(
 
     updateParameterValuesWithLocalTieTo(domainIndex, parameter, newValue);
     if (m_fittingMode == FittingMode::SIMULTANEOUS) {
-      updateParameterValuesWithGlobalTieTo(domainIndex, fullParameter,
-                                           newValue);
+      updateParameterValuesWithGlobalTieTo(fullParameter, newValue);
     }
   }
 }
@@ -256,19 +255,19 @@ void FitScriptGeneratorModel::updateParameterValuesWithLocalTieTo(
 }
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
-    FitDomainIndex domainIndex, std::string const &fullParameter,
-    double newValue) {
+    std::string const &fullParameter, double newValue) {
   // Deep copy so that global ties can be removed whilst in this for loop
   auto const globalTies = m_globalTies;
   for (auto const &globalTie : globalTies)
     if (fullParameter == globalTie.m_tie)
-      updateParameterValueInGlobalTie(domainIndex, globalTie, newValue);
+      updateParameterValueInGlobalTie(globalTie, newValue);
 }
 
 void FitScriptGeneratorModel::updateParameterValueInGlobalTie(
-    FitDomainIndex domainIndex, GlobalTie const &globalTie, double newValue) {
+    GlobalTie const &globalTie, double newValue) {
   if (validGlobalTie(globalTie.m_parameter, globalTie.m_tie)) {
-    m_fitDomains[domainIndex.value]->setParameterValue(
+    auto const domainIndex = getFunctionIndexAt(globalTie.m_parameter, 0);
+    m_fitDomains[domainIndex]->setParameterValue(
         getAdjustedFunctionIndex(globalTie.m_parameter), newValue);
   } else {
     clearGlobalTie(globalTie.m_parameter);
