@@ -116,9 +116,9 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
     # -- check SHA1
     # NOTE: The new attribute absSHA1 should be there.
     if mtd.doesExist(wsn_as):
-        found_as = mtd[wsn_as].run()["absSHA1"] == sha1
+        found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
     if mtd.doesExist(wsn_ac):
-        found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
+        found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
 
     # step_2: try to load from cache_file provided
     if (not found_as) or (not found_ac):
@@ -130,7 +130,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
             wsntmp = f"{wsn_as}_wsg"
             Load(Filename=cache_file_name, OutputWorkspace=wsntmp)
             wstype = mtd[wsntmp].id()
-            if wstype == "EventWorkspace":
+            if wstype == "Workspace2D":
                 RenameWorkspace(InputWorkspace=wsntmp, OutputWorkspace=wsn_as)
             elif wstype == "WorkspaceGroup":
                 # there should be exactly two workspaces inside, ungroup them will
@@ -143,9 +143,9 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
         # -- wsn_as exist for all three methods
         # NOTE: The new attribute absSHA1 should be there.
         if mtd.doesExist(wsn_as):
-            found_as = mtd[wsn_as].run()["absSHA1"] == sha1
+            found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
         if mtd.doesExist(wsn_ac):
-            found_ac = mtd[wsn_ac].run()["absSHA1"] == sha1
+            found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
 
     # step_3: if we did not find the cache, set both to None
     wsn_as = wsn_as if found_as else ""
@@ -240,6 +240,7 @@ def calculate_absorption_correction(
         #    - input filename (embedded in donorWS)
         #    - SNSPowderReduction Options (mostly passed in as args)
         cache_filename, sha1 = _getCacheName(donorWS, cache_dir, abs_method)
+        log.information(f"SHA1: {sha1}")
         # -- Try to use cache
         #    - if cache is found, wsn_as and wsn_ac will be valid string (workspace name)
         #      - already exist in memory
@@ -282,7 +283,7 @@ def calculate_absorption_correction(
             else:
                 # found the cache, let's use the cache instead
                 log.information(f"-- Locate cached sample absorption correction: {wsn_as}")
-                log.infomration(f"-- Locate cached container absorption correction: {wsn_ac}")
+                log.information(f"-- Locate cached container absorption correction: {wsn_ac}")
 
     return wsn_as, wsn_ac
 
