@@ -917,25 +917,39 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
 /// Return the horizontal offset along the z axis.
 void LoadILLReflectometry::sampleHorizontalOffset() {
   if (m_instrument == Supported::FIGARO) {
-    m_sampleZOffset = mmToMeter(doubleFromRun("Distance.sample_changer_horizontal_offset"));
+    std::string offsetEntry;
+    const auto &run = m_localWorkspace->run();
+    if (run.hasProperty("Theta.sampleHorizontalOffset"))
+      offsetEntry = "Theta.sampleHorizontalOffset";
+    else if (run.hasProperty("Distance.sampleHorizontalOffset")) {
+      offsetEntry = "Distance.sampleHorizontalOffset";
+    } else if (run.hasProperty("Distance.sample_changer_horizontal_offset")) {
+      offsetEntry = "Distance.sample_changer_horizontal_offset";
+    } else {
+      throw std::runtime_error(
+          "Unable to find sample horizontal offset in the file");
+    }
+    m_sampleZOffset = mmToMeter(doubleFromRun(offsetEntry));
   }
 }
 
 /** Return the source to sample distance for the current instrument.
- *  Valid before 2018.
  *  @return the source to sample distance in meters
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument == Supported::D17) {
-    // the Distance.ChopperGap in the nexus file was initially in cm, then in m,
-    // now in mm between the first two generations we can flag on the
-    // dist_chop_samp vs MidChopper_Sample_distance however between the 2nd and
-    // 3rd we have to check the time, since all the rest is consistent
+    const std::string chopperGapUnit =
+        m_localWorkspace->getInstrument()->getStringParameter(
+            "chopper_gap_unit")[0];
+    const double scale =
+        (chopperGapUnit == "cm") ? 0.01 : (chopperGapUnit == "mm") ? 0.001 : 1.;
+    const auto &run = m_localWorkspace->run();
     double pairCentre;
     double pairSeparation;
-    try {
+    if (run.hasProperty("VirtualChopper.dist_chop_samp")) {
+      // This is valid up to cycle 191 included
       pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp"); // in [m]
-      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
+      // It is in meter, just restate its unit
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
       pairSeparation =
@@ -943,21 +957,17 @@ double LoadILLReflectometry::sourceSampleDistance() const {
       // Here it's the first chopper to sample, so we need to subtract half of
       // the gap
       pairCentre -= 0.5 * pairSeparation;
-    } catch (std::runtime_error &) {
-      try {
-        pairCentre = mmToMeter(doubleFromRun(
-            "VirtualChopper.MidChopper_Sample_distance"));     // in [m]
-        pairSeparation = doubleFromRun("Distance.ChopperGap"); // in [m]
-        //if (m_startTime > CYCLE203TIME) {
-        //  pairSeparation = mmToMeter(pairSeparation);
-        //}
-        m_localWorkspace->mutableRun().addProperty(
-            "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
-            true);
-      } catch (std::runtime_error &) {
-        throw std::runtime_error(
-            "Unable to extract chopper to sample distance");
-      }
+    } else if (run.hasProperty("VirtualChopper.MidChopper_Sample_distance")) {
+      // Valid from cycle 192 onwards, here it's directly the mid-chopper to
+      // sample, but in mm
+      pairCentre = mmToMeter(doubleFromRun(
+          "VirtualChopper.MidChopper_Sample_distance")); // [mm] to [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale; // in [m]
+      m_localWorkspace->mutableRun().addProperty(
+          "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+          true);
+    } else {
+      throw std::runtime_error("Unable to extract chopper to sample distance");
     }
     // in any case we overwrite the chopper gap now in meters, so that the
     // reduction code works universally

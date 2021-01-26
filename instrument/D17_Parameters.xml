@@ -50,8 +50,8 @@
 		</parameter>
 		<parameter name="chopper_gap_unit" type="string">
 		<!-- The unit of the chopper gap -->
-			<value val="cm" valid-to="2020-07-31T23:59:59"/>
-			<value val="m" valid-from="2020-07-31T23:59:59" valid-to="2020-07-31T23:59:59"/>
+			<value val="cm" valid-to="2019-08-19T23:59:59"/>
+			<value val="m" valid-from="2019-08-20T00:00:00" valid-to="2020-07-31T23:59:59"/>
 			<value val="mm" valid-from="2020-08-01T00:00:00"/>
 		</parameter>
 	</component-link>
