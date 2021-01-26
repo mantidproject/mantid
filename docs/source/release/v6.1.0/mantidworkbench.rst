@@ -7,7 +7,7 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
-
+- Add a checkbox to freeze the rotation in the instrument viewer in Full 3D mode.
 Bugfixes
 --------
 
