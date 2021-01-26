@@ -132,6 +132,9 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
         self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
+        # Initialization for optimization options
+        self._content._cache_dir_browse.clicked.connect(self._cache_dir_browse)
+
         # Validated widgets
 
         return
@@ -170,6 +173,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.cropwavelengthmin_edit.setText(str(state.cropwavelengthmin))
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
+        # populate Optimization options
+        self._content.cache_dir_edit.setText(state.cachedir)
+        self._content.clean_cache_box.setChecked(state.dosum)
+
         return
 
     def get_state(self):
@@ -178,6 +185,9 @@ class AdvancedSetupWidget(BaseWidget):
         """
         s = AdvancedSetupScript(self._instrument_name)
 
+        #
+        # Initialize AdvancedSetupScript static variables with widget's content
+        #
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
@@ -204,6 +214,9 @@ class AdvancedSetupWidget(BaseWidget):
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
+        # Optimization options
+        s.cache_dir = self._content.cache_dir_edit.text()
+        s.clean_cache = self._content.clean_cache_box.isChecked()
 
         return s
 
@@ -259,5 +272,11 @@ class AdvancedSetupWidget(BaseWidget):
                                                                        .build().packingFraction))
         except ValueError:  # boost.python.ArgumentError are not catchable
             self._content.packingfraction_edit.setText(str(1))
+
+    def _cache_dir_browse(self):
+        r"""Event handling for browsing the cache directory"""
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory')
+        if dir_path:
+            self._content.cache_dir_edit.setText(dir_path)
 
 #ENDCLASSDEF
