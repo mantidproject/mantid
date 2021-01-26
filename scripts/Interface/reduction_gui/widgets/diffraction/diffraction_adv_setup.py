@@ -175,7 +175,7 @@ class AdvancedSetupWidget(BaseWidget):
 
         # populate Optimization options
         self._content.cache_dir_edit.setText(state.cachedir)
-        self._content.clean_cache_box.setChecked(state.dosum)
+        self._content.clean_cache_box.setChecked(state.clean_cache)
 
         return
 
