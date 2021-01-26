@@ -105,16 +105,8 @@ class DiagnosticPlot(object):
         # Clear canvas
         # plt.cla()
 
-        # Protype multiple plots
+        # Start (multiple) plots
         fig = plt.figure()
-
-        # ax1 = fig.add_subplot(221)
-        # ax1.plot([(1, 2), (3, 4)], [(4, 3), (2, 3)])
-        #
-        # ax2 = fig.add_subplot(224)
-        # ax2.plot([(7, 2), (5, 3)], [(1, 6), (9, 5)])
-        #
-        # plt.show()
 
         for index, row_col in enumerate(self._matrix.keys()):
             # get row and columun
@@ -124,22 +116,57 @@ class DiagnosticPlot(object):
             vec_pixels = self._matrix[(row, column)].pixels
             vec_peak_pos = self._matrix[(row, column)].peak_centers_fit
 
-            print(f'Number of NaN in peak positions: {len(np.where(np.isnan(vec_peak_pos))[0])}')
+            print(f'Max position = {vec_peak_pos.max()},  Min position = {vec_peak_pos.min()}')
+
+            # filter out valid peak positions (positive)
+            valid_center_vec = vec_peak_pos[vec_peak_pos > 0]
+            valid_spec_vec = vec_pixels[vec_peak_pos > 0]
 
             # process
             if relative_position:
-                vec_peak_pos = 2 * (
-                        vec_peak_pos - self._matrix[(row, column)].expected_peak_pos_d) / (
-                        vec_peak_pos + self._matrix[(row, column)].expected_peak_pos_d)
-                vec_peak_pos = 1 - vec_peak_pos
+                valid_center_vec = 2 * (
+                        valid_spec_vec - self._matrix[(row, column)].expected_peak_pos_d) / (
+                        valid_center_vec + self._matrix[(row, column)].expected_peak_pos_d)
+                valid_center_vec = 1 - valid_center_vec
 
             # set up plot
-            plot_index = self._num_rows * 100 + self._num_cols * 10 + (index + 1)
+            plot_index = self._num_rows * 200 + self._num_cols * 10 + (index + 1)
             print(f'subplot index = {plot_index}')
-
             ax_i = fig.add_subplot(plot_index)
-            ax_i.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
-                      label=self._title[(row, column)])
+            self.plot_center_regular(ax_i, valid_spec_vec, valid_center_vec, self._title[(row, column)])
+
+            plot_index = self._num_rows * 200 + self._num_cols * 10 + (index + 2)
+            print(f'subplot index = {plot_index}')
+            ax_i = fig.add_subplot(plot_index)
+            self.plot_center_sigma(ax_i, valid_spec_vec, valid_center_vec, self._title[(row, column)], n_sigma=3)
+
+            # ax_i.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
+            #           label=self._title[(row, column)])
+            #
+            # # Get the good fitting ones only
+            # valid_centers_vec = peak_center_vec[peak_center_vec > 0]
+            # valid_spec_vec = ws_index_vec[peak_center_vec > 0]
+            #
+            # pos_average = np.mean(valid_centers_vec)
+            # pos_std_dev = np.std(valid_centers_vec)
+            # print(f'Positon = {pos_average} +/- Standard deviation = {pos_std_dev}')
+            #
+            # plt.plot(valid_spec_vec, valid_centers_vec, linestyle='None', marker='.', color='blue', label='good fit')
+            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]], [pos_average + pos_std_dev, pos_average + pos_std_dev],
+            #          linestyle='--', color='black')  # , linestyle='.')
+            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]], [pos_average - pos_std_dev, pos_average - pos_std_dev],
+            #          linestyle='--', color='black')  # linesyle='-')
+            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]],
+            #          [pos_average + 3 * pos_std_dev, pos_average + 3 * pos_std_dev], linestyle='--',
+            #          color='black')  # , linestyle='.')
+            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]],
+            #          [pos_average - 3 * pos_std_dev, pos_average - 3 * pos_std_dev], linestyle='--',
+            #          color='black')  # linesyle='-')
+            #
+            # plt.ylim(top=pos_average + 4 * pos_std_dev)  # adjust the top leaving bottom unchanged
+            # plt.ylim(bottom=pos_average - 4 * pos_std_dev)  # adjust the bottom leaving top unchanged
+            #
+            # plt.show()
 
             # Legend setup
             plt.legend()
@@ -152,6 +179,41 @@ class DiagnosticPlot(object):
             plt.savefig(png_name)
         else:
             plt.show()
+
+    @staticmethod
+    def plot_center_regular(axis, vec_pixels, vec_y, title):
+        axis.plot(vec_pixels, vec_y, linestyle='None', marker='.', color='red',
+                  label=title)
+
+        plt.legend()
+
+    @staticmethod
+    def plot_center_sigma(axis, vec_pixels, vec_y, title, n_sigma):
+        # average and standard deviation
+        pos_average = np.mean(vec_y)
+        pos_std_dev = np.std(vec_y)
+        title += f': {pos_average:.5f} +/- {pos_std_dev:.5f}'
+
+        axis.plot(vec_pixels, vec_y, linestyle='None', marker='.', color='red',
+                  label=title)
+
+        if n_sigma < 1:
+            return
+
+        # plot lines for 1-sigma, n-sigma and limit on Y
+        for sigma in [1, n_sigma]:
+            axis.plot([vec_pixels[0], vec_pixels[-1]],
+                      [pos_average - sigma * pos_std_dev, pos_average - sigma * pos_std_dev],
+                      linestyle='--', color='black')
+            axis.plot([vec_pixels[0], vec_pixels[-1]],
+                      [pos_average + sigma * pos_std_dev, pos_average + sigma * pos_std_dev],
+                      linestyle='--', color='black')
+        top = pos_average + (n_sigma + 2) * pos_std_dev
+        bottom = pos_average - (n_sigma + 2) * pos_std_dev
+        axis.set_ylim(bottom, top)  # adjust the bottom/top leaving bottom unchanged
+        axis.set_xlim(vec_pixels[0] - 1, vec_pixels[-1] + 1)  # adjust the bottom/top leaving bottom unchanged
+
+        plt.legend()
 
 
 def get_peak_centers(diamond_ws,
@@ -270,38 +332,6 @@ def observe_peak_centers(diamond_ws,
     return vec_pid, peak_pos_vec
 
 
-def test_main_old():
-    """Test main for prototyping
-    """
-    # Inputs
-    diamond_file = 'VULCAN_164960_matrix.nxs'
-    peak_pos = 1.076
-    peak_range = 1.00, 1.15
-    bank_id = 3
-
-    # Load data
-    diamond_ws = Load(Filename=diamond_file, OutputWorkspace='VULCAN_164960_matrix')
-
-    # dictionary for bank
-    bank_pixel_dict = {1: (0, 3234), 2: (3234, 6468), 3: (6468, 24900)}
-
-    # workflow
-    spec_range = bank_pixel_dict[bank_id]
-
-    x0, y0 = observe_peak_centers(diamond_ws, spec_range, peak_pos, peak_range, 'max')
-    x1, y1 = observe_peak_centers(diamond_ws, spec_range, peak_pos, peak_range, 'com')
-    x2, y2 = get_peak_centers(diamond_ws, spec_range, peak_pos, peak_range, 'bank1_peak1')
-
-    plt.plot(x0, y0, linestyle='None', marker='+', color='blue', label='max Y')
-    plt.plot(x1, y1, linestyle='None', marker='x', color='red', label='c.o.m')
-    print(f'{x2[0]}, {x2[-1]}')
-    plt.plot(x2, y2, linestyle='None', marker='.', color='black', label='Gaussian')
-    plt.legend()
-    plt.show()
-
-    return
-
-
 def test_main():
     """Test main for prototyping
     """
@@ -309,7 +339,6 @@ def test_main():
     diamond_file = 'VULCAN_164960_matrix.nxs'
     peak_pos = 1.076
     peak_range = 1.00, 1.15
-    bank_id = 3
 
     # Load data
     diamond_ws = Load(Filename=diamond_file, OutputWorkspace='VULCAN_164960_matrix')
@@ -320,11 +349,11 @@ def test_main():
     # workflow
 
     # Init diagnostic instance
-    bank_id = 1
-    spec_range = bank_pixel_dict[bank_id]
-    diagnostic_bank1_peak1 = DiagnosticData(diamond_ws, np.arange(spec_range[0], spec_range[1]),
-                                            peak_pos, peak_range, f'bank{bank_id}_peak1')
-    diagnostic_bank1_peak1.find_peaks_centers()
+    # bank_id = 1
+    # spec_range = bank_pixel_dict[bank_id]
+    # diagnostic_bank1_peak1 = DiagnosticData(diamond_ws, np.arange(spec_range[0], spec_range[1]),
+    #                                         peak_pos, peak_range, f'bank{bank_id}_peak1')
+    # diagnostic_bank1_peak1.find_peaks_centers()
 
     bank_id = 3
     spec_range = bank_pixel_dict[bank_id]
@@ -333,10 +362,10 @@ def test_main():
     diagnostic_bank1_peak3.find_peaks_centers()
 
     # Plot
-    diagnostic_plot = DiagnosticPlot(2, 1)
-    diagnostic_plot.set_cell(0, 0, diagnostic_bank1_peak1, 'Bank 1, Peak 1.076')
-    diagnostic_plot.set_cell(1, 0, diagnostic_bank1_peak3, 'Bank 3, Peak 1.076')
-    diagnostic_plot.plot('fit', None)
+    diagnostic_plot = DiagnosticPlot(1, 1)
+    # diagnostic_plot.set_cell(0, 0, diagnostic_bank1_peak1, 'Bank 1, Peak 1.076')
+    diagnostic_plot.set_cell(0, 0, diagnostic_bank1_peak3, 'Bank 3, Peak 1.076')
+    diagnostic_plot.plot('fit', None, relative_position=False)
 
     return
 

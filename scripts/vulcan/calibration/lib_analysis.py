@@ -1,6 +1,6 @@
 # Zoo of methods that are develooped for analyze the calibration
-from mantid.simpleapi import AlignDetectors, FitPeaks
-from mantid.simpleapi import DiffractionFocussing, Rebin, ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed
+from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, DiffractionFocussing, Rebin,
+                              ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed)
 from mantid.simpleapi import mtd
 import numpy as np
 
@@ -10,7 +10,6 @@ class FindDiamondPeaks(object):
     def __init(self):
 
         self._diamond_ws_name = None
-
 
     def find_peak(self, peak_name, exp_pos, d_min, d_max, start_ws_index, end_ws_index):
 
@@ -23,8 +22,6 @@ class FindDiamondPeaks(object):
         # do statistics on fit result (average, standard deviation)
 
         # ...
-
-        pass
 
     def fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index, suffix):
 
@@ -200,39 +197,6 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     return event_ws_name
 
 
-def reduced_powder_data(ipts_number, run_number, calib_file_name, event_ws_name='vulcan_diamond',
-                        focus_ws_name='vulcan_diamond_3bank'):
-    """
-    reduced: aligned detector and diffraction focus, powder data
-    :param ipts_number:
-    :param run_number:
-    :return:
-    """
-    raw_nxs_file_name = '/SNS/VULCAN/IPTS-{}/nexus/VULCAN_{}.nxs.h5'.format(ipts_number, run_number)
-    Load(Filename=raw_nxs_file_name, OutputWorkspace=event_ws_name)
-
-    # load data file
-    LoadDiffCal(InputWorkspace=event_ws_name,
-                Filename=calib_file_name, WorkspaceName='vulcan')
-
-    AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
-                   CalibrationWorkspace='vulcan_cal')
-
-    DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
-                         GroupingWorkspace='vulcan_group')
-
-    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.5,-0.0003,3')
-
-    ConvertToMatrixWorkspace(InputWorkspace='vulcan_diamond', OutputWorkspace=focus_ws_name)
-
-    EditInstrumentGeometry(Workspace='vulcan_diamond_3bank', PrimaryFlightPath=42, SpectrumIDs='1-3', L2='2,2,2',
-                           Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
-                           InstrumentName='vulcan_3bank')
-
-    return
-
-
-
 def get_masked_ws_indexes(mask_ws):
     """
     get the workspace indexes that are masked
@@ -248,45 +212,3 @@ def get_masked_ws_indexes(mask_ws):
             masked_list.append(iws)
 
     return masked_list
-
-
-# TODO NOTE: Clean... This is very confusing with the same method in mantid_helper
-# def load_calibration_file(ref_ws_name, calib_file_name, calib_ws_base_name=None):
-#     """
-#     load calibration file
-#     :param ref_ws_name:
-#     :param calib_file_name:
-#     :param calib_ws_base_name:
-#     :return:
-#     """
-#     if calib_ws_base_name is None:
-#         calib_ws_base_name = 'vulcan'
-# 
-#     # load data file
-#     r = LoadDiffCal(InputWorkspace=ref_ws_name,
-#                 Filename=calib_file_name, WorkspaceName=calib_ws_base_name)
-# 
-#     calib_ws_name = '{}_cal'.format(calib_ws_base_name)
-#     mask_ws_name = '{}_mask'.format(calib_ws_base_name)
-#     group_ws_name = '{}_group'.format(calib_ws_base_name)
-# 
-#     return calib_ws_name, mask_ws_name, group_ws_name
-
-
-
-def load_raw_nexus(file_name=None, ipts=None, run_number=None, output_ws_name=None):
-    """ Reduced: aligned detector and diffraction focus, powder data
-    :param file_name:
-    :param ipts:
-    :param run_number:
-    :return:
-    """
-    if file_name is None:
-        file_name = '/SNS/VULCAN/IPTS-{}/nexus/VULCAN_{}.nxs.h5'.format(ipts, run_number)
-
-    if output_ws_name is None:
-        output_ws_name = 'vulcan_diamond'
-
-    Load(Filename=file_name, OutputWorkspace=output_ws_name)
-
-    return output_ws_name
