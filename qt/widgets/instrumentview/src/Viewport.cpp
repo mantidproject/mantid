@@ -501,6 +501,9 @@ void Viewport::loadFromProject(const std::string &lines) {
 }
 
 std::string Viewport::saveToProject() const {
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output (via "Save Shapes to table" in the instrument viewer draw tab).
+  // Modify with great caution.
   API::TSVSerialiser tsv;
   tsv.writeLine("Translation") << m_xTrans << m_yTrans;
   tsv.writeLine("Zoom") << m_zoomFactor;

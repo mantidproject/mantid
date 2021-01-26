@@ -497,6 +497,9 @@ std::string Projection3D::saveToProject() const {
 void Projection3D::saveShapesToTableWorkspace() {
   m_maskShapes.saveToTableWorkspace();
 
+  // WARNING: Q1DWeighted heavily depends on the format of this function's
+  // output.
+  // Modify with great caution.
   std::shared_ptr<Mantid::API::ITableWorkspace> table =
       AnalysisDataService::Instance()
           .retrieveWS<typename Mantid::API::ITableWorkspace>(
