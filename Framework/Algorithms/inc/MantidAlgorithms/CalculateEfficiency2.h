@@ -78,10 +78,11 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-
   bool processGroups() override;
 
-  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr &);
+  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr &,
+                                                double startProgress = 0.0,
+                                                double stepProgress = 1.0);
 
   /// Sum all detectors, excluding monitors and masked detectors
   SummedResults sumUnmaskedAndDeadPixels(const API::MatrixWorkspace &workspace);

@@ -131,8 +131,10 @@ void CalculateEfficiency2::exec() {
   progress(1.0, "Done!");
 }
 
-API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(
-    MatrixWorkspace_sptr &inputWorkspace) {
+API::MatrixWorkspace_sptr
+CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr &inputWorkspace,
+                                          double startProgress,
+                                          double stepProgress) {
 
   // create the output workspace from the input
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
@@ -147,26 +149,26 @@ API::MatrixWorkspace_sptr CalculateEfficiency2::calculateEfficiency(
   // Loop over spectra and sum all the counts to get normalization
   // Skip monitors and masked detectors
   // returns tuple with (sum, err, npixels)
-  progress(0.1, "Computing the counts.");
+  progress(startProgress + 0.1 * endProgress, "Computing the counts.");
   auto counts = sumUnmaskedAndDeadPixels(*outputWS);
   if (counts.nPixels == 0) {
     throw std::runtime_error("No pixels being used for calculation");
   }
 
-  progress(0.3, "Normalising the detectors.");
+  progress(startProgress + 0.3 * endProgress, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
 
-  progress(0.5, "Applying bad pixel threshold.");
+  progress(startProgress + 0.5 * endProgress, "Applying bad pixel threshold.");
   applyBadPixelThreshold(*outputWS, m_minThreshold, m_maxThreshold);
 
   // do it again only using the pixels that are within the threshold
-  progress(0.7, "Computing the counts.");
+  progress(startProgress + 0.7 * endProgress, "Computing the counts.");
   counts = sumUnmaskedAndDeadPixels(*outputWS);
   if (counts.nPixels == 0) {
     throw std::runtime_error("All pixels are outside of the threshold values");
   }
 
-  progress(0.9, "Normalising the detectors.");
+  progress(startProgress + 0.9 * endProgress, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
 
   return outputWS;
@@ -193,10 +195,13 @@ bool CalculateEfficiency2::processGroups() {
     return true;
   } else {
     auto outputGroup = std::make_shared<WorkspaceGroup>();
-    for (auto entryNo = 0; entryNo < inputWS->getNumberOfEntries(); entryNo++) {
+    auto nEntries = inputWS->getNumberOfEntries();
+    auto stepProgress = 1.0 / nEntries;
+      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
       auto entryWS = std::static_pointer_cast<API::MatrixWorkspace>(
           inputWS->getItem(entryNo));
-      auto outputWS = calculateEfficiency(entryWS);
+      auto startProgress = static_cast<double>(entryNo) / nEntries;
+      auto outputWS = calculateEfficiency(entryWS, startProgress, stepProgress);
       outputGroup->addWorkspace(outputWS);
     }
     std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
