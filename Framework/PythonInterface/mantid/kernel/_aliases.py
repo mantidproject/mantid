@@ -40,6 +40,9 @@ def lazy_instance_access(cls):
             # the singleton at first access
             return cls.__getattribute__(cls.Instance(), item)
 
+        def __bool__(self):
+            return True
+
         def __len__(self):
             return cls.__getattribute__(cls.Instance(), "__len__")()
 
