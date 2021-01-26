@@ -88,7 +88,9 @@ class DiagnosticPlot(object):
         self._matrix[(row, column)] = diagnostic_data
         self._title[(row, column)] = title
 
-    def plot(self, center_find_method, png_name: Union[None, str], relative_position=True):
+    def plot(self, center_find_method, png_name: Union[None, str],\
+             relative_position: bool = False,
+             unit_y_in_sigma: bool = True):
         """Plot
 
         Parameters
@@ -138,7 +140,10 @@ class DiagnosticPlot(object):
             plot_index = self._num_rows * 200 + self._num_cols * 10 + (index + 2)
             print(f'subplot index = {plot_index}')
             ax_i = fig.add_subplot(plot_index)
-            self.plot_center_sigma(ax_i, valid_spec_vec, valid_center_vec, self._title[(row, column)], n_sigma=3)
+            self.plot_center_sigma(ax_i, valid_spec_vec, valid_center_vec, self._title[(row, column)],
+                                   n_sigma=3,
+                                   unit_y_sigma=unit_y_in_sigma,
+                                   exp_peak_pos=None)
 
         # Save or show
         if png_name:
@@ -154,11 +159,43 @@ class DiagnosticPlot(object):
         plt.legend()
 
     @staticmethod
-    def plot_center_sigma(axis, vec_pixels, vec_y, title, n_sigma):
+    def plot_center_sigma(axis, vec_pixels, vec_y, title, n_sigma, unit_y_sigma=False, exp_peak_pos=None):
+        """Plot peak center considering standard deviations
+
+        Equation (1):   (obs-exp) / uncertainty. Then the values on the y-axis are +/- the number of sigma
+
+        Parameters
+        ----------
+        axis: pyplot.axis
+            figure axis
+        vec_pixels: numpy.ndarray
+            vector of pixel IDS (workspace indexes)
+        vec_y: numpy.ndarray
+            vector of Y
+        title: str
+            line label
+        n_sigma: int
+            number of sigma to plot out
+        unit_y_sigma: bool
+            if True, then use equation (1) above.  Otherwise, plot absolute peak position
+        exp_peak_pos: float, None
+            If center_on_1 is True, then expected peak position is required; Default is mean of Y
+
+        Returns
+        -------
+
+        """
         # average and standard deviation
         pos_average = np.mean(vec_y)
         pos_std_dev = np.std(vec_y)
         title += f': {pos_average:.5f} +/- {pos_std_dev:.5f}'
+
+        # center on 1?
+        if unit_y_sigma:
+            # default as the mean value of vec Y
+            if exp_peak_pos is None:
+                exp_peak_pos = pos_average
+            vec_y = (vec_y - exp_peak_pos) / pos_std_dev
 
         axis.plot(vec_pixels, vec_y, linestyle='None', marker='.', color='red',
                   label=title)
@@ -168,14 +205,26 @@ class DiagnosticPlot(object):
 
         # plot lines for 1-sigma, n-sigma and limit on Y
         for sigma in [1, n_sigma]:
+            if unit_y_sigma:
+                neg_sigma_line = -sigma
+                pos_sigma_line = sigma
+            else:
+                neg_sigma_line = pos_average - sigma * pos_std_dev
+                pos_sigma_line = pos_average + sigma * pos_std_dev
             axis.plot([vec_pixels[0], vec_pixels[-1]],
-                      [pos_average - sigma * pos_std_dev, pos_average - sigma * pos_std_dev],
+                      [neg_sigma_line, neg_sigma_line],  # pos_average - sigma * pos_std_dev],
                       linestyle='--', color='black')
             axis.plot([vec_pixels[0], vec_pixels[-1]],
-                      [pos_average + sigma * pos_std_dev, pos_average + sigma * pos_std_dev],
+                      [pos_sigma_line, pos_sigma_line],  # pos_average + sigma * pos_std_dev],
                       linestyle='--', color='black')
-        top = pos_average + (n_sigma + 2) * pos_std_dev
-        bottom = pos_average - (n_sigma + 2) * pos_std_dev
+
+        # image range
+        if sigma:
+            top = 2 + n_sigma
+            bottom = -2 - n_sigma
+        else:
+            top = pos_average + (n_sigma + 2) * pos_std_dev
+            bottom = pos_average - (n_sigma + 2) * pos_std_dev
         axis.set_ylim(bottom, top)  # adjust the bottom/top leaving bottom unchanged
         axis.set_xlim(vec_pixels[0] - 1, vec_pixels[-1] + 1)  # adjust the bottom/top leaving bottom unchanged
 
