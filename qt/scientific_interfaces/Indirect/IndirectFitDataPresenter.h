@@ -27,7 +27,8 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view);
+  IndirectFitDataPresenter(IIndirectFittingModel *model,
+                           IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -79,8 +80,9 @@ signals:
   void updateAvailableFitTypes();
 
 protected:
-  IndirectFitDataPresenter(IndirectFittingModel *model, IIndirectFitDataView *view,
-                           std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  IndirectFitDataPresenter(
+      IIndirectFittingModel *model, IIndirectFitDataView *view,
+      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
@@ -102,7 +104,7 @@ private:
   virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  IndirectFittingModel *m_model;
+  IIndirectFittingModel *m_model;
   IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };
