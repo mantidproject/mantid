@@ -276,10 +276,10 @@ class AdvancedSetupScript(BaseScriptElement):
 
             # Optimization options
             self.cache_dir = BaseScriptElement.getStringElement(
-                instrument_dom, 'cache_directory', default=AdvancedSetupScript.cache_dir)
+                instrument_dom, 'cache_directory', default=self.__class__.cache_dir)
 
             tempbool = BaseScriptElement.getStringElement(
-                instrument_dom, "clean_cache", default=str(int(AdvancedSetupScript.clean_cache)))
+                instrument_dom, "clean_cache", default=str(int(self.__class__.clean_cache)))
             self.clean_cache = bool(int(tempbool))
 
     def reset(self):
