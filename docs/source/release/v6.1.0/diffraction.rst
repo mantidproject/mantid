@@ -12,6 +12,7 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 - New algorithm :ref:`RebinRagged <algm-RebinRagged>` which can rebin a workspace with different binning parameters for each spectrum
+- New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 
 Engineering Diffraction
 -----------------------
