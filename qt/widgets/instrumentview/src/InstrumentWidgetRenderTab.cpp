@@ -635,6 +635,7 @@ void InstrumentWidgetRenderTab::resetView() {
   // just recreate the surface from scratch
   m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
   m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+  m_instrWidget->getSurface()->freezeRotation(m_freezeRotation->isChecked());
 }
 
 /**
