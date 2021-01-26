@@ -426,6 +426,29 @@ class SliceViewerTest(unittest.TestCase):
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
 
+    def test_clear_observer_peaks_presenter_not_none(self):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._peaks_presenter = mock.MagicMock()
+
+        presenter.clear_observer()
+
+        presenter._peaks_presenter.clear_observer.assert_called_once()
+
+    def test_clear_observer_peaks_presenter_is_none(self):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._peaks_presenter = None
+
+        # Will raise exception if misbehaving.
+        presenter.clear_observer()
+
 
 if __name__ == '__main__':
     unittest.main()
