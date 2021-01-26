@@ -274,6 +274,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if self.getProperty("SampleFormula").value == '':
                 issues['SampleFormula'] = "A sample formula must be provided."
 
+        # The provided cache directory does not exist
+        if self.getProperty('CacheDir').value:
+            cache_dir = Path(self.getProperty('CacheDir').value).absolute()
+            if cache_dir.exist() is False:
+                issues['CacheDir'] = f'Directory {cache_dir} does not exist'
+
+        # We cannot clear the cache if property "CacheDir" has not been set
+        if self.getProperty('CleanFile').value and not bool(self.getProperty('CacheDir').value):
+            issues['CleanFile'] = f'Property "CacheDir" must be set in order to clean the cache'
+
         return issues
 
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
