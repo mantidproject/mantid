@@ -174,7 +174,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
         # populate Optimization options
-        self._content.cache_dir_edit.setText(state.cachedir)
+        self._content.cache_dir_edit.setText(state.cache_dir)
         self._content.clean_cache_box.setChecked(state.clean_cache)
 
         return
