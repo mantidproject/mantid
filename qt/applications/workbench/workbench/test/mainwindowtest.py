@@ -12,14 +12,15 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 import unittest
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock, MagicMock, call
 
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import FrameworkManager
 
-from qtpy.QtWidgets import QMessageBox
+from qtpy.QtWidgets import QMessageBox, QAction, QApplication
 
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 
 @start_qapplication
 class MainWindowTest(unittest.TestCase):
@@ -72,6 +73,43 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.clear_all_memory_action()
 
         mock_fm_instance.clear.assert_not_called()
+
+    def test_menus_exist(self):
+        self.main_window.menuBar().addMenu = MagicMock()
+        expected_calls = [call("&File"), call("&View"), call("&Interfaces"), call("&Help")]
+
+        self.main_window.create_menus()
+
+        self.main_window.menuBar().addMenu.assert_has_calls(expected_calls, any_order=False)
+
+    @patch('workbench.app.mainwindow.add_actions')
+    def test_menus_are_correct(self, mock_add_actions):
+        from workbench.app.mainwindow import MainWindow
+        main_window = MainWindow()
+        main_window.editor = Mock()
+        expected_file_menu_items = ['Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu, 'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None, 'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit']
+        expected_view_menu_items = ['Restore Default Layout', None]  # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
+        expected_help_menu_items = ['Mantid Help', 'Mantid Concepts', 'Algorithm Descriptions', None, 'Mantid Homepage', 'Mantid Forum', None, 'About Mantid Workbench']
+
+        convert_actions_to_texts = lambda menu_actions: \
+            [a.text() if isinstance(a, QAction) else a if not a else type(a) for a in menu_actions]
+
+        main_window.create_menus()
+        main_window.create_actions()
+        main_window.populate_menus()
+
+        actual_file_menu_items = convert_actions_to_texts(main_window.file_menu_actions)
+        actual_view_menu_items = convert_actions_to_texts(main_window.view_menu_actions)
+        actual_help_menu_items = convert_actions_to_texts(main_window.help_menu_actions)
+
+        self.assertEqual(expected_file_menu_items, actual_file_menu_items)
+        self.assertEqual(expected_view_menu_items, actual_view_menu_items)
+        self.assertEqual(expected_help_menu_items, actual_help_menu_items)
+        mock_add_actions.add_actions.assert_has_calls([
+            call(main_window.file_menu, main_window.file_menu_actions),
+            call(main_window.view_menu, main_window.view_menu_actions),
+            call(main_window.help_menu, main_window.help_menu_actions),
+        ])
 
 
 if __name__ == '__main__':
