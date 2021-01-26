@@ -13,6 +13,7 @@ from enum import Enum
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+from ..adsobsever import SliceViewerADSObserver
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
@@ -39,7 +40,7 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
         return item
 
 
-class PeaksViewerPresenter():
+class PeaksViewerPresenter:
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
@@ -140,7 +141,7 @@ class PeaksViewerPresenter():
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
 
 
-class PeaksViewerCollectionPresenter():
+class PeaksViewerCollectionPresenter:
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
 
@@ -161,6 +162,16 @@ class PeaksViewerCollectionPresenter():
         """
         self._view = view
         self._child_presenters = []
+        self._ads_observer = None
+        self.setup_ads_observer()
+
+    def setup_ads_observer(self):
+        if self._ads_observer is None:
+            self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
+                                                        self.delete_handle)
+
+    def clear_observer(self):
+        self._ads_observer = None
 
     @property
     def view(self):
@@ -172,6 +183,7 @@ class PeaksViewerCollectionPresenter():
         :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
+        self.setup_ads_observer()
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
@@ -209,6 +221,7 @@ class PeaksViewerCollectionPresenter():
         Remove the named workspace from display. No op if no workspace can be found with that name
         :param name: The name of a workspace
         """
+        self.setup_ads_observer()
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
@@ -231,6 +244,7 @@ class PeaksViewerCollectionPresenter():
 
     def notify(self, event):
         """Dispatch notification to all subpresenters"""
+        self.setup_ads_observer()
         for presenter in self._child_presenters:
             presenter.notify(event)
 
@@ -254,3 +268,22 @@ class PeaksViewerCollectionPresenter():
             fg_color = '#000000'
 
         return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)
+
+    def replace_handle(self, ws_name, _):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+            self.append_peaksworkspace(ws_name)
+
+    def delete_handle(self, ws_name):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+
+    def clear_handle(self):
+        # This is likely handled at a higher level anyway, because SliceViewer closes given a clear all on the ADS.
+        for ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+
+    def rename_handle(self, ws_name, new_name):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+            self.append_peaksworkspace(new_name)
