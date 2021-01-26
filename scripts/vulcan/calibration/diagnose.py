@@ -88,8 +88,7 @@ class DiagnosticPlot(object):
         self._matrix[(row, column)] = diagnostic_data
         self._title[(row, column)] = title
 
-    def plot(self, center_find_method, png_name: Union[None, str],\
-             relative_position: bool = False,
+    def plot(self, center_find_method, png_name: Union[None, str], relative_position: bool = False,
              unit_y_in_sigma: bool = True):
         """Plot
 
@@ -99,9 +98,10 @@ class DiagnosticPlot(object):
             method how peak centers are found: max or fit
         png_name: None, str
             if specified, then save the figure rather than plot
-
-        Returns
-        -------
+        relative_position: bool
+            whether to plot peak position relative to expected positions
+        unit_y_in_sigma: bool
+            If True, the statistic figure will have Y unit as 1 (sigma).
 
         """
         # Clear canvas
