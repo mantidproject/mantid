@@ -6,6 +6,11 @@ import numpy as np
 
 
 class FindDiamondPeaks(object):
+    """
+    Class to handle diamond peak positions for calibration diagnosis.
+
+    It is supposed to replace diagnose.get_peak_centers()
+    """
 
     def __init(self):
 
@@ -14,16 +19,16 @@ class FindDiamondPeaks(object):
     def find_peak(self, peak_name, exp_pos, d_min, d_max, start_ws_index, end_ws_index):
 
         # fit peaks
-        peak_pos_ws_name = self.fit_peaks(exp_pos, d_min, d_max)
+        peak_pos_ws_name = self._fit_peaks(exp_pos, d_min, d_max, start_ws_index, end_ws_index, peak_name)
 
         # separate good fit/bad fit/no fit
-        self.analyze_fitted_peaks(peak_pos_ws_name)
+        self._analyze_fitted_peaks(peak_pos_ws_name, start_ws_index, end_ws_index)
 
         # do statistics on fit result (average, standard deviation)
 
         # ...
 
-    def fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index, suffix):
+    def _fit_peaks(self, expected_peak_pos, min_d, max_d, start_ws_index, end_ws_index, suffix):
 
         # base workspace name (output)
         tag = f'{self._diamond_ws_name}_{suffix}'
@@ -33,7 +38,7 @@ class FindDiamondPeaks(object):
 
         # Default to Gaussian and Linear background
         FitPeaks(InputWorkspace=self._diamond_ws_name,
-                 OutputWorkspace=out_peak_pos_ws,
+                 OutputWorkspace=peak_pos_ws_name,
                  StartWorkspaceIndex=int(start_ws_index),
                  StopWorkspaceIndex=int(end_ws_index),
                  PeakCenters=f'{expected_peak_pos}',
@@ -44,9 +49,9 @@ class FindDiamondPeaks(object):
 
         return peak_pos_ws_name
 
-    def analyze_fitted_peaks(self, peak_pos_ws_name: str,
-                             start_ws_index: int,
-                             end_ws_index: int):
+    def _analyze_fitted_peaks(self, peak_pos_ws_name: str,
+                              start_ws_index: int,
+                              end_ws_index: int):
         # . -1 for data is zero;
         # -2 for maximum value is smaller than specified minimum value.and
         # -3 for non-converged fitting.
@@ -82,19 +87,29 @@ class FindDiamondPeaks(object):
         # Check again with counts
         diamond_ws = mtd[self._diamond_ws_name]
         counts_vec = diamond_ws.extractY().sum(axis=1)[start_ws_index:end_ws_index]
+        # sanity check
+        assert counts_vec.shape == peak_center_vec.shape
+
+        # Check zero cunts
+        assert np.max(counts_vec[peak_center_vec - (-1)]) < 1E-6
 
     def get_peak_height_max_y(self):
         # Get peak height as maximum Y value by removing background
 
+        bkgd_param_ws_name = 'allmultiple'
         FindPeakBackground(InputWorkspace='VULCAN_164960_matrix', WorkspaceIndex=10000, FitWindow='1,1.2',
-                           OutputWorkspace='allmultiple')
+                           OutputWorkspace=bkgd_param_ws_name)
 
-        ws_index = cell(0, 0)
-        peak_min_index = cell(0, 1)
-        peak_max_index = cell(0, 2)
-        bgkd_0 = cell(0, 3)
-        bkgd_1 = cell(0, 4)
-        bkgd_2 = cell(0, 5)
+        bkgd_param_ws = mtd[bkgd_param_ws_name]
+        ws_index = bkgd_param_ws.cell(0, 0)
+        peak_min_index = bkgd_param_ws.cell(0, 1)
+        peak_max_index = bkgd_param_ws.cell(0, 2)
+        bgkd_0 = bkgd_param_ws.cell(0, 3)
+        bkgd_1 = bkgd_param_ws.cell(0, 4)
+        bkgd_2 = bkgd_param_ws.cell(0, 5)
+
+        print(f'Spectrum (index) {ws_index} from d-index = {peak_min_index}, {peak_max_index}: '
+              f'B = {bgkd_0} + {bkgd_1} * d + {bkgd_2} * d**2')
 
 
 def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):

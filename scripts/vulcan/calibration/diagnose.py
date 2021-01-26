@@ -140,40 +140,6 @@ class DiagnosticPlot(object):
             ax_i = fig.add_subplot(plot_index)
             self.plot_center_sigma(ax_i, valid_spec_vec, valid_center_vec, self._title[(row, column)], n_sigma=3)
 
-            # ax_i.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
-            #           label=self._title[(row, column)])
-            #
-            # # Get the good fitting ones only
-            # valid_centers_vec = peak_center_vec[peak_center_vec > 0]
-            # valid_spec_vec = ws_index_vec[peak_center_vec > 0]
-            #
-            # pos_average = np.mean(valid_centers_vec)
-            # pos_std_dev = np.std(valid_centers_vec)
-            # print(f'Positon = {pos_average} +/- Standard deviation = {pos_std_dev}')
-            #
-            # plt.plot(valid_spec_vec, valid_centers_vec, linestyle='None', marker='.', color='blue', label='good fit')
-            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]], [pos_average + pos_std_dev, pos_average + pos_std_dev],
-            #          linestyle='--', color='black')  # , linestyle='.')
-            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]], [pos_average - pos_std_dev, pos_average - pos_std_dev],
-            #          linestyle='--', color='black')  # linesyle='-')
-            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]],
-            #          [pos_average + 3 * pos_std_dev, pos_average + 3 * pos_std_dev], linestyle='--',
-            #          color='black')  # , linestyle='.')
-            # plt.plot([valid_spec_vec[0], valid_spec_vec[-1]],
-            #          [pos_average - 3 * pos_std_dev, pos_average - 3 * pos_std_dev], linestyle='--',
-            #          color='black')  # linesyle='-')
-            #
-            # plt.ylim(top=pos_average + 4 * pos_std_dev)  # adjust the top leaving bottom unchanged
-            # plt.ylim(bottom=pos_average - 4 * pos_std_dev)  # adjust the bottom leaving top unchanged
-            #
-            # plt.show()
-
-            # Legend setup
-            plt.legend()
-
-            # plt.plot(vec_pixels, vec_peak_pos, linestyle='None', marker='.', color='red',
-            #          label=self._title[(row, column)])
-
         # Save or show
         if png_name:
             plt.savefig(png_name)
