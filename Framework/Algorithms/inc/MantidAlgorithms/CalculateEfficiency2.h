@@ -91,6 +91,7 @@ private:
                                  const SummedResults &results);
 
   API::MatrixWorkspace_sptr mergeGroup(API::WorkspaceGroup_sptr &);
+  void validateGroupInput();
 
   /// Minimum efficiency. Pixels with lower efficiency will be masked
   double m_minThreshold{0.};

@@ -95,13 +95,29 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
 
   // Files from time-of-flight instruments must be integrated in Lambda before
   // using this algorithm
+
   Workspace_const_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
   MatrixWorkspace_const_sptr inputWS =
-      std::static_pointer_cast<const MatrixWorkspace>(ws1);
-  getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (inputWS->blocksize() > 1)
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws1);
+  if (inputWS == nullptr) {
+    WorkspaceGroup_const_sptr inputGroup =
+        std::dynamic_pointer_cast<const WorkspaceGroup>(ws1);
+    if (inputGroup != nullptr) {
+      for (auto entryNo = 0; entryNo < inputGroup->getNumberOfEntries();
+           entryNo++) {
+        auto const entry = std::static_pointer_cast<const MatrixWorkspace>(
+            inputGroup->getItem(entryNo));
+        if (entry->blocksize() > 1) {
+          result[PropertyNames::INPUT_WORKSPACE] =
+              "Input workspace must have only one bin";
+          break;
+        }
+      }
+    }
+  } else if (inputWS->blocksize() > 1) {
     result[PropertyNames::INPUT_WORKSPACE] =
         "Input workspace must have only one bin";
+  }
 
   if (getPropertyValue(PropertyNames::OUTPUT_WORKSPACE) == "") {
     result[PropertyNames::OUTPUT_WORKSPACE] =
@@ -149,29 +165,41 @@ CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr &inputWorkspace,
   // Loop over spectra and sum all the counts to get normalization
   // Skip monitors and masked detectors
   // returns tuple with (sum, err, npixels)
-  progress(startProgress + 0.1 * endProgress, "Computing the counts.");
+  progress(startProgress + 0.1 * stepProgress, "Computing the counts.");
   auto counts = sumUnmaskedAndDeadPixels(*outputWS);
   if (counts.nPixels == 0) {
     throw std::runtime_error("No pixels being used for calculation");
   }
 
-  progress(startProgress + 0.3 * endProgress, "Normalising the detectors.");
+  progress(startProgress + 0.3 * stepProgress, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
 
-  progress(startProgress + 0.5 * endProgress, "Applying bad pixel threshold.");
+  progress(startProgress + 0.5 * stepProgress, "Applying bad pixel threshold.");
   applyBadPixelThreshold(*outputWS, m_minThreshold, m_maxThreshold);
 
   // do it again only using the pixels that are within the threshold
-  progress(startProgress + 0.7 * endProgress, "Computing the counts.");
+  progress(startProgress + 0.7 * stepProgress, "Computing the counts.");
   counts = sumUnmaskedAndDeadPixels(*outputWS);
   if (counts.nPixels == 0) {
     throw std::runtime_error("All pixels are outside of the threshold values");
   }
 
-  progress(startProgress + 0.9 * endProgress, "Normalising the detectors.");
+  progress(startProgress + 0.9 * stepProgress, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
 
   return outputWS;
+}
+
+/**
+ * Explicitly calls validateInputs and throws runtime error in case
+ * of issues in the input properties.
+ *
+ */
+void CalculateEfficiency2::validateGroupInput() {
+  auto results = validateInputs();
+  for (auto result : results) {
+    throw std::runtime_error(result.second);
+  }
 }
 
 /**
@@ -180,8 +208,10 @@ CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr &inputWorkspace,
  * @return A boolean true if execution was sucessful, false otherwise
  */
 bool CalculateEfficiency2::processGroups() {
-  m_minThreshold = getProperty("MinThreshold");
-  m_maxThreshold = getProperty("MaxThreshold");
+
+  // if run as a script, validateInputs will not be triggered
+  // for the processGroups, so properties will be validated manually
+  validateGroupInput();
 
   Workspace_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
   WorkspaceGroup_sptr inputWS = std::static_pointer_cast<WorkspaceGroup>(ws1);
