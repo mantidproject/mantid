@@ -74,6 +74,6 @@ Bugfixes
 - Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
 - Fixed a bug where the fit action (Fit > Fit) in the fit browser wasn't disabled if all the functions were individually removed.
 - Fixed a bug in sliveviewer that wasn't transforming ellipsoid axes of integrated peaks correctly when axes swapped.
-
+- Fixed a bug in sliceviewer that wasn't updating the extent and axes limits when orthogonal axes were transposed.
 
 :ref:`Release 6.0.0 <v6.0.0>`
