@@ -227,7 +227,7 @@ bool CalculateEfficiency2::processGroups() {
     auto outputGroup = std::make_shared<WorkspaceGroup>();
     auto nEntries = inputWS->getNumberOfEntries();
     auto stepProgress = 1.0 / nEntries;
-      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+    for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
       auto entryWS = std::static_pointer_cast<API::MatrixWorkspace>(
           inputWS->getItem(entryNo));
       auto startProgress = static_cast<double>(entryNo) / nEntries;
