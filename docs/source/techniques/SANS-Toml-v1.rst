@@ -1025,6 +1025,39 @@ QRESOL[/ON][/OFF]
   [q_resolution]
     enabled = true  # Or false
 
+
+QRESOL[/H1=x][/H2=wx][/W1=x][/W2=x]
+-----------------------------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    h1 = x
+    h2 = x
+    w1 = x
+    w2 = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/H1=16.0
+    QRESOL/H2=8.0
+    QRESOL/W1=16.0
+    QRESOL/W2=8.0
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    h1 = 16.0
+    h2 = 8.0
+    w1 = 16.0
+    w2 = 8.0
+
 SAMPLE/OFFSET x
 ---------------
 

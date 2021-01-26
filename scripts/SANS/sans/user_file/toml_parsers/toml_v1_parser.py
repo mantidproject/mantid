@@ -299,6 +299,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.moderator_file = self.get_val("moderator_file", q_dict)
         self.convert_to_q.q_resolution_a1 = self.get_val("source_aperture", q_dict)
         self.convert_to_q.q_resolution_delta_r = self.get_val("delta_r", q_dict)
+        self.convert_to_q.q_resolution_h1 = self.get_val("h1", q_dict)
+        self.convert_to_q.q_resolution_h2 = self.get_val("h2", q_dict)
+        self.convert_to_q.q_resolution_w1 = self.get_val("w1", q_dict)
+        self.convert_to_q.q_resolution_w2 = self.get_val("w2", q_dict)
 
     def _parse_gravity(self):
         self.convert_to_q.use_gravity = self.get_val(["gravity", "enabled"], default=True)
