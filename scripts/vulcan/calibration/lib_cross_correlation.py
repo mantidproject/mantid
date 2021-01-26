@@ -8,17 +8,20 @@ from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
 from mantid.simpleapi import Rebin
 from mantid.simpleapi import GeneratePythonScript
 import bisect
-import numpy
+import numpy as np
 import mantid_helper
 from lib_analysis import report_masked_pixels
 from typing import Dict, Tuple, Any, Union
+import h5py
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
 
-def check_and_correct_difc(ws_name, cal_table_name, mask_ws_name):
-    """
-    check and correct DIFCs if necessary: it is for 3 banks
+def verify_vulcan_difc(ws_name: str,
+                       cal_table_name: str,
+                       mask_ws_name: str,
+                       correct: bool):
+    """Verify and possibly correct DIFCs if necessary
 
     Renamed from check_correct_difcs_3banks
 
@@ -26,61 +29,46 @@ def check_and_correct_difc(ws_name, cal_table_name, mask_ws_name):
     :param cal_table_name: name of Calibration workspace (a TableWorkspace)
     :return:
     """
-    # Generate a dictionary for each bank
-    bank_info_dict = {'west': (0, 3234),
-                      'east': (3234, 6468),
-                      'high angle': (6468, 24900)}
-
     # Define const parameters
     diamond_event_ws = mtd[ws_name]
     mask_ws = mtd[mask_ws_name]
     cal_table_ws = mtd[cal_table_name]
     difc_col_index = 1
 
+    # Generate a dictionary for each bank
+    # FIXME - this is for VULCAN (but not X)
+    bank_info_dict = {'west': (0, 3234),
+                      'east': (3234, 6468),
+                      'high angle': (6468, 24900)}
+    if diamond_event_ws.getNumberHistograms() != 24900:
+        raise NotImplementedError('Bank information dictionary is out of date')
+
+    # Init file
+    difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'r')
+
     for bank_name in ['west', 'east', 'high angle']:
         # pixel range
         pid_0, pid_f = bank_info_dict[bank_name]
         num_pixels = pid_f - pid_0
         # calculate DIFC from IDF and get calibrated DIFC
-        bank_idf_vec = numpy.ndarray(shape=(num_pixels,), dtype='float')
-        bank_cal_vec = numpy.ndarray(shape=(num_pixels,), dtype='float')
+        bank_idf_vec = np.ndarray(shape=(num_pixels,), dtype='float')
+        bank_cal_vec = np.ndarray(shape=(num_pixels,), dtype='float')
         for irow in range(pid_0, pid_f):
             bank_idf_vec[irow - pid_0] = calculate_difc(diamond_event_ws, irow)
             bank_cal_vec[irow - pid_0] = cal_table_ws.cell(irow, difc_col_index)
+        # compare and make report
+        difc_diff_vec = bank_cal_vec - bank_idf_vec
+        bank_entry = difc_h5.create_group(bank_name)
+        # data
+        h5_data = np.array([bank_cal_vec, bank_idf_vec, difc_diff_vec]).transpose()
+        bank_entry.create_dataset('DIFC_cal_raw_diff', h5_data)
+
         # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
-        correct_difc_to_default(bank_idf_vec, bank_cal_vec, cal_table_ws, pid_0, 20, 1, mask_ws)
+        if correct:
+            correct_difc_to_default(bank_idf_vec, bank_cal_vec, cal_table_ws, pid_0, 20, 1, mask_ws)
 
-    #
-    # # west_spec_vec = numpy.arange(0, 3234)
-    # west_idf_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    # west_cal_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    # for irow in range(0, 3234):
-    #     west_idf_vec[irow] = calculate_difc(diamond_event_ws, irow)
-    #     west_cal_vec[irow] = cal_table_ws.cell(irow, difc_col_index)
-    # # CreateWorkspace(DataX=west_spec_vec, DataY=west_difc_vec, NSpec=1, OutputWorkspace='west_idf_difc')
-    #
-    # # east bank
-    # # east_spec_vec = numpy.arange(3234, 6468)
-    # east_idf_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    # east_cal_vec = numpy.ndarray(shape=(3234,), dtype='float')
-    # for irow in range(3234, 6468):
-    #     east_idf_vec[irow - 3234] = calculate_difc(diamond_event_ws, irow)
-    #     east_cal_vec[irow - 3234] = cal_table_ws.cell(irow, difc_col_index)
-    #
-    # # high angle bank
-    # # highangle_spec_vec = numpy.arange(6468, 24900)
-    # highangle_idf_vec = numpy.ndarray(shape=(24900 - 6468,), dtype='float')
-    # highangle_cal_vec = numpy.ndarray(shape=(24900 - 6468,), dtype='float')
-    # for irow in range(6468, 24900):
-    #     highangle_idf_vec[irow - 6468] = calculate_difc(diamond_event_ws, irow)
-    #     highangle_cal_vec[irow - 6468] = cal_table_ws.cell(irow, difc_col_index)
-
-    # # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
-    # correct_difc_to_default(west_idf_vec, west_cal_vec, cal_table_ws, 0, 20, 1, mask_ws)
-    # correct_difc_to_default(east_idf_vec, east_cal_vec, cal_table_ws, 3234, 20, 1, mask_ws)
-    # correct_difc_to_default(highangle_idf_vec, highangle_idf_vec, cal_table_ws, 6468, 20, 1, mask_ws)
-
-    return
+    # Close file
+    difc_h5.close()
 
 
 def calculate_difc(ws, ws_index):
@@ -346,7 +334,8 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
     # difference between IDF and calibrated DIFC
     difc_diff_vec = idf_difc_vec - cal_difc_vec
 
-    print(f'[INFO] DIFC tolerance = {difc_tol}: Calibrated DIFC with difference to engineered DIFC with beyond tolerance will be reset.')
+    print(f'[INFO] DIFC tolerance = {difc_tol}:'
+          f'Calibrated DIFC with difference to engineered DIFC with beyond tolerance will be reset.')
     print(f'[INFO] DIFC number = {cal_difc_vec.shape}')
 
     # go over all the DIFCs
@@ -364,8 +353,8 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
                        ''.format(index, index + row_shift, difc_diff_vec[index], mask_sig)
         # END-IF
     # END-FOR
-    print (f'[INFO] Number of corrected DIFC = {num_corrected} out of {cal_difc_vec.shape}')
-    print (message)
+    print(f'[INFO] Number of corrected DIFC = {num_corrected} out of {cal_difc_vec.shape}')
+    print(message)
 
     return
 
@@ -772,7 +761,7 @@ def analyze_instrument_cross_correlation_quality(cross_correlation_ws_dict, getd
 
         # create the workspaces
         cost_list = evaluate_bank_cross_correlate_quality(cc_diamond_ws_name, fit_result_table_name)
-        cost_array = numpy.array(cost_list).transpose()
+        cost_array = np.array(cost_list).transpose()
         cost_ws_name_i = '{0}_cost'.format(bank_name)
         CreateWorkspace(DataX=cost_array[0], DataY=cost_array[1], NSpec=1,
                         OutputWorkspace=cost_ws_name_i)
@@ -823,7 +812,7 @@ def evaluate_bank_cross_correlate_quality(data_ws_name, fit_param_table_name):
         vec_x = vec_x[i_min:i_max]
         obs_y = data_ws.readY(ws_index)[i_min:i_max]
         model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
-        cost = numpy.sqrt(numpy.sum((model_y - obs_y)**2))/len(obs_y)
+        cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
 
         cost_list.append([ws_index, cost])
     # END-FOR
@@ -882,7 +871,7 @@ def calculate_model(data_ws_name, ws_index, fit_param_table_name) -> str:
         vec_x = vec_x[i_min:i_max]
         obs_y = data_ws.readY(ws_index)[i_min:i_max]
         model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
-        cost = numpy.sqrt(numpy.sum((model_y - obs_y)**2))/len(obs_y)
+        cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
 
         print('[INFO] Cost x = {0}'.format(cost))
 
@@ -913,7 +902,7 @@ def gaussian(vec_dspace, peak_intensity, peak_center, sigma, a0, a1):
     """
 
     # function_type = gaussian:
-    vec_y = peak_intensity * numpy.exp(
+    vec_y = peak_intensity * np.exp(
         -0.5 * (vec_dspace - peak_center) ** 2 / sigma ** 2) + a0 + a1 * vec_dspace
 
     return vec_y

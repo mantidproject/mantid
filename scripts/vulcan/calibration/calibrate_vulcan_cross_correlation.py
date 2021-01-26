@@ -1,6 +1,6 @@
 from mantid_helper import mtd_convert_units, load_nexus, load_calibration_file
 from lib_cross_correlation import (cross_correlate_vulcan_data,
-                                   check_and_correct_difc,
+                                   verify_vulcan_difc,
                                    save_calibration, merge_detector_calibration)
 from lib_analysis import (align_focus_event_ws)
 import os
@@ -130,9 +130,9 @@ def calibrate_vulcan(diamond_nexus: str,
     # TODO FIXME - Disabled for testing purpose
     if False:
         # check the difference between DIFCs
-        check_and_correct_difc(ws_name=diamond_ws_name,
-                               cal_table_name=calib_ws_name,
-                               mask_ws_name=str(mask_ws))
+        verify_vulcan_difc(ws_name=diamond_ws_name,
+                           cal_table_name=calib_ws_name,
+                           mask_ws_name=str(mask_ws))
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
@@ -169,9 +169,9 @@ def test_main_report_calibration():
                     'high angle': (6468, None)}
 
     # Report offsets
-    check_and_correct_difc(ws_name=diamond_count_ws,
-                           cal_table_name=str(calib_ws_tuple.OutputCalibrationWorkspace),
-                           mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace))
+    verify_vulcan_difc(ws_name=diamond_count_ws,
+                       cal_table_name=str(calib_ws_tuple.OutputCalibrationWorkspace),
+                       mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace))
 
     # Report masks
     from .lib_analysis import report_masked_pixels
