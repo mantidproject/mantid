@@ -116,17 +116,14 @@ class BaseWidget(QWidget):
         """
         pass
 
-    def dir_browse_dialog(self, title='Select Directory'):
-        """
-            Pop up a directory dialog box.
-            @param data_type: string used to filter the files
-            @param caption: string to use as title
-            @param multi: multiselection is enabled if True
+    def dir_browse_dialog(self, title: str = 'Select Directory') -> str:
+        r"""Pop up a directory dialog box.
+        @param title: string to use as dialog's title
+        @returns absolute path to directory
         """
         dirname = QFileDialog.getExistingDirectory(self, caption=title)
         if isinstance(dirname, tuple):
             dirname = dirname[0]
-
         return dirname
 
     def data_browse_dialog(self, data_type=None, title=None, multi=False):
