@@ -4,7 +4,7 @@ import math
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, ConvertDiffCal, SaveDiffCal
 from mantid.simpleapi import RenameWorkspace, Plus, CreateWorkspace
-from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, LoadDiffCal
+from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
 from mantid.simpleapi import Rebin
 from mantid.simpleapi import GeneratePythonScript
 import bisect
