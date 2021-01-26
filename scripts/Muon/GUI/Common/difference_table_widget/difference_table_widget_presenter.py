@@ -53,7 +53,6 @@ class DifferenceTablePresenter(object):
         changed_item_text = self._view.get_table_item_text(row, col)
         diff_name = self._view.get_table_item_text(row, 0)
         update_model = True
-        print("waa", diff_name,changed_item_text, row, col )
         if diff_columns[col] == 'diff_name' and not self.validate_diff_name(changed_item_text):
             update_model = False
         if diff_columns[col] == 'group_1':

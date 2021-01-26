@@ -63,7 +63,6 @@ class PlottingCanvasModel(object):
         """
         workspace_plot_information = []
         for workspace_name, index in zip(input_workspace_names, input_indices):
-            print("boo", workspace_name)
             axis = self._get_workspace_plot_axis(workspace_name)
             if not self._is_guess_workspace(workspace_name):
                 workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]

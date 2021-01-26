@@ -125,7 +125,7 @@ class MuonGroupPairContext(object):
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
     def __getitem__(self, name):
-        for item in self._groups + self.pairs + self.diffs:
+        for item in self.all_groups_and_pairs:
             if item.name == name:
                 return item
         return None
@@ -145,6 +145,10 @@ class MuonGroupPairContext(object):
     @property
     def diffs(self):
         return self._diffs
+
+    @property
+    def all_groups_and_pairs(self):
+        return self.groups + self.pairs + self.diffs
 
     @property
     def selected_pairs(self):
@@ -312,7 +316,7 @@ class MuonGroupPairContext(object):
             self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
-        for item in self._groups + self.pairs + self.diffs:
+        for item in self.all_groups_and_pairs:
             if item.name == name:
                 return False
         return True
@@ -346,7 +350,7 @@ class MuonGroupPairContext(object):
         return workspace_list
 
     def get_equivalent_group_pair(self, workspace_name):
-        for item in self._groups + self._pairs + self._diffs:
+        for item in self.all_groups_and_pairs:
             equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
             if equivalent_name:
                 return equivalent_name
@@ -389,7 +393,7 @@ class MuonGroupPairContext(object):
             self._selected_pairs.remove(str(pair))
 
     def remove_workspace_by_name(self, workspace_name):
-        for item in self.groups + self.pairs + self.diffs:
+        for item in self.all_groups_and_pairs:
             item.remove_workspace_by_name(workspace_name)
 
     def get_unormalisised_workspace_list(self, workspace_list):
@@ -402,7 +406,7 @@ class MuonGroupPairContext(object):
                 return unnormalised_workspace
 
     def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
-        for group_pair in self.groups + self.pairs +self.diffs:
+        for group_pair in self.all_groups_and_pairs:
             run = group_pair.get_run_for_workspace(workspace_name)
             if(run):
                 return group_pair.name, str(run)

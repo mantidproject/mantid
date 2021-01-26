@@ -55,7 +55,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # Create workspace information named tuple from input list
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
                                                                             self._options_presenter.get_errors())
-        print("hi", workspace_plot_info)
         if not hold_on:
             # Remove data which is currently plotted and not in the new workspace_plot_info
             workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
@@ -65,7 +64,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # Add workspace info which is currently not plotted
         workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
                                  not in self._view.plotted_workspace_information]
-        print("moo", workspace_info_to_add)
 
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         # check if to force autoscale

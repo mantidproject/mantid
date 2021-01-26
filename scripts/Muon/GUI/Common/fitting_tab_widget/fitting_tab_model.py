@@ -692,7 +692,6 @@ class FittingTabModel(object):
                         self.context.group_pair_context[group_or_pair].periods)
                     workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                  not self.fitting_options["fit_to_raw"])]
-        print("moo", workspace_names)
         return workspace_names
 
     def workspace_list_sorter(self, workspace_name):
