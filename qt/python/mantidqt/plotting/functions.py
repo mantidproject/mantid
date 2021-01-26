@@ -56,15 +56,13 @@ def can_overplot():
     compatible.
     """
     compatible = False
-    msg = "Unable to overplot on currently active plot type.\n" \
-          "Please select another plot."
     fig = current_figure_or_none()
     if fig is not None:
         figtype = figure_type(fig)
         if figtype in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
-            compatible, msg = True, None
+            compatible = True
 
-    return compatible, msg
+    return compatible
 
 
 def current_figure_or_none():
