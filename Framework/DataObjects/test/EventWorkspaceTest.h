@@ -164,14 +164,6 @@ public:
   }
 
   void
-  test_that_getNumberBins_returns_the_number_of_bins_in_the_first_histogram_by_default() {
-    ew = createEventWorkspace(true, false);
-    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
-
-    TS_ASSERT_EQUALS(ew->getNumberBins(), 2);
-  }
-
-  void
   test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_EventWorkspace() {
     ew = createEventWorkspace(true, false);
     ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));

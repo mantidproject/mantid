@@ -109,7 +109,6 @@ public:
   void
   test_that_getNumberBins_and_getMaxNumberBins_returns_one_for_a_WorkspaceSingleValue() {
     WorkspaceSingleValue ws;
-    TS_ASSERT_EQUALS(ws.getNumberBins(), 1);
     TS_ASSERT_EQUALS(ws.getNumberBins(0), 1);
     TS_ASSERT_EQUALS(ws.getMaxNumberBins(), 1);
   }

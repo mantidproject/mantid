@@ -64,9 +64,6 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
-// Overloads for getNumberBins function which has 1 optional argument
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_getNumberBinsOverloads,
-                                       MatrixWorkspace::getNumberBins, 0, 1)
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
@@ -197,6 +194,18 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
              "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
+}
+
+/**
+ * Adds a deprecation warning to the getNumberBins call to warn about using
+ * blocksize instead
+ * @param self A reference to the calling object
+ * @returns The blocksize()
+ */
+std::size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
+  return self.blocksize();
 }
 
 /**
@@ -342,10 +351,12 @@ void export_MatrixWorkspace() {
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberBins", &MatrixWorkspace::getNumberBins,
-           MatrixWorkspace_getNumberBinsOverloads(
-               (arg("self"), arg("index")), "Returns the number of bins for a "
-                                            "given histogram index. Default is "
-                                            "the zeroth histogram index."))
+           (arg("self"), arg("index")),
+           "Returns the number of bins for a given histogram index.")
+      .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
+           "Returns size of the Y data array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
+           "instead)")
       .def("getMaxNumberBins", &MatrixWorkspace::getMaxNumberBins, arg("self"),
            "Returns the maximum number of bins in a workspace (works on ragged "
            "data).")
