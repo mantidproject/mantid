@@ -55,6 +55,8 @@ public:
   /// disabled() signal.
   virtual void onDisabled() { emit disabled(); }
 
+  virtual void freezeRotation(bool) {}
+
   /// Returns true if a surface using this controller can show
   /// a context menu on right-click
   bool canShowContextMenu() const { return m_canShowContextMenu; }
@@ -82,6 +84,7 @@ public:
   void mouseMoveEvent(QMouseEvent * /*unused*/) override;
   void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
   void wheelEvent(QWheelEvent * /*unused*/) override;
+  void freezeRotation(bool) override;
 
 signals:
   /// Init zooming. x and y is the zoom starting point on the screen.
@@ -103,6 +106,7 @@ signals:
 
 private:
   bool m_isButtonPressed;
+  bool m_isRotationFrozen = false;
 };
 
 /**

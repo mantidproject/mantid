@@ -117,6 +117,7 @@ private: // members
   QCheckBox *m_flipCheckBox;
   QPushButton *m_peakOverlaysButton;
   QCheckBox *m_autoscaling;
+  QCheckBox *m_freezeRotation;
 
   QActionGroup *m_surfaceTypeActionGroup;
   QAction *m_full3D;

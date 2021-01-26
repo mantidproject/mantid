@@ -220,6 +220,7 @@ public slots:
 
   void setViewDirection(const QString & /*input*/);
   void pickBackgroundColor();
+  void freezeRotation(bool);
   void saveImage(QString filename);
   void setInfoText(const QString & /*text*/);
   void set3DAxesState(bool /*on*/);

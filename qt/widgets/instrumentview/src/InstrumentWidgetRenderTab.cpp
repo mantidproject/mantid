@@ -324,10 +324,17 @@ QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
   mAxisCombo->addItem("Y-");
 
   axisViewLayout->addWidget(mAxisCombo);
+
+  axisViewLayout->addWidget(new QLabel("Freeze rotation"));
+  m_freezeRotation = new QCheckBox();
+  axisViewLayout->addWidget(m_freezeRotation);
   m_resetViewFrame->setLayout(axisViewLayout);
 
   connect(mAxisCombo, SIGNAL(currentIndexChanged(const QString &)),
           m_instrWidget, SLOT(setViewDirection(const QString &)));
+
+  connect(m_freezeRotation, SIGNAL(toggled(bool)), m_instrWidget,
+          SLOT(freezeRotation(bool)));
 
   return m_resetViewFrame;
 }
