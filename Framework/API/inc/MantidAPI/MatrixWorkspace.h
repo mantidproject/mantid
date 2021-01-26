@@ -136,7 +136,7 @@ public:
   /// spectra.
   virtual std::size_t blocksize() const = 0;
   /// Returns the number of bins for a given histogram index.
-  virtual std::size_t getNumberBins(const std::size_t &index) const = 0;
+  virtual std::size_t getNumberBins(const std::size_t &index = 0) const = 0;
   /// Returns the maximum number of bins in a workspace (works on ragged data).
   virtual std::size_t getMaxNumberBins() const = 0;
   /// Returns the number of histograms in the workspace

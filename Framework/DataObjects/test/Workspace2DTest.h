@@ -95,6 +95,14 @@ public:
   }
 
   void
+  test_that_getNumberBins_returns_the_number_of_bins_in_the_first_histogram_by_default() {
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+
+    TS_ASSERT_EQUALS(cloned->getNumberBins(), 0);
+  }
+
+  void
   test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_Workspace2D() {
     Workspace2D_sptr cloned(ws->clone());
     cloned->setHistogram(0, Points(0), Counts(0));

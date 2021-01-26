@@ -64,6 +64,9 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
+// Overloads for getNumberBins function which has 1 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_getNumberBinsOverloads,
+                                       MatrixWorkspace::getNumberBins, 0, 1)
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
@@ -339,8 +342,10 @@ void export_MatrixWorkspace() {
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberBins", &MatrixWorkspace::getNumberBins,
-           (arg("self"), arg("index")),
-           "Returns the number of bins for a given histogram index.")
+           MatrixWorkspace_getNumberBinsOverloads(
+               (arg("self"), arg("index")), "Returns the number of bins for a "
+                                            "given histogram index. Default is "
+                                            "the zeroth histogram index."))
       .def("getMaxNumberBins", &MatrixWorkspace::getMaxNumberBins, arg("self"),
            "Returns the maximum number of bins in a workspace (works on ragged "
            "data).")
