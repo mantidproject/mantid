@@ -77,7 +77,10 @@ class CurvesTabWidgetView(QWidget):
         return self.select_axes_combo_box.currentText()
 
     def get_current_curve_name(self):
-        return self.select_curve_list.currentItem().text()
+        if self.select_curve_list.count() > 0:
+            return self.select_curve_list.currentItem().text()
+        else:
+            return None
 
     def get_selected_curves_names(self):
         return [item.text() for item in self.select_curve_list.selectedItems()]

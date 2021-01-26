@@ -99,7 +99,10 @@ class CurvesTabWidgetPresenter:
     def get_current_curve(self):
         """Get selected Line2D or ErrorbarContainer object"""
         name = self.view.get_current_curve_name()
-        return self.curve_names_dict[name]
+        if name:
+            return self.curve_names_dict[name]
+        else:
+            return None
 
     def get_selected_curves(self):
         """Get a list of selected Line2D or ErrorbarContainer objects"""
@@ -278,10 +281,12 @@ class CurvesTabWidgetPresenter:
         self.set_apply_to_all_buttons_enabled()
 
         # Then update the rest of the view to reflect the selected combo items.
-        curve_props = CurveProperties.from_curve(self.get_current_curve())
-        self.view.update_fields(curve_props)
-        self.set_errorbars_tab_enabled()
-        self.current_view_properties = curve_props
+        curve = self.get_current_curve()
+        if curve:
+            curve_props = CurveProperties.from_curve(self.get_current_curve())
+            self.view.update_fields(curve_props)
+            self.set_errorbars_tab_enabled()
+            self.current_view_properties = curve_props
 
     # Private methods
     def _generate_curve_name(self, curve, label):
