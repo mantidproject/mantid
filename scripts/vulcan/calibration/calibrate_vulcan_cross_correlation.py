@@ -1,7 +1,7 @@
-from mantid_helper import mtd_convert_units, load_nexus, load_grouping_file, load_calibration_file
+from mantid_helper import mtd_convert_units, load_nexus, load_calibration_file
 from lib_cross_correlation import (cross_correlate_vulcan_data,
                                    check_and_correct_difc,
-                                   save_calibration, export_difc, merge_detector_calibration)
+                                   save_calibration, merge_detector_calibration)
 from lib_analysis import (align_focus_event_ws)
 import os
 from mantid.api import AnalysisDataService as mtd
@@ -169,14 +169,15 @@ def test_main_report_calibration():
                     'high angle': (6468, None)}
 
     # Report offsets
-    check_and_correct_difc(ws_name=diamond_ws_name,
-                           cal_table_name=calib_ws_name,
-                           mask_ws_name=str(mask_ws))
+    check_and_correct_difc(ws_name=diamond_count_ws,
+                           cal_table_name=str(calib_ws_tuple.OutputCalibrationWorkspace),
+                           mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace))
 
     # Report masks
     from .lib_analysis import report_masked_pixels
     for bank in ['west', 'east', 'high angle']:
-        report_masked_pixels(diamond_count_ws, mask_ws, pixels_range[bank][0], pixels_range[bank][1])
+        report_masked_pixels(diamond_count_ws, calib_ws_tuple.OutputMaskWorkspace,
+                             pixels_range[bank][0], pixels_range[bank][1])
 
 
 def test_main_apply_calibration():
@@ -194,6 +195,7 @@ def test_main_apply_calibration():
     calib_mask_ws = calib_tuple.OutputMaskWorkspace
     # print(f'Type: {type(calib_tuple)}')
     # print(f'Function: {dir(calib_tuple)}')
+    print(f'[ERROR] Mask {calib_mask_ws} is not used!')
 
     ws_names = mtd.getObjectNames()
     for ws_name in ws_names:

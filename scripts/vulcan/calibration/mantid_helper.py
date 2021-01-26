@@ -199,4 +199,3 @@ def workspace_does_exist(workspace_name):
     does_exist = ADS.doesExist(workspace_name)
 
     return does_exist
-

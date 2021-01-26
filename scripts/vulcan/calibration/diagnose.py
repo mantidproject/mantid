@@ -1,6 +1,6 @@
 # Script to diagnose the calibration result
 from mantid.simpleapi import mtd
-from mantid.simpleapi import Load, CreateGroupingWorkspace, FitPeaks
+from mantid.simpleapi import Load, FitPeaks
 import numpy as np
 from typing import Tuple, Any, Union
 from matplotlib import pyplot as plt

@@ -2,11 +2,11 @@
 import os
 import math
 from mantid.api import AnalysisDataService as mtd
-from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, SaveCalFile, ConvertDiffCal, SaveDiffCal
-from mantid.simpleapi import RenameWorkspace, Plus, CreateWorkspace, Load, CreateGroupingWorkspace
+from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, ConvertDiffCal, SaveDiffCal
+from mantid.simpleapi import RenameWorkspace, Plus, CreateWorkspace
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, LoadDiffCal
-from mantid.simpleapi import Load, LoadDiffCal, AlignDetectors, DiffractionFocussing, Rebin, EditInstrumentGeometry
-from mantid.simpleapi import ConvertToMatrixWorkspace, CrossCorrelate, GetDetectorOffsets, GeneratePythonScript
+from mantid.simpleapi import Rebin
+from mantid.simpleapi import GeneratePythonScript
 import bisect
 import numpy
 import mantid_helper
@@ -74,7 +74,6 @@ def check_and_correct_difc(ws_name, cal_table_name, mask_ws_name):
     # for irow in range(6468, 24900):
     #     highangle_idf_vec[irow - 6468] = calculate_difc(diamond_event_ws, irow)
     #     highangle_cal_vec[irow - 6468] = cal_table_ws.cell(irow, difc_col_index)
-
 
     # # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
     # correct_difc_to_default(west_idf_vec, west_cal_vec, cal_table_ws, 0, 20, 1, mask_ws)
@@ -233,7 +232,7 @@ def cross_correlate_calibrate(ws_name: str,
     on a specified subset of spectra in a diamond workspace
 
     This is the CORE workflow algorithm for cross-correlation calibration
-    
+
     Parameters
     ----------
     ws_name
@@ -540,9 +539,6 @@ def merge_detector_calibration(offset_ws_dict: Dict,
             # Apply masks from mask bit to instrument (this is a pure Mantid issue)
             apply_masks(out_mask_ws_name)
     # END-FOR
-
-    if len(offset_ws_dict.keys()) < num_banks:
-        out_offset_ws = None
 
     return calib_ws_name, out_offset_ws_name, out_mask_ws_name
 

@@ -143,7 +143,8 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
     # Check input
     # get the number of events per spectrum
     events_number_vec = data_workspace.extractY().sum(axis=1).flatten()
-    assert mask_ws.getNumberHistograms() == events_number_vec.shape[0], f'Number of histograms does not match.  counts vector shape = {events_number_vec.shape}'
+    assert mask_ws.getNumberHistograms() == events_number_vec.shape[0],\
+        f'Number of histograms does not match.  counts vector shape = {events_number_vec.shape}'
 
     # Set initial value for statistics
     num_masked = 0
@@ -186,7 +187,7 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     if calib_ws_name:
         AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                        CalibrationWorkspace=calib_ws_name)
-   
+
         matrix_ws_name = f'{event_ws_name}_matrix'
         Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
         ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
