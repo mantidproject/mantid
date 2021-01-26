@@ -420,7 +420,6 @@ void AbsorptionCorrections::validateSampleGeometryInputs(
     if (sampleInnerRadius >= sampleOuterRadius) {
       uiv.addErrorMessage(
           "SampleOuterRadius must be greater than SampleInnerRadius.");
-      uiv.setErrorLabel(m_uiForm.lbAnnSampleOuterRadius, false);
     }
 
   } else if (shape == "Cylinder") {
@@ -458,7 +457,6 @@ void AbsorptionCorrections::validateContainerGeometryInputs(
     double const sampleRadius = m_uiForm.spAnnSampleOuterRadius->value();
     if (canOuterRadius <= sampleRadius) {
       uiv.addErrorMessage("CanOuterRadius must be greater than SampleRadius.");
-      uiv.setErrorLabel(m_uiForm.lbCylCanOuterRadius, false);
     }
 
   } else if (shape == "Annulus") {
@@ -473,12 +471,10 @@ void AbsorptionCorrections::validateContainerGeometryInputs(
     if (canInnerRadius >= sampleInnerRadius) {
       uiv.addErrorMessage(
           "SampleInnerRadius must be greater than ContainerInnerRadius.");
-      uiv.setErrorLabel(m_uiForm.lbAnnSampleInnerRadius, false);
     }
     if (canOuterRadius <= sampleOuterRadius) {
       uiv.addErrorMessage(
           "ContainerOuterRadius must be greater than SampleOuterRadius.");
-      uiv.setErrorLabel(m_uiForm.lbAnnCanOuterRadius, false);
     }
   }
   if (hasZero) {

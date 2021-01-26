@@ -277,9 +277,6 @@ Workspace Input
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Use Container
-  If checked, allows you to input container geometries for use in the absorption corrections.
-
 Number Wavelengths
   The number of wavelength points for which a simulation is attempted.
 
@@ -303,6 +300,9 @@ Beam Width
 
 Shape Details
   Select the shape of the sample (see specific geometry options below). Alternatively, select 'Preset' to use the Sample and Container geometries defined on the input workspace.
+
+Use Container
+  If checked, allows you to input container geometries for use in the absorption corrections.
 
 Sample Details Method
   Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
