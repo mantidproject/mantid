@@ -25,6 +25,7 @@ class PluginWidget(QWidget):
 
         self.dockwidget = None
         self.main = main_window
+        self.settings_read = False
 
 # ----------------- Plugin API --------------------
 
@@ -35,9 +36,15 @@ class PluginWidget(QWidget):
         raise NotImplementedError()
 
     def readSettings(self, qsettings):
+        """Load user configuration"""
+        raise NotImplementedError()
+
+    def readSettingsIfNotDone(self, qsettings):
         """Called by the main window to ask the plugin to
         load user configuration"""
-        raise NotImplementedError()
+        if not self.settings_read:
+            self.readSettings(qsettings)
+            self.settings_read = True
 
     def writeSettings(self, qsettings):
         """Called by the main window to ask the plugin to
