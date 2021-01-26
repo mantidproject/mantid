@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-lines
 import os
-
+from pathlib import Path
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
-from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
-    IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
+from mantid.kernel import (
+    ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
+    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -215,8 +216,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
                              "'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
-        self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
-        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
+
+        # Optimization options
+        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
+        self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
+        self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
+        property_names = ('CacheDir', 'CleanCache')
+        [self.setPropertyGroup(name, 'Optimization') for name in property_names]
+
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         # absorption correction
