@@ -43,6 +43,10 @@
 		<parameter name="conjoin_sample_logs_fail_tolerances" type="string">
 			<value val="" />
 		</parameter>
+		<parameter name="chopper_window_opening">
+		<!-- Chopper opening window [degrees]-->
+			<value val="45.0"/>
+		</parameter>
 		<parameter name="DH1Z">
 		 <!-- The sample to first height motor position along Z [m]-->
  		 	<value val="1.135" />
