@@ -133,7 +133,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
         # Initialization for optimization options
-        self._content._cache_dir_browse.clicked.connect(self._cache_dir_browse)
+        self._content.cache_dir_browse.clicked.connect(self._cache_dir_browse)
 
         # Validated widgets
 
