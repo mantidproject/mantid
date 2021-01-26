@@ -111,6 +111,75 @@ class MainWindowTest(unittest.TestCase):
             call(main_window.help_menu, main_window.help_menu_actions),
         ])
 
+    def test_main_window_does_not_close_when_project_is_saving(self):
+        mock_event = Mock()
+        mock_project = Mock()
+        mock_project.is_saving = True
+        self.main_window.project = mock_project
+
+        self.main_window.closeEvent(mock_event)
+
+        mock_event.ignore.assert_called()
+        mock_project.inform_user_not_possible.assert_called()
+
+    def test_main_window_does_not_close_when_project_is_loading(self):
+        mock_event = Mock()
+        mock_project = Mock()
+        mock_project.is_loading = True
+        self.main_window.project = mock_project
+
+        self.main_window.closeEvent(mock_event)
+
+        mock_event.ignore.assert_called()
+        mock_project.inform_user_not_possible.assert_called()
+
+    def test_main_window_does_not_close_if_project_not_saved_and_user_cancels_project_save(self):
+        mock_event = Mock()
+        mock_project = Mock()
+        mock_project.saved = False
+        mock_project.offer_save = Mock(return_value=False)  # user cancels when save offered
+        self.main_window.project = mock_project
+
+        self.main_window.closeEvent(mock_event)
+
+        mock_project.offer_save.assert_called()
+        mock_event.ignore.assert_called()
+
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('workbench.app.mainwindow.QApplication')
+    @patch('matplotlib.pyplot.close')
+    def test_main_window_close_behavior_correct_when_workbench_able_to_be_closed(
+            self,
+            mock_plt_close,
+            mock_QApplication,
+            mock_ConfigService
+    ):
+        mock_event = Mock()
+        mock_project = Mock()
+        mock_project.is_saving, mock_project.is_loading, mock_project.saved = False, False, True
+        mock_editor = Mock()
+        mock_editor.app_closing = Mock(return_value=True)  # Editors can be closed
+        mock_project_recovery = Mock()
+        mock_project_recovery.stop_recovery_thread, mock_project_recovery.remove_current_pid_folder =\
+            Mock(), Mock()
+        self.main_window.editor = mock_editor
+        self.main_window.writeSettings = Mock()
+        self.main_window.project_recovery = mock_project_recovery
+        self.main_window.interface_manager = Mock()
+        self.main_window.writeSettings = Mock()
+        self.main_window.project = mock_project
+
+        self.main_window.closeEvent(mock_event)
+
+        mock_ConfigService.saveConfig.assert_called_with(mock_ConfigService.getUserFilename())
+        self.main_window.writeSettings.assert_called()
+        mock_plt_close.assert_called_with('all')
+        mock_QApplication.instance().closeAllWindows.assert_called()
+        self.main_window.project_recovery.assert_has_calls([call.stop_recovery_thread(), call.remove_current_pid_folder()])
+        self.assertTrue(self.main_window.project_recovery.closing_workbench)
+        self.main_window.interface_manager.closeHelpWindow.assert_called()
+        mock_event.accept.assert_called()
+
 
 if __name__ == '__main__':
     unittest.main()
