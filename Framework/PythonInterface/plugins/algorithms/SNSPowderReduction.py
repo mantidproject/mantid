@@ -275,10 +275,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 issues['SampleFormula'] = "A sample formula must be provided."
 
         # The provided cache directory does not exist
-        if self.getProperty('CacheDir').value:
-            cache_dir = Path(self.getProperty('CacheDir').value).absolute()
-            if cache_dir.exist() is False:
-                issues['CacheDir'] = f'Directory {cache_dir} does not exist'
+        cache_dir = self.getProperty('CacheDir').value  # absolute or relative path, as a string
+        if bool(cache_dir) and Path(cache_dir).exist() is False:
+            issues['CacheDir'] = f'Directory {cache_dir} does not exist'
 
         # We cannot clear the cache if property "CacheDir" has not been set
         if self.getProperty('CleanFile').value and not bool(self.getProperty('CacheDir').value):
@@ -317,6 +316,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._scaleFactor = self.getProperty("ScaleData").value
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
+        # Optimization options
+        self._cache_dir = self.getProperty("CacheDir").value
+        self._clean_cache = self.getProperty("CleanCache").value
+
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
         self._absMethod = self.getProperty("TypeOfCorrection").value
@@ -361,6 +364,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
         if self.COMPRESS_TOL_TOF < -0.:
             self.COMPRESS_TOL_TOF = 0.01
+
+        # Clean the cache directory if so requested
+        if self._clean_cache:
+            api.CleanFileCache(CacheDir=self._cache_dir, AgeInDays=0)
 
         # Process data
         # List stores the workspacename of all data workspaces that will be converted to d-spacing in the end.
@@ -787,7 +794,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          MaxChunkSize=self._chunks,
                                          FilterBadPulses=self._filterBadPulses,
                                          Characterizations=characterizations,
-                                         CacheDir=self.getProperty("CacheDir").value,
+                                         CacheDir=self._cache_dir,
                                          Params=self._binning,
                                          ResampleX=self._resampleX,
                                          Dspacing=self._bin_in_dspace,
