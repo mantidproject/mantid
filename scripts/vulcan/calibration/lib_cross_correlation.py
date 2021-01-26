@@ -6,7 +6,7 @@ from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, ConvertDiffCal,
 from mantid.simpleapi import RenameWorkspace, Plus, CreateWorkspace
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
 from mantid.simpleapi import Rebin
-from mantid.simpleapi import GeneratePythonScript
+from mantid.simpleapi import GeneratePythonScript, SaveNexusProcessed
 import bisect
 import numpy as np
 import mantid_helper
@@ -223,7 +223,8 @@ def cross_correlate_calibrate(ws_name: str,
 
     Parameters
     ----------
-    ws_name
+    ws_name: str
+        diamond workspace name
     peak_position: float
         reference peak position
     peak_min: float
@@ -300,6 +301,8 @@ def cross_correlate_calibrate(ws_name: str,
                            # FitEachPeakTwice=fit_twice,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
+        # TODO FIXME - may remove this save effort later
+        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
         raise run_err
@@ -308,7 +311,8 @@ def cross_correlate_calibrate(ws_name: str,
     # Do analysis to the calibration result
     # TODO - NIGHT - Make it better
     # it returns full set of spectra
-    print('[INFO] OffsetsWorkspace {}: spectra number = {}'.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
+    print('[INFO] OffsetsWorkspace {}: spectra number = {}'
+          ''.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
     report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
