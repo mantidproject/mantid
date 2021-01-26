@@ -74,6 +74,10 @@ class AdvancedSetupScript(BaseScriptElement):
 
     parnamelist = None
 
+    # class static variables for Optimization options
+    cache_dir = ''  # directory containing the cache files
+    clean_cache = False  # determines whether to delete all cache files within the cache directory
+
     def __init__(self, inst_name):
         """ Initialization
         """
