@@ -160,6 +160,34 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(1, mock_logger.information.call_count)
         self.assertEqual(4, mock_writer.writerow.call_count)
 
+    @patch(file_path + ".SaveFocusedXYE")
+    @patch(file_path + ".SaveGSS")
+    @patch(file_path + ".SaveNexus")
+    def test_last_path_updates_with_no_RB_number(self, nexus, gss, xye):
+        mocked_workspace = "mocked-workspace"
+        output_file = path.join(path_handling.get_output_path(), "Focus",
+                                "ENGINX_123_bank_North.nxs")
+
+        self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+                                mocked_workspace, None)
+
+        self.assertEqual(self.model._last_path, output_file)
+
+    @patch(file_path + ".SaveFocusedXYE")
+    @patch(file_path + ".SaveGSS")
+    @patch(file_path + ".SaveNexus")
+    def test_last_path_updates_with_RB_number(self, nexus, gss, xye):
+        mocked_workspace = "mocked-workspace"
+        rb_num = '2'
+        output_file = path.join(path_handling.get_output_path(), "User", rb_num, "Focus", "ENGINX_123_bank_North.nxs")
+
+        self.model._last_path_ws = 'ENGINX_123_bank_North.nxs'
+        self.model._save_output("ENGINX", "Path/To/ENGINX000123.whatever", "North",
+                                mocked_workspace, rb_num)
+
+        self.assertEqual(self.model._last_path, output_file)
+
 
 if __name__ == '__main__':
     unittest.main()

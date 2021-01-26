@@ -73,8 +73,6 @@ class FocusModel(object):
                 output_workspaces.append([output_workspace_name])
                 self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
-        if self._last_path and self._last_path_ws:
-            self._last_path = path.join(self._last_path, self._last_path_ws)
         # Plot the output
         if plot_output:
             for ws_names in output_workspaces:
@@ -145,6 +143,8 @@ class FocusModel(object):
             output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
             logger.notice(f"\n\nFocus files also saved to: \"{output_path}\"\n\n")
         self._last_path = output_path
+        if self._last_path and self._last_path_ws:
+            self._last_path = path.join(self._last_path, self._last_path_ws)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
