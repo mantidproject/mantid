@@ -42,7 +42,6 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     
     return fileName(full path), sha1
     """
-    log = Logger('GetCacheName')
 
     # fix up the workspace name
     prefix = wkspname.replace('__', '')
@@ -76,16 +75,11 @@ def _getCacheName(wkspname, cache_dir, abs_method):
         }.items()
     ]
 
-    log.notice(prefix)
-    log.notice("\t".join(property_string))
-    log.notice(cache_dir)
-
     cache_path, signature = mantid.simpleapi.CreateCacheFilename(
         Prefix=prefix,
         OtherProperties=property_string,
         CacheDir=cache_dir,
     )
-    log.notice(cache_path)
 
     return cache_path, signature
 
