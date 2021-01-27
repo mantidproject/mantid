@@ -3,8 +3,8 @@ import os
 import math
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, ConvertDiffCal, SaveDiffCal
-from mantid.simpleapi import RenameWorkspace, Plus, CreateWorkspace
-from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
+from mantid.simpleapi import Plus, CreateWorkspace
+from mantid.simpleapi import CloneWorkspace
 from mantid.simpleapi import Rebin
 from mantid.simpleapi import GeneratePythonScript, SaveNexusProcessed
 import bisect
@@ -603,7 +603,6 @@ def apply_masks(mask_ws):
     mask_bits = mask_ws.extractY().flatten()
     print(f'[DEBUG MASK] {mask_ws}: {len(np.where(mask_bits > 0.1)[0])}')
 
-
     # mask all detectors explicitly
     mask_ws_name = mask_ws.name()
     mask_ws.maskDetectors(WorkspaceIndexList=mask_wsindex_list)
@@ -733,7 +732,8 @@ def save_calibration(calib_ws_name: str,
     if os.path.exists(out_file_name):
         os.unlink(out_file_name)
 
-    print(f'[SAVING CAL] Mask {mask_ws_name} Y = {np.sum(mtd[mask_ws_name].extractY().flatten())} Masked = {mtd[mask_ws_name].getNumberMasked()}') 
+    print(f'[SAVING CAL] Mask {mask_ws_name} Y = {np.sum(mtd[mask_ws_name].extractY().flatten())} '
+          f'Masked = {mtd[mask_ws_name].getNumberMasked()}')
 
     # Save for Mantid diffraction calibration file
     SaveDiffCal(CalibrationWorkspace=calib_ws_name,
