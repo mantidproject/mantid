@@ -45,12 +45,18 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 Kernel::Logger g_log("Run");
 } // namespace
 
-Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {}
+Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {
+  m_goniometers.clear();
+  m_goniometers.push_back(std::make_unique<Geometry::Goniometer>());
+}
 
 Run::Run(const Run &other)
     : LogManager(other),
       m_goniometer(std::make_unique<Geometry::Goniometer>(*other.m_goniometer)),
-      m_histoBins(other.m_histoBins) {}
+      m_histoBins(other.m_histoBins) {
+
+  this->copyGoniometers(other);
+}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 Run::~Run() = default;
@@ -58,6 +64,7 @@ Run::~Run() = default;
 Run &Run::operator=(const Run &other) {
   LogManager::operator=(other);
   m_goniometer = std::make_unique<Geometry::Goniometer>(*other.m_goniometer);
+  copyGoniometers(other);
   m_histoBins = other.m_histoBins;
   return *this;
 }
@@ -77,6 +84,7 @@ std::shared_ptr<Run> Run::clone() {
   }
   clone->m_goniometer =
       std::make_unique<Geometry::Goniometer>(*this->m_goniometer);
+  clone->copyGoniometers(const_cast<Run &>(*this));
   clone->m_histoBins = this->m_histoBins;
   return clone;
 }
@@ -540,5 +548,15 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   }
 }
 
+//-----------------------------------------------------------------------------------------------
+/** Copy the goniometers from another
+ * @param other :: other workspace to copy    */
+void Run::copyGoniometers(const Run &other) {
+  m_goniometers.clear();
+  m_goniometers.reserve(other.m_goniometers.size());
+  for (const auto &goniometer : other.m_goniometers) {
+    m_goniometers.push_back(std::make_unique<Geometry::Goniometer>(*goniometer));
+  }
+}
 } // namespace API
 } // namespace Mantid
