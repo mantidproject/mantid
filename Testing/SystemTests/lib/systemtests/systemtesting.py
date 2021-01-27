@@ -1207,9 +1207,6 @@ class MantidFrameworkConfig:
         # Save path
         config['defaultsave.directory'] = self.__saveDir
 
-        # Do not show paraview dialog
-        config['paraview.ignore'] = "1"
-
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"
 

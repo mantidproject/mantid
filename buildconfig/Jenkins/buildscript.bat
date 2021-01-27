@@ -5,10 +5,9 @@ setlocal enableextensions enabledelayedexpansion
 :: Notes:
 ::
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
-:: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
+:: BUILD_THREADS should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 ::
-:: All nodes currently have PARAVIEW_DIR=5.3.0 and PARAVIEW_NEXT_DIR=5.4.0
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
 echo %sha1%
@@ -33,8 +32,6 @@ if !_grep_exe! == "" (
 )
 @echo Using grep: !_grep_exe!
 
-:: ParaView version
-set PARAVIEW_DIR=%PARAVIEW_DIR%-python3
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Pre-processing steps on the workspace itself
@@ -207,7 +204,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DParaView_DIR= -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -A %CM_ARCH% -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
