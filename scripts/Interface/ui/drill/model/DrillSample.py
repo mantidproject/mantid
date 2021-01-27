@@ -13,6 +13,11 @@ class DrillSample:
     """
     _parameters = None
 
+    """
+    Name of the output workspace.
+    """
+    _outputName = None
+
     def __init__(self):
         """
         Create an empty sample.
@@ -66,3 +71,21 @@ class DrillSample:
                 del self._parameters[name]
         else:
             self._parameters[name] = value
+
+    def setOutputName(self, name):
+        """
+        Set the name of the output.
+
+        Args:
+            name (str): name
+        """
+        self._outputName = name
+
+    def getOutputName(self):
+        """
+        Get the name of the output.
+
+        Returns:
+            str: name
+        """
+        return self._outputName

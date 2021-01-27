@@ -613,6 +613,7 @@ class DrillModel(QObject):
         # add the output workspace param
         if "OutputWorkspace" not in params:
             params["OutputWorkspace"] = "sample_" + str(sample + 1)
+        self.samples[sample].setOutputName(params["OutputWorkspace"])
         return params
 
     def process(self, elements):
@@ -653,10 +654,7 @@ class DrillModel(QObject):
         logger.information("Processing of sample {0} finished with sucess"
                            .format(name))
         self.processSuccess.emit(ref)
-        name = self.samples[ref].getParameter("OutputWorkspace")
-        if name is None:
-            name = "sample_" + str(ref + 1)
-        self.exportModel.run(name, ref + 1)
+        self.exportModel.run(self.samples[ref], ref + 1)
 
     def _onTaskError(self, ref, msg):
         """

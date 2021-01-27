@@ -119,7 +119,7 @@ class DrillExportModel:
         logger.error("Error while exporting sample {}.".format(sampleName))
         logger.error(msg)
 
-    def run(self, workspaceName, ref):
+    def run(self, sample, ref):
         """
         Run the export algorithms on a workspace. If the provided workspace is
         a groupworkspace, the export algorithms will be run on each member of
@@ -129,6 +129,8 @@ class DrillExportModel:
             workspaceName (str): name of the workspace
         """
         exportPath = config.getString("defaultsave.directory")
+        workspaceName = sample.getOutputName()
+
         tasks = list()
         for wsName in mtd.getObjectNames():
             if ((workspaceName in wsName)
