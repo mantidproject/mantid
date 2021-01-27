@@ -97,6 +97,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         Rebin(InputWorkspace=ws, OutputWorkspace=self.output, Params=[0, number_of_channels, number_of_channels])
         self._normalize_by_monitor(self.output)
 
+        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
+
         ConvertSpectrumAxis(InputWorkspace=self.output,
                             OutputWorkspace=self.output,
                             Target='ElasticQ',
@@ -109,8 +111,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
                      SampleLogAsXAxis=self.scan_parameter,
                      FailBehaviour="Stop",
                      OutputWorkspace=self.output)
-
-        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
 
         Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
 
