@@ -102,12 +102,14 @@ private:
 
   /// Goniometer for this run
   std::unique_ptr<Geometry::Goniometer> m_goniometer;
+  std::vector<std::unique_ptr<Geometry::Goniometer>> m_goniometers;
   /// A set of histograms that can be stored here for future reference
   std::vector<double> m_histoBins;
 
   /// Adds all the time series in from one property manager into another
   void mergeMergables(Mantid::Kernel::PropertyManager &sum,
                       const Mantid::Kernel::PropertyManager &toAdd);
+  void copyGoniometers(const Run &other);
 };
 } // namespace API
 } // namespace Mantid
