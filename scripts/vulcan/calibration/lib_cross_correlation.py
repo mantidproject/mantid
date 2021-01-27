@@ -634,8 +634,10 @@ def _merge_mask_workspaces(target_mask_ws_name: str,
     print('[MERGING MASK] {} + {} = {}'.format(target_mask_ws_name, source_mask_ws_name, target_mask_ws_name))
 
     # Get the non-zero spectra from LHS and RHS (as masks)
-    lhs_index_list = np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0]
-    rhs_index_list = np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0]
+    # lhs_index_list = list(np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0])
+    # rhs_index_list = list(np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0])
+    lhs_index_list = np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0].tolist()
+    rhs_index_list = np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0].tolist()
     print(f'[MERGING MASK] LHS: masked spectrum = {len(lhs_index_list)}, '
           f'RHS: masked spectrum = {len(rhs_index_list)}')
 
@@ -643,14 +645,17 @@ def _merge_mask_workspaces(target_mask_ws_name: str,
     target_mask_ws = mtd[target_mask_ws_name]
 
     for masked_index in rhs_index_list:
+        masked_index = int(masked_index)
         target_mask_ws.dataY(masked_index)[0] = 1.
 
     # Mask pixels
     # merge 2 lists
     lhs_index_list.extend(rhs_index_list)
+    lhs_index_list.extend(rhs_index_list)
     # remove redundant pixels
     merged_masked_pixels = list(set(lhs_index_list))
     # mask all detectors explicitly
+    print(f'{type(merged_masked_pixels)}')
     target_mask_ws.maskDetectors(WorkspaceIndexList=merged_masked_pixels)
 
     # verify output
