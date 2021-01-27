@@ -427,6 +427,26 @@ public:
     TS_ASSERT_EQUALS(runCopy.getGoniometer().getNumberAxes(), 3);
   }
 
+  void test_multiple_goniometers() {
+    Run runInfo;
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 1);
+
+    DblMatrix rotation(3, 3, true);
+    rotation[0][0] = cos(0.5);
+    rotation[0][2] = sin(0.5);
+    rotation[2][0] = -sin(0.5);
+    rotation[2][2] = cos(0.5);
+    Goniometer goniometer(rotation);
+
+    auto index = runInfo.addGoniometer(goniometer);
+
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 2);
+    TS_ASSERT_EQUALS(index, 1);
+
+    TS_ASSERT_EQUALS(runInfo.getGoniometer(0), Goniometer());
+    TS_ASSERT_EQUALS(runInfo.getGoniometer(1), goniometer);
+  }
+
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
     TimeSeriesProperty<double> *tsp;
     tsp = new TimeSeriesProperty<double>(name);

@@ -89,6 +89,17 @@ public:
   // Retrieve the goniometer rotation matrix
   const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
+  /** @return A reference to the const Goniometer object for this run */
+  inline const std::vector<std::unique_ptr<Geometry::Goniometer>> &getGoniometers() const {
+    return m_goniometers;
+  }
+
+  const Geometry::Goniometer getGoniometer(const uint16_t runIndex);
+  uint16_t getNumGoniometers() const;
+  const Kernel::Matrix<double> &getGoniometerMatrix(const uint16_t runIndex) const;
+  uint16_t addGoniometer(const Geometry::Goniometer &goniometer);
+  void setGoniometers(std::vector<std::unique_ptr<Geometry::Goniometer>>);
+
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,
                  bool keepOpen = false) const override;

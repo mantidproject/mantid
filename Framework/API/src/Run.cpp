@@ -47,7 +47,7 @@ Kernel::Logger g_log("Run");
 
 Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {
   m_goniometers.clear();
-  m_goniometers.push_back(std::make_unique<Geometry::Goniometer>());
+  m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
 }
 
 Run::Run(const Run &other)
@@ -360,6 +360,42 @@ const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix() const {
   return m_goniometer->getR();
 }
 
+//-----------------------------------------------------------------------------------------------
+/// @return the number of goniometers's in this Run
+uint16_t Run::getNumGoniometers() const {
+  return uint16_t(m_goniometers.size());
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Add a new Goniometer to this Run
+ *
+ * @param goniometer :: goniometer to add
+ * @return the index at which it was added
+ * @throw std::runtime_error if you reach the limit of 65536 entries.
+ */
+uint16_t Run::addGoniometer(const Geometry::Goniometer &goniometer) {
+  m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>(goniometer));
+  if (m_goniometers.size() >=
+      static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
+    throw std::runtime_error("Reached the capacity for the number "
+                             "of goniometer of 65536.");
+  return uint16_t(m_goniometers.size() - 1);
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Get the Goniometerfor the given run index
+ *
+ * @param index :: 0-based index of the run to get.
+ * @return goniometer
+ */
+const Geometry::Goniometer Run::getGoniometer(const uint16_t index) {
+  if (size_t(index) >= m_goniometers.size())
+    throw std::invalid_argument(
+				"Run::getGoniometer() const: index is out of range.");
+  return *m_goniometers[index];
+}
+
+
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
@@ -555,7 +591,7 @@ void Run::copyGoniometers(const Run &other) {
   m_goniometers.clear();
   m_goniometers.reserve(other.m_goniometers.size());
   for (const auto &goniometer : other.m_goniometers) {
-    m_goniometers.push_back(std::make_unique<Geometry::Goniometer>(*goniometer));
+    m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>(*goniometer));
   }
 }
 } // namespace API
