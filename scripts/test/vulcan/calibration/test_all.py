@@ -21,7 +21,7 @@ class TestAll(unittest.TestCase):
         See http://xion.io/post/code/python-all-wild-imports.html for more information
         """
         import vulcan.calibration
-        self.find_missing(corelli.calibration)
+        self.find_missing(vulcan.calibration)
 
 
 if __name__ == '__main__':
