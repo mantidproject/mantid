@@ -21,6 +21,10 @@ The NeXus paths for the default and optional entries are specified in the :ref:`
 relevant to the instrument that the data comes from. The header for the custom entry can be specified through `CustomHeaders`,
 or not at all. In that case, the name for the custom entry will be derived from its NeXus path.
 
+The files in the directory are expected to be uniquely raw data for the chosen instrument and facility, specified through
+`Facility` and `Instrument`, respectively. The range of files to be logged can be specified through `NumorRange` property,
+where both edges of the range are inclusive.
+
 The logbook can be stored as a CSV file and read outside of the Mantid using spreadsheet software, such as Microsoft Excel.
 
 Usage
@@ -29,7 +33,7 @@ Usage
 
 **Example - GenerateLogbook for ILL D7 rawdata**
 
-.. code-block:: python
+.. testcode:: ExGenerateLogbook_D7
 
    data_dirs = config['datasearch.directories'].split(';')
    unit_test_data_dir = [p for p in data_dirs if 'UnitTest' in p][0]
@@ -39,8 +43,15 @@ Usage
                     OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
                     NumorRange=[396990,396993], OptionalHeaders='TOF',
 		    CustomEntries='entry0/acquisition_mode')
-    print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
-    print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
+   print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
+   print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
+
+Output:
+
+.. testoutput:: ExGenerateLogbook_D7
+
+   Number of numors in the logbook: 3
+   Number of headers in the logbook: 5
 
 .. categories::
 
