@@ -224,7 +224,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectFlatPlateAbsorption2.py
     algorithms/WorkflowAlgorithms/IndirectILLEnergyTransfer.py
     algorithms/WorkflowAlgorithms/IndirectILLReductionDIFF.py
-    algorithms/WorkflowAlgorithms/IndirectILLReductionDIFF.py
     algorithms/WorkflowAlgorithms/IndirectILLReductionFWS.py
     algorithms/WorkflowAlgorithms/IndirectILLReductionQENS.py
     algorithms/WorkflowAlgorithms/IndirectQuickRun.py
