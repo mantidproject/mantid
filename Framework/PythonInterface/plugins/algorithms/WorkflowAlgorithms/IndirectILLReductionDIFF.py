@@ -22,6 +22,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     mask_end_pixels = None
     output = None
     progress = None
+    transpose = None
 
     def category(self):
         return "ILL\\Indirect"
@@ -37,6 +38,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         self.scan_parameter = self.getPropertyValue('Observable')
         self.mask_start_pixels = self.getProperty('MaskPixelsFromStart').value
         self.mask_end_pixels = self.getProperty('MaskPixelsFromEnd').value
+        self.transpose = self.getProperty("Transpose").value
         self.output = self.getPropertyValue('OutputWorkspace')
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
@@ -53,6 +55,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty("Observable", "sample.temperature",
                              doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
+
+        self.declareProperty("Transpose", True, doc="Transpose the result.")
 
     def _normalize_by_monitor(self, ws):
         """
@@ -112,7 +116,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
                      FailBehaviour="Stop",
                      OutputWorkspace=self.output)
 
-        Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
+        if self.transpose:
+            Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
 
     def _treat_BATS(self, ws):
         self.log().warning("BATS treatment not implemented yet.")
