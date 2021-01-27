@@ -11,7 +11,7 @@ import unittest
 # from os import path
 #
 from mantid import AnalysisDataService
-from mantid import config
+# from mantid import config
 # from mantid.kernel import V3D
 # from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
 #                               LoadNexusProcessed, mtd)
