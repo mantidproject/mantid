@@ -112,6 +112,7 @@ class TestUtils(unittest.TestCase):
         # expected = [15.4, 30.4, 45.4, 60.4, 75.4, 90.5, 105.5, 120.5,
         #             135.5, 150.5, 165.5, 180.6, 195.6, 210.6, 225.6, 240.6]
         # assert_allclose(wire_positions(units='pixels'), np.array(expected), atol=0.1)
+        assert 1 == 123, 'It shall fail'
 
     def tearDown(self) -> None:
         to_delete = [w for w in ['a', 'b'] if AnalysisDataService.doesExist(w)]
