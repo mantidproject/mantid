@@ -76,6 +76,8 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 class MainWindow(QMainWindow):
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
+    # list of custom interfaces that are not qt4/qt5 compatible
+    PYTHON_GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -350,7 +352,7 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        self.interface_list = self._discover_python_interfaces(interface_dir)
+        self.interface_list = self._discover_python_interfaces(interface_dir, self.PYTHON_GUI_BLACKLIST)
         self._discover_cpp_interfaces(self.interface_list)
 
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
@@ -385,11 +387,9 @@ class MainWindow(QMainWindow):
 
         warnings.showwarning = to_mantid_warning
 
-    def _discover_python_interfaces(self, interface_dir):
+    def _discover_python_interfaces(self, interface_dir, gui_blacklist):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-        # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -399,7 +399,7 @@ class MainWindow(QMainWindow):
                 logger.warning('Failed to find script "{}" in "{}"'.format(
                     scriptname, interface_dir))
                 continue
-            if scriptname in GUI_BLACKLIST:
+            if scriptname in gui_blacklist:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)

@@ -180,6 +180,49 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()
 
+    @patch('workbench.app.mainwindow.logger')
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('os.path.exists')
+    def test_python_interfaces_are_discovered_correctly(self, mock_os_path_exists, mock_ConfigService, _):
+        interfaces = ['Muon/Frequency_Domain_Analysis.py', 'ILL/Drill.py']
+        interfaces_str = " ".join(interfaces)  # config service returns them as a whole string.
+        mock_os_path_exists.return_value = lambda path: path in interfaces
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: interfaces_str if arg == 'mantidqt.python_interfaces' else None
+
+        returned_interfaces = self.main_window._discover_python_interfaces('', [])
+
+        expected_interfaces = {'Muon': ['Frequency_Domain_Analysis.py'], 'ILL': ['Drill.py']}
+        self.assertDictEqual(expected_interfaces, returned_interfaces)
+
+    @patch('workbench.app.mainwindow.logger')
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('os.path.exists')
+    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
+        interface_str = 'fake/interface.py'
+        mock_os_path_exists.return_value = False
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: interface_str if arg == 'mantidqt.python_interfaces' else None
+
+        returned_interfaces = self.main_window._discover_python_interfaces('', [])
+
+        self.assertDictEqual({}, returned_interfaces)
+        mock_logger.warning.assert_called()
+
+    @patch('workbench.app.mainwindow.logger')
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('os.path.exists')
+    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
+        interface_str = 'blacklisted/interface.py'
+        mock_os_path_exists.return_value = True
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: interface_str if arg == 'mantidqt.python_interfaces' else None
+
+        returned_interfaces = self.main_window._discover_python_interfaces('', 'interface.py')
+
+        self.assertDictEqual({}, returned_interfaces)
+        mock_logger.information.assert_called()
+
 
 if __name__ == '__main__':
     unittest.main()
