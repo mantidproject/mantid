@@ -353,7 +353,7 @@ public:
 
   void test_allow_list() {
     auto testWS = createTestWorkspace();
-    
+
     std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
 
     LoadNexusLogs loader;
@@ -386,22 +386,21 @@ public:
     TS_ASSERT_EQUALS(properties.size(), allowed.size());
 
     // Lookup each name in the workspace property list
-    for( const auto &name : allowed) {
+    for (const auto &name : allowed) {
       bool found = false;
       for (const auto &prop : properties) {
-        if(prop->name() == name) {
+        if (prop->name() == name) {
           found = true;
           break;
         }
       }
       TS_ASSERT_EQUALS(found, true);
     }
-
   }
 
   void test_block_list() {
     auto testWS = createTestWorkspace();
-    
+
     std::vector<std::string> blocked = {"proton_charge", "S2HGap", "S2VGap"};
 
     LoadNexusLogs loader;
@@ -421,17 +420,16 @@ public:
     TS_ASSERT_EQUALS(properties.size(), 94 - blocked.size() - 2);
 
     // Lookup each name in the workspace property list
-    for( const auto &name : blocked) {
+    for (const auto &name : blocked) {
       bool found = false;
       for (const auto &prop : properties) {
-        if(prop->name() == name) {
+        if (prop->name() == name) {
           found = true;
           break;
         }
       }
       TS_ASSERT_EQUALS(found, false);
     }
-
   }
 
   void test_allow_and_block_list() {
