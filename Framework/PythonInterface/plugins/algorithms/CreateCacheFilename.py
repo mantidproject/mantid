@@ -52,17 +52,13 @@ class CreateCacheFilename(PythonAlgorithm):
             StringArrayProperty("OtherProperties", Direction.Input),
             "A list of key=value strings for other properties not in the property manager")
 
-        self.declareProperty(
-            "Prefix", "", "prefix for the output file name")
+        self.declareProperty("Prefix", "", "prefix for the output file name")
 
         self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
 
-
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
 
-        self.declareProperty("OutputSignature", "",
-                             "Comma-separated sorted list of key=values pairs used to create the sha1 hash",
-                             Direction.Output)
+        self.declareProperty("OutputSignature", "", "sha1 string, 40 characters long", Direction.Output)
         return
 
     def validateInputs(self):
@@ -106,9 +102,9 @@ class CreateCacheFilename(PythonAlgorithm):
                 "cache"
                 )
         # calculate
-        fn = self._calculate(
-            prop_manager, props, other_props, prefix, cache_dir)
-        self.setProperty("OutputFilename", fn)
+        file_name, sha1_hash = self._calculate(prop_manager, props, other_props, prefix, cache_dir)
+        self.setProperty("OutputFilename", file_name)
+        self.setProperty("OutputSignature", sha1_hash)
         return
 
     def _get_signature(self, prop_manager, props, other_props):
@@ -127,19 +123,16 @@ class CreateCacheFilename(PythonAlgorithm):
         kvpairs.sort()
         # one string out of the list
         s = ','.join(kvpairs)
-        self.setProperty("OutputSignature", s)
         return s
 
     def _calculate(self, prop_manager, props, other_props, prefix, cache_dir):
         s = self._get_signature(prop_manager, props, other_props)
-        # hash
-        h = _hash(s)
-        # prefix
+        h = _hash(s)   # sha1 hash
         if prefix:
-            h = "%s_%s" % (prefix, h)
-        # filename
-        fn = "%s.nxs" % h
-        return os.path.join(cache_dir, fn)
+            fn = "%s_%s.nxs" % (prefix, h)  # filename
+        else:
+            fn = "%s.nxs" % h
+        return os.path.join(cache_dir, fn), h
 
 
 def _hash(s):
