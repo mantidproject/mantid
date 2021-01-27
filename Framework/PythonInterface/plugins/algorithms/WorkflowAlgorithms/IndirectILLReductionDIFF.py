@@ -58,27 +58,25 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty("Transpose", True, doc="Transpose the result.")
 
-    def _normalize_by_monitor(self, ws):
+    def _normalize_by_monitor(self):
         """
-            Normalizes the workspace by monitor values (ID is 0 for IN16B)
-            @param ws : the input workspace
+            Normalizes the workspace by monitor value (ID is 0 for IN16B)
         """
-        monitor_ws = ws + '_mon'
-        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=monitor_ws)
+        monitor_ws = self.output + '_mon'
+        ExtractMonitors(InputWorkspace=self.output, DetectorWorkspace=self.output, MonitorWorkspace=monitor_ws)
 
-        # in case of 0 counts monitors, replace 0s by 1s so the division becomes neutral
-        # (since it's generally division of 0 detector's counts by 0 monitor's counts,
-        # they weren't very useful to begin with)
+        Divide(LHSWorkspace=self.output, RHSWorkspace=monitor_ws, OutputWorkspace=self.output, WarnOnZeroDivide=True)
 
-        ReplaceSpecialValues(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws, SmallNumberThreshold=0.00000001,
-                             SmallNumberValue=1)
+        DeleteWorkspace(monitor_ws)
 
-        Divide(LHSWorkspace=ws, RHSWorkspace=monitor_ws, OutputWorkspace=ws, WarnOnZeroDivide=True)
-
+    def _mask_tube_ends(self):
+        """
+            Mask the ends of each tube according to values provided by the user
+        """
+        # the numbers here correspond to IN16B detectors
         cache = list(range(1, self.mask_start_pixels)) + list(range(257 - self.mask_end_pixels, 257))
         to_mask = [i + 256 * j for i in cache for j in range(8)]
-        MaskDetectors(Workspace=ws, DetectorList=to_mask)
-        DeleteWorkspace(monitor_ws)
+        MaskDetectors(Workspace=self.output, DetectorList=to_mask)
 
     def _treat_doppler(self, ws):
         """
@@ -97,7 +95,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
         Integration(InputWorkspace=ws, OutputWorkspace=self.output)
-        self._normalize_by_monitor(self.output)
+        self._normalize_by_monitor()
+        self._mask_tube_ends()
 
         ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
 
