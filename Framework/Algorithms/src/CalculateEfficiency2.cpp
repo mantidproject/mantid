@@ -104,7 +104,7 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
         std::dynamic_pointer_cast<const WorkspaceGroup>(ws1);
     if (inputGroup != nullptr) {
       for (auto entryNo = 0; entryNo < inputGroup->getNumberOfEntries();
-           entryNo++) {
+           ++entryNo) {
         auto const entry = std::static_pointer_cast<const MatrixWorkspace>(
             inputGroup->getItem(entryNo));
         if (entry->blocksize() > 1) {
@@ -227,7 +227,7 @@ bool CalculateEfficiency2::processGroups() {
     auto outputGroup = std::make_shared<WorkspaceGroup>();
     auto nEntries = inputWS->getNumberOfEntries();
     auto stepProgress = 1.0 / nEntries;
-    for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+    for (auto entryNo = 0; entryNo < nEntries; ++entryNo) {
       auto entryWS = std::static_pointer_cast<API::MatrixWorkspace>(
           inputWS->getItem(entryNo));
       auto startProgress = static_cast<double>(entryNo) / nEntries;
@@ -345,14 +345,14 @@ CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &input) {
 
   auto spectrumInfo = mergedNormalisedWs->spectrumInfo();
   for (std::size_t spectrumNo = 0;
-       spectrumNo < mergedNormalisedWs->getNumberHistograms(); spectrumNo++) {
+       spectrumNo < mergedNormalisedWs->getNumberHistograms(); ++spectrumNo) {
     if (spectrumInfo.isMasked(spectrumNo)) {
       auto &detDataY = mergedNormalisedWs->mutableY(spectrumNo);
       auto &detDataErr = mergedNormalisedWs->mutableE(spectrumNo);
       auto dataY = 0.0;
       auto dataE = 0.0;
       auto nonMaskedEntries = 0;
-      for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
+      for (auto entryNo = 0; entryNo < nEntries; ++entryNo) {
         MatrixWorkspace_sptr entry =
             std::static_pointer_cast<API::MatrixWorkspace>(
                 input.getItem(entryNo));
