@@ -233,7 +233,8 @@ bool CalculateEfficiency2::processGroups() {
       auto outputWS = calculateEfficiency(entryWS, startProgress, stepProgress);
       outputGroup->addWorkspace(outputWS);
     }
-    const std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+    const std::string groupName =
+        getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
     AnalysisDataService::Instance().addOrReplace(groupName, outputGroup);
     setProperty(PropertyNames::OUTPUT_WORKSPACE, outputGroup);
   }
@@ -343,8 +344,10 @@ CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &input) {
       divideAlg->getProperty("OutputWorkspace");
 
   auto spectrumInfo = mergedNormalisedWs->spectrumInfo();
-  for (std::size_t spectrumNo = 0;
-       spectrumNo < mergedNormalisedWs->getNumberHistograms(); ++spectrumNo) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*mergedNormalisedWs))
+  for (auto spectrumNo = 0;
+       spectrumNo < static_cast<int>(mergedNormalisedWs->getNumberHistograms());
+       ++spectrumNo) {
     if (spectrumInfo.isMasked(spectrumNo)) {
       auto &detDataY = mergedNormalisedWs->mutableY(spectrumNo);
       auto &detDataErr = mergedNormalisedWs->mutableE(spectrumNo);
