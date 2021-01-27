@@ -434,12 +434,15 @@ void LoadNexusLogs::init() {
                       "NXentryName", "", Direction::Input),
                   "Entry in the nexus file from which to read the logs");
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>("AllowList", "",
-                                                       Direction::Input),
-      "If specified, only these logs will be loaded from the file.");
-  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
-                      "BlockList", "", Direction::Input),
-                  "If specified, these logs will NOT be loaded from the file.");
+      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+          "AllowList", std::vector<std::string>(), Direction::Input),
+      "If specified, only these logs will be loaded from the file (each "
+      "separated by a space).");
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+          "BlockList", std::vector<std::string>(), Direction::Input),
+      "If specified, these logs will NOT be loaded from the file (each "
+      "separated by a space).");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -455,8 +458,8 @@ void LoadNexusLogs::execLoader() {
 
   std::string entry_name = getPropertyValue("NXentryName");
 
-  std::string allow_list = getPropertyValue("AllowList");
-  std::string block_list = getPropertyValue("BlockList");
+  std::vector<std::string> allow_list = getProperty("AllowList");
+  std::vector<std::string> block_list = getProperty("BlockList");
 
   // Find the entry name to use (normally "entry" for SNS, "raw_data_1" for
   // ISIS) if entry name is empty
@@ -517,8 +520,6 @@ void LoadNexusLogs::execLoader() {
         "Please only enter values for one of these fields.");
   }
 
-  // TODO: Handle logs specified for AllowList and BlockList.
-
   const std::map<std::string, std::set<std::string>> &allEntries =
       getFileInfo()->getAllEntries();
 
@@ -534,7 +535,7 @@ void LoadNexusLogs::execLoader() {
       // match for 2nd level entry /a/b
       if (std::count(entry.begin(), entry.end(), '/') == 2) {
         if (isLog) {
-          loadLogs(file, entry, group_class, workspace);
+          loadLogs(file, entry, group_class, workspace, allow_list, block_list);
         } else {
           loadNPeriods(file, workspace);
         }
@@ -558,7 +559,8 @@ void LoadNexusLogs::execLoader() {
         continue;
       }
       // here we must search only in NxLogs and NXpositioner sets
-      loadLogs(file, absoluteGroupName, group_class, workspace);
+      loadLogs(file, absoluteGroupName, group_class, workspace, allow_list,
+               block_list);
     }
   };
 
@@ -658,6 +660,16 @@ void LoadNexusLogs::execLoader() {
         workspace->mutableRun().getProtonCharge();
       } catch (Exception::NotFoundError &) {
         // Ignore not found property error.
+      }
+    }
+  }
+
+  if (!allow_list.empty()) {
+    for (const auto &allow : allow_list) {
+      if (!workspace->run().hasProperty(allow)) {
+        g_log.notice() << "could not load entry '" << allow
+                       << "' that was specified in the allow list"
+                       << "\n";
       }
     }
   }
@@ -789,7 +801,9 @@ void LoadNexusLogs::loadNPeriods(
 void LoadNexusLogs::loadLogs(
     ::NeXus::File &file, const std::string &absolute_entry_name,
     const std::string &entry_class,
-    const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
+    const std::shared_ptr<API::MatrixWorkspace> &workspace,
+    const std::vector<std::string> &allow_list,
+    const std::vector<std::string> &block_list) const {
 
   const std::map<std::string, std::set<std::string>> &allEntries =
       getFileInfo()->getAllEntries();
@@ -803,16 +817,49 @@ void LoadNexusLogs::loadLogs(
     const std::set<std::string> &logsSet = itLogClass->second;
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
-    for (auto it = itPrefixBegin;
-         it != logsSet.end() &&
-         it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0;
-         ++it) {
-      // must be third level entry
-      if (std::count(it->begin(), it->end(), '/') == 3) {
-        if (isNxLog) {
-          loadNXLog(file, *it, logClass, workspace);
-        } else {
-          loadSELog(file, *it, workspace);
+    if (allow_list.empty()) {
+      for (auto it = itPrefixBegin;
+           it != logsSet.end() &&
+           it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0;
+           ++it) {
+        // must be third level entry
+        if (std::count(it->begin(), it->end(), '/') == 3) {
+          if (!block_list.empty()) {
+            bool skip = false;
+            for (const auto &block : block_list) {
+              if ((*it).substr((*it).find_last_of("/") + 1) == block) {
+                skip = true;
+                break;
+              }
+            }
+            if (skip) {
+              continue;
+            }
+          }
+
+          if (isNxLog) {
+            loadNXLog(file, *it, logClass, workspace);
+          } else {
+            loadSELog(file, *it, workspace);
+          }
+        }
+      }
+    } else {
+      for (const auto &allow : allow_list) {
+        itPrefixBegin = logsSet.find(absolute_entry_name + "/" + allow);
+        if (itPrefixBegin == logsSet.end()) {
+          // don't print warning yet since it might be found in another log
+          // class
+          continue;
+        }
+        auto it = itPrefixBegin;
+        // must be third level entry
+        if (std::count(it->begin(), it->end(), '/') == 3) {
+          if (isNxLog) {
+            loadNXLog(file, *it, logClass, workspace);
+          } else {
+            loadSELog(file, *it, workspace);
+          }
         }
       }
     }

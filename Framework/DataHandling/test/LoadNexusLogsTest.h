@@ -351,25 +351,58 @@ public:
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(2), 7, 1e-5);
   }
 
-  // TODO: Check whether the correct logs are in the final workspace
   void test_allow_list() {
     auto testWS = createTestWorkspace();
-    auto run = testWS->run();
+    
+    std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
 
     LoadNexusLogs loader;
     loader.setChild(true);
     loader.initialize();
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
-    loader.setPropertyValues("AllowList", ""); // Specify logs to allow here
-    loader.setPropertyValues("BlockList", "");
+    loader.setProperty<std::vector<std::string>>("AllowList", allowed);
+    loader.setPropertyValue("BlockList", "");
     loader.execute();
     TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    // selog versions
+    allowed.push_back("selog_S2HGap");
+    allowed.push_back("selog_S2VGap");
+
+    // extra proton charge properties
+    allowed.push_back("gd_prtn_chrg");
+    allowed.push_back("proton_charge_by_period");
+    allowed.push_back("nperiods");
+
+    // The default logs that are always present:
+    allowed.push_back("start_time");
+    allowed.push_back("end_time");
+    allowed.push_back("run_title");
+
+    auto run = testWS->run();
+    auto properties = run.getProperties();
+
+    TS_ASSERT_EQUALS(properties.size(), allowed.size());
+
+    // Lookup each name in the workspace property list
+    for( const auto &name : allowed) {
+      bool found = false;
+      for (const auto &prop : properties) {
+        if(prop->name() == name) {
+          found = true;
+          break;
+        }
+      }
+      TS_ASSERT_EQUALS(found, true);
+    }
+
   }
 
   void test_block_list() {
     auto testWS = createTestWorkspace();
-    auto run = testWS->run();
+    
+    std::vector<std::string> blocked = {"proton_charge", "S2HGap", "S2VGap"};
 
     LoadNexusLogs loader;
     loader.setChild(true);
@@ -377,15 +410,32 @@ public:
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
     loader.setPropertyValue("AllowList", "");
-    loader.setPropertyValue("BlockList", ""); // Specify logs to block here
+    loader.setProperty<std::vector<std::string>>("BlockList", blocked);
     loader.execute();
-    run = testWS->run();
     TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    auto run = testWS->run();
+    auto properties = run.getProperties();
+
+    // add 2 to account for selog_ versions of properties
+    TS_ASSERT_EQUALS(properties.size(), 94 - blocked.size() - 2);
+
+    // Lookup each name in the workspace property list
+    for( const auto &name : blocked) {
+      bool found = false;
+      for (const auto &prop : properties) {
+        if(prop->name() == name) {
+          found = true;
+          break;
+        }
+      }
+      TS_ASSERT_EQUALS(found, false);
+    }
+
   }
 
   void test_allow_and_block_list() {
     auto testWS = createTestWorkspace();
-    auto run = testWS->run();
 
     LoadNexusLogs loader;
     loader.setChild(true);
@@ -396,6 +446,11 @@ public:
     loader.setPropertyValue("BlockList", ""); // To ensure logs load as expected
     loader.execute();
     TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    auto run = testWS->run();
+    auto properties = run.getProperties();
+
+    TS_ASSERT_EQUALS(properties.size(), 94);
   }
 
 private:
