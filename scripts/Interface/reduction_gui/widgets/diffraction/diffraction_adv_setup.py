@@ -132,7 +132,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
         self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
-        # Initialization for optimization options
+        # Initialization for Caching options
         self._content.cache_dir_browse.clicked.connect(self._cache_dir_browse)
 
         # Validated widgets
@@ -173,7 +173,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.cropwavelengthmin_edit.setText(str(state.cropwavelengthmin))
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
-        # populate Optimization options
+        # populate Caching options
         self._content.cache_dir_edit.setText(state.cache_dir)
         self._content.clean_cache_box.setChecked(state.clean_cache)
 
@@ -214,7 +214,7 @@ class AdvancedSetupWidget(BaseWidget):
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
-        # Optimization options
+        # Caching options
         s.cache_dir = self._content.cache_dir_edit.text()
         s.clean_cache = self._content.clean_cache_box.isChecked()
 

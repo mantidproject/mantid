@@ -632,7 +632,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="optimization_options_group">
+        <widget class="QGroupBox" name="caching_options_group">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -646,7 +646,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Optimization Options</string>
+          <string>Caching Options</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
@@ -697,7 +697,7 @@
              <layout class="QHBoxLayout" name="horizontalLayout_2"/>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="cacheDir_label">
+             <widget class="QLabel" name="cache_dir_label">
               <property name="minimumSize">
                <size>
                 <width>160</width>
