@@ -73,7 +73,7 @@ class AdvancedSetupScript(BaseScriptElement):
     containershape = ""
     typeofcorrection = ""
     parnamelist = None
-    # Optimization options
+    # Caching options
     cache_dir = ''  # directory containing the cache files
     clean_cache = False  # determines whether to delete all cache files within the cache directory
 
@@ -113,7 +113,7 @@ class AdvancedSetupScript(BaseScriptElement):
                             'MeasuredMassDensity',
                             'SampleNumberDensity',
                             'ContainerShape',
-                            # Optimization options
+                            # Caching options
                             'CacheDir',
                             'CleanCache']
 
@@ -168,7 +168,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["MeasuredMassDensity"] = self.measuredmassdensity
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
-        #Optimization options
+        #Caching options
         pardict['CacheDir'] = self.cache_dir
         pardict['CleanCache'] = str(int(self.clean_cache))
 
@@ -276,7 +276,7 @@ class AdvancedSetupScript(BaseScriptElement):
             self.typeofcorrection = BaseScriptElement.getStringElement(instrument_dom, "typeofcorrection",
                                                                        default=AdvancedSetupScript.typeofcorrection)
 
-            # Optimization options
+            # Caching options
             self.cache_dir = BaseScriptElement.getStringElement(
                 instrument_dom, 'cache_directory', default=self.__class__.cache_dir)
 
@@ -303,7 +303,7 @@ class AdvancedSetupScript(BaseScriptElement):
                                 'preserveevents',
                                 'extension',
                                 'outputfileprefix',
-                                # Optimization options
+                                # Caching options
                                 'cache_dir',
                                 'clean_cache']
         [setattr(self, attr, getattr(self.__class__, attr)) for attr in class_attrs_selected]

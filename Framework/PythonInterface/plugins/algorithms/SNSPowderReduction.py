@@ -218,12 +218,12 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
 
-        # Optimization options
+        # Caching options
         self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
         self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
         self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
         property_names = ('CacheDir', 'CleanCache')
-        [self.setPropertyGroup(name, 'Optimization') for name in property_names]
+        [self.setPropertyGroup(name, 'Caching') for name in property_names]
 
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
@@ -316,7 +316,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._scaleFactor = self.getProperty("ScaleData").value
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
-        # Optimization options
+        # Caching options
         self._cache_dir = self.getProperty("CacheDir").value
         self._clean_cache = self.getProperty("CleanCache").value
 
