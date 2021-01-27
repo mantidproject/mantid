@@ -10,6 +10,7 @@ import json
 from mantid.kernel import *
 
 from .configurations import RundexSettings
+from .DrillSample import DrillSample
 
 
 class DrillRundexIO:
@@ -96,7 +97,13 @@ class DrillRundexIO:
         # samples
         if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
                 and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
-            for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
+            for sampleJson in json_data[RundexSettings.SAMPLES_JSON_KEY]:
+                # for backward compatibility
+                if "CustomOptions" in sampleJson:
+                    sampleJson.update(sampleJson["CustomOptions"])
+                    del sampleJson["CustomOptions"]
+                sample = DrillSample()
+                sample.setParameters(sampleJson)
                 drill.addSample(-1, sample)
         else:
             logger.warning("No sample found when importing {0}."

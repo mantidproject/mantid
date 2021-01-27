@@ -117,9 +117,9 @@ public:
     group.execute();
     m_testee.setProperty("InputWorkspaces", "group");
     m_testee.setProperty("OutputWorkspace", "out");
-    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "Some invalid Properties found");
+    TS_ASSERT_THROWS_EQUALS(
+        m_testee.execute(), const std::runtime_error &e, std::string(e.what()),
+        "Some invalid Properties found: [ InputWorkspaces ]");
   }
 
   void testWSWithoutDxValues() {

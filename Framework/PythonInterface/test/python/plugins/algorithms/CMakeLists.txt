@@ -88,6 +88,7 @@ set(TEST_PY_FILES
     OptimizeCrystalPlacementByRunTest.py
     PDConvertRealSpaceTest.py
     PDConvertReciprocalSpaceTest.py
+    RebinRaggedTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py

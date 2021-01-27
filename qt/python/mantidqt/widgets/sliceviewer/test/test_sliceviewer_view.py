@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -8,12 +9,13 @@
 import io
 import sys
 import unittest
+from unittest.mock import patch
 
 import matplotlib as mpl
-
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
+from numpy import hstack
 
 mpl.use('Agg')
+from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
     FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
@@ -28,25 +30,31 @@ from math import inf  # noqa: E402
 
 @start_qapplication
 class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
-    @classmethod
-    def setUpClass(cls):
-        cls.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                              Extents='-3,3,-10,10,-1,1',
-                                              SignalInput=range(100),
-                                              ErrorInput=range(100),
-                                              NumberOfBins='5,5,4',
-                                              Names='Dim1,Dim2,Dim3',
-                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                              OutputWorkspace='ws_MD_2d')
-        cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                       Extents='-10,10,-10,10,-10,10',
-                                       Names='A,B,C',
-                                       Units='r.l.u.,r.l.u.,r.l.u.',
-                                       Frames='HKL,HKL,HKL',
-                                       OutputWorkspace='hkl_ws')
+    def setUp(self):
+        self.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
+                                               Extents='-3,3,-10,10,-1,1',
+                                               SignalInput=range(100),
+                                               ErrorInput=range(100),
+                                               NumberOfBins='5,5,4',
+                                               Names='Dim1,Dim2,Dim3',
+                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                               OutputWorkspace='ws_MD_2d')
+        self.hkl_ws = CreateMDWorkspace(Dimensions=3,
+                                        Extents='-10,10,-10,10,-10,10',
+                                        Names='A,B,C',
+                                        Units='r.l.u.,r.l.u.,r.l.u.',
+                                        Frames='HKL,HKL,HKL',
+                                        OutputWorkspace='hkl_ws')
         expt_info = CreateSampleWorkspace()
-        cls.hkl_ws.addExperimentInfo(expt_info)
+        self.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
+
+    def tearDown(self):
+        for ii in QApplication.topLevelWidgets():
+            ii.close()
+        QApplication.sendPostedEvents()
+        QApplication.sendPostedEvents()
+        self.assert_no_toplevel_widgets()
 
     def test_deleted_on_close(self):
         pres = SliceViewer(self.histo_ws)
@@ -237,6 +245,29 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
 
+    def test_plot_matrix_xlimits_ignores_monitors(self):
+        xmin = 5000
+        xmax = 10000
+        ws = CreateSampleWorkspace(NumBanks=1, NumMonitors=1, BankPixelWidth=1, XMin=xmin, XMax=xmax)
+        ws.setX(0, 2 * ws.readX(0))  # change x limits of monitor spectrum
+        pres = SliceViewer(ws)
+
+        pres.view.data_view.plot_matrix(ws)
+
+        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
+
+    @patch("mantidqt.widgets.sliceviewer.dimensionwidget.Dimension.update_slider")
+    def test_plot_matrix_xlimits_ignores_nans(self, mock_update_slider):
+        # need to mock update slider as doesn't handle inf when initialising SliceViewer in this manner
+        xmin = 5000
+        xmax = 10000
+        ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XMin=xmin, XMax=xmax)  # two non-monitor spectra
+        ws.setX(0, hstack([2 * ws.readX(0)[0:-1], inf]))  # change x limits of spectrum and put inf in last element
+        pres = SliceViewer(ws)
+
+        pres.view.data_view.plot_matrix(ws)
+
+        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
 
 # private helper functions
 

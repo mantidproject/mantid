@@ -40,6 +40,7 @@ public:
 
   // Context Menu Handlers
   void popupContextMenu() override;
+  void setOverplotDisabled(bool disabled);
 
 signals:
   void plotSpectrumClicked(const QStringList &workspaceNames);
@@ -58,6 +59,7 @@ signals:
   void plotSurfaceClicked(const QStringList &workspaceNames);
   void plotWireframeClicked(const QStringList &workspaceNames);
   void plotContourClicked(const QStringList &workspaceNames);
+  void contextMenuAboutToShow(void);
 
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();

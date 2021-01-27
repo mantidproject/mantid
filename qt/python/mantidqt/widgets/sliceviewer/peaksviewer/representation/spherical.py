@@ -17,7 +17,7 @@ from .ellipsoid import slice_ellipsoid_matrix
 from .painter import Painted
 
 
-class SphericallyIntergratedPeakRepresentation(object):
+class SphericallyIntergratedPeakRepresentation():
     """Provide methods to display a representation of a slice through an
     Spherically intgerated region around a Peak"""
     @classmethod

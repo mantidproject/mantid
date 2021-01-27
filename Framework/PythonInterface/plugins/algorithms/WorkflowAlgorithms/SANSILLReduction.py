@@ -482,9 +482,8 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws : the input workspace
         """
         self.log().information('Performing parallax correction')
-        if self._instrument == 'D33':
-            components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
-                          'front_detector_left', 'front_detector_right']
+        if self._instrument in ['D33', 'D11B', 'D22B']:
+            components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
         else:
             components = ['detector']
         ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
@@ -498,8 +497,8 @@ class SANSILLReduction(PythonAlgorithm):
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
-            if self._instrument == 'D33':
-                grouping_filename = 'D33_Grouping.xml'
+            if self._instrument == 'D33' or self._instrument == 'D11B':
+                grouping_filename = self._instrument + '_Grouping.xml'
                 grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
             elif instrument.hasParameter('grouping'):
@@ -513,13 +512,9 @@ class SANSILLReduction(PythonAlgorithm):
 
     def _finalize(self, ws, process):
         if process != 'Transmission':
-            if self._instrument == 'D33':
-                CalculateDynamicRange(Workspace=ws,
-                                      ComponentNames=['back_detector',
-                                                      'front_detector_right',
-                                                      'front_detector_left',
-                                                      'front_detector_top',
-                                                      'front_detector_bottom'])
+            if self._instrument in ['D33', 'D11B', 'D22B']:
+                components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0]
+                CalculateDynamicRange(Workspace=ws, ComponentNames=components.split(','))
             elif self._instrument == 'D16' and mtd[ws].getAxis(0).getUnit().caption() != "Wavelength":
                 # D16 omega scan case : we have an histogram indexed by omega, not wavelength
                 pass
@@ -654,7 +649,7 @@ class SANSILLReduction(PythonAlgorithm):
                         self._apply_masks(ws)
                         self._apply_thickness(ws)
                         # parallax (gondola) effect
-                        if self._instrument in ['D22', 'D22lr', 'D33']:
+                        if self._instrument in ['D22', 'D22lr', 'D33', 'D11B', 'D22B']:
                             self._apply_parallax(ws)
                         progress.report()
                         sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
