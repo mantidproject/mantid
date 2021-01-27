@@ -38,6 +38,7 @@ Bug fixes
 - A bug has been fixed where changing rebin wouldn't update the plot in the GUI.
 - A bug has been fixed where the plot would update incorrectly when changing plot raw and plot difference.
 - A bug has been fixed where pressing autoscale y without any data loaded would cause a crash.
+- A bug has been fixed where autoscale y would not calculate the y limits correctly.
 
 ALC
 ---
