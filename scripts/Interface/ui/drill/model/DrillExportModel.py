@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import mtd
-from mantid.kernel import config
+from mantid.kernel import config, logger
 from mantid.api import WorkspaceGroup
 
 from .configurations import RundexSettings
@@ -37,6 +37,7 @@ class DrillExportModel:
                 for k,v
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._pool = DrillAlgorithmPool()
+        self._pool.signals.taskError.connect(self._onTaskError)
 
     def getAlgorithms(self):
         """
@@ -79,7 +80,19 @@ class DrillExportModel:
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = False
 
-    def run(self, workspaceName):
+    def _onTaskError(self, ref, msg):
+        """
+        Triggered when the export failed.
+
+        Args:
+            ref (int): task reference
+            msg (str): error msg
+        """
+        sampleName = str(ref)
+        logger.error("Error while exporting sample {}.".format(sampleName))
+        logger.error(msg)
+
+    def run(self, workspaceName, ref):
         """
         Run the export algorithms on a workspace. If the provided workspace is
         a groupworkspace, the export algorithms will be run on each member of
@@ -97,7 +110,7 @@ class DrillExportModel:
                     if s:
                         filename = exportPath + wsName \
                                    + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        task = DrillTask(-1, a, InputWorkspace=wsName,
+                        task = DrillTask(ref, a, InputWorkspace=wsName,
                                          FileName=filename)
                         tasks.append(task)
         self._pool.addProcesses(tasks)

@@ -541,11 +541,11 @@ class DrillModelTest(unittest.TestCase):
         self.model._onTaskSuccess(0)
         self.mLogger.information.assert_called_once()
         self.model.processSuccess.emit.assert_called_once()
-        self.model.exportModel.run.assert_called_once_with("sample_1")
+        self.model.exportModel.run.assert_called_once_with("sample_1", 1)
         self.model.exportModel.reset_mock()
         s1.getParameter.return_value = "test"
         self.model._onTaskSuccess(0)
-        self.model.exportModel.run.assert_called_once_with("test")
+        self.model.exportModel.run.assert_called_once_with("test", 1)
 
     def test_onTaskError(self):
         self.model.processError = mock.Mock()

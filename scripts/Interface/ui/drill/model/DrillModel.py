@@ -656,7 +656,7 @@ class DrillModel(QObject):
         name = self.samples[ref].getParameter("OutputWorkspace")
         if name is None:
             name = "sample_" + str(ref + 1)
-        self.exportModel.run(name)
+        self.exportModel.run(name, ref + 1)
 
     def _onTaskError(self, ref, msg):
         """
