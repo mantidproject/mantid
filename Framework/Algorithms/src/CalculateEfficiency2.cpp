@@ -221,8 +221,6 @@ bool CalculateEfficiency2::processGroups() {
     auto mergedWS = mergeGroup(*inputWS);
     auto outputWS = calculateEfficiency(mergedWS);
     setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
-    progress(1.0, "Done!");
-    return true;
   } else {
     auto outputGroup = std::make_shared<WorkspaceGroup>();
     auto const nEntries = inputWS->getNumberOfEntries();
@@ -237,9 +235,9 @@ bool CalculateEfficiency2::processGroups() {
     const std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
     AnalysisDataService::Instance().addOrReplace(groupName, outputGroup);
     setProperty(PropertyNames::OUTPUT_WORKSPACE, outputGroup);
-    progress(1.0, "Done!");
-    return true;
   }
+  progress(1.0, "Done!");
+  return true;
 }
 
 /**
