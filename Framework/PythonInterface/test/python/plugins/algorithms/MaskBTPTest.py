@@ -264,6 +264,21 @@ class MaskBTPTest(unittest.TestCase):
         self.assertEquals(len(mask), 9*128)
         self.checkConsistentMask(ws, mask)
 
+    def test_d22b(self):
+        ws = LoadEmptyInstrument(InstrumentName="D22B")
+        mask = MaskBTP(Workspace=ws, Bank="2")
+
+        self.assertEquals(len(mask), 256*96)
+        self.checkConsistentMask(ws, mask)
+
+    def test_d11b(self):
+        ws = LoadEmptyInstrument(InstrumentName="D11B")
+        mask = MaskBTP(Workspace=ws, Components="detector_right, detector_left")
+
+        self.assertEquals(len(mask), 256*32*2)
+        self.checkConsistentMask(ws, mask)
+
+
 
 if __name__ == '__main__':
     unittest.main()

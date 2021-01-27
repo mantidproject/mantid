@@ -120,12 +120,12 @@ class MatchPeaksTest(unittest.TestCase):
             self._args['InputWorkspace'] = self._in1
             run1 = run_algorithm('MatchPeaks', **self._args)
             self.assertTrue(run1.isExecuted())
-        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 ]', str(contextManager.exception))
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace'] = self._in2
             run2 = run_algorithm('MatchPeaks', **self._args)
             self.assertTrue(run2.isExecuted())
-        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 ]', str(contextManager.exception))
 
     def testValidateInputWorkspace2(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -134,11 +134,11 @@ class MatchPeaksTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace2'] = self._in1
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
         with self.assertRaises(RuntimeError) as contextManager:
             self._args['InputWorkspace2'] = self._in2
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
 
     def testValidateInputWorkspace3(self):
         self._args['InputWorkspace'] = self._ws_shift
@@ -147,7 +147,7 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(sys.version_info >= (2, 7))
         with self.assertRaises(RuntimeError) as contextManager:
             run_algorithm('MatchPeaks', **self._args)
-        self.assertEqual('Some invalid Properties found', str(contextManager.exception))
+        self.assertEqual('Some invalid Properties found: [ InputWorkspace2 InputWorkspace3 ]', str(contextManager.exception))
 
     def testMatchCenter(self):
         # Input workspace should match its center

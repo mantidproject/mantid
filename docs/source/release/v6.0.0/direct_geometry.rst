@@ -68,4 +68,14 @@ Improvements
 
 - Widgets were rearranged into groups of items based on their logical function
 
+
+MSlice
+------
+
+BugFixes
+########
+- Fixed a bug that prevented the selection of more than one workspace for workspace addition.
+- Fixed a bug that caused MSlice crashes by ignoring the workspace selected by default for subtracting workspaces.
+- Fixed a bug that caused MSlice crashes when entering unexpected values into the width box for cuts.
+
 :ref:`Release 6.0.0 <v6.0.0>`

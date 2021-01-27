@@ -374,6 +374,7 @@ public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
   void enableDeletePrompt(bool enable);
+  void setOverplotDisabled(bool disabled);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -594,7 +595,7 @@ signals:
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
     void removePlotSignal(PropertyHandler *);
-
+    void fitResultsChanged(const QString &);
 };
 
 // ---------------------------------

@@ -52,6 +52,7 @@ public:
   /// Constructor
   FitOptionsBrowser(QWidget *parent = nullptr,
                     FittingType fitType = Simultaneous);
+  ~FitOptionsBrowser();
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const;
