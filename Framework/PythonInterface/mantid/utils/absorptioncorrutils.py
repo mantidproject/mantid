@@ -47,7 +47,7 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     prefix = wkspname.replace('__', '')
 
     # parse algorithm used for absorption calculation
-    # NOTE: the acutal algorithm used depends on selected abs_method, therefore
+    # NOTE: the actual algorithm used depends on selected abs_method, therefore
     #       we are embedding the algorithm name into the SHA1 so that we can
     #       differentiate them for caching purpose
     alg_name = {
@@ -86,7 +86,16 @@ def _getCacheName(wkspname, cache_dir, abs_method):
 
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
     """
-    With a given absorption workspace name, check both memory and disk to see if we can locate the cache
+    Check both memory and disk to locate cache data.  Returns ("", "")
+    if no cache can be found.
+
+    :params absName: absorption workspace name base
+    :params abs_method: absorption calculation method
+    :params sha1: SHA1 that identify cached workspace
+    :params cache_file_name: cache file name to search
+
+    return cached_absorption_correction_workspace_name_sample,
+           cached_absorption_correction_workspace_name_container
     """
     wsn_as = ""  # absorption workspace sample
     wsn_ac = ""  # absorption workspace container
@@ -131,7 +140,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
                 # restore them with the orignal name (wsn_as, wsn_ac)
                 UnGroupWorkspace(InputWorkspace=wsntmp)
             else:
-                raise ValueError(f"Unsupported caching type: {wstype}")
+                raise ValueError(f"Unsupported cached workspace type: {wstype}")
 
         # now check the memory again
         # -- wsn_as exist for all three methods
@@ -141,7 +150,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
         if mtd.doesExist(wsn_ac):
             found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
 
-    # step_3: if we did not find the cache, set both to None
+    # step_3: if we did not find the cache, set both to empty string
     wsn_as = wsn_as if found_as else ""
     wsn_ac = wsn_ac if found_ac else ""
 
