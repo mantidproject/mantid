@@ -80,7 +80,7 @@ private:
   void exec() override;
   bool processGroups() override;
 
-  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr &,
+  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr,
                                                 double startProgress = 0.0,
                                                 double stepProgress = 1.0);
 
@@ -90,7 +90,7 @@ private:
   void averageAndNormalizePixels(API::MatrixWorkspace &workspace,
                                  const SummedResults &results);
 
-  API::MatrixWorkspace_sptr mergeGroup(API::WorkspaceGroup_sptr &);
+  API::MatrixWorkspace_sptr mergeGroup(API::WorkspaceGroup &);
   void validateGroupInput();
 
   /// Minimum efficiency. Pixels with lower efficiency will be masked

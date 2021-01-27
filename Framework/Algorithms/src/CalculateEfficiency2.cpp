@@ -148,7 +148,7 @@ void CalculateEfficiency2::exec() {
 }
 
 API::MatrixWorkspace_sptr
-CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr &inputWorkspace,
+CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
                                           double startProgress,
                                           double stepProgress) {
 
@@ -218,7 +218,7 @@ bool CalculateEfficiency2::processGroups() {
 
   bool mergeGroups = getProperty(PropertyNames::MERGE_GROUP);
   if (mergeGroups) {
-    auto mergedWS = mergeGroup(inputWS);
+    auto mergedWS = mergeGroup(*inputWS);
     auto outputWS = calculateEfficiency(mergedWS);
     setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
     progress(1.0, "Done!");
@@ -324,10 +324,10 @@ void CalculateEfficiency2::averageAndNormalizePixels(
  *  @returns merged workspace group
  */
 API::MatrixWorkspace_sptr
-CalculateEfficiency2::mergeGroup(API::WorkspaceGroup_sptr &input) {
-  auto nEntries = input->getNumberOfEntries();
+CalculateEfficiency2::mergeGroup(API::WorkspaceGroup &input) {
+  auto nEntries = input.getNumberOfEntries();
   auto mergeRuns = createChildAlgorithm("MergeRuns");
-  mergeRuns->setProperty("InputWorkspaces", input->getName());
+  mergeRuns->setProperty("InputWorkspaces", input.getName());
   mergeRuns->executeAsChildAlg();
   Workspace_sptr mergedWs = mergeRuns->getProperty("OutputWorkspace");
 
@@ -355,7 +355,7 @@ CalculateEfficiency2::mergeGroup(API::WorkspaceGroup_sptr &input) {
       for (auto entryNo = 0; entryNo < nEntries; entryNo++) {
         MatrixWorkspace_sptr entry =
             std::static_pointer_cast<API::MatrixWorkspace>(
-                input->getItem(entryNo));
+                input.getItem(entryNo));
         auto spectrumInfoEntry = entry->spectrumInfo();
         if (!spectrumInfoEntry.isMasked(spectrumNo)) {
           dataY += entry->readY(spectrumNo)[0];
