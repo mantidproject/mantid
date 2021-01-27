@@ -113,6 +113,8 @@ class GenerateLogbook(PythonAlgorithm):
                 continue
             if self._numor_range[0] <= numor <= self._numor_range[1]:
                 file_list.append(os.path.splitext(file)[0])
+        if file_list == list():
+            raise RuntimeError("There are no files in {} in the specified numor range.".format(self._data_directory))
         return file_list
 
     def _get_default_entries(self):
