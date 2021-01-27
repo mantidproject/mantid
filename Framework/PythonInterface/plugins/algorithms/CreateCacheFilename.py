@@ -55,9 +55,8 @@ class CreateCacheFilename(PythonAlgorithm):
         self.declareProperty(
             "Prefix", "", "prefix for the output file name")
 
-        self.declareProperty(
-            "CacheDir", "",
-            "the directory in which the cache file will be created")
+        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
+
 
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
 
