@@ -197,8 +197,9 @@ CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
  */
 void CalculateEfficiency2::validateGroupInput() {
   auto results = validateInputs();
-  for (const auto& result : results) {
-    throw std::runtime_error(result.second);
+  for (const auto &result : results) {
+    throw std::runtime_error("Issue in " + result.first +
+                             " property: " + result.second);
   }
 }
 
