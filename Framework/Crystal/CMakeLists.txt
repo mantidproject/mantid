@@ -227,6 +227,9 @@ if(COVERALLS)
   endforeach(loop_var)
 endif()
 
+# Add a precompiled header where they are supported
+enable_precompiled_headers(inc/MantidCrystal/PrecompiledHeader.h SRC_FILES)
+
 # Add the target for this directory
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
