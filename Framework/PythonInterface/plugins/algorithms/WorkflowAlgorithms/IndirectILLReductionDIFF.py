@@ -87,10 +87,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         """
         run = None
         if len(self.runs) > 1:
-            number_of_channels = mtd[mtd[ws].getNames()[0]].blocksize()
             run = mtd[mtd[ws].getNames()[0]].getRun()
         else:
-            number_of_channels = mtd[ws].blocksize()
             run = mtd[ws].getRun()
 
         if run.hasProperty('Doppler.incident_energy'):
@@ -98,7 +96,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         else:
             raise RuntimeError("Unable to find incident energy for Doppler mode")
 
-        Rebin(InputWorkspace=ws, OutputWorkspace=self.output, Params=[0, number_of_channels, number_of_channels])
+        Integration(InputWorkspace=ws, OutputWorkspace=self.output)
         self._normalize_by_monitor(self.output)
 
         ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
