@@ -235,6 +235,8 @@ class TestUtils(unittest.TestCase):
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')
         DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
 
+        assert 1 == 3, 'Break a test to see what is going one.'
+
     def tearDown(self) -> None:
         to_delete = [w for w in [self.workspace, self.table] if AnalysisDataService.doesExist(w)]
         if len(to_delete) > 0:
