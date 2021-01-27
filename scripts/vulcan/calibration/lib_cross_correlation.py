@@ -614,46 +614,53 @@ def apply_masks(mask_ws):
     return mask_ws
 
 
-def merge_2_masks(lhs_mask_name, rhs_mask_name, output_mask_name):
+def _merge_mask_workspaces(target_mask_ws_name: str,
+                           source_mask_ws_name: str):
+    """Merge (add) 2 MaskWorkspaces from source mask workspace to target mask workspace.
+    The original masked pixels in the target workspace will be reserved
+
+    Parameters
+    ----------
+    target_mask_ws_name: str
+        name of the target mask workspace to have mask to merge into
+    source_mask_ws_name: str
+        name of the source mask workspace to have mask to merge from
+
+    Returns
+    -------
+    None
+
     """
-    Merge (add) 2 MaskWorkspaces
-    :param lhs_mask_name:
-    :param rhs_mask_name:
-    :param output_mask_name:
-    :return:
-    """
-    print('[MERGING MASK] {} + {} = {}'.format(lhs_mask_name, rhs_mask_name, output_mask_name))
+    print('[MERGING MASK] {} + {} = {}'.format(target_mask_ws_name, source_mask_ws_name, target_mask_ws_name))
 
-    # Plus 2 workspaces
-    Plus(LHSWorkspace=lhs_mask_name, RHSWorkspace=rhs_mask_name,
-         OutputWorkspace=output_mask_name)
-    for mask_ws_name in [lhs_mask_name, rhs_mask_name, output_mask_name]:
-        print(f'{mask_ws_name}: sum(Y) = {np.sum(mtd[mask_ws_name].extractY().flatten())}')
+    # Get the non-zero spectra from LHS and RHS (as masks)
+    lhs_index_list = np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0]
+    rhs_index_list = np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0]
+    print(f'[MERGING MASK] LHS: masked spectrum = {len(lhs_index_list)}, '
+          f'RHS: masked spectrum = {len(rhs_index_list)}')
 
-    # now time to set everything right
-    # lhs_mask = mtd[lhs_mask_name]
-    # rhs_mask = mtd[rhs_mask_name]
-    ohs_mask = mtd[output_mask_name]
+    # Set the masked spectra from source MaskWorkspace to target MaskWorkspace
+    target_mask_ws = mtd[target_mask_ws_name]
 
-    apply_masks(mask_ws=ohs_mask)
+    for masked_index in rhs_index_list:
+        target_mask_ws.dataY(masked_index)[0] = 1.
 
-    # # collect the masked spectra
-    # mask_wsindex_list = list()
-    # for iws in range(lhs_mask.getNumberHistograms()):
-    #     if lhs_mask.readY(iws)[0] > 0.5:
-    #         mask_wsindex_list.append(iws)
-    # for iws in range(rhs_mask.getNumberHistograms()):
-    #     if rhs_mask.readY(iws)[0] > 0.5:
-    #         mask_wsindex_list.append(iws)
-    #
-    # # mask all detectors explicitly
-    # ohs_mask.maskDetectors(WorkspaceIndexList=mask_wsindex_list)
+    # Mask pixels
+    # merge 2 lists
+    lhs_index_list.extend(rhs_index_list)
+    # remove redundant pixels
+    merged_masked_pixels = list(set(lhs_index_list))
+    # mask all detectors explicitly
+    target_mask_ws.maskDetectors(WorkspaceIndexList=merged_masked_pixels)
 
-    return
+    # verify output
+    print(f'[MERGING MASK] {target_mask_ws_name}: sum(Y) = {np.sum(mtd[target_mask_ws_name].extractY().flatten())}')
 
 
-def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name,
-                                          mask_ws_name, partial_mask_ws_name) -> Tuple[str, str]:
+def _merge_partial_offset_mask_workspaces(offset_ws_name: str,
+                                          partial_offset_ws_name: str,
+                                          mask_ws_name: str,
+                                          partial_mask_ws_name: str) -> Tuple[str, str]:
     """Merge partially calibrated offsets and masks to the final offsets and masks workspace
 
     Parameters
@@ -671,25 +678,25 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name, partial_offset_ws_name
         final offset workspace name, final mask workspace name
 
     """
-    # Use Plus to combine 2 offsets workspace
+    # Merge offsets
+    # use Plus to combine 2 offsets workspace
     Plus(LHSWorkspace=offset_ws_name, RHSWorkspace=partial_offset_ws_name,
          OutputWorkspace=offset_ws_name)
 
-    print('[MERGING MASK] Partial: Number of masked spectra = {0} in {1} ... Sum(Y) = {2}'.format(mtd[partial_mask_ws_name].getNumberMasked(), partial_mask_ws_name, np.sum(mtd[partial_mask_ws_name].extractY().flatten())))
+    # Merge masks
+    print('[MERGING MASK] Partial: Number of masked spectra = {0} in {1} ... Sum(Y) = {2}'
+          ''.format(mtd[partial_mask_ws_name].getNumberMasked(), partial_mask_ws_name,
+                    np.sum(mtd[partial_mask_ws_name].extractY().flatten())))
     # Mask:
     # Make sure mask_ws_name is a string for workspace name
     mask_ws_name = str(mask_ws_name)
 
     # merge masks workspace
-    temp_mask_ws_name =f'{mask_ws_name}_temp'
-    merge_2_masks(mask_ws_name, partial_mask_ws_name, temp_mask_ws_name)
+    _merge_mask_workspaces(mask_ws_name, partial_mask_ws_name)
 
-    # Replace input (target) mask workspace by new mask workspace
-    # - deelete previous combined mask workspace
-    # - rename merged mask workspace to target MaskWorkspace
-    DeleteWorkspace(Workspace=mask_ws_name)
-    RenameWorkspace(InputWorkspace=temp_mask_ws_name, OutputWorkspace=mask_ws_name)
-    print('[MERGING MASK] Summed:  Number of masked spectra = {0} in {1} ... sum[Y] = {2}'.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name, np.sum(mtd[mask_ws_name].extractY().flatten())))
+    print('[MERGING MASK] Summed:  Number of masked spectra = {0} in {1} ... sum[Y] = {2}'
+          ''.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name,
+                    np.sum(mtd[mask_ws_name].extractY().flatten())))
 
     return offset_ws_name, mask_ws_name
 
