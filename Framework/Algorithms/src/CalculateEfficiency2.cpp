@@ -114,6 +114,10 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
           break;
         }
       }
+    } else {
+      result[PropertyNames::INPUT_WORKSPACE] =
+          "The input property must be either MatrixWorkspace or a "
+          "WorkspaceGroup containing MatrixWorkspaces";
     }
   } else if (inputWS->blocksize() > 1) {
     result[PropertyNames::INPUT_WORKSPACE] = oneBinMsg;
