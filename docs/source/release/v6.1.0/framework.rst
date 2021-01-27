@@ -14,6 +14,7 @@ Concepts
 
 Algorithms
 ----------
+:ref:`LoadNexusLogs <algm-LoadNexusLogs>` has additional parameters to allow or block specific logs from being loaded.
 
 Data Objects
 ------------
