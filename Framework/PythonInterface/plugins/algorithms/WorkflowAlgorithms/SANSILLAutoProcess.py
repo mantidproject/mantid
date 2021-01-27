@@ -605,11 +605,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 else self.mask[0])
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
         self.progress.report('Loading mask')
-        kwargs = dict()
         if load_mask:
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
-            if isinstance(mtd[mask_name], WorkspaceGroup):
-                kwargs['MaskedInputWorkspaces'] = mask_name
         # sensitivity
         sens_input = ''
         ref_input = ''
