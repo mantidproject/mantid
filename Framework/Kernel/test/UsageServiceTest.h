@@ -70,7 +70,7 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",

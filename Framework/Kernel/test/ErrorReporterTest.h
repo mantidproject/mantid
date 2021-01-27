@@ -51,7 +51,7 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode"};
     for (auto expectedMember : expectedMembers) {
@@ -77,7 +77,7 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView",      "application", "host",     "mantidSha1",
+        "application", "host",     "mantidSha1",
         "mantidVersion", "osArch",      "osName",   "osReadable",
         "osVersion",     "uid",         "facility", "upTime",
         "exitCode",      "textBox",     "name",     "email"};
@@ -107,7 +107,7 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
         "email",    "stacktrace"};
@@ -138,7 +138,7 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     const std::vector<std::string> expectedMembers{
-        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
         "email",    "stacktrace"};

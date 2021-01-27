@@ -166,7 +166,7 @@ On Docker supported systems you may use the `mantid-development
 <https://github.com/mantidproject/dockerfiles/tree/master/development>`_
 images to develop Mantid without having to configure your system as a suitable
 build environment. This will give you an out of the box working build
-environment, including ParaView/VATES, Python 3 (where available) and ccache.
+environment, Python 3 (where available) and ccache.
 
 More details and instructions can be found at the GitHub link above.
 
