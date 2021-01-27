@@ -160,6 +160,11 @@ class RundexSettings(object):
                 }
             }
 
+    EXPORT_ALGO_CRITERIA = {
+            "SaveCanSAS1D": "%OutputType% == 'I(Q)'",
+            "SaveNISTDAT": "%OutputType% == 'I(Qx,Qy)'",
+            }
+
     EXPORT_ALGO_EXTENSION = {
             "SaveNexusProcessed": ".nxs",
             "SaveAscii": ".txt",

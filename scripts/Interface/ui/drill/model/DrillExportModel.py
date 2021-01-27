@@ -13,6 +13,8 @@ from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
+import re
+
 
 class DrillExportModel:
 
@@ -80,6 +82,31 @@ class DrillExportModel:
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = False
 
+    def _validCriteria(self, ws, algo):
+        """
+        Check if the criteria of the export algorithm is valid ot not.
+
+        Args:
+            ws (name): name of the workspace on which the critaeria will be
+                       tested
+            algo (str): name of the export algorithm
+        """
+        if algo not in RundexSettings.EXPORT_ALGO_CRITERIA:
+            return True
+        criteria = RundexSettings.EXPORT_ALGO_CRITERIA[algo]
+        if not criteria:
+            return True
+
+        processingAlgo = mtd[ws].getHistory().lastAlgorithm()
+        try:
+            params = re.findall("%[a-zA-Z]*%", criteria)
+            for param in params:
+                value = processingAlgo.getPropertyValue(param[1:-1])
+                criteria = criteria.replace(param, '"' + value + '"')
+            return bool(eval(criteria))
+        except:
+            return False
+
     def _onTaskError(self, ref, msg):
         """
         Triggered when the export failed.
@@ -107,7 +134,7 @@ class DrillExportModel:
             if ((workspaceName in wsName)
                     and (not isinstance(mtd[wsName], WorkspaceGroup))):
                 for a,s in self._exportAlgorithms.items():
-                    if s:
+                    if s and self._validCriteria(wsName, a):
                         filename = exportPath + wsName \
                                    + RundexSettings.EXPORT_ALGO_EXTENSION[a]
                         task = DrillTask(ref, a, InputWorkspace=wsName,
