@@ -111,7 +111,7 @@ class GenerateLogbook(PythonAlgorithm):
             except ValueError:
                 self.log().debug("File {} cannot be cast into an integer numor".format(file))
                 continue
-            if self._numor_range[0] <= numor < self._numor_range[1]:
+            if self._numor_range[0] <= numor <= self._numor_range[1]:
                 file_list.append(os.path.splitext(file)[0])
         return file_list
 

@@ -42,21 +42,21 @@ class GenerateLogbookTest(unittest.TestCase):
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='default_logbook', Facility='ILL', Instrument='D7',
                         NumorRange=[396990,396993])
-        self._check_output('default_logbook', numberEntries=2, numberColumns=3)
+        self._check_output('default_logbook', numberEntries=3, numberColumns=3)
 
     def test_d7_optional(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='optional_logbook', Facility='ILL', Instrument='D7',
                         NumorRange=[396990,396993], OptionalHeaders='TOF')
-        self._check_output('optional_logbook', numberEntries=2, numberColumns=4)
+        self._check_output('optional_logbook', numberEntries=3, numberColumns=4)
 
     def test_d7_custom(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='custom_logbook', Facility='ILL', Instrument='D7',
                         NumorRange=[396990,396993], CustomEntries='entry0/acquisition_mode')
-        self._check_output('custom_logbook', numberEntries=2, numberColumns=4)
+        self._check_output('custom_logbook', numberEntries=3, numberColumns=4)
 
     def test_d7_custom_nonexisting(self):
         self.assertTrue(os.path.exists(self._data_directory))
