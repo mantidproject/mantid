@@ -107,8 +107,8 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
   const auto l1 = m_spectrumInfo->l1();
   auto emode = m_workspace->getEMode();
   UnitParametersMap pmap{};
-  m_workspace->getDetectorValues(*m_spectrumInfo, Units::Empty(),
-                                 Units::Empty(), emode, false, wsIndex, pmap);
+  m_spectrumInfo->getDetectorValues(Units::Empty(), Units::Empty(), emode,
+                                    false, wsIndex, pmap);
   double efixed = 0.;
   if (pmap.find(UnitParams::efixed) != pmap.end()) {
     efixed = pmap[UnitParams::efixed];
