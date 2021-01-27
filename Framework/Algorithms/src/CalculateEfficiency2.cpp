@@ -96,6 +96,8 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
   // Files from time-of-flight instruments must be integrated in Lambda before
   // using this algorithm
 
+  auto oneBinMsg = "Input workspace must have only one bin. Consider "
+                   "integrating the input over all the bins.";
   Workspace_const_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
   MatrixWorkspace_const_sptr inputWS =
       std::dynamic_pointer_cast<const MatrixWorkspace>(ws1);
@@ -108,15 +110,13 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
         auto const entry = std::static_pointer_cast<const MatrixWorkspace>(
             inputGroup->getItem(entryNo));
         if (entry->blocksize() > 1) {
-          result[PropertyNames::INPUT_WORKSPACE] =
-              "Input workspace must have only one bin";
+          result[PropertyNames::INPUT_WORKSPACE] = oneBinMsg;
           break;
         }
       }
     }
   } else if (inputWS->blocksize() > 1) {
-    result[PropertyNames::INPUT_WORKSPACE] =
-        "Input workspace must have only one bin";
+    result[PropertyNames::INPUT_WORKSPACE] = oneBinMsg;
   }
 
   if (getPropertyValue(PropertyNames::OUTPUT_WORKSPACE) == "") {
