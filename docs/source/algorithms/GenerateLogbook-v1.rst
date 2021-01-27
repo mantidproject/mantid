@@ -11,7 +11,7 @@
 Description
 -----------
 
-This is the algorithm that allows to create a :ref:`TableWorkspace <TableWorkspace>` logbook containing metadata specific
+This is the algorithm that allows to create a :ref:`TableWorkspace <Table Workspaces>` logbook containing metadata specific
 to the selected instrument and relevant technique, without the need to load NeXus data in Mantid.
 
 There are three levels of entries that can be included in a logbook: default, optional, and custom. The default entries
