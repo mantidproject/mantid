@@ -41,6 +41,8 @@ def lazy_instance_access(cls):
             return cls.__getattribute__(cls.Instance(), item)
 
         def __bool__(self):
+            if hasattr(cls, "__len__"):
+                return cls.__getattribute__(cls.Instance(), "__len__")() != 0
             return True
 
         def __len__(self):
