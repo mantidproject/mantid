@@ -30,7 +30,7 @@ void ChangeBinOffset::init() {
                   "Name of the output workspace");
   auto isDouble = std::make_shared<BoundedValidator<double>>();
   declareProperty("Offset", 0.0, isDouble,
-                  "The amount to change each time bin by");
+                  "The amount to adjust the time bins. Usually in microseconds");
 
   declareWorkspaceIndexSetProperties();
 }
