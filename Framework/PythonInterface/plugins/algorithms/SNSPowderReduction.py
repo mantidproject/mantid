@@ -219,7 +219,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
 
         # Caching options
-        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
+        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
         self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
         self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
         property_names = ('CacheDir', 'CleanCache')
