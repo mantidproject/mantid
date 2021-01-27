@@ -152,7 +152,7 @@ CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
                                           double startProgress,
                                           double stepProgress) {
 
-  // create the output workspace from the input
+  // create the output workspace from the input, while NOT preserving events
   auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
   childAlg->setProperty("WorkspaceToRebin", inputWorkspace);
   childAlg->setProperty("WorkspaceToMatch", inputWorkspace);
