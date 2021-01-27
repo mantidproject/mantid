@@ -657,7 +657,7 @@ bool ReflectometryReductionOne2::useDetectorAngleForQConversion(
   // If summing in Q, the output workspace is constructed such that the angle
   // of the detector is correct for the conversion to Q
   if (summingInQ())
-    return true;
+    return false;
 
   // Otherwise we are summing in lambda. If ThetaIn was not specified then no
   // correction was requested so assume the detector angle is correct
@@ -703,13 +703,22 @@ ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
     // single region of interest (i.e. a single histogram in the summed
     // workspace) because different regions of interest would be centred around
     // different angles.
-    if (inputWS->getNumberHistograms() > 1) {
+    if (detectorGroups().size() != 1) {
       throw std::invalid_argument(
           "Angle correction using ThetaIn can only be done for a single group "
           "in ProcessingInstructions, but the number of groups specified was " +
           std::to_string(inputWS->getNumberHistograms()));
     }
-    double const theta = getProperty("ThetaIn");
+
+    // The angle to use in conversion is different for each mode
+    double theta = 0.0;
+    if (summingInQ())
+      theta = getDetectorTwoTheta(m_spectrumInfo,
+                                  twoThetaRDetectorIdx(detectorGroups()[0])) *
+              radToDeg / 2.;
+    else
+      theta = getProperty("ThetaIn");
+
     auto refRoi = this->createChildAlgorithm("RefRoi");
     refRoi->initialize();
     refRoi->setProperty("InputWorkspace", inputWS);

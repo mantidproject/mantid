@@ -8,7 +8,7 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
-    CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
+    CopySample, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
     LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
     RebinToWorkspace, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
@@ -435,6 +435,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # end of inner loop
         if not mtd.doesExist(wkspname):
             raise RuntimeError('Failed to process any data from file "{}"'.format(filename))
+
+        # copy the sample object from the absorption workspace
+        if self.absorption is not None and len(str(self.absorption)) > 0:
+            CopySample(InputWorkspace=self.absorption, OutputWorkspace=wkspname,
+                       CopyEnvironment=False)
 
         # write out the cachefile for the main reduced data independent of whether
         # the unfocussed workspace was requested

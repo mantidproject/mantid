@@ -500,8 +500,9 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
                                                                OutputWorkspace=workspace_names[table_type])
         else:
-            message = f'No {table_type} file found for {str(input_workspace)} with run start {run_start}. ' \
-                      f'Oldest calibration dates {available_dates[0]}'
+            message = f'No {table_type} file found for {str(input_workspace)} with run start {run_start}. '
+            if len(available_dates) > 0:
+                message += f'Oldest calibration date is {available_dates[0]}'
             logger.warning(message)
 
     return instrument_tables.values()

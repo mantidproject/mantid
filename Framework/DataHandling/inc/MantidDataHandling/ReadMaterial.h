@@ -61,6 +61,8 @@ public:
     double scatteringXSection = EMPTY_DBL();
     /// The name or path of a file containing an attenuation profile
     std::string attenuationProfileFileName = "";
+    /// The name or path of a file containing an x ray attenuation profile
+    std::string xRayAttenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
@@ -104,7 +106,8 @@ private:
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection,
-                         std::string attenuationProfileFileName);
+                         std::string attenuationProfileFileName,
+                         std::string xRayAttenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };

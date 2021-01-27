@@ -46,7 +46,7 @@ The files needed for this example are not present in our standard usage data
 download due to their size.  They can however be downloaded using these links:
 `PG3_9830_event.nxs <https://github.com/mantidproject/systemtests/blob/master/Data/PG3_9830_event.nxs?raw=true>`_
 and
-`pg3_mantid_det.cal <http://198.74.56.37/ftp/external-data/MD5/e2b281817b76eadbc26a0a2617477e97>`_.
+`pg3_mantid_det.cal <https://testdata.mantidproject.org/ftp/external-data/MD5/e2b281817b76eadbc26a0a2617477e97>`_.
 
 You will have to rename :literal:`pg3_mantid_det.cal` manually, as its name in the link above is a list of random characters.
 

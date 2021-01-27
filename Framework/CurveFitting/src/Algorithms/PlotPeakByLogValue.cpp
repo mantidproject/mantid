@@ -157,7 +157,13 @@ void PlotPeakByLogValue::init() {
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
-                  "exclude from the fit.");
+                  "exclude from the fit for all spectra.");
+
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("ExcludeMultiple", ""),
+      "A list of Exclusion ranges, defining the regions to "
+      "exclude from the fit for each spectra. Must have the "
+      "same number of sets as the number of the spectra.");
 
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
@@ -166,6 +172,21 @@ void PlotPeakByLogValue::init() {
       "OutputFitStatus", false,
       "Flag to output fit status information which consists of the fit "
       "OutputStatus and the OutputChiSquared");
+}
+
+std::map<std::string, std::string> PlotPeakByLogValue::validateInputs() {
+  std::map<std::string, std::string> errors;
+  std::string inputList = getPropertyValue("Input");
+  int default_wi = getProperty("WorkspaceIndex");
+  int default_spec = getProperty("Spectrum");
+  const std::vector<InputSpectraToFit> wsNames =
+      makeNames(inputList, default_wi, default_spec);
+  std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
+  if (!excludeList.empty() && excludeList.size() != wsNames.size()) {
+    errors["ExcludeMultiple"] =
+        "ExcludeMultiple must be the same size has the number of spectra.";
+  }
+  return errors;
 }
 
 /**
@@ -190,6 +211,7 @@ void PlotPeakByLogValue::exec() {
   m_baseName = getPropertyValue("OutputWorkspace");
   std::vector<double> startX = getProperty("StartX");
   std::vector<double> endX = getProperty("EndX");
+  std::vector<std::string> exclude = getExclude(wsNames.size());
 
   bool isDataName = false; // if true first output column is of type string and
                            // is the data source name
@@ -258,15 +280,15 @@ void PlotPeakByLogValue::exec() {
     if (startX.size() == 0) {
       fit = runSingleFit(createFitOutput, outputCompositeMembers,
                          outputConvolvedMembers, ifun, data, EMPTY_DBL(),
-                         EMPTY_DBL());
+                         EMPTY_DBL(), exclude[i]);
     } else if (startX.size() == 1) {
-      fit =
-          runSingleFit(createFitOutput, outputCompositeMembers,
-                       outputConvolvedMembers, ifun, data, startX[0], endX[0]);
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
+                         outputConvolvedMembers, ifun, data, startX[0], endX[0],
+                         exclude[i]);
     } else {
-      fit =
-          runSingleFit(createFitOutput, outputCompositeMembers,
-                       outputConvolvedMembers, ifun, data, startX[i], endX[i]);
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
+                         outputConvolvedMembers, ifun, data, startX[i], endX[i],
+                         exclude[i]);
     }
 
     ifun = fit->getProperty("Function");
@@ -428,7 +450,8 @@ PlotPeakByLogValue::createResultsTable(const std::string &logName,
 std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
     bool createFitOutput, bool outputCompositeMembers,
     bool outputConvolvedMembers, const IFunction_sptr &ifun,
-    const InputSpectraToFit &data, double startX, double endX) {
+    const InputSpectraToFit &data, double startX, double endX,
+    const std::string &exclude) {
   g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i
                 << " with \n";
   g_log.debug() << ifun->asString() << '\n';
@@ -438,7 +461,6 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
 
   if (createFitOutput)
     wsBaseName = data.name + "_" + spectrum_index;
-  const std::vector<double> exclude = this->getProperty("Exclude");
   bool histogramFit = this->getPropertyValue("EvaluationType") == "Histogram";
   bool ignoreInvalidData = this->getProperty("IgnoreInvalidData");
 
@@ -538,6 +560,22 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   }
 
   return format;
+}
+
+std::vector<std::string>
+PlotPeakByLogValue::getExclude(const size_t numSpectra) {
+  std::string exclude = getPropertyValue("Exclude");
+  std::vector<std::string> excludeList = getProperty("ExcludeMultiple");
+  if (excludeList.empty()) {
+    std::vector<std::string> excludeVector;
+    excludeVector.reserve(numSpectra);
+    for (size_t i = 0; i < numSpectra; i++) {
+      excludeVector.emplace_back(exclude);
+    }
+    return excludeVector;
+  } else {
+    return excludeList;
+  }
 }
 
 } // namespace Algorithms

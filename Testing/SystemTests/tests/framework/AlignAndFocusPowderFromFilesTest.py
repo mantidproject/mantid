@@ -85,6 +85,10 @@ class SimplestCompare(systemtesting.MantidSystemTest):
 
 class ChunkingCompare(systemtesting.MantidSystemTest):
     # this test is very similar to SNAPRedux.Simple
+
+    def requiredMemoryMB(self):
+        return 24*1024  # GiB
+
     def runTest(self):
         # 11MB file
         kwargs = {'Filename':'SNAP_45874',
@@ -259,7 +263,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         SetSample(InputWorkspace='V_abs',
                   Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
                   Geometry={'Shape': 'Cylinder', 'Height': 6.97, 'Radius': (0.63 / 2), 'Center': [0., 0., 0.]})
-        self.assertEqual(absorptionWS.getNumberBins(), num_wl_bins)
+        self.assertEqual(absorptionWS.blocksize(), num_wl_bins)
         # calculate the absorption
         CylinderAbsorption(InputWorkspace='V_abs', OutputWorkspace='V_abs',
                            NumberOfSlices=20, NumberOfAnnuli=3)
@@ -292,4 +296,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
+        # verify the material name
+        assert mtd[self.wksp_file].sample().getMaterial().name() == 'V'
+        # use standard method
         return (self.wksp_mem, self.wksp_file)

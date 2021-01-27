@@ -234,17 +234,22 @@ class MantidSystemTest(unittest.TestCase):
         if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
-        # Start timer
-        start = time.time()
-        countmax = self.maxIterations() + 1
-        for i in range(1, countmax):
-            istart = time.time()
-            self.runTest()
-            delta_t = time.time() - istart
-            self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
-        delta_t = float(time.time() - start)
-        # Finish
-        self.reportResult('time_taken', '%.2f' % delta_t)
+        self.setUp()
+
+        try:
+            # Start timer
+            start = time.time()
+            countmax = self.maxIterations() + 1
+            for i in range(1, countmax):
+                istart = time.time()
+                self.runTest()
+                delta_t = time.time() - istart
+                self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
+            delta_t = float(time.time() - start)
+            # Finish
+            self.reportResult('time_taken', '%.2f' % delta_t)
+        finally:
+            self.tearDown()
 
     def __prepASCIIFile(self, filename):
         """Prepare an ascii file for comparison using difflib."""
@@ -671,21 +676,20 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = """
+        code = f"""
 import sys
-for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
+for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
     sys.path.append(p)
-from {test_modname} import {test_cls}
-systest = {test_cls}()
-if {exclude_in_pr}:
+                
+# Ensure sys path matches current to avoid weird import errors
+sys.path.extend({sys.path})
+from {self._modname} import {self._test_cls_name}
+systest = {self._test_cls_name}()
+if {self._exclude_in_pr_builds}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR,
-           pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
-           test_dir=self._test_dir,
-           test_modname=self._modname,
-           test_cls=self._test_cls_name,
-           exclude_in_pr=self._exclude_in_pr_builds)
-        if (not clean):
+"""
+
+        if not clean:
             code += "systest.execute()\n" + \
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:

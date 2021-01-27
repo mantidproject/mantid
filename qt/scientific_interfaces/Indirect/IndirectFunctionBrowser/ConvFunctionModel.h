@@ -78,6 +78,7 @@ public:
                             const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
                                    const QString &constraint) override;
+  void setGlobalParameterValue(const QString &paramName, double value) override;
   QString setBackgroundA0(double value) override;
 
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);

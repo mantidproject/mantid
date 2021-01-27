@@ -775,6 +775,10 @@ class Instrument(object):
         # If not set, sets energy transfers to values to compare exactly to RAE's original implementation.
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
+        Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
+        if len(np.where(Etrans > Ei)[0]) > 0:
+            warnings.warn('Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
+        Etrans[np.where(Etrans >= Ei)] = np.nan
         v_van, _, _ = self.getVanVar(Ei, frequency, Etrans)
         x2 = self.chopper_system.sam_det
         Ef = Ei - np.array(Etrans)

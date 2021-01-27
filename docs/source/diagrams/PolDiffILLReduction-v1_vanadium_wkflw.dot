@@ -1,0 +1,64 @@
+digraph Vanadium {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    AverageCounts
+    SelfAttenuationMethod
+  }
+
+  subgraph params {
+    $param_style
+    Run
+    D7YIGPositionCalibration
+    AbsorberInputWorkspace
+    ContainerInputWorkspace
+    QuartzInputWorkspace
+    TransmissionInputWorkspace
+    SampleSelfAttenuationFactors
+    SampleAndEnvironmentProperties
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    Divide [label="Normalize to monitor"]
+    Multiply [label="Correct polarising efficiency"]
+    Minus [label="Subtract background"]
+    Plus [label="Average counts"]
+    Divide2 [label="Normalize"]
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
+  }
+
+  Run -> Load
+  D7YIGPositionCalibration -> Load
+  Load -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  ContainerInputWorkspace -> Minus
+  TransmissionInputWorkspace -> Minus
+  Minus -> Multiply
+  QuartzInputWorkspace -> Multiply
+  Multiply -> SelfAttenuationMethod
+  SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
+  SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> PaalmanPingsAbsorptionCorrection
+  SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  SelfAttenuationMethod -> SampleSelfAttenuationFactors
+  SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
+  ApplyPaalmanPingsCorrection -> AverageCounts
+  SelfAttenuationMethod -> AverageCounts
+  AverageCounts -> Divide2
+  AverageCounts -> Plus
+  Plus -> Divide2
+  Divide2 -> OutputWorkspace
+}

@@ -14,7 +14,7 @@ from typing import List
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
+from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 
 from sans.common.file_information import find_full_file_path
 from sans.common.enums import (DetectorType, SANSInstrument)
@@ -201,9 +201,6 @@ class StateMask(metaclass=JsonSerializable):
         # The detector dependent masks
         self.detectors = None  # : Dict
 
-        # The idf path of the instrument
-        self.idf_path = ""
-
     def validate(self):
         is_invalid = dict()
 
@@ -306,25 +303,12 @@ class StateMaskNoInst(StateMask):
 # ----------------------------------------------------------------------------------------------------------------------
 
 
-def setup_idf_and_ipf_content(move_info, data_info):
-    # Get the IDF and IPF path since they contain most of the import information
-    idf_file_path = data_info.idf_file_path
-    ipf_file_path = data_info.ipf_file_path
-    # Set the detector names
-    if ipf_file_path:
-        set_detector_names(move_info, ipf_file_path)
-    # Set the idf path
-    move_info.idf_path = idf_file_path
-
-
 class StateMaskBuilder(object):
     @automatic_setters(StateMask)
     def __init__(self, data_info, state):
         super(StateMaskBuilder, self).__init__()
         self._data = data_info
         self.state = state
-        if data_info.instrument is not SANSInstrument.NO_INSTRUMENT:
-            setup_idf_and_ipf_content(self.state, data_info)
 
     def set_single_spectra_on_detector(self, single_spectra):
         """

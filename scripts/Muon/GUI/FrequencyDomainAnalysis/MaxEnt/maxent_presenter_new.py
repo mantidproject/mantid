@@ -69,10 +69,6 @@ class MaxEntPresenter(object):
         if self.maxent_alg is not None:
             self.maxent_alg.cancel()
 
-            # Need to set this as sent as part of calculation finished signal
-            self._maxent_output_workspace_name = get_maxent_workspace_name(
-                self.get_parameters_for_maxent_calculation()['InputWorkspace'])
-
     # turn on button
     def activate(self):
         self.view.activateCalculateButton()
@@ -83,6 +79,8 @@ class MaxEntPresenter(object):
 
     def createThread(self):
         self.maxent_alg = mantid.AlgorithmManager.create("MuonMaxent")
+        self._maxent_output_workspace_name = get_maxent_workspace_name(
+            self.get_parameters_for_maxent_calculation()['InputWorkspace'])
         calculation_function = functools.partial(self.calculate_maxent, self.maxent_alg)
         self._maxent_calculation_model = ThreadModelWrapper(calculation_function)
         return thread_model.ThreadModel(self._maxent_calculation_model)
@@ -118,7 +116,7 @@ class MaxEntPresenter(object):
         inputs = {}
 
         inputs['InputWorkspace'] = self.view.input_workspace
-        run = [float(re.search('[0-9]+', inputs['InputWorkspace']).group())]
+        run = float(re.search('[0-9]+', inputs['InputWorkspace']).group())
 
         if self.view.phase_table != 'Construct':
             inputs['InputPhaseTable'] = self.view.phase_table
@@ -126,9 +124,9 @@ class MaxEntPresenter(object):
         if self.load.dead_time_table(run):
             inputs['InputDeadTimeTable'] = self.load.dead_time_table(run)
 
-        inputs['FirstGoodTime'] = self.load.first_good_data(run)
+        inputs['FirstGoodTime'] = self.load.first_good_data([run])
 
-        inputs['LastGoodTime'] = self.load.last_good_data(run)
+        inputs['LastGoodTime'] = self.load.last_good_data([run])
 
         inputs['Npts'] = self.view.num_points
 

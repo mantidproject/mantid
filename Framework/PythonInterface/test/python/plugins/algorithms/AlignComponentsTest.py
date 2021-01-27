@@ -4,117 +4,117 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import numpy as np
 import unittest
-from mantid.simpleapi import AlignComponents, CreateSampleWorkspace, MoveInstrumentComponent, CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent
+from mantid.simpleapi import (
+    AlignComponents, ConvertUnits, CloneWorkspace, CreateSampleWorkspace, Max, MoveInstrumentComponent,
+    CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent)
 from mantid.api import AlgorithmFactory
+from mantid.kernel import V3D
 
 
 class AlignComponentsTest(unittest.TestCase):
 
-    def testAlignComponentsPositionXY(self):
-        CreateSampleWorkspace(OutputWorkspace='testWS', NumBanks=1,BankPixelWidth=4)
-        component='bank1'
-        MoveInstrumentComponent(Workspace='testWS',ComponentName=component,X=0.06,Y=0.04,Z=4.98,RelativePosition=False)
+    def testAlignComponentsPosition(self):
+        r"""
 
-        ### Detector should move to [0.05,0.03,4.98]
-        ### Calibration table generated with:
-        # CreateSampleWorkspace(OutputWorkspace='sample', NumBanks=1,BankPixelWidth=4)
-        # MoveInstrumentComponent(Workspace='sample',ComponentName='bank1',X=0.05,Y=0.03,Z=4.98,RelativePosition=False)
-        # CalculateDIFC(InputWorkspace='sample', OutputWorkspace='sample')
-        # d=mtd['sample'].extractY()
-        # for i in range(len(d)):
-        #        print "calTable.addRow(["+str(i+16)+", "+str(d[i][0])+"])"
+        CreateSampleWorkspace here generates one bank of 2x2 pixels. All pixels have a single peak at
+        TOF=10000 micro-seconds. The bank is facing the sample, centered along the vertical axis (Y),
+        and at a scattering angle from the beam axis (Z).
+        Because the pixels are at different locations, converting units to d-spacing results in peaks at different
+        values of d-spacing. For the bank in this test we have:
 
-        calTable = CreateEmptyTableWorkspace()
-        calTable.addColumn("int", "detid")
-        calTable.addColumn("double", "difc")
+            workspace index       | 0      | 1      | 2      | 3      |
+            ----------------------|--------|--------|--------|--------|
+            detector ID           | 4      | 5      | 6      | 6      |
+            ----------------------|--------|--------|--------|--------|
+            peack-center TOF      |10000   | 10000  | 10000  | 10000  |
+            ----------------------|--------|--------|--------|--------|
+            peak-center d-spacing | 5.2070 | 5.2070 | 5.1483 | 5.1483 |
 
-        calTable.addRow([16, 44.3352831346])
-        calTable.addRow([17, 47.7503426493])
-        calTable.addRow([18, 51.6581064544])
-        calTable.addRow([19, 55.9553976608])
-        calTable.addRow([20, 49.6495672525])
-        calTable.addRow([21, 52.7214213944])
-        calTable.addRow([22, 56.285004349])
-        calTable.addRow([23, 60.2530897937])
-        calTable.addRow([24, 55.1227558338])
-        calTable.addRow([25, 57.9048914599])
-        calTable.addRow([26, 61.1671229038])
-        calTable.addRow([27, 64.8369848035])
-        calTable.addRow([28, 60.7118272387])
-        calTable.addRow([29, 63.2484968666])
-        calTable.addRow([30, 66.2480051141])
-        calTable.addRow([31, 69.650545037])
+        The first workspace index corresponds to a pixel centered on the beam axis, hence the scattering angle is zero
+        and the corresponding d-spacing is infinite.
 
-        ws = mtd["testWS"]
-        startPos = ws.getInstrument().getComponentByName(component).getPos()
-        startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles()
-        AlignComponents(CalibrationTable="calTable",
-                        Workspace="testWS",
-                        ComponentList=component,
-                        Xposition=True,
-                        Yposition=True)
-        ws = mtd["testWS"]
-        endPos = ws.getInstrument().getComponentByName(component).getPos()
-        endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles()
-        self.assertAlmostEqual(endPos.getX(), 0.05)
-        self.assertAlmostEqual(endPos.getY(), 0.03)
-        self.assertEqual(startPos.getZ(), endPos.getZ())
-        self.assertEqual(startRot[0], endRot[0])
-        self.assertEqual(startRot[1], endRot[1])
-        self.assertEqual(startRot[2], endRot[2])
+        Correspondence betwee
+        """
 
-    def testAlignComponentsRotationY(self):
-        CreateSampleWorkspace(OutputWorkspace='testWS', NumBanks=1,BankPixelWidth=4)
-        component='bank1'
-        MoveInstrumentComponent(Workspace='testWS',ComponentName=component,X=2.00,Y=0,Z=2.00,RelativePosition=False)
-        RotateInstrumentComponent(Workspace='testWS',ComponentName='bank1',X=0,Y=1,Z=0,Angle=50,RelativeRotation=False)
+        def serve_instrument(output_workspace):
+            scattering_angle = 20  # in degrees
+            # Instrument with four spectra. Each spectrum has one single Gaussian peak in TOF, centered at 10000
+            CreateSampleWorkspace(OutputWorkspace=output_workspace, BinWidth=0.1, NumBanks=1, BankPixelWidth=2,
+                                  Function='User Defined',
+                                  UserDefinedFunction='name=Gaussian, PeakCentre=10000, Height=100, Sigma=2',
+                                  Xmin=9900, Xmax=10100, BankDistanceFromSample=2, SourceDistanceFromSample=20)
+            MoveInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', RelativePosition=False,
+                                    X=0, Y=0.0, Z=0)  # move to the origin
+            RotateInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', X=0, Y=1, Z=0,
+                                      Angle=scattering_angle, RelativeRotation=False)
+            sin, cos = np.sin(np.radians(scattering_angle)), np.cos(np.radians(scattering_angle))
+            # detector pixel width is 0.008m, perpendicular to the scattered beam. Detector is 2m away from the sample
+            z, x = 2 * cos + 0.004 * sin, 2 * sin - 0.004 * cos
+            MoveInstrumentComponent(Workspace=output_workspace, ComponentName='bank1', RelativePosition=False,
+                                    X=x, Y=0, Z=z)  # translate 2 meters away and center the detector
+            return mtd['original']
 
-        ### Detector should rotate to +45deg around Y
-        ### Calibration table generated with:
-        # CreateSampleWorkspace(OutputWorkspace='sample2', NumBanks=1,BankPixelWidth=4)
-        # MoveInstrumentComponent(Workspace='sample2',ComponentName='bank1',X=2.0,Y=0.0,Z=2.0,RelativePosition=False)
-        # RotateInstrumentComponent(Workspace='sample2',ComponentName='bank1',X=0,Y=1,Z=0,Angle=45,RelativeRotation=False)
-        # CalculateDIFC(InputWorkspace='sample2', OutputWorkspace='sample2')
-        # d=mtd['sample2'].extractY()
-        # for i in range(len(d)):
-        #        print "calTable.addRow(["+str(i+16)+", "+str(d[i][0])+"])"
+        serve_instrument('original')
+        # Convert to d-spacing
+        ConvertUnits(InputWorkspace='original', Target='dSpacing', EMode='Elastic', OutputWorkspace='original_dspacing')
+        # Find the bin boundaries limiting the peak maximum
+        Max(InputWorkspace='original_dspacing', OutputWorkspace='original_d_at_max')
+        # Average the two bin boundaries to find the bin center, taken to be the location of the peak center
+        original_d = np.average(mtd['original_d_at_max'].extractX(), axis=1)
 
-        calTable = CreateEmptyTableWorkspace()
-        calTable.addColumn("int", "detid")
-        calTable.addColumn("double", "difc")
+        peak_positions = [5.1483, 5.2070]  # reference peak positions in d-spacing (Angstroms)
 
-        calTable.addRow([16, 2481.89300158])
-        calTable.addRow([17, 2481.90717397])
-        calTable.addRow([18, 2481.94969])
-        calTable.addRow([19, 2482.02054626])
-        calTable.addRow([20, 2490.36640334])
-        calTable.addRow([21, 2490.38050851])
-        calTable.addRow([22, 2490.42282292])
-        calTable.addRow([23, 2490.49334316])
-        calTable.addRow([24, 2498.83911141])
-        calTable.addRow([25, 2498.85314962])
-        calTable.addRow([26, 2498.89526313])
-        calTable.addRow([27, 2498.96544859])
-        calTable.addRow([28, 2507.31101837])
-        calTable.addRow([29, 2507.32498986])
-        calTable.addRow([30, 2507.36690322])
-        calTable.addRow([31, 2507.43675513])
+        # Generate a table of peak centers in TOF units
+        table_tofs = CreateEmptyTableWorkspace(OutputWorkspace='table_tofs')
+        column_info = [('int', 'detid'), ('double', '@5.1483'), ('double', '@5.2070')]
+        [table_tofs.addColumn(c_type, c_name) for c_type, c_name in column_info]
+        table_tofs.addRow([4, float('nan'), 10000.0])
+        table_tofs.addRow([5, float('nan'), 10000.0])  # a peak in TOF correspoding to a peak of 306.5928 Angstroms
+        table_tofs.addRow([6, 10000.0, float('nan')])  # a peak in TOF correspoding to a peak of 306.5928 Angstroms
+        table_tofs.addRow([7, 10000.0, float('nan')])  # a peak in TOF correspoding to a peak of 216.7940 Angstroms
 
-        ws = mtd["testWS"]
-        startPos = ws.getInstrument().getComponentByName(component).getPos()
-        startRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
-        AlignComponents(CalibrationTable="calTable",
-                        Workspace="testWS",
-                        ComponentList=component,
-                        AlphaRotation=True)
-        ws = mtd["testWS"]
-        endPos = ws.getInstrument().getComponentByName(component).getPos()
-        endRot = ws.getInstrument().getComponentByName(component).getRotation().getEulerAngles("YZX") #YZX
-        self.assertEqual(startPos, endPos)
-        self.assertAlmostEqual(endRot[0],45.0,places=0)
-        self.assertEqual(startRot[1], endRot[1])
-        self.assertEqual(startRot[2], endRot[2])
+        # perturb the position of the bank with a translation or the order of a few milimeters
+        component = 'bank1'
+        xyz_shift = V3D(0.005, 0.010, 0.007)
+        CloneWorkspace(InputWorkspace='original', OutputWorkspace='perturbed')
+        MoveInstrumentComponent(Workspace='perturbed', ComponentName='bank1', RelativePosition=True,
+                                X=xyz_shift.X(), Y=xyz_shift.Y(), Z=xyz_shift.Z())
+
+        # calibrate the perturbed bank
+        AlignComponents(PeakCentersTofTable='table_tofs', PeakPositions=peak_positions, OutputWorkspace='calibrated',
+                        InputWorkspace='perturbed', ComponentList=component, AdjustmentsTable='adjustments',
+                        Xposition=True, Yposition=True, Zposition=True)
+
+        # compare the peak-centers (in d-spacing units) between the original and calibrated
+        # spectra, up to 0.001 Angstroms
+        ConvertUnits(InputWorkspace='calibrated', Target='dSpacing', EMode='Elastic',
+                     OutputWorkspace='calibrated_dspacing')
+        Max(InputWorkspace='calibrated_dspacing', OutputWorkspace='calibrated_d_at_max')
+        calibrated_d = np.average(mtd['calibrated_d_at_max'].extractX(), axis=1)
+        assert np.allclose(original_d, calibrated_d, atol=0.001)
+
+        # perturb the orientation of the bank with a rotation of a small angle around an axis almost parallel
+        # to the vertical
+        axis_shift, angle_shift = V3D(0.2, 0.8, np.sqrt(1 - 0.2 ** 2 - 0.8 ** 2)), 9.0  # angle shift in degrees
+        CloneWorkspace(InputWorkspace='original', OutputWorkspace='perturbed')
+        RotateInstrumentComponent(Workspace='perturbed', ComponentName='bank1', RelativeRotation=True,
+                                  X=axis_shift.X(), Y=axis_shift.Y(), Z=axis_shift.Z(), Angle=angle_shift)
+        ConvertUnits(InputWorkspace='perturbed', OutputWorkspace='perturbed_dspacing', Target='dSpacing', Emode='Elastic')
+
+        # calibrate the perturbed bank
+        AlignComponents(PeakCentersTofTable='table_tofs', PeakPositions=peak_positions, OutputWorkspace='calibrated',
+                        InputWorkspace='perturbed', ComponentList=component, AdjustmentsTable='adjustments',
+                        AlphaRotation=True, BetaRotation=True, GammaRotation=True)
+        ConvertUnits(InputWorkspace='calibrated', OutputWorkspace='calibrated_dspacing', Target='dSpacing', Emode='Elastic')
+
+        # compare the peak-centers (in d-spacing units) between the original and calibrated
+        # spectra, up to 0.001 Angstroms
+        Max(InputWorkspace='calibrated_dspacing', OutputWorkspace='calibrated_d_at_max')
+        calibrated_d = np.average(mtd['calibrated_d_at_max'].extractX(), axis=1)
+        assert np.allclose(original_d, calibrated_d, atol=0.001)
+
 
 if __name__ == "__main__":
     # Only test is Algorithm is loaded

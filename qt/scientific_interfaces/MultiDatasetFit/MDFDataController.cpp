@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFDataController.h"
-#include "MDFAddWorkspaceDialog.h"
 #include "MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 
 #include <QMessageBox>
 #include <QStringList>
@@ -41,7 +41,7 @@ DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable)
 
 /// Show a dialog to select a workspace from the ADS.
 void DataController::addWorkspace() {
-  AddWorkspaceDialog dialog(owner());
+  MantidQt::MantidWidgets::AddWorkspaceDialog dialog(owner());
   if (dialog.exec() == QDialog::Accepted) {
     QString wsName = dialog.workspaceName().trimmed();
     // if name is empty assume that there are no workspaces in the ADS

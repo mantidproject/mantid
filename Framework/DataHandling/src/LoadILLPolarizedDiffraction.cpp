@@ -110,16 +110,21 @@ void LoadILLPolarizedDiffraction::init() {
 
   declareProperty(std::make_unique<FileProperty>(
                       "YIGFilename", "", FileProperty::OptionalLoad, ".xml"),
-                  "File path of the YIG calibration data file to load");
+                  "File path of the YIG calibration data file to load.");
   setPropertySettings("YIGFilename",
                       std::make_unique<Kernel::EnabledWhenProperty>(
                           "PositionCalibration", IS_EQUAL_TO, "YIGFile"));
   declareProperty("ConvertToScatteringAngle", false,
-                  "Convert the bin edges to scattering angle",
+                  "Convert the bin edges to scattering angle.",
                   Direction::Input);
   declareProperty("TransposeMonochromatic", false,
                   "Transpose the 2D workspace with monochromatic data",
                   Direction::Input);
+  const std::vector<std::string> TOFUnitOptions{"UncalibratedTime",
+                                                "TimeChannels"};
+  declareProperty("TOFUnits", TOFUnitOptions[0],
+                  std::make_shared<StringListValidator>(TOFUnitOptions),
+                  "The choice of X-axis units for Time-Of-Flight data.");
 }
 
 std::map<std::string, std::string>
@@ -300,18 +305,19 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
 
   // Set x axis units
   if (m_acquisitionMode == TOF_MODE_ON) {
-    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-        UnitFactory::Instance().create("Label"));
-    lblUnit->setLabel("Time", Units::Symbol::Microsecond);
-    workspace->getAxis(0)->unit() = lblUnit;
+    if (getPropertyValue("TOFUnits") == "TimeChannels") {
+      auto lblUnit = std::dynamic_pointer_cast<Kernel::Units::Label>(
+          UnitFactory::Instance().create("Label"));
+      lblUnit->setLabel("Time channel", Units::Symbol::EmptyLabel);
+      workspace->getAxis(0)->unit() = lblUnit;
+    } else {
+      workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    }
   } else {
-    auto lblUnit = std::static_pointer_cast<Kernel::Units::Label>(
-        UnitFactory::Instance().create("Label"));
-    lblUnit->setLabel("Wavelength", Units::Symbol::Angstrom);
-    workspace->getAxis(0)->unit() = lblUnit;
+    workspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Wavelength");
   }
   // Set y axis unit
-
   workspace->setYUnit("Counts");
 
   // check the polarization direction and set the workspace title
@@ -466,10 +472,15 @@ LoadILLPolarizedDiffraction::prepareAxes(const NXEntry &entry) {
     NXFloat timeOfFlightInfo = entry.openNXFloat("D7/Detector/time_of_flight");
     timeOfFlightInfo.load();
     auto channelWidth = static_cast<double>(timeOfFlightInfo[0]);
+    m_numberOfChannels = size_t(timeOfFlightInfo[1]);
     auto tofDelay = timeOfFlightInfo[2];
     for (auto channel_no = 0;
          channel_no <= static_cast<int>(m_numberOfChannels); channel_no++) {
-      axes.push_back(static_cast<double>(tofDelay + channel_no * channelWidth));
+      if (getPropertyValue("TOFUnits") == "UncalibratedTime") {
+        axes.push_back(tofDelay + channel_no * channelWidth);
+      } else {
+        axes.push_back(channel_no);
+      }
     }
   } else {
     double wavelength = 0;

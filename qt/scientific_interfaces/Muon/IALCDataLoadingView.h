@@ -82,6 +82,20 @@ public:
 
   virtual std::string getRunsFirstRunText() const = 0;
 
+  /// Enable/disable alpha to be editable
+  virtual void enableAlpha(const bool alpha) = 0;
+
+  virtual bool isAlphaEnabled() const = 0;
+
+  /// Set value of alpha
+  virtual void setAlphaValue(const std::string &alpha) = 0;
+
+  /// Get alpha value
+  virtual std::string getAlphaValue() const = 0;
+
+  /// Show/hide alpha explanation
+  virtual void showAlphaMessage(const bool alpha) = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;

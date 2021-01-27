@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -13,7 +13,11 @@ import isis_instrument
 import isis_reduction_steps
 import SANS2DReductionGUI as sansgui
 
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from sans.common.enums import SANSInstrument
 
+
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 
     def checkCentreResult(self):
@@ -29,7 +33,7 @@ class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 
         i.ReductionSingleton.clean(isis_reducer.ISISReducer)
         i.ReductionSingleton().set_instrument(isis_instrument.SANS2D())
-        i.ReductionSingleton().user_settings =isis_reduction_steps.UserFile(sansgui.MASKFILE)
+        i.ReductionSingleton().user_settings =isis_reduction_steps.UserFile('MaskSANS2DReductionGUI.txt')
         i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())
 
     def validate(self):

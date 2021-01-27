@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,11 +11,11 @@ from os import path
 
 import systemtesting
 from systemtesting import MantidSystemTest
-
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import AlgorithmManager
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge, SANSInstrument)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.state.Serializer import Serializer
@@ -28,6 +28,7 @@ from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SingleReductionTest(unittest.TestCase):
     def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")

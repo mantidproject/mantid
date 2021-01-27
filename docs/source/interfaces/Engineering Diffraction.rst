@@ -164,8 +164,6 @@ Custom Spectra
 Fitting
 -------
 
-**This tab is currently a work in progress!**
-
 This tab will allow for single peak fitting of focused run files.
 
 Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
@@ -180,7 +178,7 @@ Selecting this loads the function and the parameters and the curve can be inspec
 
 The output from the fit is stored in a group of workspaces that contains a matrix workspace of the fit value and error for each parameter in the model. If there is more than one of the same function, the parameters are stored in the same workspace with different x-values. For example, if there were two Gaussian peaks then there would be a workspace for each parameter of the Gaussian (i.e. Height, PeakCentre, Sigma) each of which will have two columns corresponding to each peak. Each workspace has a spectra per run loaded (each row in the table of the UI fitting tab). In general different models/functions could be fitted to each run, so when there is a parameter that does not exist for a run (or that run has not yet been fitted), the Y and E fields in the relevant row are filled with NaNs. The group of fit workspaces also contains a table workspace that stores the model string that can be copied into the fit browser (Setup > Manage Setup > Load From String).
 
-The workspaces can be fit sequentially (sorted by the average of a chosen log in the settings). If a valid model is present in the fit browser then the Sequential Fit button will be enabled - it is not necessary to run an initial fit. The user may want to fix or constrain certain model parameters, which can be done in the usual way in the fit browser. The sequential fit will popoulate the fit tables as above and store the model in the Custom Setups.
+The workspaces can be fit sequentially (sorted by the average of a chosen log in the settings). If a valid model is present in the fit browser then the Sequential Fit button (below the table in the UI) will be enabled - it is not necessary to run an initial fit. The user may want to fix or constrain certain model parameters, which can be done in the usual way in the fit browser. The sequential fit will popoulate the fit tables as above and store the model in the Custom Setups.
 
 Parameters
 ^^^^^^^^^^

@@ -157,6 +157,10 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['drawstyle'] = 'steps-post'
     else:
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
+        # the get... function returns kwargs without 'normalize_by_bin_width', but it is needed in _get_data_for_plot to
+        # avoid reverting to the default norm setting, in the event that this function is being called as part of a plot
+        # restoration
+        kwargs['normalize_by_bin_width'] = normalize_by_bin_width
         x, y, _, _, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs)
         if kwargs.pop('update_axes_labels', True):
             _setLabels1D(axes,

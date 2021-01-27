@@ -70,6 +70,9 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
   m_view->setLoadStatus("Finding " + m_view->getInstrument() + " -\n" +
                             m_view->getRunsText(),
                         "orange");
+  m_view->enableAlpha(false);
+  m_view->setAlphaValue("");
+  m_view->showAlphaMessage(false);
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
@@ -136,6 +139,10 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
                               " -\n" + m_view->getRunsText(),
                           "green");
     m_view->enableRunsAutoAdd(true);
+
+    // If alpha empty, default used is 1 so update interface
+    if (m_view->getAlphaValue() == "1.0" && m_view->isAlphaEnabled())
+      m_view->setAlphaValue("1.0");
   } catch (const std::runtime_error &errorLoadFiles) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
@@ -218,6 +225,9 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
       alg->setProperty("BackwardSpectra", m_view->getBackwardGrouping());
     }
 
+    // Set alpha for balance parameter
+    alg->setProperty("Alpha", m_view->getAlphaValue());
+
     // If Subtract checkbox is selected, set green period
     if (m_view->subtractIsChecked()) {
       alg->setProperty("Green", m_view->greenPeriod());
@@ -255,7 +265,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
-
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
@@ -328,6 +337,16 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     periods.emplace_back(buffer.str());
   }
   m_view->setAvailablePeriods(periods);
+
+  // If single period, enable alpha, otherwise disable
+  if (numPeriods == 1) {
+    m_view->enableAlpha(true);
+    m_view->setAlphaValue("1.0");
+    m_view->showAlphaMessage(false);
+  } else {
+    m_view->enableAlpha(false);
+    m_view->showAlphaMessage(true);
+  }
 
   // Set time limits if this is the first data loaded (will both be zero)
   if (auto timeLimits = m_view->timeRange()) {

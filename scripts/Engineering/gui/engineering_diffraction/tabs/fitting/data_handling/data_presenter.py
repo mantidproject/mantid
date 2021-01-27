@@ -37,8 +37,9 @@ class FittingDataPresenter(object):
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
         self.seq_fit_started_notifier = GenericObservable()
-        # Obeservers
+        # Observers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+        #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
         self.seq_fit_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
@@ -47,8 +48,8 @@ class FittingDataPresenter(object):
     def set_fit_enabled(self, fit_enabled):
         self.view.set_seq_fit_button_enabled(fit_enabled)
 
-    def fit_completed(self, fitprops):
-        self.model.update_fit(fitprops)
+    def fit_completed(self, fit_props):
+        self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
         ws_list = self.model.get_ws_sorted_by_primary_log()

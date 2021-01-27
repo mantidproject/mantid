@@ -1,17 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 import copy
 import SANS2DReductionGUI as sansgui
 
+from sans.common.enums import SANSInstrument
 
+
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
     def runTest(self):
         self.initialization()
@@ -59,6 +62,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
@@ -101,6 +105,7 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
@@ -146,6 +151,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
@@ -190,6 +196,7 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
     def runTest(self):
 

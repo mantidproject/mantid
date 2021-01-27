@@ -1,12 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 from mantid import config
@@ -14,8 +15,10 @@ from SANSBatchMode import *
 import os.path
 
 # test batch mode with sans2d and selecting a period in batch mode
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatch(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -43,6 +46,7 @@ class SANS2DBatch(systemtesting.MantidSystemTest):
         return '5512p7_SANS2DBatch','SANS2DBatch.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
@@ -72,6 +76,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(systemtesting.MantidSystemTest):
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DTUBESBatchWithZeroErrorCorrection(systemtesting.MantidSystemTest):
     """
     We want to make sure that the BatchMode can remove zero error values

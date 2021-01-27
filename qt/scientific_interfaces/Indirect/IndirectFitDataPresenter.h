@@ -9,6 +9,7 @@
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
 #include "IndirectDataTablePresenter.h"
+#include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 

@@ -72,9 +72,8 @@ set(SRC_FILES
     src/CopyLogs.cpp
     src/CopySample.cpp
     src/CorelliCrossCorrelate.cpp
-    src/CorelliPowderCalibrationApply.cpp
-    src/CorelliPowderCalibrationDatabase.cpp
-    src/CorelliPowderCalibrationLoad.cpp
+    src/CorelliCalibrationApply.cpp
+    src/CorelliCalibrationDatabase.cpp
     src/CorrectKiKf.cpp
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
@@ -328,7 +327,8 @@ set(SRC_FILES
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
     src/WorkspaceJoiners.cpp
-    src/XDataConverter.cpp)
+    src/XDataConverter.cpp
+    src/XrayAbsorptionCorrection.cpp)
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
@@ -404,9 +404,8 @@ set(INC_FILES
     inc/MantidAlgorithms/CopyLogs.h
     inc/MantidAlgorithms/CopySample.h
     inc/MantidAlgorithms/CorelliCrossCorrelate.h
-    inc/MantidAlgorithms/CorelliPowderCalibrationApply.h
-    inc/MantidAlgorithms/CorelliPowderCalibrationDatabase.h
-    inc/MantidAlgorithms/CorelliPowderCalibrationLoad.h
+    inc/MantidAlgorithms/CorelliCalibrationApply.h
+    inc/MantidAlgorithms/CorelliCalibrationDatabase.h
     inc/MantidAlgorithms/CorrectKiKf.h
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
@@ -668,7 +667,8 @@ set(INC_FILES
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
-    inc/MantidAlgorithms/XDataConverter.h)
+    inc/MantidAlgorithms/XDataConverter.h
+    inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
 
 set(SRC_UNITY_IGNORE_FILES
     src/AlignDetectors.cpp
@@ -756,9 +756,8 @@ set(TEST_FILES
     CopyLogsTest.h
     CopySampleTest.h
     CorelliCrossCorrelateTest.h
-    CorelliPowderCalibrationApplyTest.h
-    CorelliPowderCalibrationDatabaseTest.h
-    CorelliPowderCalibrationLoadTest.h
+    CorelliCalibrationApplyTest.h
+    CorelliCalibrationDatabaseTest.h
     CorrectKiKfTest.h
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
@@ -995,7 +994,8 @@ set(TEST_FILES
     WienerSmoothTest.h
     WorkflowAlgorithmRunnerTest.h
     WorkspaceCreationHelperTest.h
-    WorkspaceGroupTest.h)
+    WorkspaceGroupTest.h
+    XrayAbsorptionCorrectionTest.h)
 
 set(TEST_PY_FILES
     test/NormaliseToUnityTest.py)

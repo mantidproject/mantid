@@ -463,6 +463,11 @@ void IqtFunctionModel::setLocalParameterFixed(const QString &parName, int i,
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
+void IqtFunctionModel::setGlobalParameterValue(const QString &paramName,
+                                               double value) {
+  m_model.setGlobalParameterValue(paramName, value);
+}
+
 void IqtFunctionModel::setParameter(ParamID name, double value) {
   auto const prefix = getPrefix(name);
   if (prefix) {

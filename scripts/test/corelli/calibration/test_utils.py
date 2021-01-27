@@ -13,10 +13,10 @@ import unittest
 from mantid import AnalysisDataService, config
 from mantid.kernel import V3D
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
-                              LoadNexusProcessed)
+                              LoadNexusProcessed, mtd)
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_peak_y_table, calibrate_tube,
-                                       load_banks, trim_calibration_table, wire_positions)
+from corelli.calibration.utils import (apply_calibration, preprocess_banks, bank_numbers, calculate_peak_y_table,
+                                       calibrate_tube, load_banks, trim_calibration_table, wire_positions)
 
 
 class TestUtils(unittest.TestCase):
@@ -115,6 +115,20 @@ class TestUtils(unittest.TestCase):
         assert bank_numbers(' 32 - 34 , 37 ') == ['32', '33', '34', '37']
         assert bank_numbers(' 32 - 34 , 37 -  38 ') == ['32', '33', '34', '37', '38']
         assert bank_numbers(' 32 - 34 , 37 , 39 - 41 ') == ['32', '33', '34', '37', '39', '40', '41']
+
+    def test_preprocess_banks(self):
+        ref = np.array([
+            16406.101884326443,  # mean
+            1028.9536367012543,  # std
+            16811.476562499956,  # median
+            67199393.31820111,   # sum
+            ])
+        intputws = TestUtils.cases['124023_bank10']  # try to use existing data
+        preprocess_banks(intputws, "_ws")
+        _ws = mtd["_ws"]
+        sig = np.array([_ws.readY(i) for i in range(_ws.getNumberHistograms())])
+        rst = np.array([sig.mean(), sig.std(), np.median(sig), sig.sum()])
+        np.testing.assert_allclose(rst, ref)
 
     def test_load_banks(self):
         # loading a non-existing file

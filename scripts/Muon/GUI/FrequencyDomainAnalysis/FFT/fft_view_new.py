@@ -127,7 +127,6 @@ class FFTView(QtWidgets.QWidget):
         self.ws.addItems(options)
         self.Im_ws.clear()
         self.Im_ws.addItems(options)
-        self.phaseQuadChanged()
 
     def removeIm(self, pattern):
         index = self.Im_ws.findText(pattern)
@@ -154,18 +153,11 @@ class FFTView(QtWidgets.QWidget):
     def deactivateButton(self):
         self.button.setEnabled(False)
 
-    def setPhaseBox(self):
-        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.workspace)
-
     def changed(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() == QtCore.Qt.Checked)
 
     def changedHideUnTick(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
-
-    def phaseQuadChanged(self):
-        # hide complex ws
-        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.workspace or self.Im_box.checkState() != QtCore.Qt.Checked)
 
     def set_raw_checkbox_state(self, state):
         if state:

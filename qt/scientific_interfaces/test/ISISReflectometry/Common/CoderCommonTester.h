@@ -12,6 +12,7 @@
 #include "../../../ISISReflectometry/GUI/Experiment/QtExperimentView.h"
 #include "../../../ISISReflectometry/GUI/Instrument/QtInstrumentView.h"
 #include "../../../ISISReflectometry/GUI/MainWindow/QtMainWindowView.h"
+#include "../../../ISISReflectometry/GUI/Runs/QtCatalogSearcher.h"
 #include "../../../ISISReflectometry/GUI/Runs/QtRunsView.h"
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/QtRunsTableView.h"
@@ -53,7 +54,9 @@ public:
     auto runsTablePresenter = dynamic_cast<RunsTablePresenter *>(
         runsPresenter->m_tablePresenter.get());
     auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
-    testRuns(gui->m_runs.get(), reductionJobs,
+    auto searcher =
+        dynamic_cast<QtCatalogSearcher *>(runsPresenter->m_searcher.get());
+    testRuns(gui->m_runs.get(), reductionJobs, searcher,
              map[QString("runsView")].toMap());
     testEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
     testExperiment(gui->m_experiment.get(),
@@ -152,14 +155,24 @@ private:
   }
 
   void testRuns(const QtRunsView *gui, const ReductionJobs *redJobs,
+                QtCatalogSearcher *searcher,
                 const QMap<QString, QVariant> &map) {
     testRunsTable(gui->m_tableView, redJobs, map[QString("runsTable")].toMap());
+    testSearchModel(gui->searchResults(),
+                    map[QString("searchResults")].toList());
     TS_ASSERT_EQUALS(gui->m_ui.comboSearchInstrument->currentIndex(),
                      map[QString("comboSearchInstrument")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.textSearch->text(),
                      map[QString("textSearch")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.textCycle->text(),
                      map[QString("textCycle")].toString())
+    // Test that the cached criteria in the searcher match the map
+    TS_ASSERT_EQUALS(searcher->searchCriteria().investigation,
+                     map[QString("textSearch")].toString().toStdString())
+    TS_ASSERT_EQUALS(searcher->searchCriteria().cycle,
+                     map[QString("textCycle")].toString().toStdString())
+    TS_ASSERT_EQUALS(searcher->searchCriteria().instrument,
+                     map[QString("textInstrument")].toString().toStdString())
   }
 
   void testRunsTable(const QtRunsTableView *gui, const ReductionJobs *redJobs,
@@ -258,6 +271,32 @@ private:
     }
     TS_ASSERT_EQUALS(pair.firstTransmissionRunNumbers(), firstTransRunNums)
     TS_ASSERT_EQUALS(pair.secondTransmissionRunNumbers(), secondTransRunNums)
+  }
+
+  void testSearchModel(const ISearchModel &searchModel,
+                       const QList<QVariant> &list) {
+    auto const &rows = searchModel.getRows();
+    for (auto index = 0u; index < rows.size(); ++index) {
+      testSearchResult(rows[index], list[index].toMap());
+    }
+  }
+
+  void testSearchResult(const SearchResult &searchResult,
+                        const QMap<QString, QVariant> &map) {
+    TS_ASSERT_EQUALS(searchResult.runNumber(),
+                     map[QString("runNumber")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.title(),
+                     map[QString("title")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.groupName(),
+                     map[QString("groupName")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.theta(),
+                     map[QString("theta")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.error(),
+                     map[QString("error")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.excludeReason(),
+                     map[QString("excludeReason")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.comment(),
+                     map[QString("comment")].toString().toStdString());
   }
 
   void testReductionWorkspaces(const ReductionWorkspaces &redWs,

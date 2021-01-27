@@ -22,45 +22,57 @@ Ensure that you have first run all the tests in group 2, then open the Frequency
 Test 1: Basic FFT
 -----------------
 - Set the workspace to "MUSR00062260;Group;bkwd;Asym;#1" 
-- Click the calculate FFT button and a workspace should appear in the "MUSR00062260" group
-- Then plot spectrum 2 (there should be a total of 3 spectrums)
-- You will see a few sharp peaks. 
-- Untick the Imaginary Data and the a row should disappear
+- Click the calculate FFT button and a 3 workspaces should appear in the "MUSR00062260 FFT FD" group
+- The group will contain 3 workspace ending in `Re` (real), `Im` (imaginary) and `mod` (modulus)
+- The plot window will show a broad peak
+- Untick the Imaginary Data and the row beneath should disappear
 - Click the Calculate FFT button
-- Look at the data table and there should be 6 rows.
+- 3 new workspaces should appear in the group
 
 Test 2: Advanced FFT
 --------------------
-- Plot spectrum 0 of the data
-- Leave this plot open and make sure you can see it and the interface at the same time
-- Change the "Apodization Function" to "Gaussian"
-- Click the Calculate FFT button
-- The plot should change, the data will be less noisy.
-- Set the "Apodization Function" back to "None"
-- Click the Calculate FFT Button
-- Set the "Padding" to 0
-- Click the Calculate FFT Button
-- The peak should not be very clear
+- The "Apodization Function" determines the amount of smoothing of the data
+- Set the "Apodization Function" to `None` and press calculate
+- The plot will show a large peak at 0 and then lots of noise
+- Set the "Apodization Function" to `Gaussian` and press calculate
+- There will be a clear peak near to 100 Gauss
+- The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
+- Set the xrange for the plot to be from `50` to `150`
+- Set the "padding" to zero and press calculate
+- The plots should be a nice peak, but it will have lots of straight lines
+- Set the "padding" to `500` and press calculate
+- The plot will now be nice and smooth
+
 
 Test 3: PhaseQuad
 -----------------
-- Change the workspace to "PhaseQuad"
-- You should not be able to select the workspace for the imaginary part, but it is possible to turn the imaginary component on and off. 
-- An extra row will appear labeled "axis"
-- Click the Calculate FFT button
-- A new table workspace will appear (PhaseTable) and the output added to the grouped worksapce
-- Open PhaseTable and with it open change the axis in the GUI and make sure that generate new phase table is  unticked
-- Click the Calculate FFT button
-- PhaseTable should not have changed
-- Make sure that generate new phase table is ticked
-- Click the Calculate FFT button
-- PhaseTable should change
+- Go to the phase tab
+- Click "calculate phase table"
+- Click "calculate phasequad"
+- When asked for a name enter `pq`
+- Go to the transform tab
+- You will be able to select the real and imaginary parts of 'pq'
+- Select the real part
+- Click calculate
+- Tick the `Imaginary Data` 
+- Select the imaginary part of the phasequad
+- Click calculate
+- In both cases the plot should be a nice peak
+
 
 Test 4: MaxEnt
 --------------
 - Change the drop-down menu at the top of the interface to "MaxEnt"
 - The interface should look different
 - Click the Calculate MaxEnt button 
-- This will be slow - a warning should be provided and the button disabled
-- When it is complete a workspace should appear "FFTMuon" and the button should be enabled 
-
+- The calculate button will be disabled and cancel enabled
+- Click the cancel button
+- Click Calculate MaxEnt
+- The plot should update to a mostly flat line with a peak
+- Make sure everything in the top table is ticked
+- Click calculate MaxEnt
+- In the ADS expand the `MUSR62260 MaxEnt FD` group
+- It will contain several workspaces
+- The phase convergence will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
+- Deadtimes and phase table will be table of spectrum number then some numbers
+- The reconstructed spectra will look like the original data

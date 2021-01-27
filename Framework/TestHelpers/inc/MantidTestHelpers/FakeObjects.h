@@ -23,6 +23,7 @@
  *      Author: Janik Zikovsky
  */
 
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <string>
@@ -166,6 +167,26 @@ public:
     }
     return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
+
+  std::size_t getNumberBins(const std::size_t &index) const override {
+    if (index > m_vec.size())
+      return 0;
+    return m_vec[index].dataY().size();
+  }
+
+  std::size_t getMaxNumberBins() const override {
+    if (m_vec.empty()) {
+      return 0;
+    } else {
+      const auto iter = std::max_element(
+          m_vec.cbegin(), m_vec.cend(),
+          [](const SpectrumTester &s1, const SpectrumTester &s2) {
+            return s1.dataY().size() < s2.dataY().size();
+          });
+      return iter->dataY().size();
+    }
+  }
+
   ISpectrum &getSpectrum(const size_t index) override {
     invalidateCommonBinsFlag();
     m_vec[index].setMatrixWorkspace(this, index);

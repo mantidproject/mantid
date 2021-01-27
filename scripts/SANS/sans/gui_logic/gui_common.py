@@ -70,7 +70,7 @@ def meter_2_millimeter(num):
     @param float in m
     @returns float in mm
     '''
-    return num*1000.
+    return num * 1000.
 
 
 def millimeter_2_meter(num):

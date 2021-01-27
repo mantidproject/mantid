@@ -204,6 +204,32 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
 }
 
 /**
+ * Create a simple time zero TableWorkspace with one column (time zero)
+ * @param numSpec :: The number of spectra (rows of the table)
+ * @param timeZeros :: Vector of time zeros for each spectra
+ * @return TableWorkspace with time zeros in each row for all spectra
+ */
+ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec,
+                                         std::vector<double> &timeZeros) {
+
+  auto timeZeroTable = std::dynamic_pointer_cast<ITableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
+
+  timeZeroTable->addColumn("double", "time zero");
+
+  if (timeZeros.size() != numSpec) {
+    return timeZeroTable;
+  }
+
+  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
+    TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[specNum];
+  }
+
+  return timeZeroTable;
+}
+
+/**
  * Creates a single-point workspace with instrument and runNumber set.
  * @param instrName :: Instrument name e.g. MUSR
  * @param runNumber ::  e.g. 1000

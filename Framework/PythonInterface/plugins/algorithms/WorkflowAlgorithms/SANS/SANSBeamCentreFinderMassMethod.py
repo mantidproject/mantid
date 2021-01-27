@@ -217,10 +217,10 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(move_info=state.move, component_name='',
+        move_component(state=state, component_name='',
                        workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-        move_component(component_name=component, move_info=state.move, workspace=workspace,
+        move_component(component_name=component, state=state, workspace=workspace,
                        is_transmission_workspace=is_transmission, move_type=MoveTypes.INITIAL_MOVE)
         return workspace
 
