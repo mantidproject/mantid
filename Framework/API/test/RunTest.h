@@ -445,6 +445,9 @@ public:
 
     TS_ASSERT_EQUALS(runInfo.getGoniometer(0), Goniometer());
     TS_ASSERT_EQUALS(runInfo.getGoniometer(1), goniometer);
+    TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(0), DblMatrix(3, 3, true));
+    TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(1), rotation);
+
   }
 
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
