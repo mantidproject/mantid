@@ -142,6 +142,14 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D22'
         config.appendDataSearchSubDir('ILL/D22/')
 
+        # create necessary masks:
+        MaskBTP(Instrument='D22', Pixel='0-12,245-255')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='top_bottom')
+        MaskBTP(Instrument='D22', Tube='10-31', Pixel='105-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_offset')
+        MaskBTP(Instrument='D22', Tube='54-75', Pixel='108-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_central')
+
     def cleanup(self):
         mtd.clear()
 
@@ -153,8 +161,6 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
     def runTest(self):
         # Load the mask
         LoadNexusProcessed(Filename='D22_mask.nxs', OutputWorkspace='mask')
-        LoadNexusProcessed(Filename='D22_mask_central.nxs', OutputWorkspace='mask_central')
-        LoadNexusProcessed(Filename='D22_mask_offset.nxs', OutputWorkspace='mask_offset')
 
         # Absorber
         SANSILLReduction(Run='241238', ProcessAs='Absorber', OutputWorkspace='Cd')
@@ -176,11 +182,9 @@ class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
 
         # Reference
         SANSILLReduction(Run='344411', ProcessAs='Sample', MaskedInputWorkspace='mask_central',
-                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
                          OutputWorkspace='ref1', SensitivityOutputWorkspace='sens1')
 
         SANSILLReduction(Run='344407', ProcessAs='Sample', MaskedInputWorkspace='mask_offset',
-                         AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', ContainerInputWorkspace='can',
                          OutputWorkspace='ref2', SensitivityOutputWorkspace='sens2')
 
         GroupWorkspaces(InputWorkspaces=['ref1', 'ref2'], OutputWorkspace='sensitivity_input')
