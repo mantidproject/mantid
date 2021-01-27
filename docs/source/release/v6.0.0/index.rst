@@ -1,24 +1,35 @@
 .. _v6.0.0:
 
-===========================
-Mantid 6.0.0 Release Notes
-===========================
-
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../../../images/mantid_workbench.png
    :class: screenshot
    :width: 385px
    :align: right
 
+===========================
+Mantid 6.0.0 Release Notes
+===========================
+
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.0.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+**This is the first release only featuring** :doc:`MantidWorkbench <mantidworkbench>`
 
-This is just one of many improvements in this release, so please take a
+The last release of MantidPlot was :ref:`version 5.1.1<v5.1.1>`.
+
+This release welcomes some minor features to make Workbench feature complete, including migrating the Step Scan interface
+and allowing control of InstrumentViewer from Python.
+
+Other highlights include:
+
+- :doc:`ISIS Reflectometry <reflectometry>` allows runs to be excluded or annotated
+- Further plot settings, including tick customisation and axis autoscaling
+- Upgraded support for ILL instruments D1B, D2B, D20 and IN16B
+- Several improvements to SliceViewer and diffraction fitting, including the reliability of :ref:`func-BackToBackExponential`
+- :doc:`Muon and Frequency Domain Analysis <muon>` support multiple runs with the co-add option
+
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
