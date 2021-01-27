@@ -197,7 +197,7 @@ CalculateEfficiency2::calculateEfficiency(MatrixWorkspace_sptr inputWorkspace,
  */
 void CalculateEfficiency2::validateGroupInput() {
   auto results = validateInputs();
-  for (auto result : results) {
+  for (const auto& result : results) {
     throw std::runtime_error(result.second);
   }
 }
@@ -216,7 +216,7 @@ bool CalculateEfficiency2::processGroups() {
   Workspace_sptr ws1 = getProperty(PropertyNames::INPUT_WORKSPACE);
   WorkspaceGroup_sptr inputWS = std::static_pointer_cast<WorkspaceGroup>(ws1);
 
-  bool mergeGroups = getProperty(PropertyNames::MERGE_GROUP);
+  const bool mergeGroups = getProperty(PropertyNames::MERGE_GROUP);
   if (mergeGroups) {
     auto mergedWS = mergeGroup(*inputWS);
     auto outputWS = calculateEfficiency(mergedWS);
@@ -225,16 +225,16 @@ bool CalculateEfficiency2::processGroups() {
     return true;
   } else {
     auto outputGroup = std::make_shared<WorkspaceGroup>();
-    auto nEntries = inputWS->getNumberOfEntries();
-    auto stepProgress = 1.0 / nEntries;
+    auto const nEntries = inputWS->getNumberOfEntries();
+    auto const stepProgress = 1.0 / nEntries;
     for (auto entryNo = 0; entryNo < nEntries; ++entryNo) {
       auto entryWS = std::static_pointer_cast<API::MatrixWorkspace>(
           inputWS->getItem(entryNo));
-      auto startProgress = static_cast<double>(entryNo) / nEntries;
+      auto const startProgress = static_cast<double>(entryNo) / nEntries;
       auto outputWS = calculateEfficiency(entryWS, startProgress, stepProgress);
       outputGroup->addWorkspace(outputWS);
     }
-    std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
+    const std::string groupName = getPropertyValue(PropertyNames::OUTPUT_WORKSPACE);
     AnalysisDataService::Instance().addOrReplace(groupName, outputGroup);
     setProperty(PropertyNames::OUTPUT_WORKSPACE, outputGroup);
     progress(1.0, "Done!");
