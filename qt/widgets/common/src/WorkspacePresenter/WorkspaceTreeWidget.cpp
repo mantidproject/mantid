@@ -1019,7 +1019,7 @@ void WorkspaceTreeWidget::addMDEventWorkspaceMenuItems(
 void WorkspaceTreeWidget::addMDHistoWorkspaceMenuItems(
     QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const {
   Q_UNUSED(WS);
-  menu->addAction(m_showHist);     // Algorithm history
+  menu->addAction(m_showHist);        // Algorithm history
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot);      // A plot of intensity vs bins
   menu->addAction(m_showListData);    // Show data in table
