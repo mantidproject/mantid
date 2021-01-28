@@ -30,6 +30,7 @@ Improvements
     - There can be multiple inputs for sensitivity calculation. A new parameter, SensitivityWithOffsets, has been added 
       to mark that these multiple sensitivities should be processed separately and specially merged before calculation 
       of the efficiency to remove gaps caused by beam stop mask.
+    - More than one transmission per processing, consistent with number of sample runs, are now accepted.
 - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
 - Added loader and MaskBTP support for D11B and D22B.
 
