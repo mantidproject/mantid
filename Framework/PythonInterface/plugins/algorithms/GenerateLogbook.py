@@ -130,6 +130,8 @@ class GenerateLogbook(PythonAlgorithm):
             self._metadata_headers += logbook_headers.split(',')
         except IndexError:
             raise RuntimeError("The default logbook entries and headers are not defined for {}".format(self._instrument))
+        default_entries = list(self._metadata_entries)
+
         if not self.getProperty('OptionalHeaders').isDefault:
             try:
                 logbook_optional_entries = parameters.getStringParameter('logbook_optional_entries')[0]
@@ -165,14 +167,15 @@ class GenerateLogbook(PythonAlgorithm):
                 self._metadata_headers += logbook_custom_headers
 
         DeleteWorkspace(Workspace=tmp_instr)
+        return default_entries
 
     def _verify_contains_metadata(self, data_array):
         """Verifies that the rawdata indeed contains the desired meta-data to be logged."""
-        # Load empty instrument to access parameters defining metadata entries to be searched
-        self._get_default_entries()
+        default_entries = self._get_default_entries()
         data_path = os.path.join(self._data_directory, data_array[0] + '.nxs')
+        # check only if default entries exist in the first file in the directory
         with h5py.File(data_path, 'r') as f:
-            for entry in self._metadata_entries:
+            for entry in default_entries:
                 try:
                     f.get(entry)[0]
                 except TypeError:

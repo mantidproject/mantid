@@ -55,14 +55,8 @@ class GenerateLogbookTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='custom_logbook', Facility='ILL', Instrument='D7',
-                        NumorRange=[396990,396993], CustomEntries='entry0/acquisition_mode')
+                        NumorRange=[396990,396993], CustomEntries='/entry0/acquisition_mode')
         self._check_output('custom_logbook', numberEntries=3, numberColumns=4)
-
-    def test_d7_custom_nonexisting(self):
-        self.assertTrue(os.path.exists(self._data_directory))
-        with self.assertRaises(RuntimeError):
-            GenerateLogbook(Directory=self._data_directory, OutputWorkspace='__unused',
-                            Facility='ILL', Instrument='D7', CustomEntries='entry0/does_not_exist')
 
     def test_d7_save_csv(self):
         self.assertTrue(os.path.exists(self._data_directory))
