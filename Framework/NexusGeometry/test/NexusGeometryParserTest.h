@@ -346,8 +346,8 @@ public:
         instrument_path(filename),
         std::make_unique<testing::NiceMock<MockLogger>>());
 
-    // THEN the voxels are successfully parsed and locations matches
-    // offsets datasets from file
+    // THEN the voxels are successfully parsed, locations match
+    // offsets datasets from file, and shape has expected characteristics
     auto parsedBeamline = extractBeamline(*instrument);
     auto &parsedDetInfo = *parsedBeamline.second;
     TS_ASSERT_EQUALS(parsedDetInfo.size(), 2);
@@ -360,22 +360,29 @@ public:
         detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber2)));
     TS_ASSERT(voxelPosition2.isApprox(expectedPosition2));
 
-    // Check voxel has expected volume
+    // Check shape of each of the two voxels
     auto &parsedCompInfo = *parsedBeamline.first;
-    auto &parsedShape1 = parsedCompInfo.shape(0);
-    const auto *parsedShape1Mesh =
-        dynamic_cast<const Geometry::MeshObject *>(&parsedShape1);
-    TS_ASSERT(parsedShape1Mesh->hasValidShape());
-    // The voxel is a regular octahedron, which can be treated as 2
-    // square-based pyramids connected at their bases
-    // Volume is therefore 2 * a^2 * h/3
-    // where a is base edge and h is pyramid height
-    // Corners of the octahedron are at unit cartesian positions:
-    // [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] and so on, therefore
-    // a = sqrt(2) and h = 1
-    // 2 * sqrt(2)^2 * 1/3 = 4/3
-    double expectedVolume = 1.33;
-    TS_ASSERT_DELTA(parsedShape1Mesh->volume(), expectedVolume, 0.01);
+    const std::array<size_t, 2> pixelIndices{0, 1};
+    for (const auto pixelIndex : pixelIndices) {
+      auto &parsedShape = parsedCompInfo.shape(pixelIndex);
+      const auto *parsedShapeMesh =
+          dynamic_cast<const Geometry::MeshObject *>(&parsedShape);
+      // Check it looks like it might define an enclosed volume:
+      TS_ASSERT(parsedShapeMesh->hasValidShape());
+      // The voxel is a regular octahedron, which can be treated as 2
+      // square-based pyramids connected at their bases
+      // Volume is therefore 2 * a^2 * h/3
+      // where a is base edge and h is pyramid height
+      // Corners of the octahedron are at unit cartesian positions:
+      // [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] and so on, therefore
+      // a = sqrt(1^2 + 1^2) and h = 1
+      // 2 * sqrt(1^2 + 1^2)^2 * 1/3 = 4/3
+      double expectedVolume = 1.33;
+      TS_ASSERT_DELTA(parsedShapeMesh->volume(), expectedVolume, 0.01);
+      // Each face of the octahedron is a triangle,
+      // therefore expect mesh to be composed of 8 triangles
+      TS_ASSERT_EQUALS(parsedShapeMesh->numberOfTriangles(), 8);
+    }
   }
 };
 
