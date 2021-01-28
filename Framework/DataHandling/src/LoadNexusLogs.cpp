@@ -797,6 +797,8 @@ void LoadNexusLogs::loadNPeriods(
  * @param absolute_entry_name :: The name of the log entry
  * @param entry_class :: The class type of the log entry
  * @param workspace :: A pointer to the workspace to store the logs
+ * @param allow_list :: Names of specific log entries to load
+ * @param block_list :: Names of specific log entries to skip when loading
  */
 void LoadNexusLogs::loadLogs(
     ::NeXus::File &file, const std::string &absolute_entry_name,
