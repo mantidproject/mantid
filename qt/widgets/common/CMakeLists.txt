@@ -367,8 +367,6 @@ set(
   src/MantidDialog.cpp
   src/MantidHelpInterface.cpp
   src/MantidWidget.cpp
-  src/MdConstants.cpp
-  src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
   src/FileFinderWidget.cpp
@@ -670,8 +668,6 @@ set(
   inc/MantidQtWidgets/Common/LogValueFinder.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
-  inc/MantidQtWidgets/Common/MdConstants.h
-  inc/MantidQtWidgets/Common/MdSettings.h
   inc/MantidQtWidgets/Common/NonOrthogonal.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PlotAxis.h
@@ -839,7 +835,6 @@ set(
   OLD_UI_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_MWView.h
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
 )
 foreach(

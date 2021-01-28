@@ -11,7 +11,6 @@ set(
   src/Qwt/MantidColorMap.cpp
   src/Qwt/MantidQwtIMDWorkspaceData.cpp
   src/Qwt/MantidQwtWorkspaceData.cpp
-  src/Qwt/MWView.cpp
   src/Qwt/PowerScaleEngine.cpp
   src/Qwt/QwtHelper.cpp
   src/Qwt/QwtRasterDataMD.cpp
@@ -35,7 +34,6 @@ set(
   inc/MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/DraggableColorBarWidget.h
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.h
-  inc/MantidQtWidgets/Plotting/Qwt/MWView.h
   inc/MantidQtWidgets/Plotting/Qwt/RangeSelector.h
   inc/MantidQtWidgets/Plotting/Qwt/PeakPicker.h
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.h
@@ -71,7 +69,6 @@ set(
   inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.ui
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.ui
-  inc/MantidQtWidgets/Plotting/Qwt/MWView.ui
   inc/MantidQtWidgets/Plotting/PreviewPlot.ui
 )
 
