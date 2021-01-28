@@ -32,6 +32,25 @@ def create_colormap_img(cmap_name, width=50, height=20):
     return QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
 
 
+class MinMaxDoubleValidator(QDoubleValidator):
+
+    def __init__(self, line_edit, initial_value):
+        super(MinMaxDoubleValidator, self).__init__(None)
+        self.last_valid_value = initial_value
+        self._line_edit = line_edit
+
+        self._line_edit.editingFinished.connect(self.on_editing_finished)
+
+    def on_editing_finished(self):
+        """Entered when the data input is valid according to QDoubleValidator."""
+        self.last_valid_value = self._line_edit.text()
+
+    def fixup(self, new_value):
+        """Entered when the data input is invalid according to QDoubleValidator (empty string or broken e notation)."""
+        logger.warning(f"An invalid value '{new_value}' was provided. Using '{self.last_valid_value}' instead.")
+        self._line_edit.setText(self.last_valid_value)
+
+
 class ImagesTabWidgetView(QWidget):
     def __init__(self, parent=None):
         super(ImagesTabWidgetView, self).__init__(parent=parent)
@@ -43,12 +62,10 @@ class ImagesTabWidgetView(QWidget):
 
         self.max_min_value_warning.setVisible(False)
 
-        validator = QDoubleValidator()
-        self.min_value_line_edit.setValidator(validator)
-        self.max_value_line_edit.setValidator(validator)
-
-        self.min_value = 0.0
-        self.max_value = 1.0
+        self.min_value_validator = MinMaxDoubleValidator(self.min_value_line_edit, 0.0)
+        self.max_value_validator = MinMaxDoubleValidator(self.max_value_line_edit, 1.0)
+        self.min_value_line_edit.setValidator(self.min_value_validator)
+        self.max_value_line_edit.setValidator(self.max_value_validator)
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
@@ -97,30 +114,18 @@ class ImagesTabWidgetView(QWidget):
         self.reverse_colormap_check_box.setCheckState(qt_checked)
 
     def get_min_value(self):
-        min_value = self.min_value_line_edit.text()
-        try:
-            return float(min_value)
-        except ValueError:
-            logger.warning(f"Failed to set max value to '{min_value}'. Using '{self.min_value}' instead.")
-            self.set_min_value(self.min_value)
-            return self.min_value
+        return float(self.min_value_line_edit.text())
 
     def set_min_value(self, value):
-        self.min_value = value
-        self.min_value_line_edit.setText(str(self.min_value))
+        self.min_value_validator.last_valid_value = str(value)
+        self.min_value_line_edit.setText(str(value))
 
     def get_max_value(self):
-        max_value = self.max_value_line_edit.text()
-        try:
-            return float(max_value)
-        except ValueError:
-            logger.warning(f"Failed to set max value to '{max_value}'. Using '{self.max_value}' instead.")
-            self.set_max_value(self.max_value)
-            return self.max_value
+        return float(self.max_value_line_edit.text())
 
     def set_max_value(self, value):
-        self.max_value = value
-        self.max_value_line_edit.setText(str(self.max_value))
+        self.max_value_validator.last_valid_value = str(value)
+        self.max_value_line_edit.setText(str(value))
 
     def get_interpolation(self):
         return self.interpolation_combo_box.currentText()
