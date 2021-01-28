@@ -8,13 +8,16 @@ MuSR Changes
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 
-New Features
-############
-
 Improvements
 ############
 - Both interfaces are now able to analyse Phasequads.
-- Both interfaces are now able to analise multiple runs as one run by ticking co-add.
+- **Both interfaces are now able to analyse multiple runs as one run by ticking co-add.**
+
+.. figure:: /images/MA_co_add.png
+   :class: screenshot
+   :width: 750px
+   :align: center
+
 - Input validation has been added to First and Last good Data in the Phase Table tab.
 - When using co-add and creating a phasequad, the deadtime table will now be taken from the first file only.
 - If the start time of a fit is greater than the end time the interface will swap the two.
@@ -42,7 +45,12 @@ ALC
 New Features
 ############
 - The data loading section has been updated for this release. See :ref:`Muon ALC <MuonALC-ref>` for more.
-- The alpha in the ALC interface can now be set for single period data.
+- **The alpha in the ALC interface can now be set for single period data.**
+
+.. figure:: /images/ALC_alpha.png
+   :class: screenshot
+   :width: 750px
+   :align: center
 
 Improvements
 ############
@@ -59,10 +67,11 @@ New Features
 ############
 
 - A new :ref:`XrayAbsorptionCorrection <algm-XrayAbsorptionCorrection>` algorithm has been added.
-- A bug has been fixed in the Elemental Analysis GUI where minor peaks wouldn't be added to a new detector subplot.
 
 Bug fixes
 #########
+
+- A bug has been fixed in the Elemental Analysis GUI where minor peaks wouldn't be added to a new detector subplot.
 
 Algorithms
 ----------

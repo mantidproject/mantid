@@ -5,10 +5,6 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-Improvements
-############
-
-
 Algorithms and instruments
 --------------------------
 
@@ -27,7 +23,6 @@ Improvements
   processing, this is consistent with number of sample runs.
 - Support has been added for D11, D16, D22 and D33 in the :ref:`MaskBTP <algm-MaskBTP>` algorithm.
 - Instrument definitions have been added for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
-- The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
 - Loader and MaskBTP support have been added for D11B and D22B.
 
 Bugfixes
@@ -42,7 +37,7 @@ Bugfixes
 - A bug has been fixed where Wavelength limits entered with comma ranges larger than 10, e.g. `1,5,10,15` would throw a
   Runtime Error.
 - A bug has been Fixed in ISIS SANS GUI where the `Save Other` dialog caused an error.
-- ISIS SANS will print the name of any missing maskfiles instead of an empty name.
+- ISIS SANS will print the name of any missing mask files instead of an empty name.
 - A bug has been fixed in the ISIS SANS GUI sum runs tab, where clicking browse and then cancelling the file picker
   dialog caused a crash.
 
