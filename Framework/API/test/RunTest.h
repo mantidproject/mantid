@@ -448,6 +448,11 @@ public:
     TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(0), DblMatrix(3, 3, true));
     TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(1), rotation);
 
+    std::vector<DblMatrix> matrices = runInfo.getGoniometerMatrices();
+    TS_ASSERT_EQUALS(matrices.size(), 2);
+    TS_ASSERT_EQUALS(matrices[0], DblMatrix(3, 3, true));
+    TS_ASSERT_EQUALS(matrices[1], rotation);
+
     runInfo.clearGoniometers();
     TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
 

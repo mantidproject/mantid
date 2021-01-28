@@ -412,6 +412,15 @@ const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix(const size_t index) co
   return m_goniometers[index]->getR();
 }
 
+const std::vector<Kernel::Matrix<double>> Run::getGoniometerMatrices() const {
+  std::vector<Kernel::Matrix<double>> goniometers;
+  goniometers.reserve(m_goniometers.size());
+  for (auto it = m_goniometers.begin(); it != m_goniometers.end(); ++it) {
+    goniometers.emplace_back((*it)->getR());
+  }
+  return goniometers;
+}
+
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
