@@ -395,6 +395,9 @@ public:
         }
       }
       TS_ASSERT_EQUALS(found, true);
+      if (!found) {
+        break;
+      }
     }
   }
 
@@ -429,6 +432,9 @@ public:
         }
       }
       TS_ASSERT_EQUALS(found, false);
+      if (found) {
+        break;
+      }
     }
   }
 
