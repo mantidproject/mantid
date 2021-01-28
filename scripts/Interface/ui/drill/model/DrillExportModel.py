@@ -28,6 +28,16 @@ class DrillExportModel:
     """
     _pool = None
 
+    """
+    Dictionnary of all the exports (dict(str:set(str))).
+    """
+    _exports = None
+
+    """
+    Dictionnary of the successful exports (dict(str:set(str))).
+    """
+    _successExport = None
+
     def __init__(self, acquisitionMode):
         """
         Create the export model by providing an aquisition mode.
@@ -40,6 +50,9 @@ class DrillExportModel:
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)
+        self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
+        self._exports = dict()
+        self._successExports = dict()
 
     def getAlgorithms(self):
         """
@@ -107,6 +120,27 @@ class DrillExportModel:
         except:
             return False
 
+    def _onTaskSuccess(self, name):
+        """
+        Triggered when the export finished with success.
+
+        Args:
+            name (str): the task name
+        """
+        name = name.split(':')
+        wsName = name[0]
+        filename = name[1]
+
+        if wsName not in self._successExports:
+            self._successExports[wsName] = set()
+        self._successExports[wsName].add(filename)
+
+        if wsName in self._exports:
+            self._exports[wsName].discard(filename)
+            if not self._exports[wsName]:
+                del self._exports[wsName]
+                self._logSuccessExport(wsName)
+
     def _onTaskError(self, name, msg):
         """
         Triggered when the export failed.
@@ -115,8 +149,32 @@ class DrillExportModel:
             name (str): the task name
             msg (str): error msg
         """
-        logger.error("Error while exporting workspace {}.".format(name))
+        name = name.split(':')
+        wsName = name[0]
+        filename = name[1]
+
+        logger.error("Error while exporting workspace {}.".format(wsName))
         logger.error(msg)
+
+        if wsName in self._exports:
+            self._exports[wsName].discard(filename)
+            if not self._exports[wsName]:
+                del self._exports[wsName]
+                self._logSuccessExport(wsName)
+
+    def _logSuccessExport(self, wsName):
+        """
+        Log all the successful exports.
+
+        Args:
+            wsName (str): name of the concerned workspace
+        """
+        if wsName not in self._successExports:
+            return
+        filenames = ", ".join(self._successExports[wsName])
+        logger.notice("Successful export of workspace {} to {}"
+                      .format(wsName, filenames))
+        del self._successExports[wsName]
 
     def run(self, sample):
         """
@@ -138,7 +196,11 @@ class DrillExportModel:
                     if s and self._validCriteria(wsName, a):
                         filename = exportPath + wsName \
                                    + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        task = DrillTask(wsName, a, InputWorkspace=wsName,
+                        name = wsName + ":" + filename
+                        if wsName not in self._exports:
+                            self._exports[wsName] = set()
+                        self._exports[wsName].add(filename)
+                        task = DrillTask(name, a, InputWorkspace=wsName,
                                          FileName=filename)
                         tasks.append(task)
         self._pool.addProcesses(tasks)
