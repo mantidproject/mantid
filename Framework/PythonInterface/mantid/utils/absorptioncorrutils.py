@@ -276,12 +276,13 @@ def calculate_absorption_correction(
                 # set the SHA1 to workspace in memory (for in-memory cache search)
                 mtd[wsn_as].mutableRun()["absSHA1"] = sha1
                 # case SampleOnly is the annoying one
-                if wsn_ac is not None:
+                if wsn_ac != "":
                     mtd[wsn_ac].mutableRun()["absSHA1"] = sha1
+
                 # save the cache to file (for hard-disk cache)
                 SaveNexusProcessed(InputWorkspace=wsn_as, Filename=cache_filename)
                 # case SampleOnly is the annoying one
-                if wsn_ac is not None:
+                if wsn_ac != "":
                     SaveNexusProcessed(InputWorkspace=wsn_ac, Filename=cache_filename, Append=True)
             else:
                 # found the cache, let's use the cache instead
