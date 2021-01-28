@@ -628,7 +628,7 @@ class DrillModel(QObject):
             if (e >= len(self.samples)) or (not self.samples[e]):
                 continue
             kwargs = self.getProcessingParameters(e)
-            tasks.append(DrillTask(e, self.algorithm, **kwargs))
+            tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
         self.tasksPool.addProcesses(tasks)
 
     def _onTaskStarted(self, ref):
@@ -638,6 +638,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.information("Starting of sample {0} processing"
                            .format(name))
@@ -650,11 +651,12 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.information("Processing of sample {0} finished with sucess"
                            .format(name))
         self.processSuccess.emit(ref)
-        self.exportModel.run(self.samples[ref], ref + 1)
+        self.exportModel.run(self.samples[ref])
 
     def _onTaskError(self, ref, msg):
         """
@@ -665,6 +667,7 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.error("Error while processing sample {0}: {1}"
                      .format(name, msg))

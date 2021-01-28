@@ -107,19 +107,18 @@ class DrillExportModel:
         except:
             return False
 
-    def _onTaskError(self, ref, msg):
+    def _onTaskError(self, name, msg):
         """
         Triggered when the export failed.
 
         Args:
-            ref (int): task reference
+            name (str): the task name
             msg (str): error msg
         """
-        sampleName = str(ref)
-        logger.error("Error while exporting sample {}.".format(sampleName))
+        logger.error("Error while exporting workspace {}.".format(name))
         logger.error(msg)
 
-    def run(self, sample, ref):
+    def run(self, sample):
         """
         Run the export algorithms on a workspace. If the provided workspace is
         a groupworkspace, the export algorithms will be run on each member of
@@ -139,7 +138,7 @@ class DrillExportModel:
                     if s and self._validCriteria(wsName, a):
                         filename = exportPath + wsName \
                                    + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        task = DrillTask(ref, a, InputWorkspace=wsName,
+                        task = DrillTask(wsName, a, InputWorkspace=wsName,
                                          FileName=filename)
                         tasks.append(task)
         self._pool.addProcesses(tasks)

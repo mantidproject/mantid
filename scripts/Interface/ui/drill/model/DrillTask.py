@@ -46,13 +46,28 @@ class DrillTask(QRunnable):
     """
     Class that defines a processing task in the drill interface.
     """
-    def __init__(self, ref, alg, **kwargs):
+
+    """
+    Name of the task.
+    """
+    _name = None
+
+    def __init__(self, name, alg, **kwargs):
         super(DrillTask, self).__init__()
-        self.ref = ref
+        self._name = name
         self.signals = DrillTaskSignals()
         self.algName = alg
         self.alg = None
         self.properties = kwargs
+
+    def getName(self):
+        """
+        Get the name of the task.
+
+        Returns:
+            str: name
+        """
+        return self._name
 
     def run(self):
         """

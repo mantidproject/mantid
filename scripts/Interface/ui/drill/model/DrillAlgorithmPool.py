@@ -10,12 +10,41 @@ from qtpy.QtCore import QObject, Signal, QThreadPool
 
 class DrillAlgorithmPoolSignals(QObject):
     """
-    Signals that the observer could send.
+    Signals that the pool could send.
     """
-    taskStarted = Signal(int)     # task reference
-    taskSuccess = Signal(int)     # task reference
-    taskError = Signal(int, str)  # task reference
-    progressUpdate = Signal(int)  # progress in percent
+
+    """
+    Sent when a task starts.
+    Args:
+        str: the name of the task.
+    """
+    taskStarted = Signal(str)
+
+    """
+    Sent when a task ends with success.
+    Args:
+        str: the name of the task
+    """
+    taskSuccess = Signal(str)
+
+    """
+    Sent when a task ends with an error.
+    Args:
+        str: the name of the task
+        str: the error message
+    """
+    taskError = Signal(str, str)
+
+    """
+    Sent when the global progress of the pool is updated.
+    Args:
+        int: progress in percent
+    """
+    progressUpdate = Signal(int)
+
+    """
+    Sent when all the tasks are done.
+    """
     processingDone = Signal()
 
 
@@ -78,7 +107,7 @@ class DrillAlgorithmPool(QThreadPool):
         Args:
             task (DrillTask): the task
         """
-        self.signals.taskStarted.emit(task.ref)
+        self.signals.taskStarted.emit(task.getName())
 
     def onTaskFinished(self, task, ret, msg):
         """
@@ -98,9 +127,9 @@ class DrillAlgorithmPool(QThreadPool):
 
         self._tasksDone += 1
         if ret:
-            self.signals.taskError.emit(task.ref, msg)
+            self.signals.taskError.emit(task.getName(), msg)
         else:
-            self.signals.taskSuccess.emit(task.ref)
+            self.signals.taskSuccess.emit(task.getName())
 
         if self._running:
             if not self._tasks:
