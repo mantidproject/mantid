@@ -93,9 +93,10 @@ public:
   size_t getNumGoniometers() const;
   const Kernel::Matrix<double> &getGoniometerMatrix(const size_t index) const;
   size_t addGoniometer(const Geometry::Goniometer &goniometer);
-  void setGoniometers(std::vector<std::unique_ptr<Geometry::Goniometer>>);
+  void clearGoniometers();
 
-  const std::vector<std::unique_ptr<Geometry::Goniometer>> getGoniometerMatrices() const;
+  const std::vector<std::unique_ptr<Geometry::Goniometer>> getGoniometers() const;
+  const std::vector<Kernel::Matrix<double>> getGoniometerMatrices() const;
 
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group,

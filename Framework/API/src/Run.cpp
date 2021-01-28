@@ -378,6 +378,10 @@ size_t Run::addGoniometer(const Geometry::Goniometer &goniometer) {
   return m_goniometers.size() - 1;
 }
 
+void Run::clearGoniometers() {
+  m_goniometers.clear();
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Get the Goniometer for the given run index
  *
@@ -402,6 +406,9 @@ const Geometry::Goniometer Run::getGoniometer(const size_t index) const{
  * @return 3x3 double rotation matrix
  */
 const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix(const size_t index) const {
+  if (index >= m_goniometers.size())
+    throw std::invalid_argument(
+				"Run::getGoniometer() const: index is out of range.");
   return m_goniometers[index]->getR();
 }
 
