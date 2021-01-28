@@ -106,6 +106,7 @@ SliceViewer
 - For the elliptical shell of integrated peaks, the inner background radius is now correct
 - The sort order of peaks in the peaks overlay has been corrected
 - Now the correct view is displayed for orthogonal axis indices in non-orthogonal view
+- Displayed peaks update if the underlying PeaksWorkspace has been changed, removed or cleared
 
 
 Miscellaneous
@@ -128,6 +129,5 @@ Miscellaneous
 - Deleting rows or columns in a TableWorkspace is handled smoothly
 - The fit button in the fit browser is now disabled when all functions are removed
 - Pressing ``Esc`` to close ManageUserDirectories is now handled correctly
-
 
 :ref:`Release 6.0.0 <v6.0.0>`

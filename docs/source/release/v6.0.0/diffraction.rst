@@ -37,7 +37,7 @@ Improvements
 - Powder diffraction support (instruments D2B and D20) has been added to DrILL interface. See :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 - **The height of the** :ref:`func-BackToBackExponential` **peak is now preserved when changing the FWHM sliders during fitting**
-- :ref:`PaalmanPingsMonteCarloAbsorption` can now use tabulated density values, and allows for overridden X Sections
+- :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` can now use tabulated density values, and allows for overridden X Sections
 
 - Add ability to store multiple alternative attenuation file paths in the Pearl YAML configuration file
 - Add ``sample_empty`` and ``sample_empty_scale`` into PEARL powder diffraction scripts

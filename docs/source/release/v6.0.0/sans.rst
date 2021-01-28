@@ -27,6 +27,7 @@ Improvements
     - If sample thickness is set to -1, the algorithm will try to get it from the nexus file itself.
     - The output workspace will get its title from the nexus file.
     - WavelengthRange is exposed to the algorithm, which is crucial for TOF reduction.
+    - More than one transmission per processing, consistent with number of sample runs, are now accepted.
 - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
 - Added loader and MaskBTP support for D11B and D22B.
 
