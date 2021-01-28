@@ -18,7 +18,7 @@ namespace API {
 
 /*
  * An interface for handling offline help
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON MantidHelpInterface : public QWidget {
   Q_OBJECT
 public:
