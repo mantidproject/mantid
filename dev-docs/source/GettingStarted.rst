@@ -191,10 +191,6 @@ Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
 
-Building VATES
-##############
-See :ref:`BuildingVATES` for infromation about building VATES.
-
 Archive access
 ##############
 

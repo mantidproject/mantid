@@ -636,7 +636,6 @@ if(${CMAKE_PROJECT_NAME} MATCHES "MantidFramework")
   set(COLORMAPS_FOLDER "")
 else()
   set(QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V")
-  set(PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V")
   set(COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps)
 endif()
 

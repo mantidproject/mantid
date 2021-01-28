@@ -77,7 +77,6 @@ Instruction
       -DPYQT4_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/PyQt4 \ 
       -DSITEPACKAGES_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages \
       -DOPENSSL_ROOT_DIR=/opt/local \
-      -DMAKE_VATES=FALSE \
       -DMACPORTS=TRUE \
       -DCMAKE_INSTALL_PREFIX=path_where_to_install_mantid  /path_to_repository/mantid/Code/Mantid
 
