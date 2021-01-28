@@ -223,6 +223,25 @@ class MainWindowTest(unittest.TestCase):
         self.assertDictEqual({}, returned_interfaces)
         mock_logger.information.assert_called()
 
+    @patch('workbench.app.mainwindow.UserSubWindowFactory')
+    def test_cpp_interfaces_are_discovered_correctly(self, mock_UserSubWindowFactory):
+        """Assuming we have already found some python interfaces, test that
+        cpp interfaces are discovered correctly using the Direct interfaces as an example."""
+
+        cpp_interface_factory = Mock()
+        cpp_interface_factory.keys.return_value = ['ALF View', 'TOFCalculator']
+        cpp_interface_factory.categories.side_effect = lambda name: ['Direct'] if name == 'ALF View' else []
+        mock_UserSubWindowFactory.Instance.return_value = cpp_interface_factory
+
+        all_interfaces = self.main_window._discover_cpp_interfaces(
+            {'Direct': ['DGS_Reduction.py', 'DGSPlanner.py', 'PyChop.py', 'MSlice.py']})
+
+        expected_interfaces = {
+            'Direct': ['DGS_Reduction.py', 'DGSPlanner.py', 'PyChop.py', 'MSlice.py', 'ALF View'],
+            'General': ['TOFCalculator']
+        }
+        self.assertDictEqual(expected_interfaces, all_interfaces)
+
 
 if __name__ == '__main__':
     unittest.main()
