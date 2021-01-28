@@ -218,7 +218,7 @@ class GenerateLogbook(PythonAlgorithm):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
         entry_not_found_msg = "The requested entry: {}, is not present in the raw data"
-        regex_all = '(\*)|(//)|(\+)|(\-)'
+        regex_all = r'(\*)|(//)|(\+)|(\-)'
         p = re.compile(regex_all)
         operators = ["+","-","*","//"]
 
