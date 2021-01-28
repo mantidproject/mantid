@@ -437,36 +437,6 @@ bool SlicingAlgorithmDialog::doAutoFillDimensions() const {
   return ui.ck_calculate->isChecked();
 }
 
-/**
- * Resets the axis dimensions externally.
- * @param index The property index.
- * @param propertyValue The new value of the axis dimension.
- */
-void SlicingAlgorithmDialog::resestAlignedDimProperty(
-    size_t index, const QString &propertyValue) {
-  QString alignedDim = "AlignedDim";
-
-  const QString propertyName = alignedDim.append(QString().number(index));
-
-  if (!m_tied_properties.contains(propertyName)) {
-    return;
-  }
-
-  QWidget *widget = m_tied_properties[propertyName];
-
-  if (!widget) {
-    return;
-  }
-
-  auto *edit = dynamic_cast<QLineEdit *>(widget);
-
-  if (!edit) {
-    return;
-  }
-
-  edit->setText(propertyValue);
-}
-
 /*---------------------------------------------------------------------------------------------
 SliceMDDialog Methods
 ---------------------------------------------------------------------------------------------*/
