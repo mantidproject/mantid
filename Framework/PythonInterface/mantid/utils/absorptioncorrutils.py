@@ -113,7 +113,7 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
         wsn_as = f"{absName}_assc"
         wsn_ac = f"{absName}_ac"
     else:
-        raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
+        raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
     # step_1: check memory to see if the ws is already there
     # -- check SHA1
@@ -344,7 +344,7 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
                OutputWorkspace=absName + '_ac')
         return absName + '_assc', absName + '_ac'
     else:
-        raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
+        raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
 def create_absorption_input(
