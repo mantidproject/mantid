@@ -88,6 +88,12 @@ void SetSampleMaterial::init() {
       std::make_unique<FileProperty>("AttenuationProfile", "",
                                      FileProperty::OptionalLoad, extensions),
       "The path name of the file containing the attenuation profile");
+
+  declareProperty(
+      std::make_unique<FileProperty>("XRayAttenuationProfile", "",
+                                     FileProperty::OptionalLoad, extensions),
+      "The path name of the file containing the Xray attenuation profile");
+
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the effective number density.");
@@ -127,6 +133,7 @@ void SetSampleMaterial::init() {
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
   setPropertyGroup("AttenuationProfile", specificValuesGrp);
+  setPropertyGroup("XRayAttenuationProfile", specificValuesGrp);
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
@@ -160,6 +167,8 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
   params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
+  params.xRayAttenuationProfileFileName =
+      getPropertyValue("XRayAttenuationProfile");
   const std::string numberDensityUnit = getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;

@@ -128,6 +128,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.pr_loader.recovery_presenter = mock.MagicMock()
         self.pr_loader._open_script_in_editor_call = mock.MagicMock()
         self.pr_loader._run_script_in_open_editor = mock.MagicMock()
+        self.pr_loader._load_project_interfaces = mock.MagicMock()
 
         # Find the checkpoint
         checkpoints = os.listdir(self.pr.recovery_directory_pid)
@@ -138,6 +139,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         # Test the calls are made properly
         self.assertEqual(self.pr_loader._open_script_in_editor_call.call_count, 1)
         self.assertEqual(self.pr_loader._run_script_in_open_editor.call_count, 1)
+        self.assertEqual(self.pr_loader._load_project_interfaces.call_count, 1)
 
     def test_open_script_in_editor(self):
         self.pr_loader.recovery_presenter = mock.MagicMock()

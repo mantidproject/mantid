@@ -389,7 +389,7 @@
       <item>
        <widget class="QToolButton" name="processRows">
         <property name="toolTip">
-         <string>Process selected rows</string>
+         <string>Process selected row(s)</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -397,7 +397,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="processAll">
+       <widget class="QToolButton" name="buttonProcessGroup">
+        <property name="toolTip">
+         <string>Process selected group(s)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="buttonProcessAll">
         <property name="toolTip">
          <string>Process all</string>
         </property>
@@ -436,6 +446,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionLoadRundex"/>
     <addaction name="actionSaveAs"/>
     <addaction name="actionSave"/>
@@ -448,18 +459,43 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="actionAddRow"/>
-    <addaction name="actionDelRow"/>
-    <addaction name="actionCopyRow"/>
-    <addaction name="actionCutRow"/>
-    <addaction name="actionPasteRow"/>
-    <addaction name="actionErase"/>
+    <widget class="QMenu" name="menuRow_s">
+     <property name="title">
+      <string>&amp;Row(s)</string>
+     </property>
+     <addaction name="actionAddRow"/>
+     <addaction name="actionDelRow"/>
+     <addaction name="actionCopyRow"/>
+     <addaction name="actionCutRow"/>
+     <addaction name="actionPasteRow"/>
+    </widget>
+    <widget class="QMenu" name="menuColumns_s">
+     <property name="title">
+      <string>&amp;Columns(s)</string>
+     </property>
+     <widget class="QMenu" name="menuAddRemoveColumn">
+      <property name="title">
+       <string>&amp;Add/remove column</string>
+      </property>
+     </widget>
+     <addaction name="menuAddRemoveColumn"/>
+    </widget>
+    <widget class="QMenu" name="menuCell_s">
+     <property name="title">
+      <string>Cell(&amp;s)</string>
+     </property>
+     <addaction name="actionErase"/>
+    </widget>
+    <addaction name="menuColumns_s"/>
+    <addaction name="menuRow_s"/>
+    <addaction name="menuCell_s"/>
    </widget>
    <widget class="QMenu" name="menuProcess_2">
     <property name="title">
      <string>&amp;Process</string>
     </property>
     <addaction name="actionProcessRow"/>
+    <addaction name="actionProcessGroup"/>
     <addaction name="actionProcessAll_2"/>
     <addaction name="actionStopProcessing"/>
    </widget>
@@ -476,7 +512,7 @@
   </widget>
   <action name="actionLoadRundex">
    <property name="text">
-    <string>Load rundex</string>
+    <string>&amp;Load rundex</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -494,67 +530,67 @@
   </action>
   <action name="actionSaveAs">
    <property name="text">
-    <string>Save rundex as</string>
+    <string>&amp;Save rundex as</string>
    </property>
   </action>
   <action name="actionManageDirectories">
    <property name="text">
-    <string>Manage data directories</string>
+    <string>&amp;Manage data directories</string>
    </property>
   </action>
   <action name="actionSettings">
    <property name="text">
-    <string>Settings</string>
+    <string>S&amp;ettings</string>
    </property>
   </action>
   <action name="actionProcessRow">
    <property name="text">
-    <string>Process select row(s)</string>
+    <string>&amp;Process select row(s)</string>
    </property>
   </action>
   <action name="actionProcessAll_2">
    <property name="text">
-    <string>Process all rows</string>
+    <string>Process all &amp;rows</string>
    </property>
   </action>
   <action name="actionStopProcessing">
    <property name="text">
-    <string>Stop processing</string>
+    <string>&amp;Stop processing</string>
    </property>
   </action>
   <action name="actionCopyRow">
    <property name="text">
-    <string>Copy selected row(s)</string>
+    <string>&amp;Copy selected row(s)</string>
    </property>
   </action>
   <action name="actionCutRow">
    <property name="text">
-    <string>Cut selected row(s)</string>
+    <string>Cut &amp;selected row(s)</string>
    </property>
   </action>
   <action name="actionPasteRow">
    <property name="text">
-    <string>Paste row(s)</string>
+    <string>&amp;Paste row(s)</string>
    </property>
   </action>
   <action name="actionErase">
    <property name="text">
-    <string>Erase seleced cell(s)</string>
+    <string>&amp;Erase selected cell(s)</string>
    </property>
   </action>
   <action name="actionAddRow">
    <property name="text">
-    <string>Add a row</string>
+    <string>&amp;Add a row</string>
    </property>
   </action>
   <action name="actionDelRow">
    <property name="text">
-    <string>Remove selected row(s)</string>
+    <string>&amp;Remove selected row(s)</string>
    </property>
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save rundex</string>
+    <string>Save &amp;rundex</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -562,7 +598,7 @@
   </action>
   <action name="actionClose">
    <property name="text">
-    <string>Close</string>
+    <string>&amp;Close</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -570,7 +606,22 @@
   </action>
   <action name="actionHelp">
    <property name="text">
-    <string>DrILL help</string>
+    <string>&amp;DrILL help</string>
+   </property>
+  </action>
+  <action name="actiona">
+   <property name="text">
+    <string>a</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="actionProcessGroup">
+   <property name="text">
+    <string>Process selected group(s)</string>
    </property>
   </action>
  </widget>

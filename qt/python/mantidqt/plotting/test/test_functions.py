@@ -12,6 +12,7 @@ from unittest import TestCase, main
 
 # third party imports
 import matplotlib
+from matplotlib import cm
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -30,6 +31,14 @@ from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, f
                                          manage_workspace_names, plot, plot_from_names, plot_md_ws_from_names,
                                          pcolormesh_from_names, plot_surface)
 
+IMAGE_PLOT_OPTIONS = {"plots.images.Colormap": "spring", "plots.images.ColorBarScale": "Log",
+                      "plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off"}
+
+
+class MockConfigService(object):
+    def __init__(self):
+        self.getString = mock.Mock(side_effect=IMAGE_PLOT_OPTIONS.get)
+
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
 class FakeWorkspace(object):
@@ -46,7 +55,6 @@ def workspace_names_dummy_func(workspaces):
 
 
 class FunctionsTest(TestCase):
-
     _test_ws = None
     _test_md_ws = None
 
@@ -70,17 +78,16 @@ class FunctionsTest(TestCase):
         plt.close('all')
 
     def test_can_overplot_returns_false_with_no_active_plots(self):
-        self.assertFalse(can_overplot()[0])
+        self.assertFalse(can_overplot())
 
     def test_can_overplot_returns_true_for_active_line_plot(self):
         plt.plot([1, 2])
-        self.assertTrue(can_overplot()[0])
+        self.assertTrue(can_overplot())
 
     def test_can_overplot_returns_false_for_active_patch_plot(self):
         plt.pcolormesh(np.arange(9.).reshape(3, 3))
-        allowed, msg = can_overplot()
+        allowed = can_overplot()
         self.assertFalse(allowed)
-        self.assertGreater(len(msg), 0)
 
     def test_current_figure_or_none_returns_none_if_no_figures_exist(self):
         self.assertEqual(current_figure_or_none(), None)
@@ -188,6 +195,25 @@ class FunctionsTest(TestCase):
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
 
+    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    def test_pcolor_mesh_from_names_gets_colorbar_scale_from_ConfigService(self, mock_ConfigService):
+        ws = CreateSampleWorkspace()
+
+        fig = pcolormesh_from_names([ws])
+
+        mock_ConfigService.getString.assert_any_call('plots.images.ColorBarScale')
+        self.assertTrue(isinstance(fig.gca().images[0].colorbar.norm, matplotlib.colors.LogNorm))
+
+    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    def test_pcolor_mesh_from_names_gets_colormap_from_ConfigService(self, mock_ConfigService):
+        ws = CreateSampleWorkspace()
+        spring_colormap = cm.get_cmap('spring')
+
+        fig = pcolormesh_from_names([ws])
+
+        mock_ConfigService.getString.assert_any_call('plots.images.Colormap')
+        self.assertEqual(fig.gca().images[0].colorbar.get_cmap(), spring_colormap)
+
     def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
         fig = plt.figure()
         plt.plot([0, 1], [0, 1])
@@ -250,7 +276,7 @@ class FunctionsTest(TestCase):
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
 
         self.assertTrue(ax.is_waterfall())
@@ -266,7 +292,7 @@ class FunctionsTest(TestCase):
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         # Overplot one of the same lines.
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
         ax = plt.gca()

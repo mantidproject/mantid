@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm performs the data reduction for D20 instrument at the ILL.
+This algorithm performs the data reduction for D20 and D1B instruments at the ILL.
 
 Input runs
 ----------

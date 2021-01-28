@@ -3,11 +3,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 from unittest.mock import Mock, patch
-from mantidqt.utils.qt.testing import start_qapplication
+
 from SampleTransmissionCalculator.stc_view import SampleTransmissionCalculatorView
-from qtpy.QtWidgets import QHBoxLayout
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
@@ -92,4 +91,3 @@ class SampleTransmissionCalculatorViewTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

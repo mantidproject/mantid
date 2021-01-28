@@ -132,6 +132,29 @@ void Axes::setTitle(const char *label) {
 }
 
 /**
+ * Format the tick labels on an axis or axes
+ * @param char* axis :: [ 'x' | 'y' | 'both' ]
+ * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
+ * scientific notation
+ * @param bool useOffset :: True, the offset will be
+ * calculated as needed, False no offset will be used
+ */
+void Axes::tickLabelFormat(const char *axis, const char *style,
+                           const bool useOffset) {
+  try {
+    GlobalInterpreterLock lock;
+    Python::List args;
+    Python::Dict kwargs;
+    kwargs["axis"] = axis;
+    kwargs["style"] = style;
+    kwargs["useOffset"] = useOffset;
+    pyobj().attr("ticklabel_format")(*args, **kwargs);
+  } catch (...) {
+    throw PythonException();
+  }
+}
+
+/**
  * (Re-)generate a legend on the axes
  * @param draggable If true the legend will be draggable
  * @return An artist object representing the legend

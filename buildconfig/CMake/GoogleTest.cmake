@@ -35,3 +35,10 @@ foreach( target_var gmock gtest gmock_main gtest_main )
                           PROPERTIES EXCLUDE_FROM_ALL TRUE
                           FOLDER "UnitTests/gmock" )
 endforeach()
+
+# W4 logging doesn't work with MSVC address sanitizer, turn off sanitizer since not our code
+if(MSVC AND (USE_SANITIZERS_LOWER STREQUAL "address"))
+    get_target_property(opts gmock COMPILE_OPTIONS)
+    string(REPLACE "/fsanitize=address" "" opts ${opts})
+    set_property(TARGET gmock PROPERTY COMPILE_OPTIONS ${opts})
+endif()

@@ -10,8 +10,12 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <climits>
 #include <list>
@@ -20,6 +24,10 @@
 class ISISRAW;
 class ISISRAW2;
 
+namespace Poco {
+class Path;
+}
+
 namespace Mantid {
 namespace API {
 class SpectrumDetectorMapping;
@@ -27,13 +35,8 @@ class SpectrumDetectorMapping;
 
 namespace DataHandling {
 /** @class LoadRawHelper DataHandling/LoadRawHelper.h
-
-Helper class for LoadRaw algorithms.
-
-
-@author Sofia Antony, ISIS,RAL
-@date 14/04/2010
-*/
+ * Helper class for LoadRaw algorithms.
+ */
 class DLLExport LoadRawHelper
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
@@ -97,7 +100,8 @@ public:
                                    const std::string &title,
                                    const API::WorkspaceGroup_sptr &grpws_sptr,
                                    const DataObjects::Workspace2D_sptr &ws_sptr,
-                                   int64_t numberOfPeriods, bool bMonitor,
+                                   int64_t numberOfPeriods,
+                                   [[maybe_unused]] bool bMonitor,
                                    API::Algorithm *const pAlg);
 
   /// overloaded method to set the workspace property
@@ -115,8 +119,6 @@ public:
 protected:
   /// Overwrites Algorithm method.
   void init() override;
-  /// checks the file is an ascii file
-  bool isAscii(FILE *file) const;
   /// Reads title from the isisraw class
   void readTitle(FILE *file, std::string &title);
   /// reads workspace parameters like number of histograms,size of vectors etc
@@ -242,16 +244,9 @@ private:
 
   /// Search for the log files in the workspace, and output their names as a
   /// set.
-  std::list<std::string> searchForLogFiles(const std::string &pathToRawFile);
+  std::list<std::string> searchForLogFiles(const Poco::Path &pathToRawFile);
   /// Extract the log name from the path to the specific log file.
   std::string extractLogName(const std::string &path);
-  /// Checks if the file is an ASCII file
-  bool isAscii(const std::string &filename);
-  /// if  alternate data stream named checksum exists for the raw file
-  bool adsExists(const std::string &pathToFile);
-  /// returns the list of log files from ADS checksum
-  std::set<std::string>
-  getLogFilenamesfromADS(const std::string &pathToRawFile);
 };
 
 } // namespace DataHandling

@@ -1,3 +1,5 @@
+.. _sliceviewer_release:
+
 ===================
 Sliceviewer Changes
 ===================
@@ -87,6 +89,8 @@ is now limited to the selected region:
 A new status bar has been added at the bottom to indicate that the cuts can be extracted
 to separate workspaces by using the relevant keys. Similar keys and status information is
 presented in the single-pixel line plots mode.
+
+.. _sliceviewer_cursor:
 
 Cursor Information Widget
 #########################

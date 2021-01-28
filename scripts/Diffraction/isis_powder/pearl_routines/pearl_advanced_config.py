@@ -21,8 +21,8 @@ general_params = {
          "nxs_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
          "gss_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
          "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof_xye.dat",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d_xye.dat"
+         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
+         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
     },
 
     "subtract_empty_instrument": True,

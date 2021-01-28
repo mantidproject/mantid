@@ -22,6 +22,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
 #include <tuple>
 
 using namespace Mantid::API;
@@ -129,6 +131,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_timeOfFlight() {
@@ -154,6 +157,9 @@ public:
         std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             outputWS->getItem(0));
     TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "TOF")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
+                     "Time-of-flight")
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
@@ -214,6 +220,96 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
+    checkTimeFormat(workspaceEntry1);
+  }
+
+  void test_D7_timeOfFlight_timechannels() {
+    // Tests loading TOF data for D7
+    LoadILLPolarizedDiffraction alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "395850"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("PositionCalibration", "None"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TOFUnits", "TimeChannels"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    WorkspaceGroup_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT(outputWS->isGroup())
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+    do_test_general_features(outputWS, "TOF");
+
+    MatrixWorkspace_sptr workspaceEntry1 =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    TS_ASSERT(workspaceEntry1)
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->unitID(), "Label")
+    TS_ASSERT_EQUALS(workspaceEntry1->getAxis(0)->unit()->caption(),
+                     "Time channel")
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(0)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(1)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[365], 365)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(130)[366], 366)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[365], 365)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(131)[366], 366)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(131)[365], 1)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[365], 1.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[0], 5468)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[0], 73.94, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(132)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(132)[511], 5394)
+    TS_ASSERT_DELTA(workspaceEntry1->e(132)[511], 73.44, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[0], 0)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[1], 1)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
+
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[511], 511)
+    TS_ASSERT_EQUALS(workspaceEntry1->x(133)[512], 512)
+    TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
   }
 
   void test_D7_multifile_sum() {
@@ -272,6 +368,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 4109)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 64.10, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_multifile_list() {
@@ -361,6 +458,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry12->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(133)[0], 108504)
     TS_ASSERT_DELTA(workspaceEntry12->e(133)[0], 329.39, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_default_alignment() {
@@ -457,7 +555,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("PositionCalibration", "YIGFile"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("YIGFilename", "YIG_IPF.xml"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("YIGFilename", "D7_YIG_calibration.xml"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertToScatteringAngle", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TransposeMonochromatic", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -472,7 +571,7 @@ public:
     for (auto entry_no = 0; entry_no < outputWS->getNumberOfEntries();
          ++entry_no) {
       MatrixWorkspace_sptr workspaceEntry =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
               outputWS->getItem(entry_no));
       TS_ASSERT(workspaceEntry)
 
@@ -489,6 +588,14 @@ public:
       TS_ASSERT_DELTA(workspaceEntry->detectorInfo().twoTheta(131) * RAD_2_DEG,
                       144.17, 0.01)
     }
+    // check for the correct wavelength value from the IPF
+    MatrixWorkspace_sptr ws =
+        std::static_pointer_cast<Mantid::API::MatrixWorkspace>(
+            outputWS->getItem(0));
+    double wavelength =
+        stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
+    TS_ASSERT_DELTA(wavelength, 3.09, 0.01)
+    checkTimeFormat(ws);
   }
 
   void test_D7_transpose() {
@@ -558,7 +665,7 @@ public:
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
-      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+      TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
                        "Wavelength")
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(0), 12.66, 0.01)
       TS_ASSERT_DELTA(workspaceEntry->getAxis(1)->getValue(1), 13.45, 0.01)
@@ -620,18 +727,21 @@ public:
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
+      checkTimeFormat(workspaceEntry);
       if (measurementMode == "monochromatic") {
         TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
-        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
+        TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(),
                          "Wavelength")
       } else if (measurementMode == "TOF") {
-        {
-          TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
-                           "Time")
-          TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
-        }
+        { TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512) }
       }
     }
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("start_time")->value()));
   }
 
 private:

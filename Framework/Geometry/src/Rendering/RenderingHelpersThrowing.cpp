@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include <stdexcept>
+#include <string>
 
 namespace {
 void throwNoOpenGLError(const std::string &function) {

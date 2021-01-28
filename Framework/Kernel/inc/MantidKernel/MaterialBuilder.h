@@ -45,6 +45,7 @@ public:
   MaterialBuilder &setIncoherentXSection(double xsec);
   MaterialBuilder &setAbsorptionXSection(double xsec);
   MaterialBuilder &setAttenuationProfileFilename(std::string filename);
+  MaterialBuilder &setXRayAttenuationProfileFilename(std::string filename);
 
   void setAttenuationSearchPath(std::string path);
 
@@ -79,6 +80,7 @@ private:
       m_absSection;
   NumberDensityUnit m_numberDensityUnit;
   boost::optional<std::string> m_attenuationProfileFileName;
+  boost::optional<std::string> m_xRayAttenuationProfileFileName;
   std::string m_attenuationFileSearchPath;
 };
 

@@ -13,26 +13,34 @@ from enum import Enum
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter, create_table_item
 from .model import create_peaksviewermodel
+from ..adsobsever import SliceViewerADSObserver
 
 
 class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
     """Override create_item method to format table columns more
     appropriately
     """
+    # Format specifier for floats in the table
     FLOAT_FORMAT_STR = '{:.5f}'
+    # Qt model classes can store data against different roles.
+    # Defines a custom role to be used for sorting with QSortFilterProxy.
+    # See https://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop
+    DATA_SORT_ROLE = 2001
 
     def create_item(self, data, _):
         """Create a table item to display the data. The data is always readonly
         here.
         """
         if type(data) == float:
-            data = self.FLOAT_FORMAT_STR.format(data)
+            display_data = self.FLOAT_FORMAT_STR.format(data)
         else:
-            data = str(data)
-        return create_table_item(data, editable=False)
+            display_data = str(data)
+        item = create_table_item(display_data, editable=False)
+        item.setData(data, self.DATA_SORT_ROLE)
+        return item
 
 
-class PeaksViewerPresenter(object):
+class PeaksViewerPresenter:
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
@@ -121,7 +129,7 @@ class PeaksViewerPresenter(object):
         Respond to a change in the peaks list in the model
         """
         self._peaks_table_presenter.refresh()
-        self.view.table_view.enable_sorting()
+        self.view.table_view.enable_sorting(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
 
     # private api
     @staticmethod
@@ -133,7 +141,7 @@ class PeaksViewerPresenter(object):
             raise ValueError("Expected a PeaksWorkspace. Found {}.".format(type(ws)))
 
 
-class PeaksViewerCollectionPresenter(object):
+class PeaksViewerCollectionPresenter:
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
 
@@ -154,6 +162,16 @@ class PeaksViewerCollectionPresenter(object):
         """
         self._view = view
         self._child_presenters = []
+        self._ads_observer = None
+        self.setup_ads_observer()
+
+    def setup_ads_observer(self):
+        if self._ads_observer is None:
+            self._ads_observer = SliceViewerADSObserver(self.replace_handle, self.rename_handle, self.clear_handle,
+                                                        self.delete_handle)
+
+    def clear_observer(self):
+        self._ads_observer = None
 
     @property
     def view(self):
@@ -165,6 +183,7 @@ class PeaksViewerCollectionPresenter(object):
         :param name: The name of a PeaksWorkspace.
         :returns: The child presenter
         """
+        self.setup_ads_observer()
         presenter = PeaksViewerPresenter(self._create_peaksviewer_model(name),
                                          self._view.append_peaksviewer())
         self._child_presenters.append(presenter)
@@ -202,6 +221,7 @@ class PeaksViewerCollectionPresenter(object):
         Remove the named workspace from display. No op if no workspace can be found with that name
         :param name: The name of a workspace
         """
+        self.setup_ads_observer()
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
@@ -224,6 +244,7 @@ class PeaksViewerCollectionPresenter(object):
 
     def notify(self, event):
         """Dispatch notification to all subpresenters"""
+        self.setup_ads_observer()
         for presenter in self._child_presenters:
             presenter.notify(event)
 
@@ -247,3 +268,22 @@ class PeaksViewerCollectionPresenter(object):
             fg_color = '#000000'
 
         return create_peaksviewermodel(name, fg_color, self.DEFAULT_BG_COLOR)
+
+    def replace_handle(self, ws_name, _):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+            self.append_peaksworkspace(ws_name)
+
+    def delete_handle(self, ws_name):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+
+    def clear_handle(self):
+        # This is likely handled at a higher level anyway, because SliceViewer closes given a clear all on the ADS.
+        for ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+
+    def rename_handle(self, ws_name, new_name):
+        if ws_name in self.workspace_names():
+            self.remove_peaksworkspace(ws_name)
+            self.append_peaksworkspace(new_name)

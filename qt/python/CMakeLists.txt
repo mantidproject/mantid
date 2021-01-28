@@ -3,17 +3,15 @@
 
 include(PythonPackageTargetFunctions)
 
-# Legacy wrappers for MantidPlot
-if(ENABLE_MANTIDPLOT)
-  add_subdirectory(mantidqtpython)
-endif()
-
 # mantidqt
-if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs)
+    if(ENABLE_WORKBENCH)
+      list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
+    endif()
   else()
-    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs "${SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
@@ -23,9 +21,6 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   # Setup dependency chain
   add_dependencies(mantidqt PythonInterface)
 
-  if(ENABLE_MANTIDPLOT)
-    add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
-  endif()
   if(ENABLE_WORKBENCH)
     # Configure resources data in place for ease of development. The output file
     # is added to the toplevel gitignore
@@ -76,6 +71,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/project/test/test_projectsaver.py
       mantidqt/project/test/test_workspaceloader.py
       mantidqt/project/test/test_workspacesaver.py
+      mantidqt/project/test/test_projectparser_mantidplot.py
       mantidqt/utils/test/test_async.py
       mantidqt/utils/test/test_modal_tester.py
       mantidqt/utils/test/test_qt_utils.py
@@ -84,6 +80,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
+      mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
       mantidqt/widgets/test/test_functionbrowser.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
@@ -131,6 +128,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
+        mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_view.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksviewercollectionpresenter.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectormodel.py
         mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_peaksworkspaceselectorpresenter.py
@@ -142,6 +140,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_peaksviewer_representation_spherical.py
         mantidqt/widgets/test/test_jupyterconsole.py
         mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+        mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
         mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
@@ -165,12 +164,5 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES}
       ${PYTHON_WIDGET_QT5_ONLY_TESTS}
     )
-  endif()
-  if(ENABLE_MANTIDPLOT)
-    set(PYUNITTEST_QT_API pyqt)
-    pyunittest_add_test(
-      ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt4 ${PYTHON_TEST_FILES}
-    )
-    unset(PYUNITTEST_QT_API)
   endif()
 endif()

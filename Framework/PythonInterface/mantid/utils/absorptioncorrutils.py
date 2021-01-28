@@ -4,10 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from typing import ValuesView
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
-from mantid.simpleapi import AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply, \
-    PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD, SetSample, mtd
+from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
+                              PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
+                              RenameWorkspace, SetSample, SaveNexusProcessed, UnGroupWorkspace, mtd)
+import mantid.simpleapi
 import numpy as np
 import os
 
@@ -15,6 +18,9 @@ VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
 
+# ---------------------------- #
+# ----- Helper functions ----- #
+# ---------------------------- #
 def _getBasename(filename):
     """
     Helper function to get the filename without the path or extension
@@ -27,12 +33,146 @@ def _getBasename(filename):
     return name
 
 
-def calculate_absorption_correction(filename, abs_method, props, sample_formula, mass_density,
-                                    number_density=Property.EMPTY_DBL,
-                                    container_shape="PAC06",
-                                    num_wl_bins=1000,
-                                    element_size=1,
-                                    metaws=None):
+def _getCacheName(wkspname, cache_dir, abs_method):
+    """
+    Generate a MDF5 string based on given key properties.
+
+    :param wkspname: donor workspace containing absorption correction info
+    :param cache_dir: location to store the cached absorption correction
+    
+    return fileName(full path), sha1
+    """
+
+    # fix up the workspace name
+    prefix = wkspname.replace('__', '')
+
+    # parse algorithm used for absorption calculation
+    # NOTE: the actual algorithm used depends on selected abs_method, therefore
+    #       we are embedding the algorithm name into the SHA1 so that we can
+    #       differentiate them for caching purpose
+    alg_name = {
+        "SampleOnly": "AbsorptionCorrection",
+        "SampleAndContainer": "AbsorptionCorrection",
+        "FullPaalmanPings": "PaalmanPingsAbsorptionCorrection",
+    }[abs_method]
+
+    # key property to generate the HASH
+    ws = mtd[wkspname]
+    # NOTE:
+    #  - The query for height is tied to a beamline, which is not a good design as it
+    #    will break for other beamlines
+    property_string = [
+        f"{key}={val}" for key, val in {
+            'wavelength_min': ws.readX(0).min(),
+            'wavelength_max': ws.readX(0).max(),
+            "num_wl_bins": len(ws.readX(0)) - 1,
+            "sample_formula": ws.run()['SampleFormula'].lastValue().strip(),
+            "mass_density": ws.run()['SampleDensity'].lastValue(),
+            "height_unit": ws.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue(),
+            "height": ws.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(),
+            "sample_container": ws.run()['SampleContainer'].lastValue().replace(" ", ""),
+            "algorithm_used": alg_name,
+        }.items()
+    ]
+
+    cache_path, signature = mantid.simpleapi.CreateCacheFilename(
+        Prefix=prefix,
+        OtherProperties=property_string,
+        CacheDir=cache_dir,
+    )
+
+    return cache_path, signature
+
+
+def _getCachedData(absName, abs_method, sha1, cache_file_name):
+    """
+    Check both memory and disk to locate cache data.  Returns ("", "")
+    if no cache can be found.
+
+    :params absName: absorption workspace name base
+    :params abs_method: absorption calculation method
+    :params sha1: SHA1 that identify cached workspace
+    :params cache_file_name: cache file name to search
+
+    return cached_absorption_correction_workspace_name_sample,
+           cached_absorption_correction_workspace_name_container
+    """
+    wsn_as = ""  # absorption workspace sample
+    wsn_ac = ""  # absorption workspace container
+    found_as = False
+    found_ac = False
+
+    # step_0: depending on the abs_method, suffix will be different
+    if abs_method == "SampleOnly":
+        wsn_as = f"{absName}_ass"
+        found_ac = True
+    elif abs_method == "SampleAndContainer":
+        wsn_as = f"{absName}_ass"
+        wsn_ac = f"{absName}_acc"
+    elif abs_method == "FullPaalmanPings":
+        wsn_as = f"{absName}_assc"
+        wsn_ac = f"{absName}_ac"
+    else:
+        raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
+
+    # step_1: check memory to see if the ws is already there
+    # -- check SHA1
+    # NOTE: The new attribute absSHA1 should be there.
+    if mtd.doesExist(wsn_as):
+        found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
+    if mtd.doesExist(wsn_ac):
+        found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
+
+    # step_2: try to load from cache_file provided
+    if (not found_as) or (not found_ac):
+        # disk -> memory
+        if os.path.exists(cache_file_name):
+            # LoadNexus(Filename=cache_file_name, OutputWorkspace=wsn_as)
+            # if mtd[wsn_as].id() == "WorkspaceGroup":
+            #     UnGroupWorkspace(InputWorkspace=wsn_as)
+            wsntmp = f"{wsn_as}_wsg"
+            Load(Filename=cache_file_name, OutputWorkspace=wsntmp)
+            wstype = mtd[wsntmp].id()
+            if wstype == "Workspace2D":
+                RenameWorkspace(InputWorkspace=wsntmp, OutputWorkspace=wsn_as)
+            elif wstype == "WorkspaceGroup":
+                # there should be exactly two workspaces inside, ungroup them will
+                # restore them with the orignal name (wsn_as, wsn_ac)
+                UnGroupWorkspace(InputWorkspace=wsntmp)
+            else:
+                raise ValueError(f"Unsupported cached workspace type: {wstype}")
+
+        # now check the memory again
+        # -- wsn_as exist for all three methods
+        # NOTE: The new attribute absSHA1 should be there.
+        if mtd.doesExist(wsn_as):
+            found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
+        if mtd.doesExist(wsn_ac):
+            found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
+
+    # step_3: if we did not find the cache, set both to empty string
+    wsn_as = wsn_as if found_as else ""
+    wsn_ac = wsn_ac if found_ac else ""
+
+    return wsn_as, wsn_ac
+
+
+# ----------------------------- #
+# ---- Core functionality ----- #
+# ------------------------------#
+def calculate_absorption_correction(
+    filename,
+    abs_method,
+    props,
+    sample_formula,
+    mass_density,
+    number_density=Property.EMPTY_DBL,
+    container_shape="PAC06",
+    num_wl_bins=1000,
+    element_size=1,
+    metaws=None,
+    cache_dir="",
+):
     """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
 
     If no cross-term then I_s/A_ss - I_c/A_cc
@@ -68,25 +208,88 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
     :param num_wl_bins: Number of bins for calculating wavelength
     :param element_size: Size of one side of the integration element cube in mm
     :param metaws: Optional workspace containing metadata to use instead of reading from filename
+    :param cache_dir: cache directory for storing cached absorption correction workspace
+
     :return:
+        Two workspaces (A_s, A_c) names
     """
+    log = Logger('CalculateAbsorptionCorrection')
+
     if abs_method == "None":
         return None, None
 
-    material = {"ChemicalFormula": sample_formula,
-                "SampleMassDensity": mass_density}
+    material = {"ChemicalFormula": sample_formula, "SampleMassDensity": mass_density}
 
     if number_density != Property.EMPTY_DBL:
         material["SampleNumberDensity"] = number_density
 
     environment = {'Name': 'InAir', 'Container': container_shape}
 
-    donorWS = create_absorption_input(filename, props, num_wl_bins, material=material,
-                                      environment=environment, metaws=metaws)
+    donorWS = create_absorption_input(filename,
+                                      props,
+                                      num_wl_bins,
+                                      material=material,
+                                      environment=environment,
+                                      metaws=metaws)
 
-    absName = '__{}_abs_correction'.format(_getBasename(filename))
+    absName = '{}_abs_correction'.format(_getBasename(filename))
 
-    return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
+    if cache_dir == "":
+        # no caching activity if no cache directory is provided
+        return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
+    else:
+        # -- Caching -- #
+        # -- Generate the cache file name based on
+        #    - input filename (embedded in donorWS)
+        #    - SNSPowderReduction Options (mostly passed in as args)
+        cache_filename, sha1 = _getCacheName(donorWS, cache_dir, abs_method)
+        log.information(f"SHA1: {sha1}")
+        # -- Try to use cache
+        #    - if cache is found, wsn_as and wsn_ac will be valid string (workspace name)
+        #      - already exist in memory
+        #      - load from cache nxs file
+        #    - if cache is not found, wsn_as and wsn_ac will both be None
+        #      - standard calculation will be kicked off as before
+        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename)
+
+        # NOTE:
+        # -- one algorithm with three very different behavior, why not split them to
+        #    to make the code cleaner, also the current design will most likely leads
+        #    to severe headache down the line
+        log.information(f"For current analysis using {abs_method}")
+        if (abs_method == "SampleOnly") and (wsn_as != ""):
+            # first deal with special case where we only care about the sample absorption
+            log.information(f"-- Located cached workspace, {wsn_as}")
+            # NOTE:
+            #  Nothing to do here, since
+            #  - wsn_as is already loaded by _getCachedData
+            #  - wsn_ac is already set to None by _getCachedData.
+        else:
+            if (wsn_as == "") or (wsn_ac == ""):
+                log.information(f"-- Cannot locate all necessary cache, start from scrach")
+                wsn_as, wsn_ac = calc_absorption_corr_using_wksp(donorWS, abs_method, element_size,
+                                                                 absName)
+                # NOTE:
+                #  We need to set the SHA1 first, then save.
+                #  Because the final check is always comparing SHA1 of given
+                #  workspace.
+                # set the SHA1 to workspace in memory (for in-memory cache search)
+                mtd[wsn_as].mutableRun()["absSHA1"] = sha1
+                # case SampleOnly is the annoying one
+                if wsn_ac != "":
+                    mtd[wsn_ac].mutableRun()["absSHA1"] = sha1
+
+                # save the cache to file (for hard-disk cache)
+                SaveNexusProcessed(InputWorkspace=wsn_as, Filename=cache_filename)
+                # case SampleOnly is the annoying one
+                if wsn_ac != "":
+                    SaveNexusProcessed(InputWorkspace=wsn_ac, Filename=cache_filename, Append=True)
+            else:
+                # found the cache, let's use the cache instead
+                log.information(f"-- Locate cached sample absorption correction: {wsn_as}")
+                log.information(f"-- Locate cached container absorption correction: {wsn_ac}")
+
+    return wsn_as, wsn_ac
 
 
 def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, prefix_name=''):
@@ -141,13 +344,20 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
                OutputWorkspace=absName + '_ac')
         return absName + '_assc', absName + '_ac'
     else:
-        raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
+        raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(filename, props, num_wl_bins=1000,
-                            material=None, geometry=None, environment=None,
-                            opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL,
-                            metaws=None):
+def create_absorption_input(
+    filename,
+    props,
+    num_wl_bins=1000,
+    material=None,
+    geometry=None,
+    environment=None,
+    opt_wl_min=0,
+    opt_wl_max=Property.EMPTY_DBL,
+    metaws=None,
+):
     """
     Create an input workspace for carpenter or other absorption corrections
 
@@ -195,7 +405,9 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
             instr = mtd[absName].getInstrument()
             L1 = instr.getSource().getDistance(instr.getSample())
             # determine L2 range
-            PreprocessDetectorsToMD(InputWorkspace=absName, OutputWorkspace=absName + '_dets', GetMaskState=False)
+            PreprocessDetectorsToMD(InputWorkspace=absName,
+                                    OutputWorkspace=absName + '_dets',
+                                    GetMaskState=False)
             L2 = mtd[absName + '_dets'].column('L2')
             Lmin = np.min(L2) + L1
             Lmax = np.max(L2) + L1
@@ -216,8 +428,10 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
         raise RuntimeError('Invalid wavelength range min={}A max={}A'.format(wl_min, wl_max))
     log.information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
 
-    absorptionWS = WorkspaceFactory.create(mtd[absName], NVectors=mtd[absName].getNumberHistograms(),
-                                           XLength=num_wl_bins + 1, YLength=num_wl_bins)
+    absorptionWS = WorkspaceFactory.create(mtd[absName],
+                                           NVectors=mtd[absName].getNumberHistograms(),
+                                           XLength=num_wl_bins + 1,
+                                           YLength=num_wl_bins)
     xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
     for i in range(absorptionWS.getNumberHistograms()):
         absorptionWS.setX(i, xaxis)
@@ -230,10 +444,10 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
     if material is not None:
         if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
             material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
-        if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and (
-                "SampleDensity" in absorptionWS.run()):
-            if (absorptionWS.run()['SampleDensity'].lastValue() != 1.0) and (
-                    absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
+        if ("SampleMassDensity" not in material
+                or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+            if (absorptionWS.run()['SampleDensity'].lastValue() !=
+                    1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
                 material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
             else:
                 material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
@@ -250,15 +464,18 @@ def create_absorption_input(filename, props, num_wl_bins=1000,
             elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
                 conversion = 1.0
             else:
-                raise ValueError("HeightInContainerUnits expects cm or mm; specified units not recognized: ",
-                                 absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+                raise ValueError(
+                    "HeightInContainerUnits expects cm or mm; specified units not recognized: ",
+                    absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
 
-            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue() * conversion
+            geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(
+            ) * conversion
 
     # Set container if not set
     if environment is not None:
         if environment['Container'] == "":
-            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
+            environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(
+                " ", "")
 
     # Make sure one is set before calling SetSample
     if material or geometry or environment is not None:

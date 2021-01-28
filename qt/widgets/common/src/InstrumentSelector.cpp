@@ -173,8 +173,8 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
 
   QString defaultName;
   try {
-    defaultName =
-        QString::fromStdString(m_currentFacility->instrument().name());
+    defaultName = QString::fromStdString(
+        ConfigService::Instance().getString("default.instrument"));
   } catch (Exception::NotFoundError &) {
     defaultName = "";
   }

@@ -94,6 +94,7 @@ set(SRC_FILES
     src/CreateWorkspace.cpp
     src/CropToComponent.cpp
     src/CropWorkspace.cpp
+    src/CropWorkspaceRagged.cpp
     src/CrossCorrelate.cpp
     src/CuboidGaugeVolumeAbsorption.cpp
     src/CylinderAbsorption.cpp
@@ -326,7 +327,8 @@ set(SRC_FILES
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
     src/WorkspaceJoiners.cpp
-    src/XDataConverter.cpp)
+    src/XDataConverter.cpp
+    src/XrayAbsorptionCorrection.cpp)
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
@@ -424,6 +426,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateWorkspace.h
     inc/MantidAlgorithms/CropToComponent.h
     inc/MantidAlgorithms/CropWorkspace.h
+    inc/MantidAlgorithms/CropWorkspaceRagged.h
     inc/MantidAlgorithms/CrossCorrelate.h
     inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
     inc/MantidAlgorithms/CylinderAbsorption.h
@@ -664,7 +667,8 @@ set(INC_FILES
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
-    inc/MantidAlgorithms/XDataConverter.h)
+    inc/MantidAlgorithms/XDataConverter.h
+    inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
 
 set(SRC_UNITY_IGNORE_FILES
     src/AlignDetectors.cpp
@@ -773,6 +777,7 @@ set(TEST_FILES
     CreateWorkspaceTest.h
     CropToComponentTest.h
     CropWorkspaceTest.h
+    CropWorkspaceRaggedTest.h
     CrossCorrelateTest.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
@@ -989,7 +994,8 @@ set(TEST_FILES
     WienerSmoothTest.h
     WorkflowAlgorithmRunnerTest.h
     WorkspaceCreationHelperTest.h
-    WorkspaceGroupTest.h)
+    WorkspaceGroupTest.h
+    XrayAbsorptionCorrectionTest.h)
 
 set(TEST_PY_FILES
     test/NormaliseToUnityTest.py)

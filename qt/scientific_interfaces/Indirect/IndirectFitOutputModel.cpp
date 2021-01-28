@@ -6,14 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <memory>
 
-#include "DllConfig.h"
-#include "IndexTypes.h"
 #include "IndirectFitOutputModel.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidAPI/WorkspaceGroup.h"
+
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;

@@ -64,7 +64,7 @@ private:
   void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
-                                const NeXus::NXFloat &);
+                                const double &);
 
   std::vector<Types::Core::DateAndTime>
   getAbsoluteTimes(const NeXus::NXDouble &) const;
@@ -80,7 +80,7 @@ private:
   getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                   const std::string &propertyName) const;
 
-  void initStaticWorkspace();
+  void initStaticWorkspace(const std::string &start_time);
   void initMovingWorkspace(const NeXus::NXDouble &scan,
                            const std::string &start_time);
 

@@ -7,6 +7,7 @@
 from contextlib import contextmanager
 
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
@@ -33,6 +34,9 @@ class Pearl(AbstractInst):
 
     def focus(self, **kwargs):
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
+            if self._inst_settings.perform_atten:
+                if not hasattr(self._inst_settings, 'attenuation_file'):
+                    raise RuntimeError("Attenuation cannot be applied because attenuation_file not specified")
             return self._focus(run_number_string=self._inst_settings.run_number,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm)
@@ -181,10 +185,26 @@ class Pearl(AbstractInst):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
 
+        attenuation_path = None
         if self._inst_settings.perform_atten:
-            attenuation_path = self._inst_settings.attenuation_file_path
-        else:
-            attenuation_path = None
+            name_key='name'
+            path_key='path'
+            if isinstance(self._inst_settings.attenuation_files, str):
+                self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
+            atten_file_found = False
+            for atten_file in self._inst_settings.attenuation_files:
+                if any (required_key not in atten_file for required_key in [name_key,path_key]):
+                    logger.warning("A dictionary in attenuation_files has been ignored because "
+                                   f"it doesn't contain both {name_key} and {path_key} entries")
+                elif atten_file[name_key] == self._inst_settings.attenuation_file:
+                    if atten_file_found:
+                        raise RuntimeError(
+                            f"Duplicate name {self._inst_settings.attenuation_file} found in attenuation_files")
+                    attenuation_path = atten_file[path_key]
+                    atten_file_found = True
+            if attenuation_path is None:
+                raise RuntimeError(
+                    f"Unknown attenuation_file {self._inst_settings.attenuation_file} specified for attenuation")
 
         output_spectra = \
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,

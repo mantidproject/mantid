@@ -16,8 +16,6 @@
 #include <QRegExpValidator>
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
-using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -89,12 +87,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectDataTablePresenter::IndirectDataTablePresenter(IIndirectFitData *model,
-                                                       QTableWidget *dataTable)
+IndirectDataTablePresenter::IndirectDataTablePresenter(
+    IIndirectFitDataModel *model, QTableWidget *dataTable)
     : IndirectDataTablePresenter(model, dataTable, defaultHeaders()) {}
 
 IndirectDataTablePresenter::IndirectDataTablePresenter(
-    IIndirectFitData *model, QTableWidget *dataTable,
+    IIndirectFitDataModel *model, QTableWidget *dataTable,
     const QStringList &headers)
     : m_model(model), m_dataTable(dataTable) {
 

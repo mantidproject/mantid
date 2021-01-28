@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,6 +46,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
+
+  Mantid::Geometry::Instrument_const_sptr getInstrument();
 };
 
 } // namespace Algorithms

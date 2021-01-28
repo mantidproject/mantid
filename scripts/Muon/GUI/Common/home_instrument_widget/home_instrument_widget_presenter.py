@@ -64,7 +64,10 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
 
-        last_good_data = self._model.get_last_good_data()
+        if self._view.last_good_data_state():
+            last_good_data = self._model.get_file_last_good_data()
+        else:
+            last_good_data = self._model.get_last_good_data()
         self._view.set_last_good_data(last_good_data)
 
         if self._view.time_zero_state():
@@ -133,7 +136,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def handle_loaded_last_good_data_checkState_change(self):
         if self._view.last_good_data_state():
             self._model.set_last_good_data_source(True)
-            last_good_data = self._model.get_last_good_data()
+            last_good_data = self._model.get_file_last_good_data()
             self._view.set_last_good_data(last_good_data)
         else:
             self._model.set_last_good_data_source(False)

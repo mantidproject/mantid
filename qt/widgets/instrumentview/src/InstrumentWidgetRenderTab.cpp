@@ -627,6 +627,7 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
 void InstrumentWidgetRenderTab::resetView() {
   // just recreate the surface from scratch
   m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
+  m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
 
 /**

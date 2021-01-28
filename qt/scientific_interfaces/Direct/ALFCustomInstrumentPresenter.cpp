@@ -100,6 +100,7 @@ void ALFCustomInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
   const std::string WSName = m_model->WSName();
   m_analysisPane->addSpectrum(WSName);
+  m_analysisPane->updateEstimateAfterExtraction();
 }
 
 void ALFCustomInstrumentPresenter::averageTube() {

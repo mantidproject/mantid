@@ -21,6 +21,7 @@
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -63,6 +64,8 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"Angstrom^-1", "Angstrom"}};
 // A threshold for small singular values
 const double THRESHOLD = 1E-6;
+
+const double BIN_WIDTH_ERROR_LEVEL = 0.5;
 
 /** removes zeros from converged results
  * @param ws :: [input] The input workspace with zeros
@@ -122,12 +125,10 @@ const std::string MaxEnt::summary() const {
 void MaxEnt::init() {
 
   // X values in input workspace must be (almost) equally spaced
-  const double warningLevel = 0.01;
-  const double errorLevel = 0.5;
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input,
-          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "An input workspace.");
 
   declareProperty("ComplexData", false,
@@ -220,7 +221,7 @@ void MaxEnt::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
-          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "Adjusts the calculated data by multiplying each value by the "
       "corresponding Y value of this workspace. "
       "The data in this workspace is complex in the same manner as complex "
@@ -228,7 +229,7 @@ void MaxEnt::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
-          std::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+          std::make_shared<EqualBinSizesValidator>(BIN_WIDTH_ERROR_LEVEL)),
       "Adjusts the calculated data by adding to each value the corresponding Y "
       "value of this workspace. "
       "If DataLinearAdj is also specified, this addition is done after its "
@@ -260,11 +261,33 @@ void MaxEnt::init() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** Revisit bin edge validation to write errors/warnings to the log
+ */
+void MaxEnt::validateBinEdges(const std::string &wsName,
+                              std::map<std::string, std::string> &messages) {
+  const double warningLevel = 0.01;
+  MatrixWorkspace_const_sptr ws = getProperty(wsName);
+  if (ws) {
+
+    Kernel::EqualBinsChecker binChecker(ws->readX(0), BIN_WIDTH_ERROR_LEVEL,
+                                        warningLevel);
+    const std::string binError = binChecker.validate();
+    if (!binError.empty()) {
+      messages[wsName] = binError;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
 /** Validate the input properties.
  */
 std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
+
+  validateBinEdges("InputWorkspace", result);
+  validateBinEdges("DataLinearAdj", result);
+  validateBinEdges("DataConstAdj", result);
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 

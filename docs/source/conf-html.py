@@ -39,3 +39,10 @@ html_theme_options = {
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
 }
+
+# -- Fix up angstrom symbol for mathjax
+rst_prolog = r"""
+
+:math:`\renewcommand\AA{\unicode{x212B}}`
+
+"""

@@ -46,13 +46,6 @@ PyObject *getCategories(IFunction &self) {
   return registered;
 }
 
-/**
- * Return fitting error for a parameter given its name.
- */
-double getError(IFunction &self, std::string const &name) {
-  return self.getError(self.parameterIndex(name));
-}
-
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
@@ -63,11 +56,26 @@ GNU_DIAG_OFF("conversion")
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
-// setProperty(index,value,explicit)
+// setProperty(name,value,explicit)
 using setParameterType2 = void (IFunction::*)(const std::string &,
                                               const double &, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
+
+// setError(index,value)
+using setErrorType1 = void (IFunction::*)(size_t, double);
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setErrorType1_Overloads, setError, 2, 2)
+// setError(name,value)
+using setErrorType2 = void (IFunction::*)(const std::string &, double);
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setErrorType2_Overloads, setError, 2, 2)
+
+// getError(index)
+using getErrorType1 = double (IFunction::*)(size_t) const;
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType1_Overloads, getError, 1, 1)
+// getError(name)
+using getErrorType2 = double (IFunction::*)(const std::string &) const;
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType2_Overloads, getError, 1, 1)
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints,
                                        1, 2)
@@ -147,14 +155,28 @@ void export_IFunction() {
                (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
                "Sets the value of the ith parameter"))
 
-      .def("setError", &IFunction::setError,
-           (args("self"), args("i"), args("err")),
-           "Sets the error on parameter index i")
-
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
                (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
                "Sets the value of the named parameter"))
+
+      .def("setError", (setErrorType1)&IFunction::setError,
+           setErrorType1_Overloads((args("self"), arg("index"), args("err")),
+                                   "Sets the error on the indexed parameter"))
+
+      .def("setError", (setErrorType2)&IFunction::setError,
+           setErrorType2_Overloads((args("self"), arg("name"), args("err")),
+                                   "Sets the error on the named parameter"))
+
+      .def("getError", (getErrorType1)&IFunction::getError,
+           getErrorType1_Overloads(
+               (arg("self"), arg("index")),
+               "Return fitting error of the index parameter"))
+
+      .def("getError", (getErrorType2)&IFunction::getError,
+           getErrorType2_Overloads(
+               (arg("self"), arg("name")),
+               "Return fitting error of the named parameter"))
 
       .def("__setitem__", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
@@ -272,10 +294,6 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
-      .def("getError", &IFunction::getError, (arg("self"), arg("i")),
-           "Return fitting error of the ith parameter")
-      .def("getError", &getError, (arg("self"), arg("name")),
-           "Return fitting error of the named parameter")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),

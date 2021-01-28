@@ -119,7 +119,7 @@ class PlottingCanvasModel(object):
 
     def _create_workspace_label(self, workspace_name, index):
         group = str(get_group_or_pair_from_name(workspace_name))
-        run = str(get_run_number_from_workspace_name(workspace_name, self._context.data_context.instrument))
+        run = str(get_run_numbers_as_string_from_workspace_name(workspace_name, self._context.data_context.instrument))
         instrument = self._context.data_context.instrument
         fit_label = self._get_fit_label(workspace_name, index)
         rebin_label = self._get_rebin_label(workspace_name)

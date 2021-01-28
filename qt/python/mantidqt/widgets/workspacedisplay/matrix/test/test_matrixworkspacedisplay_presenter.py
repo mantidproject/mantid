@@ -52,7 +52,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         container = Mock(spec=StatusBarView)
         container.status_bar = Mock(spec=QStatusBar)
         MatrixWorkspaceDisplay(ws, view=view, container=container)
-        self.assertEqual(3, view.set_context_menu_actions.call_count)
+        self.assertEqual(4, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
     @patch(show_mouse_toast_package)
@@ -358,13 +358,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_input_ws.axes.return_value = 1
         mock_input_ws.readY.return_value = [2, 2]
         mock_input_ws.readE.return_value = [1, 1]
+        mock_input_ws.readDx.return_value = [3, 3]
 
         mock_table.model().ws = mock_input_ws
 
         presenter.action_copy_bin_to_table(mock_table)
 
-        # (2 Selected Bins * 2 Spectra * 2 Cols per bin) + 2 spectra names
-        self.assertEqual(mock_table_ws.setCell.call_count, 10)
+        # (2 Selected Bins * 2 Spectra * 3 Cols per bin) + 2 spectra names
+        self.assertEqual(mock_table_ws.setCell.call_count, 14)
 
     @patch("mantidqt.widgets.workspacedisplay.matrix.presenter.MatrixWorkspaceDisplay.notify_no_selection_to_copy")
     def test_action_copy_spectrum_to_table_no_selection(self, mock_notify):
@@ -400,13 +401,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_input_ws.readX.return_value = [3, 3]
         mock_input_ws.readY.return_value = [2, 2]
         mock_input_ws.readE.return_value = [1, 1]
+        mock_input_ws.readDx.return_value = [4, 4]
 
         mock_table.model().ws = mock_input_ws
 
         presenter.action_copy_spectrum_to_table(mock_table)
 
-        # 2 Selected Bins * 2 Spectra * 3 Cols per bin
-        self.assertEqual(mock_table_ws.setCell.call_count, 12)
+        # 2 Selected Bins * 2 Spectra * 4 Cols per bin
+        self.assertEqual(mock_table_ws.setCell.call_count, 16)
 
     @with_mock_presenter
     def test_close_incorrect_workspace(self, ws, view, presenter):
@@ -446,7 +448,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_replace_workspace(ws.TEST_NAME, ws)
 
-        self.assertEqual(3, view.set_context_menu_actions.call_count)
+        self.assertEqual(4, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
 

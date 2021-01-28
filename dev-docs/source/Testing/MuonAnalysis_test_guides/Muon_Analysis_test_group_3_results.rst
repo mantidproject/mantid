@@ -1,5 +1,6 @@
 .. _Muon_Analysis_TestGuide_3_Results-ref:
 
+==========================================================
 Muon Analysis Unscripted Testing: Group 3 (Results Tables)
 ==========================================================
 
@@ -7,84 +8,115 @@ Muon Analysis Unscripted Testing: Group 3 (Results Tables)
     :local:
     
 Introduction
-^^^^^^^^^^^^
+------------
 
 These are unscripted tests for the :program:`Muon Analysis` interface.
-The tests here in group 3 are concerned with generating results tables from fits that have previously been run.
-In this case, the fits previously run are those in test group 2, so those tests need to be run before these ones.
+The tests here in group 3 are concerned with generating results tables from 
+fits that have previously been run. In this case, the fits previously run are 
+those in :ref:`Muon_Analysis_TestGuide_2_Fitting-ref`, so those tests need to 
+be run before these ones. Once you have comepleted group 2 tests, go to the 
+**Reults** tab.
 
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-Tests
-^^^^^
+-----------
 
-Ensure that you have first run all the tests in group 2, then go to the *Results Table* tab.
+.. _test_1:
 
-Test 1: individual fits
------------------------
-- Top group box: select ``run_number`` and ``sample_temp`` as logs
-- Centre group box: keep the default, which should be the *Individual fits* radio button with both individual fits selected
-- Create the table with the default name ``ResultsTable``.
-- Table should have two rows, one for runs 20918-20 (co-added) and one for run 20918.
-- Sample temp should be expressed correctly as a range "180 to 200" for co-added runs
-- Should be one pair of columns for each parameter + error, plus a final column for "cost function value"
+Test 1: Individual And Co-Added Fits
+------------------------------------
 
-Like this:
+**Time required 5-10 minutes**
+
+- In the **Results** tab, in the top log values table, check **run_number** 
+  and **sample_temp**
+- Change **Function Name** to be **FlatBackground,Abragam** or equivalent
+- The bottom table should have all fit workspaces that used both 
+  **Flat Background** and the **Abragam** functions
+- Click **Unselect All** for the workspaces table
+- Change **Table Name** to ``IndividualFitsTable``
+- Check all boxes next to workspaces that are individual fits, including the 
+  co-added workspace
+- This should look a little something like this:
+
+.. image:: /images/MuonAnalysisTests/results_test1_table.png
+	:align: center
+	:alt: results_test1_table.png
+	:width: 600
+
+- Click **Output Results**
+- In the main workbench window, in the workspace toolbox, open the results 
+  table
+- The table should have four rows, one for each individual fit
+- **sample_temp** should be correctly expresses as an average for the co-added 
+  runs, in this case the average is ``190`` (``180+190+200/3``)
+- There should be several pairs of columns, one for each parameter and one for 
+  the error of the parameter, plus a final column called 
+  **Cost function value**
+- The table should look similar to this:
 
 .. image:: /images/MuonAnalysisTests/results_test1.png
   :align: center
 
-Test 2: Sequential fit (simple)
--------------------------------
-- Top group box: keep same logs as before
-- Select the *Sequential fits* radio button in the centre group box, and "Label" in the drop-down, *i.e.* the first sequential fit you did. Keep all three runs included.
-- Create the table - check that, if you don't change the name, it warns you about overwriting. (Say yes to create the table ``ResultsTable``.)
-- The table should have three rows, one for each run, with the correct sample log values (180, 190, 200).
-- Again there should be one pair of columns for each parameter and error, and a cost function column at the end.
+Test 2: Sequential Fits And Simultaneous Fits
+---------------------------------------------
 
-Test 3: Sequential fit of simultaneous fits
--------------------------------------------
-- Now select "LabelSeq" in the drop-down next to *Sequential fits* (see test 2).
-- The top box should have extra log values for ``group`` and ``period`` - select ``group`` (as well as ``run_number``)
-- Keep all runs selected and create table, this time with the name ``ResultsTable2``.
-- There should be six rows in all, two per run (one for fwd, one for bwd).
+*Time required 5-10 minutes*
 
-Like this:
+- For this test we will use the same **Function Name** as in :ref:`test_1` 
+  (*FlatBackground,Abragam*)
+- Change the **Table Name** to ``SeqFitOfSimFits``
+- Click **Unselect All** for the workspaces table
+- Check the three workspaces that were simultaneous fits over groups and 
+  sequentially fit for all runs
+- At this point the table should look something like this:
 
-.. image:: /images/MuonAnalysisTests/results_tests2and3.png
+.. image:: /images/MuonAnalysisTests/results_test2_table.png
+	:align: center
+	:alt: results_test2_table.png
+	:width: 600
+	
+- Click **Output Results**
+- In the main workbench window, in the workspace toolbox, open the results 
+  table
+- There should be 3 rows
+- In particular, there should be only one column for ``A``, ``Omega``, ``Phi`` 
+  and ``Sigma`` (plus one for each paramaters error) as these paramaters are 
+  global
+- There should be a column for ``f0.f0.A0`` and ``f1.f0.A0`` as this was not 
+  a global paramater, and similarly for the ``Tau`` Parameter. They should all 
+  have their own error associated with them
+- The table should look similar to this:
+
+.. image:: /images/MuonAnalysisTests/results_test2.png
   :align: center
+	:alt: results_test2.png
+	:width: 600
+  
+Test 3: TF Asymmetry Results
+----------------------------
 
-Test 4: Simultaneous fits
--------------------------
-- Select the "Simultaneous fits" radio button above the centre group box.
-- Keep the first label, "20918", selected in the drop-down list. (This was the fit across groups in the same run)
-- Create the table with the name ``Results20918``
-- There should be one row per run
-- For the global parameters (``f1.A``, ``f1.Omega``, ``f1.Phi``, ``f1.Sigma``), note the error is non-zero for the first run and zero for the others as they were all fitted together.
+*Time required 5-10 minutes*
 
-Test 5: Simultaneous fits (2)
------------------------------
-- Now in the drop-down list next to the "Simultaneous fits" radio button, select the label "20918-20", which was the fit across runs.
-- Create the table with the name ``Results20918-20``
-- In the drop-down list, select the label "MUSRlabel", the fit across periods for MUSR data. Have the ``period`` log value selected in the top box for this one, and create the table ``ResultsMUSR``.
+- Click **Unselect All** for the log values table
+- Now Select **Field_Danfysik**
+- Change **Function Name** to be **GausOsc,TFAsymmetry** or equivalent
+- There is one workspace which was fit simultaneously so will not be included 
+  in this results table. Deselect that worksapce
+- Change the table name to ``TFAsymmetryFits``
+- The table should look like this:
 
-Should look like this:
+.. image:: /images/MuonAnalysisTests/results_test3_table.png
+	:align: center
+	:alt: results_test3_table.png
+	:width: 600
 
-.. image:: /images/MuonAnalysisTests/results_tests4and5.png
-  :align: center
+- Click **Output Results**
+- There should be 12 rows and a column for **Field_Danfysik**, like this:
 
-Test 6: Multiple simultaneous fits
-----------------------------------
-- Select the last radio button, "Multiple", above the centre group box.
-- Three simultaneous fit labels are listed: 20918, 20918#2, 20918-20 and MUSRlabel.
-- Note that they have different colours, because the number of datasets and fit models differ. You should not be able to create a table with all of these selected.
-- Select just the first two, i.e. "20918" and "20918#2", log values ``run_number`` and ``sample_temp``, and create the table.
-- There should be columns for label, run number/sample temp (with correct ranges) and fit parameters.
-- Non-global parameters should have a column for each dataset - so ``f0.f0.A0``, ``f1.f0.A0``, ``f2.f0.A0``
-- Global parameters should share a column - so just ``f1.A``, ``f1.Omega`` etc.
+.. image:: /images/MuonAnalysisTests/results_test3.png
+	:align: center
+	:alt: results_test3.png
+	:width: 600
 
-Should look like this:
-
-.. image:: /images/MuonAnalysisTests/results_test6.png
-  :align: center
 

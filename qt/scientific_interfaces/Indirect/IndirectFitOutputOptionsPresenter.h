@@ -9,6 +9,7 @@
 #include "IIndirectFitOutputOptionsView.h"
 #include "IndirectEditResultsDialog.h"
 #include "IndirectFitOutputOptionsModel.h"
+#include "IndirectFitOutputOptionsView.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"

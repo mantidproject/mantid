@@ -44,8 +44,10 @@ private:
   void initWorkSpace();
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
+  std::string getDataPath(NeXus::NXEntry &entry);
   void loadNexusEntriesIntoProperties(const std::string &nexusfilename);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry);
+  void loadDiffractionData(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(NeXus::NXEntry &entry);
@@ -70,6 +72,7 @@ private:
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
   LoadHelper m_loader;
+  std::string m_loadOption;
 };
 
 } // namespace DataHandling

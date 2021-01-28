@@ -196,6 +196,35 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  void
+  test_creating_a_grouping_workpsace_will_work_when_using_a_custom_grouping_string() {
+    auto &ads = AnalysisDataService::Instance();
+
+    const std::string outputWS("CreateGroupingWorkspaceTest_OutputWS");
+
+    CreateGroupingWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("InstrumentName", "IRIS");
+    alg.setPropertyValue("ComponentName", "graphite");
+    alg.setPropertyValue("CustomGroupingString", "3-5,6+7,8:10");
+    alg.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    const auto groupingWorkspace = ads.retrieveWS<GroupingWorkspace>(outputWS);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(0)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(1)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(2)[0], 1.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(3)[0], 2.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(4)[0], 2.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(5)[0], 3.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(6)[0], 4.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(7)[0], 5.0, 0.000001);
+    TS_ASSERT_DELTA(groupingWorkspace->dataY(8)[0], 0.0, 0.000001);
+
+    ads.remove(outputWS);
+  }
+
   void test_exec_WithFixedGroups_FailOnGroupsGreaterThanDet() {
     // Name of the output workspace.
     std::string outWSName("CreateGroupingWorkspaceTest_OutputWS_fail");

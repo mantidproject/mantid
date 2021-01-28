@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+from unittest import mock
 import sys
 
 from qtpy.QtWidgets import QApplication, QTableWidgetItem
@@ -124,6 +125,17 @@ class DrillTableWidgetTest(unittest.TestCase):
                                                          (1, 1),
                                                          (2, 2)])
 
+    def test_getSelectionShape(self):
+        self.table.getSelectedCells = mock.Mock()
+        self.table.setRowCount(3)
+        self.table.setColumnCount(1)
+        self.table.getSelectedCells.return_value = [(0, 0)]
+        self.assertEqual(self.table.getSelectionShape(), (1, 1))
+        self.table.getSelectedCells.return_value = [(0, 0), (1, 0), (2, 0)]
+        self.assertEqual(self.table.getSelectionShape(), (3, 1))
+        self.table.getSelectedCells.return_value = [(0, 0), (10, 10)]
+        self.assertEqual(self.table.getSelectionShape(), (0, 0))
+
     def test_getRowsFromSelectedCells(self):
         self.assertEqual(self.table.getSelectedCells(), [])
         self.table.setRowCount(5)
@@ -171,6 +183,152 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.assertEqual(self.table.item(0, 0).text(), "test")
         self.assertEqual(self.table.item(0, 1).text(), "test2")
         self.table.setRowContents(0, ["test", "test2", "test3"])
+
+    def test_setRowBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        for c in range(self.table.columnCount()):
+            item = self.table.item(0, c)
+            a = item.background().color().alpha()
+            r = item.background().color().red()
+            g = item.background().color().green()
+            b = item.background().color().blue()
+            self.assertEqual(a, int("11", 16))
+            self.assertEqual(r, int("22", 16))
+            self.assertEqual(g, int("33", 16))
+            self.assertEqual(b, int("44", 16))
+
+    def test_removeRowBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        self.table.removeRowBackground(0)
+        for c in range(self.table.columnCount()):
+            item = self.table.item(0, c)
+            a = item.background().color().alpha()
+            r = item.background().color().red()
+            g = item.background().color().green()
+            b = item.background().color().blue()
+            self.assertEqual(a, 255)
+            self.assertEqual(r, 0)
+            self.assertEqual(g, 0)
+            self.assertEqual(b, 0)
+
+    def test_setCellBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setCellBackground(0, 0, "#11223344")
+        item = self.table.item(0, 0)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, int("11", 16))
+        self.assertEqual(r, int("22", 16))
+        self.assertEqual(g, int("33", 16))
+        self.assertEqual(b, int("44", 16))
+        item = self.table.item(0, 1)
+        self.assertIsNone(item)
+
+    def test_removeCellBackground(self):
+        self.table.setColumnCount(2)
+        self.table.setRowBackground(0, "#11223344")
+        self.table.removeCellBackground(0, 0)
+        item = self.table.item(0, 0)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, 255)
+        self.assertEqual(r, 0)
+        self.assertEqual(g, 0)
+        self.assertEqual(b, 0)
+        item = self.table.item(0, 1)
+        a = item.background().color().alpha()
+        r = item.background().color().red()
+        g = item.background().color().green()
+        b = item.background().color().blue()
+        self.assertEqual(a, int("11", 16))
+        self.assertEqual(r, int("22", 16))
+        self.assertEqual(g, int("33", 16))
+        self.assertEqual(b, int("44", 16))
+
+    def test_setCellToolTip(self):
+        self.table.setCellToolTip(0, 0, "test")
+        self.assertEqual(self.table.item(0, 0).toolTip(), "test")
+
+    def test_setColumnHeaderToolTips(self):
+        self.table.setHorizontalHeaderLabels(["label"])
+        self.table.setColumnHeaderToolTips(["tooltip"])
+        self.assertEqual(self.table.horizontalHeaderItem(0).toolTip(),
+                         "tooltip")
+
+    def test_setRowLabel(self):
+        self.table.setRowLabel(0, "test", False)
+        self.assertEqual(self.table.verticalHeaderItem(0).text(), "test")
+        self.table.setRowLabel(0, "test", False, "tooltip")
+        self.assertEqual(self.table.verticalHeaderItem(0).text(), "test")
+        self.assertEqual(self.table.verticalHeaderItem(0).toolTip(), "tooltip")
+
+    def test_getRowLabel(self):
+        self.assertEqual(self.table.getRowLabel(0), "1")
+        self.table.setRowLabel(0, "test")
+        self.assertEqual(self.table.getRowLabel(0), "test")
+
+    def test_delRowLabel(self):
+        self.table.setRowLabel(0, "test")
+        self.assertEqual(self.table.getRowLabel(0), "test")
+        self.table.delRowLabel(0)
+        self.assertEqual(self.table.getRowLabel(0), "1")
+
+    def test_setFoldedColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.setFoldedColumns(["test"])
+        mHeader.foldSection.assert_not_called()
+        self.table.setFoldedColumns(["test2"])
+        mHeader.foldSection.assert_called_with(1)
+
+    def test_getFoldedColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.isSectionFolded.return_value = True
+        self.table.columns = ["test1", "test2", "test3"]
+        folded = self.table.getFoldedColumns()
+        self.assertEqual(folded, ["test1", "test2", "test3"])
+
+    def test_setHiddenColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.setHiddenColumns(["test"])
+        mHeader.hideSection.assert_not_called()
+        self.table.setHiddenColumns(["test1"])
+        mHeader.hideSection.assert_called_with(0)
+
+    def test_getHiddenColumns(self):
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.isSectionHidden.return_value = True
+        self.table.columns = ["test1", "test2"]
+        hidden = self.table.getHiddenColumns()
+        self.assertEqual(hidden, ["test1", "test2"])
+
+    def test_setColumnsOrder(self):
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.visualIndex.side_effect = [3, 1, 0]
+        self.table.setColumnsOrder(["test3", "test2", "test1"])
+        calls = [mock.call(3, 0), mock.call(1, 1), mock.call(0, 2)]
+        mHeader.moveSection.assert_has_calls(calls)
+
+    def test_getColumnsOrder(self):
+        self.table.columns = ["test1", "test2", "test3"]
+        self.table.horizontalHeader = mock.Mock()
+        mHeader = self.table.horizontalHeader.return_value
+        mHeader.visualIndex.side_effect = [2, 1, 0]
+        self.assertEqual(self.table.getColumnsOrder(),
+                         ["test3", "test2", "test1"])
 
 
 if __name__ == "__main__":

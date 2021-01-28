@@ -125,9 +125,12 @@ const std::vector<std::string> IqtFit<Base>::seeAlso() const {
 template <>
 std::map<std::string, std::string> IqtFit<QENSFitSequential>::validateInputs() {
   auto errors = QENSFitSequential::validateInputs();
-  double startX = QENSFitSequential::getProperty("StartX");
-  if (startX < 0)
-    errors["StartX"] = "StartX must be greater than or equal to 0.";
+  const std::vector<double> startX = QENSFitSequential::getProperty("StartX");
+  for (const double &start : startX) {
+    if (start < 0) {
+      errors["StartX"] = "StartX must be greater than or equal to 0.";
+    }
+  }
   return errors;
 }
 
@@ -164,9 +167,13 @@ double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("StartX" + getPropertySuffix(index));
 }
 
-template <typename Base>
-double IqtFit<Base>::getStartX(std::size_t /*unused*/) const {
-  return Base::getProperty("StartX");
+template <> double IqtFit<QENSFitSequential>::getStartX(std::size_t i) const {
+  std::vector<double> startX = QENSFitSequential::getProperty("StartX");
+  if (startX.size() == 1) {
+    return startX[0];
+  } else {
+    return startX[i];
+  }
 }
 
 template <>
@@ -174,9 +181,13 @@ double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("EndX" + getPropertySuffix(index));
 }
 
-template <typename Base>
-double IqtFit<Base>::getEndX(std::size_t /*unused*/) const {
-  return Base::getProperty("EndX");
+template <> double IqtFit<QENSFitSequential>::getEndX(std::size_t i) const {
+  std::vector<double> endX = QENSFitSequential::getProperty("EndX");
+  if (endX.size() == 1) {
+    return endX[0];
+  } else {
+    return endX[i];
+  }
 }
 
 // Register the algorithms into the AlgorithmFactory

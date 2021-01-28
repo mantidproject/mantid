@@ -54,7 +54,7 @@ Use the Categories tab to de/select categories of Algorithms and Interfaces.
 
 Set your basic preferences for plots, such as set Capsize > 0 if you want your error bars to have end caps!
 
-.. figure:: /images/SettingsPlots.png
+.. figure:: /images/PlotSettings.png
    :align: center
    :alt: SettingsPlots
 

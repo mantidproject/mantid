@@ -123,6 +123,7 @@ Advanced options:
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything outside of ``C:\MantidInstall`` could be a problem.
 
+If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``set PYTHONNOUSERSITE=1``
 
 10.  Try to open workbench. After it fails, open **Event Viewer** (just search in the Windows menu bar) and selected ``Windows Logs->Application``. Double-click on the relevant error line/s and send the crash information to the dev team.
 
@@ -202,6 +203,7 @@ Advanced Options:
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
+If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
 10. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
@@ -285,5 +287,6 @@ Advanced Options:
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
+If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
 10. Further diagnosis for process monitoring: `dtrace <http://dtrace.org/>`_.

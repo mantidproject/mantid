@@ -3,7 +3,17 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+# Workaround a segfault importing readline with doctests and PyQt5.
+# doctest.py initializes a custom pdb to be able to redirect stdout:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/doctest.py#L367
+# and in turn this attempts to import readline:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/pdb.py#L157
+# The workaround is discussed in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
+# and simply amounts to importing readline before a QApplication is created in the screenshots
+# directive
 import sys
+if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
+    import readline
 import os
 from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme  # checked at cmake time
@@ -144,13 +154,6 @@ pngmath_latex_preamble = r'\usepackage[active]{preview}'
 # Ensures that the vertical alignment of equations is correct.
 # See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
 pngmath_use_preview = True
-
-# -- Fix up angstrom symbol for mathjax which shouldn't have an effect on pngmath
-rst_prolog = r"""
-
-:math:`\renewcommand\AA{\unicode{x212B}}`
-
-"""
 
 # -- HTML output ----------------------------------------------------
 

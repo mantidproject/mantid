@@ -48,6 +48,8 @@ private:
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
   void addAdditionalLogs(const API::WorkspaceGroup_sptr &resultWorkspace);
   void addAdditionalLogs(const API::Workspace_sptr &result);
+  void addFitRangeLogs(const API::Workspace_sptr &resultWorkspace,
+                       size_t itter);
 
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;

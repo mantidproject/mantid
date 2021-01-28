@@ -64,8 +64,6 @@ set(TEST_FILES
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/ClipboardTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
-    test/ISISReflectometry/Common/DecoderTest.h
-    test/ISISReflectometry/Common/EncoderTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE

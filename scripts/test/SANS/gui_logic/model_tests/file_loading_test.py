@@ -25,7 +25,6 @@ class FileLoadingTest(unittest.TestCase):
         expected_wrapped = [KeyError(), ValueError()]
 
         for known_exception in expected_wrapped:
-
             with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:
                 mocked_parser = mock.Mock()
                 mocked_module.return_value = mocked_parser
@@ -63,8 +62,6 @@ class FileLoadingTest(unittest.TestCase):
                 mocked_parser.get_all_states.side_effect = unexpected_exception
                 with self.assertRaises(type(unexpected_exception)):
                     FileLoading.load_user_file('legacy.txt', None)
-
-
 
 
 if __name__ == '__main__':

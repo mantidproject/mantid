@@ -21,6 +21,8 @@ class MANTID_CURVEFITTING_DLL CrystalFieldMultiSpectrum
     : public API::FunctionGenerator {
 public:
   CrystalFieldMultiSpectrum();
+
+  void init() override;
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }
   const std::string category() const override { return "General"; }
   size_t getNumberDomains() const override;

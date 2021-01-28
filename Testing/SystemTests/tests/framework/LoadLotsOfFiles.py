@@ -61,7 +61,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'MER06399.raw',  # Don't need to check multiple MERLIN files
                 'PG3_11485-1.dat',  # Generic load doesn't do very well with ASCII files
                 'PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt',
-                'PG3_char_2020_01_04_PAC_limit_1.4MW',
+                'PG3_char_2020_01_04_PAC_limit_1.4MW.txt',
                 'PG3_PAC_HR_d46168_2020_05_06.h5', # loaded by a different algorithm
                 'PG3_2538_event.nxs',  # Don't need to check all of the PG3 files
                 'PG3_9829_event.nxs',
@@ -116,10 +116,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'TolueneScratchAbins.out',
                 'SingleCrystalDiffuseReduction_UB.mat',
                 'Na2SiF6_DMOL3.outmol',
-                'FE_ALPHA.cif',
-                'Fe-gamma.cif',
-                'Fe-alpha.cif',
-                'Sm2O3.cif',
                 'template_ENGINX_241391_236516_North_bank.prm',
                 'test_data_Iqxy.dat',
                 'BioSANS_test_data_Iqxy.dat',
@@ -147,6 +143,7 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'EVS.*\.raw',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon',
+                 r'.*\.cif',
                  r'.*\.toml']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]

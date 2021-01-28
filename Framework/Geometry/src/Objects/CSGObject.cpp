@@ -38,6 +38,7 @@
 #include <deque>
 #include <random>
 #include <stack>
+#include <unordered_set>
 #include <utility>
 
 using namespace Mantid::Geometry;
@@ -863,12 +864,21 @@ int CSGObject::createSurfaceList(const int outFlag) {
       }
     }
   }
-  // Remove duplicates
-  sort(m_surList.begin(), m_surList.end());
-  auto sc = unique(m_surList.begin(), m_surList.end());
-  if (sc != m_surList.end()) {
-    m_surList.erase(sc, m_surList.end());
-  }
+  // Remove duplicates without reordering
+  std::unordered_set<const Surface *> uniqueSurfacePtrs;
+
+  auto newEnd = std::remove_if(m_surList.begin(), m_surList.end(),
+                               [&uniqueSurfacePtrs](const Surface *sPtr) {
+                                 if (uniqueSurfacePtrs.find(sPtr) !=
+                                     std::end(uniqueSurfacePtrs)) {
+                                   return true;
+                                 } else {
+                                   uniqueSurfacePtrs.insert(sPtr);
+                                   return false;
+                                 };
+                               });
+  m_surList.erase(newEnd, m_surList.end());
+
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;

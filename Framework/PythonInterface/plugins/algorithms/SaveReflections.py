@@ -96,15 +96,16 @@ class SaveReflections(PythonAlgorithm):
         self.declareProperty(name="Format",
                              direction=Direction.Input,
                              defaultValue="Fullprof",
-                             validator=StringListValidator(dir(ReflectionFormat)),
+                             validator=StringListValidator(
+                                 [fmt.name for fmt in ReflectionFormat]),
                              doc="The output format to export reflections to")
 
         self.declareProperty(name="SplitFiles",
                              defaultValue=False,
                              direction=Direction.Input,
                              doc="If True save separate files with only the peaks associated"
-                             "with a single modulation vector in a single file. Only "
-                             "applies to JANA format.")
+                                 "with a single modulation vector in a single file. Only "
+                                 "applies to JANA format.")
 
     def PyExec(self):
         """Execute the algorithm"""
@@ -126,6 +127,7 @@ class FullprofFormat(object):
     This is a 7 columns file format consisting of H, K, L, instensity,
     sigma, crystal domain, and wavelength.
     """
+
     def __call__(self, file_name, workspace, split_files):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
@@ -182,8 +184,10 @@ class JanaFormat(object):
 
     Currently the last three columns are hard coded to 1.0, 0.0, and 0.0 respectively.
     """
+
     class FileBuilder(object):
         """Encapsulate information to build a single Jana file"""
+
         def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None):
             self._filepath = filepath
             self._workspace = workspace
@@ -358,6 +362,7 @@ class SaveHKLFormat(object):
     The SaveHKL algorithm currently supports both the GSAS and SHELX formats. For
     more information see the SaveHKL algorithm documentation.
     """
+
     def __call__(self, file_name, workspace, _):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 

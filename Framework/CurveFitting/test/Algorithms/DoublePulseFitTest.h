@@ -23,7 +23,7 @@ public:
         std::dynamic_pointer_cast<ParamFunction>(initialFunction), 5.0, 1.0,
         2.0);
     TS_ASSERT_EQUALS(
-        "composite=Convolution,FixResolution=false,NumDeriv=true;name=ExpDecay,"
+        "composite=Convolution,NumDeriv=true,FixResolution=false;name=ExpDecay,"
         "Height=5,Lifetime=2;(name=DeltaFunction,"
         "Height=1,Centre=-2.5,ties=(Height=1,Centre=-2.5);name="
         "DeltaFunction,Height=2,Centre=2.5,ties=(Height=2,Centre=2.5)"
@@ -39,11 +39,11 @@ public:
         getDoublePulseMultiDomainFunction(initialFunction, 5.0, 1.0, 2.0);
     TS_ASSERT_EQUALS(
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
-        "FixResolution=false,NumDeriv=true,$domains=i;name=ExpDecay,Height=5,"
+        "NumDeriv=true,FixResolution=false,$domains=i;name=ExpDecay,Height=5,"
         "Lifetime=2;(name=DeltaFunction,Height=1,Centre=-2.5,ties=(Height=1,"
         "Centre=-2.5);name=DeltaFunction,Height=2,Centre=2.5,ties=(Height=2,"
         "Centre="
-        "2.5)));(composite=Convolution,FixResolution=false,NumDeriv=true,$"
+        "2.5)));(composite=Convolution,NumDeriv=true,FixResolution=false,$"
         "domains=i;name=ExpDecay,Height=5,Lifetime=2;(name=DeltaFunction,"
         "Height=1,Centre=-2.5,ties=(Height=1,Centre=-2.5);name=DeltaFunction,"
         "Height=2,Centre=2.5,ties=(Height=2,Centre=2.5)))",

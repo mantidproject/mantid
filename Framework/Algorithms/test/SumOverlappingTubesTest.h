@@ -702,13 +702,14 @@ public:
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
+                      1e-6)
     }
 
-    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 27)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 17)
     TS_ASSERT_EQUALS(outWS->getSpectrum(13).y()[293], 22)
-    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 88.5)
-    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 296)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 75)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 364)
   }
 
   void test_PANTHER_2dTubes() {
@@ -739,7 +740,8 @@ public:
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
-      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 1.92 * double(i) / 256,
+                      1e-6)
     }
 
     TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 40)

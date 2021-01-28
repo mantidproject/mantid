@@ -57,8 +57,8 @@ bool knownFileType(std::string const &filename) {
 } // unnamed namespace
 
 QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
-    : m_view(view), m_notifyee(nullptr), m_searchText(), m_instrument(),
-      m_cycle(), m_searchType(SearchType::NONE), m_searchInProgress(false) {
+    : m_view(view), m_notifyee(nullptr), m_searchCriteria(),
+      m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
@@ -66,14 +66,8 @@ void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-SearchResults QtCatalogSearcher::search(const std::string &text,
-                                        const std::string &instrument,
-                                        const std::string &cycle,
-                                        ISearcher::SearchType searchType) {
-  m_searchText = text;
-  m_instrument = instrument;
-  m_cycle = cycle;
-  m_searchType = searchType;
+SearchResults QtCatalogSearcher::search(SearchCriteria searchCriteria) {
+  m_searchCriteria = std::move(searchCriteria);
   auto algSearch = createSearchAlgorithm();
   algSearch->execute();
   auto resultsTable = getSearchAlgorithmResultsTable(algSearch);
@@ -103,13 +97,13 @@ SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
     const std::string runFile = tableWorkspace->String(i, 0);
 
-    if (!runHasCorrectInstrument(runFile, m_instrument))
+    if (!runHasCorrectInstrument(runFile, searchCriteria().instrument))
       continue;
 
     if (requiresICat() && !knownFileType(runFile))
       continue;
 
-    auto const run = trimRunName(runFile, m_instrument);
+    auto const run = trimRunName(runFile, searchCriteria().instrument);
     const std::string description = tableWorkspace->String(i, 6);
     auto result = SearchResult(run, description);
 
@@ -142,14 +136,8 @@ void QtCatalogSearcher::searchAsync() {
   m_searchInProgress = true;
 }
 
-bool QtCatalogSearcher::startSearchAsync(const std::string &text,
-                                         const std::string &instrument,
-                                         const std::string &cycle,
-                                         SearchType searchType) {
-  m_searchText = text;
-  m_instrument = instrument;
-  m_cycle = cycle;
-  m_searchType = searchType;
+bool QtCatalogSearcher::startSearchAsync(SearchCriteria searchCriteria) {
+  m_searchCriteria = std::move(searchCriteria);
 
   // Check if ICat login is required
   if (!requiresICat() || hasActiveCatalogSession()) {
@@ -195,6 +183,8 @@ void QtCatalogSearcher::notifySearchComplete() {
   m_notifyee->notifySearchComplete();
 }
 
+void QtCatalogSearcher::notifySearchResultsChanged() { results().setUnsaved(); }
+
 bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
 SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
@@ -202,18 +192,18 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
 }
 
 void QtCatalogSearcher::reset() {
-  m_searchText.clear();
-  m_instrument.clear();
-  m_searchType = SearchType::NONE;
   results().clear();
+  setSaved();
 }
 
-bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
-                                              const std::string &instrument,
-                                              const std::string &cycle,
-                                              SearchType searchType) const {
-  return m_searchText != text || m_instrument != instrument ||
-         m_cycle != cycle || searchType != m_searchType;
+bool QtCatalogSearcher::hasUnsavedChanges() const {
+  return results().hasUnsavedChanges();
+}
+
+void QtCatalogSearcher::setSaved() { results().setSaved(); }
+
+SearchCriteria QtCatalogSearcher::searchCriteria() const {
+  return m_searchCriteria;
 }
 
 bool QtCatalogSearcher::hasActiveCatalogSession() const {
@@ -270,11 +260,11 @@ IAlgorithm_sptr QtCatalogSearcher::createSearchAlgorithm() {
     // Use journal search
     algSearch =
         AlgorithmManager::Instance().create("ISISJournalGetExperimentRuns");
-    algSearch->setProperty("Instrument", m_instrument);
-    algSearch->setProperty("Cycle", m_cycle);
+    algSearch->setProperty("Instrument", searchCriteria().instrument);
+    algSearch->setProperty("Cycle", searchCriteria().cycle);
   }
 
-  algSearch->setProperty("InvestigationId", m_searchText);
+  algSearch->setProperty("InvestigationId", searchCriteria().investigation);
   algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   algSearch->initialize();
   algSearch->setChild(true);
@@ -290,7 +280,9 @@ ISearchModel &QtCatalogSearcher::results() const {
 /** Returns true if the search requires ICat, false otherwise. If the cycle is
  * given then we use the journal file search instead so ICat is not required.
  */
-bool QtCatalogSearcher::requiresICat() const { return m_cycle.empty(); }
+bool QtCatalogSearcher::requiresICat() const {
+  return searchCriteria().cycle.empty();
+}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

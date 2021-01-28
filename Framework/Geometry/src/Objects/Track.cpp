@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
@@ -134,10 +135,11 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
   } else {
     auto lowestPtr =
         std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
-
-    // Make sure same point isn't added twice
-    if (newPoint == *lowestPtr) {
-      return;
+    if (lowestPtr != m_surfPoints.end()) {
+      // Make sure same point isn't added twice
+      if (newPoint == *lowestPtr) {
+        return;
+      }
     }
 
     m_surfPoints.insert(lowestPtr, newPoint);
@@ -283,6 +285,16 @@ std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
     os.setstate(std::ios_base::failbit);
   }
   return os;
+}
+
+double Track::calculateAttenuation(double lambda) const {
+  double factor(1.0);
+  for (const auto &segment : m_links) {
+    const double length = segment.distInsideObject;
+    const auto &segObj = *(segment.object);
+    factor *= segObj.material().attenuation(length, lambda);
+  }
+  return factor;
 }
 
 } // NAMESPACE Geometry

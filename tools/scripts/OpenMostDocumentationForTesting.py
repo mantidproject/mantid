@@ -13,10 +13,10 @@
 #
 # Author: Samuel Jones - ISIS
 
-# Need to install BeautifulSoup:
-# pip install beautifulsoup
-from BeautifulSoup import BeautifulSoup
-import urllib2
+# Need to install BeautifulSoup4:
+# pip install beautifulsoup4
+from bs4 import BeautifulSoup
+import urllib.request as urllib2
 import re
 import webbrowser
 import time

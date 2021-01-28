@@ -106,12 +106,22 @@ class SampleLogs(object):
                    if self.model.is_log_plottable(self.view.get_row_log_name(row))]
         self.view.new_plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
 
-    def setup_table(self):
+    def setup_table(self, search_key=''):
         """Set the model in the view to the one create from the model"""
         self.view.show_plot_and_stats(self.model.are_any_logs_plottable())
-        self.view.set_model(self.model.getItemModel())
+        self.view.set_model(self.model.getItemModel(search_key))
 
     def filtered_changed(self, state):
         self.filtered = state
         self.plot_logs()
         self.update_stats()
+
+    def search_key_changed(self):
+        """When the line edit is changed, print the logs that match the search key,
+        and display the data.
+        """
+        self.update_table_with_matching_logs()
+
+    def update_table_with_matching_logs(self):
+        """Updates the table with logs matching the search key."""
+        self.setup_table(self.view.line_edit.text())

@@ -381,7 +381,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
   } else { // Analyse the runs one by one
     runNumberVectors.reserve(selectedRuns.size());
     for (const int run : selectedRuns) {
-      runNumberVectors.emplace_back(std::vector<int>(1, run));
+      runNumberVectors.emplace_back(1, run);
     }
   }
 

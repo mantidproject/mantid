@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndexTypes.h"
 #include "ui_IndirectSpectrumSelector.h"
 
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -19,6 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 

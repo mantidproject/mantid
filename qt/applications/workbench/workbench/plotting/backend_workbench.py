@@ -15,14 +15,14 @@ are done on the main thread of the application as the default
 """
 
 from workbench.plotting.figuremanager import (
-    FigureCanvasQTAgg, QAppThreadCall, draw_if_interactive_impl, show_impl, new_figure_manager as
+    MantidFigureCanvas, QAppThreadCall, draw_if_interactive_impl, show_impl, new_figure_manager as
     new_figure_manager_impl, new_figure_manager_given_figure as
     new_figure_manager_given_figure_impl)
 
 # -----------------------------------------------------------------------------
 # Backend implementation
 # -----------------------------------------------------------------------------
-FigureCanvas = FigureCanvasQTAgg
+FigureCanvas = MantidFigureCanvas
 draw_if_interactive = QAppThreadCall(draw_if_interactive_impl)
 show = QAppThreadCall(show_impl)
 # These are wrapped by figuremanager

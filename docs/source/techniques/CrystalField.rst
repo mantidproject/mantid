@@ -1,10 +1,10 @@
-.. Crystal Field:
+.. _Crystal_Field_Examples:
 
-=============
-Crystal Field
-=============
+======================
+Crystal Field Examples
+======================
 
-Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the :ref:`concept page <Crystal structure and reflections>` whilst the syntax of the Python commands used is described in the :ref:`interface page <Crystal Field Python Interface>`
+Mantid supports the calculation and fitting of inelastic neutron scattering (INS) measurements of transitions between crystal field (or crystalline electric field) energy levels. The scientific background is summarised in the :ref:`concept page <Crystal Field Theory>` whilst the syntax of the Python commands used is described in the :ref:`interface page <Crystal Field Python Interface>`
 
 This page contains specific worked examples. The data files can be found `here <https://github.com/mducle/cf_examples/raw/master/cf_examples_data.zip>`_. Please download and unzip this into a folder which is on your Mantid path (set using the "Manage User Directories" menu item).
 
@@ -219,4 +219,55 @@ Fitting multiple INS spectra
    :width: 33%
 
 .. |FittingMultipleINSSpectra_2.png| image:: /images/FittingMultipleINSSpectra_2.png
-   :width: 33%   
+   :width: 33%
+
+
+Fixing Background Parameters
+============================
+
+.. code-block:: python
+
+   from CrystalField import Background, CrystalField, Function
+
+   # Sets up the crystal field model
+   refpars = {'B20':0.2, 'B40':-0.00164, 'B60':0.0001146, 'B66':0.001509}
+
+   cf = CrystalField('Pr', 'C6v', Temperature=5, **refpars)
+   cf.IntensityScaling = 0.05
+   cf.FWHMVariation = 0.0
+   cf.PeakShape = 'Gaussian'
+
+   # Creates a background using a list of Function objects
+   cf.background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84, PeakCentre=-0.1),
+                                         Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0)])
+
+   # Fixes all the parameters of the PseudoVoigt to their current values.
+   cf.background.functions[0].fix('all')
+
+   # Fixes the PeakCentre and Height of the Gaussian to their current values.
+   cf.background.functions[1].fix('PeakCentre', 'Height')
+
+
+Tying Background Parameters
+===========================
+
+.. code-block:: python
+
+   from CrystalField import Background, CrystalField, Function
+
+   # Sets up the crystal field model
+   refpars = {'B20':0.2, 'B40':-0.00164, 'B60':0.0001146, 'B66':0.001509}
+
+   cf = CrystalField('Pr', 'C6v', Temperature=5, **refpars)
+   cf.IntensityScaling = 0.05
+   cf.FWHMVariation = 0.0
+   cf.PeakShape = 'Gaussian'
+
+   # Creates a background using a list of Function objects
+   cf.background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84, PeakCentre=-0.1),
+                                         Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0)])
+
+   # Ties some of the parameters in the Gaussian to different values.
+   cf.background.functions[1].ties(PeakCentre=9.0, Height=2.0)
+
+.. categories:: Techniques

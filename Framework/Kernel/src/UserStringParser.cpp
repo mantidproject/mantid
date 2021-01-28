@@ -52,7 +52,7 @@ void UserStringParser::parse(const std::string &userString,
   std::string separators("-+:");
   // if input contains no separator string
   if (userString.find_first_of(separators) == std::string::npos) {
-    numbers.emplace_back(std::vector<unsigned int>(1, toUInt(userString)));
+    numbers.emplace_back(1, toUInt(userString));
   } else if (Contains(userString, '-')) {
     std::vector<unsigned int> value = separateDelimiters(userString, "-:");
     if (!value.empty()) {
@@ -107,7 +107,7 @@ UserStringParser::separateColon(const std::string &input) {
   std::vector<std::vector<unsigned int>> separatedValues;
   Tokenize(input, ":", startNum, endNum, step);
   for (unsigned int num = startNum; num <= endNum; num += step) {
-    separatedValues.emplace_back(std::vector<unsigned int>(1, num));
+    separatedValues.emplace_back(1, num);
   }
 
   return separatedValues;

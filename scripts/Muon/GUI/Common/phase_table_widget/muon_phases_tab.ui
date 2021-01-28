@@ -108,6 +108,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="rowCount">
+      <number>1</number>
+     </property>
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
      </attribute>
@@ -120,11 +123,6 @@
      <row>
       <property name="text">
        <string>New Row</string>
-      </property>
-     </row>
-     <row>
-      <property name="text">
-       <string>PhaseTable</string>
       </property>
      </row>
      <column>

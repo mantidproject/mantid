@@ -95,6 +95,7 @@ find_package(JsonCPP 0.7.0 REQUIRED)
 
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
 
 if(ENABLE_OPENCASCADE)
   find_package(OpenCascade REQUIRED)

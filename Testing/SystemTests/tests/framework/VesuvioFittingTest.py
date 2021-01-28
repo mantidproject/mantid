@@ -104,7 +104,8 @@ class VesuvioFittingWithKFreeTest(systemtesting.MantidSystemTest):
         self.assertTrue(WS_PREFIX + "_NormalisedCovarianceMatrix" in mtd, "Expected covariance workspace in ADS")
 
     def validate(self):
-        self.tolerance = tolerance()
+        # A large tolerance band is required due to differences in the fitting calculations for each platform
+        self.tolerance = 1.2e-2
         self.disableChecking.append('SpectraMap')
         return "fit_Workspace","VesuvioFittingWithKFreeTest.nxs"
 

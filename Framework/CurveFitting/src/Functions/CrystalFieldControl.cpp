@@ -63,8 +63,9 @@ void CrystalFieldControl::setAttribute(const std::string &name,
     } else if (name == "FWHMs") {
       const size_t nSpec = m_temperatures.size();
       m_FWHMs = attr.asVector();
+      auto frontValue = m_FWHMs.front();
       if (m_FWHMs.size() == 1 && m_FWHMs.size() != nSpec) {
-        m_FWHMs.assign(nSpec, m_FWHMs.front());
+        m_FWHMs.assign(nSpec, frontValue);
       }
       if (!m_FWHMs.empty()) {
         m_fwhmX.resize(nSpec);

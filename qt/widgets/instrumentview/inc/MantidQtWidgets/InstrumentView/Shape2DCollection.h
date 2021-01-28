@@ -128,6 +128,8 @@ public slots:
   void restoreOverrideCursor();
   void drawFree(const QPolygonF &polygon);
   void eraseFree(const QPolygonF &polygon);
+  void copySelectedShapes();
+  void pasteCopiedShapes();
 
 protected:
   void drawShape(QPainter & /*painter*/) const override {} // never called
@@ -158,6 +160,8 @@ protected:
   size_t m_currentCP;      ///< control point of m_currentShape selected to edit
   QList<Shape2D *>
       m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
+  QList<Shape2D *>
+      m_copiedShapes; ///< A list of shapes to be pasted if requiered
   bool m_overridingCursor;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;

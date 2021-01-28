@@ -697,7 +697,7 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<specnum_t, std::string> &monitors,
       includedMonitors.emplace_back(min);
     } else {
       auto max = dataBlock.getMaxSpectrumID();
-      m_spectraBlocks.emplace_back(SpectraBlock(min, max, false, ""));
+      m_spectraBlocks.emplace_back(min, max, false, "");
     }
   }
 

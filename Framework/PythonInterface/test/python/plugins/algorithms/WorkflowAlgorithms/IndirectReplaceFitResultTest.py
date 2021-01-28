@@ -135,8 +135,7 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         output = get_ads_workspace(self._output_name)
         expected_name = self._output_name + '_gslv2' if current_os_has_gslv2() else self._output_name
         expected_output = LoadNexus(Filename=expected_name + '.nxs')
-
-        result, _ = CompareWorkspaces(output, expected_output, Tolerance=0.00001)
+        result, _ = CompareWorkspaces(output, expected_output, Tolerance=0.0001)
         self.assertTrue(result)
 
     def test_that_get_indices_of_equivalent_labels_will_return_the_correct_indices(self):

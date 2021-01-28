@@ -8,9 +8,9 @@
 
 #include "DllConfig.h"
 
-#include "IndexTypes.h"
 #include "IndirectFitPlotModel.h"
 #include "IndirectPlotter.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include "IIndirectFitPlotView.h"
 #include "LazyAsyncRunner.h"
@@ -18,6 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT

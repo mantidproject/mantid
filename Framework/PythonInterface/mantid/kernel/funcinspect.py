@@ -274,14 +274,14 @@ def process_frame(frame):
         # put this in a loop and stack the results in an array.
         count = 0
         max_returns = 0 # Must count the max_returns ourselves in this case
-        while count < len(ins_stack[call_function_locs[i][0]:call_function_locs[i][1]]):
-            (offset_, op_, name_, argument_, argvalue_) = ins[call_function_locs[i][0]+count]
+        while count < len(ins_stack[call_function_locs[last_i][0]:call_function_locs[last_i][1]]):
+            (offset_, op_, name_, argument_, argvalue_) = ins_stack[call_function_locs[last_i][0]+count]
             if name_ == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign
                 hold = []
                 if argvalue_ > max_returns:
                     max_returns = argvalue_
                 for index in range(argvalue_):
-                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins[call_function_locs[i][0] + count+1+index]
+                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins_stack[call_function_locs[last_i][0] + count+1+index]
                     hold.append(_argvalue_)
                 count = count + argvalue_
                 output_var_names.append(hold)

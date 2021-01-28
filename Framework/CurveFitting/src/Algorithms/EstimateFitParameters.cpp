@@ -230,7 +230,7 @@ void runCrossEntropy(
   for (auto &range : ranges) {
     auto mean = (range.first + range.second) / 2;
     auto sigma = std::fabs(range.first - range.second) / 2;
-    distributionParams.emplace_back(std::make_pair(mean, sigma));
+    distributionParams.emplace_back(mean, sigma);
   }
 
   auto nParams = costFunction.nParams();
@@ -401,7 +401,7 @@ void EstimateFitParameters::execConcrete() {
     }
     // Use the lower and upper bounds of the constraint to set the range
     // of a generator with uniform distribution.
-    ranges.emplace_back(std::make_pair(boundary->lower(), boundary->upper()));
+    ranges.emplace_back(boundary->lower(), boundary->upper());
   }
   // Number of parameters could have changed
   costFunction->reset();

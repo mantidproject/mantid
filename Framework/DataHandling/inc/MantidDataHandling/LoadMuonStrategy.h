@@ -14,6 +14,11 @@
 namespace Mantid {
 namespace DataHandling {
 class LoadMuonNexusV2NexusHelper;
+
+// Create time zero table
+DataObjects::TableWorkspace_sptr
+createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros);
+
 class DLLExport LoadMuonStrategy {
 public:
   // Constructor
@@ -31,6 +36,8 @@ public:
   virtual API::Workspace_sptr loadDetectorGrouping() const = 0;
   // Load dead time table
   virtual API::Workspace_sptr loadDeadTimeTable() const = 0;
+  // Get time zero table
+  virtual API::Workspace_sptr getTimeZeroTable() = 0;
 
 protected:
   // Create grouping table

@@ -19,6 +19,14 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
 
 
 class FocusModel(object):
+
+    def __init__(self):
+        self._last_path = None
+        self._last_path_ws = None
+
+    def get_last_path(self):
+        return self._last_path
+
     def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers):
         """
         Focus some data using the current calibration.
@@ -129,10 +137,14 @@ class FocusModel(object):
                                                rb_num)
         self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
                                                      rb_num)
-        logger.notice(f"\n\nFocus files saved to: \"{path.join(path_handling.get_output_path(), 'Focus')}\"\n\n")
+        output_path = path.join(path_handling.get_output_path(), 'Focus')
+        logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
         if rb_num:
             output_path = path.join(path_handling.get_output_path(), 'User', rb_num, 'Focus')
-            logger.notice(f"\n\nFocus files saved to: \"{output_path}\"\n\n")
+            logger.notice(f"\n\nFocus files also saved to: \"{output_path}\"\n\n")
+        self._last_path = output_path
+        if self._last_path and self._last_path_ws:
+            self._last_path = path.join(self._last_path, self._last_path_ws)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
@@ -148,15 +160,15 @@ class FocusModel(object):
 
     def _save_focused_output_files_as_nexus(self, instrument, sample_path, bank, sample_workspace,
                                             rb_num):
+        file_name = self._generate_output_file_name(instrument, sample_path, bank, ".nxs")
         nexus_output_path = path.join(
-            path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
+            path_handling.get_output_path(), "Focus", file_name)
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
         if rb_num:
             nexus_output_path = path.join(
-                path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
+                path_handling.get_output_path(), "User", rb_num, "Focus", file_name)
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
+        self._last_path_ws = file_name
 
     def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
                                                 sample_workspace, rb_num):

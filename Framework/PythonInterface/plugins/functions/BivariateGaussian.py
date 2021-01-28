@@ -19,13 +19,13 @@ def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
 
     This was copied from https://matplotlib.org/2.2.4/_modules/matplotlib/mlab.html#bivariate_normal
     """
-    Xmu = X-mux
-    Ymu = Y-muy
+    Xmu = X - mux
+    Ymu = Y - muy
 
-    rho = sigmaxy/(sigmax*sigmay)
-    z = Xmu**2/sigmax**2 + Ymu**2/sigmay**2 - 2*rho*Xmu*Ymu/(sigmax*sigmay)
-    denom = 2*np.pi*sigmax*sigmay*np.sqrt(1-rho**2)
-    return np.exp(-z/(2*(1-rho**2))) / denom
+    rho = sigmaxy / (sigmax * sigmay)
+    z = Xmu ** 2 / sigmax ** 2 + Ymu ** 2 / sigmay ** 2 - 2 * rho * Xmu * Ymu / (sigmax * sigmay)
+    denom = 2 * np.pi * sigmax * sigmay * np.sqrt(1 - rho ** 2)
+    return np.exp(-z / (2 * (1 - rho ** 2))) / denom
 
 
 class BivariateGaussian(IFunction1D):
@@ -66,12 +66,12 @@ class BivariateGaussian(IFunction1D):
     """
 
     def init(self):
-        self.declareParameter("A")  # Amplitude
-        self.declareParameter("MuX")  # Mean along the x direction
-        self.declareParameter("MuY")  # Mean along the y direction
-        self.declareParameter("SigX")  # sigma along the x direction
-        self.declareParameter("SigY")  # sigma along the y direction
-        self.declareParameter("SigP")  # interaction term rho
+        self.declareParameter("A", 1.0)  # Amplitude
+        self.declareParameter("MuX", 0.0)  # Mean along the x direction
+        self.declareParameter("MuY", 0.0)  # Mean along the y direction
+        self.declareParameter("SigX", 0.05)  # sigma along the x direction
+        self.declareParameter("SigY", 0.05)  # sigma along the y direction
+        self.declareParameter("SigP", 0.0)  # interaction term rho
         self.declareParameter("Bg")  # constant BG terms
         self.declareAttribute("nX", 50)  # used for reconstructing 2d profile
         self.declareAttribute("nY", 50)  # used for reconstruction 2d profile
@@ -95,12 +95,14 @@ class BivariateGaussian(IFunction1D):
         if t.ndim == 1:
             nX = int(self.getAttributeValue('nX'))
             nY = int(self.getAttributeValue('nY'))
+            if nX*nY*2 != t.size:
+                raise ValueError(f"Input array cannot be resized as a {nX} x {nY} x 2 matrix, please modify "
+                                 "attributes nX and nY")
             pos = t.reshape(nX, nY, 2)
         elif t.ndim == 3:
             pos = t
         X = pos[..., 0]
         Y = pos[..., 1]
-
         A = self.getParamValue(0)
         MuX = self.getParamValue(1)
         MuY = self.getParamValue(2)
@@ -109,11 +111,11 @@ class BivariateGaussian(IFunction1D):
         SigP = self.getParamValue(5)
         Bg = self.getParamValue(6)
 
-        SigXY = SigX*SigY*SigP
-        Z = A*bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                               mux=MuX, muy=MuY, sigmaxy=SigXY)
+        SigXY = SigX * SigY * SigP
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
+                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
         if t.ndim == 1:
-            zRet = np.empty(Z.shape+(2,))
+            zRet = np.empty(Z.shape + (2,))
             zRet[:, :, 0] = Z
             zRet[:, :, 1] = Z
         elif t.ndim == 3:
@@ -130,7 +132,7 @@ class BivariateGaussian(IFunction1D):
         SigX = self.getParamValue(3)
         SigY = self.getParamValue(4)
         SigP = self.getParamValue(5)
-        return np.array([[SigX**2, SigX*SigY*SigP], [SigX*SigY*SigP, SigY**2]])
+        return np.array([[SigX ** 2, SigX * SigY * SigP], [SigX * SigY * SigP, SigY ** 2]])
 
     def getMuSigma(self):
         return self.getMu(), self.getSigma()
@@ -185,9 +187,9 @@ class BivariateGaussian(IFunction1D):
         SigP = self.getParamValue(5)
         Bg = self.getParamValue(6)
 
-        SigXY = SigX*SigY*SigP
-        Z = A*bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                               mux=MuX, muy=MuY, sigmaxy=SigXY)
+        SigXY = SigX * SigY * SigP
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
+                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
         Z += Bg
         return Z
 
@@ -204,9 +206,9 @@ class BivariateGaussian(IFunction1D):
         SigP = self.getParamValue(5)
         Bg = self.getParamValue(6)
 
-        SigXY = SigX*SigY*SigP
-        Z = A*bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
-                               mux=MuX, muy=MuY, sigmaxy=SigXY)
+        SigXY = SigX * SigY * SigP
+        Z = A * bivariate_normal(X, Y, sigmax=SigX, sigmay=SigY,
+                                 mux=MuX, muy=MuY, sigmaxy=SigXY)
         Z += Bg
         return Z
 
@@ -240,10 +242,10 @@ class BivariateGaussian(IFunction1D):
                 epsUse = 1.e-3
             else:
                 epsUse = eps
-            dc[k] = max(epsUse, epsUse*c[k])
-            f_new = self.function1DDiffParams(xvals, c+dc)
-            for i, dF in enumerate(f_new-f_int):
-                jacobian.set(i, k, dF/dc[k])
+            dc[k] = max(epsUse, epsUse * c[k])
+            f_new = self.function1DDiffParams(xvals, c + dc)
+            for i, dF in enumerate(f_new - f_int):
+                jacobian.set(i, k, dF / dc[k])
 
 
 FunctionFactory.subscribe(BivariateGaussian)

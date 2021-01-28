@@ -101,6 +101,10 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(selectMultipleMasks(QRect)));
   connect(drawController, SIGNAL(finishSelection(QRect)), this,
           SIGNAL(shapeChangeFinished()));
+  connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes,
+          SLOT(copySelectedShapes()));
+  connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes,
+          SLOT(pasteCopiedShapes()));
 
   InputControllerDrawAndErase *freeDrawController =
       new InputControllerDrawAndErase(this);
@@ -468,7 +472,8 @@ QString ProjectionSurface::getInfoText() const {
     return "Click on a detector then click on the mini-plot to add a peak.";
   case DrawRegularMode:
     return "Select a tool button to draw a new shape. "
-           "Click on shapes to select. Click and move to edit.";
+           "Click on shapes to select. Click and move to edit. Press Ctrl+C "
+           "/ Ctrl+V to copy/paste";
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
@@ -973,8 +978,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
         });
 
     if (result == m_selectedAlignmentPlane.cend()) {
-      m_selectedAlignmentPlane.emplace_back(
-          std::make_pair(peak->getQSampleFrame(), origin));
+      m_selectedAlignmentPlane.emplace_back(peak->getQSampleFrame(), origin);
     }
   } else {
     m_selectedAlignmentPeak = std::make_pair(peak, origin);

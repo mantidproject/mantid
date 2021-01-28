@@ -9,19 +9,16 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 from qtpy import QtCore
 import sys
 
-# If the GUI has not been created yet, make a new one.
-if 'engineering_gui' not in globals():
+if 'engineering_gui' in globals() and not globals()['engineering_gui'].isHidden():
+    engineering_gui = globals()['engineering_gui']
+    engineering_gui.setWindowState(engineering_gui.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+    engineering_gui.activateWindow()
+else:
     if 'workbench' in sys.modules:
         from workbench.config import get_window_config
+
         parent, flags = get_window_config()
     else:
-        parent, flags = None
+        parent, flags = None, None
     engineering_gui = EngineeringDiffractionGui(parent=parent, window_flags=flags)
-
-# Restore minimised and hidden windows without recreating the GUI.
-if engineering_gui.isHidden():  # noqa
     engineering_gui.show()
-else:
-    engineering_gui.setWindowState(engineering_gui.windowState() & ~QtCore.Qt.WindowMinimized
-                                   | QtCore.Qt.WindowActive)
-    engineering_gui.activateWindow()

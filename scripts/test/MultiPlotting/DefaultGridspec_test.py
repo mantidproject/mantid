@@ -16,7 +16,7 @@ class DefaultGridSpecTest(unittest.TestCase):
         for root in roots:
             result = defaultGridspecGrid(root*root)
             self.assertEqual(result, [root, root])
- 
+
     def test_notSquares(self):
         roots = [3, 4, 5, 123]
         for root in roots:

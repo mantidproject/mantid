@@ -84,6 +84,11 @@ class InstrumentView(QWidget, ObservingView):
     def set_range(self, min_value, max_value):
         self.widget.setBinRange(min_value, max_value)
 
+    def replace_workspace(self, new_ws_name, new_window_name):
+        if new_window_name is None:
+            new_window_name = new_ws_name
+        self.widget.replaceWorkspace(new_ws_name, new_window_name)
+
     @Slot()
     def _run_close(self):
         self.close()

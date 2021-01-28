@@ -38,5 +38,6 @@ class TestListSelectorView(unittest.TestCase):
 
         self.assertEqual(self.view.item_table_widget.rowCount(), 0)
 
+
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

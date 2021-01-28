@@ -106,7 +106,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::vector<point> pairs;
     pairs.reserve(n);
     for (int i = 0; i < n; ++i) {
-      pairs.emplace_back(std::make_pair(x[i], y[i]));
+      pairs.emplace_back(x[i], y[i]);
     }
 
     std::sort(pairs.begin(), pairs.end(),
@@ -179,9 +179,9 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
     }
   }
 
-  // warn user than some values wern't calculated
+  // inform user that some values weren't calculated
   if (outOfRange) {
-    g_log.warning()
+    g_log.information()
         << "Some x values where out of range and will not be calculated.\n";
   }
 }
@@ -247,9 +247,9 @@ void CubicSpline::calculateDerivative(double *out, const double *xValues,
     out[i] = xDeriv;
   }
 
-  // warn user that some values weren't calculated
+  // inform user that some values weren't calculated
   if (outOfRange) {
-    g_log.warning()
+    g_log.information()
         << "Some x values where out of range and will not be calculated.\n";
   }
 }

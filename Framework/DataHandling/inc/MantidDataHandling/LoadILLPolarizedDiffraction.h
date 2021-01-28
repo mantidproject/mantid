@@ -46,9 +46,11 @@ private:
 
   void loadData();
   void loadMetaData();
-  void loadInstrument(API::MatrixWorkspace_sptr);
+  void loadInstrument(API::MatrixWorkspace_sptr, const std::string &);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr,
                                             const NeXus::NXEntry &, const int);
+  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr,
+                                         const int);
   void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
   std::vector<double> prepareAxes(const NeXus::NXEntry &);
 
@@ -61,6 +63,8 @@ private:
 
   std::string m_instName; ///< instrument name to load the IDF
   std::string m_fileName; ///< file name to load
+
+  double m_wavelength; // wavelength value is read from the YIG IPF
 
   LoadHelper m_loadHelper;                         ///< a helper for metadata
   API::WorkspaceGroup_sptr m_outputWorkspaceGroup; ///< output workspace

@@ -55,6 +55,10 @@ bool Resolution::hasAttribute(const std::string &attName) const {
   return m_fun.hasAttribute(attName);
 }
 
+std::string Resolution::attributeName(size_t index) const {
+  return m_fun.attributeName(index);
+}
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid

@@ -61,8 +61,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.load_run_mock = self.load_run_patcher.start()
 
         self.mock_workspace = self.create_fake_workspace(1)
-        self.mock_loading_from_browse(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
-        file_utils.get_current_run_filename = mock.Mock(return_value="C:\dir1\dir2\dir3\EMU0001234.nxs")
+        self.mock_loading_from_browse(self.mock_workspace, r"C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
+        file_utils.get_current_run_filename = mock.Mock(return_value=r"C:\dir1\dir2\dir3\EMU0001234.nxs")
 
         self.presenter.load_file_widget._view.warning_popup = mock.MagicMock()
         self.presenter.load_run_widget._view.warning_popup = mock.MagicMock()
@@ -124,7 +124,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.load_file_widget.on_browse_button_clicked()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(self.presenter._model.filenames, ["C:\dir1\dir2\dir3\EMU0001234.nxs"])
+        self.assertEqual(self.presenter._model.filenames, [r"C:\dir1\dir2\dir3\EMU0001234.nxs"])
         self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
         self.assertEqual(self.presenter._model.runs, [[1234]])
 
@@ -132,7 +132,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.load_file_widget.on_browse_button_clicked()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(self.load_file_view.get_file_edit_text(), "C:\dir1\dir2\dir3\EMU0001234.nxs")
+        self.assertEqual(self.load_file_view.get_file_edit_text(), r"C:\dir1\dir2\dir3\EMU0001234.nxs")
         self.assertEqual(self.load_run_view.get_run_edit_text(), "1234")
 
     def test_that_loading_via_browse_disables_all_load_buttons(self):
@@ -147,26 +147,26 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.enable_load_buttons.call_count, 1)
 
     def test_that_loading_single_file_via_user_input_file_is_loaded_into_model_correctly(self):
-        self.mock_user_input_single_file(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
+        self.mock_user_input_single_file(self.mock_workspace, r"C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
 
         self.presenter.load_file_widget.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(self.presenter._model.filenames, ["C:\dir1\dir2\dir3\EMU0001111.nxs"])
+        self.assertEqual(self.presenter._model.filenames, [r"C:\dir1\dir2\dir3\EMU0001111.nxs"])
         self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
         self.assertEqual(self.presenter._model.runs, [[1111]])
 
     def test_that_loading_single_file_via_user_input_file_is_displayed_correctly_in_the_interface(self):
-        self.mock_user_input_single_file(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
+        self.mock_user_input_single_file(self.mock_workspace, r"C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
 
         self.presenter.load_file_widget.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(self.load_file_view.get_file_edit_text(), "C:\dir1\dir2\dir3\EMU0001111.nxs")
+        self.assertEqual(self.load_file_view.get_file_edit_text(), r"C:\dir1\dir2\dir3\EMU0001111.nxs")
         self.assertEqual(self.load_run_view.get_run_edit_text(), "1111")
 
     def test_that_loading_via_user_input_file_disables_all_load_buttons(self):
-        self.mock_user_input_single_file([1], "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
+        self.mock_user_input_single_file([1], r"C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
 
         self.mock_disabling_buttons_in_run_and_file_widget()
 

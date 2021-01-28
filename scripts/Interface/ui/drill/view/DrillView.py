@@ -7,7 +7,7 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QMainWindow, QMessageBox, QDialog, QMenu, QAction
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -17,6 +17,8 @@ from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 
 from ..presenter.DrillPresenter import DrillPresenter
+from .DrillTableWidget import DrillTableWidget
+from .DrillContextMenu import DrillContextMenu
 
 
 class DrillView(QMainWindow):
@@ -64,17 +66,39 @@ class DrillView(QMainWindow):
     Sent when a cell contents has changed.
     Args:
         int: row index
-        int: column index
-        str: new cell contents
+        str: column name
     """
-    dataChanged = Signal(int, int, str)
+    dataChanged = Signal(int, str)
 
     """
-    Sent when the user asks for a row processing.
-    Args:
-        int: row index
+    Sent when a new group is requested.
     """
-    process = Signal(list)
+    groupSelectedRows = Signal()
+
+    """
+    Sent when the removing of row(s) from their group is requested.
+    """
+    ungroupSelectedRows = Signal()
+
+    """
+    Sent when a row is set as master row.
+    """
+    setMasterRow = Signal()
+
+    """
+    Sent when the user asks to process the selected row(s).
+    """
+    process = Signal()
+
+    """
+    Sent when the user asks to process all rows.
+    """
+    processAll = Signal()
+
+    """
+    Sent when the user asks to process selected groups.
+    """
+    processGroup = Signal()
 
     """
     Sent when the user wants to stop the current processing.
@@ -82,18 +106,24 @@ class DrillView(QMainWindow):
     processStopped = Signal()
 
     """
-    Sent when the user asks for data loading from file.
-    Args:
-        str: rundex file name
+    Sent when the user asks for an empty table.
     """
-    rundexLoaded = Signal(str)
+    newTable = Signal()
+
+    """
+    Sent when the user asks for data loading from file.
+    """
+    loadRundex = Signal()
 
     """
     Sent when the user aks for data saving.
-    Args:
-        str: file name
     """
-    rundexSaved = Signal(str)
+    saveRundex = Signal()
+
+    """
+    Sent when the user aks for data saving in a new file.
+    """
+    saveRundexAs = Signal()
 
     """
     Sent when the user asks for the settings window.
@@ -117,28 +147,17 @@ class DrillView(QMainWindow):
 
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
-        self.invalidCells = set()
-        self.coloredRows = set()
-        self.errorRows = set()
-        self.rundexFile = None
 
         self._presenter = DrillPresenter(self)
-
-    def show(self):
-        """
-        Override QMainWindow::show. It calls the base class method and
-        updates the instrument.
-        """
-        super(DrillView, self).show()
-        self._changeInstrument(self.instrumentselector.currentText())
 
     def setup_header(self):
         """
         Setup the window header. Set the buttons icons and connect the signals.
         """
-        self.actionLoadRundex.triggered.connect(self.load_rundex)
-        self.actionSaveAs.triggered.connect(self.saveRundexAs)
-        self.actionSave.triggered.connect(self.saveRundex)
+        self.actionNew.triggered.connect(self.newTable.emit)
+        self.actionLoadRundex.triggered.connect(self.loadRundex.emit)
+        self.actionSaveAs.triggered.connect(self.saveRundexAs.emit)
+        self.actionSave.triggered.connect(self.saveRundex.emit)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.showSettings.emit)
         self.actionClose.triggered.connect(self.close)
@@ -148,8 +167,9 @@ class DrillView(QMainWindow):
         self.actionCutRow.triggered.connect(self.cutSelectedCells)
         self.actionPasteRow.triggered.connect(self.pasteCells)
         self.actionErase.triggered.connect(self.eraseSelectedCells)
-        self.actionProcessRow.triggered.connect(self.process_selected_rows)
-        self.actionProcessAll.triggered.connect(self.process_all_rows)
+        self.actionProcessRow.triggered.connect(self.process.emit)
+        self.actionProcessGroup.triggered.connect(self.processGroup.emit)
+        self.actionProcessAll.triggered.connect(self.processAll.emit)
         self.actionStopProcessing.triggered.connect(self.processStopped.emit)
         self.actionHelp.triggered.connect(self.helpWindow)
 
@@ -157,10 +177,10 @@ class DrillView(QMainWindow):
         self.instrumentselector.setToolTip("Instrument")
         self.toolbar.insertWidget(0, self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
-                self._changeInstrument)
+                self.instrumentChanged.emit)
 
         self.modeSelector.currentTextChanged.connect(
-                self._changeAcquisitionMode)
+                self.acquisitionModeChanged.emit)
 
         self.cycleNumber.editingFinished.connect(self._changeCycleOrExperiment)
         self.experimentId.editingFinished.connect(self._changeCycleOrExperiment)
@@ -169,7 +189,7 @@ class DrillView(QMainWindow):
         self.datadirs.clicked.connect(self.show_directory_manager)
 
         self.load.setIcon(icons.get_icon("mdi.file-import"))
-        self.load.clicked.connect(self.load_rundex)
+        self.load.clicked.connect(self.loadRundex.emit)
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(self.showSettings.emit)
@@ -193,7 +213,7 @@ class DrillView(QMainWindow):
         self.addrow.clicked.connect(self.add_row_after)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
-        self.save.clicked.connect(self.saveRundexAs)
+        self.save.clicked.connect(self.saveRundex.emit)
 
         self.help.setIcon(icons.get_icon("mdi.help"))
         self.help.clicked.connect(self.helpWindow)
@@ -202,10 +222,13 @@ class DrillView(QMainWindow):
         self.fill.clicked.connect(self.automatic_filling)
 
         self.processRows.setIcon(icons.get_icon("mdi.play"))
-        self.processRows.clicked.connect(self.process_selected_rows)
+        self.processRows.clicked.connect(self.process.emit)
 
-        self.processAll.setIcon(icons.get_icon("mdi.fast-forward"))
-        self.processAll.clicked.connect(self.process_all_rows)
+        self.buttonProcessGroup.setIcon(icons.get_icon("mdi.skip-forward"))
+        self.buttonProcessGroup.clicked.connect(self.processGroup.emit)
+
+        self.buttonProcessAll.setIcon(icons.get_icon("mdi.fast-forward"))
+        self.buttonProcessAll.clicked.connect(self.processAll.emit)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
         self.stop.clicked.connect(self.processStopped.emit)
@@ -214,7 +237,10 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(self.on_cell_changed)
+        self.table.cellChanged.connect(
+                lambda r,c: self.dataChanged.emit(r, self.columns[c]))
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.showContextMenu)
 
     def closeEvent(self, event):
         """
@@ -224,50 +250,15 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
-        if self.isWindowModified():
-            self._saveDataQuestion()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
+        self._presenter.onClose()
         super(DrillView, self).closeEvent(event)
 
     ###########################################################################
     # actions                                                                 #
     ###########################################################################
-
-    def _saveDataQuestion(self):
-        """
-        Opens a popup message asking if the user wants to save its data.
-        """
-        q = QMessageBox.question(self, "DrILL: Unsaved data", "You have "
-                                 + "unsaved modifications, do you want to save "
-                                 + "them before?")
-        if (q == QMessageBox.Yes):
-            self.saveRundex()
-
-    def _changeInstrument(self, instrument):
-        """
-        Triggered when the instrument selection changed.
-
-        Args:
-            instrument(str): instrument name
-        """
-        if self.isHidden():
-            return
-        if self.isWindowModified():
-            self._saveDataQuestion()
-        self.instrumentChanged.emit(instrument)
-
-    def _changeAcquisitionMode(self, acquisitionMode):
-        """
-        Triggered when the acquisition mode is changed.
-
-        Args:
-            acquisitionMode(str): acquisition mode name
-        """
-        if self.isWindowModified():
-            self._saveDataQuestion()
-        self.acquisitionModeChanged.emit(acquisitionMode)
 
     def _changeCycleOrExperiment(self):
         """
@@ -279,35 +270,6 @@ class DrillView(QMainWindow):
             self.cycleAndExperimentChanged.emit(cycle, exp)
         self.setWindowModified(True)
 
-    def _getSelectionShape(self, selection):
-        """
-        Get the shape of the selection, the number of rows and the number of
-        columns.
-
-        Args:
-            selection (list(tuple(int, int))): list of selected cells indexes
-
-        Returns:
-            tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
-                             selection is empty or discontinuous
-        """
-        if not selection:
-            return (0, 0)
-        rmin = selection[0][0]
-        rmax = rmin
-        cmin = selection[0][1]
-        cmax = cmin
-        for item in selection:
-            if item[0] > rmax:
-                rmax = item[0]
-            if item[1] > cmax:
-                cmax = item[1]
-        shape = (rmax - rmin + 1, cmax - cmin + 1)
-        if shape[0] * shape[1] != len(selection):
-            return (0, 0)
-        else:
-            return shape
-
     def copySelectedCells(self):
         """
         Copy in the local buffer the content of the selected cells. The
@@ -317,8 +279,7 @@ class DrillView(QMainWindow):
         cells = self.table.getSelectedCells()
         if not cells:
             return
-        cells.sort()
-        shape = self._getSelectionShape(cells)
+        shape = self.table.getSelectionShape()
         if shape == (0, 0):
             QMessageBox.warning(self, "Selection error",
                                 "Please select adjacent cells")
@@ -360,8 +321,7 @@ class DrillView(QMainWindow):
         if not cells:
             QMessageBox.warning(self, "Paste error", "No cell selected")
             return
-        cells.sort()
-        shape = self._getSelectionShape(cells)
+        shape = self.table.getSelectionShape()
         if self.bufferShape == (1, 1) and shape != (0, 0):
             for cell in cells:
                 self.table.setCellContents(cell[0], cell[1], self.buffer[0])
@@ -373,7 +333,7 @@ class DrillView(QMainWindow):
                 and (shape != (0, 0))):
             for i in range(len(cells)):
                 self.table.setCellContents(cells[i][0], cells[i][1],
-                                           self.buffer[i % shape[1]])
+                                           self.buffer[int(i / shape[0])])
         elif self.buffer and shape != self.bufferShape and shape != (0, 0):
             QMessageBox.warning(self, "Paste error",
                                 "The selection does not correspond to the "
@@ -416,73 +376,42 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def process_selected_rows(self):
+    def updateLabelsFromGroups(self, groups, masters):
         """
-        Ask for the processing of the selected rows. If the selected rows
-        contain invalid values, this function display an error message dialog.
-        """
-        rows = self.table.getSelectedRows()
-        if not rows:
-            rows = self.table.getRowsFromSelectedCells()
-        if rows:
-            for cell in self.invalidCells:
-                if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the "
-                                        + "parameters value before processing")
-                    return
-            self.errorRows = set()
-            self.process.emit(rows)
+        Update all the row labels from the current groups.
 
-    def process_all_rows(self):
+        Args:
+            groups (dict(str:set(int))): group name and rows
+            master (dict(str:int)): group name and master row
         """
-        Ask for the processing of all the rows. If the rows contain invalid
-        values, this function display an error message dialog.
-        """
-        rows = self.table.getAllRows()
-        if rows:
-            for cell in self.invalidCells:
-                if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the "
-                                        + "parameters value before processing")
-                    return
-            self.errorRows = set()
-            self.process.emit(rows)
+        for row in range(self.table.rowCount()):
+            self.table.delRowLabel(row)
+        for groupName,rows in groups.items():
+            rowName = 1
+            for row in sorted(rows):
+                if groupName in masters and masters[groupName] == row:
+                    _bold = True
+                    _tooltip = "This is the master row of the group {}" \
+                               .format(groupName)
+                else:
+                    _bold = False
+                    _tooltip = "This row belongs to the sample group {}" \
+                               .format(groupName)
+                self.table.setRowLabel(row, groupName + str(rowName),
+                                       _bold, _tooltip)
+                rowName += 1
 
-    def load_rundex(self):
+    def getRowLabel(self, row):
         """
-        Ask for the loading of a rundex file.
-        """
-        filename = QFileDialog.getOpenFileName(
-                self, 'Load rundex', '.', "Rundex (*.mrd);;All files (*.*)"
-                )
-        if not filename[0]:
-            return
-        self.rundexLoaded.emit(filename[0])
-        self.setWindowModified(False)
+        Get the visual label of a row.
 
-    def saveRundexAs(self):
-        """
-        Ask for the saving of the table in a rundex file.
-        """
-        filename = QFileDialog.getSaveFileName(
-                self, 'Save rundex', '.', "Rundex (*.mrd)"
-                )
-        if not filename[0]:
-            return
-        self.rundexSaved.emit(filename[0])
-        self.setWindowModified(False)
-        self.rundexFile = filename[0]
+        Args:
+            row(int): row index
 
-    def saveRundex(self):
+        Returns:
+            str: row label
         """
-        Save in the current rundex file. The current file is the one which has
-        been used to import or export the current data.
-        """
-        if self.rundexFile:
-            self.rundexSaved.emit(self.rundexFile)
-            self.setWindowModified(False)
-        else:
-            self.saveRundexAs()
+        return self.table.getRowLabel(row)
 
     def helpWindow(self):
         """
@@ -496,7 +425,9 @@ class DrillView(QMainWindow):
         Copy (and increment) the contents of the first selected cell in the
         other ones. If a numors string is detected in the first cell, the
         numors values are incremented by the number found in the ui spinbox
-        associated with this action.
+        associated with this action. If a single row is selected, the increment
+        will be propagated along that row. Otherwise, the increment is
+        propagated along columns.
         """
         def inc(numors, i):
             """
@@ -551,10 +482,15 @@ class DrillView(QMainWindow):
 
         increment = self.increment.value()
         cells = self.table.getSelectedCells()
+        # check if increment should append along columns
+        columnIncrement = (len(self.table.getRowsFromSelectedCells()) > 1)
         if not cells:
             return
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
+            # if we increment along columns and this is a new column
+            if columnIncrement and cells[i][1] != cells[i-1][1]:
+                continue
             contents = self.table.getCellContents(cells[i-1][0], cells[i-1][1])
             self.table.setCellContents(cells[i][0], cells[i][1],
                                        inc(contents, increment))
@@ -577,6 +513,15 @@ class DrillView(QMainWindow):
             self.pasteCells()
         elif (event.key() == Qt.Key_Delete):
             self.eraseSelectedCells()
+        elif (event.key() == Qt.Key_G
+                and event.modifiers() == Qt.ControlModifier):
+            self.groupSelectedRows.emit()
+        elif (event.key() == Qt.Key_G
+                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+            self.ungroupSelectedRows.emit()
+        elif (event.key() == Qt.Key_M
+                and event.modifiers() == Qt.ControlModifier):
+            self.setMasterRow.emit()
 
     def show_directory_manager(self):
         """
@@ -584,14 +529,15 @@ class DrillView(QMainWindow):
         """
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
-    def on_cell_changed(self, row, column):
-        if row in self.coloredRows:
-            self.table.removeRowBackground(row)
-            self.coloredRows.remove(row)
+    def showContextMenu(self, pos):
+        """
+        Display the context menu.
 
-        self.dataChanged.emit(row, column,
-                              self.table.getCellContents(row, column))
-        self.setWindowModified(True)
+        Args:
+            pos (QPoint): mouse position in the widget frame
+        """
+        menu = DrillContextMenu(self.table.viewport().mapToGlobal(pos), self)
+        self._presenter.onShowContextMenu(menu)
 
     ###########################################################################
     # for model calls                                                         #
@@ -641,43 +587,88 @@ class DrillView(QMainWindow):
         """
         self.columns = columns
         self.table.clear()
-        self.invalidCells = set()
-        self.coloredRows = set()
         self.table.setRowCount(0)
+        self.table.setColumnCount(0)
+        self.table.horizontalHeader().reset()
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
         if tooltips:
             self.table.setColumnHeaderToolTips(tooltips)
+        for i in range(len(columns)):
+            self.table.setColumnHidden(i, False)
+        self.menuAddRemoveColumn.aboutToShow.connect(
+                lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
-    def fill_table(self, rows_contents):
+    def getSelectedRows(self):
         """
-        Fill the table.
+        Get the list of selected row indexes. If the user did not select any
+        full row, the selected rows are extracted from the selected cells.
+
+        Returns:
+            list(int): row indexes
+        """
+        rows = self.table.getSelectedRows()
+        if not rows:
+            rows = self.table.getRowsFromSelectedCells()
+        return rows
+
+    def getAllRows(self):
+        """
+        Get the list of all row indexes.
+
+        Returns:
+            list(int): row indexes
+        """
+        return self.table.getAllRows()
+
+    def getCellContents(self, row, column):
+        """
+        Get the contents of a specific cell.
 
         Args:
-            rows_contents (list(list(str))): list of rows contents
+            row (int): row index
+            column (str): column name
         """
-        if (not self.table.columnCount()):
+        return self.table.getCellContents(row, self.columns.index(column))
+
+    def setAddRemoveColumnMenu(self, columns):
+        """
+        Fill the "add/remove column" menu. This function is triggered each time
+        the menu is displayed to display a correct icon depending on the status
+        of the column (hidden or not).
+
+        Args:
+            columns (list(str)): list of column titles
+        """
+        if self.menuAddRemoveColumn.receivers(QMenu.triggered):
+            self.menuAddRemoveColumn.triggered.disconnect()
+        self.menuAddRemoveColumn.clear()
+        hidden = self.table.getHiddenColumns()
+        for c in columns:
+            action = QAction(c, self.menuAddRemoveColumn)
+            if c in hidden:
+                action.setIcon(icons.get_icon("mdi.close"))
+            else:
+                action.setIcon(icons.get_icon("mdi.check"))
+            self.menuAddRemoveColumn.addAction(action)
+
+        self.menuAddRemoveColumn.triggered.connect(
+                lambda action: self.table.toggleColumnVisibility(action.text()))
+
+    def setCellContents(self, row, column, value):
+        """
+        Set the contents of a specific cell.
+
+        Args:
+            row (int): row index
+            column (str): column name
+            value (str): column contents
+        """
+        if row >= self.table.rowCount() or column not in self.columns:
             return
-        if rows_contents:
-            self.blockSignals(True)
-            self.table.setRowCount(len(rows_contents))
-            for row in range(len(rows_contents)):
-                self.table.setRowContents(row, rows_contents[row])
-            self.blockSignals(False)
-        else:
-            self.table.addRow(0)
-            self.rowAdded.emit(0)
-
-    def setRundexFile(self, filename):
-        """
-        Set the current rundex filename.
-
-        Args:
-            filename: rundex file name.
-        """
-        self.rundexFile = filename
+        self.table.setCellContents(row, self.columns.index(column), value)
 
     def set_progress(self, n, nmax):
         """
@@ -717,7 +708,8 @@ class DrillView(QMainWindow):
         self.fill.setDisabled(state)
         self.help.setDisabled(state)
         self.processRows.setDisabled(state)
-        self.processAll.setDisabled(state)
+        self.buttonProcessGroup.setDisabled(state)
+        self.buttonProcessAll.setDisabled(state)
         self.stop.setDisabled(not state)
         self.table.setDisabled(state)
         self.table.clearSelection()
@@ -726,45 +718,45 @@ class DrillView(QMainWindow):
         else:
             self.table.setCursor(Qt.ArrowCursor)
 
-    def set_row_processing(self, row):
+    def unsetRowBackground(self, row):
+        """
+        Remove any background for a specific row.
+
+        Args:
+            row (int): row index
+        """
+        self.table.removeRowBackground(row)
+
+    def setRowProcessing(self, row):
         """
         Set a row as currently processing.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.PROCESSING_COLOR)
 
-    def set_row_done(self, row):
+    def setRowDone(self, row):
         """
         Set a row as done with success.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.OK_COLOR)
 
-    def set_row_error(self, row):
+    def setRowError(self, row):
         """
         Set a row as done with error.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
-        if row not in self.errorRows:
-            self.errorRows.add(row)
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
-    def set_cell_ok(self, row, columnTitle):
+    def setCellOk(self, row, columnTitle):
         """
-        Set a cell as OK. Remove it from the invalid cells set, change its
-        color and remove the tooltip itf it exists.
+        Set a cell as OK. Change its color and remove the tooltip if it exists.
 
         Args:
             row (int): row index
@@ -776,13 +768,11 @@ class DrillView(QMainWindow):
         column = self.columns.index(columnTitle)
         self.table.removeCellBackground(row, column)
         self.table.setCellToolTip(row, column, "")
-        self.invalidCells.discard((row, column))
 
-    def set_cell_error(self, row, columnTitle, msg):
+    def setCellError(self, row, columnTitle, msg):
         """
         Set a cell a containing an invalid value. Change its colors, add a
-        tooltip containing the provided message and add it to the set of
-        invalid cells.
+        tooltip containing the provided message.
 
         Args:
             row (int): row index
@@ -795,7 +785,6 @@ class DrillView(QMainWindow):
         column = self.columns.index(columnTitle)
         self.table.setCellBackground(row, column, self.ERROR_COLOR)
         self.table.setCellToolTip(row, column, msg)
-        self.invalidCells.add((row, column))
 
     def setVisualSettings(self, visualSettings):
         """
@@ -805,15 +794,23 @@ class DrillView(QMainWindow):
             visualSettings (dict): dictionnary containing some visual
                                    parameters that the view can deal with
         """
-        # folding state
+        # folded columns
         if ("FoldedColumns" in visualSettings):
-            f = list()
-            for c in self.columns:
-                if (c not in visualSettings["FoldedColumns"]):
-                    f.append(False)
-                    continue
-                f.append(visualSettings["FoldedColumns"][c])
-            self.table.setHeaderFoldingState(f)
+            if isinstance(visualSettings["FoldedColumns"], list):
+                self.table.setFoldedColumns(visualSettings["FoldedColumns"])
+            else:
+                self.table.setFoldedColumns(
+                        [c for c in visualSettings["FoldedColumns"]
+                            if visualSettings["FoldedColumns"][c]]
+                        )
+
+        # hidden columns
+        if ("HiddenColumns" in visualSettings):
+            self.table.setHiddenColumns(visualSettings["HiddenColumns"])
+
+        # columns order
+        if ("ColumnsOrder" in visualSettings):
+            self.table.setColumnsOrder(visualSettings["ColumnsOrder"])
 
     def getVisualSettings(self):
         """
@@ -825,37 +822,14 @@ class DrillView(QMainWindow):
             dict: visual settings dictionnay
         """
         vs = dict()
-        # folding state
-        vs["FoldedColumns"] = dict()
-        f = self.table.getHeaderFoldingState()
-        for i in range(len(self.columns)):
-            if f[i]:
-                vs["FoldedColumns"][self.columns[i]] = f[i]
+
+        # folded columns
+        vs["FoldedColumns"] = self.table.getFoldedColumns()
+
+        # hidden columns
+        vs["HiddenColumns"] = self.table.getHiddenColumns()
+
+        # columns order
+        vs["ColumnsOrder"] = self.table.getColumnsOrder()
 
         return vs
-
-    def errorPopup(self, title, msg, details=None):
-        """
-        Display an error popup to inform the user.
-
-        Args:
-            title (str): popup title
-            msg (str): popup message
-            details (str): facultative detailed text
-        """
-        w = QMessageBox(QMessageBox.Critical, title, msg, QMessageBox.Ok, self)
-        if details:
-            w.setDetailedText(details)
-        w.exec()
-
-    def displayProcessingReport(self):
-        """
-        Display a popup listing row(s) that have been pushed to the errorRows
-        set.
-        """
-        if self.errorRows:
-            names = [str(r + 1) for r in self.errorRows]
-            rows = ", ".join(names)
-            self.errorPopup("Processing error(s)",
-                            "Check logs for processing errors concerning rows: "
-                            + rows)

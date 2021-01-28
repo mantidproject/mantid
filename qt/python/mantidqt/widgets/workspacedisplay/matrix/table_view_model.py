@@ -17,6 +17,7 @@ class MatrixWorkspaceTableViewModelType(Enum):
     x = 'x'
     y = 'y'
     e = 'e'
+    dx = 'dx'
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
@@ -35,11 +36,15 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     HORIZONTAL_BINS_VARY_DISPLAY_STRING = "{0}\nbins vary"
     HORIZONTAL_BINS_VARY_TOOLTIP_STRING = "index {0}\nbin centre value varies\nRebin to set common bins"
 
-    MASKED_MONITOR_ROW_STRING = "This is a masked monitor spectrum. "
-    MASKED_ROW_STRING = "This is a masked spectrum. "
+    BLANK_CELL_STRING = ""
 
-    MONITOR_ROW_STRING = "This is a monitor spectrum. "
-    MASKED_BIN_STRING = "This bin is masked. "
+    MASKED_MONITOR_ROW_TOOLTIP = "This is a masked monitor spectrum. "
+    MASKED_ROW_TOOLTIP = "This is a masked spectrum. "
+
+    MONITOR_ROW_TOOLTIP = "This is a monitor spectrum. "
+    MASKED_BIN_TOOLTIP = "This bin is masked. "
+
+    BLANK_CELL_TOOLTIP = "This cell is blank because the workspace is ragged."
 
     def __init__(self, ws, model_type):
         """
@@ -48,22 +53,24 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         :type model_type: MatrixWorkspaceTableViewModelType
         """
         assert model_type in [MatrixWorkspaceTableViewModelType.x, MatrixWorkspaceTableViewModelType.y,
-                              MatrixWorkspaceTableViewModelType.e], "The Model type must be either X, Y or E."
+                              MatrixWorkspaceTableViewModelType.e, MatrixWorkspaceTableViewModelType.dx], \
+            "The Model type must be either X, Y, E or DX."
 
         super(MatrixWorkspaceTableViewModel, self).__init__()
 
         self.ws = ws
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
-        self.column_count = self.ws.blocksize()
+        self.column_count = self.ws.getMaxNumberBins()
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
         self.masked_bins_cache = {}
+        self.blank_cell_cache = {}
 
         self.masked_color = QtGui.QColor(240, 240, 240)
-
         self.monitor_color = QtGui.QColor(255, 253, 209)
+        self.blank_cell_color = QtGui.QColor(145, 139, 141)
 
         self.type = model_type
         if self.type == MatrixWorkspaceTableViewModelType.x:
@@ -78,6 +85,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             self.relevant_data = self.ws.readY
         elif self.type == MatrixWorkspaceTableViewModelType.e:
             self.relevant_data = self.ws.readE
+        elif self.type == MatrixWorkspaceTableViewModelType.dx:
+            self.relevant_data = self.ws.readDx
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
 
@@ -167,9 +176,13 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
     def data(self, index, role=None):
         row = index.row()
+        column = index.column()
         if role == Qt.DisplayRole:
             # DisplayRole determines the text of each cell
-            return str(self.relevant_data(row)[index.column()])
+            if self.has_data_at(row, column):
+                return str(self.relevant_data(row)[column])
+            # The cell is blank
+            return self.BLANK_CELL_STRING
         elif role == Qt.BackgroundRole:
             # BackgroundRole determines the background of each cell
 
@@ -186,27 +199,38 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                 return self.monitor_color
 
             # Checks if the BIN is MASKED, if so makes it the specified color for masked
-            elif self.checkMaskedBinCache(row, index):
+            elif self.checkMaskedBinCache(row, column):
                 return self.masked_color
+
+            # Checks if the cell is BLANK, if so it returns the specified color for blank cells
+            elif self.checkBlankCache(row, column):
+                return self.blank_cell_color
 
         elif role == Qt.ToolTipRole:
             tooltip = QVariant()
             if self.checkMaskedCache(row):
                 if self.checkMonitorCache(row):
-                    tooltip = self.MASKED_MONITOR_ROW_STRING
+                    tooltip = self.MASKED_MONITOR_ROW_TOOLTIP
                 else:
-                    tooltip = self.MASKED_ROW_STRING
+                    tooltip = self.MASKED_ROW_TOOLTIP
             elif self.checkMonitorCache(row):
-                tooltip = self.MONITOR_ROW_STRING
-                if self.checkMaskedBinCache(row, index):
-                    tooltip += self.MASKED_BIN_STRING
-            elif self.checkMaskedBinCache(row, index):
-                tooltip = self.MASKED_BIN_STRING
+                tooltip = self.MONITOR_ROW_TOOLTIP
+                if self.checkMaskedBinCache(row, column):
+                    tooltip += self.MASKED_BIN_TOOLTIP
+            elif self.checkMaskedBinCache(row, column):
+                tooltip = self.MASKED_BIN_TOOLTIP
+            elif self.checkBlankCache(row, column):
+                tooltip = self.BLANK_CELL_TOOLTIP
             return tooltip
         else:
             return QVariant()
 
     def checkMaskedCache(self, row):
+        """
+        Checks to see if a spectrum is masked.
+        :param row: The index of the spectrum in the workspace.
+        :return: True if the spectrum is masked.
+        """
         if row in self.masked_rows_cache:
             return True
         elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMasked(row):
@@ -214,20 +238,61 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return True
 
     def checkMonitorCache(self, row):
+        """
+        Checks to see if a spectrum represents a monitor.
+        :param row: The index of the spectrum in the workspace.
+        :return: True if the spectrum is a monitor.
+        """
         if row in self.monitor_rows_cache:
             return True
         elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMonitor(row):
             self.monitor_rows_cache.append(row)
             return True
 
-    def checkMaskedBinCache(self, row, index):
+    def checkMaskedBinCache(self, row, column):
+        """
+        Checks to see if a specific cell is masked.
+        :param row: The row index of the cell.
+        :param column: The column index of the cell.
+        :return: True if the cell is masked.
+        """
         if row in self.masked_bins_cache:
             # retrieve the masked bins IDs from the cache
-            if index.column() in self.masked_bins_cache[row]:
+            if column in self.masked_bins_cache[row]:
                 return True
 
         elif self.ws.hasMaskedBins(row):
             masked_bins = self.ws.maskedBinsIndices(row)
-            if index.column() in masked_bins:
+            if column in masked_bins:
                 self.masked_bins_cache[row] = masked_bins
                 return True
+
+    def checkBlankCache(self, row, column):
+        """
+        Checks to see if a specific cell should be blank (because the workspace is ragged).
+        :param row: The row index of the cell.
+        :param column: The column index of the cell.
+        :return: True if the cell should be blank.
+        """
+        if row in self.blank_cell_cache and column in self.blank_cell_cache[row]:
+            return True
+        elif not self.has_data_at(row, column):
+            if row in self.blank_cell_cache:
+                self.blank_cell_cache[row].append(column)
+            else:
+                self.blank_cell_cache[row] = [column]
+            return True
+        return False
+
+    def has_data_at(self, row, column):
+        """
+        Checks to see if data exists at a specific location in the relevant_data.
+        :param row: The row index of the data to check.
+        :param column: The column index of the data to check.
+        :return: True if data exists at a specific location.
+        """
+        try:
+            row_data = self.relevant_data(row)
+            return column < len(row_data)
+        except IndexError:
+            return False

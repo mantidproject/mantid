@@ -23,9 +23,6 @@ Account Creation
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`__.
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
 
-- Consider signing up for **Skype**; follow `this link <https://www.skype.com/>`__.
-- Sign up for a **Gravatar** account; follow `this link <https://en.gravatar.com/>`__.
-
 SNS Git
 -------
 

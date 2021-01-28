@@ -24,7 +24,8 @@ PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start,
                                                  const double &end,
                                                  QWidget *parent)
     : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr),
-      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr) {
+      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr),
+      m_updateEstimateObservable(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
@@ -50,12 +51,17 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   auto fitButtons = new QWidget();
   auto layout = new QHBoxLayout(fitButtons);
   m_fitButton = new QPushButton("Fit");
+  m_updateEstimateButton = new QPushButton("Update Estimate");
   m_fitObservable = new Observable();
+  m_updateEstimateObservable = new Observable();
   connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
+  connect(m_updateEstimateButton, SIGNAL(clicked()), this,
+          SLOT(updateEstimate()));
 
   layout->addWidget(m_fitButton);
   layout->addItem(
       new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  layout->addWidget(m_updateEstimateButton);
 
   fitPaneLayout->addWidget(fitButtons);
 
@@ -88,6 +94,10 @@ void PlotFitAnalysisPaneView::doFit() {
   }
 }
 
+void PlotFitAnalysisPaneView::updateEstimate() {
+  m_updateEstimateObservable->notify();
+}
+
 void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
@@ -114,8 +124,8 @@ void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
   m_fitBrowser->setFunction(std::move(func));
 }
 
-void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {
-  QMessageBox::warning(this, "Fit error", message.c_str());
+void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {
+  QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
 } // namespace MantidWidgets

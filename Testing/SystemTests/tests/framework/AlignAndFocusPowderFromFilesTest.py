@@ -263,7 +263,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         SetSample(InputWorkspace='V_abs',
                   Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
                   Geometry={'Shape': 'Cylinder', 'Height': 6.97, 'Radius': (0.63 / 2), 'Center': [0., 0., 0.]})
-        self.assertEqual(absorptionWS.getNumberBins(), num_wl_bins)
+        self.assertEqual(absorptionWS.blocksize(), num_wl_bins)
         # calculate the absorption
         CylinderAbsorption(InputWorkspace='V_abs', OutputWorkspace='V_abs',
                            NumberOfSlices=20, NumberOfAnnuli=3)

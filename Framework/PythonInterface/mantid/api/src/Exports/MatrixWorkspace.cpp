@@ -133,7 +133,7 @@ list getSpectrumNumbers(const MatrixWorkspace &self) {
   const auto &spectrumNums = self.indexInfo().spectrumNumbers();
   list spectra;
 
-  for (const auto index : spectrumNums) {
+  for (const auto &index : spectrumNums) {
     spectra.append(static_cast<int32_t>(index));
   }
 
@@ -182,18 +182,6 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
 void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
                        const boost::python::object &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
-}
-
-/**
- * Adds a deprecation warning to the getNumberBins call to warn about using
- * blocksize instead
- * @param self A reference to the calling object
- * @returns The blocksize()
- */
-size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
-  return self.blocksize();
 }
 
 /**
@@ -250,11 +238,12 @@ std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
  * Raw Pointer wrapper of replaceAxis to allow it to work with python
  * @param self
  * @param axisIndex :: The index of the axis to replace
- * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ * @param newAxis :: A pointer to the new axis. The class will take ownership of
+ * its clone.
  */
 void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
                        Axis *newAxis) {
-  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
+  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis->clone(&self)));
 }
 
 /**
@@ -343,8 +332,18 @@ void export_MatrixWorkspace() {
          boost::noncopyable>("MatrixWorkspace", no_init)
       //--------------------------------------- Meta information
       //-----------------------------------------------------------------------
+      .def("isRaggedWorkspace", &MatrixWorkspace::isRaggedWorkspace,
+           arg("self"),
+           "Returns true if the workspace is ragged (has differently sized "
+           "spectra).")
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
+      .def("getNumberBins", &MatrixWorkspace::getNumberBins,
+           (arg("self"), arg("index")),
+           "Returns the number of bins for a given histogram index.")
+      .def("getMaxNumberBins", &MatrixWorkspace::getMaxNumberBins, arg("self"),
+           "Returns the maximum number of bins in a workspace (works on ragged "
+           "data).")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
            arg("self"), "Returns the number of spectra in the workspace")
       .def("getSpectrumNumbers", &getSpectrumNumbers, arg("self"),
@@ -419,11 +418,6 @@ void export_MatrixWorkspace() {
            "Find first index in Y equal to value. Start may be specified to "
            "begin at a specifc index. Returns tuple with the "
            "histogram and bin indices.")
-      // Deprecated
-      .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use "
-           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
-           "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
            "Return the Run object for this workspace (deprecated, use "
@@ -450,7 +444,8 @@ void export_MatrixWorkspace() {
            "the bin-width.")
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
-           "Replaces one of the workspace's axes with the new one provided.")
+           "Replaces one of the workspace's axes with the new one provided. "
+           "The axis is cloned.")
       .def("applyBinEdgesFromAnotherWorkspace",
            &applyBinEdgesFromAnotherWorkspace,
            (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),

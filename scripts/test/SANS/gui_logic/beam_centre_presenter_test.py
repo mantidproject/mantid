@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
+
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
-from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenterTest(unittest.TestCase):

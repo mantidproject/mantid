@@ -190,8 +190,9 @@ void ConvTemplatePresenter::setCurrentDataset(int i) {
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void ConvTemplatePresenter::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
+  m_model.setDatasets(datasets);
 }
 
 void ConvTemplatePresenter::setBackgroundA0(double value) {
@@ -227,6 +228,10 @@ void ConvTemplatePresenter::updateViewParameters() {
 
 QStringList ConvTemplatePresenter::getDatasetNames() const {
   return m_model.getDatasetNames();
+}
+
+QStringList ConvTemplatePresenter::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
 }
 
 double ConvTemplatePresenter::getLocalParameterValue(const QString &parName,
@@ -270,12 +275,13 @@ void ConvTemplatePresenter::setLocalParameterFixed(const QString &parName,
 }
 
 void ConvTemplatePresenter::editLocalParameter(const QString &parName) {
-  auto const wsNames = getDatasetNames();
+  auto const datasetNames = getDatasetNames();
+  auto const domainNames = getDatasetDomainNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = wsNames.size();
+  const int n = domainNames.size();
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -287,8 +293,9 @@ void ConvTemplatePresenter::editLocalParameter(const QString &parName) {
     constraints.push_back(constraint);
   }
 
-  m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, wsNames, values, fixes, ties, constraints);
+  m_editLocalParameterDialog =
+      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames,
+                                   values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

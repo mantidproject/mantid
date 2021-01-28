@@ -71,6 +71,8 @@ public:
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double>
   getAxisRange(AxisID axisID = AxisID::XBottom) const;
+  void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
+  void tickLabelFormat(char *axis, char *style, bool useOffset);
 
   QPair<double, double>
   getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws);
@@ -89,7 +91,6 @@ public:
   void removeSpectrum(const QString &curveName);
 
   bool hasCurve(const QString &curveName);
-
   void setCurveStyle(const QString &curveName, const int style);
   void setCurveSymbol(const QString &curveName, const int symbol);
 
@@ -98,7 +99,6 @@ public:
                    RangeSelector::SelectType type = RangeSelector::XMINMAX);
   RangeSelector *getRangeSelector(const QString &rsName);
   void removeRangeSelector(const QString &rsName, bool del);
-
   bool hasRangeSelector(const QString &rsName);
 
   SingleSelector *
@@ -225,6 +225,11 @@ private:
 
   QMap<QString, QwtPlotCurve::CurveStyle> m_curveStyle;
   QMap<QString, QwtSymbol::Style> m_curveSymbol;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
 
   friend class DisplayCurveFit;
 

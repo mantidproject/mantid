@@ -5,9 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import json
 import os
 import sys
+import numpy
 
 from qtpy.QtCore import QObject, Signal, QThread
 
@@ -19,6 +19,7 @@ from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
+from .DrillRundexIO import DrillRundexIO
 
 
 class DrillModel(QObject):
@@ -101,6 +102,11 @@ class DrillModel(QObject):
     """
     paramError = Signal(int, str, str)
 
+    """
+    Raised when groups are updated.
+    """
+    groupsUpdated = Signal()
+
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -109,21 +115,33 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSamples = dict()
         self.settings = dict()
         self.controller = None
-        self.rundexFile = None
-        self.visualSettings = None
+        self.visualSettings = dict()
+        self.rundexIO = None
 
         # set the instrument and default acquisition mode
+        self.tasksPool = DrillAlgorithmPool()
         self.setInstrument(config['default.instrument'], log=False)
 
-        self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
         self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
         self.tasksPool.signals.taskError.connect(self._onTaskError)
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
+
+    def clear(self):
+        """
+        Clear the sample list and the settings.
+        """
+        self.samples = list()
+        self.groups = dict()
+        self.masterSamples = dict()
+        self.visualSettings = dict()
+        self._setDefaultSettings()
 
     def setInstrument(self, instrument, log=True):
         """
@@ -134,39 +152,29 @@ class DrillModel(QObject):
         Args:
             instrument (str): instrument name
         """
-        self.rundexFile = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSamples = dict()
         self.settings = dict()
+        self.columns = list()
+        self.visualSettings = dict()
+        self.instrument = None
+        self.acquisitionMode = None
+        self.algorithm = None
 
         # When the user changes the facility after DrILL has been started
         if config['default.facility'] != 'ILL':
             logger.error('Drill is enabled only if the facility is set to ILL.')
-            self.instrument = None
-            self.acquisitionMode = None
-            self.columns = list()
-            self.algorithm = None
-            self.settings = dict()
             return
 
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
             self.instrument = instrument
-            self.acquisitionMode = \
-                RundexSettings.ACQUISITION_MODES[instrument][0]
-            self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
-            self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-            self.settings.update(
-                    RundexSettings.SETTINGS[self.acquisitionMode])
-            self._initController()
+            self.setAcquisitionMode(RundexSettings.ACQUISITION_MODES[instrument][0])
         else:
             if log:
                 logger.error('Instrument {0} is not supported yet.'
                              .format(instrument))
-            self.instrument = None
-            self.acquisitionMode = None
-            self.columns = list()
-            self.algorithm = None
-            self.settings = dict()
 
     def getInstrument(self):
         """
@@ -190,8 +198,10 @@ class DrillModel(QObject):
                 or (mode not in RundexSettings.ACQUISITION_MODES[
                     self.instrument])):
             return
-        self.rundexFile = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSamples = dict()
+        self.visualSettings = dict()
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
@@ -200,8 +210,9 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict()
-        self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
+        self.settings = dict.fromkeys(
+                RundexSettings.SETTINGS[self.acquisitionMode])
+        self._setDefaultSettings()
         self._initController()
 
     def getAcquisitionMode(self):
@@ -339,21 +350,19 @@ class DrillModel(QObject):
         types = dict()
         values = dict()
         docs = dict()
-
         if not self.algorithm:
             return types, values, docs
 
         alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
         alg.initialize()
-
         for s in self.settings:
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):
                 t = "file"
             elif (isinstance(p, MultipleFileProperty)):
                 t = "files"
-            elif ((isinstance(p, WorkspaceGroupProperty))
-                  or (isinstance(p, MatrixWorkspaceProperty))):
+            elif (isinstance(p, (WorkspaceGroupProperty,
+                                 MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
                 if (p.allowedValues):
@@ -362,6 +371,10 @@ class DrillModel(QObject):
                     t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
+            elif (isinstance(p, FloatArrayProperty)):
+                t = "floatArray"
+            elif (isinstance(p, IntArrayProperty)):
+                t = "intArray"
             else:
                 t = "string"
 
@@ -370,6 +383,24 @@ class DrillModel(QObject):
             docs[s] = p.documentation
 
         return (types, values, docs)
+
+    def _setDefaultSettings(self):
+        """
+        Set the settings to their defautl values. This method takes the default
+        values directly from the algorithm.
+        """
+        if not self.algorithm:
+            return
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
+        for s in self.settings:
+            p = alg.getProperty(s)
+            v = p.value
+            if (isinstance(v, numpy.ndarray)):
+                self.settings[s] = v.tolist()
+            else:
+                self.settings[s] = v
 
     def checkParameter(self, param, value, sample=-1):
         """
@@ -384,60 +415,150 @@ class DrillModel(QObject):
         """
         self.controller.addParameter(DrillParameter(param, value, sample))
 
-    def checkAllParameters(self):
+    def changeParameter(self, sampleIndex, name, value):
         """
-        Check all the parameters.
-        """
-        for i in range(len(self.samples)):
-            for (n, v) in self.samples[i].items():
-                if n == "CustomOptions":
-                    for (nn, vv) in v.items():
-                        self.controller.addParameter(DrillParameter(nn, vv, i))
-                else:
-                    self.controller.addParameter(DrillParameter(n, v, i))
-        for (n, v) in self.settings.items():
-            self.controller.addParameter(DrillParameter(n, v, -1))
-
-    def changeParameter(self, row, column, contents):
-        """
-        Change parameter value and update the model samples. The method is able
-        to parse usual parameters (present in self.columns) and those coming
-        from the custom options. It submits the new value to the parameters
-        controller to check it. In case of empty value, the paramOk signal is
-        sent without any submission to the controller.
+        Change parameter value and update the model samples. It submits the new
+        value to the parameters controller to check it. In case of empty value,
+        the paramOk signal is sent without any submission to the controller.
 
         Args:
-            row (int): index of the sample in self.samples
-            column (int): index of the parameter in self.columns
-            contents (str): new value
+            sampleIndex (int): index of the sample in self.samples
+            name (str): name of the parameter
+            value (str): new value
         """
-        if (not contents):
-            self.paramOk.emit(row, self.columns[column])
-            if (self.columns[column] in self.samples[row]):
-                del self.samples[row][self.columns[column]]
-            return
-
-        if (self.columns[column] == RundexSettings.CUSTOM_OPT_JSON_KEY):
-            options = dict()
-            for option in contents.split(';'):
-                if ('=' not in option):
-                    self.paramError.emit(row, self.columns[column],
-                                         "Badly formatted custom options")
-                    return
-                name = option.split("=")[0]
-                value = option.split("=")[1]
-                # everything is a str, we try to find bool
-                if value in ['true', 'True', 'TRUE']:
-                    value = True
-                if value in ['false', 'False', 'FALSE']:
-                    value = False
-                options[name] = value
-            for (k, v) in options.items():
-                self.checkParameter(k, v, row)
-            self.samples[row][RundexSettings.CUSTOM_OPT_JSON_KEY] = options
+        self.samples[sampleIndex].changeParameter(name, value)
+        if (value == "DEFAULT") or not value:
+            self.paramOk.emit(sampleIndex, name)
         else:
-            self.samples[row][self.columns[column]] = contents
-            self.checkParameter(self.columns[column], contents, row)
+            self.checkParameter(name, value, sampleIndex)
+
+    def groupSamples(self, sampleIndexes, groupName=None):
+        """
+        Group samples.
+
+        Args:
+            sampleIndexes (list(int)): sample indexes
+            groupName (str): optional name for the new group
+        """
+        for i in sampleIndexes:
+            sample = self.samples[i]
+            for group in self.groups:
+                if sample in self.groups[group]:
+                    self.groups[group].remove(sample)
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == sample)):
+                    del self.masterSamples[group]
+
+        self.groups = {k:v for k,v in self.groups.items() if v}
+
+        def incrementName(name):
+            """
+            Increment the group name from A to Z, AA to AZ, ...
+
+            Args:
+                name (str): group name
+            """
+            name = list(name)
+            if name[-1] == 'Z':
+                name[-1] = 'A'
+                name += 'A'
+            else:
+                name[-1] = chr(ord(name[-1]) + 1)
+            return ''.join(name)
+
+        if not groupName:
+            groupName = 'A'
+            while groupName in self.groups:
+                groupName = incrementName(groupName)
+        samples = set(self.samples[i] for i in sampleIndexes)
+        self.groups[groupName] = samples
+
+        self.groupsUpdated.emit()
+
+    def addToGroup(self, sampleIndexes, groupName):
+        """
+        Add some samples in an existing group.
+
+        Args:
+            sampleIndexes (list(int)): list of sample indexes
+            groupName (str): name of the group
+        """
+        if groupName not in self.groups:
+            return
+        self.ungroupSamples(sampleIndexes)
+        samples = set(self.samples[i] for i in sampleIndexes)
+        self.groups[groupName].update(samples)
+        self.groupsUpdated.emit()
+
+    def ungroupSamples(self, sampleIndexes):
+        """
+        Ungroup samples.
+
+        Args:
+            sampleIndexes (list(int)): sample indexes
+        """
+        for i in sampleIndexes:
+            sample = self.samples[i]
+            for group in self.groups:
+                if sample in self.groups[group]:
+                    self.groups[group].remove(sample)
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == sample)):
+                    del self.masterSamples[group]
+
+        self.groups = {k:v for k,v in self.groups.items() if v}
+        self.groupsUpdated.emit()
+
+    def setSamplesGroups(self, groups):
+        """
+        Set the dictionnary of samples groups.
+
+        Args:
+            groups (dict(str:list(int))): samples groups
+        """
+        self.groups = {k:set(self.samples[i] for i in v) for k,v in groups.items()}
+
+    def getSamplesGroups(self):
+        """
+        Get the samples groups.
+
+        Returns:
+            dict(str, list(int)): groups of samples
+        """
+        groups = {}
+        for k,v in self.groups.items():
+            groups[k] = set(self.samples.index(s) for s in v)
+        return groups
+
+    def setMasterSamples(self, masterSamples):
+        """
+        Set the dictionnary of master samples.
+
+        Args:
+            masterSamples (dict(str:int)): master samples
+        """
+        self.masterSamples = {k:self.samples[v] for k,v in masterSamples.items()}
+
+    def getMasterSamples(self):
+        """
+        Get the master samples of each groups.
+
+        Returns:
+            dict(str, int): master samples for each group.
+        """
+        return {k:self.samples.index(v) for k,v in self.masterSamples.items()}
+
+    def setGroupMaster(self, sampleIndex):
+        """
+        Set the sample as master for its group.
+
+        Args:
+            sampleIndex (int): sample index
+        """
+        for group in self.groups:
+            if self.samples[sampleIndex] in self.groups[group]:
+                self.masterSamples[group] = self.samples[sampleIndex]
+                self.groupsUpdated.emit()
 
     def getProcessingParameters(self, sample):
         """
@@ -456,14 +577,25 @@ class DrillModel(QObject):
         if self.acquisitionMode in RundexSettings.FLAGS:
             params.update(RundexSettings.FLAGS[self.acquisitionMode])
         params.update(self.settings)
-        params.update(self.samples[sample])
+
+        # search for master sample
+        master = None
+        for group in self.groups:
+            if self.samples[sample] in self.groups[group]:
+                master = None
+                if group in self.masterSamples:
+                    master = self.masterSamples[group]
+                if master is not None:
+                    params.update(master.getParameters())
+
+        params.update(self.samples[sample].getParameters())
         # override global params with custom ones
         if "CustomOptions" in params:
             params.update(params["CustomOptions"])
             del params["CustomOptions"]
         # remove empty params
         for (k, v) in list(params.items()):
-            if v is None:
+            if v is None or v == "DEFAULT":
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params:
@@ -545,106 +677,54 @@ class DrillModel(QObject):
         """
         self.tasksPool.abortProcessing()
 
-    def importRundexData(self, filename):
+    def setIOFile(self, filename):
         """
-        Import data contained in a Json rundex file.
+        Setup the io service on a provided filename.
 
         Args:
-            filename(str): rundex file path
+            filename (str): the filename
         """
-        with open(filename) as json_file:
-            try:
-                json_data = json.load(json_file)
-            except Exception as ex:
-                logger.error("Wrong file format for: {0}".format(filename))
-                logger.error(str(ex))
-                raise ex
+        self.rundexIO = DrillRundexIO(filename, self)
 
-        if ((RundexSettings.MODE_JSON_KEY not in json_data)
-                or (RundexSettings.INSTRUMENT_JSON_KEY not in json_data)):
-            logger.error("Unable to load {0}".format(filename))
-            raise ValueError("Json mandatory fields '{0}' or '{1}' not found."
-                             .format(RundexSettings.CYCLE_JSON_KEY,
-                                     RundexSettings.INSTRUMENT_JSON_KEY))
-
-        self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
-        self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
-
-        # cycle number and experiment id
-        if ((RundexSettings.CYCLE_JSON_KEY in json_data)
-                and (RundexSettings.EXPERIMENT_JSON_KEY in json_data)):
-            self.cycleNumber = json_data[RundexSettings.CYCLE_JSON_KEY]
-            self.experimentId = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
-
-        # visual setings
-        if RundexSettings.VISUAL_SETTINGS_JSON_KEY in json_data:
-            self.visualSettings = json_data[
-                    RundexSettings.VISUAL_SETTINGS_JSON_KEY]
-        else:
-            self.visualSettings = None
-
-        # global settings
-        if (RundexSettings.SETTINGS_JSON_KEY in json_data):
-            self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
-        else:
-            logger.warning("No global settings found when importing {0}. "
-                           "Default settings will be used."
-                           .format(filename))
-
-        # samples
-        self.samples = list()
-        if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
-                and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
-            for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
-                self.samples.append(sample)
-        else:
-            logger.warning("No sample found when importing {0}."
-                           .format(filename))
-
-        self.rundexFile = filename
-
-    def exportRundexData(self, filename, visualSettings=None):
+    def resetIOFile(self):
         """
-        Export the data in a Json rundex file.
+        Reset the IO service.
+        """
+        self.rundexIO = None
+
+    def getIOFile(self):
+        """
+        Get the filename used by the IO service.
+        """
+        if self.rundexIO:
+            return self.rundexIO.getFilename()
+        return None
+
+    def importRundexData(self):
+        """
+        Import data.
+        """
+        if self.rundexIO:
+            self.rundexIO.load()
+
+    def exportRundexData(self):
+        """
+        Export data.
+        """
+        if self.rundexIO:
+            self.rundexIO.save()
+
+    def setVisualSettings(self, vs):
+        """
+        Set the visual settings.
 
         Args:
-            filename (str): rundex file path
-            visualSettings (dict): settings that the view produced and can read
+            vs (dict(str:str)): visual settings
         """
-        json_data = dict()
-        json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
-        json_data[RundexSettings.MODE_JSON_KEY] = self.acquisitionMode
-
-        # experiment
-        if self.cycleNumber:
-            json_data[RundexSettings.CYCLE_JSON_KEY] = self.cycleNumber
-        if self.experimentId:
-            json_data[RundexSettings.EXPERIMENT_JSON_KEY] = self.experimentId
-
-        # visual setings
-        if visualSettings:
-            json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings
-
-        # global settings
-        json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
-
-        # samples
-        json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
-        for sample in self.samples:
-            json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
-
-        with open(filename, 'w') as json_file:
-            json.dump(json_data, json_file, indent=4)
-        self.rundexFile = filename
-
-    def getRundexFile(self):
-        """
-        Get the current rundex file.
-
-        Returns:
-            str: rundex file
-        """
-        return self.rundexFile
+        if vs:
+            self.visualSettings = {k:v for k,v in vs.items()}
+        else:
+            self.visualSettings = dict()
 
     def getVisualSettings(self):
         """
@@ -653,7 +733,7 @@ class DrillModel(QObject):
         Returns:
             dict: visual settings that the view understands
         """
-        return self.visualSettings
+        return {k:v for k,v in self.visualSettings.items()}
 
     def getColumnHeaderData(self):
         """
@@ -679,14 +759,18 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
-    def addSample(self, ref):
+    def addSample(self, index, sample):
         """
-        Add an empty sample. This method adds an empty space for a new sample.
+        Add a sample to the model.
 
         Args:
-            ref (int): sample index
+            index (int): sample index; if -1 the sample is added to the end
+            sample (DrillSample): sample
         """
-        self.samples.insert(ref, dict())
+        if (index == -1):
+            self.samples.append(sample)
+        else:
+            self.samples.insert(index, sample)
 
     def deleteSample(self, ref):
         """
@@ -695,7 +779,28 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        sample = self.samples[ref]
         del self.samples[ref]
+        # remove from groups if needed
+        for group in self.groups:
+            if sample in self.groups[group]:
+                self.groups[group].remove(sample)
+                if not self.groups[group]:
+                    del self.groups[group]
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == sample)):
+                    del self.masterSamples[group]
+                self.groupsUpdated.emit()
+                return
+
+    def getSamples(self):
+        """
+        Get the list of all the samples.
+
+        Return:
+            list(dict(str:str)): samples
+        """
+        return self.samples
 
     def getRowsContents(self):
         """
@@ -706,15 +811,16 @@ class DrillModel(QObject):
         """
         rows = list()
         for sample in self.samples:
+            params = sample.getParameters()
             row = list()
             for column in self.columns[:-1]:
-                if column in sample:
-                    row.append(str(sample[column]))
+                if column in params:
+                    row.append(str(params[column]))
                 else:
                     row.append("")
-            if self.columns[-1] in sample:
+            if self.columns[-1] in params:
                 options = list()
-                for (k, v) in sample[self.columns[-1]].items():
+                for (k, v) in params[self.columns[-1]].items():
                     options.append(str(k) + "=" + str(v))
                 row.append(';'.join(options))
             rows.append(row)
