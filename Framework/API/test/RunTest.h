@@ -448,6 +448,13 @@ public:
     TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(0), DblMatrix(3, 3, true));
     TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(1), rotation);
 
+    runInfo.clearGoniometers();
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
+
+    TS_ASSERT_THROWS(runInfo.getGoniometer(0),
+		     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getGoniometerMatrix(0),
+		     const std::invalid_argument &);
   }
 
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
