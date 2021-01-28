@@ -14,8 +14,6 @@ Powder Diffraction
 - New algorithm :ref:`RebinRagged <algm-RebinRagged>` which can rebin a workspace with different binning parameters for each spectrum
 - New algorithm :ref:`IndirectILLReductionDIFF <algm-IndirectILLReductionDIFF>` to reduce Doppler diffraction data for ILL's IN16B instrument.
 
-=======
->>>>>>> master
 Engineering Diffraction
 -----------------------
 
