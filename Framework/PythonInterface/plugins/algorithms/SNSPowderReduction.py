@@ -379,14 +379,21 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
-        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(samRuns[0], self._absMethod,
-                                                                                    self._info, self._sampleFormula,
-                                                                                    self._massDensity,
-                                                                                    self._numberDensity,
-                                                                                    self._containerShape,
-                                                                                    self._num_wl_bins,
-                                                                                    self._elementSize,
-                                                                                    metaws)
+        # NOTE: inconsistent naming among different methods
+        #       -> adding more comments to help clarify
+        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(
+            samRuns[0],  # filename: File to be used for absorption correction
+            self._absMethod,  # [None, SampleOnly, SampleAndContainer, FullPaalmanPings]
+            self._info,  # PropertyManager of run characterizations
+            self._sampleFormula,  # Material for absorption correction
+            self._massDensity,  # Mass density of the sample
+            self._numberDensity,  # Optional number density of sample to be added
+            self._containerShape,  # Shape definition of container
+            self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
+            self._elementSize,  # Size of one side of the integration element cube in mm
+            metaws,  # Optional workspace containing metadata
+            self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
+        )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
