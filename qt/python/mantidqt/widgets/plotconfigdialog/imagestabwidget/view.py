@@ -13,6 +13,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator, QPixmap, QIcon, QImage
 from qtpy.QtWidgets import QWidget
 
+from mantid import logger
 from mantid.plots.utility import get_colormap_names
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
@@ -45,6 +46,9 @@ class ImagesTabWidgetView(QWidget):
         validator = QDoubleValidator()
         self.min_value_line_edit.setValidator(validator)
         self.max_value_line_edit.setValidator(validator)
+
+        self.min_value = 0.0
+        self.max_value = 1.0
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
@@ -93,16 +97,30 @@ class ImagesTabWidgetView(QWidget):
         self.reverse_colormap_check_box.setCheckState(qt_checked)
 
     def get_min_value(self):
-        return float(self.min_value_line_edit.text())
+        min_value = self.min_value_line_edit.text()
+        try:
+            return float(min_value)
+        except ValueError:
+            logger.warning(f"Failed to set max value to '{min_value}'. Using '{self.min_value}' instead.")
+            self.set_min_value(self.min_value)
+            return self.min_value
 
     def set_min_value(self, value):
-        self.min_value_line_edit.setText(str(value))
+        self.min_value = value
+        self.min_value_line_edit.setText(str(self.min_value))
 
     def get_max_value(self):
-        return float(self.max_value_line_edit.text())
+        max_value = self.max_value_line_edit.text()
+        try:
+            return float(max_value)
+        except ValueError:
+            logger.warning(f"Failed to set max value to '{max_value}'. Using '{self.max_value}' instead.")
+            self.set_max_value(self.max_value)
+            return self.max_value
 
     def set_max_value(self, value):
-        self.max_value_line_edit.setText(str(value))
+        self.max_value = value
+        self.max_value_line_edit.setText(str(self.max_value))
 
     def get_interpolation(self):
         return self.interpolation_combo_box.currentText()
