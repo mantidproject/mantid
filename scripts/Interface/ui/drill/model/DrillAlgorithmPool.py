@@ -52,7 +52,7 @@ class DrillAlgorithmPool(QThreadPool):
         self._tasks = tasks
         for task in tasks:
             self._progresses[task.ref] = 0.0
-            task.signals.started.connect(self.signals.taskStarted.emit)
+            task.signals.started.connect(self.onTaskStarted)
             task.signals.finished.connect(self.onTaskFinished)
             task.signals.progress.connect(self.onProgress)
             self.start(task)
@@ -71,6 +71,15 @@ class DrillAlgorithmPool(QThreadPool):
         self._tasksDone.clear()
         self._progresses.clear()
         self.signals.processingDone.emit()
+
+    def onTaskStarted(self, ref):
+        """
+        Called when a task is started.
+
+        Args:
+            ref (int): reference of the task
+        """
+        self.signals.taskStarted.emit(ref)
 
     def onTaskFinished(self, ref, ret, msg):
         """
