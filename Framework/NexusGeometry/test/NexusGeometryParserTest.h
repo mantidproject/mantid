@@ -342,29 +342,29 @@ public:
     const auto expectedPosition2 = Eigen::Vector3d{3.1, 2.2, 2.0};
 
     // WHEN the NeXus geometry is parsed
-    auto instrument = NexusGeometryParser::createInstrument(
+    const auto instrument = NexusGeometryParser::createInstrument(
         instrument_path(filename),
         std::make_unique<testing::NiceMock<MockLogger>>());
 
     // THEN the voxels are successfully parsed, locations match
     // offsets datasets from file, and shape has expected characteristics
-    auto parsedBeamline = extractBeamline(*instrument);
-    auto &parsedDetInfo = *parsedBeamline.second;
+    const auto parsedBeamline = extractBeamline(*instrument);
+    const auto &parsedDetInfo = *parsedBeamline.second;
     TS_ASSERT_EQUALS(parsedDetInfo.size(), 2);
 
-    auto detectorInfo = extractDetectorInfo(*instrument);
-    auto voxelPosition1 = Kernel::toVector3d(
+    const auto detectorInfo = extractDetectorInfo(*instrument);
+    const auto voxelPosition1 = Kernel::toVector3d(
         detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber1)));
     TS_ASSERT(voxelPosition1.isApprox(expectedPosition1));
-    auto voxelPosition2 = Kernel::toVector3d(
+    const auto voxelPosition2 = Kernel::toVector3d(
         detectorInfo->position(detectorInfo->indexOf(expectedDetectorNumber2)));
     TS_ASSERT(voxelPosition2.isApprox(expectedPosition2));
 
     // Check shape of each of the two voxels
-    auto &parsedCompInfo = *parsedBeamline.first;
+    const auto &parsedCompInfo = *parsedBeamline.first;
     const std::array<size_t, 2> pixelIndices{0, 1};
     for (const auto pixelIndex : pixelIndices) {
-      auto &parsedShape = parsedCompInfo.shape(pixelIndex);
+      const auto &parsedShape = parsedCompInfo.shape(pixelIndex);
       const auto *parsedShapeMesh =
           dynamic_cast<const Geometry::MeshObject *>(&parsedShape);
       // Check it looks like it might define an enclosed volume:
@@ -377,7 +377,7 @@ public:
       // [1.0, 0.0, 0.0], [0.0, 1.0, 0.0] and so on, therefore
       // a = sqrt(1^2 + 1^2) and h = 1
       // 2 * sqrt(1^2 + 1^2)^2 * 1/3 = 4/3
-      double expectedVolume = 1.33;
+      const double expectedVolume = 1.33;
       TS_ASSERT_DELTA(parsedShapeMesh->volume(), expectedVolume, 0.01);
       // Each face of the octahedron is a triangle,
       // therefore expect mesh to be composed of 8 triangles
