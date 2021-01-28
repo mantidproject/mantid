@@ -280,8 +280,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             issues['CacheDir'] = f'Directory {cache_dir} does not exist'
 
         # We cannot clear the cache if property "CacheDir" has not been set
-        if self.getProperty('CleanFile').value and not bool(self.getProperty('CacheDir').value):
-            issues['CleanFile'] = f'Property "CacheDir" must be set in order to clean the cache'
+        if self.getProperty('CleanCache').value and not bool(self.getProperty('CacheDir').value):
+            issues['CleanCache'] = f'Property "CacheDir" must be set in order to clean the cache'
 
         return issues
 
