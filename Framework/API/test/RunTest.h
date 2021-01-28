@@ -453,6 +453,15 @@ public:
     TS_ASSERT_EQUALS(matrices[0], DblMatrix(3, 3, true));
     TS_ASSERT_EQUALS(matrices[1], rotation);
 
+    Run runInfo2;
+    TS_ASSERT_DIFFERS(runInfo, runInfo2);
+    runInfo2.addGoniometer(Goniometer());
+    TS_ASSERT_DIFFERS(runInfo, runInfo2);
+    runInfo2.clearGoniometers();
+    runInfo2.addGoniometer(Goniometer());
+    runInfo2.addGoniometer(goniometer);
+    TS_ASSERT_EQUALS(runInfo, runInfo2);
+
     runInfo.clearGoniometers();
     TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
 

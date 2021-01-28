@@ -80,16 +80,16 @@ public:
   void setGoniometer(const Geometry::Goniometer &goniometer,
                      const bool useLogValues);
   /** @return A reference to the const Goniometer object for this run */
-  inline const Geometry::Goniometer &getGoniometer() const {
-    return *m_goniometer;
-  }
+  const Geometry::Goniometer &getGoniometer() const;
+
   /** @return A reference to the non-const Goniometer object for this run */
-  inline Geometry::Goniometer &mutableGoniometer() { return *m_goniometer; }
+  Geometry::Goniometer &mutableGoniometer();
 
   // Retrieve the goniometer rotation matrix
   const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
-  const Geometry::Goniometer getGoniometer(const size_t index) const;
+  const Geometry::Goniometer &getGoniometer(const size_t index) const;
+  Geometry::Goniometer &mutableGoniometer(const size_t index);
   size_t getNumGoniometers() const;
   const Kernel::Matrix<double> &getGoniometerMatrix(const size_t index) const;
   size_t addGoniometer(const Geometry::Goniometer &goniometer);
@@ -108,7 +108,6 @@ private:
   void calculateGoniometerMatrix();
 
   /// Goniometer for this run
-  std::unique_ptr<Geometry::Goniometer> m_goniometer;
   std::vector<std::unique_ptr<Geometry::Goniometer>> m_goniometers;
   /// A set of histograms that can be stored here for future reference
   std::vector<double> m_histoBins;
