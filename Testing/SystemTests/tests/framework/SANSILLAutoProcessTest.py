@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import SANSILLAutoProcess, GroupWorkspaces, \
-                             SaveNexusProcessed, LoadNexusProcessed, config, mtd
+    SaveNexusProcessed, LoadNexusProcessed, config, mtd, MaskBTP, \
+    RenameWorkspace, Plus
 import systemtesting
 from tempfile import gettempdir
 import os
@@ -168,6 +169,73 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
             OutputWorkspace='iqxy',
             OutputType='I(Qx,Qy)',
             BeamRadius='0.05,0.05,0.05',
+            TransmissionBeamRadius=0.05
+        )
+
+
+class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 1 sample at 3 different distances,
+    and with multiple transmissions per process.
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_Multiple_Transmissions_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+        # prepare mask for instrument edges first:
+        MaskBTP(Instrument='D11', Tube='1-3,253-256')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_vertical')
+        MaskBTP(Instrument='D11', Pixel='1-3,253-256')
+        Plus(LHSWorkspace='mask_vertical', RHSWorkspace='D11MaskBTP', OutputWorkspace='edge_masks')
+        # the edges mask can be used as a default mask for all distances and wavelengths
+        MaskBTP(Instrument='D11', Tube='116-139', Pixel='90-116')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_39m_10A')
+        MaskBTP(Instrument='D11', Tube='115-140', Pixel='115-140')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A')
+        MaskBTP(Instrument='D11', Tube='105-145', Pixel='105-145')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['iq_mult_wavelengths', 'D11_AutoProcess_Multiple_Tr_Reference.nxs']
+
+    def runTest(self):
+        beams = '1020,947,1088'
+        containers = '1023,973,1003'
+        container_tr = '1023,988,988'
+        beam_tr = '1020,1119,1119'
+        samples = '1025,975,1005'
+        sample_tr = '1204,990,990'
+        thick = 0.1
+
+        # reduce samples
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            DefaultMaskFile='edge_masks',
+            MaskFiles='mask_39m_10A,mask_8m_4_6A,mask_1m_4_6A',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=sample_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='iq_mult_wavelengths',
+            BeamRadius='0.05',
             TransmissionBeamRadius=0.05
         )
 
