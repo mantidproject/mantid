@@ -32,32 +32,21 @@ class CreateCacheFilename(PythonAlgorithm):
         """
         return """Create cache filename"""
 
-    def require(self):
-        return
-
     def PyInit(self):
         """ Declare properties
         """
         # this is the requirement of using this plugin
         # is there a place to register that?
-        self.require()
-
         self.declareProperty("PropertyManager", "", "Name of a property manager from which properties are extracted from")
-
         self.declareProperty(
             StringArrayProperty("Properties", Direction.Input),
             "A list of property names to be included")
-
         self.declareProperty(
             StringArrayProperty("OtherProperties", Direction.Input),
             "A list of key=value strings for other properties not in the property manager")
-
         self.declareProperty("Prefix", "", "prefix for the output file name")
-
-        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.Directory))
-
+        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.OptionalDirectory))
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
-
         self.declareProperty("OutputSignature", "", "sha1 string, 40 characters long", Direction.Output)
         return
 
@@ -97,10 +86,7 @@ class CreateCacheFilename(PythonAlgorithm):
         prefix = self.getPropertyValue("Prefix")
         cache_dir = self.getPropertyValue("CacheDir")
         if not cache_dir:
-            cache_dir = os.path.join(
-                ConfigService.getUserPropertiesDir(),
-                "cache"
-                )
+            cache_dir = os.path.join(ConfigService.getUserPropertiesDir(), "cache")
         # calculate
         file_name, sha1_hash = self._calculate(prop_manager, props, other_props, prefix, cache_dir)
         self.setProperty("OutputFilename", file_name)
