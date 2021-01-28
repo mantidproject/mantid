@@ -59,6 +59,8 @@ def load_calibration_file(calib_file_name: str,
                           ref_ws_name: Union[None, str]):
     """Load calibration diffraction file
 
+    Outputs are 'OutputCalWorkspace', 'OutputGroupingWorkspace', 'OutputMaskWorkspace'
+
     Note:
     - output_name:  this is NOT calibration workspace name but a base name for multiple calibration-related
     workspaces
@@ -88,6 +90,7 @@ def load_calibration_file(calib_file_name: str,
                            ''.format(calib_file_name))
 
     # Load files: new diff calib file
+    print(f'About to loading {diff_cal_file} to {output_name} with reference to {ref_ws_name}')
     outputs = LoadDiffCal(InputWorkspace=ref_ws_name,
                           Filename=diff_cal_file,
                           WorkspaceName=output_name)

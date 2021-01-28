@@ -7,7 +7,7 @@ import os
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import (CreateGroupingWorkspace,
                               ConvertToMatrixWorkspace,
-                              SaveNexusProcessed,
+                              SaveNexusProcessed, LoadNexusProcessed,
                               DeleteWorkspace)
 from typing import Union
 
@@ -155,29 +155,36 @@ def test_main_report_calibration():
     """(Testing) main to import a calibration file and make reports
     """
     # Set up
-    calib_file = 'whatever.h5'
-    counts_file = 'counts.nxs'
+    calib_file = 'pdcalibration/VULCAN_pdcalibration.h5'
+    counts_file = 'VULCAN_164960_matrix.nxs'
 
-    # Load
-    diamond_count_ws = load_nexus(counts_file, 'Diamond_Counts', False, None)
+    # Load counts for each pixel
+    diamond_count_ws = LoadNexusProcessed(Filename=counts_file, OutputWorkspace='Diamond_Counts')
+    # counts_vec = diamond_count_ws.extractY().sum(axis=1).flatten()
 
+    # Load calibration file
     calib_ws_tuple = load_calibration_file(calib_file,
                                            output_name='VULCAN_calibration',
-                                           ref_ws_name=None)
+                                           ref_ws_name=str(diamond_count_ws))
+
+    # FIXME - This is hard coded and bound to VULCAN but not VULCAN-X
     pixels_range = {'west': (0, 3234),
                     'east': (3234, 6468),
                     'high angle': (6468, None)}
 
     # Report offsets
-    verify_vulcan_difc(ws_name=diamond_count_ws,
-                       cal_table_name=str(calib_ws_tuple.OutputCalibrationWorkspace),
-                       mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace))
+    verify_vulcan_difc(ws_name=str(diamond_count_ws),
+                       cal_table_name=str(calib_ws_tuple.OutputCalWorkspace),
+                       mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace),
+                       correct=False)
 
     # Report masks
-    from .lib_analysis import report_masked_pixels
+    from lib_analysis import report_masked_pixels
     for bank in ['west', 'east', 'high angle']:
-        report_masked_pixels(diamond_count_ws, calib_ws_tuple.OutputMaskWorkspace,
-                             pixels_range[bank][0], pixels_range[bank][1])
+        print(f'[MASK] Bank {bank}')
+        report = report_masked_pixels(diamond_count_ws, calib_ws_tuple.OutputMaskWorkspace,
+                                      pixels_range[bank][0], pixels_range[bank][1])
+        print(report)
 
 
 def test_main_apply_calibration():
@@ -208,7 +215,7 @@ def test_main_apply_calibration():
 
 
 if __name__ == '__main__':
-    choice = '1'
+    choice = '2'
     if choice == '1':
         test_main_calibrate()
     elif choice == '2':

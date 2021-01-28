@@ -29,7 +29,7 @@ def verify_vulcan_difc(ws_name: str,
     :param cal_table_name: name of Calibration workspace (a TableWorkspace)
     :return:
     """
-    # Define const parameters
+    # Define const parameterr
     diamond_event_ws = mtd[ws_name]
     mask_ws = mtd[mask_ws_name]
     cal_table_ws = mtd[cal_table_name]

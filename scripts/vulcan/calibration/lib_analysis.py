@@ -150,7 +150,7 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
     num_masked = 0
     zero_masked = 0
     event_spectrum_list = list()
-    for ws_index in range(wi_start, wi_stop+1):
+    for ws_index in range(wi_start, wi_stop):
         # skip non-masked pixels
         if mask_ws.readY(ws_index)[0] < 0.1:
             continue
@@ -171,7 +171,7 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
     event_spectrum_list.sort(reverse=True)
     for i in range(min(100, len(event_spectrum_list))):
         num_events_i, ws_index = event_spectrum_list[i]
-        print('      ws-index = {}, num of events = {}'.format(ws_index, num_events_i))
+        report += '\n      ws-index = {}, num of events = {}'.format(ws_index, num_events_i)
 
     return report
 
