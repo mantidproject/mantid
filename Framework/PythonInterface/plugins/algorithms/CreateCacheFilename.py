@@ -45,7 +45,9 @@ class CreateCacheFilename(PythonAlgorithm):
             StringArrayProperty("OtherProperties", Direction.Input),
             "A list of key=value strings for other properties not in the property manager")
         self.declareProperty("Prefix", "", "prefix for the output file name")
-        self.declareProperty(FileProperty(name='CacheDir', defaultValue='', action=FileAction.OptionalDirectory))
+        self.declareProperty(
+            FileProperty(name='CacheDir', defaultValue='', action=FileAction.OptionalDirectory),
+            doc='Directory storing cache files for reuse, in-lieu of repetitive, time-consuming calculations')
         self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
         self.declareProperty("OutputSignature", "", "sha1 string, 40 characters long", Direction.Output)
         return
