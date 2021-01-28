@@ -13,12 +13,13 @@ from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
-from numpy import full, nan, max, array, vstack, argsort
+from numpy import full, nan, max, array, vstack, argsort, sqrt
 from itertools import chain
 from collections import defaultdict
 from re import findall, sub
 from scipy import constants
 from math import sin
+
 
 pi = constants.pi
 m_over_h = 252.816
@@ -171,19 +172,11 @@ class FittingDataModel(object):
             ws_list_tof = ws_list_tof[::-1]
         return ws_list_tof
 
-    def update_fit(self, args):
-        fit_props, peak_centre_params = ([], ) * 2
-        for arg in args:
-            if isinstance(arg, dict):
-                fit_props.append(arg)
-            elif isinstance(arg, list):
-                peak_centre_params = arg
+    def update_fit(self, fit_props):
         for fit_prop in fit_props:
             wsname = fit_prop['properties']['InputWorkspace']
-            difc = self.estimate_difc(wsname)
             self._fit_results[wsname] = {'model': fit_prop['properties']['Function']}
             self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            self._fit_results[wsname]['dpeaks'] = defaultdict(list)
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fit_prop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constraints which are enclosed in ()
@@ -198,48 +191,21 @@ class FittingDataModel(object):
                     key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
                     self._fit_results[wsname]['results'][key].append([
                         params_dict['Value'][irow], params_dict['Error'][irow]])
-                    if key in peak_centre_params:
-                        # division by difc is a temporary estimation of conversion to dspacing, working on the
-                        # assumption that difa = tzero = 0 until we're able to get these values from the ws
-                        self._fit_results[wsname]['dpeaks'][key].append([
-                            params_dict['Value'][irow], params_dict['Error'][irow]])
+                    if key in fit_prop['peak_centre_params']:
+                        # param corresponds to a peak centre in TOF which we also need in dspacing
+                        # add another entry into the results dictionary
+                        key_d = key + "_dSpacing"
+                        dcen = self._convert_TOF_to_d(params_dict['Value'][irow], wsname)
+                        dcen_er = self._convert_TOFerror_to_derror(params_dict['Error'][irow], dcen, wsname)
+                        self._fit_results[wsname]['results'][key_d].append([dcen, dcen_er])
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
             self._fit_results[wsname]['costFunction'] = params_dict['Value'][-1]
-            self.convert_tof_peaks_to_dspacing(wsname, difc)
-        self.create_fit_tables(peak_centre_params)
+        self.create_fit_tables()
 
-    # this function is an estimation assuming that difa = tzero = 0, and should be updated once functionality exists to
-    # obtain these values from the workspace
-    def convert_tof_peaks_to_dspacing(self, wsname, difc):
-        if not self._fit_results[wsname]['dpeaks']:
-            return
-        for peak_name in self._fit_results[wsname]['dpeaks']:
-            # may be multiple peaks with same name
-            for peakno, peakvals in enumerate(self._fit_results[wsname]['dpeaks'][peak_name]):
-                newpeak = [0, 0]
-                newpeak[0] = peakvals[0] / difc
-                newpeak[1] = peakvals[1] / difc
-                self._fit_results[wsname]['dpeaks'][peak_name][peakno] = newpeak
-
-    def estimate_difc(self, ws_name):
-        ws = ADS.retrieve(ws_name)
-        instrument = ws.getInstrument()
-        detector = ws.getDetector(0)
-        sample = instrument.getSample()
-        source = instrument.getSource()
-        sample_pos = sample.getPos()
-        source_pos = source.getPos()
-        l_tot = source.getDistance(sample) + sample.getDistance(detector)
-        theta = detector.getTwoTheta(sample_pos, (sample_pos-source_pos)) / 2
-
-        difc = 2 * m_over_h * l_tot * sin(theta)
-        return difc
-
-    def create_fit_tables(self, peak_centre_params=None):
+    def create_fit_tables(self):
         wslist = []  # ws to be grouped
-        dp_wslist = []  # ws containing peaks converted to dspacing
         # extract fit parameters and errors
         nruns = len(self._loaded_workspaces.keys())  # num of rows of output workspace
         # get unique set of function parameters across all workspaces
@@ -250,24 +216,12 @@ class FittingDataModel(object):
             # make output workspace
             ipeak = list(range(1, nfuncs + 1)) * nruns
             ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
-            tabulate_dspacing = False
-            if param in peak_centre_params:
-                tabulate_dspacing = True
-                ws_dspacing = CreateEmptyTableWorkspace(OutputWorkspace=(param + '_dSpacing'))
-                ws_dspacing.addColumn(type="str", name="PeakFunction")
-                ws_dspacing.addColumn(type="float", name="Value")
-                ws_dspacing.addColumn(type="float", name="Error")
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
             for iws, wsname in enumerate(self._loaded_workspaces.keys()):
                 if wsname in self._fit_results and param in self._fit_results[wsname]['results']:
                     fitvals = array(self._fit_results[wsname]['results'][param])
-                    # pad to max length (with nans)
                     data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
-                    if tabulate_dspacing:
-                        for peakno, peakvals in enumerate(self._fit_results[wsname]['dpeaks'][param]):
-                            row = [param + '.' + str(peakno), peakvals[0], peakvals[1]]
-                            ws_dspacing.addRow(row)
                 else:
                     data = full((nfuncs, 2), nan)
                 ws.setY(iws, data[:, 0])
@@ -276,9 +230,6 @@ class FittingDataModel(object):
                 axis.setLabel(iws, wsname)
             ws.replaceAxis(1, axis)
             wslist += [ws]
-            if tabulate_dspacing:
-                dp_wslist += [ws_dspacing]
-        wslist.extend(dp_wslist)
         # table for model summary/info
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
@@ -362,6 +313,25 @@ class FittingDataModel(object):
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
+    def _convert_TOF_to_d(self, tof, ws_name):
+        difa, difc, tzero = self._get_diff_constants(ws_name)
+        if abs(difa) < 1E-10:
+            return (tof-tzero)/difc
+        else:
+            return (-difc + sqrt(difc**2 - 4*difa*(tzero-tof)))/(2*difa)
+
+    def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
+        difa, difc, _ = self._get_diff_constants(ws_name)
+        return tof_error/(2*difa*d + difc)
+
+    def _get_diff_constants(self, ws_name):
+        """Subject to change when ws will be able to carry diff constant on ws object post calibration"""
+        si = self._loaded_workspaces[ws_name].spectrumInfo()
+        difc = 2 * m_over_h * (si.l1() + si.l2(0)) * sin(si.twoTheta(0) / 2)
+        difa = 0
+        tzero = 0
+        return difa, difc, tzero
 
     @staticmethod
     def write_table_row(ws_table, row, irow):
