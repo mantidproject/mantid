@@ -62,13 +62,8 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.plot->setCurveStyle("Corrected", -1);
-  m_ui.plot->setCurveSymbol("Corrected", 0);
-#else
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
 
   m_ui.plot->clear();
   m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black,
@@ -115,16 +110,11 @@ void ALCPeakFittingView::setParameter(const QString &funcIndex,
 }
 
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_peakPicker->setEnabled(enabled);
-  m_peakPicker->setVisible(enabled);
-#else
   m_peakPicker->select(enabled);
   if (enabled)
     m_peakPicker->redraw();
   else
     m_peakPicker->remove();
-#endif
   m_ui.plot->replot();
 }
 

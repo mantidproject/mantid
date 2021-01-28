@@ -16,7 +16,7 @@
 
 #include "../Muon/ALCBaselineModellingModel.h"
 
-#include <QtTest/QSignalSpy>
+#include <QSignalSpy>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -51,12 +51,11 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
     data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9},
                        Counts{100, 1, 2, 100, 100, 3, 4, 5, 100});
-
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
 
-    TS_ASSERT_EQUALS(spy.size(), 1);
+    TS_ASSERT_EQUALS(spy.count(), 1);
 
     MatrixWorkspace_const_sptr modelData = m_model->data();
 
