@@ -75,8 +75,7 @@ include(Bootstrap)
 
 # Configure Eigen early
 include(Eigen)
-
-include(Span
+include(Span)
 
 if( MSVC )
   include ( MSVCSetup )
