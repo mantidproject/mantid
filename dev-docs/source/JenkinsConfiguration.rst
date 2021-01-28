@@ -177,15 +177,15 @@ Print the Value of an Environment Variable on All Nodes
     for(node in nodes) {
       node_props = node.nodeProperties.getAll(hudson.slaves.EnvironmentVariablesNodeProperty.class)
       if(node_props.size() == 1) {
-      env_vars = node_props[0].getEnvVars()
+        env_vars = node_props[0].getEnvVars()
       if(env_vars.containsKey(VARIABLE_NAME)) {
-      pv_dir = env_vars.get(VARIABLE_NAME, "")
+        pv_dir = env_vars.get(VARIABLE_NAME, "")
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
+        pv_dir = VARIABLE_NAME + " not set."
       }
       println(node.getDisplayName() + ": " + pv_dir)
       } else {
-      pv_dir = VARIABLE_NAME + " not set."
+        pv_dir = VARIABLE_NAME + " not set."
       }
     }
 

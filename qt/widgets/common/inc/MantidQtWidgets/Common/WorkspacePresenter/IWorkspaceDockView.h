@@ -76,7 +76,6 @@ public:
   virtual void showColourFillPlot() = 0;
   virtual void showDetectorsTable() = 0;
   virtual void showBoxDataTable() = 0;
-  virtual void showVatesGUI() = 0;
   virtual void showMDPlot() = 0;
   virtual void showListData() = 0;
   virtual void showSpectrumViewer() = 0;

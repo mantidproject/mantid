@@ -99,7 +99,6 @@ build/
 .builds
 *.egg-info/
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
-Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 qt/python/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
 qt/applications/workbench/setup.py
