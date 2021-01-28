@@ -14,8 +14,9 @@ from mantid.simpleapi import *
 
 import fnmatch
 import h5py
-import os
 import numpy
+import os
+import re
 
 
 class GenerateLogbook(PythonAlgorithm):
@@ -189,9 +190,38 @@ class GenerateLogbook(PythonAlgorithm):
             mtd[logbook_ws].addColumn("str", headline)
         return logbook_ws
 
+    @staticmethod
+    def _perform_binary_operations(values, binary_operations, operations):
+        while True:
+            operation = [(ind, ind+1, op) for ind, op in enumerate(binary_operations)
+                         if op == operations[0] or op == operations[1]]
+            if operation == list():
+                break
+            ind1, ind2, op = operation[0]
+            if op == "+":
+                new_val = values[ind1] + values[ind2]
+            elif op == "-":
+                new_val = values[ind1] + values[ind2]
+            elif op == "*":
+                new_val = values[ind1] + values[ind2]
+            if op == "//":
+                if values[ind2] == 0:
+                    raise RuntimeError("Divisor is equal to 0.")
+                new_val = list_values[ind1] / list_values[ind2]
+            values[ind1] = new_val
+            values.pop(ind2)
+            binary_operations.pop(ind1)
+
+        return values, binary_operations
+
     def _fill_logbook(self, logbook_ws, data_array, progress):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
+        entry_not_found_msg = "The requested entry: {}, is not present in the raw data"
+        regex_all = '(\*)|(//)|(\+)|(\-)'
+        p = re.compile(regex_all)
+        operators = ["+","-","*","//"]
+
         for file_no, file_name in enumerate(data_array):
             # reporting progress each 10% of the data
             if file_no % (len(data_array)/10) == 0:
@@ -201,11 +231,47 @@ class GenerateLogbook(PythonAlgorithm):
                 rowData = numpy.empty(n_entries, dtype=object)
                 rowData[0] = str(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
-                    data = f.get(entry)[0]
-                    if isinstance(data, numpy.bytes_):
-                        data = data.decode('utf-8')
-                        data = data.replace(',', ';') # needed for CSV output
-                    rowData[entry_no] = str(data)
+                    if any(op in entry for op in operators):
+                        list_entries = []
+                        binary_operations = []
+                        prev_pos = 0
+                        for obj in p.finditer(entry):
+                            list_entries.append(entry[prev_pos:obj.span()[0]])
+                            prev_pos = obj.span()[1]
+                            binary_operations.append(obj.group())
+                        list_entries.append(entry[prev_pos:]) # add the last remaining file
+                        # load all entries from the file
+                        values = [0]*len(list_entries)
+                        for split_entry_no, split_entry in enumerate(list_entries):
+                            try:
+                                data = f.get(split_entry)[0]
+                            except TypeError:
+                                rowData[entry_no] = "Not found"
+                                self.log().warning(entry_not_found_msg.format(entry))
+                            else:
+                                if isinstance(data, numpy.bytes_):
+                                    if any(op in operators[1:] for op in binary_operations):
+                                        self.log().warning("Only 'sum' operation is supported for string entries")
+                                        data = "N/A"
+                                        break
+                                    else:
+                                        data = data.decode('utf-8')
+                                        data = data.replace(',', ';')  # needed for CSV output
+                            values[split_entry_no] = data
+                        values, binary_operations = self._perform_binary_operations(values, binary_operations, operations=['*', '//'])
+                        values, _ = self._perform_binary_operations(values, binary_operations, operations=['+', '-'])
+                        rowData[entry_no] = str(values)
+                    else:
+                        try:
+                            data = f.get(entry)[0]
+                        except TypeError:
+                            rowData[entry_no] = "Not found"
+                            self.log().warning(entry_not_found_msg.format(entry))
+                        else:
+                            if isinstance(data, numpy.bytes_):
+                                data = data.decode('utf-8')
+                                data = data.replace(',', ';') # needed for CSV output
+                            rowData[entry_no] = str(data)
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):

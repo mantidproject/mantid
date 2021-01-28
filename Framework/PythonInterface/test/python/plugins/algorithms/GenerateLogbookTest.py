@@ -58,6 +58,13 @@ class GenerateLogbookTest(unittest.TestCase):
                         NumorRange=[396990,396993], CustomEntries='/entry0/acquisition_mode')
         self._check_output('custom_logbook', numberEntries=3, numberColumns=4)
 
+    def test_d7_custom_with_summing(self):
+        self.assertTrue(os.path.exists(self._data_directory))
+        GenerateLogbook(Directory=self._data_directory,
+                        OutputWorkspace='custom_logbook_w_summing', Facility='ILL', Instrument='D7',
+                        NumorRange=[396990,396993], CustomEntries='/entry0/acquisition_mode,polarisation')
+        self._check_output('custom_logbook_w_summing', numberEntries=3, numberColumns=5)
+
     def test_d7_save_csv(self):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,

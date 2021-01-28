@@ -28,10 +28,10 @@
     </parameter>
 
     <parameter name="logbook_optional_headers" type="string">
-      <value val="TOF" />
+      <value val="TOF,polarisation" />
     </parameter>
     <parameter name="logbook_optional_entries" type="string">
-      <value val="/entry0/acquisition_mode" />
+      <value val="/entry0/acquisition_mode,/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2" />
     </parameter>
 
   </component-link>
