@@ -438,30 +438,6 @@ bool SlicingAlgorithmDialog::doAutoFillDimensions() const {
 }
 
 /**
- *Customise the layout for usage in the Vsi
- */
-void SlicingAlgorithmDialog::customiseLayoutForVsi(
-    const std::string &initialWorkspace) {
-  // File back-end
-  ui.file_backend_layout->setVisible(false);
-
-  // Output workspace
-  ui.lbl_workspace_output->setDisabled(true);
-  ui.txt_output->setDisabled(true);
-
-  // Input workspace
-  ui.workspace_selector->setDisabled(true);
-  ui.lbl_workspace_input->setDisabled(true);
-
-  // Reset the input workspace
-  ui.workspace_selector->clear();
-  ui.workspace_selector->addItem(initialWorkspace.c_str());
-
-  // Turn off history of the aligned dimension fields;
-  buildDimensionInputs(true);
-}
-
-/**
  * Resets the axis dimensions externally.
  * @param index The property index.
  * @param propertyValue The new value of the axis dimension.
