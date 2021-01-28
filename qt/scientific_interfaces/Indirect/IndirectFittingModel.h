@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataModel.h"
+#include "IIndirectFitDataTableModel.h"
 #include "IIndirectFitOutput.h"
 #include "IIndirectFittingModel.h"
 #include "IndirectFitData.h"
@@ -44,7 +44,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  // Functions that interact with IndirectFitDataModel
+  // Functions that interact with IndirectFitDataTableModel
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(TableDatasetIndex index) const;
   FunctionModelSpectra getSpectra(TableDatasetIndex index) const;
@@ -120,7 +120,7 @@ public:
                        TableDatasetIndex index);
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
-  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
+  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
   void removeFittingData();
 
 protected:

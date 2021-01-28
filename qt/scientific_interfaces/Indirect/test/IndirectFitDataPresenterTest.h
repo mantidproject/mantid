@@ -14,7 +14,7 @@
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
-#include "IndirectFitDataModel.h"
+#include "IndirectFitDataTableModel.h"
 #include "ParameterEstimation.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -95,7 +95,7 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectFitDataModel : public IIndirectFittingModel {
+class MockIndirectFitDataTableModel : public IIndirectFittingModel {
 public:
 
   /// Public Methods
@@ -259,7 +259,7 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+    m_model = std::make_unique<NiceMock<MockIndirectFitDataTableModel>>();
     m_model->m_fitDataModel = std::make_unique<MockIndirectDataTableModel>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
@@ -430,7 +430,7 @@ private:
   std::unique_ptr<QTableWidget> m_table;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
-  std::unique_ptr<MockIndirectFitDataModel> m_model;
+  std::unique_ptr<MockIndirectFitDataTableModel> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;

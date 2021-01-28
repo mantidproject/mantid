@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFittingModel.h"
-#include "IndirectFitDataModel.h"
+#include "IndirectFitDataTableModel.h"
 #include "IndirectFitOutputModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -187,7 +187,7 @@ std::ostringstream &addInputString(const std::string &workspaceName, size_t work
     throw std::runtime_error("Workspace name is empty. The sample workspace may not be loaded.");
 }
 
-std::string constructInputString(const IIndirectFitDataModel *fittingData) {
+std::string constructInputString(const IIndirectFitDataTableModel *fittingData) {
   std::ostringstream input;
   for (auto index = FitDomainIndex{0}; index < fittingData->getNumberOfDomains(); index++) {
     addInputString(fittingData->getWorkspace(index)->getName(), fittingData->getSpectrum(index), input);

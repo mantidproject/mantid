@@ -45,7 +45,7 @@ public:
   virtual std::unordered_map<std::string, ParameterValue>
   getDefaultParameters(TableDatasetIndex dataIndex) const = 0;
   
-  // Functions that interact with IndirectFitDataModel
+  // Functions that interact with IndirectFitDataTableModel
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const = 0;
@@ -124,7 +124,7 @@ public:
       const EstimationDataSelector &selector) const = 0;
   virtual void removeFittingData() = 0;
 
-  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
+  std::unique_ptr<IIndirectFitDataTableModel> m_fitDataModel;
 };
 
 } // namespace IDA

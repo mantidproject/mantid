@@ -11,19 +11,19 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectFitDataModel.h"
+#include "IndirectFitDataTableModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
 
-class IndirectFitDataModelTest : public CxxTest::TestSuite {
+class IndirectFitDataTableModelTest : public CxxTest::TestSuite {
 public:
-  IndirectFitDataModelTest() = default;
+  IndirectFitDataTableModelTest() = default;
 
   void setUp() override {
-    m_fitData = std::make_unique<IndirectFitDataModel>();
+    m_fitData = std::make_unique<IndirectFitDataTableModel>();
     auto resolutionWorkspace =
         Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
     auto dataWorkspace =
@@ -80,5 +80,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IIndirectFitDataModel> m_fitData;
+  std::unique_ptr<IIndirectFitDataTableModel> m_fitData;
 };

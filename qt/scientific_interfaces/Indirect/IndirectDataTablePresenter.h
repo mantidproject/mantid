@@ -54,7 +54,7 @@ protected:
   virtual void addTableEntry(FitDomainIndex row);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column);
   void setCellText(const QString &text, FitDomainIndex row, int column);
-  IIndirectFitDataModel *m_model;
+  IIndirectFitDataTableModel *m_model;
 
 private:
   virtual int workspaceIndexColumn() const;
