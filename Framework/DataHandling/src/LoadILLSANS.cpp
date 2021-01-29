@@ -185,7 +185,6 @@ void LoadILLSANS::exec() {
 
     // mm to meter
     offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
-    const double initialOffset = getComponentPosition("detector_right").X();
     moveDetectorHorizontal(-offset / 1000, "detector_right");
 
   } else {
