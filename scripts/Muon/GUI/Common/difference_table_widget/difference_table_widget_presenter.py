@@ -18,10 +18,10 @@ diff_columns = ['diff_name', 'to_analyse', 'group_1', 'group_2']
 
 class DifferenceTablePresenter(object):
 
-    def __init__(self, view, model):
+    def __init__(self, view, model, group_or_pair):
         self._view = view
         self._model = model
-
+        self._group_or_pair = group_or_pair
         self._view.on_add_diff_button_clicked(self.handle_add_diff_button_checked_state)
         self._view.on_remove_diff_button_clicked(self.handle_remove_diff_button_clicked)
 
@@ -75,11 +75,11 @@ class DifferenceTablePresenter(object):
     def update_model_from_view(self, table=None):
         if not table:
             table = self._view.get_table_contents()
-        self._model.clear_diffs()
+        self._model.clear_diffs(self._group_or_pair)
         for entry in table:
             diff = MuonDiff(diff_name=str(entry[0]),
                             backward_group_name=str(entry[2]),
-                            forward_group_name=str(entry[3]))
+                            forward_group_name=str(entry[3]), group_or_pair = self._group_or_pair)
             self._model.add_diff(diff)
 
     def update_view_from_model(self):
@@ -87,7 +87,7 @@ class DifferenceTablePresenter(object):
 
         self._view.clear()
         for diff in self._model.diffs:
-            if isinstance(diff, MuonDiff):
+            if isinstance(diff, MuonDiff) and diff.group_or_pair == self._group_or_pair:
                 to_analyse = True if diff.name in self._model.selected_diffs else False
                 forward_group_periods = self._model._context.group_pair_context[diff.forward_group].periods
                 backward_group_periods = self._model._context.group_pair_context[diff.backward_group].periods
@@ -106,7 +106,7 @@ class DifferenceTablePresenter(object):
         self._view.enable_updates()
 
     def update_group_selections(self):
-        groups = self._model.group_names
+        groups = self._model.get_names(self._group_or_pair)
         self._view.update_group_selections(groups)
 
     def to_analyse_data_checkbox_changed(self, state, row, diff_name):
@@ -156,7 +156,7 @@ class DifferenceTablePresenter(object):
         self.handle_add_diff_button_clicked()
 
     def handle_add_diff_button_clicked(self, group_1='', group_2=''):
-        if len(self._model.group_names) == 0 or len(self._model.group_names) == 1:
+        if len(self._model.get_names(self._group_or_pair)) == 0 or len(self._model.get_names(self._group_or_pair)) == 1:
             self._view.warning_popup("At least two groups are required to create a diff")
         else:
             new_diff_name = self._view.enter_diff_name()
@@ -165,10 +165,10 @@ class DifferenceTablePresenter(object):
             elif new_diff_name in self._model.group_and_pair_names:
                 self._view.warning_popup("Groups and diffs must have unique names")
             elif self.validate_diff_name(new_diff_name):
-                group1 = self._model.group_names[0] if not group_1 else group_1
-                group2 = self._model.group_names[1] if not group_2 else group_2
+                group1 = self._model.get_names(self._group_or_pair)[0] if not group_1 else group_1
+                group2 = self._model.get_names(self._group_or_pair)[1] if not group_2 else group_2
                 diff = MuonDiff(diff_name=str(new_diff_name),
-                                forward_group_name=group1, backward_group_name=group2)
+                                forward_group_name=group1, backward_group_name=group2, group_or_pair = self._group_or_pair)
                 self.add_diff(diff)
                 self.notify_data_changed()
 

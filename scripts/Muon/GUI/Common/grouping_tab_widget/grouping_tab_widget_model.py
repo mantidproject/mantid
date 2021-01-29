@@ -67,6 +67,14 @@ class GroupingTabModel(object):
     def pair_names(self):
         return self._groups_and_pairs.pair_names
 
+    def get_names(self, group_or_pair):
+        if group_or_pair == "group":
+            return self.group_names
+        elif group_or_pair == "pair":
+            return self.pair_names
+        else:
+            return []
+
     @property
     def group_and_pair_names(self):
         return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names + self._groups_and_pairs.diff_names
@@ -94,8 +102,8 @@ class GroupingTabModel(object):
     def clear_pairs(self):
         self._groups_and_pairs.clear_pairs()
 
-    def clear_diffs(self):
-        self._groups_and_pairs.clear_diffs()
+    def clear_diffs(self, group_or_pair):
+        self._groups_and_pairs.clear_diffs(group_or_pair)
 
     def clear_selected_pairs(self):
         self._groups_and_pairs.clear_selected_pairs()

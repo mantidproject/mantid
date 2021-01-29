@@ -176,8 +176,10 @@ class MuonGroupPairContext(object):
     def clear_pairs(self):
         self._pairs = []
 
-    def clear_diffs(self):
-        self._diffs = []
+    def clear_diffs(self, group_or_pair):
+        for diff in self._diffs:
+            if diff.group_or_pair == group_or_pair:
+                self._diffs.remove(diff)
 
     def clear_selected_pairs(self):
         self._selected_pairs = []

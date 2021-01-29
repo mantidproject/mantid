@@ -270,11 +270,11 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         # differences
-        self.grouping_tab_widget.diff_table.selected_diff_changed_notifier.add_subscriber(
+        self.grouping_tab_widget.diff_table.group_widget.selected_diff_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
-        self.grouping_tab_widget.diff_table.selected_diff_changed_notifier.add_subscriber(
+        self.grouping_tab_widget.diff_table.group_widget.selected_diff_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
-        self.grouping_tab_widget.diff_table.selected_diff_changed_notifier.add_subscriber(
+        self.grouping_tab_widget.diff_table.group_widget.selected_diff_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)
 
         # phase table set up

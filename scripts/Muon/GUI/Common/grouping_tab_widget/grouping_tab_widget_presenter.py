@@ -49,7 +49,7 @@ class GroupingTabPresenter(object):
         # notifiers
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
-        self.diff_table.on_data_changed(self.diff_table_changed)
+        self.diff_table.group_widget.on_data_changed(self.diff_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
