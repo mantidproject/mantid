@@ -123,7 +123,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
     def PyExec(self):
         self.setUp()
         LoadAndMerge(Filename=self.getPropertyValue('SampleRuns'), OutputWorkspace=self.output,
-                     LoaderOptions={"LoadDetectors": "Diffractometer"}, startProgress=0, endProgress=0.4)
+                     LoaderOptions={"LoadDetectors": "Diffractometer"}, startProgress=0, endProgress=0.9)
 
         if len(self.runs) > 1:
             run = mtd[mtd[self.output].getNames()[0]].getRun()
@@ -137,7 +137,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             self.mode = "Doppler"
             self.log().information("Mode recognized as Doppler.")
 
-        self.progress.report(4, "Treating data")
+        self.progress.report(9, "Treating data")
         if self.mode == "Doppler":
             self._treat_doppler(self.output)
         elif self.mode == "BATS":
