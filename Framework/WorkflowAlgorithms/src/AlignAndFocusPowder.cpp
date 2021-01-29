@@ -24,7 +24,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
@@ -57,6 +56,7 @@ const std::string RESAMPLEX("ResampleX");
 const std::string BIN_IN_D("Dspacing");
 const std::string D_MINS("DMin");
 const std::string D_MAXS("DMax");
+const std::string DELTA("Delta");
 const std::string TOF_MIN("TMin");
 const std::string TOF_MAX("TMax");
 const std::string WL_MIN("CropWavelengthMin");
@@ -160,6 +160,9 @@ void AlignAndFocusPowder::init() {
       std::make_unique<ArrayProperty<double>>(PropertyNames::D_MAXS),
       "Maximum for Dspace axis. (Default 0.) ");
   mapPropertyName(PropertyNames::D_MAXS, "d_max");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::DELTA),
+                  "Step parameter for rebin");
+  mapPropertyName(PropertyNames::DELTA, "delta");
   declareProperty(PropertyNames::TOF_MIN, EMPTY_DBL(),
                   "Minimum for TOF axis. Defaults to 0. ");
   mapPropertyName(PropertyNames::TOF_MIN, "tof_min");
@@ -355,6 +358,7 @@ void AlignAndFocusPowder::exec() {
   dspace = getProperty(PropertyNames::BIN_IN_D);
   auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
+  this->getVecPropertyFromPmOrSelf(PropertyNames::DELTA, m_delta);
   LRef = getProperty(PropertyNames::UNWRAP_REF);
   DIFCref = getProperty(PropertyNames::LOWRES_REF);
   const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
@@ -745,9 +749,18 @@ void AlignAndFocusPowder::exec() {
   // this next call should probably be in for rebin as well
   // but it changes the system tests
   if (dspace && m_resampleX != 0) {
-    m_outputW = rebin(m_outputW);
-    if (m_processLowResTOF)
-      m_lowResW = rebin(m_lowResW);
+    if (m_delta.empty()) {
+      m_outputW = rebin(m_outputW);
+    } else {
+      m_outputW = rebinRagged(m_outputW);
+    }
+    if (m_processLowResTOF) {
+      if (m_delta.empty()) {
+        m_lowResW = rebin(m_lowResW);
+      } else {
+        m_lowResW = rebinRagged(m_lowResW);
+      }
+    }
   }
   m_progress->report();
 
@@ -787,6 +800,10 @@ void AlignAndFocusPowder::exec() {
   // Convert units to TOF
   m_outputW = convertUnits(m_outputW, "TOF");
   m_progress->report();
+
+  if (!dspace && !m_delta.empty()) {
+    m_outputW = rebinRagged(m_outputW);
+  }
 
   // compress again if appropriate
   m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
@@ -902,7 +919,9 @@ AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
  */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
-  if (m_resampleX != 0) {
+  if (!m_delta.empty()) {
+    return matrixws;
+  } else if (m_resampleX != 0) {
     // ResampleX
     g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
                         << ", LogBinning=" << (m_resampleX < 0) << ", dMin("
@@ -946,6 +965,37 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
     matrixws = rebin3Alg->getProperty("OutputWorkspace");
     return matrixws;
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Rebin
+ */
+API::MatrixWorkspace_sptr
+AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws) {
+  API::IAlgorithm_sptr alg = createChildAlgorithm("Rebin");
+  g_log.information() << "running RebinRagged( ";
+  size_t numHist = m_outputW->getNumberHistograms();
+  if ((numHist == m_dmins.size()) && (numHist == m_dmaxs.size())) {
+    alg->setProperty("XMin", m_dmins);
+    alg->setProperty("XMax", m_dmaxs);
+  } else {
+    g_log.information()
+        << "Number of dmin and dmax values don't match the "
+        << "number of workspace indices. Ignoring the parameters.\n";
+  }
+  g_log.information() << ") started at "
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
+  for (double param : m_params) {
+    if (isEmpty(param)) {
+      g_log.warning("encountered empty binning parameter");
+    }
+  }
+  alg->setProperty("InputWorkspace", matrixws);
+  alg->setProperty("OutputWorkspace", matrixws);
+  alg->setProperty("Delta", m_delta);
+  alg->executeAsChildAlg();
+  matrixws = alg->getProperty("OutputWorkspace");
+  return matrixws;
 }
 
 //----------------------------------------------------------------------------------------------
