@@ -891,7 +891,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
     if (allow_list.empty() && block_list.empty()) {
       m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-        m_filename, m_ws, *this, true, nPeriods, periodLog);
+          m_filename, m_ws, *this, true, nPeriods, periodLog);
     } else {
       m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
           m_filename, m_ws, *this, true, nPeriods, periodLog, allow_list,
