@@ -190,8 +190,7 @@ class GenerateLogbook(PythonAlgorithm):
                 try:
                     f.get(entry)[0]
                 except TypeError:
-                    self.log().error("The requested entry: {}, is not present in the raw data. ".format(entry))
-                    raise RuntimeError("The requested entry is not present in the raw data.")
+                    self.log().warning("The requested entry: {}, is not present in the raw data. ".format(entry))
 
     def _prepare_logbook_ws(self):
         """Prepares the TableWorkspace logbook for filling with entries, sets up the headers."""
@@ -220,7 +219,7 @@ class GenerateLogbook(PythonAlgorithm):
             elif op == "//":
                 if values[ind2] == 0:
                     raise RuntimeError("Divisor is equal to 0.")
-                new_val = list_values[ind1] / list_values[ind2]
+                new_val = values[ind1] / values[ind2]
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
             values[ind1] = new_val
