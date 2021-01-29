@@ -55,7 +55,6 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
-  // void resetBounds();
   void redrawMarker();
 
 private:
