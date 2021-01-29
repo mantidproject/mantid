@@ -101,6 +101,7 @@ class GenerateLogbook(PythonAlgorithm):
                              doc='Names of those additional custom entries.')
 
     def _prepare_file_array(self):
+        """Prepares a list containing the NeXus files in the specified directory."""
         facility_name_len = 0
         if self._facility != 'ILL':
             facility_name_len = len(self._facility)
@@ -119,9 +120,11 @@ class GenerateLogbook(PythonAlgorithm):
         return file_list
 
     def _get_default_entries(self):
+        """Gets default and optional metadata entries using the specified instrument IPF."""
         self._metadata_entries = []
         self._metadata_headers = ['run_number']
         tmp_instr = self._instrument + '_tmp'
+        # Load empty instrument to access parameters defining metadata entries to be searched
         LoadEmptyInstrument(InstrumentName=self._instrument, OutputWorkspace=tmp_instr)
         parameters = mtd[tmp_instr].getInstrument()
         try:
@@ -171,7 +174,7 @@ class GenerateLogbook(PythonAlgorithm):
         return default_entries
 
     def _verify_contains_metadata(self, data_array):
-        """Verifies that the rawdata indeed contains the desired meta-data to be logged."""
+        """Verifies that the raw data indeed contains the desired meta-data to be logged."""
         default_entries = self._get_default_entries()
         data_path = os.path.join(self._data_directory, data_array[0] + '.nxs')
         # check only if default entries exist in the first file in the directory
@@ -184,6 +187,7 @@ class GenerateLogbook(PythonAlgorithm):
                     raise RuntimeError("The requested entry is not present in the raw data.")
 
     def _prepare_logbook_ws(self):
+        """Prepares the TableWorkspace logbook for filling with entries, sets up the headers."""
         logbook_ws = self.getPropertyValue('OutputWorkspace')
         CreateEmptyTableWorkspace(OutputWorkspace=logbook_ws)
         for headline in self._metadata_headers:
@@ -192,6 +196,8 @@ class GenerateLogbook(PythonAlgorithm):
 
     @staticmethod
     def _perform_binary_operations(values, binary_operations, operations):
+        """Performs binary arithmetic operations based on the list of operations
+        to perform and list of values."""
         while True:
             operation = [(ind, ind+1, op) for ind, op in enumerate(binary_operations)
                          if op == operations[0] or op == operations[1]]
@@ -275,6 +281,7 @@ class GenerateLogbook(PythonAlgorithm):
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):
+        """Calls algorithm that will store the logbook TableWorkspace in the specified location."""
         SaveAscii(InputWorkspace=logbook_ws, Filename=self.getPropertyValue('OutputFile'),
                   Separator='CSV')
 
@@ -286,8 +293,7 @@ class GenerateLogbook(PythonAlgorithm):
             self._numor_range = [0, float('inf')]
         else:
             self._numor_range = self.getProperty('NumorRange').value
-        nreports = 15
-        progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+        progress = Progress(self, start=0.0, end=1.0, nreports=14)
         progress.report("Preparing file list")
         data_array = self._prepare_file_array()
         progress.report("Verifying conformity")
