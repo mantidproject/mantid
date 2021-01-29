@@ -31,4 +31,4 @@ class LineEditDoubleValidator(QDoubleValidator):
     def fixup(self, new_value):
         """Entered when the data input is invalid according to QDoubleValidator (empty string or broken e notation)."""
         logger.warning(f"An invalid value '{new_value}' was provided. Using '{self.last_valid_value}' instead.")
-        self._line_edit.setText(self.last_valid_value)
+        self._line_edit.setText(str(self.last_valid_value))
