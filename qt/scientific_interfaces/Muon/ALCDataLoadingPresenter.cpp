@@ -47,7 +47,9 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)),
           SLOT(handleInstrumentChanged(std::string)));
-  connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
+  connect(m_view, SIGNAL(runsEditingSignal()), SLOT(handleRunsEditing()));
+  connect(m_view, SIGNAL(runsEditingFinishedSignal()),
+          SLOT(handleRunsEditingFinished()));
   connect(m_view, SIGNAL(manageDirectoriesClicked()),
           SLOT(handleManageDirectories()));
   connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
@@ -57,10 +59,13 @@ void ALCDataLoadingPresenter::initialize() {
           SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
-void ALCDataLoadingPresenter::handleRunsChanged() {
-  // Make sure everything is reset
+void ALCDataLoadingPresenter::handleRunsEditing() {
   m_view->enableLoad(false);
   m_view->setPath(std::string{});
+}
+
+void ALCDataLoadingPresenter::handleRunsEditingFinished() {
+  // Make sure everything is reset
   m_view->enableRunsAutoAdd(false);
 
   if (m_previousFirstRun !=
