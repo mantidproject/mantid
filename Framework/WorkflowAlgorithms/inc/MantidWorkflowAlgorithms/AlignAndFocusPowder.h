@@ -74,6 +74,7 @@ private:
   void loadCalFile(const std::string &calFilename,
                    const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
+  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws);
 
   API::MatrixWorkspace_sptr
   conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
@@ -112,6 +113,7 @@ private:
   int m_resampleX{0};
   std::vector<double> m_dmins;
   std::vector<double> m_dmaxs;
+  std::vector<double> m_delta;
   bool dspace{false};
   double xmin{0.0};
   double xmax{0.0};

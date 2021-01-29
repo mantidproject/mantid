@@ -300,3 +300,45 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         assert mtd[self.wksp_file].sample().getMaterial().name() == 'V'
         # use standard method
         return (self.wksp_mem, self.wksp_file)
+
+class VulcanRaggedCompare(systemtesting.MantidSystemTest):
+    cal_file  = "VULCAN_calibrate_2019_06_27.h5"
+    data_file = 'VULCAN_189186.nxs.h5'
+
+    def cleanup(self):
+        return do_cleanup(self.cacheDir)
+
+    def requiredMemoryMB(self):
+        return 3*1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.data_file]
+
+    def runTest(self):
+        self.cacheDir = getCacheDir()
+
+        self.wksp_mem = os.path.basename(self.data_file).split('.')[0]
+        self.wksp_mem, self.wksp_file = self.wksp_mem + '_mem', self.wksp_mem + '_file'
+
+        # load then process
+        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
+        LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName='PG3')
+        AlignAndFocusPowder(InputWorkspace=self.wksp_mem, OutputWorkspace=self.wksp_mem,
+                            GroupingWorkspace='PG3_group', CalibrationWorkspace='PG3_cal', MaskWorkspace='PG3_mask',
+                            Params=-.0002, CompressTolerance=0.01,
+                            PrimaryFlightPath=60, SpectrumIDs='1,2,3', L2='3.18,3.18,3.18', Polar='90,270,145', Azimuthal='0,0,0')
+
+        # everything inside the algorithm
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_file,
+                                     GroupingWorkspace='PG3_group', CalibrationWorkspace='PG3_cal',
+                                     MaskWorkspace='PG3_mask',
+                                     Params=-.0002, CompressTolerance=0.01,
+                                     PrimaryFlightPath=60, SpectrumIDs='1,2,3', L2='3.18,3.18,3.18', Polar='90,270,145', Azimuthal='0,0,0',
+                                     ReductionProperties='__snspowderreduction_inner')
+
+    def validateMethod(self):
+        self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return (self.wksp_mem, self.wksp_file)

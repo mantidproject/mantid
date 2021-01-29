@@ -159,7 +159,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
-        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents'])
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents', 'DMin', 'DMax', 'Delta'])
 
         self.declareProperty("Sum", False,
                              "Sum the runs. Does nothing for characterization runs")
