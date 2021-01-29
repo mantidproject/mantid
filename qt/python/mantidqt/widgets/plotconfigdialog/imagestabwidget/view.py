@@ -10,12 +10,12 @@ import numpy as np
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib import cm
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDoubleValidator, QPixmap, QIcon, QImage
+from qtpy.QtGui import QPixmap, QIcon, QImage
 from qtpy.QtWidgets import QWidget
 
-from mantid import logger
 from mantid.plots.utility import get_colormap_names
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 
 INTERPOLATIONS = [
@@ -32,25 +32,6 @@ def create_colormap_img(cmap_name, width=50, height=20):
     return QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
 
 
-class MinMaxDoubleValidator(QDoubleValidator):
-
-    def __init__(self, line_edit, initial_value):
-        super(MinMaxDoubleValidator, self).__init__(None)
-        self.last_valid_value = initial_value
-        self._line_edit = line_edit
-
-        self._line_edit.editingFinished.connect(self.on_editing_finished)
-
-    def on_editing_finished(self):
-        """Entered when the data input is valid according to QDoubleValidator."""
-        self.last_valid_value = self._line_edit.text()
-
-    def fixup(self, new_value):
-        """Entered when the data input is invalid according to QDoubleValidator (empty string or broken e notation)."""
-        logger.warning(f"An invalid value '{new_value}' was provided. Using '{self.last_valid_value}' instead.")
-        self._line_edit.setText(self.last_valid_value)
-
-
 class ImagesTabWidgetView(QWidget):
     def __init__(self, parent=None):
         super(ImagesTabWidgetView, self).__init__(parent=parent)
@@ -62,8 +43,8 @@ class ImagesTabWidgetView(QWidget):
 
         self.max_min_value_warning.setVisible(False)
 
-        self.min_value_validator = MinMaxDoubleValidator(self.min_value_line_edit, 0.0)
-        self.max_value_validator = MinMaxDoubleValidator(self.max_value_line_edit, 1.0)
+        self.min_value_validator = LineEditDoubleValidator(self.min_value_line_edit, 0.0)
+        self.max_value_validator = LineEditDoubleValidator(self.max_value_line_edit, 1.0)
         self.min_value_line_edit.setValidator(self.min_value_validator)
         self.max_value_line_edit.setValidator(self.max_value_validator)
 
