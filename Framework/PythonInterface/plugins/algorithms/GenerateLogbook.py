@@ -210,14 +210,15 @@ class GenerateLogbook(PythonAlgorithm):
                 new_val = values[ind1] + values[ind2]
             elif op == "*":
                 new_val = values[ind1] + values[ind2]
-            if op == "//":
+            elif op == "//":
                 if values[ind2] == 0:
                     raise RuntimeError("Divisor is equal to 0.")
                 new_val = list_values[ind1] / list_values[ind2]
+            else:
+                raise RuntimeError("Unknown operation: {}".format(operation))
             values[ind1] = new_val
             values.pop(ind2)
             binary_operations.pop(ind1)
-
         return values, binary_operations
 
     def _fill_logbook(self, logbook_ws, data_array, progress):
