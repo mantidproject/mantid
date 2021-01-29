@@ -183,7 +183,7 @@ public:
     checkTimeFormat(outputWS);
   }
 
-  void trest_d22B() {
+  void test_d22B() {
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
