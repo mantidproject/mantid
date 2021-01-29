@@ -41,6 +41,7 @@ protected:
    * needed
    */
   uint16_t runIndex;
+  uint16_t goniometerIndex;
 
   /** Detector ID of the pixel that measured this event. */
   int32_t detectorId;
