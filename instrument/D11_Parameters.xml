@@ -24,17 +24,73 @@
         <value val="3.75"/>
       </parameter>
       <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
-      <parameter name="logbook_default_headers" type="string">
-	<value val="SampleDescription,TotalTime,RateMonitor1,TotalCountsDetMain,RateCountsDetMain,StartTime,Wavelength,Attenuator,Collimation,SD,BeamStopY" />
+
+      <parameter name="logbook_default_parameters" type="string">
+	<value val="SampleDescription:/entry0/sample_description,
+		    TotalTime:/entry0/duration,
+		    RateMonitor1:/entry0/monitor1/monrate,
+		    TotalCountsDetMain:/entry0/D11/detector/detsum,
+		    RateCountsDetMain:/entry0/D11/detector/detrate,
+		    StartTime:/entry0/start_time,
+		    Wavelength:/entry0/D11/selector/wavelength,
+		    Attenuator:/entry0/D11/attenuator/attenuation_value,
+		    Collimation:/entry0/D11/collimation/actual_position,
+		    SD:/entry0/D11/detector/det_actual,
+		    BeamStopY:/entry0/D11/beamstop/by_actual" />
       </parameter>
-      <parameter name="logbook_default_entries" type="string">
-	<value val="/entry0/sample_description,/entry0/duration,/entry0/monitor1/monrate,/entry0/D11/detector/detsum,/entry0/D11/detector/detrate,/entry0/start_time,/entry0/D11/selector/wavelength,/entry0/D11/attenuator/attenuation_value,/entry0/D11/collimation/actual_position,/entry0/D11/detector/det_actual,/entry0/D11/beamstop/by_actual" />
-      </parameter>
-      <parameter name="logbook_optional_headers" type="string">
-	<value val="AcquisitionMode,Beamstop,VelocitySelectorSpeed,VelocitySelectorTilt,AttenuationFactor,Diaphragm1,Diaphragm2,Diaphragm3,Diaphragm4,Diaphragm5,Diaphragm6,Guide1,Guide2,Guide3,Guide4,Guide5,Guide6,Guide7,Guide8,Guide9,Guide10,Guide11,Guide12,Guide13,TotalCountsMonitor1,ReactorPower,BeamstopX,TotalCountsDetLeft,TotalCountsDetRight,RateCountsDetLeft,RateCountsDetRight,san,omega,phi,sdi,sht,str,trs,SampleTemperature,AirTemperature,RackTemperature,Bath1Temperature,Bath2Temperature,BathSelector,Thermocouple1,Thermocouple2,SampleChanger,Position,SampleThickness,SampleApertureWidth,SampleApertureHeight" />
-      </parameter>
-      <parameter name="logbook_optional_entries" type="string">
-	<value val="/entry0/acquisition_mode,/entry0/D11/beamstop/actual_beamstop_number,/entry0/D11/selector/rotation_speed,/entry0/D11/selector/selrot_actual,/entry0/D11/attenuator/attenuation_coefficient,/entry0/D11/collimation/diaphragm1_position,/entry0/D11/collimation/diaphragm2_position,/entry0/D11/collimation/diaphragm3_position,/entry0/D11/collimation/diaphragm4_position,/entry0/D11/collimation/diaphragm5_position,/entry0/D11/collimation/diaphragm6_position,/entry0/D11/collimation/coll1_actual_state,/entry0/D11/collimation/coll2_actual_state,/entry0/D11/collimation/coll3_actual_state,/entry0/D11/collimation/coll4_actual_state,/entry0/D11/collimation/coll5_actual_state,/entry0/D11/collimation/coll6_actual_state,/entry0/D11/collimation/coll7_actual_state,/entry0/D11/collimation/coll8_actual_state,/entry0/D11/collimation/coll9_actual_state,/entry0/D11/collimation/coll10_actual_state,/entry0/D11/collimation/coll11_actual_state,/entry0/D11/collimation/coll12_actual_state,/entry0/D11/collimation/coll13_actual_state,/entry0/monitor1/data,/entry0/reactor_power,/entry0/D11/beamstop/bx_actual,/entry0/D11/detectorLeft/detsum,/entry0/D11/detectorRight/detsum,/entry0/D11/detectorLeft/detrate,/entry0/D11/detectorRight/detrate,/entry0/sample/san_actual,/entry0/sample/omega_actual,/entry0/sample/phi_actual,/entry0/sample/sdi_actual,/entry0/sample/sht_actual,/entry0/sample/str_actual,/entry0/sample/trs_actual,/entry0/sample/temperature,/entry0/sample/air_temperature,/entry0/sample/rack_temperature,/entry0/sample/bath1_regulation_temperature,/entry0/sample/bath2_regulation_temperature,/entry0/sample/Actual bath,/entry0/sample/thermo_temperature1,/entry0/sample/thermo_temperature2,/entry0/sample/sample_changer_nickname,/entry0/sample/sample_changer_slot_value,entry0/sample/thickness,/entry0/D11/Beam/sample_ap_x_or_diam,/entry0/D11/Beam/sample_ap_y" />
+      <parameter name="logbook_optional_parameters" type="string">
+	<value val="AcquisitionMode:/entry0/acquisition_mode,
+		    TotalCountsDetAll:/entry0/D11/detector/detsum+/entry0/D11/detectorLeft/detsum+/entry0/D11/detectorRight/detsum
+		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number,
+		    VelocitySelectorSpeed:/entry0/D11/selector/rotation_speed,
+		    VelocitySelectorTilt:/entry0/D11/selector/selrot_actual,
+		    AttenuationFactor:/entry0/D11/attenuator/attenuation_coefficient,
+		    Diaphragm1:/entry0/D11/collimation/diaphragm1_position,
+		    Diaphragm2:/entry0/D11/collimation/diaphragm2_position,
+		    Diaphragm3:/entry0/D11/collimation/diaphragm3_position,
+		    Diaphragm4:/entry0/D11/collimation/diaphragm4_position,
+		    Diaphragm5:/entry0/D11/collimation/diaphragm5_position,
+		    Diaphragm6:/entry0/D11/collimation/diaphragm6_position,
+		    Guide1:/entry0/D11/collimation/coll1_actual_state,
+		    Guide2:/entry0/D11/collimation/coll2_actual_state,
+		    Guide3:/entry0/D11/collimation/coll3_actual_state,
+		    Guide4:/entry0/D11/collimation/coll4_actual_state,
+		    Guide5:/entry0/D11/collimation/coll5_actual_state,
+		    Guide6:/entry0/D11/collimation/coll6_actual_state,
+		    Guide7:/entry0/D11/collimation/coll7_actual_state,
+		    Guide8:/entry0/D11/collimation/coll8_actual_state,
+		    Guide9:/entry0/D11/collimation/coll9_actual_state,
+		    Guide10:/entry0/D11/collimation/coll10_actual_state,
+		    Guide11:/entry0/D11/collimation/coll11_actual_state,
+		    Guide12:/entry0/D11/collimation/coll12_actual_state,
+		    Guide13:/entry0/D11/collimation/coll13_actual_state,
+		    TotalCountsMonitor1:/entry0/monitor1/data,
+		    ReactorPower:/entry0/reactor_power,
+		    BeamstopX:/entry0/D11/beamstop/bx_actual,
+		    TotalCountsDetLeft:/entry0/D11/detectorLeft/detsum,
+		    TotalCountsDetRight:/entry0/D11/detectorRight/detsum,
+		    RateCountsDetLeft:/entry0/D11/detectorLeft/detrate,
+		    RateCountsDetRight:/entry0/D11/detectorRight/detrate,
+		    san:/entry0/sample/san_actual,
+		    omega:/entry0/sample/omega_actual,
+		    phi:/entry0/sample/phi_actual,
+		    sdi:/entry0/sample/sd_actual,
+		    sht:/entry0/sample/sht_actual,
+		    str:/entry0/sample/str_actual,
+		    trs:/entry0/sample/trs_actual,
+		    SampleTemperature:/entry0/sample/temperature,
+		    AirTemperature:/entry0/sample/air_temperature,
+		    RackTemperature:/entry0/sample/rack_temperature,
+		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature,
+		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature,
+		    BathSelector:/entry0/sample/Actual bath,
+		    Thermocouple1:/entry0/sample/thermo_temperature1,
+		    Thermocouple2:/entry0/sample/thermo_temperature2,
+		    SampleChanger:/entry0/sample/sample_changer_nickname,
+		    Position:/entry0/sample/sample_changer_slot_value,
+		    SampleThickness:/entry0/sample/thickness,
+		    SampleApertureWidth:/entry0/D11/Beam/sample_ap_x_or_diam,
+		    SampleApertureHeight:/entry0/D11/Beam/sample_ap_y" />
       </parameter>
     </component-link>
 
