@@ -150,6 +150,20 @@ public:
     removeWorkspaceFromADS(transNameCan);
   }
 
+  void test_that_legacy_transmissions_saved_as_histograms_are_loaded() {
+    NXcanSASTestParameters parameters;
+    parameters.filename = "NXcanSAS-histo-lambda.h5";
+    const std::string outWsName{"loaded_histo_trans"};
+
+    Mantid::API::MatrixWorkspace_sptr wsOut;
+    TS_ASSERT_THROWS_NOTHING(
+        wsOut = load_file_no_issues(parameters, true /*load transmission*/,
+                                    outWsName));
+    TS_ASSERT(!wsOut->isHistogramData());
+
+    removeWorkspaceFromADS(outWsName);
+  }
+
   void test_that_2D_workspace_can_be_loaded() {
     // Arrange
     NXcanSASTestParameters parameters;
