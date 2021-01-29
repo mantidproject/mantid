@@ -307,6 +307,18 @@ void LoadEventNexus::init() {
                   "The number of bins intially defined. Use Rebin to change "
                   "the binning later.  If there is no data loaded, or you "
                   "select meta data only you will only get 1 bin.");
+
+  // Flexible log loading
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+          "AllowList", std::vector<std::string>(), Direction::Input),
+      "If specified, only these logs will be loaded from the file (each "
+      "separated by a space).");
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::vector<std::string>>>(
+          "BlockList", std::vector<std::string>(), Direction::Input),
+      "If specified, these logs will NOT be loaded from the file (each "
+      "separated by a space).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -625,6 +637,115 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
   return out;
 }
 
+/** Load the instrument from the nexus file
+ *
+ * @param nexusfilename :: The name of the nexus file being loaded
+ * @param localWorkspace :: Templated workspace in which to put the instrument
+ *geometry
+ * @param alg :: Handle of the algorithm
+ * @param returnpulsetimes :: flag to return shared pointer for
+ *BankPulseTimes, otherwise NULL.
+ * @param nPeriods : Number of periods (write to)
+ * @param periodLog : Period logs DateAndTime to int map.
+ * @param allow_list: list of properties that will be loaded
+ * @param block_list: list of properties that will be excluded from loading
+ *
+ * @return Pulse times given in the DAS logs
+ */
+template <typename T>
+std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
+    const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
+    bool returnpulsetimes, int &nPeriods,
+    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+    const std::vector<std::string> &allow_list,
+    const std::vector<std::string> &block_list) {
+  // --------------------- Load DAS Logs -----------------
+  // The pulse times will be empty if not specified in the DAS logs.
+  // BankPulseTimes * out = NULL;
+  std::shared_ptr<BankPulseTimes> out;
+  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    alg.getLogger().information() << "Loading logs from NeXus file..."
+                                  << "\n";
+    loadLogs->setPropertyValue("Filename", nexusfilename);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
+                                                     localWorkspace);
+    loadLogs->setProperty<std::vector<std::string>>("AllowList", allow_list);
+    loadLogs->setProperty<std::vector<std::string>>("BlockList", block_list);
+
+    try {
+      loadLogs->setPropertyValue("NXentryName",
+                                 alg.getPropertyValue("NXentryName"));
+    } catch (...) {
+    }
+
+    loadLogs->execute();
+
+    const Run &run = localWorkspace->run();
+    // Get the number of periods
+    if (run.hasProperty("nperiods")) {
+      nPeriods = run.getPropertyValueAsType<int>("nperiods");
+    }
+    // Get the period log. Map of DateAndTime to Period int values.
+    if (run.hasProperty("period_log")) {
+      auto *temp = run.getProperty("period_log");
+      // Check for corrupted period logs
+      std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(
+          dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
+      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods,
+                               nexusfilename);
+    }
+
+    // If successful, we can try to load the pulse times
+    std::vector<Types::Core::DateAndTime> temp;
+    if (localWorkspace->run().hasProperty("proton_charge")) {
+      auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          localWorkspace->mutableRun().getProperty("proton_charge"));
+      if (log)
+        temp = log->timesAsVector();
+    }
+    if (returnpulsetimes)
+      out = std::make_shared<BankPulseTimes>(temp);
+
+    // Use the first pulse as the run_start time.
+    if (!temp.empty()) {
+      if (temp[0] < Types::Core::DateAndTime("1991-01-01T00:00:00"))
+        alg.getLogger().warning() << "Found entries in the proton_charge "
+                                     "sample log with invalid pulse time!\n";
+
+      Types::Core::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      // add the start of the run as a ISO8601 date/time string. The start =
+      // first non-zero time.
+      // (this is used in LoadInstrument to find the right instrument file to
+      // use).
+      localWorkspace->mutableRun().addProperty(
+          "run_start", run_start.toISO8601String(), true);
+    } else {
+      alg.getLogger().warning() << "Empty proton_charge sample log. You will "
+                                   "not be able to filter by time.\n";
+    }
+    /// Attempt to make a gonoimeter from the logs
+    try {
+      Geometry::Goniometer gm;
+      gm.makeUniversalGoniometer();
+      localWorkspace->mutableRun().setGoniometer(gm, true);
+    } catch (std::runtime_error &) {
+    }
+  } catch (const InvalidLogPeriods &) {
+    // Rethrow so LoadEventNexus fails.
+    // If we don't, Mantid will crash.
+    throw;
+  } catch (...) {
+    alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
+                               "sample logs may be missing."
+                            << "\n";
+    return out;
+  }
+  return out;
+}
+
 /** Check for corrupted period logs
  * If data is historical (1 periods, period is labelled 0) then change period
  * labels to 1 If number of periods does not match expected number of periods
@@ -701,6 +822,38 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
   return ret;
 }
 
+/** Load the instrument from the nexus file
+ *
+ * @param nexusfilename :: The name of the nexus file being loaded
+ * @param localWorkspace :: EventWorkspaceCollection in which to put the
+ *instrument
+ *geometry
+ * @param alg :: Handle of the algorithm
+ * @param returnpulsetimes :: flag to return shared pointer for
+ *BankPulseTimes, otherwise NULL.
+ * @param nPeriods : Number of periods (write to)
+ * @param periodLog : Period logs DateAndTime to int map.
+ * @param allow_list: log entry that will be loaded
+ * @param block_list: log entry that will be excluded
+ *
+ * @return Pulse times given in the DAS logs
+ */
+template <>
+std::shared_ptr<BankPulseTimes>
+LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+    const std::string &nexusfilename,
+    EventWorkspaceCollection_sptr localWorkspace, API::Algorithm &alg,
+    bool returnpulsetimes, int &nPeriods,
+    std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+    const std::vector<std::string> &allow_list,
+    const std::vector<std::string> &block_list) {
+  auto ws = localWorkspace->getSingleHeldWorkspace();
+  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(
+      nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog, allow_list,
+      block_list);
+  return ret;
+}
+
 enum class LoadEventNexus::LoaderType { MPI, MULTIPROCESS, DEFAULT };
 
 //-----------------------------------------------------------------------------
@@ -721,6 +874,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Get the time filters
   setTimeFilters(monitors);
 
+  // Get the log filter if provided
+  std::vector<std::string> allow_list = getProperty("AllowList");
+  std::vector<std::string> block_list = getProperty("BlockList");
+
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
   bool takeTimesFromEvents = false;
@@ -732,8 +889,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   if (loadlogs) {
     prog->doReport("Loading DAS logs");
 
-    m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+    if (allow_list.empty() && block_list.empty()) {
+      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
         m_filename, m_ws, *this, true, nPeriods, periodLog);
+    } else {
+      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+          m_filename, m_ws, *this, true, nPeriods, periodLog, allow_list,
+          block_list);
+    }
 
     try {
       run_start = m_ws->getFirstPulseTime();
