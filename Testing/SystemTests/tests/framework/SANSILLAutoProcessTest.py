@@ -32,6 +32,7 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Reference.nxs']
 
     def runTest(self):
@@ -90,6 +91,7 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['out', 'D11_AutoProcess_Wedges_Reference.nxs']
 
     def runTest(self):
@@ -151,6 +153,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
         return ['iqxy', 'D11_AutoProcess_IQxQy_Reference.nxs']
 
     def runTest(self):
