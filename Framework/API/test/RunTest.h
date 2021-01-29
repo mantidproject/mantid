@@ -465,10 +465,9 @@ public:
     runInfo.clearGoniometers();
     TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
 
-    TS_ASSERT_THROWS(runInfo.getGoniometer(0),
-		     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getGoniometer(0), const std::invalid_argument &);
     TS_ASSERT_THROWS(runInfo.getGoniometerMatrix(0),
-		     const std::invalid_argument &);
+                     const std::invalid_argument &);
   }
 
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
@@ -614,6 +613,33 @@ public:
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
     TS_ASSERT(run3.hasProperty("double_val"));
+  }
+
+  /** Save and load to NXS file */
+  void test_nexus_multiple_goniometer() {
+    NexusTestHelper th(true);
+    th.createFile("RunTest2.nxs");
+
+    Run run1;
+    addTimeSeriesEntry(run1, "phi", 12.3);
+    addTimeSeriesEntry(run1, "chi", 45.6);
+    addTimeSeriesEntry(run1, "omega", 78.9);
+    addTimeSeriesEntry(run1, "proton_charge", 78.9);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    run1.setGoniometer(gm, true);
+    run1.addGoniometer(run1.getGoniometer(0));
+    run1.addGoniometer(Goniometer());
+
+    run1.saveNexus(th.file.get(), "logs");
+    th.file->openGroup("logs", "NXgroup");
+
+    // ---- Now re-load the same and compare ------
+    th.reopenFile();
+    Run run2;
+    run2.loadNexus(th.file.get(), "logs");
+    TS_ASSERT_EQUALS(run2, run1);
   }
 
   void test_setGoniometerWithLogsUsesTimeSeriesAverage() {

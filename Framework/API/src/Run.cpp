@@ -35,6 +35,7 @@ const std::string ADDABLE[ADDABLES] = {
     "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
+const char *GONIOMETERS_LOG_NAME = "goniometers";
 /// Name of the stored histogram bins log when saved to NeXus
 const char *HISTO_BINS_LOG_NAME = "processed_histogram_bins";
 const char *PEAK_RADIUS_GROUP = "peak_radius";
@@ -444,7 +445,16 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
-  m_goniometers[0]->saveNexus(file, GONIOMETER_LOG_NAME);
+  if (m_goniometers.size() == 1)
+    m_goniometers[0]->saveNexus(file, GONIOMETER_LOG_NAME);
+  else if (m_goniometers.size() > 1) {
+    file->makeGroup(GONIOMETERS_LOG_NAME, "NXcollection", true);
+    file->writeData("num_goniometer", int(m_goniometers.size()));
+    for (size_t i = 0; i < m_goniometers.size(); i++) {
+      m_goniometers[i]->saveNexus(file, "goniometer" + std::to_string(i));
+    }
+    file->closeGroup();
+  }
 
   // write the histogram bins, if there are any
   if (!m_histoBins.empty()) {
@@ -498,9 +508,20 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   file->getEntries(entries);
   LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
-    if (name_class.second == "NXpositioner") {
+    if (name_class.first == GONIOMETER_LOG_NAME) {
       // Goniometer class
       m_goniometers[0]->loadNexus(file, name_class.first);
+    } else if (name_class.first == GONIOMETERS_LOG_NAME) {
+      file->openGroup(name_class.first, "NXcollection");
+      int num_goniometer;
+      file->readData("num_goniometer", num_goniometer);
+      m_goniometers.clear();
+      m_goniometers.reserve(num_goniometer);
+      for (int i = 0; i < num_goniometer; i++) {
+        m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
+        m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
+      }
+      file->closeGroup();
     } else if (name_class.first == HISTO_BINS_LOG_NAME) {
       file->openGroup(name_class.first, "NXdata");
       file->readData("value", m_histoBins);
