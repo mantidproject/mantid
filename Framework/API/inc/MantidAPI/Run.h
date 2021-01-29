@@ -76,9 +76,13 @@ public:
   /// Returns the vector of bin boundaries
   std::vector<double> getBinBoundaries() const;
 
-  /// Set the gonoimeter & read the values from the logs if told to do so
+  /// Set a single gonoimeter & read the average values from the logs if told to
+  /// do so
   void setGoniometer(const Geometry::Goniometer &goniometer,
                      const bool useLogValues);
+  /// Set the gonoimeters using the individual values from the logs if told to
+  /// do so
+  void setGoniometer(const Geometry::Goniometer &goniometer);
   /** @return A reference to the const Goniometer object for this run */
   const Geometry::Goniometer &getGoniometer() const;
 
@@ -104,8 +108,10 @@ public:
                  bool keepOpen = false) override;
 
 private:
-  /// Calculate the gonoimeter matrix
-  void calculateGoniometerMatrix();
+  /// Calculate the average gonoimeter matrix
+  void calculateAverageGoniometerMatrix();
+  /// Calculate the gonoimeter matrices from logs
+  void calculateGoniometerMatrices(Geometry::Goniometer goniometer);
 
   /// Goniometer for this run
   std::vector<std::unique_ptr<Geometry::Goniometer>> m_goniometers;
