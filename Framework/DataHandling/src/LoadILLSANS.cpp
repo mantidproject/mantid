@@ -186,6 +186,9 @@ void LoadILLSANS::exec() {
     // mm to meter
     offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
     moveDetectorHorizontal(-offset / 1000, "detector_right");
+    double angle =
+        firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
+    rotateInstrument(-angle, "detector_right");
 
   } else {
     // D11 and D22
@@ -202,10 +205,6 @@ void LoadILLSANS::exec() {
       double offset = m_loadHelper.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
-      /*TODO: DO NOT ROTATE UNTIL CONFIRMED BY INSTRUMENT SCIENTIST
-      double angle = m_loader.getDoubleFromNexusPath(
-          firstEntry, instrumentPath + "/detector/dan_actual");
-      rotateD22(angle, "detector");*/
     }
   }
 
@@ -220,9 +219,8 @@ void LoadILLSANS::exec() {
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
   if (instrumentNamePath.empty()) {
-    std::string message("Cannot set the instrument name from the Nexus file!");
-    g_log.error(message);
-    throw std::runtime_error(message);
+    throw std::runtime_error(
+        "Cannot set the instrument name from the Nexus file!");
   }
   m_instrumentName = m_loadHelper.getStringFromNexusPath(
       firstEntry, instrumentNamePath + "/name");
