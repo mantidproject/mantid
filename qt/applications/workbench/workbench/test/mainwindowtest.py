@@ -24,10 +24,9 @@ from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu 
 
 @start_qapplication
 class MainWindowTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         from workbench.app.mainwindow import MainWindow
-        cls.main_window = MainWindow()
+        self.main_window = MainWindow()
 
     @patch("workbench.app.mainwindow.find_window")
     def test_launch_custom_cpp_gui_creates_interface_if_not_already_open(self, mock_find_window):
@@ -84,9 +83,8 @@ class MainWindowTest(unittest.TestCase):
 
     @patch('workbench.app.mainwindow.add_actions')
     def test_file_view_and_help_menus_are_correct(self, mock_add_actions):
-        from workbench.app.mainwindow import MainWindow
-        main_window = MainWindow()
-        main_window.editor = Mock()
+        self.main_window.editor = Mock()
+        self.main_window.populate_interfaces_menu = Mock()
         expected_file_menu_items = ['Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu, 'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None, 'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit']
         expected_view_menu_items = ['Restore Default Layout', None]  # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
         expected_help_menu_items = ['Mantid Help', 'Mantid Concepts', 'Algorithm Descriptions', None, 'Mantid Homepage', 'Mantid Forum', None, 'About Mantid Workbench']
@@ -94,21 +92,23 @@ class MainWindowTest(unittest.TestCase):
         convert_actions_to_texts = lambda menu_actions: \
             [a.text() if isinstance(a, QAction) else a if not a else type(a) for a in menu_actions]
 
-        main_window.create_menus()
-        main_window.create_actions()
-        main_window.populate_menus()
+        self.main_window.create_menus()
+        self.main_window.create_actions()
+        self.main_window.populate_menus()
 
-        actual_file_menu_items = convert_actions_to_texts(main_window.file_menu_actions)
-        actual_view_menu_items = convert_actions_to_texts(main_window.view_menu_actions)
-        actual_help_menu_items = convert_actions_to_texts(main_window.help_menu_actions)
-
+        self.main_window.populate_interfaces_menu.assert_called()
+        actual_file_menu_items = convert_actions_to_texts(self.main_window.file_menu_actions)
+        actual_view_menu_items = convert_actions_to_texts(self.main_window.view_menu_actions)
+        actual_help_menu_items = convert_actions_to_texts(self.main_window.help_menu_actions)
         self.assertEqual(expected_file_menu_items, actual_file_menu_items)
         self.assertEqual(expected_view_menu_items, actual_view_menu_items)
         self.assertEqual(expected_help_menu_items, actual_help_menu_items)
-        mock_add_actions.add_actions.assert_has_calls([
-            call(main_window.file_menu, main_window.file_menu_actions),
-            call(main_window.view_menu, main_window.view_menu_actions),
-            call(main_window.help_menu, main_window.help_menu_actions),
+        print(self.main_window.file_menu, self.main_window.file_menu_actions)
+        print(mock_add_actions.call_args)
+        mock_add_actions.assert_has_calls([
+            call(self.main_window.file_menu, self.main_window.file_menu_actions),
+            call(self.main_window.view_menu, self.main_window.view_menu_actions),
+            call(self.main_window.help_menu, self.main_window.help_menu_actions),
         ])
 
     @patch('workbench.app.mainwindow.ConfigService')
@@ -206,8 +206,8 @@ class MainWindowTest(unittest.TestCase):
     def test_main_window_does_not_close_if_project_not_saved_and_user_cancels_project_save(self):
         mock_event = Mock()
         mock_project = Mock()
-        mock_project.saved = False
-        mock_project.offer_save = Mock(return_value=False)  # user cancels when save offered
+        mock_project.is_saving, mock_project.is_loading, mock_project.saved, = False, False, False
+        mock_project.offer_save = Mock(return_value=True)  # user cancels when save offered
         self.main_window.project = mock_project
 
         self.main_window.closeEvent(mock_event)
