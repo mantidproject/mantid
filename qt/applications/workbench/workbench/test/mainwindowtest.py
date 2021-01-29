@@ -18,7 +18,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import FrameworkManager
 
-from qtpy.QtWidgets import QMessageBox, QAction, QApplication
+from qtpy.QtWidgets import QMessageBox, QAction, QApplication, QMenu
 
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 
@@ -83,7 +83,7 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.menuBar().addMenu.assert_has_calls(expected_calls, any_order=False)
 
     @patch('workbench.app.mainwindow.add_actions')
-    def test_menus_are_correct(self, mock_add_actions):
+    def test_file_view_and_help_menus_are_correct(self, mock_add_actions):
         from workbench.app.mainwindow import MainWindow
         main_window = MainWindow()
         main_window.editor = Mock()
@@ -110,6 +110,76 @@ class MainWindowTest(unittest.TestCase):
             call(main_window.view_menu, main_window.view_menu_actions),
             call(main_window.help_menu, main_window.help_menu_actions),
         ])
+
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('workbench.app.mainwindow.add_actions')
+    def test_interfaces_menu_texts_are_correct(self, _, mock_ConfigService):
+        interface_dir = './interfaces/'
+        example_interfaces = {
+            'General': ['TOFCalculator'],
+            'Direct': ['DGS_Reduction.py', 'DGSPlanner.py', 'PyChop.py', 'MSlice.py', 'ALF View']
+        }
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: \
+                '' if arg == 'interfaces.categories.hidden' else \
+                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
+                None
+        self.main_window._discover_python_interfaces = Mock(return_value=example_interfaces)
+        self.main_window._discover_cpp_interfaces = Mock()
+
+        self.main_window.create_menus()
+        self.main_window.populate_interfaces_menu()
+
+        expected_menu_texts = ['Direct', 'General']  # Alphabetical order
+        actual_menu_texts = [action.text() for action in self.main_window.interfaces_menu.actions()]
+        self.assertEqual(expected_menu_texts, actual_menu_texts)
+        expected_direct_texts = ['ALF View', 'DGSPlanner', 'DGS Reduction', 'MSlice', 'PyChop']
+        expected_general_texts = ['TOFCalculator']
+        submenus = list(filter(lambda child: isinstance(child, QMenu), self.main_window.interfaces_menu.children()))
+        actual_direct_texts = [action.text() for action in submenus[0].actions()]
+        actual_general_texts = [action.text() for action in submenus[1].actions()]
+        self.assertEqual(expected_direct_texts, actual_direct_texts)
+        self.assertEqual(expected_general_texts, actual_general_texts)
+
+    @patch('workbench.app.mainwindow.ConfigService')
+    @patch('workbench.app.mainwindow.add_actions')
+    def test_that_populate_interfaces_menu_discovers_interfaces(self, _, mock_ConfigService):
+        interface_dir = './interfaces/'
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: \
+                '' if arg == 'interfaces.categories.hidden' else \
+                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
+                None
+        self.main_window._discover_python_interfaces = Mock(return_value={'category': ['interface.py']})
+        self.main_window._discover_cpp_interfaces = Mock()
+
+        self.main_window.create_menus()
+        self.main_window.populate_interfaces_menu()
+
+        self.main_window._discover_python_interfaces.assert_called_with(
+            interface_dir, self.main_window.PYTHON_GUI_BLACKLIST
+        )
+        self.main_window._discover_cpp_interfaces.assert_called_with(
+            self.main_window._discover_python_interfaces.return_value
+        )
+
+    @patch('workbench.app.mainwindow.ConfigService')
+    def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self, mock_ConfigService):
+        interface_dir = './interfaces/'
+        mock_ConfigService.__getitem__.side_effect = \
+            lambda arg: \
+                'category1;category2' if arg == 'interfaces.categories.hidden' else \
+                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
+                None
+        self.main_window._discover_python_interfaces = Mock(return_value={
+            'category1': ['interface1.py'], 'category2': ['interface2.py']
+        })
+        self.main_window._discover_cpp_interfaces = Mock()
+
+        with patch.object(self.main_window, 'interfaces_menu') as mock_interfaces_menu:
+            self.main_window.populate_interfaces_menu()
+
+            mock_interfaces_menu.addMenu.assert_not_called()
 
     def test_main_window_does_not_close_when_project_is_saving(self):
         mock_event = Mock()
@@ -212,7 +282,7 @@ class MainWindowTest(unittest.TestCase):
     @patch('workbench.app.mainwindow.logger')
     @patch('workbench.app.mainwindow.ConfigService')
     @patch('os.path.exists')
-    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
+    def test_that_blacklisted_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
         interface_str = 'blacklisted/interface.py'
         mock_os_path_exists.return_value = True
         mock_ConfigService.__getitem__.side_effect = \
@@ -242,6 +312,8 @@ class MainWindowTest(unittest.TestCase):
         }
         self.assertDictEqual(expected_interfaces, all_interfaces)
 
+    def test_that_after_mainwindow_setup_stdout_and_stderr_are_captured(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
