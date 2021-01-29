@@ -160,9 +160,6 @@ void LoadILLSANS::exec() {
     double currentDistance = pos.Z();
 
     moveDetectorDistance(finalDistance - currentDistance, "detector");
-
-    // L2 was put at "finalDistance - currentDistance", so we update it to the
-    // correct value
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", finalDistance, true);
 
@@ -173,30 +170,35 @@ void LoadILLSANS::exec() {
 
     // first we move the central detector
     double distance =
-        firstEntry.getFloat(instrumentPath + "/Detector/det_calc");
+        firstEntry.getFloat(instrumentPath + "/Detector 2/det2_calc");
     moveDetectorDistance(distance, "detector");
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", distance, true);
 
     double offset =
-        firstEntry.getFloat(instrumentPath + "/Detector/dtr_actual");
-    // TODO : check sign on actual data
+        firstEntry.getFloat(instrumentPath + "/Detector 2/dtr2_actual");
     moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
 
     // then the right one
-    distance = firstEntry.getFloat(instrumentPath + "/RightDetector/det_calc");
+    distance = firstEntry.getFloat(instrumentPath + "/Detector 1/det1_calc");
     moveDetectorDistance(distance, "detector_right");
 
-    offset = firstEntry.getFloat(instrumentPath + "/RightDetector/dtr_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+    // mm to meter
+    offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
+    const double initialOffset = getComponentPosition("detector_right").X();
+    moveDetectorHorizontal(-offset / 1000, "detector_right");
 
   } else {
+    // D11 and D22
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
     double distance = m_loadHelper.getDoubleFromNexusPath(
         firstEntry, instrumentPath + "/detector/det_calc");
-
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", distance, true);
     if (m_instrumentName == "D22") {
       double offset = m_loadHelper.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
@@ -211,7 +213,7 @@ void LoadILLSANS::exec() {
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
-} // namespace DataHandling
+}
 
 /**
  * Set member variable with the instrument name
@@ -356,11 +358,11 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
-  NXInt dataCenter = data1.openIntData();
-  dataCenter.load();
   NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataSide = data2.openIntData();
+  NXInt dataCenter = data2.openIntData();
+  dataCenter.load();
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataSide = data1.openIntData();
   dataSide.load();
 
   size_t numberOfHistograms =
@@ -681,8 +683,6 @@ void LoadILLSANS::moveDetectorDistance(double distance,
 
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
-  API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**
