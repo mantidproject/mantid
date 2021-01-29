@@ -228,9 +228,9 @@ public:
     double dan1_act = run.getLogAsSingleValue("Detector 1.dan1_actual");
     double angle, qx, qy, qz;
     comp->getRotation().getAngleAxis(angle, qx, qy, qz);
-    TS_ASSERT_DELTA(-angle, dan1_act, 1E-6)
+    TS_ASSERT_DELTA(angle, dan1_act, 1E-6)
     TS_ASSERT_EQUALS(qx, 0.)
-    TS_ASSERT_EQUALS(qy, 1.)
+    TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
     TS_ASSERT_EQUALS(qz, 0.)
     checkTimeFormat(outputWS);
   }
