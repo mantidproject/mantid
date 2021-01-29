@@ -52,7 +52,6 @@ Run::Run() {
 }
 
 Run::Run(const Run &other) : LogManager(other), m_histoBins(other.m_histoBins) {
-
   this->copyGoniometers(other);
 }
 
@@ -400,12 +399,14 @@ size_t Run::addGoniometer(const Geometry::Goniometer &goniometer) {
   return m_goniometers.size() - 1;
 }
 
+//-----------------------------------------------------------------------------------------------
+/// Remove all goniometers on the Run
 void Run::clearGoniometers() { m_goniometers.clear(); }
 
 //-----------------------------------------------------------------------------------------------
 /** Get the Goniometer for the given run index
  *
- * @param index :: 0-based index of the run to get.
+ * @param index :: index of the run to get.
  * @return goniometer
  */
 const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
@@ -415,7 +416,12 @@ const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
   return *m_goniometers[index];
 }
 
-/** @return A reference to the non-const Goniometer object for this run */
+//-----------------------------------------------------------------------------------------------
+/** Get the non-const Goniometer for the given run index
+ *
+ * @param index :: index of the run to get.
+ * @return goniometer
+ */
 Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
   if (index >= m_goniometers.size())
     throw std::invalid_argument(
@@ -429,7 +435,7 @@ Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
  *
  * As of now, it uses the MEAN angle.
  *
- * @param index :: 0-based index of the run to get.
+ * @param index :: index of the run to get.
  * @return 3x3 double rotation matrix
  */
 const Mantid::Kernel::DblMatrix &
@@ -440,6 +446,10 @@ Run::getGoniometerMatrix(const size_t index) const {
   return m_goniometers[index]->getR();
 }
 
+/** Get a vector of all the gonoimeter rotation matries
+ *
+ * @return vector of 3x3 double rotation matrix
+ */
 const std::vector<Kernel::Matrix<double>> Run::getGoniometerMatrices() const {
   std::vector<Kernel::Matrix<double>> goniometers;
   goniometers.reserve(m_goniometers.size());

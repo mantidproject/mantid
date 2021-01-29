@@ -80,24 +80,30 @@ public:
   /// do so
   void setGoniometer(const Geometry::Goniometer &goniometer,
                      const bool useLogValues);
-  /// Set the gonoimeters using the individual values from the logs if told to
-  /// do so
+  /// Set the gonoimeters using the individual values
   void setGoniometer(const Geometry::Goniometer &goniometer);
-  /** @return A reference to the const Goniometer object for this run */
+  /// Return reference to the first const Goniometer object for this run
   const Geometry::Goniometer &getGoniometer() const;
 
-  /** @return A reference to the non-const Goniometer object for this run */
+  /// Return reference to the first non-const Goniometer object for this run
   Geometry::Goniometer &mutableGoniometer();
 
-  // Retrieve the goniometer rotation matrix
+  /// Retrieve the first goniometer rotation matrix
   const Kernel::Matrix<double> &getGoniometerMatrix() const;
 
+  /// Return reference to a const Goniometer object for the run
   const Geometry::Goniometer &getGoniometer(const size_t index) const;
+  /// Return reference to a non-const Goniometer object for the run
   Geometry::Goniometer &mutableGoniometer(const size_t index);
+  /// Get the number of goniometers in the Run
   size_t getNumGoniometers() const;
+  /// Retrieve the a goniometer rotation matrix
   const Kernel::Matrix<double> &getGoniometerMatrix(const size_t index) const;
+  /// Append a goniometer to the run
   size_t addGoniometer(const Geometry::Goniometer &goniometer);
+  /// Clear all goniometers on the Run
   void clearGoniometers();
+  /// Get vector of all goniometer matrices in the Run
   const std::vector<Kernel::Matrix<double>> getGoniometerMatrices() const;
 
   /// Save the run to a NeXus file with a given group name
