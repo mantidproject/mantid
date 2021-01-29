@@ -11,19 +11,21 @@ Algorithms and instruments
 Improvements
 ############
 
-- In the :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` algorithm, the beam radius can made be different for each
-  distance with the ``TransmissionBeamRadius`` parameter. The default value of all beam radii is now 0.1m.
-- In the :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` algorithm, if sample thickness is set to -1, the algorithm
-  will try to get it from the nexus file.
-- In the :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` algorithm, the output workspace will get its title from the
-  nexus file.
-- The :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` algorithm now utilises the WavelengthRange for TOF reduction.
-- The Rectangle option in the :ref:`SolidAngle <algm-SolidAngle>` algorithm is now supported for ILL's D22 and D33.
-- The :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` algorithm nopw accepts more than one transmission per
-  processing, this is consistent with number of sample runs.
-- Support has been added for D11, D16, D22 and D33 in the :ref:`MaskBTP <algm-MaskBTP>` algorithm.
-- Instrument definitions have been added for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
-- Loader and MaskBTP support have been added for D11B and D22B.
+- Added instrument definitions for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
+- Added support for D11, D16, D22 and D33 in the :ref:`MaskBTP <algm-MaskBTP>` algorithm.
+- Several improvements have been done in ILL SANS suite :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`:
+    - The beam radius can be different for each distance.
+    - A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission measurements.
+    - The default value of all the beam radii is now 0.1m.
+    - If sample thickness is set to -1, the algorithm will try to get it from the nexus file itself.
+    - The output workspace will get its title from the nexus file.
+    - WavelengthRange is exposed to the algorithm, which is crucial for TOF reduction.
+    - There can be multiple inputs for sensitivity calculation. A new parameter, SensitivityWithOffsets, has been added
+      to mark that these multiple sensitivities should be processed separately and specially merged before calculation
+      of the efficiency to remove gaps caused by beam stop mask.
+    - More than one transmission per processing, consistent with number of sample runs, are now accepted.
+- The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+- Added loader and MaskBTP support for D11B and D22B.
 
 Bugfixes
 ########
