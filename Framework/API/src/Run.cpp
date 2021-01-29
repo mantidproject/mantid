@@ -339,7 +339,7 @@ Geometry::Goniometer &Run::mutableGoniometer() { return *m_goniometers[0]; }
 //-----------------------------------------------------------------------------------------------
 /**
  * Set the gonoimeter & optionally read the average values from the logs
- * @param goniometer :: A refernce to a goniometer
+ * @param goniometer :: A reference to a goniometer
  * @param useLogValues :: If true, recalculate the goniometer using the log
  * values
  */
@@ -350,7 +350,22 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
     m_goniometers.emplace_back(
         std::make_unique<Geometry::Goniometer>(goniometer));
     if (useLogValues)
-      calculateGoniometerMatrix();
+      calculateAverageGoniometerMatrix();
+  } catch (std::runtime_error &) {
+    m_goniometers = std::move(old);
+    throw;
+  }
+}
+
+//-----------------------------------------------------------------------------------------------
+/**
+ * Set the gonoimeter & read the individual values from the logs
+ * @param goniometer :: A reference to a goniometer
+ */
+void Run::setGoniometer(const Geometry::Goniometer &goniometer) {
+  auto old = std::move(m_goniometers);
+  try {
+    calculateGoniometerMatrices(goniometer);
   } catch (std::runtime_error &) {
     m_goniometers = std::move(old);
     throw;
@@ -572,9 +587,9 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 //-----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Calculate the goniometer matrix
+ * Calculate the average goniometer matrix
  */
-void Run::calculateGoniometerMatrix() {
+void Run::calculateAverageGoniometerMatrix() {
   for (size_t i = 0; i < m_goniometers[0]->getNumberAxes(); ++i) {
     const std::string axisName = m_goniometers[0]->getAxis(i).name;
     const double minAngle =
@@ -614,6 +629,39 @@ void Run::calculateGoniometerMatrix() {
       }
     }
     m_goniometers[0]->setRotationAngle(i, angle);
+  }
+}
+
+/**
+ * Calculate the goniometer matrixes from logs
+ * @param goniometer goniometer with axes names to use
+ */
+void Run::calculateGoniometerMatrices(Geometry::Goniometer goniometer) {
+  if (goniometer.getNumberAxes() == 0)
+    throw std::runtime_error(
+        "Run::calculateGoniometerMatrices must include axes for goniometer");
+
+  const size_t num_log_values =
+      getTimeSeriesProperty<double>(goniometer.getAxis(0).name)->size();
+
+  m_goniometers.clear();
+  m_goniometers.reserve(num_log_values);
+
+  for (size_t i = 0; i < num_log_values; ++i)
+    m_goniometers.emplace_back(
+        std::make_unique<Geometry::Goniometer>(goniometer));
+
+  for (size_t i = 0; i < goniometer.getNumberAxes(); ++i) {
+    const auto angles =
+        getTimeSeriesProperty<double>(goniometer.getAxis(i).name)
+            ->valuesAsVector();
+    if (angles.size() != num_log_values)
+      throw std::runtime_error("Run::calculateGoniometerMatrices different "
+                               "number of log entries between axes");
+
+    for (size_t j = 0; j < num_log_values; ++j) {
+      m_goniometers[j]->setRotationAngle(i, angles[j]);
+    }
   }
 }
 

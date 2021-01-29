@@ -117,6 +117,68 @@ public:
     TS_ASSERT_EQUALS(gon.getAxis(2).angle, 45);
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
+
+  void test_multiple_goniometers() {
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace("SetMutipleGoniometerTest_ws",
+                                                 ws);
+    FrameworkManager::Instance().exec(
+        "AddTimeSeriesLog", 8, "Workspace", "SetMutipleGoniometerTest_ws",
+        "Name", "angle1", "Time", "2010-01-01T00:00:00", "Value", "0.0");
+    FrameworkManager::Instance().exec(
+        "AddTimeSeriesLog", 8, "Workspace", "SetMutipleGoniometerTest_ws",
+        "Name", "angle1", "Time", "2010-01-01T00:01:00", "Value", "90.0");
+
+    FrameworkManager::Instance().exec(
+        "AddTimeSeriesLog", 8, "Workspace", "SetMutipleGoniometerTest_ws",
+        "Name", "angle2", "Time", "2010-01-01T00:00:00", "Value", "90.0");
+
+    FrameworkManager::Instance().exec(
+        "AddTimeSeriesLog", 8, "Workspace", "SetMutipleGoniometerTest_ws",
+        "Name", "angle2", "Time", "2010-01-01T00:01:00", "Value", "0.0");
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Workspace", "SetMutipleGoniometerTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis0", "angle1, 1,0,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Axis1", "angle2, 0,1,0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Average", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted()); // no log values
+
+    // Check the results
+    TS_ASSERT_EQUALS(ws->run().getNumGoniometers(), 2);
+
+    const Goniometer &gon = ws->mutableRun().getGoniometer(0);
+    TS_ASSERT_EQUALS(gon.getNumberAxes(), 2);
+
+    TS_ASSERT_EQUALS(gon.getAxis(0).name, "angle1");
+    TS_ASSERT_EQUALS(gon.getAxis(0).rotationaxis, V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(gon.getAxis(0).sense, 1);
+    TS_ASSERT_EQUALS(gon.getAxis(0).angle, 0.0);
+
+    TS_ASSERT_EQUALS(gon.getAxis(1).name, "angle2");
+    TS_ASSERT_EQUALS(gon.getAxis(1).rotationaxis, V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(gon.getAxis(1).sense, 1);
+    TS_ASSERT_EQUALS(gon.getAxis(1).angle, 90.0);
+
+    const Goniometer &gon2 = ws->mutableRun().getGoniometer(1);
+    TS_ASSERT_EQUALS(gon2.getNumberAxes(), 2);
+
+    TS_ASSERT_EQUALS(gon2.getAxis(0).name, "angle1");
+    TS_ASSERT_EQUALS(gon2.getAxis(0).rotationaxis, V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(gon2.getAxis(0).sense, 1);
+    TS_ASSERT_EQUALS(gon2.getAxis(0).angle, 90.0);
+
+    TS_ASSERT_EQUALS(gon2.getAxis(1).name, "angle2");
+    TS_ASSERT_EQUALS(gon2.getAxis(1).rotationaxis, V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(gon2.getAxis(1).sense, 1);
+    TS_ASSERT_EQUALS(gon2.getAxis(1).angle, 0.0);
+    AnalysisDataService::Instance().remove("SetMultipleGoniometerTest_ws");
+  }
+
   void test_universal() {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetUnivGoniometerTest_ws",

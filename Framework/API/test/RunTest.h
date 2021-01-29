@@ -665,6 +665,53 @@ public:
     TS_ASSERT_EQUALS(gm.getAxis(2).angle, 45.6);
   }
 
+  void test_setGoniometerWithLogsUsesTimeSeries() {
+    Run run;
+
+    auto omega = std::make_unique<TimeSeriesProperty<double>>("omega");
+    omega->addValue("2018-01-01T00:00:00", 0.0);
+    omega->addValue("2018-01-01T01:00:00", 90.0);
+    omega->addValue("2018-01-01T02:00:00", 0.0);
+    run.addProperty(omega.release());
+
+    auto chi = std::make_unique<TimeSeriesProperty<double>>("chi");
+    chi->addValue("2018-01-01T00:00:00", 0.0);
+    chi->addValue("2018-01-01T01:00:00", 0.0);
+    chi->addValue("2018-01-01T02:00:00", 0.0);
+    run.addProperty(chi.release());
+
+    addTimeSeriesEntry(run, "phi", 0.0);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    TS_ASSERT_THROWS(run.setGoniometer(gm), const std::runtime_error &);
+
+    auto phi = std::make_unique<TimeSeriesProperty<double>>("phi");
+    phi->addValue("2018-01-01T00:00:00", 0.0);
+    phi->addValue("2018-01-01T01:00:00", 0.0);
+    phi->addValue("2018-01-01T02:00:00", 90.0);
+    run.addProperty(phi.release(), true);
+
+    run.setGoniometer(gm);
+
+    TS_ASSERT_EQUALS(run.getNumGoniometers(), 3);
+
+    gm = run.getGoniometer(0);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 0.0, 1e-7);
+
+    gm = run.getGoniometer(1);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 90.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 0.0, 1e-7);
+
+    gm = run.getGoniometer(2);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 90.0, 1e-7);
+  }
+
   /** Check for loading the old way of saving proton_charge */
   void test_legacy_nexus() {
     NexusTestHelper th(true);
