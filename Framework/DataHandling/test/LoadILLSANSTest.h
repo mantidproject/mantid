@@ -208,8 +208,8 @@ public:
     V3D pos = comp->getPos();
     TS_ASSERT(run.hasProperty("Detector 2.det2_calc"))
     double det2_calc = run.getLogAsSingleValue("Detector 2.det2_calc");
-    TS_ASSERT(run.hasProperty("Detector_2.dtr2_actual"))
-    double dtr2_act = run.getLogAsSingleValue("Detector_2.dtr2_actual");
+    TS_ASSERT(run.hasProperty("Detector 2.dtr2_actual"))
+    double dtr2_act = run.getLogAsSingleValue("Detector 2.dtr2_actual");
     TS_ASSERT_DELTA(pos.Z(), det2_calc, 1E-6)
     TS_ASSERT_DELTA(pos.X(), -dtr2_act / 1000., 1E-6)
     TS_ASSERT(run.hasProperty("L2"))
@@ -220,8 +220,8 @@ public:
     pos = comp->getPos();
     TS_ASSERT(run.hasProperty("Detector 1.det1_calc"))
     double det1_calc = run.getLogAsSingleValue("Detector 1.det1_calc");
-    TS_ASSERT(run.hasProperty("Detector_1.dtr1_actual"))
-    double dtr1_act = run.getLogAsSingleValue("Detector_1.dtr1_actual");
+    TS_ASSERT(run.hasProperty("Detector 1.dtr1_actual"))
+    double dtr1_act = run.getLogAsSingleValue("Detector 1.dtr1_actual");
     TS_ASSERT_DELTA(pos.Z(), det1_calc, 1E-6)
     TS_ASSERT_DELTA(pos.X(), -dtr1_act / 1000., 1E-6)
 
