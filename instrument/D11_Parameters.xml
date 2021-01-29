@@ -40,7 +40,7 @@
       </parameter>
       <parameter name="logbook_optional_parameters" type="string">
 	<value val="AcquisitionMode:/entry0/acquisition_mode,
-		    TotalCountsDetAll:/entry0/D11/detector/detsum+/entry0/D11/detectorLeft/detsum+/entry0/D11/detectorRight/detsum
+		    TotalCountsDetAll:/entry0/D11/detector/detsum+/entry0/D11/detectorLeft/detsum+/entry0/D11/detectorRight/detsum,
 		    Beamstop:/entry0/D11/beamstop/actual_beamstop_number,
 		    VelocitySelectorSpeed:/entry0/D11/selector/rotation_speed,
 		    VelocitySelectorTilt:/entry0/D11/selector/selrot_actual,
