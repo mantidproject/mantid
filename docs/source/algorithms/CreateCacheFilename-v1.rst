@@ -72,7 +72,8 @@ Usage
       pm.setProperty(p, "fish")
       continue
   mantid.PropertyManagerDataService.add("excreatecachefilename", pm)
-  other_props = ["A=1", "B=2"]
+  other_props = [f'{key}={val}' for key, val in
+                 {"A": 1, "B": 2}.items()]
   # Execute
   cache_path, signature = CreateCacheFilename(
       PropertyManager = "excreatecachefilename",
