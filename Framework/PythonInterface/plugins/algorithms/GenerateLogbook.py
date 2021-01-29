@@ -128,25 +128,25 @@ class GenerateLogbook(PythonAlgorithm):
         LoadEmptyInstrument(InstrumentName=self._instrument, OutputWorkspace=tmp_instr)
         parameters = mtd[tmp_instr].getInstrument()
         try:
-            logbook_entries = parameters.getStringParameter('logbook_default_entries')[0]
-            logbook_headers = parameters.getStringParameter('logbook_default_headers')[0]
-            self._metadata_entries += logbook_entries.split(',')
-            self._metadata_headers += logbook_headers.split(',')
+            logbook_default_parameters = (parameters.getStringParameter('logbook_default_parameters')[0]).split(',')
+            for parameter in logbook_default_parameters:
+                parameter = parameter.split(':')
+                self._metadata_headers.append(str(parameter[0]).strip()) # removes whitespaces
+                self._metadata_entries.append(parameter[1])
         except IndexError:
             raise RuntimeError("The default logbook entries and headers are not defined for {}".format(self._instrument))
         default_entries = list(self._metadata_entries)
 
         if not self.getProperty('OptionalHeaders').isDefault:
             try:
-                logbook_optional_entries = parameters.getStringParameter('logbook_optional_entries')[0]
-                logbook_optional_headers = parameters.getStringParameter('logbook_optional_headers')[0]
+                logbook_optional_parameters = parameters.getStringParameter('logbook_optional_parameters')[0]
             except IndexError:
                 raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
             else:
-                logbook_optional_entries = logbook_optional_entries.split(',')
-                logbook_optional_headers = logbook_optional_headers.split(',')
-                optional_entries = {header : entry for header, entry in zip(logbook_optional_headers,
-                                                                            logbook_optional_entries)}
+                logbook_optional_parameters = logbook_optional_parameters.split(',')
+                # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
+                optional_entries = {str(entry.split(':')[0]).strip() : entry.split(':')[1]
+                                    for entry in logbook_optional_parameters}
                 requested_headers = self.getPropertyValue('OptionalHeaders').split(',')
                 for header in requested_headers:
                     if header in optional_entries:
@@ -160,16 +160,23 @@ class GenerateLogbook(PythonAlgorithm):
             logbook_custom_entries = self.getPropertyValue('CustomEntries')
             logbook_custom_entries = logbook_custom_entries.split(',')
             self._metadata_entries += logbook_custom_entries
+            logbook_custom_headers = [""]*len(logbook_custom_entries)
             if self.getProperty('CustomHeaders').isDefault:
                 # derive headers from custom entries:
-                for entry in logbook_custom_entries:
+                for entry_no, entry in enumerate(logbook_custom_entries):
                     header = entry[entry.rfind('/')+1:]
-                    self._metadata_headers.append(header)
+                    try: # check if the final '/' does not designate a data index to be read
+                        float(header)
+                    except ValueError:
+                        pass
+                    else:
+                        header = entry[entry.rfind('/', 0, entry.rfind('/')-1)+1:entry.rfind('/')]
+                        logbook_custom_headers[entry_no] = header
+                    logbook_custom_headers[entry_no] = header
             else:
                 logbook_custom_headers = self.getPropertyValue('CustomHeaders')
                 logbook_custom_headers = logbook_custom_headers.split(',')
-                self._metadata_headers += logbook_custom_headers
-
+            self._metadata_headers += logbook_custom_headers
         DeleteWorkspace(Workspace=tmp_instr)
         return default_entries
 
