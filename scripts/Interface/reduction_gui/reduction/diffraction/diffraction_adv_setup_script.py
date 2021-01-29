@@ -46,8 +46,9 @@ def getFloatElement(instrument_dom, keyname, default):
 class AdvancedSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
     """
-
-    # Class static variables
+    #
+    # Class attributes
+    #
     pushdatapositive = "None"
     unwrapref = ""
     lowresref = ""
@@ -71,8 +72,10 @@ class AdvancedSetupScript(BaseScriptElement):
     measuredmassdensity = ""
     containershape = ""
     typeofcorrection = ""
-
     parnamelist = None
+    # Caching options
+    cache_dir = ''  # directory containing the cache files
+    clean_cache = False  # determines whether to delete all cache files within the cache directory
 
     def __init__(self, inst_name):
         """ Initialization
@@ -88,29 +91,31 @@ class AdvancedSetupScript(BaseScriptElement):
     def createParametersList(self):
         """ Create a list of parameter names for SNSPowderReductionPlus()
         """
-        self.parnamelist = []
-        self.parnamelist.append("UnwrapRef")
-        self.parnamelist.append("LowResRef")
-        self.parnamelist.append("CropWavelengthMin")
-        self.parnamelist.append('CropWavelengthMax')
-        self.parnamelist.append("RemovePromptPulseWidth")
-        self.parnamelist.append("MaxChunkSize")
-        self.parnamelist.append("StripVanadiumPeaks")
-        self.parnamelist.append("VanadiumFWHM")
-        self.parnamelist.append("VanadiumPeakTol")
-        self.parnamelist.append("VanadiumSmoothParams")
-        self.parnamelist.append("VanadiumRadius")
-        self.parnamelist.append("FilterBadPulses")
-        self.parnamelist.append("BackgroundSmoothParams")
-        self.parnamelist.append("PushDataPositive")
-        self.parnamelist.append("PreserveEvents")
-        self.parnamelist.append("OutputFilePrefix")
-        self.parnamelist.append("ScaleData")
-        self.parnamelist.append("TypeOfCorrection")
-        self.parnamelist.append("SampleFormula")
-        self.parnamelist.append("MeasuredMassDensity")
-        self.parnamelist.append("SampleNumberDensity")
-        self.parnamelist.append("ContainerShape")
+        self.parnamelist = ['UnwrapRef',
+                            'LowResRef',
+                            'CropWavelengthMin',
+                            'CropWavelengthMax',
+                            'RemovePromptPulseWidth',
+                            'MaxChunkSize',
+                            'StripVanadiumPeaks',
+                            'VanadiumFWHM',
+                            'VanadiumPeakTol',
+                            'VanadiumSmoothParams',
+                            'VanadiumRadius',
+                            'FilterBadPulses',
+                            'BackgroundSmoothParams',
+                            'PushDataPositive',
+                            'PreserveEvents',
+                            'OutputFilePrefix',
+                            'ScaleData',
+                            'TypeOfCorrection',
+                            'SampleFormula',
+                            'MeasuredMassDensity',
+                            'SampleNumberDensity',
+                            'ContainerShape',
+                            # Caching options
+                            'CacheDir',
+                            'CleanCache']
 
     def set_default_pars(self, inst_name):
         """ Set default values
@@ -163,6 +168,9 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["MeasuredMassDensity"] = self.measuredmassdensity
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
+        #Caching options
+        pardict['CacheDir'] = self.cache_dir
+        pardict['CleanCache'] = str(int(self.clean_cache))
 
         return pardict
 
@@ -191,7 +199,7 @@ class AdvancedSetupScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("AdvancedSetup")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
 
             self.unwrapref = getFloatElement(instrument_dom, "unwrapref",
@@ -268,25 +276,35 @@ class AdvancedSetupScript(BaseScriptElement):
             self.typeofcorrection = BaseScriptElement.getStringElement(instrument_dom, "typeofcorrection",
                                                                        default=AdvancedSetupScript.typeofcorrection)
 
-    def reset(self):
-        """ 'Public' method to reset state
-        """
-        self.pushdatapositive       = AdvancedSetupScript.pushdatapositive
-        self.unwrapref              = AdvancedSetupScript.unwrapref
-        self.lowresref              = AdvancedSetupScript.lowresref
-        self.cropwavelengthmin      = AdvancedSetupScript.cropwavelengthmin
-        self.cropwavelengthmax      = AdvancedSetupScript.cropwavelengthmax
-        self.removepropmppulsewidth = AdvancedSetupScript.removepropmppulsewidth
-        self.maxchunksize           = AdvancedSetupScript.maxchunksize
-        self.filterbadpulses        = AdvancedSetupScript.filterbadpulses
-        self.bkgdsmoothpars         = AdvancedSetupScript.bkgdsmoothpars
-        self.stripvanadiumpeaks     = AdvancedSetupScript.stripvanadiumpeaks
-        self.vanadiumfwhm           = AdvancedSetupScript.vanadiumfwhm
-        self.vanadiumpeaktol        = AdvancedSetupScript.vanadiumpeaktol
-        self.vanadiumsmoothparams   = AdvancedSetupScript.vanadiumsmoothparams
-        self.preserveevents         = AdvancedSetupScript.preserveevents
-        self.extension              = AdvancedSetupScript.extension
-        self.outputfileprefix       = AdvancedSetupScript.outputfileprefix
-        self.scaledata              = AdvancedSetupScript.scaledata
+            # Caching options
+            self.cache_dir = BaseScriptElement.getStringElement(
+                instrument_dom, 'cache_directory', default=self.__class__.cache_dir)
 
+            tempbool = BaseScriptElement.getStringElement(
+                instrument_dom, "clean_cache", default=str(int(self.__class__.clean_cache)))
+            self.clean_cache = bool(int(tempbool))
+
+    def reset(self):
+        r"""reset instance's attributes with the values of the class' attributes
+        """
+        class_attrs_selected = ['pushdatapositive',
+                                'unwrapref',
+                                'lowresref',
+                                'cropwavelengthmin',
+                                'cropwavelengthmax',
+                                'removepropmppulsewidth',
+                                'maxchunksize',
+                                'filterbadpulses',
+                                'bkgdsmoothpars',
+                                'stripvanadiumpeaks',
+                                'vanadiumfwhm',
+                                'vanadiumpeaktol',
+                                'vanadiumsmoothparams',
+                                'preserveevents',
+                                'extension',
+                                'outputfileprefix',
+                                # Caching options
+                                'cache_dir',
+                                'clean_cache']
+        [setattr(self, attr, getattr(self.__class__, attr)) for attr in class_attrs_selected]
         return
