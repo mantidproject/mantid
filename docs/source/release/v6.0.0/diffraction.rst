@@ -67,7 +67,9 @@ Engineering Diffraction
 
 Bugfixes
 ############
+- Check if log in settings exists in workspace before averaging when focussed data is loaded in EngDiff UI fitting tab.
 - Settings are now saved only when the Apply or OK button are clicked (i.e. clicking cancel will not update the settings).
+
 
 Improvements
 ############
