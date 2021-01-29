@@ -228,6 +228,7 @@ class GenerateLogbook(PythonAlgorithm):
         regex_all = r'(\*)|(//)|(\+)|(\-)'
         p = re.compile(regex_all)
         operators = ["+","-","*","//"]
+        cache_entries_ops = {}
 
         for file_no, file_name in enumerate(data_array):
             # reporting progress each 10% of the data
@@ -239,14 +240,18 @@ class GenerateLogbook(PythonAlgorithm):
                 rowData[0] = str(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
                     if any(op in entry for op in operators):
-                        list_entries = []
-                        binary_operations = []
-                        prev_pos = 0
-                        for obj in p.finditer(entry):
-                            list_entries.append(entry[prev_pos:obj.span()[0]])
-                            prev_pos = obj.span()[1]
-                            binary_operations.append(obj.group())
-                        list_entries.append(entry[prev_pos:]) # add the last remaining file
+                        if entry in cache_entries_ops:
+                            list_entries, binary_operations = cache_entries_ops[entry]
+                        else:
+                            list_entries = []
+                            binary_operations = []
+                            prev_pos = 0
+                            for obj in p.finditer(entry):
+                                list_entries.append(entry[prev_pos:obj.span()[0]])
+                                prev_pos = obj.span()[1]
+                                binary_operations.append(obj.group())
+                            list_entries.append(entry[prev_pos:]) # add the last remaining file
+                            cache_entries_ops[entry] = (list_entries, list(binary_operations))
                         # load all entries from the file
                         values = [0]*len(list_entries)
                         for split_entry_no, split_entry in enumerate(list_entries):
