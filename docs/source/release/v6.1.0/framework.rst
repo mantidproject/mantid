@@ -14,6 +14,7 @@ Concepts
 
 Algorithms
 ----------
+:ref:`LoadNexusLogs <algm-LoadNexusLogs>` has additional parameters to allow or block specific logs from being loaded.
 
 - New algorithm :ref:`GenerateLogbook <algm-GenerateLogbook>`, that allows creating TableWorkspace
   logbooks based on provided directory path with rawdata.

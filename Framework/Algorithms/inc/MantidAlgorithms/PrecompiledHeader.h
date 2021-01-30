@@ -7,8 +7,15 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/Exception.h"
+
+// STL
+// No speed up from including STL headers for some reason
 
 // Boost
-#include <memory>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/function.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions.hpp>

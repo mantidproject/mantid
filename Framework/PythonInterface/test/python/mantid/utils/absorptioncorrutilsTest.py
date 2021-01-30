@@ -5,13 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import tempfile
 from mantid.kernel import PropertyManagerDataService
 from mantid.simpleapi import Load, PDLoadCharacterizations, PDDetermineCharacterizations, DeleteWorkspaces
 from mantid.utils import absorptioncorrutils
 
 
 class AbsorptionCorrUtilsTest(unittest.TestCase):
-
     def test_correction_props(self):
         self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
 
@@ -27,15 +27,28 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         props = PropertyManagerDataService.retrieve("props")
 
         # Sample only absorption correction
-        abs_sample = absorptioncorrutils.calculate_absorption_correction("PG3_46577.nxs.h5", "SampleOnly", props, "Si",
-                                                                         1.165, element_size=2)
+        abs_sample = absorptioncorrutils.calculate_absorption_correction("PG3_46577.nxs.h5",
+                                                                         "SampleOnly",
+                                                                         props,
+                                                                         "Si",
+                                                                         1.165,
+                                                                         element_size=2)
         self.assertIsNotNone(abs_sample[0])
 
         DeleteWorkspaces([char, data, abs_sample[0]])
         PropertyManagerDataService.remove('props')
 
     def test_correction_methods(self):
-        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction('', "None", None, "V", 1.0)
+        # no caching
+        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction(
+            '', "None", None, "V", 1.0)
+
+        self.assertIsNone(sample_ws)
+        self.assertIsNone(container_ws)
+
+        # with caching
+        sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction(
+            '', "None", None, "V", 1.0, cache_dir=tempfile.gettempdir())
 
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)

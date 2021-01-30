@@ -64,6 +64,10 @@ set(INC_FILES
     inc/MantidPythonInterface/core/Policies/VectorToNumpy.h
 )
 
+# Add a precompiled header where they are supported
+enable_precompiled_headers(inc/MantidPythonInterface/core/PrecompiledHeader.h SRC_FILES)
+
+
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
