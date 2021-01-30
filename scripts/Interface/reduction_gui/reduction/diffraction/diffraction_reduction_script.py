@@ -220,7 +220,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             # ENDFOR data file names
 
         else:
-            # b) Construct python scrpt without generating filters
+            # b) Construct python script without generating filters
             script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict)
 
         # ENDIF : do filter
@@ -314,7 +314,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 continue
 
             if propname == "RunNumber":
-                propname = 'Filename' # change to what SNSPowderReduction uses
+                propname = 'Filename'  # change to what SNSPowderReduction uses
 
                 # option to take user input run number
                 if runnumber is not None:
