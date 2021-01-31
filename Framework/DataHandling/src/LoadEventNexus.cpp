@@ -535,7 +535,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   return numEvents;
 }
 
-/** Load the instrument from the nexus file
+/** Load the log from the nexus file
  *
  * @param nexusfilename :: The name of the nexus file being loaded
  * @param localWorkspace :: Templated workspace in which to put the instrument
@@ -637,7 +637,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
   return out;
 }
 
-/** Load the instrument from the nexus file
+/** Load the log from the nexus file
  *
  * @param nexusfilename :: The name of the nexus file being loaded
  * @param localWorkspace :: Templated workspace in which to put the instrument
