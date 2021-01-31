@@ -142,6 +142,7 @@ public:
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
    * @param detectorId :: ID of the detector that measured this event.
+   * @param goniometerIndex : 0-based index defining goniometer settings when this event took place
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
@@ -167,6 +168,7 @@ public:
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
    * @param detectorId :: ID of the detector that measured this event.
+   * @param goniometerIndex : 0-based index defining goniometer settings when this event took place
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
