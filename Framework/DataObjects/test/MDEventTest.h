@@ -195,7 +195,8 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        uint32_t(data[ncols * i + 3]));
-      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), uint16_t(data[ncols * i + 2]));
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       uint16_t(data[ncols * i + 2]));
 
       TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 4], 1.e-6);
       TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 5], 1.e-6);
@@ -217,7 +218,8 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), transfEvents[i].getRunIndex());
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        transfEvents[i].getDetectorID());
-      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), transfEvents[i].getGoniometerIndex());
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       transfEvents[i].getGoniometerIndex());
 
       TS_ASSERT_DELTA(events[i].getCenter(0), transfEvents[i].getCenter(0),
                       1.e-6);
@@ -279,8 +281,8 @@ public:
     uint16_t goniometerIndex = 42;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.emplace_back(
-          MDEvent<3>(signal, error, runIndex, detectorId, goniometerIndex, center));
+      events3.emplace_back(MDEvent<3>(signal, error, runIndex, detectorId,
+                                      goniometerIndex, center));
   }
 
   void test_create_MDEvent4() {
@@ -291,8 +293,8 @@ public:
     uint16_t goniometerIndex = 42;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.emplace_back(
-          MDEvent<4>(signal, error, runIndex, detectorId, goniometerIndex, center));
+      events4.emplace_back(MDEvent<4>(signal, error, runIndex, detectorId,
+                                      goniometerIndex, center));
   }
 
   void test_create_MDLeanEvent3() {
