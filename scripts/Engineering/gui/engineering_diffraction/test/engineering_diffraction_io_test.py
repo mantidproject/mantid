@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from os import path
 from unittest import mock
 from unittest.mock import MagicMock
 from mantid.simpleapi import Load, Fit
@@ -24,8 +25,12 @@ from Engineering.gui.engineering_diffraction.tabs.fitting.presenter import Fitti
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.EngDiff_fitpropertybrowser import \
     EngDiffFitPropertyBrowser
+from Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
+from Engineering.gui.engineering_diffraction.settings.settings_view import SettingsView
+from Engineering.gui.engineering_diffraction.settings.settings_presenter import SettingsPresenter
 
-TEST_FILE = 'ENGINX_277208_focused_bank_2.nxs'
+IO_VERSION = 1
+TEST_FILE = "ENGINX_277208_focused_bank_2.nxs"
 TEST_WS = 'ENGINX_277208_focused_bank_2_TOF'
 FIT_WS = TEST_WS + '_Workspace'
 FIT_DICT = {'properties': {'InputWorkspace': TEST_WS, 'Output': TEST_WS, 'StartX':
@@ -34,9 +39,31 @@ FIT_DICT = {'properties': {'InputWorkspace': TEST_WS, 'Output': TEST_WS, 'StartX
                                                                       'eakCentre=21506.1,Sigma=1945.78',
             'ConvolveMembers': True, 'OutputCompositeMembers': True}}
 
+SETTINGS_DICT = {
+    "full_calibration": "",
+    "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
+    "recalc_vanadium": False,
+    "logs": ','.join(
+        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
+    "primary_log": 'strain',
+    "sort_ascending": False  # this is changed to false to show a deviation from the default
+}
 
-@start_qapplication
-class EngineeringDiffractionIOTest(unittest.TestCase):
+ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces':
+                [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff': True,
+                'settings_dict': SETTINGS_DICT}
+
+
+def _create_fit_workspace():
+    fn_input = FIT_DICT['properties']
+    Fit(**fn_input)
+
+
+def _load_test_file():
+    Load(TEST_FILE, OutputWorkspace=TEST_WS)
+
+
+class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def setUp(self):
         self.fitprop_browser = None
@@ -45,6 +72,7 @@ class EngineeringDiffractionIOTest(unittest.TestCase):
         self.create_test_calibration_presenter()
         self.create_test_focus_presenter()
         self.create_test_fitting_presenter()
+        self.create_test_settings_presenter()
         self.mock_view.presenter = self.presenter
         self.mock_tabs = MagicMock()
         self.mock_view.tabs = self.mock_tabs
@@ -53,10 +81,6 @@ class EngineeringDiffractionIOTest(unittest.TestCase):
         self.decoder = EngineeringDiffractionDecoder()
         self.io_version = 1
         self.fit_ws = None
-
-    def create_fit_workspace(self):
-        fn_input = FIT_DICT['properties']
-        Fit(**fn_input)
 
     def create_test_focus_presenter(self):
         focus_model = FocusModel()
@@ -78,44 +102,53 @@ class EngineeringDiffractionIOTest(unittest.TestCase):
         fitting_plot_view.fit_browser = self.fitprop_browser
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
-    def load_test_file(self):
-        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
+    def create_test_settings_presenter(self):
+        settings_model = SettingsModel()
+        settings_view = mock.create_autospec(SettingsView)
+        settings_presenter = SettingsPresenter(settings_model, settings_view)
+        self.presenter.settings_presenter = settings_presenter
+        settings_model.set_settings_dict(SETTINGS_DICT)
 
     def test_blank_gui_encodes(self):
         self.mock_tabs.currentIndex.return_value = 0
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual(test_dic, {'encoder_version': self.io_version, 'current_tab': 0})
+        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'settings_dict': SETTINGS_DICT},
+                         test_dic)
 
     def test_loaded_workspaces_encode(self):
-        self.load_test_file()
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
         self.fitprop_browser.get_fitprop.return_value = None
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual(test_dic, {'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                                    [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None})
+        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
+                         [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'settings_dict':
+                         SETTINGS_DICT}, test_dic)
 
     def test_fits_encode(self):
-        self.load_test_file()
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
         self.fitprop_browser.get_fitprop.return_value = FIT_DICT
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
         self.fitprop_browser.plotDiff.return_value = True
         self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual(test_dic, {'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                                    [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
-                                    'True'})
+        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
+                          [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
+                          'True', 'settings_dict': SETTINGS_DICT}, test_dic)
 
-    def test_fits_restore(self):
-        # the load of the workspaces into the ADS during recovery is handled separately
-        Load(TEST_FILE, OutputWorkspace=TEST_WS)
-        self.create_fit_workspace()
-        encoded_dict = {'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
-                        [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
-                        'True'}
-        gui = self.decoder.decode(encoded_dict)
-        self.assertEqual([*gui.presenter.fitting_presenter.data_widget.presenter.plotted],
-                         encoded_dict['plotted_workspaces'])
-        self.assertEqual(gui.presenter.fitting_presenter.plot_widget.view.fit_browser.read_current_fitprop(),
-                         encoded_dict['fit_properties'])
+
+@start_qapplication
+class EngineeringDiffractionDecoderTest(unittest.TestCase):
+
+    def setUp(self):
+        # ConfigService.setLogLevel(7)
+        self.encoder = EngineeringDiffractionEncoder()
+        self.decoder = EngineeringDiffractionDecoder()
+        _load_test_file()
+        _create_fit_workspace()
+
+    def test_decode_produces_gui_returning_same_dict(self):
+        self.gui = self.decoder.decode(ENCODED_DICT)
+        post_decode_dict = self.encoder.encode(self.gui)
+        self.assertEqual(ENCODED_DICT, post_decode_dict)
 
 
 if __name__ == '__main__':
