@@ -307,7 +307,7 @@ void SaveWorkspaces::saveSel() {
   QString saveCommands;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i) { // the key to a pointer to the check
                                                                                    // box that the user may have clicked
-    if (i.key()->isChecked()) { // we need to save in this format
+    if (i.key()->isChecked()) {                                                    // we need to save in this format
 
       bool toAppend = m_append->isChecked();
 
@@ -356,7 +356,7 @@ bool SaveWorkspaces::isValid() {
   auto isCanSAS = false;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i) { // the key to a pointer to the check
                                                                                    // box that the user may have clicked
-    if (i.key()->isChecked()) { // we need to save in this format
+    if (i.key()->isChecked()) {                                                    // we need to save in this format
       if (i.value() == "SaveCanSAS1D") {
         isCanSAS = true;
       }

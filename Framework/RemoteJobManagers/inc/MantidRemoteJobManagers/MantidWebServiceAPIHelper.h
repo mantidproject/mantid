@@ -102,7 +102,7 @@ private:
   mutable std::unique_ptr<Poco::Net::HTTPClientSession> m_session; // Pointer to session object for all our HTTP
                                                                    // requests (Has to be a pointer because we allocate
                                                                    // and delete it multiple times)
-  Poco::Net::HTTPResponse m_response; // Response object for all of our HTTP requests
+  Poco::Net::HTTPResponse m_response;                              // Response object for all of our HTTP requests
 
   // No default copy constructor or assignment operator (mainly because
   // HTTPResponse doesn't have them

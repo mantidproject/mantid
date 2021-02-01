@@ -265,7 +265,7 @@ public:
     auto parentIndices =
         std::make_shared<const std::vector<size_t>>(std::vector<size_t>{9, 9, 9}); // These indices are invalid, but
                                                                                    // that's ok as not being tested here
-    auto innerDetectorRanges = std::vector<std::pair<size_t, size_t>>{{0, 0}}; // One component with no detectors
+    auto innerDetectorRanges = std::vector<std::pair<size_t, size_t>>{{0, 0}};     // One component with no detectors
     auto detectorRanges =
         std::make_shared<const std::vector<std::pair<size_t, size_t>>>(std::move(innerDetectorRanges));
 
@@ -305,8 +305,8 @@ public:
     auto parentIndices =
         std::make_shared<const std::vector<size_t>>(std::vector<size_t>{9, 9, 9}); // These indices are invalid, but
                                                                                    // that's ok as not being tested here
-    auto positions = std::make_shared<PosVec>(1); // 1 position provided
-    auto rotations = std::make_shared<RotVec>(1); // 1 rotation provided
+    auto positions = std::make_shared<PosVec>(1);                                  // 1 position provided
+    auto rotations = std::make_shared<RotVec>(1);                                  // 1 rotation provided
 
     auto scaleFactors = std::make_shared<PosVec>();
     auto names = std::make_shared<StrVec>();
