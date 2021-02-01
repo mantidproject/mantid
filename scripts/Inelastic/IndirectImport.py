@@ -112,10 +112,6 @@ def import_f2py(lib_base_name):
         sys.path.pop(0)
 
     lib_name = lib_base_name + _lib_suffix()
-    # In Python 3 f2py produces a filename properly tagged with the ABI compatability
-    # information and Python can import this without issue but it will take an untagged
-    # filename in preference so we cannot keep the Python2/Python3 ones in the same
-    # directory. We manipulate the sys.path temporarily to get the correct library.
     return __import__(lib_name)
 
 

@@ -53,7 +53,7 @@ def attach_binary_operators_to_workspace():
         "And": "__and__",
         "Xor": "__xor__"
     }
-    # The division operator changed in Python 3
+
     divops = ["__truediv__", "__rtruediv__", "__itruediv__"]
     operations["Divide"] = divops
 
