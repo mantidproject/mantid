@@ -36,6 +36,8 @@ class DifferenceView(QtWidgets.QWidget):
         self.pair_button = QtWidgets.QRadioButton("Pairs")
         self.pair_button.setChecked(True)
         self.group_button = QtWidgets.QRadioButton("Groups")
+        self.pair_button.toggled.connect(self.change)
+        self.group_button.toggled.connect(self.change)
 
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
@@ -50,3 +52,11 @@ class DifferenceView(QtWidgets.QWidget):
         self.vertical_layout.addWidget(self._pair_table)
         self._group_table.hide()
         self.setLayout(self.vertical_layout)
+
+    def change(self):
+        if self.group_button.isChecked():
+            self._pair_table.hide()
+            self._group_table.show()
+        elif self.pair_button.isChecked():
+            self._group_table.hide()
+            self._pair_table.show()

@@ -36,3 +36,12 @@ class DifferencePresenter(object):
     def enable_editing(self):
         self.group_widget.enable_editing()
         self.pair_widget.enable_editing()
+
+    def add_subscribers(self, observer_list):
+        for observer in observer_list:
+            self.group_widget.selected_diff_changed_notifier.add_subscriber(observer)
+            self.pair_widget.selected_diff_changed_notifier.add_subscriber(observer)
+
+    def on_data_changed(self, observer):
+        self.group_widget.on_data_changed(observer)
+        self.pair_widget.on_data_changed(observer)

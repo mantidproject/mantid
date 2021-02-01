@@ -54,11 +54,16 @@ class MuonBase(object):
     - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, periods=[1]):
 
         self._name = name
         self._workspace = {}
         self.workspace_rebin = {}
+        self._periods = periods
+
+    @property
+    def periods(self):
+        return self._periods
 
     @property
     def workspace(self):

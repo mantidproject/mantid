@@ -114,7 +114,6 @@ class MuonContext(object):
         except KeyError:
             # A key error here means the requested workspace does not exist so return None
             return None
-
         run_as_string = run_list_to_string(run)
         output_workspace_name = get_diff_asymmetry_name(self, diff.name, run_as_string, rebin=rebin)
         return calculate_diff_data(diff, forward_group_workspace_name, backward_group_workspace_name, output_workspace_name)
@@ -481,15 +480,20 @@ class MuonContext(object):
         if group_and_pair == 'All':
             group = self.group_pair_context.group_names
             pair = self.group_pair_context.pair_names
+            group += self.group_pair_context.get_diffs("group")
+            pair += self.group_pair_context.get_diffs("pair")
         else:
             group_pair_list = group_and_pair.replace(' ', '').split(',')
             group = [
                 group for group in group_pair_list if group in self.group_pair_context.group_names]
             # add group diffs
+            diffs = self.group_pair_context.get_diffs("group")
             group += [diff for diff in group_pair_list if diff in self.group_pair_context.diff_names]
 
             pair = [
                 pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
+            diffs = self.group_pair_context.get_diffs("pair")
+            pair += [diff for diff in group_pair_list if diff in self.group_pair_context.diff_names]
         return group, pair
 
     def get_runs(self, runs):

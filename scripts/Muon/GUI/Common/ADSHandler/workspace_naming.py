@@ -7,7 +7,7 @@
 import re
 
 group_str = "; Group; "
-DIFF_STR = "; Group Diff;"
+DIFF_STR = "; Diff;"
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad; '
 PHASEQUAD_RE = '_Re_' # use _ on both sides to prevent accidental ID (e.g. Red)

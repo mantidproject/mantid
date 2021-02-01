@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-
+from math import floor
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -61,8 +61,8 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_diffs, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
-    return new_groups, new_diffs, new_pairs, default
+    new_groups, new_pairs, new_diffs, description, default = xml_utils.load_grouping_from_XML(filename)
+    return new_groups, new_pairs, new_diffs, default
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -146,6 +146,9 @@ class MuonGroupPairContext(object):
     def diffs(self):
         return self._diffs
 
+    def get_diffs(self, group_or_pair):
+        return [diff for diff in self._diffs if diff.group_or_pair == group_or_pair]
+
     @property
     def all_groups_and_pairs(self):
         return self.groups + self.pairs + self.diffs
@@ -164,6 +167,7 @@ class MuonGroupPairContext(object):
 
     @property
     def selected_groups_and_pairs(self):
+        print("moo", self._selected_diffs)
         return self.selected_groups+self.selected_pairs+self.selected_diffs
 
     def clear(self):
@@ -177,9 +181,12 @@ class MuonGroupPairContext(object):
         self._pairs = []
 
     def clear_diffs(self, group_or_pair):
+        to_rm = []
         for diff in self._diffs:
             if diff.group_or_pair == group_or_pair:
-                self._diffs.remove(diff)
+                to_rm.append(diff.name)
+        for name in to_rm:
+            self.remove_diff(name)
 
     def clear_selected_pairs(self):
         self._selected_pairs = []
@@ -286,7 +293,7 @@ class MuonGroupPairContext(object):
                 return
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
-        default_groups, default_diffs, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        default_groups, default_pairs, default_diffs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
         if num_periods == 1:
             self._groups = default_groups
             self._diffs = default_diffs
@@ -301,19 +308,21 @@ class MuonGroupPairContext(object):
                 for group in default_groups:
                     self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
 
-            if default_diffs:
-                for diff in default_diffs:
-                    self._diffs.append(MuonDiff(diff.name, diff.forward, diff.backward))
-            else:
-                for period in range(1, len(periods)):
-                    for group in default_groups:
-                        self._diffs.append(MuonDiff(group.name+"_"+str(period)+"_minus_"+str(period+1),
-                                                    group.name + str(period), group.name + str(period+1)))
-
             for period in periods:
                 for pair in default_pairs:
                     self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
-                                       pair.backward_group + str(period), pair.alpha))
+                                       pair.backward_group + str(period), pair.alpha, [period]))
+
+            if default_diffs:
+                for diff in default_diffs:
+                    self._diffs.append(MuonDiff(diff.name, diff.forward, diff.backward, diff.group_or_pair, diff.periods))
+            else:
+                for index in range(0, floor(len(periods)/2.)):
+                    for pair in default_pairs:
+                        odd_period = index*2 + 1
+                        even_period = odd_period+1
+                        self._diffs.append(MuonDiff(pair.name+"_"+str(odd_period)+"_minus_"+str(even_period),
+                                                    pair.name + str(odd_period), pair.name + str(even_period), group_or_pair="pair", periods=[odd_period,even_period]))
 
             self._selected = self.pair_names[0]
 

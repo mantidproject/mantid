@@ -47,8 +47,12 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
         child = ET.SubElement(root_node, 'diff', name=diff.name)
         fwd_group = ET.SubElement(child, 'positive-group', val=diff.forward_group)
         bwd_group = ET.SubElement(child, 'negative-group', val=diff.backward_group)
+        group_or_pair = ET.SubElement(child, 'group-or-pair', val=diff.group_or_pair)
+        periods = ET.SubElement(child, 'periods', val=diff.periods)
         child.extend(fwd_group)
         child.extend(bwd_group)
+        child.extend(group_or_pair)
+        child.extend(periods)
         diff_nodes += [child]
     return diff_nodes
 
@@ -82,10 +86,10 @@ def save_grouping_to_XML(groups, diffs, pairs, filename, save=True, description=
 
     # handle groups
     _create_XML_subElement_for_groups(root, groups)
-    #handle diffs
-    _create_XML_subElement_for_diffs(root, diffs)
     # handle pairs
     _create_XML_subElement_for_pairs(root, pairs)
+    #handle diffs
+    _create_XML_subElement_for_diffs(root, diffs)
 
     if save:
         prettyXML = MD.parseString(ET.tostring(root)).toprettyxml(indent="\t")
@@ -112,8 +116,8 @@ def load_grouping_from_XML(filename):
         default = ''
 
     group_names, group_ids, periods = _get_groups_from_XML(root)
-    diff_names, diff_groups = _get_diffs_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
+    diff_names, diff_groups = _get_diffs_from_XML(root)
     groups, diffs, pairs = [], [], []
 
     for i, group_name in enumerate(group_names):
@@ -121,16 +125,17 @@ def load_grouping_from_XML(filename):
         groups += [MuonGroup(group_name=group_name,
                              detector_ids=group_ids[i], periods=period)]
 
-    for i, diff_name in enumerate(diff_names):
-        diffs +=[MuonDiff(diff_name,diff_groups[i][0],
-                          diff_groups[i][1])]
-
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
                            forward_group_name=pair_groups[i][0],
                            backward_group_name=pair_groups[i][1],
                            alpha=pair_alphas[i])]
-    return groups, diffs, pairs, description, default
+
+    for i, diff_name in enumerate(diff_names):
+        diffs +=[MuonDiff(diff_name,diff_groups[i][0],
+                          diff_groups[i][1], diff_groups[i][2], diff_groups[i][3])]
+
+    return groups, pairs, diffs, description, default
 
 
 def _get_groups_from_XML(root):
@@ -152,7 +157,7 @@ def _get_diffs_from_XML(root):
     for child in root:
         if child.tag == "diff":
             names += [child.attrib['name']]
-            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val']]]
+            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val'],child.find('group-or-pair').attrib['val'], child.find('periods').attrib['val'] ]]
     return names, groups
 
 

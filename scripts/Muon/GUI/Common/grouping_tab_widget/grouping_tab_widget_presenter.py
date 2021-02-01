@@ -49,7 +49,7 @@ class GroupingTabPresenter(object):
         # notifiers
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
-        self.diff_table.group_widget.on_data_changed(self.diff_table_changed)
+        self.diff_table.on_data_changed(self.diff_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
@@ -142,7 +142,7 @@ class GroupingTabPresenter(object):
         if filename == '':
             return
 
-        groups, diffs, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+        groups, pairs, diffs, description, default = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
@@ -151,17 +151,18 @@ class GroupingTabPresenter(object):
             except ValueError as error:
                 self._view.display_warning_box(str(error))
 
-        for diff in diffs:
-            try:
-                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
-                    self._model.add_diff(diff)
-            except ValueError as error:
-                self._view.display_warning_box(str(error))
-
         for pair in pairs:
             try:
                 if pair.forward_group in self._model.group_names and pair.backward_group in self._model.group_names:
                     self._model.add_pair(pair)
+            except ValueError as error:
+                self._view.display_warning_box(str(error))
+        for diff in diffs:
+            try:
+                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
+                    self._model.add_diff(diff)
+                elif diff.forward_group in self._model.pair_names and diff.backward_group in self._model.pair_names:
+                    self._model.add_diff(diff)
             except ValueError as error:
                 self._view.display_warning_box(str(error))
         # Sets the default from file if it exists, if not selected groups/pairs are set on the logic

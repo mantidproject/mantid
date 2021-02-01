@@ -12,10 +12,10 @@ import itertools
 
 
 class MuonDiff(MuonBase):
-    def __init__(self,diff_name,backward_group_name,forward_group_name, group_or_pair="group"):
-        super(MuonDiff, self).__init__(diff_name)
-        self._positive = backward_group_name
-        self._negative = forward_group_name
+    def __init__(self,diff_name,positive,negative, group_or_pair="group", periods =[1]):
+        super(MuonDiff, self).__init__(diff_name, periods)
+        self._positive = positive
+        self._negative = negative
         self._group_or_pair = group_or_pair
 
     @property

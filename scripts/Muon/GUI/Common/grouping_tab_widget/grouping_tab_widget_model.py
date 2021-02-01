@@ -67,6 +67,9 @@ class GroupingTabModel(object):
     def pair_names(self):
         return self._groups_and_pairs.pair_names
 
+    def get_diffs(self, group_or_pair):
+        return self._groups_and_pairs.get_diffs(group_or_pair)
+
     def get_names(self, group_or_pair):
         if group_or_pair == "group":
             return self.group_names
@@ -117,7 +120,8 @@ class GroupingTabModel(object):
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
-        self.clear_diffs()
+        self.clear_diffs("group")
+        self.clear_diffs("pair")
         self.clear_selected_groups()
         self.clear_selected_diffs()
         self.clear_selected_pairs()
@@ -260,3 +264,6 @@ class GroupingTabModel(object):
             return RowValid.invalid_for_all_runs
         else:
             return RowValid.valid_for_some_runs
+
+    def get_periods(self, name):
+        return self._groups_and_pairs[name].periods

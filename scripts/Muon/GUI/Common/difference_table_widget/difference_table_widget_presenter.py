@@ -57,10 +57,10 @@ class DifferenceTablePresenter(object):
             update_model = False
         if diff_columns[col] == 'group_1':
             if changed_item_text == self._view.get_table_item_text(row, diff_columns.index('group_2')):
-                table[row][diff_columns.index('group_2')] = self._model.diffs[row].forward_group
+                table[row][diff_columns.index('group_2')] = self._model.get_diffs(self._group_or_pair)[row].forward_group
         if diff_columns[col] == 'group_2':
             if changed_item_text == self._view.get_table_item_text(row, diff_columns.index('group_1')):
-                table[row][diff_columns.index('group_1')] = self._model.diffs[row].backward_group
+                table[row][diff_columns.index('group_1')] = self._model.get_diffs(self._group_or_pair)[row].backward_group
         if diff_columns[col] == 'to_analyse':
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, diff_name)
@@ -77,9 +77,11 @@ class DifferenceTablePresenter(object):
             table = self._view.get_table_contents()
         self._model.clear_diffs(self._group_or_pair)
         for entry in table:
+            periods = self._model._context.group_pair_context[entry[2]].periods
+            periods += self._model._context.group_pair_context[entry[3]].periods
             diff = MuonDiff(diff_name=str(entry[0]),
-                            backward_group_name=str(entry[2]),
-                            forward_group_name=str(entry[3]), group_or_pair = self._group_or_pair)
+                            positive=str(entry[2]),
+                            negative=str(entry[3]), group_or_pair = self._group_or_pair, periods=periods)
             self._model.add_diff(diff)
 
     def update_view_from_model(self):
@@ -157,7 +159,7 @@ class DifferenceTablePresenter(object):
 
     def handle_add_diff_button_clicked(self, group_1='', group_2=''):
         if len(self._model.get_names(self._group_or_pair)) == 0 or len(self._model.get_names(self._group_or_pair)) == 1:
-            self._view.warning_popup("At least two groups are required to create a diff")
+            self._view.warning_popup("At least two groups/pairs are required to create a diff")
         else:
             new_diff_name = self._view.enter_diff_name()
             if new_diff_name is None:
@@ -167,8 +169,10 @@ class DifferenceTablePresenter(object):
             elif self.validate_diff_name(new_diff_name):
                 group1 = self._model.get_names(self._group_or_pair)[0] if not group_1 else group_1
                 group2 = self._model.get_names(self._group_or_pair)[1] if not group_2 else group_2
+                periods = self._model._context.group_pair_context[group1].periods
+                periods += self._model._context.group_pair_context[group2].periods
                 diff = MuonDiff(diff_name=str(new_diff_name),
-                                forward_group_name=group1, backward_group_name=group2, group_or_pair = self._group_or_pair)
+                                positive=group1, negative=group2, group_or_pair = self._group_or_pair, periods=periods)
                 self.add_diff(diff)
                 self.notify_data_changed()
 
