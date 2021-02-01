@@ -205,8 +205,7 @@ class GenerateLogbook(PythonAlgorithm):
             mtd[logbook_ws].addColumn("str", headline)
         return logbook_ws
 
-    @staticmethod
-    def _perform_binary_operations(values, binary_operations, operations):
+    def _perform_binary_operations(self, values, binary_operations, operations):
         """Performs binary arithmetic operations based on the list of operations
         to perform and list of values."""
         while True:
@@ -223,7 +222,8 @@ class GenerateLogbook(PythonAlgorithm):
                 new_val = values[ind1] + values[ind2]
             elif op == "//":
                 if values[ind2] == 0:
-                    raise RuntimeError("Divisor is equal to 0.")
+                    self.log().warning("Divisor is equal to 0.")
+                    new_val = 'N/A'
                 new_val = values[ind1] / values[ind2]
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
@@ -261,6 +261,7 @@ class GenerateLogbook(PythonAlgorithm):
                     if any(op in entry for op in operators):
                         if entry in cache_entries_ops:
                             list_entries, binary_operations = cache_entries_ops[entry]
+                            binary_operations = list(binary_operations)
                         else:
                             list_entries = []
                             binary_operations = []
@@ -290,9 +291,11 @@ class GenerateLogbook(PythonAlgorithm):
                                         data = data.decode('utf-8')
                                         data = data.replace(',', ';')  # needed for CSV output
                             values[split_entry_no] = data
-                        values, binary_operations = self._perform_binary_operations(values, binary_operations, operations=['*', '//'])
-                        values, _ = self._perform_binary_operations(values, binary_operations, operations=['+', '-'])
-                        rowData[entry_no] = str(values)
+                        values, binary_operations = self._perform_binary_operations(values, binary_operations,
+                                                                                    operations=['*', '//'])
+                        values, _ = self._perform_binary_operations(values, binary_operations,
+                                                                    operations=['+', '-'])
+                        rowData[entry_no] = str(values[0])
                     else:
                         try:
                             index = self._get_index(entry)
