@@ -45,6 +45,7 @@ Improvements
 - Support for D16 sample scan mode in DrILL.
 - A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
 - Improved plot generated scripts to better support major and minor tick settings at time of generation.
+- Allowed the use of greater precision and scientific notation when changing the colorbar limits on a colorfill plot from the Figure Options.
 
 Bugfixes
 ########
