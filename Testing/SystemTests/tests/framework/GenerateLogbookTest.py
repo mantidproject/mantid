@@ -4,8 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import GenerateLogbook, SaveNexusProcessed, \
-    LoadNexusProcessed, config, mtd
+from mantid.simpleapi import GenerateLogbook, config, mtd
 import systemtesting
 
 import os
@@ -84,6 +83,3 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d11b_logbook',
                         Facility='ILL', Instrument='D11B', NumorRange='000101,000102',
                         OptionalHeaders='all')
-
-
-
