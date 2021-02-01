@@ -310,7 +310,7 @@ class GenerateLogbook(PythonAlgorithm):
                         else:
                             if isinstance(data, numpy.ndarray):
                                 data = ''.join([repr(num) for num in data])
-                            if isinstance(data, numpy.bytes_):
+                            elif isinstance(data, numpy.bytes_):
                                 data = data.decode('utf-8')
                                 data = data.replace(',', ';') # needed for CSV output
                             rowData[entry_no] = str(data)
