@@ -112,7 +112,7 @@ public:
   }
 
   /** Note: the copy constructor is not explicitly written but rather is filled
- * in by the compiler */
+   * in by the compiler */
   void test_CopyConstructor() {
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
     MDEvent<3> b(2.5, 1.5, 123, 456789, 42, coords);
@@ -237,7 +237,8 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        uint32_t(data[ncols * i + 3]));
-      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), uint16_t(data[ncols * i + 4]));
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       uint16_t(data[ncols * i + 4]));
 
       TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 4], 1.e-6);
       TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 5], 1.e-6);
@@ -259,7 +260,8 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), transfEvents[i].getRunIndex());
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        transfEvents[i].getDetectorID());
-      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), transfEvents[i].getGoniometerIndex());
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       transfEvents[i].getGoniometerIndex());
 
       TS_ASSERT_DELTA(events[i].getCenter(0), transfEvents[i].getCenter(0),
                       1.e-6);
