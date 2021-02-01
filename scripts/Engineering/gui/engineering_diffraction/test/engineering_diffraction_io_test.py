@@ -51,7 +51,7 @@ SETTINGS_DICT = {
 
 ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces':
                 [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff': 'True',
-                'settings_dict': SETTINGS_DICT, 'background_params': {}}
+                'settings_dict': SETTINGS_DICT, 'background_params': {TEST_WS: [True, 70, 4000, True]}}
 
 
 def _create_fit_workspace():
@@ -123,6 +123,15 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
                          [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'settings_dict':
                          SETTINGS_DICT, 'background_params': {}}, test_dic)
 
+    def test_background_params_encode(self):
+        self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
+        self.fitprop_browser.read_current_fitprop.return_value = None
+        self.presenter.fitting_presenter.data_widget.model._bg_params = {TEST_WS: [True, 70, 4000, True]}
+        test_dic = self.encoder.encode(self.mock_view)
+        self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
+                         [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'settings_dict':
+                         SETTINGS_DICT, 'background_params': {TEST_WS: [True, 70, 4000, True]}}, test_dic)
+
     def test_fits_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
@@ -138,7 +147,6 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 class EngineeringDiffractionDecoderTest(unittest.TestCase):
 
     def setUp(self):
-        # ConfigService.setLogLevel(7)
         self.encoder = EngineeringDiffractionEncoder()
         self.decoder = EngineeringDiffractionDecoder()
         _load_test_file()
