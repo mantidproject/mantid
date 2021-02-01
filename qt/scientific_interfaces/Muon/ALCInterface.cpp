@@ -187,14 +187,18 @@ void ALCInterface::exportResults() {
 
   std::map<std::string, Workspace_sptr> results;
 
-  results["Loaded_Data"] = m_dataLoading->exportWorkspace();
-
-  results["Baseline_Workspace"] = m_baselineModellingModel->exportWorkspace();
-  results["Baseline_Sections"] = m_baselineModellingModel->exportSections();
-  results["Baseline_Model"] = m_baselineModellingModel->exportModel();
-
-  results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
-  results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
+  if (const auto loadedData = m_dataLoading->exportWorkspace())
+    results["Loaded_Data"] = loadedData->clone();
+  if (const auto baseline = m_baselineModellingModel->exportWorkspace())
+    results["Baseline_Workspace"] = baseline->clone();
+  if (const auto baselineSections = m_baselineModellingModel->exportSections())
+    results["Baseline_Sections"] = baselineSections->clone();
+  if (const auto baselineModel = m_baselineModellingModel->exportModel())
+    results["Baseline_Model"] = baselineModel->clone();
+  if (const auto peaksWorkspace = m_peakFittingModel->exportWorkspace())
+    results["Peaks_Workspace"] = peaksWorkspace->clone();
+  if (const auto peaksResults = m_peakFittingModel->exportFittedPeaks())
+    results["Peaks_FitResults"] = peaksResults->clone();
 
   // Check if any of the above is not empty
   bool nothingToExport = true;
