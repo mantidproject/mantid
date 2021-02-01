@@ -159,7 +159,7 @@ class GenerateLogbook(PythonAlgorithm):
                             self._metadata_entries.append(optional_entries[header])
                         else:
                             raise RuntimeError("Header {} requested, but not defined for {}.".format(header,
-                                                                                                 self._instrument))
+                                                                                                     self._instrument))
 
         if not self.getProperty('CustomEntries').isDefault:
             logbook_custom_entries = self.getPropertyValue('CustomEntries')
@@ -325,7 +325,7 @@ class GenerateLogbook(PythonAlgorithm):
             self._numor_range = [0, float('inf')]
         else:
             self._numor_range = self.getProperty('NumorRange').value
-        progress = Progress(self, start=0.0, end=1.0, nreports=14)
+        progress = Progress(self, start=0.0, end=1.0, nreports=15)
         progress.report("Preparing file list")
         data_array = self._prepare_file_array()
         progress.report("Verifying conformity")
