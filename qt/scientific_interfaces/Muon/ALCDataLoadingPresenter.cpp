@@ -67,6 +67,7 @@ void ALCDataLoadingPresenter::handleRunsEditing() {
 void ALCDataLoadingPresenter::handleRunsEditingFinished() {
   // Make sure everything is reset
   m_view->enableRunsAutoAdd(false);
+  m_view->enablePlotByLogGroup(false);
 
   if (m_previousFirstRun !=
       m_view->getInstrument() + m_view->getRunsFirstRunText())
@@ -121,6 +122,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError("The list of files to load is empty");
     m_view->enableRunsAutoAdd(false);
+    m_view->enablePlotByLogGroup(false);
     return;
   }
 
@@ -142,6 +144,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
                               m_view->getRunsText(),
                           "green");
     m_view->enableRunsAutoAdd(true);
+    m_view->enablePlotByLogGroup(true);
 
     // If alpha empty, default used is 1 so update interface
     if (m_view->getAlphaValue() == "1.0" && m_view->isAlphaEnabled())
@@ -150,6 +153,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
     m_view->enableRunsAutoAdd(false);
+    m_view->enablePlotByLogGroup(false);
     m_view->enableAll();
     m_loadingData = false;
   }

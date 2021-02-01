@@ -333,6 +333,7 @@ void ALCDataLoadingView::disableAll() {
 void ALCDataLoadingView::enableAll() {
 
   // Enable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(true);
   m_ui.deadTimeGroup->setEnabled(true);
   m_ui.dataGroup->setEnabled(true);
   m_ui.detectorGroupingGroup->setEnabled(true);
@@ -350,6 +351,10 @@ void ALCDataLoadingView::instrumentChanged(QString instrument) {
 
 void ALCDataLoadingView::enableLoad(bool enable) {
   m_ui.load->setEnabled(enable);
+}
+
+void ALCDataLoadingView::enablePlotByLogGroup(bool enable) {
+  m_ui.plotByLogGroup->setEnabled(enable);
 }
 
 void ALCDataLoadingView::setPath(const std::string &path) {

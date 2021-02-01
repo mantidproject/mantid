@@ -73,6 +73,7 @@ public:
   MOCK_METHOD0(initInstruments, void());
   MOCK_METHOD1(instrumentChanged, void(QString));
   MOCK_METHOD1(enableLoad, void(bool));
+  MOCK_METHOD1(enablePlotByLogGroup, void(bool));
   MOCK_METHOD1(setPath, void(const std::string &));
   MOCK_METHOD1(enableRunsAutoAdd, void(bool));
   MOCK_METHOD1(setInstrument, void(const std::string &));

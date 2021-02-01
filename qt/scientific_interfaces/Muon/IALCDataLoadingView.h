@@ -148,6 +148,9 @@ public slots:
   /// Enables/Disables the load button when ready
   virtual void enableLoad(bool enable) = 0;
 
+  /// Enables/Disables the Plot by log group
+  virtual void enablePlotByLogGroup(bool enable) = 0;
+
   /// Sets path from where data loaded from
   virtual void setPath(const std::string &path) = 0;
 
