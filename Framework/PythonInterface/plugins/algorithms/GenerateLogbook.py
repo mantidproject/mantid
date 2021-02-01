@@ -147,13 +147,18 @@ class GenerateLogbook(PythonAlgorithm):
                 # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
                 optional_entries = {str(entry.split(':')[0]).strip() : entry.split(':')[1]
                                     for entry in logbook_optional_parameters}
-                requested_headers = self.getPropertyValue('OptionalHeaders').split(',')
-                for header in requested_headers:
-                    if header in optional_entries:
+                requested_headers = self.getPropertyValue('OptionalHeaders')
+                if str(requested_headers).casefold() == 'all':
+                    for header in optional_entries:
                         self._metadata_headers.append(header)
                         self._metadata_entries.append(optional_entries[header])
-                    else:
-                        raise RuntimeError("Header {} requested, but not defined for {}.".format(header,
+                else:
+                    for header in requested_headers.split(','):
+                        if header in optional_entries:
+                            self._metadata_headers.append(header)
+                            self._metadata_entries.append(optional_entries[header])
+                        else:
+                            raise RuntimeError("Header {} requested, but not defined for {}.".format(header,
                                                                                                  self._instrument))
 
         if not self.getProperty('CustomEntries').isDefault:
