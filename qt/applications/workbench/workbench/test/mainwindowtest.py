@@ -11,16 +11,15 @@
 Defines the QMainWindow of the application and the main() entry point.
 """
 import unittest
+import sys
 
 from unittest.mock import patch, Mock, MagicMock, call
-
 from mantidqt.utils.qt.testing import start_qapplication
-
 from mantid.api import FrameworkManager
-
-from qtpy.QtWidgets import QMessageBox, QAction, QApplication, QMenu
-
+from qtpy.QtWidgets import QMessageBox, QAction, QMenu
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
+from io import StringIO
+
 
 @start_qapplication
 class MainWindowTest(unittest.TestCase):
@@ -73,6 +72,26 @@ class MainWindowTest(unittest.TestCase):
 
         mock_fm_instance.clear.assert_not_called()
 
+    @patch('workbench.plugins.logmessagedisplay.ORIGINAL_STDOUT', new=StringIO())
+    @patch('workbench.plugins.logmessagedisplay.ORIGINAL_STDERR', new=StringIO())
+    @patch('workbench.plugins.logmessagedisplay.MessageDisplay.append_script_notice')
+    @patch('workbench.plugins.logmessagedisplay.MessageDisplay.append_script_error')
+    def test_after_setup_stdout_and_stderr_are_captured(self, append_script_notice, append_script_error):
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+
+        try:
+            self.main_window.setup()
+            print('test stdout')
+            print('test stderr', file=sys.stderr)
+        finally:
+            # whatever happened, we need to reset these so unittest can report it!
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+
+        append_script_notice.assert_called()
+        append_script_error.assert_called()
+
     def test_menus_exist(self):
         self.main_window.menuBar().addMenu = MagicMock()
         expected_calls = [call("&File"), call("&View"), call("&Interfaces"), call("&Help")]
@@ -103,8 +122,6 @@ class MainWindowTest(unittest.TestCase):
         self.assertEqual(expected_file_menu_items, actual_file_menu_items)
         self.assertEqual(expected_view_menu_items, actual_view_menu_items)
         self.assertEqual(expected_help_menu_items, actual_help_menu_items)
-        print(self.main_window.file_menu, self.main_window.file_menu_actions)
-        print(mock_add_actions.call_args)
         mock_add_actions.assert_has_calls([
             call(self.main_window.file_menu, self.main_window.file_menu_actions),
             call(self.main_window.view_menu, self.main_window.view_menu_actions),
@@ -312,8 +329,6 @@ class MainWindowTest(unittest.TestCase):
         }
         self.assertDictEqual(expected_interfaces, all_interfaces)
 
-    def test_that_after_mainwindow_setup_stdout_and_stderr_are_captured(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()
