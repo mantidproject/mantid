@@ -213,10 +213,8 @@ properties of the material, such as its low temperature heat capacity and magnet
 magnetic fields, the Zeeman term,
 
 .. math::
-    \begin{eqnarray}
-      \mathcal{H}_{\mathrm{Z}} &=& -\mu_B \mathbf{H} \cdot \left( \mathbf{L} + 2 \mathbf{S} \right) \mathrm{\qquad or\ } \\
-                               &=& -\mu_B \mathbf{H} \cdot \left( g_J \mathbf{J} \right) ,
-    \end{eqnarray}
+      \mathcal{H}_{\mathrm{Z}} &= -\mu_B \mathbf{H} \cdot \left( \mathbf{L} + 2 \mathbf{S} \right) \mathrm{\qquad or\ } \\
+                               &= -\mu_B \mathbf{H} \cdot \left( g_J \mathbf{J} \right) ,
   :label: zeeman
 
 where the second equality applies in the case of the rare-earths, where :math:`L+2S=g_J J` and the Landé
@@ -251,12 +249,9 @@ value of the eigenvalues of the Hamiltonian, e.g. :math:`U = \frac{1}{Z}\sum_n E
 Thus the heat capacity is
 
 .. math::
-    \begin{multline}
-    C_v = \frac{1}{k_BT^2} \left\{ -\left(\frac{1}{Z}\sum_n E_n \exp(-\beta E_n)\right)^2 + %\right. \\
-                 %    \left.      
-                  \frac{1}{Z} \sum_n E_n^2 \exp(-\beta E_n) \right\},
-    \end{multline}
-  :label: heatcapacity
+    C_v = \frac{1}{k_BT^2} \left\{ -\left(\frac{1}{Z}\sum_n E_n \exp(-\beta E_n)\right)^2 +
+    \frac{1}{Z} \sum_n E_n^2 \exp(-\beta E_n) \right\},
+    :label: heatcapacity
 
 where :math:`\beta = 1/k_B T`.
 
@@ -328,12 +323,10 @@ because they transform in the same way under rotations as the :math:`C_{lm}` fun
 What this means is that they obey the same commutation relations with respects to the angular momentum operators:
 
 .. math::
-    \begin{align}
         [J_z,C_{lm}] &= m C_{lm}, \\
         [J_{\pm},C_{lm}] &= \sqrt{(l\mp m)(l\pm m+1)} C_{l,m\pm 1}, \\
         [J_z,T_q^{(k)}] &= q T_q^{(k)}, \\
         [J_{\pm},T_q^{(k)}] &= \sqrt{(k\mp q)(k\pm q+1)} T_{q\pm 1}^{(k)}.
-    \end{align}
 
 Now, it turns out the matrix elements of the tensor operators can expressed, via the Wigner-Eckart theorem, as the
 product of an angular momentum coupling (Clebsch-Gordan) coefficient, and a *reduced matrix element*,
@@ -408,10 +401,8 @@ The crystal field in Stevens normalisation used in Mantid is then defined by:
 so the Stevens :math:`A_q^k` and :math:`B_q^k` parameters are related to the real-valued Wybourne parameters by:
 
 .. math::
-    \begin{eqnarray}
-    A_q^k &=& \lambda_{k,|q|} L_q^k / \langle r^k \rangle \\
-    B_q^k &=& \lambda_{k,|q|} \theta_k L_q^k
-    \end{eqnarray}
+    A_q^k &= \lambda_{k,|q|} L_q^k / \langle r^k \rangle \\
+    B_q^k &= \lambda_{k,|q|} \theta_k L_q^k
 
 where :math:`\theta_k` are the Stevens operator equivalent factors tabulated in `Table 1`_.
 

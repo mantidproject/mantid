@@ -94,7 +94,7 @@ private:
   /**
    * Set file's last modified time (resolution: nearest second)
    * @param path :: [input] Path to file
-   * @param time :: [input] ISO8601 formatted time string
+   * @param modifiedTime :: [input] ISO8601 formatted time string
    */
   void adjustFileTime(const std::string &path,
                       const std::string &modifiedTime) {

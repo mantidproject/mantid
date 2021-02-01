@@ -58,9 +58,13 @@ set(INC_FILES inc/MantidPythonInterface/geometry/ComponentInfoPythonIterator.h
               inc/MantidPythonInterface/geometry/DetectorInfoPythonIterator.h
 )
 
+# Add a precompiled header where they are supported
+list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+enable_precompiled_headers(inc/MantidPythonInterface/geometry/PrecompiledHeader.h ALL_FILES)
+
 # Create the target for this directory
 add_library(
-  PythonGeometryModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES}
+  PythonGeometryModule ${ALL_FILES} ${MODULE_DEFINITION}
                        ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
 set_python_properties(PythonGeometryModule _geometry)
