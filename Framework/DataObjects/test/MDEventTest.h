@@ -28,6 +28,7 @@ public:
     TS_ASSERT_EQUALS(a.getErrorSquared(), 1.0);
     TS_ASSERT_EQUALS(a.getRunIndex(), 0);
     TS_ASSERT_EQUALS(a.getDetectorID(), 0);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
 
     MDEvent<4> b(2.5, 1.5);
     TS_ASSERT_EQUALS(b.getNumDims(), 4);
@@ -35,6 +36,7 @@ public:
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 0);
     TS_ASSERT_EQUALS(b.getDetectorID(), 0);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
 
     // NOTE: The pragma (pack,2) call has no effect on some platforms: RHEL5,
     // Ubuntu 10.04 and MacOS as of now.
@@ -44,16 +46,27 @@ public:
     // TS_ASSERT_EQUALS( sizeof(b), sizeof(Mantid::coord_t)*4+8+6);
   }
 
-  void test_constructor() {
+  void test_constructor_noGoniometer() {
     MDEvent<3> b(2.5, 1.5, 123, 456789);
     TS_ASSERT_EQUALS(b.getNumDims(), 3);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
   }
 
-  void test_constructor_withCoords() {
+  void test_constructor() {
+    MDEvent<3> b(2.5, 1.5, 123, 456789, 42);
+    TS_ASSERT_EQUALS(b.getNumDims(), 3);
+    TS_ASSERT_EQUALS(b.getSignal(), 2.5);
+    TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
+    TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
+  }
+
+  void test_constructor_withCoords_noGoniometer() {
     // Fixed-size array
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
     MDEvent<3> b(2.5, 1.5, 123, 456789, coords);
@@ -64,11 +77,26 @@ public:
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
   }
 
-  /** Note: the copy constructor is not explicitely written but rather is filled
+  void test_constructor_withCoords() {
+    // Fixed-size array
+    Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
+    MDEvent<3> b(2.5, 1.5, 123, 456789, 42, coords);
+    TS_ASSERT_EQUALS(b.getSignal(), 2.5);
+    TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
+    TS_ASSERT_EQUALS(b.getCenter(0), 0.125);
+    TS_ASSERT_EQUALS(b.getCenter(1), 1.25);
+    TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
+    TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
+  }
+
+  /** Note: the copy constructor is not explicitly written but rather is filled
    * in by the compiler */
-  void test_CopyConstructor() {
+  void test_CopyConstructor_noGoniometer() {
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
     MDEvent<3> b(2.5, 1.5, 123, 456789, coords);
     MDEvent<3> a(b);
@@ -80,6 +108,24 @@ public:
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(a.getRunIndex(), 123);
     TS_ASSERT_EQUALS(a.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
+  }
+
+  /** Note: the copy constructor is not explicitly written but rather is filled
+ * in by the compiler */
+  void test_CopyConstructor() {
+    Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
+    MDEvent<3> b(2.5, 1.5, 123, 456789, 42, coords);
+    MDEvent<3> a(b);
+    TS_ASSERT_EQUALS(a.getNumDims(), 3);
+    TS_ASSERT_EQUALS(a.getSignal(), 2.5);
+    TS_ASSERT_EQUALS(a.getErrorSquared(), 1.5);
+    TS_ASSERT_EQUALS(b.getCenter(0), 0.125);
+    TS_ASSERT_EQUALS(b.getCenter(1), 1.25);
+    TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
+    TS_ASSERT_EQUALS(a.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(a.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
   }
 
   void test_serialize_deserializeLean() {
@@ -153,6 +199,7 @@ public:
                       transfEvents[nPoints + i].getCenter(2), 1.e-6);
     }
   }
+
   void test_serialize_deserializeFat() {
     size_t nPoints = 100; // the number should not be nPoints%3=0 to hold test
                           // TS_ASSERT_THROWS below
@@ -162,8 +209,9 @@ public:
 
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
-      events[i].setDetectorId(uint32_t(i));
       events[i].setRunIndex(uint16_t(i / 10));
+      events[i].setDetectorId(uint32_t(i));
+      events[i].setGoniometerIndex(uint16_t(i / 10));
       sumGuess += double(i);
       errGuess += double(i * i);
       events[i].setCenter(0, 0.1 * static_cast<double>(i));
@@ -189,6 +237,7 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        uint32_t(data[ncols * i + 3]));
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), uint16_t(data[ncols * i + 4]));
 
       TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 4], 1.e-6);
       TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 5], 1.e-6);
@@ -210,6 +259,7 @@ public:
       TS_ASSERT_EQUALS(events[i].getRunIndex(), transfEvents[i].getRunIndex());
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        transfEvents[i].getDetectorID());
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(), transfEvents[i].getGoniometerIndex());
 
       TS_ASSERT_DELTA(events[i].getCenter(0), transfEvents[i].getCenter(0),
                       1.e-6);
