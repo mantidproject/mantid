@@ -344,7 +344,6 @@ Preset
 ######
 
 .. interface:: Corrections
-   :widget: pgAbsCorPreset
 
 This option will use the Sample and Container geometries as defined in the input workspace. No further geometry inputs will be taken, though the Sample material can still be overridden.
 
