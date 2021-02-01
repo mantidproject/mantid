@@ -193,7 +193,12 @@ class DrillExportModel:
             if ((workspaceName in wsName)
                     and (not isinstance(mtd[wsName], WorkspaceGroup))):
                 for a,s in self._exportAlgorithms.items():
-                    if s and self._validCriteria(wsName, a):
+                    if s:
+                        if not self._validCriteria(wsName, a):
+                            logger.notice("Export of {} with {} was skipped "
+                                          "because the workspace is not "
+                                          "compatible.".format(wsName, a))
+                            continue
                         filename = exportPath + wsName \
                                    + RundexSettings.EXPORT_ALGO_EXTENSION[a]
                         name = wsName + ":" + filename
