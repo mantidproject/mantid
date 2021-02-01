@@ -10,6 +10,9 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 
 IO_VERSION = 1
 
+SETTINGS_KEYS_TYPES = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
+                 "primary_log": str, "sort_ascending": bool}
+
 
 class EngineeringDiffractionUIAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
@@ -28,6 +31,10 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
         obj_dic = dict()
         obj_dic["encoder_version"] = IO_VERSION
         obj_dic["current_tab"] = obj.tabs.currentIndex()
+        if presenter.settings_presenter.settings:
+            obj_dic["settings_dict"] = presenter.settings_presenter.settings
+        else:
+            obj_dic["settings_dict"] = presenter.settings_presenter.model.get_settings_dict(SETTINGS_KEYS_TYPES)
         if data_widget.presenter.get_loaded_workspaces():
             obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
@@ -59,6 +66,8 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         presenter.fitting_presenter.data_widget.model.restore_files(ws_names)
         presenter.fitting_presenter.data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
         presenter.fitting_presenter.data_widget.presenter.restore_table()
+        presenter.settings_presenter.model.set_settings_dict(obj_dic["settings_dict"])
+        presenter.settings_presenter.settings = obj_dic["settings_dict"]
 
         if obj_dic["fit_properties"]:
             fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser
