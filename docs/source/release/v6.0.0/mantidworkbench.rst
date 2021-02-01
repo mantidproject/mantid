@@ -45,6 +45,7 @@ Improvements
 - A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
 - Improved plot generated scripts to better support major and minor tick settings at time of generation.
 - Automatic data export in DrILL. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
+- Allowed the use of greater precision and scientific notation when changing the colorbar limits on a colorfill plot from the Figure Options.
 
 Bugfixes
 ########
@@ -67,9 +68,15 @@ Bugfixes
 - Fixed a crash in the plot config when removing the last curve on a plot
 - Fixed a bug with editing legends in-situ on Linux platforms.
 - Fixed a bug in SliceViewer that caused shown data to not update correctly when changing axis selection.
+- Fixed a bug in SliceViewer where peaks workspaces would still be present even though they had been changed, removed or cleared in workbench.
 - Fixed bug supplying rebin arguments for non-orthogonal data in sliceviewer that meant that not all the availible data within the axes limits were being plotted.
+- Fixed bug in supplying display indices when viewinng axes changed in non-orthog view.
 - Fixed a crash in SliceViewer when hovering the cursor over Direct or Indirect data.
 - Fixed a crash when using broken e notation for axis limits in plot settings
+- Fixed bug in plotting elliptical shell of integrated peaks in sliceviewer - the inner background radius is now correct.
 - Fixed a bug in error bars tab in plot settings where the Error Every property was not being shown correctly
+- Fixed a bug where the fit action (Fit > Fit) in the fit browser wasn't disabled if all the functions were individually removed.
+- Fixed a bug in sliveviewer that wasn't transforming ellipsoid axes of integrated peaks correctly when axes swapped.
+
 
 :ref:`Release 6.0.0 <v6.0.0>`

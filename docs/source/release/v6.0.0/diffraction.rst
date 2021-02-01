@@ -67,12 +67,15 @@ Engineering Diffraction
 
 Bugfixes
 ############
+- Check if log in settings exists in workspace before averaging when focussed data is loaded in EngDiff UI fitting tab.
 - Settings are now saved only when the Apply or OK button are clicked (i.e. clicking cancel will not update the settings).
+
 
 Improvements
 ############
 - The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
 - Generic Sequential Fit button removed from fit menu (users should use sequential fit button below the table in the fitting tab of the UI).
+- Status of fit updated in fit browser when Sequential Fit performed in the fittinng tab of the UI.
 
 New features
 ############

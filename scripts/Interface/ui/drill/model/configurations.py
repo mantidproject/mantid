@@ -209,7 +209,8 @@ class RundexSettings(object):
                 "MaxQxy",
                 "DeltaQ",
                 "IQxQyLogBinning",
-                "OutputPanels"
+                "OutputPanels",
+                "WavelengthRange"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",

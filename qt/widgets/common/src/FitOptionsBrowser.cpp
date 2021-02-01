@@ -50,7 +50,8 @@ namespace MantidWidgets {
  * @param fitType :: The type of the underlying fitting algorithm.
  */
 FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
-    : QWidget(parent), m_decimals(6), m_fittingType(fitType) {
+    : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr),
+      m_decimals(6), m_fittingType(fitType) {
   // create m_browser
   createBrowser();
   createProperties();
@@ -58,6 +59,14 @@ FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   auto *layout = new QVBoxLayout(this);
   layout->addWidget(m_browser);
   layout->setContentsMargins(0, 0, 0, 0);
+}
+
+FitOptionsBrowser::~FitOptionsBrowser() {
+  m_browser->unsetFactoryForManager(m_stringManager);
+  m_browser->unsetFactoryForManager(m_doubleManager);
+  m_browser->unsetFactoryForManager(m_intManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
+  m_browser->unsetFactoryForManager(m_enumManager);
 }
 
 /**

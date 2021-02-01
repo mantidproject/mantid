@@ -160,9 +160,8 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
 
-    set ( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
-    if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
-      ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.cpp _cxxtest_cpp_files _cxxtest_h_files)
+    if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeader.h )
+      enable_precompiled_headers( PrecompiledHeader.h  _cxxtest_cpp_files )
     ENDIF ()
 
     # define the test executable and exclude it from the all target

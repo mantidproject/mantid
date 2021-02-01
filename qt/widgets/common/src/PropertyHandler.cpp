@@ -465,6 +465,7 @@ void PropertyHandler::removeFunction() {
       }
     }
     ph->renameChildren();
+    m_browser->setFitEnabled(cf->nFunctions() > 0);
   }
 }
 
