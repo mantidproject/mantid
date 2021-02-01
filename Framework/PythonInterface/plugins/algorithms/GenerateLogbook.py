@@ -304,6 +304,8 @@ class GenerateLogbook(PythonAlgorithm):
                             rowData[entry_no] = "Not found"
                             self.log().warning(entry_not_found_msg.format(entry))
                         else:
+                            if isinstance(data, numpy.ndarray):
+                                data = ''.join([repr(num) for num in data])
                             if isinstance(data, numpy.bytes_):
                                 data = data.decode('utf-8')
                                 data = data.replace(',', ';') # needed for CSV output
