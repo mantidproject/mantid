@@ -70,7 +70,7 @@ class GenerateLogbookTest(unittest.TestCase):
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='__unused', Facility='ILL', Instrument='D7',
                         NumorRange=[396990,396994], OutputFile=os.path.join(gettempdir(), 'logbook.csv'))
-        self.assertTrue(os.path.exists('/tmp/logbook.csv'))
+        self.assertTrue(os.path.join(gettempdir(), 'logbook.csv'))
 
     def _check_output(self, ws, numberEntries, numberColumns):
         self.assertTrue(mtd[ws])
