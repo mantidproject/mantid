@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.writetosignal import WriteToSignal
+from io import UnsupportedOperation
 
 
 class Receiver(QObject):
@@ -57,6 +58,14 @@ class WriteToSignalTest(unittest.TestCase):
             writer = WriteToSignal(mock_stdout)
             self.assertEqual(writer._original_out, None)
 
+    def test_with_fileno_throw_AttributeError(self):
+        def raise_UnsupportedOperation():
+            raise UnsupportedOperation
+
+        with patch('sys.stdout') as mock_stdout:
+            mock_stdout.fileno.side_effect = raise_UnsupportedOperation
+            writer = WriteToSignal(mock_stdout)
+            self.assertEqual(writer._original_out, None)
 
 if __name__ == "__main__":
     unittest.main()
