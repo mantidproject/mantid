@@ -53,7 +53,7 @@ public:
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
-    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 0);
   }
 
   void test_constructor() {
@@ -63,7 +63,7 @@ public:
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
-    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
   }
 
   void test_constructor_withCoords_noGoniometer() {
@@ -77,7 +77,7 @@ public:
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
-    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 0);
   }
 
   void test_constructor_withCoords() {
@@ -91,7 +91,7 @@ public:
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
-    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
   }
 
   /** Note: the copy constructor is not explicitly written but rather is filled
