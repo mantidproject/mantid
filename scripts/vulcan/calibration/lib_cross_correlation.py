@@ -16,20 +16,27 @@ import h5py
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
-# TODO NOW FIXME - need to make it work with mask workspace
 def verify_vulcan_difc(ws_name: str,
                        cal_table_name: str,
                        mask_ws_name: str,
-                       correct: bool,
-                       discard_bad: bool):
+                       fallback_incorrect_difc_pixels: bool,
+                       mask_incorrect_difc_pixels: bool):
     """Verify and possibly correct DIFCs if necessary
 
-    Renamed from check_correct_difcs_3banks
+    Parameters
+    ----------
+    ws_name
+    cal_table_name: str
+         name of Calibration workspace (a TableWorkspace)
+    mask_ws_name
+    fallback_incorrect_difc_pixels: bool
+        If calibrated DIFC is obviously wrong, fallback to the engineered value
+    mask_incorrect_difc_pixels: bool
+        if fallback_incorrect_difc_pixels==False, choice to discard (aka mask) bad pixels
 
-    :param ws_name:
-    :param cal_table_name: name of Calibration workspace (a TableWorkspace)
-    :param discard_bad: if correct==False, choice to discard (aka mask) bad pixels
-    :return:
+    Returns
+    -------
+
     """
     # Define const parameterr
     diamond_event_ws = mtd[ws_name]
@@ -66,10 +73,16 @@ def verify_vulcan_difc(ws_name: str,
         bank_entry.create_dataset('DIFC_cal_raw_diff', data=h5_data)
 
         # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
-        if correct:
-            correct_difc_to_default(bank_idf_vec, bank_cal_vec, cal_table_ws, pid_0, 20, 1, mask_ws)
-        elif discard_bad:
-            mask_bad_difc()
+        param_dict = {}
+        if fallback_incorrect_difc_pixels:
+            param_dict['cal_table_ws'] = cal_table_ws
+            param_dict['start_row_number'] = pid_0
+            param_dict['difc_col_index'] = 1
+
+        correct_difc_to_default(bank_idf_vec, bank_cal_vec, difc_tol=20,
+                                start_row_number=pid_0,
+                                mask_ws=mask_ws, mask_erroneous_pixels=mask_incorrect_difc_pixels,
+                                **param_dict)
 
     # Close file
     difc_h5.close()
@@ -327,17 +340,36 @@ def cross_correlate_calibrate(ws_name: str,
     return offset_ws_name, mask_ws_name
 
 
-def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, difc_tol, difc_col_index, mask_ws):
-    """ Compare the DIFC calculated from the IDF and calibration.
-    If the difference is beyond tolerance, using the IDF-calculated DIFC instead and report verbally
-    :param idf_difc_vec: DIFC calculated from the instrument geometry (engineered)
-    :param cal_difc_vec: DIFC calculated from the calibration
-    :param cal_table: calibration value table (TableWorkspace)
-    :param row_shift: starting row number the first element in DIFC vector
-    :param difc_tol: tolerance on the difference between calculated difc and calibrated difc
-    :param difc_col_index: column index of the DIFC in the table workspace
-    :param mask_ws: mask workspace
-    :return:
+def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
+                            start_row_number: int,
+                            cal_table: Union[Any, None],
+                            difc_col_index: Union[int, None],
+                            mask_ws,
+                            mask_erroneous_pixels: bool):
+    """
+
+    Parameters
+    ----------
+    idf_difc_vec: numpy.array
+         DIFC calculated from the instrument geometry (engineered)
+    cal_difc_vec: numpy.array
+        DIFC calculated from the calibration
+    cal_table: ~TableWorkspace, None
+        calibration table workspace, calibration value table (TableWorkspace)
+    start_row_number: int
+        starting row number the first element in DIFC vector
+    difc_tol: float
+        tolerance on the difference between calculated difc and calibrated difc
+    difc_col_index: int, None
+        column index of the DIFC in the table workspace
+    mask_ws: ~MaskWorkspace
+        mask workspace
+    mask_erroneous_pixels: bool
+        if True, mask the pixels with DIFC out of tolerance
+
+    Returns
+    -------
+
     """
     # difference between IDF and calibrated DIFC
     difc_diff_vec = idf_difc_vec - cal_difc_vec
@@ -347,24 +379,37 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, cal_table, row_shift, di
     print(f'[INFO] DIFC number = {cal_difc_vec.shape}')
 
     # go over all the DIFCs
-    num_corrected = 0
+    num_wild_difc = 0
     message = ''
     for index in range(len(difc_diff_vec)):
         if abs(difc_diff_vec[index]) > difc_tol:
-            cal_table.setCell(index + row_shift, difc_col_index, idf_difc_vec[index])
-            if mask_ws.readY(index + row_shift)[0] < 0.5:
-                mask_sig = 'No Mask'
-                num_corrected += 1
+            # calibrated DIFC is out of tolerance
+
+            # is it already masked
+            if mask_ws.readY(index + start_row_number)[0] < 0.5:
+                num_wild_difc += 1
+                masked = False
             else:
-                mask_sig = 'Masked'
+                masked = True
+
+            # fall back or mask
+            if cal_table:
+                # fallback DIFC to original
+                cal_table.setCell(index + start_row_number, difc_col_index, idf_difc_vec[index])
+            elif mask_erroneous_pixels and not masked:
+                mask_ws.dataY(start_row_number + index)[0] = 1.
+
+            # error message
+            mask_sig = 'Previously masked' if masked else 'Fallback' if cal_table else 'Mask'
             message += '{0}: ws-index = {1}, diff = {2}...  {3}\n' \
-                       ''.format(index, index + row_shift, difc_diff_vec[index], mask_sig)
+                       ''.format(index, index + start_row_number, difc_diff_vec[index], mask_sig)
         # END-IF
     # END-FOR
-    print(f'[INFO] Number of corrected DIFC = {num_corrected} out of {cal_difc_vec.shape}')
-    print(message)
+    print(f'[INFO] Number of corrected DIFC = {num_wild_difc} out of {cal_difc_vec.shape}\n{message}')
 
-    return
+    # Mask detectors
+    if mask_erroneous_pixels and num_wild_difc > 0:
+        apply_masks(mask_ws)
 
 
 # TODO - FUTURE - Convert this method to a more general form
@@ -612,7 +657,7 @@ def apply_masks(mask_ws):
     mask_ws.maskDetectors(WorkspaceIndexList=mask_wsindex_list)
     mask_ws = mtd[mask_ws_name]
 
-    print ('[INFO] {}: # Masked Detectors = {}'.format(mask_ws.name(), len(mask_wsindex_list)))
+    print('[INFO] {}: # Masked Detectors = {}'.format(mask_ws.name(), len(mask_wsindex_list)))
 
     return mask_ws
 

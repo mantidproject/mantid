@@ -126,15 +126,12 @@ def calibrate_vulcan(diamond_nexus: str,
                                     output_ws_name=base_output_ws_name)
     calib_ws_name, offset_ws, mask_ws = rt
 
-    # Correct obviously erroneous DIFC
-    # TODO FIXME - Disabled for testing purpose
-    if True:
-        # check the difference between DIFCs
-        verify_vulcan_difc(ws_name=diamond_ws_name,
-                           cal_table_name=calib_ws_name,
-                           mask_ws_name=str(mask_ws),
-                           correct=False,
-                           discard_bad=True)
+    # Check, mask or fallback the difference between calibrated and engineered DIFCs
+    verify_vulcan_difc(ws_name=diamond_ws_name,
+                       cal_table_name=calib_ws_name,
+                       mask_ws_name=str(mask_ws),
+                       fallback_incorrect_difc_pixels=False,
+                       mask_incorrect_difc_pixels=True)
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
@@ -179,7 +176,8 @@ def test_main_report_calibration():
     verify_vulcan_difc(ws_name=str(diamond_count_ws),
                        cal_table_name=str(calib_ws_tuple.OutputCalWorkspace),
                        mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace),
-                       correct=False)
+                       fallback_incorrect_difc_pixels=False,
+                       mask_incorrect_difc_pixels=False)
 
     # Report masks
     from lib_analysis import report_masked_pixels
