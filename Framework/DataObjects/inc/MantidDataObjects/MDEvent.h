@@ -228,7 +228,7 @@ public:
    * @param goniometerIndex :: 0-based index defining the goniometer settings when the event took place
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
-   * */
+   */
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
           const int32_t detectorId, const uint16_t goniometerIndex, const double *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
@@ -263,20 +263,21 @@ public:
   /** @returns a string identifying the type of event this is. */
   static std::string getTypeName() { return "MDEvent"; }
 
-  /* static method used to convert vector of lean events into vector of their
-   coordinates & signal and error
-   @param events    -- vector of events
-   @return data     -- vector of events data, namely, their signal and error
-   casted to coord_t type
-   @return ncols    -- the number of colunts  in the data (it is nd+4 here but
-   may be different for other data types)
-   @return totalSignal -- total signal in the vector of events
-   @return totalErr   -- total error corresponting to the vector of events
+  /**
+   * Static method used to convert a vector of events into a list of their
+   * signal, errorSquared, runIndex, detectorId, goniometerIndex, and
+   * nd-Dimensional coordinates. All list items are casted into coord_t type.
+   * @param events : vector of events
+   * @param data : resulting list (of type std::vector) of data events
+   * @param ncols : resulting number of entries per event, here 5+nd
+   * @param totalSignal : the sum of all event signal attribute
+   * @param totalErrSq : the summ of all event errorSquared attribute
   */
   static inline void eventsToData(const std::vector<MDEvent<nd>> &events,
                                   std::vector<coord_t> &data, size_t &ncols,
                                   double &totalSignal, double &totalErrSq) {
-    ncols = (nd + 4);
+    std::vector<std::string> trait_names = {"signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
+    ncols = trait_names.size() + nd;  // number of data items per event
     size_t nEvents = events.size();
     data.resize(nEvents * ncols);
 
@@ -292,25 +293,30 @@ public:
       // Additional stuff for MDEvent
       data[index++] = static_cast<coord_t>(event.runIndex);
       data[index++] = static_cast<coord_t>(event.detectorId);
+      data[index++] = static_cast<coord_t>(event.goniometerIndex);
       for (size_t d = 0; d < nd; d++)
-        data[index++] = event.center[d];
+        data[index++] = event.center[d];  // add event's coordinates
       // Track the total signal
       totalSignal += signal_t(signal);
       totalErrSq += signal_t(errorSquared);
     }
   }
-  /* static method used to convert vector of data into vector of lean events
-   @return data    -- vector of events coordinates, their signal and error
-   casted to coord_t type
-   @param events    -- vector of events
-   @param reserveMemory -- reserve memory for events copying. Set to false if
-   one wants to add new events to the existing one.
+
+  /**
+   * static method converts a vector of data items into a vector of events.
+   * It is assumed the data items for each event are ordered as follows:
+   * 1 signal, 2 errorSquared, 3 runIndex, 4 detectorId, 5 goniometerIndex,
+   * 6 to 6+nd-1 nd-Dimensional coordinates.
+   * @param data : vector data items, all as type coord_t
+   * @param events : resulting vector of events
+   * @param reserveMemory : reserve memory for events copying. Set to false if
+   * one wants to add new events to the existing one.
   */
   static inline void dataToEvents(const std::vector<coord_t> &data,
                                   std::vector<MDEvent<nd>> &events,
                                   bool reserveMemory = true) {
-    // Number of columns = number of dimensions + 4 (signal/error)+detId+runID
-    size_t numColumns = (nd + 4);
+    std::vector<std::string> trait_names = {"signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
+    size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
     if (numEvents * numColumns != data.size())
       throw(std::invalid_argument("wrong input array of data to convert to "
@@ -328,13 +334,15 @@ public:
       size_t ii = i * numColumns;
 
       // Point directly into the data block for the centers.
-      coord_t const *const centers = &(data[ii + 4]);
+      coord_t const *const centers = &(data[ii + trait_names.size()]);
 
-      // Create the event with signal, error squared, and the centers
+      // Create the event with the traits and the coordinates
       events.emplace_back(static_cast<signal_t>(data[ii]),
                           static_cast<signal_t>(data[ii + 1]),
                           static_cast<uint16_t>(data[ii + 2]),
-                          static_cast<int32_t>(data[ii + 3]), centers);
+                          static_cast<int32_t>(data[ii + 3]),
+                          static_cast<uint16_t>(data[ii + 4]),
+                          centers);
     }
   }
 };
