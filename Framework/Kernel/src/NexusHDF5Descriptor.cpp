@@ -112,17 +112,14 @@ herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
   return iRet;
 }
 
-void getGroup(hid_t groupID,
-              std::map<std::string, std::set<std::string>> &allEntries) {
+void getGroup(hid_t groupID, std::map<std::string, std::set<std::string>> &allEntries) {
 
   /**
    * Return the NX_class attribute associate with objectName group entry
    */
-  auto lf_getNxClassAttribute = [&](hid_t groupID,
-                                    const char *objectName) -> std::string {
+  auto lf_getNxClassAttribute = [&](hid_t groupID, const char *objectName) -> std::string {
     std::string attribute = "";
-    hid_t attributeID = H5Aopen_by_name(groupID, objectName, "NX_class",
-                                        H5P_DEFAULT, H5P_DEFAULT);
+    hid_t attributeID = H5Aopen_by_name(groupID, objectName, "NX_class", H5P_DEFAULT, H5P_DEFAULT);
     if (attributeID < 0) {
       H5Aclose(attributeID);
       return attribute;
@@ -145,16 +142,12 @@ void getGroup(hid_t groupID,
   constexpr std::size_t maxLength = 1024;
   char groupName[maxLength];
   char memberName[maxLength];
-  std::size_t groupNameLength =
-      static_cast<std::size_t>(H5Iget_name(groupID, groupName, maxLength));
+  std::size_t groupNameLength = static_cast<std::size_t>(H5Iget_name(groupID, groupName, maxLength));
   hsize_t nObjects = 0;
   H5Gget_num_objs(groupID, &nObjects);
 
   const std::string groupNameStr(groupName, groupNameLength);
-  const std::string nxClass =
-      (groupNameStr == "/")
-          ? ""
-          : lf_getNxClassAttribute(groupID, groupNameStr.c_str());
+  const std::string nxClass = (groupNameStr == "/") ? "" : lf_getNxClassAttribute(groupID, groupNameStr.c_str());
 
   if (!nxClass.empty()) {
     allEntries[nxClass].insert(groupNameStr);
@@ -164,8 +157,7 @@ void getGroup(hid_t groupID,
 
     const int type = H5Gget_objtype_by_idx(groupID, static_cast<size_t>(i));
     const std::size_t memberNameLength =
-        static_cast<std::size_t>(H5Gget_objname_by_idx(
-            groupID, static_cast<hsize_t>(i), memberName, maxLength));
+        static_cast<std::size_t>(H5Gget_objname_by_idx(groupID, static_cast<hsize_t>(i), memberName, maxLength));
 
     if (type == H5O_TYPE_GROUP) {
       hid_t subGroupID = H5Gopen2(groupID, memberName, H5P_DEFAULT);
@@ -184,26 +176,21 @@ void getGroup(hid_t groupID,
 
 bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
   // use existing function to do the work
-  return NexusDescriptor::isReadable(filename,
-                                     NexusDescriptor::Version::Version5);
+  return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
 }
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
     : m_filename(filename), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
-std::string NexusHDF5Descriptor::getFilename() const noexcept {
-  return m_filename;
-}
+std::string NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }
 
-const std::map<std::string, std::set<std::string>> &
-NexusHDF5Descriptor::getAllEntries() const noexcept {
+const std::map<std::string, std::set<std::string>> &NexusHDF5Descriptor::getAllEntries() const noexcept {
   return m_allEntries;
 }
 
 // PRIVATE
-std::map<std::string, std::set<std::string>>
-NexusHDF5Descriptor::initAllEntries() {
+std::map<std::string, std::set<std::string>> NexusHDF5Descriptor::initAllEntries() {
 
   hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
@@ -211,9 +198,8 @@ NexusHDF5Descriptor::initAllEntries() {
   hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, fapl);
   if (fileID < 0) {
 
-    throw std::invalid_argument(
-        "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " +
-        m_filename + " with fapl " + std::to_string(fapl) + "\n");
+    throw std::invalid_argument("ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " + m_filename +
+                                " with fapl " + std::to_string(fapl) + "\n");
   }
 
   hid_t groupID = H5Gopen2(fileID, "/", H5P_DEFAULT);
@@ -228,9 +214,7 @@ NexusHDF5Descriptor::initAllEntries() {
   return allEntries;
 }
 
-bool NexusHDF5Descriptor::isEntry(const std::string &entryName,
-                                  const std::string &groupClass) const
-    noexcept {
+bool NexusHDF5Descriptor::isEntry(const std::string &entryName, const std::string &groupClass) const noexcept {
 
   auto itClass = m_allEntries.find(groupClass);
   if (itClass == m_allEntries.end()) {
@@ -246,8 +230,7 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName,
 
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
 
-  for (auto itClass = m_allEntries.rbegin(); itClass != m_allEntries.rend();
-       ++itClass) {
+  for (auto itClass = m_allEntries.rbegin(); itClass != m_allEntries.rend(); ++itClass) {
     if (itClass->second.count(entryName) == 1) {
       return true;
     }

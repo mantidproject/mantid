@@ -89,8 +89,7 @@ private:
   void fitSimultaneous();
   void fitIndividual(const bool &isEvaluation = false);
   void updateFunctionBrowser(Mantid::API::IFunction_sptr fun);
-  void updateFunctionBrowser(const QString &directory,
-                             const QString &modelName);
+  void updateFunctionBrowser(const QString &directory, const QString &modelName);
   void initBuiltInModels();
   void saveBuiltInModels();
   void loadBuiltInModels(QMenu *menuBuiltIn);

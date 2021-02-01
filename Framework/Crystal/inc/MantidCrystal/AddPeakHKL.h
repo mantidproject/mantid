@@ -18,9 +18,7 @@ class MANTID_CRYSTAL_DLL AddPeakHKL : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AddPeak"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"AddPeak"}; }
   const std::string category() const override;
   const std::string summary() const override;
 

@@ -18,9 +18,7 @@ namespace MantidWidgets {
  */
 class RotationSurface : public UnwrappedSurface {
 public:
-  RotationSurface(const InstrumentActor *rootActor,
-                  const Mantid::Kernel::V3D &origin,
-                  const Mantid::Kernel::V3D &axis);
+  RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
   void init() override;
   // Get the value of the u-correction - a shift in the u-coord added to
   // automatically determined uv coordinates
@@ -64,12 +62,11 @@ protected:
   /// Calculate UV offsets from the view rect
   std::pair<double, double> calculateViewRectOffsets();
 
-  const Mantid::Kernel::V3D m_pos; ///< Origin (sample position)
-  const Mantid::Kernel::V3D
-      m_zaxis; ///< The z axis of the surface specific coord system
-  Mantid::Kernel::V3D m_xaxis; ///< The x axis
-  Mantid::Kernel::V3D m_yaxis; ///< The y axis
-  bool m_manual_u_correction;  ///< Flag set to prevent automatic
+  const Mantid::Kernel::V3D m_pos;   ///< Origin (sample position)
+  const Mantid::Kernel::V3D m_zaxis; ///< The z axis of the surface specific coord system
+  Mantid::Kernel::V3D m_xaxis;       ///< The x axis
+  Mantid::Kernel::V3D m_yaxis;       ///< The y axis
+  bool m_manual_u_correction;        ///< Flag set to prevent automatic
   /// FindAndCorrectUGap()
 };
 } // namespace MantidWidgets

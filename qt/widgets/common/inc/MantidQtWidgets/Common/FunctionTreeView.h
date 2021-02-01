@@ -83,9 +83,8 @@ public:
   };
 
   /// Constructor
-  FunctionTreeView(
-      QWidget *parent, bool multi,
-      const std::vector<std::string> &categories = std::vector<std::string>());
+  FunctionTreeView(QWidget *parent, bool multi,
+                   const std::vector<std::string> &categories = std::vector<std::string>());
   /// Destructor
   ~FunctionTreeView() override;
   /// Clear the contents
@@ -111,8 +110,7 @@ public:
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
   /// Set a constraint
-  void setParameterConstraint(const QString &paramName,
-                              const QString &constraint) override;
+  void setParameterConstraint(const QString &paramName, const QString &constraint) override;
   /// Set new global parameters.
   void setGlobalParameters(const QStringList &) override;
   /// Get a list of global parameters
@@ -122,8 +120,7 @@ public:
   void showFunctionHelp(const QString &functionName) const override;
 
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
-                                          bool attributesOnly = false);
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr, bool attributesOnly = false);
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
@@ -148,20 +145,17 @@ protected:
   /// Add a function property
   AProperty addFunctionProperty(QtProperty *parent, const QString &funName);
   /// Add a parameter property
-  AProperty addParameterProperty(QtProperty *parent, const QString &paramName,
-                                 const QString &paramDesc, double paramValue);
+  AProperty addParameterProperty(QtProperty *parent, const QString &paramName, const QString &paramDesc,
+                                 double paramValue);
   /// Add a attribute property
   AProperty addAttributeProperty(QtProperty *parent, const QString &attName,
                                  const Mantid::API::IFunction::Attribute &att);
   /// Add attribute and parameter properties to a function property
-  void
-  addAttributeAndParameterProperties(QtProperty *prop,
-                                     const Mantid::API::IFunction_sptr &fun);
+  void addAttributeAndParameterProperties(QtProperty *prop, const Mantid::API::IFunction_sptr &fun);
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties
-  void updateFunctionIndices(QtProperty *prop = nullptr,
-                             const QString &index = "");
+  void updateFunctionIndices(QtProperty *prop = nullptr, const QString &index = "");
   /// Get property of the overall function
   AProperty getFunctionProperty() const;
   /// Check if property is a function group
@@ -213,8 +207,7 @@ protected:
   QString getTie(QtProperty *prop) const;
 
   /// Add a constraint property
-  QList<AProperty> addConstraintProperties(QtProperty *prop,
-                                           const QString &constraint);
+  QList<AProperty> addConstraintProperties(QtProperty *prop, const QString &constraint);
   /// Check if a property is a constraint
   bool isConstraint(QtProperty *prop) const;
   /// Check if a parameter property has a constraint
@@ -224,8 +217,7 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const QString &paramName,
-                        const double &lowerBound = Mantid::EMPTY_DBL(),
+  QString getConstraint(const QString &paramName, const double &lowerBound = Mantid::EMPTY_DBL(),
                         const double &upperBound = Mantid::EMPTY_DBL()) const;
   /// Get a pair of function index (eg f0.f2.) and constraint expression given a
   /// parameter property
@@ -372,8 +364,7 @@ private:
   void setIntAttribute(const QString &attrName, int value) override;
   void setStringAttribute(const QString &attrName, std::string &value) override;
   void setBooleanAttribute(const QString &attrName, bool value) override;
-  void setVectorAttribute(const QString &attrName,
-                          std::vector<double> &val) override;
+  void setVectorAttribute(const QString &attrName, std::vector<double> &val) override;
 
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;

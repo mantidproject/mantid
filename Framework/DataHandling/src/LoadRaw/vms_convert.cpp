@@ -30,9 +30,7 @@ inline unsigned swap_int(unsigned a)
 }
 #endif
 
-#define swap_int(a)                                                            \
-  (((a) << 24) | (((a) << 8) & 0x00ff0000) | (((a) >> 8) & 0x0000ff00) |       \
-   ((unsigned long)(a) >> 24))
+#define swap_int(a) (((a) << 24) | (((a) << 8) & 0x00ff0000) | (((a) >> 8) & 0x0000ff00) | ((unsigned long)(a) >> 24))
 
 #define swap_short(a) (((a & 0xff) << 8) | ((unsigned short)(a) >> 8))
 
@@ -228,13 +226,12 @@ struct ieee_double {
 
 /** Vax double precision floating point */
 struct vax_double {
-  unsigned int mantissa1 : 7; ///< mantissa 1
-  unsigned int exp : 8;       ///< exponential
-  unsigned int sign : 1;      ///< sign
-  unsigned int
-      mantissa2 : 16; ///< mantissa 2
-                      //	unsigned int	mantissa3 : 16;  ///<mantissa 3
-                      //	unsigned int	mantissa4 : 16;  ///<mantissa 4
+  unsigned int mantissa1 : 7;  ///< mantissa 1
+  unsigned int exp : 8;        ///< exponential
+  unsigned int sign : 1;       ///< sign
+  unsigned int mantissa2 : 16; ///< mantissa 2
+                               //	unsigned int	mantissa3 : 16;  ///<mantissa 3
+                               //	unsigned int	mantissa4 : 16;  ///<mantissa 4
 };
 
 #endif /* WORDS_BIGENDIAN */
@@ -359,8 +356,7 @@ void vaxf_to_local(float *val, const int *n, int *errcode) {
   /* Do a null conversion to replace invalid values (prevents floating
    * exceptions later on) */
   for (i = 0; i < *n; i++) {
-    if (cvt$ftof(val + i, CVT$K_VAX_F, val + i, CVT$K_VAX_F,
-                 CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
+    if (cvt$ftof(val + i, CVT$K_VAX_F, val + i, CVT$K_VAX_F, CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
       val[i] = 0.0; /* Fix with a safe value when status shows an invalid real
                        is being converted */
     }
@@ -401,8 +397,7 @@ void ieee_float_to_local(float *val, const int *n, int *errcode) {
   *errcode = 0;
   for (i = 0; i < *n; i++) {
     //                if (ieee_to_vax_float(i+val) != 0)
-    if (cvt$ftof(val + i, CVT$K_IEEE_S, val + i, VMS_FLOAT_NATIVE, 0) !=
-        CVT$K_NORMAL) {
+    if (cvt$ftof(val + i, CVT$K_IEEE_S, val + i, VMS_FLOAT_NATIVE, 0) != CVT$K_NORMAL) {
       *errcode = 1;
       val[i] = 0.0;
     }
@@ -423,8 +418,7 @@ void ieee_double_to_local(double *val, const int *n, int *errcode) {
   int i;
   *errcode = 0;
   for (i = 0; i < *n; i++) {
-    if (cvt$ftof(val + i, CVT$K_IEEE_T, val + i, VMS_DOUBLE_NATIVE,
-                 CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
+    if (cvt$ftof(val + i, CVT$K_IEEE_T, val + i, VMS_DOUBLE_NATIVE, CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
       val[i] = 0.0;
       *errcode = 1;
     }
@@ -445,8 +439,7 @@ void local_to_ieee_float(float *val, const int *n, int *errcode) {
   int i;
   *errcode = 0;
   for (i = 0; i < *n; i++) {
-    if (cvt$ftof(val + i, VMS_FLOAT_NATIVE, val + i, CVT$K_IEEE_S,
-                 CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
+    if (cvt$ftof(val + i, VMS_FLOAT_NATIVE, val + i, CVT$K_IEEE_S, CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
       val[i] = 0.0;
       *errcode = 1;
     }
@@ -465,8 +458,7 @@ void local_to_ieee_double(double *val, const int *n, int *errcode) {
   int i;
   *errcode = 0;
   for (i = 0; i < *n; i++) {
-    if (cvt$ftof(val + i, VMS_DOUBLE_NATIVE, val + i, CVT$K_IEEE_T,
-                 CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
+    if (cvt$ftof(val + i, VMS_DOUBLE_NATIVE, val + i, CVT$K_IEEE_T, CVT$M_REPORT_ALL) != CVT$K_NORMAL) {
       val[i] = 0.0;
       *errcode = 1;
     }

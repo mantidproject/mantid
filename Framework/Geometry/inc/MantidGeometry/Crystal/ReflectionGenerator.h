@@ -14,12 +14,7 @@
 namespace Mantid {
 namespace Geometry {
 
-enum struct ReflectionConditionFilter {
-  None,
-  Centering,
-  SpaceGroup,
-  StructureFactor
-};
+enum struct ReflectionConditionFilter { None, Centering, SpaceGroup, StructureFactor };
 
 /** ReflectionGenerator
 
@@ -93,24 +88,20 @@ enum struct ReflectionConditionFilter {
 class MANTID_GEOMETRY_DLL ReflectionGenerator {
 public:
   ReflectionGenerator(const CrystalStructure &crystalStructure,
-                      ReflectionConditionFilter defaultFilter =
-                          ReflectionConditionFilter::SpaceGroup);
+                      ReflectionConditionFilter defaultFilter = ReflectionConditionFilter::SpaceGroup);
 
   const CrystalStructure &getCrystalStructure() const;
 
   HKLFilter_const_sptr getDRangeFilter(double dMin, double dMax) const;
-  HKLFilter_const_sptr
-  getReflectionConditionFilter(ReflectionConditionFilter filter);
+  HKLFilter_const_sptr getReflectionConditionFilter(ReflectionConditionFilter filter);
 
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
-  std::vector<Kernel::V3D>
-  getHKLs(double dMin, double dMax,
-          const HKLFilter_const_sptr &reflectionConditionFilter) const;
+  std::vector<Kernel::V3D> getHKLs(double dMin, double dMax,
+                                   const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax) const;
-  std::vector<Kernel::V3D>
-  getUniqueHKLs(double dMin, double dMax,
-                const HKLFilter_const_sptr &reflectionConditionFilter) const;
+  std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax,
+                                         const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
   std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;

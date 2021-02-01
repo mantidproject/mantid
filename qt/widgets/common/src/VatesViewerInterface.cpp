@@ -15,12 +15,9 @@ VatesViewerInterface::VatesViewerInterface(QWidget *parent) : QWidget(parent) {}
 
 VatesViewerInterface::~VatesViewerInterface() {}
 
-void VatesViewerInterface::setupPluginMode(
-    int /*WsType*/, const std::string & /*instrumentName*/) {}
+void VatesViewerInterface::setupPluginMode(int /*WsType*/, const std::string & /*instrumentName*/) {}
 
-void VatesViewerInterface::renderWorkspace(QString workSpaceName,
-                                           int workspaceType,
-                                           std::string instrumentName) {
+void VatesViewerInterface::renderWorkspace(QString workSpaceName, int workspaceType, std::string instrumentName) {
   UNUSED_ARG(workSpaceName);
   UNUSED_ARG(workspaceType);
   UNUSED_ARG(instrumentName);
@@ -36,8 +33,8 @@ void VatesViewerInterface::renderWorkspace(QString workSpaceName,
  * @param fileVersion :: version of the Mantid project file.
  * @return a handle to the newly created Vates window
  */
-IProjectSerialisable *VatesViewerInterface::loadFromProject(
-    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
+IProjectSerialisable *VatesViewerInterface::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                                                            const int fileVersion) {
   UNUSED_ARG(app);
   UNUSED_ARG(fileVersion);
 

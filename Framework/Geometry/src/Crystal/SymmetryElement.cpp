@@ -14,15 +14,12 @@ namespace Mantid {
 namespace Geometry {
 
 /// Constructor with symbol argument.
-SymmetryElement::SymmetryElement(const std::string &symbol)
-    : m_hmSymbol(symbol) {}
+SymmetryElement::SymmetryElement(const std::string &symbol) : m_hmSymbol(symbol) {}
 
 SymmetryElementIdentity::SymmetryElementIdentity() : SymmetryElement("1") {}
 
 /// Returns a clone of the identity element.
-SymmetryElement_sptr SymmetryElementIdentity::clone() const {
-  return std::make_shared<SymmetryElementIdentity>();
-}
+SymmetryElement_sptr SymmetryElementIdentity::clone() const { return std::make_shared<SymmetryElementIdentity>(); }
 
 /// Constructor with inversion point, default is (0,0,0).
 SymmetryElementInversion::SymmetryElementInversion(const V3R &inversionPoint)
@@ -34,9 +31,7 @@ SymmetryElement_sptr SymmetryElementInversion::clone() const {
 }
 
 /// Constructor for SymmetryElementWithAxis.
-SymmetryElementWithAxis::SymmetryElementWithAxis(const std::string &symbol,
-                                                 const V3R &axis,
-                                                 const V3R &translation)
+SymmetryElementWithAxis::SymmetryElementWithAxis(const std::string &symbol, const V3R &axis, const V3R &translation)
     : SymmetryElement(symbol), m_translation(translation) {
   setAxis(axis);
 }
@@ -51,28 +46,22 @@ void SymmetryElementWithAxis::setAxis(const V3R &axis) {
 }
 
 /// Constructor for rotation-,rotoinversion- and screw-axes.
-SymmetryElementRotation::SymmetryElementRotation(
-    const std::string &symbol, const V3R &axis, const V3R &translation,
-    const SymmetryElementRotation::RotationSense &rotationSense)
-    : SymmetryElementWithAxis(symbol, axis, translation),
-      m_rotationSense(rotationSense) {}
+SymmetryElementRotation::SymmetryElementRotation(const std::string &symbol, const V3R &axis, const V3R &translation,
+                                                 const SymmetryElementRotation::RotationSense &rotationSense)
+    : SymmetryElementWithAxis(symbol, axis, translation), m_rotationSense(rotationSense) {}
 
 /// Returns a clone of the symmetry element.
 SymmetryElement_sptr SymmetryElementRotation::clone() const {
-  return std::make_shared<SymmetryElementRotation>(
-      m_hmSymbol, m_axis, m_translation, m_rotationSense);
+  return std::make_shared<SymmetryElementRotation>(m_hmSymbol, m_axis, m_translation, m_rotationSense);
 }
 
 /// Constructor for mirror planes.
-SymmetryElementMirror::SymmetryElementMirror(const std::string &symbol,
-                                             const V3R &axis,
-                                             const V3R &translation)
+SymmetryElementMirror::SymmetryElementMirror(const std::string &symbol, const V3R &axis, const V3R &translation)
     : SymmetryElementWithAxis(symbol, axis, translation) {}
 
 /// Returns a clone of the mirror plane.
 SymmetryElement_sptr SymmetryElementMirror::clone() const {
-  return std::make_shared<SymmetryElementMirror>(m_hmSymbol, m_axis,
-                                                 m_translation);
+  return std::make_shared<SymmetryElementMirror>(m_hmSymbol, m_axis, m_translation);
 }
 
 /// Constructor for translation element, requires translation vector.

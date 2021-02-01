@@ -19,23 +19,17 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorModel {
 public:
   virtual ~IFitScriptGeneratorModel() = default;
 
-  virtual void removeWorkspaceDomain(std::string const &workspaceName,
-                                     WorkspaceIndex workspaceIndex) = 0;
-  virtual void addWorkspaceDomain(std::string const &workspaceName,
-                                  WorkspaceIndex workspaceIndex, double startX,
+  virtual void removeWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex) = 0;
+  virtual void addWorkspaceDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
 
-  [[nodiscard]] virtual bool isStartXValid(std::string const &workspaceName,
-                                           WorkspaceIndex workspaceIndex,
+  [[nodiscard]] virtual bool isStartXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                            double startX) const = 0;
-  [[nodiscard]] virtual bool isEndXValid(std::string const &workspaceName,
-                                         WorkspaceIndex workspaceIndex,
+  [[nodiscard]] virtual bool isEndXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
                                          double endX) const = 0;
 
-  virtual void updateStartX(std::string const &workspaceName,
-                            WorkspaceIndex workspaceIndex, double startX) = 0;
-  virtual void updateEndX(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double endX) = 0;
+  virtual void updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX) = 0;
+  virtual void updateEndX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX) = 0;
 };
 
 } // namespace MantidWidgets

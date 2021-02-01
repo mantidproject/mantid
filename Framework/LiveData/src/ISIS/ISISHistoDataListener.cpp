@@ -52,19 +52,17 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : LiveListener(), isInitilized(false), m_daeHandle(nullptr),
-      m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
-      "An optional list of spectra to load. If blank, all "
-      "available spectra will be loaded.");
+    : LiveListener(), isInitilized(false), m_daeHandle(nullptr), m_numberOfPeriods(0), m_totalNumberOfSpectra(0),
+      m_timeRegime(-1) {
+  declareProperty(std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
+                  "An optional list of spectra to load. If blank, all "
+                  "available spectra will be loaded.");
 
   auto validator = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   validator->setLower(1);
-  declareProperty(
-      std::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
-      "An optional list of periods to load. If blank, all "
-      "available periods will be loaded.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
+                  "An optional list of periods to load. If blank, all "
+                  "available periods will be loaded.");
 }
 
 /// Destructor
@@ -80,8 +78,7 @@ ISISHistoDataListener::~ISISHistoDataListener() {
  * @param code ::    The error code (disregarded)
  * @param message :: The error message - passed to the logger at error level
  */
-void ISISHistoDataListener::IDCReporter(int status, int code,
-                                        const char *message) {
+void ISISHistoDataListener::IDCReporter(int status, int code, const char *message) {
   (void)status;
   (void)code; // Avoid compiler warning
   g_log.error(message);
@@ -130,11 +127,9 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   loadTimeRegimes();
 
   // Create dummy workspace to store instrument data
-  m_bufferWorkspace =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  m_bufferWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-  m_bufferWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
+  m_bufferWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   m_bufferWorkspace->setYUnit("Counts");
 
   runLoadInstrument(m_bufferWorkspace, getString("NAME"));
@@ -161,8 +156,7 @@ int ISISHistoDataListener::runNumber() const {
   return 0;
 }
 
-void ISISHistoDataListener::start(
-    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
+void ISISHistoDataListener::start(Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /**
@@ -173,8 +167,7 @@ std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   if (m_timeRegime < 0) {
     m_timeRegime = getTimeRegimeToLoad();
-    g_log.debug() << "Loading spectra for time regime " << m_timeRegime + 1
-                  << '\n';
+    g_log.debug() << "Loading spectra for time regime " << m_timeRegime + 1 << '\n';
   }
 
   if (!m_daeHandle) {
@@ -206,16 +199,13 @@ std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
                              "negative. This is an Internal inconsistency.");
 
   // find out the number of histograms in the output workspace
-  const size_t numberOfHistograms =
-      m_specList.empty() ? m_numberOfSpectra[m_timeRegime] : m_specList.size();
+  const size_t numberOfHistograms = m_specList.empty() ? m_numberOfSpectra[m_timeRegime] : m_specList.size();
 
   // Create the 2D workspace for the output
   auto localWorkspace = WorkspaceFactory::Instance().create(
-      m_bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
-      m_numberOfBins[m_timeRegime]);
+      m_bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1, m_numberOfBins[m_timeRegime]);
 
-  localWorkspace->updateSpectraUsing(
-      SpectrumDetectorMapping(m_specIDs, m_detIDs));
+  localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
   // cut the spectra numbers into chunks
   std::vector<int> index, count;
@@ -253,8 +243,7 @@ std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
     }
   }
 
-  if (m_numberOfPeriods > 1 &&
-      (m_periodList.empty() || m_periodList.size() > 1)) {
+  if (m_numberOfPeriods > 1 && (m_periodList.empty() || m_periodList.size() > 1)) {
     return workspaceGroup;
   }
 
@@ -267,12 +256,10 @@ std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
  */
 int ISISHistoDataListener::getInt(const std::string &par) const {
   int sv_dims_array[1] = {1}, sv_ndims = 1, buffer;
-  int stat =
-      IDCgetpari(m_daeHandle, par.c_str(), &buffer, sv_dims_array, &sv_ndims);
+  int stat = IDCgetpari(m_daeHandle, par.c_str(), &buffer, sv_dims_array, &sv_ndims);
   if (stat != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
-    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
-                                       m_daeName);
+    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ", m_daeName);
   }
   return buffer;
 }
@@ -285,11 +272,9 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
   const int maxSize = 1024;
   char buffer[maxSize];
   int dim = maxSize, ndims = 1;
-  if (IDCgetparc(m_daeHandle, par.c_str(), static_cast<char *>(buffer), &dim,
-                 &ndims) != 0) {
+  if (IDCgetparc(m_daeHandle, par.c_str(), static_cast<char *>(buffer), &dim, &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
-    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
-                                       m_daeName);
+    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ", m_daeName);
   };
   return std::string(buffer, dim);
 }
@@ -310,16 +295,13 @@ void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
  * periods.
  * @param periodList :: A vector with period numbers.
  */
-void ISISHistoDataListener::setPeriods(
-    const std::vector<specnum_t> &periodList) {
+void ISISHistoDataListener::setPeriods(const std::vector<specnum_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be
   // changed
   if (!isInitilized) {
     m_periodList = periodList;
-    if (*std::max_element(m_periodList.begin(), m_periodList.end()) >
-        m_numberOfPeriods) {
-      throw std::invalid_argument("Invalid period(s) specified. Maximum " +
-                                  std::to_string(m_numberOfPeriods));
+    if (*std::max_element(m_periodList.begin(), m_periodList.end()) > m_numberOfPeriods) {
+      throw std::invalid_argument("Invalid period(s) specified. Maximum " + std::to_string(m_numberOfPeriods));
     }
   }
 }
@@ -330,15 +312,12 @@ void ISISHistoDataListener::setPeriods(
  * @param arr :: A vector to store the values
  * @param dim :: Size of the array
  */
-void ISISHistoDataListener::getFloatArray(const std::string &par,
-                                          std::vector<float> &arr,
-                                          const size_t dim) {
+void ISISHistoDataListener::getFloatArray(const std::string &par, std::vector<float> &arr, const size_t dim) {
   int dims = static_cast<int>(dim), ndims = 1;
   arr.resize(dim);
   if (IDCgetparr(m_daeHandle, par.c_str(), arr.data(), &dims, &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
-    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
-                                       m_daeName);
+    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ", m_daeName);
   }
 }
 
@@ -348,15 +327,12 @@ void ISISHistoDataListener::getFloatArray(const std::string &par,
  * @param arr :: A vector to store the values
  * @param dim :: Size of the array
  */
-void ISISHistoDataListener::getIntArray(const std::string &par,
-                                        std::vector<int> &arr,
-                                        const size_t dim) {
+void ISISHistoDataListener::getIntArray(const std::string &par, std::vector<int> &arr, const size_t dim) {
   int dims = static_cast<int>(dim), ndims = 1;
   arr.resize(dim);
   if (IDCgetpari(m_daeHandle, par.c_str(), arr.data(), &dims, &ndims) != 0) {
     g_log.error("Unable to read " + par + " from DAE " + m_daeName);
-    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ",
-                                       m_daeName);
+    throw Kernel::Exception::FileError("Unable to read " + par + " from DAE ", m_daeName);
   }
 }
 
@@ -365,13 +341,11 @@ void ISISHistoDataListener::getIntArray(const std::string &par,
  * @param index :: Vector of first indices of a chunk.
  * @param count :: Numbers of spectra in each chunk.
  */
-void ISISHistoDataListener::calculateIndicesForReading(
-    std::vector<int> &index, std::vector<int> &count) {
+void ISISHistoDataListener::calculateIndicesForReading(std::vector<int> &index, std::vector<int> &count) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const int numberOfSpectra = m_numberOfSpectra[m_timeRegime];
   // max number of spectra that could be read in in one go
-  int maxNumberOfSpectra =
-      1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
+  int maxNumberOfSpectra = 1024 * 1024 / (numberOfBins * static_cast<int>(sizeof(int)));
   if (maxNumberOfSpectra == 0) {
     maxNumberOfSpectra = 1;
   }
@@ -398,8 +372,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
     specnum_t spec = m_specList[i0];
     for (size_t i = 1; i < m_specList.size(); ++i) {
       specnum_t next = m_specList[i];
-      if (next - m_specList[i - 1] > 1 ||
-          static_cast<int>(i - i0) >= maxNumberOfSpectra) {
+      if (next - m_specList[i - 1] > 1 || static_cast<int>(i - i0) >= maxNumberOfSpectra) {
         auto n = static_cast<int>(i - i0);
         index.emplace_back(spec);
         count.emplace_back(n);
@@ -421,8 +394,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
  * @param workspace :: Workspace to store the data
  * @param workspaceIndex :: index in workspace to store data
  */
-void ISISHistoDataListener::getData(int period, int index, int count,
-                                    const API::MatrixWorkspace_sptr &workspace,
+void ISISHistoDataListener::getData(int period, int index, int count, const API::MatrixWorkspace_sptr &workspace,
                                     size_t workspaceIndex) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const size_t bufferSize = count * (numberOfBins + 1) * sizeof(int);
@@ -433,11 +405,9 @@ void ISISHistoDataListener::getData(int period, int index, int count,
   dims[1] = numberOfBins + 1;
 
   int spectrumIndex = index + period * (m_totalNumberOfSpectra + 1);
-  if (IDCgetdat(m_daeHandle, spectrumIndex, count, dataBuffer.data(), dims,
-                &ndims) != 0) {
+  if (IDCgetdat(m_daeHandle, spectrumIndex, count, dataBuffer.data(), dims, &ndims) != 0) {
     g_log.error("Unable to read DATA from DAE " + m_daeName);
-    throw Kernel::Exception::FileError("Unable to read DATA from DAE ",
-                                       m_daeName);
+    throw Kernel::Exception::FileError("Unable to read DATA from DAE ", m_daeName);
   }
 
   auto size = workspace->y(0).size();
@@ -445,9 +415,8 @@ void ISISHistoDataListener::getData(int period, int index, int count,
     size_t wi = workspaceIndex + i;
     workspace->getSpectrum(wi).setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
-    workspace->setHistogram(
-        wi, m_bins[m_timeRegime],
-        Counts(dataBuffer.begin() + shift, dataBuffer.begin() + shift + size));
+    workspace->setHistogram(wi, m_bins[m_timeRegime],
+                            Counts(dataBuffer.begin() + shift, dataBuffer.begin() + shift + size));
   }
 }
 
@@ -465,24 +434,20 @@ void ISISHistoDataListener::loadSpectraMap() {
  *  @param localWorkspace :: The workspace
  *  @param iName :: The instrument name
  */
-void ISISHistoDataListener::runLoadInstrument(
-    const MatrixWorkspace_sptr &localWorkspace, const std::string &iName) {
-  auto loadInst =
-      API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
+void ISISHistoDataListener::runLoadInstrument(const MatrixWorkspace_sptr &localWorkspace, const std::string &iName) {
+  auto loadInst = API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
   if (!loadInst)
     return;
   loadInst->initialize();
   try {
     loadInst->setPropertyValue("InstrumentName", iName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     loadInst->executeAsChildAlg();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
   } catch (std::runtime_error &) {
-    g_log.information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
   }
   if (API::AnalysisDataService::Instance().doesExist("Anonymous")) {
     // LoadInstrument adds the workspace to ADS as Anonymous
@@ -521,8 +486,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
     int nbins = getInt(ntcPrefix + regime);
     if (nbins == 0) {
       if (tr == 0) {
-        throw std::runtime_error(
-            "Didn't find any time bins for time regime 1.");
+        throw std::runtime_error("Didn't find any time bins for time regime 1.");
       }
       break;
     }
@@ -565,8 +529,7 @@ void ISISHistoDataListener::loadTimeRegimes() {
           g_log.information() << "Monitor spectrum " << mon << '\n';
         }
 
-        const std::string detRTCB =
-            rtcbPrefix + "_" + std::to_string(m_monitorSpectra.front());
+        const std::string detRTCB = rtcbPrefix + "_" + std::to_string(m_monitorSpectra.front());
         // read in the bin boundaries
         getFloatArray(detRTCB, floatBuffer, nbins + 1);
       }
@@ -577,23 +540,19 @@ void ISISHistoDataListener::loadTimeRegimes() {
       // check that dimensions haven't changed
       if (nspec != m_numberOfSpectra[tr] || nbins != m_numberOfBins[tr]) {
         g_log.error("Data dimensions changed");
-        throw Kernel::Exception::FileError("Data dimensions changed",
-                                           m_daeName);
+        throw Kernel::Exception::FileError("Data dimensions changed", m_daeName);
       }
     }
   }
   g_log.information() << "Number of time regimes " << m_bins.size() << '\n';
   assert(m_numberOfBins.size() == m_numberOfSpectra.size());
   for (size_t i = 0; i < m_numberOfBins.size(); ++i) {
-    g_log.information() << "Number of bins in time regime " << i + 1 << " is "
-                        << m_numberOfBins[i] << '\n';
-    g_log.information() << "Number of spectra in time regime " << i + 1
-                        << " is " << m_numberOfSpectra[i] << '\n';
+    g_log.information() << "Number of bins in time regime " << i + 1 << " is " << m_numberOfBins[i] << '\n';
+    g_log.information() << "Number of spectra in time regime " << i + 1 << " is " << m_numberOfSpectra[i] << '\n';
   }
 
   // find the total number of spectra in all regimes
-  m_totalNumberOfSpectra =
-      std::accumulate(m_numberOfSpectra.begin(), m_numberOfSpectra.end(), 0);
+  m_totalNumberOfSpectra = std::accumulate(m_numberOfSpectra.begin(), m_numberOfSpectra.end(), 0);
 }
 
 /**
@@ -609,18 +568,14 @@ int ISISHistoDataListener::getTimeRegimeToLoad() const {
       return 0;
     int regime = -1;
     for (auto specIt : m_specList) {
-      bool isMonitor =
-          std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) !=
-          m_monitorSpectra.end();
+      bool isMonitor = std::find(m_monitorSpectra.begin(), m_monitorSpectra.end(), specIt) != m_monitorSpectra.end();
       if (!isMonitor && specIt > m_totalNumberOfSpectra)
-        throw std::invalid_argument("Invalid spectra index is found: " +
-                                    std::to_string(specIt));
+        throw std::invalid_argument("Invalid spectra index is found: " + std::to_string(specIt));
       int specRegime = isMonitor ? 1 : 0;
       if (regime < 0) {
         regime = specRegime;
       } else if (specRegime != regime) {
-        throw std::invalid_argument(
-            "Cannot mix spectra in different time regimes.");
+        throw std::invalid_argument("Cannot mix spectra in different time regimes.");
       }
     }
     return regime;
@@ -639,8 +594,7 @@ double ISISHistoDataListener::dblSqrt(double in) { return sqrt(in); }
 bool ISISHistoDataListener::isPeriodIgnored(int period) const {
   if (m_periodList.empty())
     return false;
-  return std::find(m_periodList.begin(), m_periodList.end(), period + 1) ==
-         m_periodList.end();
+  return std::find(m_periodList.begin(), m_periodList.end(), period + 1) == m_periodList.end();
 }
 
 } // namespace LiveData

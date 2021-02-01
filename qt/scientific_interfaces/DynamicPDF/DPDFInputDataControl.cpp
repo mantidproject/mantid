@@ -30,8 +30,7 @@ namespace DynamicPDF {
 /**
  * @brief Constructor.
  */
-InputDataControl::InputDataControl()
-    : m_workspace(), m_selectedWorkspaceIndex{0}, m_domain() {
+InputDataControl::InputDataControl() : m_workspace(), m_selectedWorkspaceIndex{0}, m_domain() {
   this->observePreDelete(true); // Subscribe to notifications
 }
 
@@ -102,9 +101,7 @@ std::vector<double> InputDataControl::selectedDataE() {
 /**
  * @brief report the energy for the slice currently selected
  */
-double InputDataControl::getSelectedEnergy() {
-  return m_workspace->getAxis(1)->getValue(m_selectedWorkspaceIndex);
-}
+double InputDataControl::getSelectedEnergy() { return m_workspace->getAxis(1)->getValue(m_selectedWorkspaceIndex); }
 
 /**
  * @brief report the name of the workspace containing the slices
@@ -147,12 +144,10 @@ bool InputDataControl::isSliceSelectedForFitting() {
 /**
  * @brief Actions when slices workspace is deleted
  */
-void InputDataControl::preDeleteHandle(
-    const std::string &workspaceName,
-    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
+void InputDataControl::preDeleteHandle(const std::string &workspaceName,
+                                       const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   UNUSED_ARG(workspaceName);
-  Mantid::API::MatrixWorkspace_sptr ws =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+  Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
   if (!ws || (ws != m_workspace)) {
     return;
   }
@@ -170,9 +165,8 @@ void InputDataControl::preDeleteHandle(
  * @param workspaceName
  */
 void InputDataControl::updateWorkspace(const QString &workspaceName) {
-  m_workspace = Mantid::API::AnalysisDataService::Instance()
-                    .retrieveWS<Mantid::API::MatrixWorkspace>(
-                        workspaceName.toStdString());
+  m_workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+      workspaceName.toStdString());
   m_domain.resize(m_workspace->getNumberHistograms());
   emit signalWorkspaceUpdated();
 }
@@ -199,8 +193,7 @@ void InputDataControl::updateSliceForFitting(const size_t &workspaceIndex) {
 void InputDataControl::updateDomain() {
   auto y = m_workspace->dataY(m_selectedWorkspaceIndex);
   // find first index with non-zero signal
-  auto it =
-      std::find_if(y.begin(), y.end(), [](const double &s) { return s > 0.0; });
+  auto it = std::find_if(y.begin(), y.end(), [](const double &s) { return s > 0.0; });
   int first = static_cast<int>(std::distance(y.begin(), it));
   // find first index with zero signal after the non-zero signal range
   it = std::find_if(it, y.end(), [](const double &s) { return s == 0.0; });

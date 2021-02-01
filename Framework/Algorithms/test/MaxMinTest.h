@@ -60,10 +60,8 @@ public:
       maxmina.initialize();
 
     // AnalysisDataService::Instance().add("tomultiply",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING(
-        maxmina.setPropertyValue("InputWorkspace", inputWSname))
-    TS_ASSERT_THROWS_NOTHING(
-        maxmina.setPropertyValue("OutputWorkspace", outputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("InputWorkspace", inputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("OutputWorkspace", outputWSname))
     TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("Showmin", "1"))
 
     TS_ASSERT_THROWS_NOTHING(maxmina.execute())
@@ -71,8 +69,7 @@ public:
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWSname)))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 4)
     TS_ASSERT_EQUALS(result->y(0)[0], 0)
@@ -92,20 +89,16 @@ public:
       maxmina.initialize();
 
     // AnalysisDataService::Instance().add("tomultiply",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING(
-        maxmina.setPropertyValue("InputWorkspace", inputWSname))
-    TS_ASSERT_THROWS_NOTHING(
-        maxmina.setPropertyValue("OutputWorkspace", outputWSname))
-    TS_ASSERT_THROWS_NOTHING(
-        maxmina.setPropertyValue("Showmin", "0")) // should find max
+    TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("InputWorkspace", inputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("OutputWorkspace", outputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxmina.setPropertyValue("Showmin", "0")) // should find max
 
     TS_ASSERT_THROWS_NOTHING(maxmina.execute())
     TS_ASSERT(maxmina.isExecuted())
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWSname)))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 3)
     TS_ASSERT_EQUALS(result->y(0)[0], 3)
@@ -125,18 +118,15 @@ public:
       maxa.initialize();
 
     // AnalysisDataService::Instance().add("tomultiply",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING(
-        maxa.setPropertyValue("InputWorkspace", inputWSname))
-    TS_ASSERT_THROWS_NOTHING(
-        maxa.setPropertyValue("OutputWorkspace", outputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxa.setPropertyValue("InputWorkspace", inputWSname))
+    TS_ASSERT_THROWS_NOTHING(maxa.setPropertyValue("OutputWorkspace", outputWSname))
 
     TS_ASSERT_THROWS_NOTHING(maxa.execute())
     TS_ASSERT(maxa.isExecuted())
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWSname)))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 3)
     TS_ASSERT_EQUALS(result->y(0)[0], 3)
@@ -156,18 +146,15 @@ public:
       mina.initialize();
 
     // AnalysisDataService::Instance().add("tomultiply",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING(
-        mina.setPropertyValue("InputWorkspace", inputWSname))
-    TS_ASSERT_THROWS_NOTHING(
-        mina.setPropertyValue("OutputWorkspace", outputWSname))
+    TS_ASSERT_THROWS_NOTHING(mina.setPropertyValue("InputWorkspace", inputWSname))
+    TS_ASSERT_THROWS_NOTHING(mina.setPropertyValue("OutputWorkspace", outputWSname))
 
     TS_ASSERT_THROWS_NOTHING(mina.execute())
     TS_ASSERT(mina.isExecuted())
 
     MatrixWorkspace_const_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputWSname)))
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWSname)))
 
     TS_ASSERT_EQUALS(result->x(0)[0], 4)
     TS_ASSERT_EQUALS(result->y(0)[0], 0)

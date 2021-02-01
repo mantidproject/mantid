@@ -29,9 +29,7 @@ class UnitsConversionHelperTest : public CxxTest::TestSuite {
   Mantid::DataObjects::TableWorkspace_sptr detLoc;
 
 public:
-  static UnitsConversionHelperTest *createSuite() {
-    return new UnitsConversionHelperTest();
-  }
+  static UnitsConversionHelperTest *createSuite() { return new UnitsConversionHelperTest(); }
   static void destroySuite(UnitsConversionHelperTest *suite) { delete suite; }
 
   void testSpecialConversionTOF() {
@@ -48,10 +46,8 @@ public:
     double delta;
     double L1(10), L2(10), TwoTheta(0.1), efix(10);
     int emode(0);
-    TS_ASSERT_THROWS_NOTHING(
-        pWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
-    TS_ASSERT_THROWS_NOTHING(
-        pSourceWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
+    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
 
     double X0(5);
     double tof(0);
@@ -112,8 +108,7 @@ public:
     const auto &X = ws2D->readX(0);
     size_t n_bins = X.size() - 1;
     for (size_t i = 0; i < n_bins; i++) {
-      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency,
-                      Conv.convertUnits(X[i]), 1.e-4);
+      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency, Conv.convertUnits(X[i]), 1.e-4);
     }
 
     auto range = Conv.getConversionRange(0, 10);
@@ -284,8 +279,7 @@ public:
     azimutal[4] = (180. / 180.) * M_PI;
 
     int numBins = 10;
-    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(
-        L2, polar, azimutal, numBins, -1, 3, 3);
+    ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal, numBins, -1, 3, 3);
 
     detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
   }

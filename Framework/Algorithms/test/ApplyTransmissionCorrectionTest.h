@@ -53,30 +53,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(correction.initialize());
 
     const std::string transWS("trans");
-    Workspace2D_sptr trans_ws =
-        WorkspaceCreationHelper::create2DWorkspace154(1, 1, 1);
+    Workspace2D_sptr trans_ws = WorkspaceCreationHelper::create2DWorkspace154(1, 1, 1);
     trans_ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     trans_ws->mutableY(0)[0] = 0.6;
     trans_ws->mutableE(0)[0] = 0.02;
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(transWS,
-                                                              trans_ws);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(transWS, trans_ws);
 
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("TransmissionWorkspace", transWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("TransmissionWorkspace", transWS))
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("OutputWorkspace", outputWS))
 
     TS_ASSERT_THROWS_NOTHING(correction.execute())
 
     TS_ASSERT(correction.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)
@@ -96,22 +90,19 @@ public:
     Mantid::Algorithms::ApplyTransmissionCorrection correction;
     TS_ASSERT_THROWS_NOTHING(correction.initialize());
 
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(correction.setProperty("TransmissionValue", 0.6))
     TS_ASSERT_THROWS_NOTHING(correction.setProperty("TransmissionError", 0.02))
     const std::string outputWS("result");
-    TS_ASSERT_THROWS_NOTHING(
-        correction.setPropertyValue("OutputWorkspace", outputWS))
+    TS_ASSERT_THROWS_NOTHING(correction.setPropertyValue("OutputWorkspace", outputWS))
 
     TS_ASSERT_THROWS_NOTHING(correction.execute())
 
     TS_ASSERT(correction.isExecuted())
 
     Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING(
-        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
+    TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+                                 Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)

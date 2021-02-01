@@ -32,9 +32,7 @@ namespace DynamicPDF {
   @date 2016-03-15
 */
 
-class MANTIDQT_DYNAMICPDF_DLL InputDataControl
-    : public QObject,
-      public MantidQt::API::WorkspaceObserver {
+class MANTIDQT_DYNAMICPDF_DLL InputDataControl : public QObject, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -50,9 +48,8 @@ public:
   std::pair<double, double> getCurrentRange();
 
 protected:
-  void preDeleteHandle(
-      const std::string &workspaceName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
+  void preDeleteHandle(const std::string &workspaceName,
+                       const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 signals:
   void signalWorkspaceUpdated();

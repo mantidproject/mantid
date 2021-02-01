@@ -17,28 +17,24 @@ namespace Algorithms {
 DECLARE_ALGORITHM(InvertMask)
 
 void InvertMask::init() {
-  this->declareProperty(
-      std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
-          "InputWorkspace", "Anonymous", Direction::Input),
-      "MaskWorkspace to be inverted. ");
+  this->declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+                            "InputWorkspace", "Anonymous", Direction::Input),
+                        "MaskWorkspace to be inverted. ");
 
-  this->declareProperty(
-      std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
-          "OutputWorkspace", "AnonynmousOutput", Direction::Output),
-      "MaskWorkspace has inverted bits from input MaskWorkspace.");
+  this->declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+                            "OutputWorkspace", "AnonynmousOutput", Direction::Output),
+                        "MaskWorkspace has inverted bits from input MaskWorkspace.");
 }
 
 void InvertMask::exec() {
   // 1. Get input
-  DataObjects::MaskWorkspace_const_sptr inWS =
-      this->getProperty("InputWorkspace");
+  DataObjects::MaskWorkspace_const_sptr inWS = this->getProperty("InputWorkspace");
   if (!inWS) {
     throw std::invalid_argument("InputWorkspace is not a MaskWorkspace.");
   }
 
   // 2. Do Invert by calling Child Algorithm
-  API::IAlgorithm_sptr invert =
-      createChildAlgorithm("BinaryOperateMasks", 0.0, 1.0, true);
+  API::IAlgorithm_sptr invert = createChildAlgorithm("BinaryOperateMasks", 0.0, 1.0, true);
   invert->setPropertyValue("InputWorkspace1", inWS->getName());
   invert->setProperty("OperationType", "NOT");
   invert->setProperty("OutputWorkspace", "tempws");
@@ -46,14 +42,11 @@ void InvertMask::exec() {
   invert->execute();
 
   if (!invert->isExecuted()) {
-    g_log.error()
-        << "ChildAlgorithm BinaryOperateMask() cannot be executed. \n";
-    throw std::runtime_error(
-        "ChildAlgorithm BinaryOperateMask() cannot be executed. ");
+    g_log.error() << "ChildAlgorithm BinaryOperateMask() cannot be executed. \n";
+    throw std::runtime_error("ChildAlgorithm BinaryOperateMask() cannot be executed. ");
   }
 
-  DataObjects::MaskWorkspace_sptr outputws =
-      invert->getProperty("OutputWorkspace");
+  DataObjects::MaskWorkspace_sptr outputws = invert->getProperty("OutputWorkspace");
   if (!outputws) {
     throw std::runtime_error("Output Workspace is not a MaskWorkspace. ");
   }

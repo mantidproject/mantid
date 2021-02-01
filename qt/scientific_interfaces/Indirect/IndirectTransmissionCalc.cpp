@@ -23,14 +23,12 @@ Mantid::Kernel::Logger g_log("IndirectTransmissionCalc");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
-    : IndirectToolsTab(parent) {
+IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
       m_uiForm.iicInstrumentConfiguration->getInstrumentName());
@@ -41,8 +39,7 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
  */
 void IndirectTransmissionCalc::setup() {
   QRegExp chemicalFormulaRegex(R"([A-Za-z0-9\-\(\)]*)");
-  QValidator *chemicalFormulaValidator =
-      new QRegExpValidator(chemicalFormulaRegex, this);
+  QValidator *chemicalFormulaValidator = new QRegExpValidator(chemicalFormulaRegex, this);
   m_uiForm.leChemicalFormula->setValidator(chemicalFormulaValidator);
 }
 
@@ -54,8 +51,7 @@ void IndirectTransmissionCalc::setup() {
 bool IndirectTransmissionCalc::validate() {
   UserInputValidator uiv;
 
-  uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula,
-                           m_uiForm.valChemicalFormula);
+  uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula, m_uiForm.valChemicalFormula);
 
   auto const chemicalFormula = m_uiForm.leChemicalFormula->text().toStdString();
   try {
@@ -77,22 +73,15 @@ bool IndirectTransmissionCalc::validate() {
 void IndirectTransmissionCalc::run() {
   setRunIsRunning(true);
 
-  std::string instrumentName =
-      m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+  std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string outWsName = instrumentName + "_transmission";
 
-  IAlgorithm_sptr transAlg =
-      AlgorithmManager::Instance().create("IndirectTransmission");
+  IAlgorithm_sptr transAlg = AlgorithmManager::Instance().create("IndirectTransmission");
   transAlg->initialize();
   transAlg->setProperty("Instrument", instrumentName);
-  transAlg->setProperty(
-      "Analyser",
-      m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
-  transAlg->setProperty(
-      "Reflection",
-      m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
-  transAlg->setProperty("ChemicalFormula",
-                        m_uiForm.leChemicalFormula->text().toStdString());
+  transAlg->setProperty("Analyser", m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString());
+  transAlg->setProperty("Reflection", m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+  transAlg->setProperty("ChemicalFormula", m_uiForm.leChemicalFormula->text().toStdString());
   if (m_uiForm.cbDensityType->currentIndex() == 0)
     transAlg->setProperty("DensityType", "Mass Density");
   else
@@ -114,12 +103,10 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
   setRunIsRunning(false);
 
   if (!error) {
-    std::string const instrumentName =
-        m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+    std::string const instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
     std::string const outWsName = instrumentName + "_transmission";
 
-    auto resultTable =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWsName);
+    auto resultTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWsName);
     Column_const_sptr propertyNames = resultTable->getColumn("Name");
     Column_const_sptr propertyValues = resultTable->getColumn("Value");
 
@@ -128,8 +115,7 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
 
     for (auto i = 0u; i < resultTable->rowCount(); ++i) {
       QTreeWidgetItem *item = new QTreeWidgetItem();
-      item->setText(
-          0, QString::fromStdString(propertyNames->cell<std::string>(i)));
+      item->setText(0, QString::fromStdString(propertyNames->cell<std::string>(i)));
       item->setText(1, QString::number(propertyValues->cell<double>(i)));
       m_uiForm.tvResultsTable->addTopLevelItem(item);
     }
@@ -144,9 +130,7 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
  *
  * @param settings The settings to loading into the interface
  */
-void IndirectTransmissionCalc::loadSettings(const QSettings &settings) {
-  UNUSED_ARG(settings);
-}
+void IndirectTransmissionCalc::loadSettings(const QSettings &settings) { UNUSED_ARG(settings); }
 
 void IndirectTransmissionCalc::runClicked() { runTab(); }
 
@@ -155,9 +139,7 @@ void IndirectTransmissionCalc::setRunIsRunning(bool running) {
   setRunEnabled(!running);
 }
 
-void IndirectTransmissionCalc::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-}
+void IndirectTransmissionCalc::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

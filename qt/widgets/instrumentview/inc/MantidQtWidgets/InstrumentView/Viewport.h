@@ -56,12 +56,10 @@ public:
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
-  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/,
-                     double /*nearz*/, double /*farz*/,
+  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
                      ProjectionType type = Viewport::ORTHO);
   /// Set a projection.
-  void setProjection(const Mantid::Kernel::V3D &minBounds,
-                     const Mantid::Kernel::V3D &maxBounds,
+  void setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
                      ProjectionType type = Viewport::ORTHO);
   /// Apply the projection to OpenGL engine
   void applyProjection() const;
@@ -115,8 +113,7 @@ public:
   void setTranslation(double /*xval*/, double /*yval*/);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double & /*xmin*/, double & /*xmax*/,
-                            double & /*ymin*/, double & /*ymax*/,
+  void getInstantProjection(double & /*xmin*/, double & /*xmax*/, double & /*ymin*/, double & /*ymax*/,
                             double & /*zmin*/, double & /*zmax*/) const;
 
   /// Apply the transformation to a vector
@@ -128,8 +125,7 @@ public:
 
 protected:
   /// Correct for aspect ratio
-  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin,
-                                    double &ymax, double &zmin,
+  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const;
   /// Project a point onto a sphere centered at rotation point
   void projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const;

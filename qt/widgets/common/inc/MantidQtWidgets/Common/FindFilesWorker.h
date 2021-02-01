@@ -55,8 +55,7 @@ struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchResults {
 /**
  * A class to allow the asynchronous finding of files.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject,
-                                                   public QRunnable {
+class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject, public QRunnable {
   Q_OBJECT
 
 public:
@@ -83,10 +82,9 @@ private:
   /// the FileFinder.
   std::pair<std::vector<std::string>, std::string> getFilesFromAlgorithm();
   /// Helper method to create a search result object
-  FindFilesSearchResults
-  createFindFilesSearchResult(const std::string &error,
-                              const std::vector<std::string> &filenames,
-                              const std::string &valueForProperty);
+  FindFilesSearchResults createFindFilesSearchResult(const std::string &error,
+                                                     const std::vector<std::string> &filenames,
+                                                     const std::string &valueForProperty);
   /// Struct to hold the parameters of the search
   FindFilesSearchParameters m_parameters;
 };

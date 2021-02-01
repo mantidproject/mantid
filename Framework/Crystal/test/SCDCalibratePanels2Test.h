@@ -53,9 +53,7 @@ class SCDCalibratePanels2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SCDCalibratePanels2Test *createSuite() {
-    return new SCDCalibratePanels2Test();
-  }
+  static SCDCalibratePanels2Test *createSuite() { return new SCDCalibratePanels2Test(); }
   static void destroySuite(SCDCalibratePanels2Test *suite) { delete suite; }
 
   // ----------------- //
@@ -66,34 +64,31 @@ public:
    *
    */
   SCDCalibratePanels2Test()
-      : wsname("wsSCDCalibratePanels2Test"),
-        pwsname("pwsSCDCalibratePanels2Test"),
-        tmppwsname("tmppwsSCDCalibratePanels2Test"), // fixed workspace name
-        bank_xtop("bank73/sixteenpack"),             //
-        bank_xcenter("bank12/sixteenpack"),          //
-        bank_xbottom("bank11/sixteenpack"),          //
-        bank_yright("bank59/sixteenpack"),           //
-        bank_yleft("bank58/sixteenpack"),            //
-        bank_ytop("bank88/sixteenpack"),             //
-        bank_ybottom("bank26/sixteenpack"),          //
+      : wsname("wsSCDCalibratePanels2Test"), pwsname("pwsSCDCalibratePanels2Test"),
+        tmppwsname("tmppwsSCDCalibratePanels2Test"),            // fixed workspace name
+        bank_xtop("bank73/sixteenpack"),                        //
+        bank_xcenter("bank12/sixteenpack"),                     //
+        bank_xbottom("bank11/sixteenpack"),                     //
+        bank_yright("bank59/sixteenpack"),                      //
+        bank_yleft("bank58/sixteenpack"),                       //
+        bank_ytop("bank88/sixteenpack"),                        //
+        bank_ybottom("bank26/sixteenpack"),                     //
         silicon_a(5.431), silicon_b(5.431), silicon_c(5.431),   // angstrom
         silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
-        silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m",
-                                    "Si 0 0 0 1.0 0.02")),
-        dspacing_min(1.0), dspacing_max(10.0),   //
+        silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02")), dspacing_min(1.0),
+        dspacing_max(10.0),                      //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(3.0),                         //
-        TOLERANCE_L(5e-4), // this calibration has intrinsic accuracy limit of
-                           // 1mm for translation
-        TOLERANCE_R(1e-5), // this calibration has intrinsic accuracy limit of
-                           // 0.1 deg for rotation
+        TOLERANCE_L(5e-4),                       // this calibration has intrinsic accuracy limit of
+                                                 // 1mm for translation
+        TOLERANCE_R(1e-5),                       // this calibration has intrinsic accuracy limit of
+                                                 // 0.1 deg for rotation
         LOGCHILDALG(false) {
     // NOTE:
     //  The MAGIC PIECE, basically we need to let AlgorithmFactory
     //  to load a non-related algorithm, then somehow AlgorithmFactory
     //  can find the Fit algorithm for the remaining test
-    std::shared_ptr<Algorithm> darkmagic =
-        AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
+    std::shared_ptr<Algorithm> darkmagic = AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     darkmagic->initialize();
     darkmagic->setLogging(false); // don't really care its output
     darkmagic->setPropertyValue("Filename", "Peaks5637.integrate");
@@ -201,12 +196,9 @@ public:
 
     // reset Workspace level of T0
     g_log.notice() << "--Reset workspace T0 \n"
-                   << pws->mutableRun().getPropertyValueAsType<double>("T0")
-                   << "->"
-                   << pwsref->mutableRun().getPropertyValueAsType<double>("T0")
-                   << "\n";
-    pws->mutableRun().addProperty<double>(
-        "T0", pwsref->mutableRun().getPropertyValueAsType<double>("T0"), true);
+                   << pws->mutableRun().getPropertyValueAsType<double>("T0") << "->"
+                   << pwsref->mutableRun().getPropertyValueAsType<double>("T0") << "\n";
+    pws->mutableRun().addProperty<double>("T0", pwsref->mutableRun().getPropertyValueAsType<double>("T0"), true);
 
     // NOTE: Toggle this back to see the per peak based impact due to dT0
     // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
@@ -270,8 +262,7 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // move source
-    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
-                    ws->getInstrument()->getSource()->getName(), ws);
+    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, ws->getInstrument()->getSource()->getName(), ws);
 
     g_log.notice() << "-- generate peaks\n";
     PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
@@ -279,11 +270,9 @@ public:
 
     // Pretend we don't know the answer
     g_log.notice() << "-- reset instrument positions&orientations\n";
-    g_log.notice() << "    * before reset L1 = "
-                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    g_log.notice() << "    * before reset L1 = " << pws->getInstrument()->getSource()->getPos().Z() << "\n";
     pws->setInstrument(wsraw->getInstrument());
-    g_log.notice() << "    * after reset L1 = "
-                   << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    g_log.notice() << "    * after reset L1 = " << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
@@ -337,10 +326,8 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     g_log.notice() << "-- for x(top) - bank73\n"
-                   << "   translated by (" << dx << "," << dy << "," << dz
-                   << ")\n"
-                   << "   rotated by " << ang << "@(" << rvx << "," << rvy
-                   << "," << rvz << ")\n";
+                   << "   translated by (" << dx << "," << dy << "," << dz << ")\n"
+                   << "   rotated by " << ang << "@(" << rvx << "," << rvy << "," << rvz << ")\n";
     adjustComponent(dx, dy, dz, rvx, rvy, rvz, ang, bank_xtop, ws);
 
     g_log.notice() << "-- generate peaks\n";
@@ -349,22 +336,16 @@ public:
 
     // Pretend we don't know the answer
     g_log.notice() << "-- reset instrument positions&orientations\n";
-    g_log.notice()
-        << "    * before reset x(top) - bank73:\n"
-        << "    pos(abs) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
-        << "    quat(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
-        << "\n";
+    g_log.notice() << "    * before reset x(top) - bank73:\n"
+                   << "    pos(abs) = " << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
+                   << "    quat(rel) = " << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+                   << "\n";
 
     pws->setInstrument(wsraw->getInstrument());
-    g_log.notice()
-        << "    * after reset x(top) - bank73:\n"
-        << "    pos(abs) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
-        << "    quat(rel) = "
-        << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
-        << "\n";
+    g_log.notice() << "    * after reset x(top) - bank73:\n"
+                   << "    pos(abs) = " << pws->getInstrument()->getComponentByName(bank_xtop)->getPos() << "\n"
+                   << "    quat(rel) = " << pws->getInstrument()->getComponentByName(bank_xtop)->getRelativeRot()
+                   << "\n";
 
     // Perform the calibration
     g_log.notice() << "-- start calibration\n";
@@ -429,25 +410,20 @@ public:
     MatrixWorkspace_sptr wsraw = ws->clone();
 
     // Source
-    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0,
-                    ws->getInstrument()->getSource()->getName(), ws);
+    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, ws->getInstrument()->getSource()->getName(), ws);
     g_log.notice() << "--Shift source by dL1 = " << dL1 << "\n";
 
     // Bank73
     adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, bank_xtop, ws);
     g_log.notice() << "-- for x(top) - bank73\n"
-                   << "   translated by (" << dx1 << "," << dy1 << "," << dz1
-                   << ")\n"
-                   << "   rotated by " << ang1 << "@(" << rvx1 << "," << rvy1
-                   << "," << rvz1 << ")\n";
+                   << "   translated by (" << dx1 << "," << dy1 << "," << dz1 << ")\n"
+                   << "   rotated by " << ang1 << "@(" << rvx1 << "," << rvy1 << "," << rvz1 << ")\n";
 
     // Bank11
     adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, bank_xbottom, ws);
     g_log.notice() << "-- for x(bottom) - bank11\n"
-                   << "   translated by (" << dx2 << "," << dy2 << "," << dz2
-                   << ")\n"
-                   << "   rotated by " << ang2 << "@(" << rvx2 << "," << rvy2
-                   << "," << rvz2 << ")\n";
+                   << "   translated by (" << dx2 << "," << dy2 << "," << dz2 << ")\n"
+                   << "   rotated by " << ang2 << "@(" << rvx2 << "," << rvy2 << "," << rvz2 << ")\n";
 
     g_log.notice() << "-- generate peaks\n";
     PeaksWorkspace_sptr pws = generateSimulatedPeaksWorkspace(ws);
@@ -481,8 +457,7 @@ private:
   MatrixWorkspace_sptr generateSimulatedWorkspace() {
 
     // create simulated workspace
-    IAlgorithm_sptr csws_alg =
-        AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
+    IAlgorithm_sptr csws_alg = AlgorithmFactory::Instance().create("CreateSimulationWorkspace", 1);
     csws_alg->initialize();
     csws_alg->setLogging(LOGCHILDALG);
     csws_alg->setProperty("Instrument", "CORELLI");
@@ -508,8 +483,7 @@ private:
     sub_alg->execute();
     TS_ASSERT(sub_alg->isExecuted());
 
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
 
     auto &sample = ws->mutableSample();
     sample.setCrystalStructure(silicon_cs);
@@ -524,12 +498,9 @@ private:
    */
   PeaksWorkspace_sptr generateSimulatedPeaksWorkspace(MatrixWorkspace_sptr ws) {
     // prepare the algs pointer
-    IAlgorithm_sptr sg_alg =
-        AlgorithmFactory::Instance().create("SetGoniometer", 1);
-    IAlgorithm_sptr pp_alg =
-        AlgorithmFactory::Instance().create("PredictPeaks", 1);
-    IAlgorithm_sptr cpw_alg =
-        AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
+    IAlgorithm_sptr sg_alg = AlgorithmFactory::Instance().create("SetGoniometer", 1);
+    IAlgorithm_sptr pp_alg = AlgorithmFactory::Instance().create("PredictPeaks", 1);
+    IAlgorithm_sptr cpw_alg = AlgorithmFactory::Instance().create("CombinePeaksWorkspaces", 1);
 
     // generate peaks for a range of omega values
     for (double omega = 0; omega <= 180; omega = omega + omega_step) {
@@ -586,13 +557,11 @@ private:
    * @param cmptName
    * @param ws
    */
-  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
-                       double rvz, double drotang, std::string cmptName,
-                       MatrixWorkspace_sptr ws) {
+  void adjustComponent(double dx, double dy, double dz, double rvx, double rvy, double rvz, double drotang,
+                       std::string cmptName, MatrixWorkspace_sptr ws) {
 
     // rotation
-    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "RotateInstrumentComponent", -1);
+    IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
     rot_alg->initialize();
     rot_alg->setLogging(LOGCHILDALG);
     rot_alg->setProperty("Workspace", ws);
@@ -605,8 +574,7 @@ private:
     rot_alg->executeAsChildAlg();
 
     // translation
-    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
-        "MoveInstrumentComponent", -1);
+    IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
     mv_alg->initialize();
     mv_alg->setLogging(LOGCHILDALG);
     mv_alg->setProperty("Workspace", ws);
@@ -626,23 +594,17 @@ private:
    */
   void adjustT0(double dT0, PeaksWorkspace_sptr pws) {
     // update the T0 record in peakworkspace
-    pws->mutableRun().addProperty<double>(
-        "T0", pws->mutableRun().getPropertyValueAsType<double>("T0") + dT0,
-        true);
+    pws->mutableRun().addProperty<double>("T0", pws->mutableRun().getPropertyValueAsType<double>("T0") + dT0, true);
 
     // update wavelength of each peak using new T0
     for (int i = 0; i < pws->getNumberPeaks(); ++i) {
       Peak &pk = pws->getPeak(i);
-      V3D hkl =
-          V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
-              boost::math::iround(pk.getL()));
+      V3D hkl = V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()), boost::math::iround(pk.getL()));
 
       // make a standalone peak to calculate q vectors
-      Peak tmppk(pws->getInstrument(), pk.getDetectorID(), pk.getWavelength(),
-                 hkl, pk.getGoniometerMatrix());
+      Peak tmppk(pws->getInstrument(), pk.getDetectorID(), pk.getWavelength(), hkl, pk.getGoniometerMatrix());
       Units::Wavelength wl;
-      wl.initialize(tmppk.getL1(), tmppk.getL2(), tmppk.getScattering(), 0,
-                    tmppk.getInitialEnergy(), 0.0);
+      wl.initialize(tmppk.getL1(), tmppk.getL2(), tmppk.getScattering(), 0, tmppk.getInitialEnergy(), 0.0);
       tmppk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
 
       // only passing the q vector, not the energy info that relates T0
@@ -659,8 +621,8 @@ private:
    * @param calibrateL1
    * @param calibrateBanks
    */
-  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws,
-                      bool calibrateT0, bool calibrateL1, bool calibrateBanks) {
+  void runCalibration(const std::string filenameBase, PeaksWorkspace_sptr pws, bool calibrateT0, bool calibrateL1,
+                      bool calibrateBanks) {
     // generate isaw, xml, and csv filename
     const std::string isawFilename = filenameBase + ".DetCal";
     const std::string xmlFilename = filenameBase + ".xml";
@@ -698,16 +660,13 @@ private:
    * @return true
    * @return false
    */
-  bool validateCalibrationResults(PeaksWorkspace_sptr refpws,
-                                  MatrixWorkspace_sptr refws,
-                                  const std::string &fileName) {
+  bool validateCalibrationResults(PeaksWorkspace_sptr refpws, MatrixWorkspace_sptr refws, const std::string &fileName) {
     // Test using xml parameter file (default)
     const std::string xmlFileName = fileName + ".xml";
 
     g_log.notice() << "Using Paramter file: " << xmlFileName << "\n";
     // Adjust components in reference workspace using calibration results
-    IAlgorithm_sptr lpf_alg =
-        AlgorithmFactory::Instance().create("LoadParameterFile", 1);
+    IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
     lpf_alg->setProperty("Workspace", refws);
@@ -734,10 +693,8 @@ private:
       }
     }
     // -- perform per bank comparison
-    Instrument_sptr inst1 = std::const_pointer_cast<Instrument>(
-        refws->getInstrument()); // based on calibration
-    Instrument_sptr inst2 = std::const_pointer_cast<Instrument>(
-        refpws->getInstrument()); // reference one
+    Instrument_sptr inst1 = std::const_pointer_cast<Instrument>(refws->getInstrument());  // based on calibration
+    Instrument_sptr inst2 = std::const_pointer_cast<Instrument>(refpws->getInstrument()); // reference one
 
     bool sameInstrument = true;
     for (auto bankname : BankNames) {
@@ -770,14 +727,11 @@ private:
    * @return true
    * @return false
    */
-  bool compareComponent(std::shared_ptr<Instrument> &instr1,
-                        std::shared_ptr<Instrument> &instr2,
+  bool compareComponent(std::shared_ptr<Instrument> &instr1, std::shared_ptr<Instrument> &instr2,
                         std::string componentName) {
 
-    std::shared_ptr<const IComponent> cmpt1 =
-        instr1->getComponentByName(componentName);
-    std::shared_ptr<const IComponent> cmpt2 =
-        instr2->getComponentByName(componentName);
+    std::shared_ptr<const IComponent> cmpt1 = instr1->getComponentByName(componentName);
+    std::shared_ptr<const IComponent> cmpt2 = instr2->getComponentByName(componentName);
 
     V3D p1 = cmpt1->getRelativePos();
     V3D p2 = cmpt2->getRelativePos();
@@ -795,16 +749,14 @@ private:
     double dz = std::abs(p1.Z() - p2.Z());
 
     bool sameComponent;
-    if (dx > TOLERANCE_L || dy > TOLERANCE_L || dz > TOLERANCE_L ||
-        dang > TOLERANCE_R) {
+    if (dx > TOLERANCE_L || dy > TOLERANCE_L || dz > TOLERANCE_L || dang > TOLERANCE_R) {
       sameComponent = false;
     } else {
       sameComponent = true;
     }
 
     if (!sameComponent)
-      g_log.notice() << std::setprecision(8) << "--Component " << componentName
-                     << "\n"
+      g_log.notice() << std::setprecision(8) << "--Component " << componentName << "\n"
                      << "  cali: " << p1 << "\n"
                      << "  ref: " << p2 << "\n"
                      << "    dx = " << dx << "\n"

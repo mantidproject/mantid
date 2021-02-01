@@ -50,8 +50,7 @@ public:
   enum FittingType { Simultaneous = 0, Sequential, SimultaneousAndSequential };
 
   /// Constructor
-  FitOptionsBrowser(QWidget *parent = nullptr,
-                    FittingType fitType = Simultaneous);
+  FitOptionsBrowser(QWidget *parent = nullptr, FittingType fitType = Simultaneous);
   ~FitOptionsBrowser();
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
@@ -94,10 +93,8 @@ private:
 
   QtProperty *createPropertyProperty(Mantid::Kernel::Property *prop);
 
-  void addProperty(const QString &name, QtProperty *prop,
-                   QString (FitOptionsBrowser::*getter)(QtProperty *) const,
-                   void (FitOptionsBrowser::*setter)(QtProperty *,
-                                                     const QString &));
+  void addProperty(const QString &name, QtProperty *prop, QString (FitOptionsBrowser::*getter)(QtProperty *) const,
+                   void (FitOptionsBrowser::*setter)(QtProperty *, const QString &));
 
   void removeProperty(const QString &name);
 

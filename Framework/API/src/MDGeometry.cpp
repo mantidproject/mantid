@@ -26,28 +26,23 @@ namespace API {
 class MDGeometryNotificationHelper {
 public:
   explicit MDGeometryNotificationHelper(MDGeometry &parent)
-      : m_parent(parent),
-        m_delete_observer(
-            *this, &MDGeometryNotificationHelper::deleteNotificationReceived) {}
+      : m_parent(parent), m_delete_observer(*this, &MDGeometryNotificationHelper::deleteNotificationReceived) {}
 
   ~MDGeometryNotificationHelper() {
     if (m_observingDelete) {
       // Stop watching once object is deleted
-      API::AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_delete_observer);
+      API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
     }
   }
 
   void watchForWorkspaceDeletions() {
     if (!m_observingDelete) {
-      API::AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_delete_observer);
+      API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
       m_observingDelete = true;
     }
   }
 
-  void deleteNotificationReceived(
-      Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
+  void deleteNotificationReceived(Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
     m_parent.deleteNotificationReceived(notice->object());
   }
 
@@ -55,8 +50,7 @@ private:
   MDGeometry &m_parent;
 
   /// Poco delete notification observer object
-  Poco::NObserver<MDGeometryNotificationHelper, WorkspacePreDeleteNotification>
-      m_delete_observer;
+  Poco::NObserver<MDGeometryNotificationHelper, WorkspacePreDeleteNotification> m_delete_observer;
 
   /// Set to True when the m_delete_observer is observing workspace deletions.
   bool m_observingDelete{false};
@@ -66,20 +60,16 @@ private:
 /** Constructor
  */
 MDGeometry::MDGeometry()
-    : m_dimensions(), m_originalWorkspaces(), m_origin(),
-      m_transforms_FromOriginal(), m_transforms_ToOriginal(),
-      m_notificationHelper(
-          std::make_unique<MDGeometryNotificationHelper>(*this)),
-      m_Wtransf(3, 3, true), m_basisVectors() {}
+    : m_dimensions(), m_originalWorkspaces(), m_origin(), m_transforms_FromOriginal(), m_transforms_ToOriginal(),
+      m_notificationHelper(std::make_unique<MDGeometryNotificationHelper>(*this)), m_Wtransf(3, 3, true),
+      m_basisVectors() {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy Constructor
  */
 MDGeometry::MDGeometry(const MDGeometry &other)
-    : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin),
-      m_transforms_FromOriginal(), m_transforms_ToOriginal(),
-      m_notificationHelper(
-          std::make_unique<MDGeometryNotificationHelper>(*this)),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin), m_transforms_FromOriginal(),
+      m_transforms_ToOriginal(), m_notificationHelper(std::make_unique<MDGeometryNotificationHelper>(*this)),
       m_Wtransf(other.m_Wtransf), m_basisVectors(other.m_basisVectors) {
   // Perform a deep copy of the dimensions
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
@@ -92,20 +82,16 @@ MDGeometry::MDGeometry(const MDGeometry &other)
 
   // Perform a deep copy of the coordinate transformations
   std::vector<CoordTransform_const_sptr>::const_iterator it;
-  for (it = other.m_transforms_FromOriginal.begin();
-       it != other.m_transforms_FromOriginal.end(); ++it) {
+  for (it = other.m_transforms_FromOriginal.begin(); it != other.m_transforms_FromOriginal.end(); ++it) {
     if (*it)
-      m_transforms_FromOriginal.emplace_back(
-          CoordTransform_const_sptr((*it)->clone()));
+      m_transforms_FromOriginal.emplace_back(CoordTransform_const_sptr((*it)->clone()));
     else
       m_transforms_FromOriginal.emplace_back(CoordTransform_const_sptr());
   }
 
-  for (it = other.m_transforms_ToOriginal.begin();
-       it != other.m_transforms_ToOriginal.end(); ++it) {
+  for (it = other.m_transforms_ToOriginal.begin(); it != other.m_transforms_ToOriginal.end(); ++it) {
     if (*it)
-      m_transforms_ToOriginal.emplace_back(
-          CoordTransform_const_sptr((*it)->clone()));
+      m_transforms_ToOriginal.emplace_back(CoordTransform_const_sptr((*it)->clone()));
     else
       m_transforms_ToOriginal.emplace_back(CoordTransform_const_sptr());
   }
@@ -141,8 +127,7 @@ MDGeometry::~MDGeometry() { m_dimensions.clear(); }
  * @param dimensions :: vector of IMDDimension objects, in the order of X, Y, Z,
  *t, etc.
  */
-void MDGeometry::initGeometry(
-    std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
+void MDGeometry::initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough
@@ -155,9 +140,8 @@ size_t MDGeometry::getNumDims() const { return m_dimensions.size(); }
 
 /** @return the number of non-integrated dimensions in this workspace */
 size_t MDGeometry::getNumNonIntegratedDims() const {
-  return std::count_if(
-      m_dimensions.cbegin(), m_dimensions.cend(),
-      [](const auto &dimension) { return !dimension->getIsIntegrated(); });
+  return std::count_if(m_dimensions.cbegin(), m_dimensions.cend(),
+                       [](const auto &dimension) { return !dimension->getIsIntegrated(); });
 }
 
 // --------------------------------------------------------------------------------------------
@@ -165,11 +149,9 @@ size_t MDGeometry::getNumNonIntegratedDims() const {
  * @param index :: which dimension
  * @return the dimension at that index
  */
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getDimension(size_t index) const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimension(size_t index) const {
   if (index >= m_dimensions.size())
-    throw std::runtime_error(
-        "Workspace does not have a dimension at that index.");
+    throw std::runtime_error("Workspace does not have a dimension at that index.");
   return m_dimensions[index];
 }
 
@@ -178,32 +160,25 @@ MDGeometry::getDimension(size_t index) const {
  * @param id :: string ID of the dimension
  * @return the dimension with the specified id string.
  */
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getDimensionWithId(std::string id) const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getDimensionWithId(std::string id) const {
   auto dimension = std::find_if(
       m_dimensions.begin(), m_dimensions.end(),
-      [&id](const std::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) {
-        return dim->getDimensionId() == id;
-      });
+      [&id](const std::shared_ptr<const Mantid::Geometry::IMDDimension> &dim) { return dim->getDimensionId() == id; });
   if (dimension != m_dimensions.end())
     return *dimension;
   else
-    throw std::invalid_argument("Dimension tagged " + id +
-                                " was not found in the Workspace");
+    throw std::invalid_argument("Dimension tagged " + id + " was not found in the Workspace");
 }
 
 // --------------------------------------------------------------------------------------------
 /** Get non-collapsed dimensions
 @return vector of collapsed dimensions in the workspace geometry.
 */
-Mantid::Geometry::VecIMDDimension_const_sptr
-MDGeometry::getNonIntegratedDimensions() const {
+Mantid::Geometry::VecIMDDimension_const_sptr MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  std::copy_if(
-      m_dimensions.cbegin(), m_dimensions.cend(),
-      std::back_inserter(vecCollapsedDimensions),
-      [](const auto &dimension) { return !dimension->getIsIntegrated(); });
+  std::copy_if(m_dimensions.cbegin(), m_dimensions.cend(), std::back_inserter(vecCollapsedDimensions),
+               [](const auto &dimension) { return !dimension->getIsIntegrated(); });
   return vecCollapsedDimensions;
 }
 
@@ -227,8 +202,7 @@ size_t MDGeometry::getDimensionIndexByName(const std::string &name) const {
   for (size_t d = 0; d < m_dimensions.size(); d++)
     if (m_dimensions[d]->getName() == name)
       return d;
-  throw std::runtime_error("Dimension named '" + name +
-                           "' was not found in the IMDWorkspace.");
+  throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDWorkspace.");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -242,15 +216,13 @@ size_t MDGeometry::getDimensionIndexById(const std::string &id) const {
   for (size_t d = 0; d < m_dimensions.size(); d++)
     if (m_dimensions[d]->getDimensionId() == id)
       return d;
-  throw std::runtime_error("Dimension with id '" + id +
-                           "' was not found in the IMDWorkspace.");
+  throw std::runtime_error("Dimension with id '" + id + "' was not found in the IMDWorkspace.");
 }
 
 // --------------------------------------------------------------------------------------------
 /** Add a dimension
  * @param dim :: shared pointer to the dimension object   */
-void MDGeometry::addDimension(
-    const std::shared_ptr<Mantid::Geometry::IMDDimension> &dim) {
+void MDGeometry::addDimension(const std::shared_ptr<Mantid::Geometry::IMDDimension> &dim) {
   m_dimensions.emplace_back(dim);
 }
 
@@ -258,38 +230,33 @@ void MDGeometry::addDimension(
 /** Add a dimension
  * @param dim :: bare pointer to the dimension object   */
 void MDGeometry::addDimension(Mantid::Geometry::IMDDimension *dim) {
-  m_dimensions.emplace_back(
-      std::shared_ptr<Mantid::Geometry::IMDDimension>(dim));
+  m_dimensions.emplace_back(std::shared_ptr<Mantid::Geometry::IMDDimension>(dim));
 }
 
 // --------------------------------------------------------------------------------------------
 /// Get the x-dimension mapping.
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getXDimension() const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getXDimension() const {
   if (this->getNumDims() < 1)
     throw std::runtime_error("Workspace does not have any dimensions!");
   return this->getDimension(0);
 }
 
 /// Get the y-dimension mapping.
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getYDimension() const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getYDimension() const {
   if (this->getNumDims() < 2)
     throw std::runtime_error("Workspace does not have a Y dimension.");
   return this->getDimension(1);
 }
 
 /// Get the z-dimension mapping.
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getZDimension() const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getZDimension() const {
   if (this->getNumDims() < 3)
     throw std::runtime_error("Workspace does not have a Z dimension.");
   return this->getDimension(2);
 }
 
 /// Get the t-dimension mapping.
-std::shared_ptr<const Mantid::Geometry::IMDDimension>
-MDGeometry::getTDimension() const {
+std::shared_ptr<const Mantid::Geometry::IMDDimension> MDGeometry::getTDimension() const {
   if (this->getNumDims() < 4)
     throw std::runtime_error("Workspace does not have a T dimension.");
   return this->getDimension(3);
@@ -334,9 +301,7 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
  */
 bool MDGeometry::allBasisNormalized() const {
   auto normalized = std::find_if(m_basisVectors.begin(), m_basisVectors.end(),
-                                 [](const Mantid::Kernel::VMD &basisVector) {
-                                   return basisVector.length() != 1.0;
-                                 });
+                                 [](const Mantid::Kernel::VMD &basisVector) { return basisVector.length() != 1.0; });
   return normalized == m_basisVectors.end();
 }
 
@@ -350,9 +315,7 @@ bool MDGeometry::hasOriginalWorkspace(size_t index) const {
 }
 
 /// @return the number of original workspaces attached to this one
-size_t MDGeometry::numOriginalWorkspaces() const {
-  return m_originalWorkspaces.size();
-}
+size_t MDGeometry::numOriginalWorkspaces() const { return m_originalWorkspaces.size(); }
 
 //---------------------------------------------------------------------------------------------------
 /** Get the "original" workspace (the workspace that was the source for a binned
@@ -365,11 +328,9 @@ size_t MDGeometry::numOriginalWorkspaces() const {
  * @return the original workspace to which the basis vectors relate
  * @param index :: index into the vector of original workspaces.
  */
-std::shared_ptr<Workspace>
-MDGeometry::getOriginalWorkspace(size_t index) const {
+std::shared_ptr<Workspace> MDGeometry::getOriginalWorkspace(size_t index) const {
   if (index >= m_originalWorkspaces.size())
-    throw std::runtime_error(
-        "MDGeometry::getOriginalWorkspace() invalid index.");
+    throw std::runtime_error("MDGeometry::getOriginalWorkspace() invalid index.");
   return m_originalWorkspaces[index];
 }
 
@@ -384,8 +345,7 @@ MDGeometry::getOriginalWorkspace(size_t index) const {
  * @param ws :: original workspace shared pointer
  * @param index :: index into the vector of original workspaces.
  */
-void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws,
-                                      size_t index) {
+void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws, size_t index) {
   if (index >= m_originalWorkspaces.size())
     m_originalWorkspaces.resize(index + 1);
   m_originalWorkspaces[index] = std::move(ws);
@@ -405,8 +365,7 @@ void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws,
  * @param scaling :: multiply each coordinate by this value.
  * @param offset :: after multiplying, add this offset.
  */
-void MDGeometry::transformDimensions(std::vector<double> &scaling,
-                                     std::vector<double> &offset) {
+void MDGeometry::transformDimensions(std::vector<double> &scaling, std::vector<double> &offset) {
   if (scaling.size() != m_dimensions.size())
     throw std::invalid_argument("MDGeometry::transformDimensions(): "
                                 "scaling.size() must be equal to number of "
@@ -417,10 +376,8 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
                                 "dimensions.");
   for (size_t d = 0; d < m_dimensions.size(); d++) {
     IMDDimension_sptr dim = m_dimensions[d];
-    coord_t min = (dim->getMinimum() * static_cast<coord_t>(scaling[d])) +
-                  static_cast<coord_t>(offset[d]);
-    coord_t max = (dim->getMaximum() * static_cast<coord_t>(scaling[d])) +
-                  static_cast<coord_t>(offset[d]);
+    coord_t min = (dim->getMinimum() * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
+    coord_t max = (dim->getMaximum() * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
     if (min < max)
       dim->setRange(dim->getNBins(), min, max);
     else
@@ -441,8 +398,7 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  *
  * @param deleted :: The deleted workspace
  */
-void MDGeometry::deleteNotificationReceived(
-    const std::shared_ptr<const Workspace> &deleted) {
+void MDGeometry::deleteNotificationReceived(const std::shared_ptr<const Workspace> &deleted) {
   for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
@@ -465,11 +421,9 @@ void MDGeometry::deleteNotificationReceived(
  * @return CoordTransform pointer
  * @param index :: index into the array of original workspaces
  */
-Mantid::API::CoordTransform const *
-MDGeometry::getTransformFromOriginal(size_t index) const {
+Mantid::API::CoordTransform const *MDGeometry::getTransformFromOriginal(size_t index) const {
   if (index >= m_transforms_FromOriginal.size())
-    throw std::runtime_error(
-        "MDGeometry::getTransformFromOriginal(): invalid index.");
+    throw std::runtime_error("MDGeometry::getTransformFromOriginal(): invalid index.");
   return m_transforms_FromOriginal[index].get();
 }
 
@@ -484,8 +438,7 @@ MDGeometry::getTransformFromOriginal(size_t index) const {
  * @param transform :: CoordTransform pointer (this assumes pointer ownership)
  * @param index :: index into the array of original workspaces
  */
-void MDGeometry::setTransformFromOriginal(
-    Mantid::API::CoordTransform *transform, size_t index) {
+void MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform *transform, size_t index) {
   if (index >= m_transforms_FromOriginal.size()) {
     m_transforms_FromOriginal.resize(index + 1);
   }
@@ -504,11 +457,9 @@ void MDGeometry::setTransformFromOriginal(
  * @return CoordTransform pointer
  * @param index :: index into the array of original workspaces
  */
-Mantid::API::CoordTransform const *
-MDGeometry::getTransformToOriginal(size_t index) const {
+Mantid::API::CoordTransform const *MDGeometry::getTransformToOriginal(size_t index) const {
   if (index >= m_transforms_ToOriginal.size())
-    throw std::runtime_error(
-        "MDGeometry::getTransformFromOriginal(): invalid index.");
+    throw std::runtime_error("MDGeometry::getTransformFromOriginal(): invalid index.");
   return m_transforms_ToOriginal[index].get();
 }
 
@@ -524,8 +475,7 @@ MDGeometry::getTransformToOriginal(size_t index) const {
  * @param transform :: CoordTransform pointer (this assumes pointer ownership)
  * @param index :: index into the array of original workspaces
  */
-void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform *transform,
-                                        size_t index) {
+void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform *transform, size_t index) {
   if (index >= m_transforms_ToOriginal.size()) {
     m_transforms_ToOriginal.resize(index + 1);
   }
@@ -564,17 +514,13 @@ std::string MDGeometry::getGeometryXML() const {
  * Get the number of transforms defined to the original coordinate system.
  * @return The number of transforms.
  */
-size_t MDGeometry::getNumberTransformsToOriginal() const {
-  return m_transforms_ToOriginal.size();
-}
+size_t MDGeometry::getNumberTransformsToOriginal() const { return m_transforms_ToOriginal.size(); }
 
 /**
  * Get the number of transforms defined from the original coordinate system.
  * @return The number of transforms.
  */
-size_t MDGeometry::getNumberTransformsFromOriginal() const {
-  return m_transforms_FromOriginal.size();
-}
+size_t MDGeometry::getNumberTransformsFromOriginal() const { return m_transforms_FromOriginal.size(); }
 
 } // namespace API
 } // namespace Mantid

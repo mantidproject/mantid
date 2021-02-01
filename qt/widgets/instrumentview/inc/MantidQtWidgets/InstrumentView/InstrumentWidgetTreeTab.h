@@ -17,8 +17,7 @@ class InstrumentTreeWidget;
 /**
  * Implements the instrument tree tab in InstrumentWidget
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTreeTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTreeTab : public InstrumentWidgetTab {
   Q_OBJECT
 public:
   explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);

@@ -20,8 +20,7 @@ namespace Mantid {
 
 namespace Geometry {
 
-LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt,
-                                       const Kernel::V3D &uVec)
+LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt, const Kernel::V3D &uVec)
     : ATrack(Pt, uVec)
 /**
   Constructor
@@ -107,8 +106,7 @@ void LineIntersectVisit::procTrack()
   // Calculate the distances to the points
   DOut.resize(PtOut.size());
   using std::placeholders::_1;
-  std::transform(PtOut.begin(), PtOut.end(), DOut.begin(),
-                 std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
+  std::transform(PtOut.begin(), PtOut.end(), DOut.begin(), std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
 }
 
 } // namespace Geometry

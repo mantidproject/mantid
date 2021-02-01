@@ -26,9 +26,7 @@ private:
    * @param inWS : Input workspace to sort
    * @param columnName : Column name to sort by
    */
-  void doExecute(const IPeaksWorkspace_sptr &inWS,
-                 const std::string &columnName,
-                 const bool sortAscending = true) {
+  void doExecute(const IPeaksWorkspace_sptr &inWS, const std::string &columnName, const bool sortAscending = true) {
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
     SortPeaksWorkspace alg;
@@ -36,16 +34,13 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ColumnNameToSortBy", columnName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ColumnNameToSortBy", columnName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SortAscending", sortAscending));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    PeaksWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
+    PeaksWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
 
     // Extract the sorted column values out into a containtainer.
     const size_t columnIndex = outWS->getColumnIndex(columnName);
@@ -69,9 +64,7 @@ private:
                  b_sortedDescending);
     }
 
-    TSM_ASSERT_DIFFERS(
-        "Output and Input Workspaces should be different objects.", outWS,
-        inWS);
+    TSM_ASSERT_DIFFERS("Output and Input Workspaces should be different objects.", outWS, inWS);
   }
 
   /**
@@ -80,11 +73,9 @@ private:
    * @param potentiallySorted : Vector that might be sorted ascending.
    * @return False if not sortedAscending
    */
-  template <typename T>
-  bool isSortedAscending(std::vector<T> potentiallySorted) {
-    return std::adjacent_find(potentiallySorted.begin(),
-                              potentiallySorted.end(),
-                              std::greater<T>()) == potentiallySorted.end();
+  template <typename T> bool isSortedAscending(std::vector<T> potentiallySorted) {
+    return std::adjacent_find(potentiallySorted.begin(), potentiallySorted.end(), std::greater<T>()) ==
+           potentiallySorted.end();
   }
 
   /**
@@ -93,19 +84,15 @@ private:
    * @param potentiallySorted : Vector that might be sorted descending.
    * @return False if not sortedAscending
    */
-  template <typename T>
-  bool isSortedDescending(std::vector<T> potentiallySorted) {
-    return std::adjacent_find(potentiallySorted.begin(),
-                              potentiallySorted.end(),
-                              std::less<T>()) == potentiallySorted.end();
+  template <typename T> bool isSortedDescending(std::vector<T> potentiallySorted) {
+    return std::adjacent_find(potentiallySorted.begin(), potentiallySorted.end(), std::less<T>()) ==
+           potentiallySorted.end();
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SortPeaksWorkspaceTest *createSuite() {
-    return new SortPeaksWorkspaceTest();
-  }
+  static SortPeaksWorkspaceTest *createSuite() { return new SortPeaksWorkspaceTest(); }
   static void destroySuite(SortPeaksWorkspaceTest *suite) { delete suite; }
 
   void test_Init() {
@@ -125,8 +112,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     // Note that We did not specify the "ColumnToSortBy" mandatory argument
     // before executing!
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
@@ -143,8 +129,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ColumnNameToSortBy", "V"));
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
   }

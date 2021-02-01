@@ -53,9 +53,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "alg_irs_r");
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_r");
 
     ExtractFFTSpectrum alg;
     alg.initialize();
@@ -64,29 +62,22 @@ public:
                      const std::runtime_error &); // check it does output error
     TS_ASSERT(!alg.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputImagWorkspace",
-        "alg_irs_r")); // use same spectra for the imaginary part (Re==Im)
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputImagWorkspace",
+                                                  "alg_irs_r")); // use same spectra for the imaginary part (Re==Im)
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(
-        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "alg_irs_t"));
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_t"));
 
     // Dimensions
-    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(),
-                     outputWS->getNumberHistograms());
+    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(inputWS->blocksize(), outputWS->blocksize());
     TS_ASSERT_EQUALS(inputWS->x(0).size(),
-                     outputWS->x(0).size() +
-                         1); // FFT results in one less X value
+                     outputWS->x(0).size() + 1); // FFT results in one less X value
 
     // Units ( Axis 1 should be the same, Axis 0 should be "Time/ns"
     TS_ASSERT(*inputWS->getAxis(1)->unit() == *outputWS->getAxis(1)->unit());
@@ -110,9 +101,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    MatrixWorkspace_sptr inputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "alg_irs_r");
+    MatrixWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_r");
 
     ExtractFFTSpectrum alg;
     alg.initialize();
@@ -120,9 +109,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "alg_irs_t");
     alg.execute();
 
-    const auto outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "alg_irs_t");
+    const auto outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("alg_irs_t");
     // For this particular workspace, the tail of zeros began at index 100,
     // so they should have been removed.
     TS_ASSERT_EQUALS(outputWS->x(0).size(), 100);

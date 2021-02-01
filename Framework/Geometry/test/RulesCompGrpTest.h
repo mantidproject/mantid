@@ -108,7 +108,7 @@ public:
     A.setLeaf(std::move(uSC), 0);
     TS_ASSERT_EQUALS(A.leaf(0), ptruSC);
     TS_ASSERT_EQUALS(A.isValid(V3D(0.0, 0.0, 0.0)),
-                     false); // inside the sphere and cylinder
+                     false);                                // inside the sphere and cylinder
     TS_ASSERT_EQUALS(A.isValid(V3D(4.1, 0.0, 0.0)), true);  // outside sphere
     TS_ASSERT_EQUALS(A.isValid(V3D(4.0, 0.0, 0.0)), false); // on sphere
     TS_ASSERT_EQUALS(A.isValid(V3D(3.9, 0.0, 0.0)), false); // inside sphere
@@ -139,9 +139,8 @@ public:
     auto uSC = createUnionSphereAndCylinder();
     A.setLeaf(std::move(uSC), 0);
     // TS_ASSERT_EQUALS(A.leaf(0), uSC);
-    TS_ASSERT_EQUALS(
-        A.simplify(),
-        0); // Always return 0 bcos a single node cannot be simplified
+    TS_ASSERT_EQUALS(A.simplify(),
+                     0); // Always return 0 bcos a single node cannot be simplified
   }
 
 private:

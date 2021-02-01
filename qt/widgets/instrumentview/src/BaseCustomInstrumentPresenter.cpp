@@ -19,11 +19,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
-    IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
-    IPlotFitAnalysisPanePresenter *analysisPanePresenter)
-    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr),
+BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
+                                                             IBaseCustomInstrumentModel *model,
+                                                             IPlotFitAnalysisPanePresenter *analysisPanePresenter)
+    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr),
       m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
@@ -34,12 +33,10 @@ void BaseCustomInstrumentPresenter::addInstrument() {
   initLayout(setUp);
 }
 
-void BaseCustomInstrumentPresenter::initLayout(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   // connect to new run
   m_view->observeLoadRun(m_loadRunObserver);
-  std::function<void()> loadBinder =
-      std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
+  std::function<void()> loadBinder = std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   initInstrument(setUp);
   setUpInstrumentAnalysisSplitter();
@@ -51,8 +48,7 @@ void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
   m_view->setupInstrumentAnalysisSplitters(paneView->getQWidget());
 }
 
-void BaseCustomInstrumentPresenter::loadAndAnalysis(
-    const std::string &pathToRun) {
+void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
     auto loadedResult = m_model->loadData(pathToRun);
 
@@ -81,8 +77,7 @@ void BaseCustomInstrumentPresenter::loadRunNumber() {
   loadAndAnalysis(pathToRun);
 }
 
-void BaseCustomInstrumentPresenter::initInstrument(
-    std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   if (!setUp) {
     return;
   }

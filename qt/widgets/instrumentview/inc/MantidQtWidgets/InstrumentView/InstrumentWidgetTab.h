@@ -23,9 +23,7 @@ namespace MantidWidgets {
 class InstrumentWidget;
 class ProjectionSurface;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTab
-    : public QFrame,
-      public InstrumentWidgetTypes {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTab : public QFrame, public InstrumentWidgetTypes {
   Q_OBJECT
 public:
   explicit InstrumentWidgetTab(InstrumentWidget *parent);
@@ -39,9 +37,7 @@ public:
   virtual void loadSettings(const QSettings & /*unused*/) {}
   /// Add tab-specific items to the context menu
   /// Return true if at least 1 item was added or false otherwise.
-  virtual bool addToDisplayContextMenu(QMenu & /*unused*/) const {
-    return false;
-  }
+  virtual bool addToDisplayContextMenu(QMenu & /*unused*/) const { return false; }
   /// Get the projection surface
   std::shared_ptr<ProjectionSurface> getSurface() const;
   /// Load state for the widget tab from a project file

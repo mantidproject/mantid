@@ -30,8 +30,7 @@ namespace DynamicPDF {
 /**
  * @brief Constructor, override fitting type with Sequential
  */
-DPDFFitOptionsBrowser::DPDFFitOptionsBrowser(QWidget *parent)
-    : FitOptionsBrowser(parent, Fittype::Sequential) {
+DPDFFitOptionsBrowser::DPDFFitOptionsBrowser(QWidget *parent) : FitOptionsBrowser(parent, Fittype::Sequential) {
   this->createAdditionalProperties();
   this->customizeBrowser();
 }

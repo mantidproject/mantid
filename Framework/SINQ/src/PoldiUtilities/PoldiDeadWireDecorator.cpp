@@ -15,17 +15,14 @@ namespace Poldi {
 
 using namespace Geometry;
 
-PoldiDeadWireDecorator::PoldiDeadWireDecorator(
-    std::set<int> deadWires,
-    const std::shared_ptr<Poldi::PoldiAbstractDetector> &detector)
-    : PoldiDetectorDecorator(detector), m_deadWireSet(std::move(deadWires)),
-      m_goodElements() {
+PoldiDeadWireDecorator::PoldiDeadWireDecorator(std::set<int> deadWires,
+                                               const std::shared_ptr<Poldi::PoldiAbstractDetector> &detector)
+    : PoldiDetectorDecorator(detector), m_deadWireSet(std::move(deadWires)), m_goodElements() {
   setDecoratedDetector(detector);
 }
 
-PoldiDeadWireDecorator::PoldiDeadWireDecorator(
-    const Geometry::DetectorInfo &poldiDetectorInfo,
-    const std::shared_ptr<PoldiAbstractDetector> &detector)
+PoldiDeadWireDecorator::PoldiDeadWireDecorator(const Geometry::DetectorInfo &poldiDetectorInfo,
+                                               const std::shared_ptr<PoldiAbstractDetector> &detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);
 
@@ -34,9 +31,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 
   auto endIterator = std::remove_copy_if(
       allDetectorIds.begin(), allDetectorIds.end(), deadDetectorIds.begin(),
-      [&](const detid_t detID) -> bool {
-        return !poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID));
-      });
+      [&](const detid_t detID) -> bool { return !poldiDetectorInfo.isMasked(poldiDetectorInfo.indexOf(detID)); });
   deadDetectorIds.resize(std::distance(deadDetectorIds.begin(), endIterator));
 
   setDeadWires(std::set<int>(deadDetectorIds.begin(), deadDetectorIds.end()));
@@ -52,9 +47,7 @@ std::set<int> PoldiDeadWireDecorator::deadWires() { return m_deadWireSet; }
 
 size_t PoldiDeadWireDecorator::elementCount() { return m_goodElements.size(); }
 
-const std::vector<int> &PoldiDeadWireDecorator::availableElements() {
-  return m_goodElements;
-}
+const std::vector<int> &PoldiDeadWireDecorator::availableElements() { return m_goodElements; }
 
 void PoldiDeadWireDecorator::detectorSetHook() {
   if (m_decoratedDetector) {
@@ -64,20 +57,17 @@ void PoldiDeadWireDecorator::detectorSetHook() {
   }
 }
 
-std::vector<int>
-PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
+std::vector<int> PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
   if (!m_deadWireSet.empty()) {
     if (*m_deadWireSet.rbegin() > rawElements.back()) {
-      throw std::runtime_error(
-          std::string("Deadwires set contains illegal index."));
+      throw std::runtime_error(std::string("Deadwires set contains illegal index."));
     }
     size_t newElementCount = rawElements.size() - m_deadWireSet.size();
 
     std::vector<int> goodElements(newElementCount);
     using namespace std::placeholders;
-    std::remove_copy_if(
-        rawElements.begin(), rawElements.end(), goodElements.begin(),
-        std::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
+    std::remove_copy_if(rawElements.begin(), rawElements.end(), goodElements.begin(),
+                        std::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
 
     return goodElements;
   }
@@ -85,9 +75,7 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
   return rawElements;
 }
 
-bool PoldiDeadWireDecorator::isDeadElement(int index) {
-  return m_deadWireSet.count(index) != 0;
-}
+bool PoldiDeadWireDecorator::isDeadElement(int index) { return m_deadWireSet.count(index) != 0; }
 
 } // namespace Poldi
 } // namespace Mantid

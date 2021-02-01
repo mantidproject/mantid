@@ -19,9 +19,7 @@ namespace MDAlgorithms {
 
 DLLExport std::vector<double> gaussianKernel(const double fwhm);
 DLLExport std::vector<double> normaliseKernel(std::vector<double> kernel);
-DLLExport std::vector<double>
-renormaliseKernel(std::vector<double> kernel,
-                  const std::vector<bool> &validity);
+DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel, const std::vector<bool> &validity);
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
  */
@@ -29,24 +27,20 @@ class DLLExport SmoothMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"ThresholdMD"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ThresholdMD"}; }
   const std::string category() const override;
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
 
-  std::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
-      const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
-      const std::vector<double> &widthVector,
-      boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
-          weightingWS);
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace>
+  hatSmooth(const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
+            const std::vector<double> &widthVector,
+            boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>> weightingWS);
 
-  std::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
-      const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
-      const std::vector<double> &widthVector,
-      boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
-          weightingWS);
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace>
+  gaussianSmooth(const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
+                 const std::vector<double> &widthVector,
+                 boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>> weightingWS);
 
 private:
   void init() override;

@@ -40,12 +40,10 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "RunInfoWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "", Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
                   "It serves as parent workspace in the algorithm.");
@@ -57,41 +55,29 @@ void ConvertSpiceDataToRealSpace::init() {
 
   /// TODO - Add HB2B as it is implemented in future
   std::array<std::string, 1> allowedinstruments = {{"HB2A"}};
-  auto instrumentvalidator =
-      std::make_shared<ListValidator<std::string>>(allowedinstruments);
-  declareProperty("Instrument", "HB2A", instrumentvalidator,
-                  "Instrument to be loaded. ");
+  auto instrumentvalidator = std::make_shared<ListValidator<std::string>>(allowedinstruments);
+  declareProperty("Instrument", "HB2A", instrumentvalidator, "Instrument to be loaded. ");
 
-  declareProperty("DetectorPrefix", "anode",
-                  "Prefix of the name for detectors. ");
+  declareProperty("DetectorPrefix", "anode", "Prefix of the name for detectors. ");
 
-  declareProperty("RunNumberName", "Pt.",
-                  "Log name for run number/measurement point.");
+  declareProperty("RunNumberName", "Pt.", "Log name for run number/measurement point.");
 
-  declareProperty(
-      "RotationAngleLogName", "2theta",
-      "Log name for rotation angle as the 2theta value of detector 0.");
+  declareProperty("RotationAngleLogName", "2theta", "Log name for rotation angle as the 2theta value of detector 0.");
 
-  declareProperty(
-      "MonitorCountsLogName", "monitor",
-      "Name of the sample log to record monitor counts of each run.");
+  declareProperty("MonitorCountsLogName", "monitor", "Name of the sample log to record monitor counts of each run.");
 
-  declareProperty("DurationLogName", "time",
-                  "Name of the sample log to record the duration of each run.");
+  declareProperty("DurationLogName", "time", "Name of the sample log to record the duration of each run.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Name to use for the output workspace.");
-
-  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
-                      "OutputMonitorWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "DetectorEfficiencyTableWorkspace", "", Direction::Input,
-          PropertyMode::Optional),
-      "Name of a table workspace containing the detectors' efficiency.");
+      std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputMonitorWorkspace", "", Direction::Output),
+      "Name to use for the output workspace.");
+
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorEfficiencyTableWorkspace", "",
+                                                                      Direction::Input, PropertyMode::Optional),
+                  "Name of a table workspace containing the detectors' efficiency.");
 }
 
 /** Exec
@@ -102,8 +88,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   MatrixWorkspace_const_sptr parentWS = getProperty("RunInfoWorkspace");
   m_instrumentName = getPropertyValue("Instrument");
 
-  DataObjects::TableWorkspace_sptr detEffTableWS =
-      getProperty("DetectorEfficiencyTableWorkspace");
+  DataObjects::TableWorkspace_sptr detEffTableWS = getProperty("DetectorEfficiencyTableWorkspace");
   std::map<detid_t, double> detEffMap; // map for detector efficiency
   if (detEffTableWS)
     detEffMap = parseDetectorEfficiencyTable(detEffTableWS);
@@ -158,8 +143,8 @@ void ConvertSpiceDataToRealSpace::exec() {
     m_extentMaxs[i] = -DBL_MAX;
   }
 
-  std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToMatrixWorkspace(
-      dataTableWS, parentWS, runstart, logvecmap, vectimes);
+  std::vector<MatrixWorkspace_sptr> vec_ws2d =
+      convertToMatrixWorkspace(dataTableWS, parentWS, runstart, logvecmap, vectimes);
 
   // Apply detector efficiency
   if (!detEffMap.empty())
@@ -183,8 +168,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   g_log.debug("About to converting to workspaces done!");
   IMDEventWorkspace_sptr m_mdEventWS = createDataMDWorkspace(vec_ws2d);
   std::string monitorlogname = getProperty("MonitorCountsLogName");
-  IMDEventWorkspace_sptr mdMonitorWS =
-      createMonitorMDWorkspace(vec_ws2d, logvecmap[monitorlogname]);
+  IMDEventWorkspace_sptr mdMonitorWS = createMonitorMDWorkspace(vec_ws2d, logvecmap[monitorlogname]);
 
   // Add experiment info for each run and sample log to the first experiment
   // info object
@@ -207,12 +191,9 @@ void ConvertSpiceDataToRealSpace::exec() {
  * @param vectimes
  * @return
  */
-std::vector<MatrixWorkspace_sptr>
-ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
-    const DataObjects::TableWorkspace_sptr &tablews,
-    const API::MatrixWorkspace_const_sptr &parentws,
-    Types::Core::DateAndTime runstart,
-    std::map<std::string, std::vector<double>> &logvecmap,
+std::vector<MatrixWorkspace_sptr> ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
+    const DataObjects::TableWorkspace_sptr &tablews, const API::MatrixWorkspace_const_sptr &parentws,
+    Types::Core::DateAndTime runstart, std::map<std::string, std::vector<double>> &logvecmap,
     std::vector<Types::Core::DateAndTime> &vectimes) {
   // Get table workspace's column information
   size_t ipt, irotangle, itime;
@@ -227,8 +208,7 @@ ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
   double duration = 0;
   vectimes.resize(numws);
   for (size_t irow = 0; irow < numws; ++irow) {
-    vecws[irow] = loadRunToMatrixWS(tablews, irow, parentws, runstart, ipt,
-                                    irotangle, itime, anodelist, duration);
+    vecws[irow] = loadRunToMatrixWS(tablews, irow, parentws, runstart, ipt, irotangle, itime, anodelist, duration);
     vectimes[irow] = runstart;
     runstart += static_cast<int64_t>(duration * 1.0E9);
   }
@@ -237,8 +217,7 @@ ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
   // MDWorkspace
   parseSampleLogs(tablews, sampleindexlist, logvecmap);
 
-  g_log.debug() << "Number of matrix workspaces in vector = " << vecws.size()
-                << "\n";
+  g_log.debug() << "Number of matrix workspaces in vector = " << vecws.size() << "\n";
   return vecws;
 }
 
@@ -249,15 +228,13 @@ ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
  * @param indexlist
  * @param logvecmap
  */
-void ConvertSpiceDataToRealSpace::parseSampleLogs(
-    const DataObjects::TableWorkspace_sptr &tablews,
-    const std::map<std::string, size_t> &indexlist,
-    std::map<std::string, std::vector<double>> &logvecmap) {
+void ConvertSpiceDataToRealSpace::parseSampleLogs(const DataObjects::TableWorkspace_sptr &tablews,
+                                                  const std::map<std::string, size_t> &indexlist,
+                                                  std::map<std::string, std::vector<double>> &logvecmap) {
   size_t numrows = tablews->rowCount();
 
   std::map<std::string, size_t>::const_iterator indexiter;
-  for (indexiter = indexlist.begin(); indexiter != indexlist.end();
-       ++indexiter) {
+  for (indexiter = indexlist.begin(); indexiter != indexlist.end(); ++indexiter) {
     std::string logname = indexiter->first;
     size_t icol = indexiter->second;
 
@@ -288,29 +265,23 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
  * @return
  */
 MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
-    const DataObjects::TableWorkspace_sptr &tablews, size_t irow,
-    const MatrixWorkspace_const_sptr &parentws,
-    Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle,
-    size_t itime, const std::vector<std::pair<size_t, size_t>> &anodelist,
-    double &duration) {
+    const DataObjects::TableWorkspace_sptr &tablews, size_t irow, const MatrixWorkspace_const_sptr &parentws,
+    Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle, size_t itime,
+    const std::vector<std::pair<size_t, size_t>> &anodelist, double &duration) {
   // New workspace from parent workspace
-  MatrixWorkspace_sptr tempws =
-      WorkspaceFactory::Instance().create(parentws, m_numSpec, 2, 1);
+  MatrixWorkspace_sptr tempws = WorkspaceFactory::Instance().create(parentws, m_numSpec, 2, 1);
 
   // Set up angle, time and run number
   double twotheta = tablews->cell<double>(irow, irotangle);
-  TimeSeriesProperty<double> *prop2theta =
-      new TimeSeriesProperty<double>("rotangle");
+  TimeSeriesProperty<double> *prop2theta = new TimeSeriesProperty<double>("rotangle");
 
   prop2theta->addValue(runstart, twotheta);
   tempws->mutableRun().addProperty(prop2theta);
 
-  TimeSeriesProperty<std::string> *proprunstart =
-      new TimeSeriesProperty<std::string>("run_start");
+  TimeSeriesProperty<std::string> *proprunstart = new TimeSeriesProperty<std::string>("run_start");
   proprunstart->addValue(runstart, runstart.toISO8601String());
 
-  g_log.debug() << "Run " << irow << ": set run start to "
-                << runstart.toISO8601String() << "\n";
+  g_log.debug() << "Run " << irow << ": set run start to " << runstart.toISO8601String() << "\n";
   if (tempws->run().hasProperty("run_start")) {
     g_log.information() << "Temporary workspace inherites run_start as "
                         << tempws->run().getProperty("run_start")->value()
@@ -321,15 +292,13 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   tempws->mutableRun().addProperty(proprunstart);
 
   int pt = tablews->cell<int>(irow, ipt);
-  tempws->mutableRun().addProperty(
-      new PropertyWithValue<int>("run_number", pt));
+  tempws->mutableRun().addProperty(new PropertyWithValue<int>("run_number", pt));
 
   // Load instrument
   IAlgorithm_sptr instloader = this->createChildAlgorithm("LoadInstrument");
   instloader->initialize();
   instloader->setProperty("InstrumentName", m_instrumentName);
-  instloader->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+  instloader->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   instloader->setProperty("Workspace", tempws);
   instloader->execute();
 
@@ -368,10 +337,10 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
  * @param anodelist
  * @param samplenameindexmap
  */
-void ConvertSpiceDataToRealSpace::readTableInfo(
-    const TableWorkspace_const_sptr &tablews, size_t &ipt, size_t &irotangle,
-    size_t &itime, std::vector<std::pair<size_t, size_t>> &anodelist,
-    std::map<std::string, size_t> &samplenameindexmap) {
+void ConvertSpiceDataToRealSpace::readTableInfo(const TableWorkspace_const_sptr &tablews, size_t &ipt,
+                                                size_t &irotangle, size_t &itime,
+                                                std::vector<std::pair<size_t, size_t>> &anodelist,
+                                                std::map<std::string, size_t> &samplenameindexmap) {
 
   // Get detectors' names and other sample names
   std::string anodelogprefix = getProperty("DetectorPrefix");
@@ -393,8 +362,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   // Check detectors' names
   if (anodelist.empty()) {
     std::stringstream errss;
-    errss << "There is no log name starting with " << anodelogprefix
-          << " for detector. ";
+    errss << "There is no log name starting with " << anodelogprefix << " for detector. ";
     throw std::runtime_error(errss.str());
   }
 
@@ -406,8 +374,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   std::string durationlogname = getProperty("DurationLogName");      //"time"
   std::string rotanglelogname = getProperty("RotationAngleLogName"); // "2theta"
 
-  std::vector<std::string> lognames{ptname, monitorlogname, durationlogname,
-                                    rotanglelogname};
+  std::vector<std::string> lognames{ptname, monitorlogname, durationlogname, rotanglelogname};
 
   std::vector<size_t> ilognames(lognames.size());
 
@@ -418,8 +385,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       ilognames[i] = mapiter->second;
     } else {
       std::stringstream ess;
-      ess << "Essential log name " << logname
-          << " cannot be found in data table workspace.";
+      ess << "Essential log name " << logname << " cannot be found in data table workspace.";
       throw std::runtime_error(ess.str());
     }
   }
@@ -440,20 +406,17 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
  * @param logvecmap
  * @param vectimes
  */
-void ConvertSpiceDataToRealSpace::appendSampleLogs(
-    const IMDEventWorkspace_sptr &mdws,
-    const std::map<std::string, std::vector<double>> &logvecmap,
-    const std::vector<Types::Core::DateAndTime> &vectimes) {
+void ConvertSpiceDataToRealSpace::appendSampleLogs(const IMDEventWorkspace_sptr &mdws,
+                                                   const std::map<std::string, std::vector<double>> &logvecmap,
+                                                   const std::vector<Types::Core::DateAndTime> &vectimes) {
   // Check!
   size_t numexpinfo = mdws->getNumExperimentInfo();
   if (numexpinfo == 0)
-    throw std::runtime_error(
-        "There is no ExperimentInfo defined for MDWorkspace. "
-        "It is impossible to add any log!");
+    throw std::runtime_error("There is no ExperimentInfo defined for MDWorkspace. "
+                             "It is impossible to add any log!");
   else if (numexpinfo != vectimes.size() + 1)
-    throw std::runtime_error(
-        "The number of ExperimentInfo should be 1 more than "
-        "the length of vector of time, i.e., number of matrix workspaces.");
+    throw std::runtime_error("The number of ExperimentInfo should be 1 more than "
+                             "the length of vector of time, i.e., number of matrix workspaces.");
 
   std::map<std::string, std::vector<double>>::const_iterator miter;
 
@@ -469,18 +432,15 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     Types::Core::DateAndTime runstart = vectimes[i];
     mdws->getExperimentInfo(static_cast<uint16_t>(i))
         ->mutableRun()
-        .addLogData(new PropertyWithValue<std::string>(
-            "run_start", runstart.toFormattedString()));
+        .addLogData(new PropertyWithValue<std::string>("run_start", runstart.toFormattedString()));
   }
   mdws->getExperimentInfo(static_cast<uint16_t>(vectimes.size()))
       ->mutableRun()
-      .addLogData(new PropertyWithValue<std::string>(
-          "run_start", vectimes[0].toFormattedString()));
+      .addLogData(new PropertyWithValue<std::string>("run_start", vectimes[0].toFormattedString()));
 
   // Add sample logs
   // get hold of last experiment info
-  ExperimentInfo_sptr eilast =
-      mdws->getExperimentInfo(static_cast<uint16_t>(numexpinfo - 1));
+  ExperimentInfo_sptr eilast = mdws->getExperimentInfo(static_cast<uint16_t>(numexpinfo - 1));
 
   for (miter = logvecmap.begin(); miter != logvecmap.end(); ++miter) {
     std::string logname = miter->first;
@@ -488,10 +448,8 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
 
     // Check log values and times
     if (veclogval.size() != vectimes.size()) {
-      g_log.error() << "Log " << logname
-                    << " has different number of log values ("
-                    << veclogval.size() << ") than number of log entry time ("
-                    << vectimes.size() << ")"
+      g_log.error() << "Log " << logname << " has different number of log values (" << veclogval.size()
+                    << ") than number of log entry time (" << vectimes.size() << ")"
                     << "\n";
       continue;
     }
@@ -501,13 +459,11 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
       // get ExperimentInfo
       ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
       // check run number matches
-      int runnumber =
-          std::stoi(tmpei->run().getProperty("run_number")->value());
+      int runnumber = std::stoi(tmpei->run().getProperty("run_number")->value());
       if (runnumber != static_cast<int>(vecrunno[i]))
         throw std::runtime_error("Run number does not match to Pt. value.");
       // add property
-      tmpei->mutableRun().addLogData(
-          new PropertyWithValue<double>(logname, veclogval[i]));
+      tmpei->mutableRun().addLogData(new PropertyWithValue<double>(logname, veclogval[i]));
     }
 
     // Create a new log
@@ -525,9 +481,8 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
  * @param mdws
  * @param vec_ws2d
  */
-void ConvertSpiceDataToRealSpace::addExperimentInfos(
-    const API::IMDEventWorkspace_sptr &mdws,
-    const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d) {
+void ConvertSpiceDataToRealSpace::addExperimentInfos(const API::IMDEventWorkspace_sptr &mdws,
+                                                     const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d) {
   // Add N experiment info as there are N measurment points
   for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
@@ -536,8 +491,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     tmp_expinfo->setInstrument(tmp_inst);
 
     int runnumber = std::stoi(ws2d->run().getProperty("run_number")->value());
-    tmp_expinfo->mutableRun().addProperty(
-        new PropertyWithValue<int>("run_number", runnumber));
+    tmp_expinfo->mutableRun().addProperty(new PropertyWithValue<int>("run_number", runnumber));
 
     // Add ExperimentInfo to workspace
     mdws->addExperimentInfo(tmp_expinfo);
@@ -545,8 +499,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
 
   // Add one additional in order to contain the combined sample logs
   ExperimentInfo_sptr combine_expinfo = std::make_shared<ExperimentInfo>();
-  combine_expinfo->mutableRun().addProperty(
-      new PropertyWithValue<int>("run_number", -1));
+  combine_expinfo->mutableRun().addProperty(new PropertyWithValue<int>("run_number", -1));
   mdws->addExperimentInfo(combine_expinfo);
 }
 
@@ -556,12 +509,11 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
  * @param vec_ws2d
  * @return
  */
-IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
-    const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
+IMDEventWorkspace_sptr
+ConvertSpiceDataToRealSpace::createDataMDWorkspace(const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
 
   // Create a target output workspace.
-  IMDEventWorkspace_sptr outWs =
-      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+  IMDEventWorkspace_sptr outWs = MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
 
@@ -576,8 +528,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   vec_name[2] = "Z";
 
   // Create MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame frame(
-      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
 
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {
@@ -585,12 +536,9 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
     std::string name = vec_name[i];
 
     for (size_t d = 0; d < 3; ++d)
-      g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
-                    << ", " << m_extentMaxs[d] << "\n";
-    outWs->addDimension(
-        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
-            static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
+      g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d] << ", " << m_extentMaxs[d] << "\n";
+    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+        id, name, frame, static_cast<coord_t>(m_extentMins[i]), static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
   // Add events
@@ -598,12 +546,10 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
       std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
 
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
-      MDEW_MDEVENT_3);
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(MDEW_MDEVENT_3);
 
   for (const auto &thisWorkspace : vec_ws2d) {
-    uint16_t runnumber = static_cast<uint16_t>(
-        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
+    uint16_t runnumber = static_cast<uint16_t>(std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
 
@@ -634,12 +580,11 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
  * @param vecmonitor
  * @return
  */
-IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
-    const std::vector<MatrixWorkspace_sptr> &vec_ws2d,
-    const std::vector<double> &vecmonitor) {
+IMDEventWorkspace_sptr
+ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(const std::vector<MatrixWorkspace_sptr> &vec_ws2d,
+                                                      const std::vector<double> &vecmonitor) {
   // Create a target output workspace.
-  IMDEventWorkspace_sptr outWs =
-      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+  IMDEventWorkspace_sptr outWs = MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
 
@@ -654,18 +599,15 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   vec_name[2] = "Z";
 
   // Create MDFrame of General Frame type
-  Mantid::Geometry::GeneralFrame frame(
-      Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+  Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
 
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = vec_ID[i];
     std::string name = vec_name[i];
 
-    outWs->addDimension(
-        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
-            id, name, frame, static_cast<coord_t>(m_extentMins[i]),
-            static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
+    outWs->addDimension(Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+        id, name, frame, static_cast<coord_t>(m_extentMins[i]), static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
   // Add events
@@ -673,13 +615,12 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
       std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outWs);
 
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
-      MDEW_MDEVENT_3);
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(MDEW_MDEVENT_3);
 
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
-    short unsigned int runnumber = static_cast<short unsigned int>(
-        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
+    short unsigned int runnumber =
+        static_cast<short unsigned int>(std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
     auto signal = static_cast<float>(vecmonitor[iws]);
@@ -711,15 +652,13 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
  * @returns detector efficiency map
  */
 std::map<detid_t, double>
-ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
-    const DataObjects::TableWorkspace_sptr &detefftablews) {
+ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(const DataObjects::TableWorkspace_sptr &detefftablews) {
   std::map<detid_t, double> deteffmap;
 
   // check table workspace
   size_t numcols = detefftablews->columnCount();
   if (numcols != 2)
-    throw std::runtime_error(
-        "Input tableworkspace must have 2 and only 2 columns.");
+    throw std::runtime_error("Input tableworkspace must have 2 and only 2 columns.");
 
   // parse the detector
   size_t numrows = detefftablews->rowCount();
@@ -738,9 +677,8 @@ ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
  * @param vec_ws2d
  * @param detEffMap
  */
-void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
-    std::vector<MatrixWorkspace_sptr> vec_ws2d,
-    const std::map<detid_t, double> &detEffMap) {
+void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(std::vector<MatrixWorkspace_sptr> vec_ws2d,
+                                                              const std::map<detid_t, double> &detEffMap) {
   std::vector<MatrixWorkspace_sptr>::iterator it;
   std::map<detid_t, double>::const_iterator detiter;
   for (it = vec_ws2d.begin(); it != vec_ws2d.end(); ++it) {

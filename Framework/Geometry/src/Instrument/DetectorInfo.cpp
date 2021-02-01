@@ -23,27 +23,21 @@ namespace Geometry {
  * The Instrument reference `instrument` must be the parameterized instrument
  * obtained from a workspace. Detector ID -> index map provided as constructor
  * argument. */
-DetectorInfo::DetectorInfo(
-    std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
-    std::shared_ptr<const Geometry::Instrument> instrument,
-    std::shared_ptr<const std::vector<detid_t>> detectorIds,
-    std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
-    : m_detectorInfo(std::move(detectorInfo)),
-      m_instrument(std::move(instrument)),
-      m_detectorIDs(std::move(detectorIds)),
-      m_detIDToIndex(std::move(detIdToIndexMap)),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
+                           std::shared_ptr<const Geometry::Instrument> instrument,
+                           std::shared_ptr<const std::vector<detid_t>> detectorIds,
+                           std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap)
+    : m_detectorInfo(std::move(detectorInfo)), m_instrument(std::move(instrument)),
+      m_detectorIDs(std::move(detectorIds)), m_detIDToIndex(std::move(detIdToIndexMap)),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
-    throw std::invalid_argument(
-        "DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
+    throw std::invalid_argument("DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
 
   if (m_detectorIDs->size() != m_detIDToIndex->size()) {
-    throw std::invalid_argument(
-        "DetectorInfo::DetectorInfo: ID and ID->index map do not match");
+    throw std::invalid_argument("DetectorInfo::DetectorInfo: ID and ID->index map do not match");
   }
 }
 
@@ -52,12 +46,9 @@ DetectorInfo::DetectorInfo(
  * Public copy should not be used since proper links between DetectorInfo and
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
-    : m_detectorInfo(
-          std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
-      m_instrument(other.m_instrument), m_detectorIDs(other.m_detectorIDs),
-      m_detIDToIndex(other.m_detIDToIndex),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+    : m_detectorInfo(std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)), m_instrument(other.m_instrument),
+      m_detectorIDs(other.m_detectorIDs), m_detIDToIndex(other.m_detIDToIndex),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
@@ -95,29 +86,19 @@ size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 
 /// Returns true if the detector is a monitor.
-bool DetectorInfo::isMonitor(const size_t index) const {
-  return m_detectorInfo->isMonitor(index);
-}
+bool DetectorInfo::isMonitor(const size_t index) const { return m_detectorInfo->isMonitor(index); }
 
 /// Returns true if the detector is a monitor.
-bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> &index) const {
-  return m_detectorInfo->isMonitor(index);
-}
+bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> &index) const { return m_detectorInfo->isMonitor(index); }
 
 /// Returns true if the detector is masked.
-bool DetectorInfo::isMasked(const size_t index) const {
-  return m_detectorInfo->isMasked(index);
-}
+bool DetectorInfo::isMasked(const size_t index) const { return m_detectorInfo->isMasked(index); }
 
 /// Returns true if the detector is masked.
-bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const {
-  return m_detectorInfo->isMasked(index);
-}
+bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const { return m_detectorInfo->isMasked(index); }
 
 /// Returns true if there are masked detectors
-bool DetectorInfo::hasMaskedDetectors() const {
-  return m_detectorInfo->hasMaskedDetectors();
-}
+bool DetectorInfo::hasMaskedDetectors() const { return m_detectorInfo->hasMaskedDetectors(); }
 
 /** Returns L2 (distance from sample to spectrum).
  *
@@ -146,15 +127,13 @@ double DetectorInfo::l2(const std::pair<size_t, size_t> &index) const {
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const size_t index) const {
   if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
+    throw std::logic_error("Two theta (scattering angle) is not defined for monitors.");
 
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
 
   const auto sampleDetVec = position(index) - samplePos;
@@ -164,15 +143,13 @@ double DetectorInfo::twoTheta(const size_t index) const {
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index) const {
   if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
+    throw std::logic_error("Two theta (scattering angle) is not defined for monitors.");
 
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
 
   const auto sampleDetVec = position(index) - samplePos;
@@ -182,19 +159,16 @@ double DetectorInfo::twoTheta(const std::pair<size_t, size_t> &index) const {
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
 double DetectorInfo::signedTwoTheta(const size_t index) const {
   if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
+    throw std::logic_error("Two theta (scattering angle) is not defined for monitors.");
 
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the axis defining the sign
-  const auto &instrumentUpAxis =
-      m_instrument->getReferenceFrame()->vecThetaSign();
+  const auto &instrumentUpAxis = m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);
@@ -208,22 +182,18 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
-double
-DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
+double DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
+    throw std::logic_error("Two theta (scattering angle) is not defined for monitors.");
 
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the axis defining the sign
-  const auto &instrumentUpAxis =
-      m_instrument->getReferenceFrame()->vecThetaSign();
+  const auto &instrumentUpAxis = m_instrument->getReferenceFrame()->vecThetaSign();
 
   const auto sampleDetVec = position(index) - samplePos;
   double angle = sampleDetVec.angle(beamLine);
@@ -244,27 +214,22 @@ double DetectorInfo::azimuthal(const size_t index) const {
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
 
   const auto sampleDetVec = position(index) - samplePos;
   const auto beamLineNormalized = Kernel::normalize(beamLine);
 
   // generate the vertical axis
-  const auto origHorizontal =
-      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto origHorizontal = m_instrument->getReferenceFrame()->vecPointingHorizontal();
   const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
-  if (vertical.scalar_prod(
-          m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
-    throw std::runtime_error(
-        "Failed to create up axis orthogonal to the beam direction");
+  if (vertical.scalar_prod(m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+    throw std::runtime_error("Failed to create up axis orthogonal to the beam direction");
 
   // generate the horizontal axis perpendicular to the other two
   const auto horizontal = vertical.cross_prod(beamLineNormalized);
   if (origHorizontal.scalar_prod(horizontal) <= 0.)
-    throw std::runtime_error(
-        "Failed to create horizontal axis orthogonal to the beam direction");
+    throw std::runtime_error("Failed to create horizontal axis orthogonal to the beam direction");
 
   const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
@@ -280,27 +245,22 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Source and sample are at same position!");
+    throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
 
   const auto sampleDetVec = position(index) - samplePos;
   const auto beamLineNormalized = Kernel::normalize(beamLine);
 
   // generate the vertical axis
-  const auto origHorizontal =
-      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto origHorizontal = m_instrument->getReferenceFrame()->vecPointingHorizontal();
   const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
-  if (vertical.scalar_prod(
-          m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
-    throw std::runtime_error(
-        "Failed to create up axis orthogonal to the beam direction");
+  if (vertical.scalar_prod(m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+    throw std::runtime_error("Failed to create up axis orthogonal to the beam direction");
 
   // generate the horizontal axis perpendicular to the other two
   const auto horizontal = vertical.cross_prod(beamLineNormalized);
   if (origHorizontal.scalar_prod(horizontal) <= 0.)
-    throw std::runtime_error(
-        "Failed to create horizontal axis orthogonal to the beam direction");
+    throw std::runtime_error("Failed to create horizontal axis orthogonal to the beam direction");
 
   const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
@@ -308,44 +268,33 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   return atan2(dotVertical, dotHorizontal);
 }
 
-std::pair<double, double>
-DetectorInfo::geographicalAngles(const size_t index) const {
+std::pair<double, double> DetectorInfo::geographicalAngles(const size_t index) const {
   const auto samplePos = samplePosition();
   const auto sampleDetVec = position(index) - samplePos;
-  const double upCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
-  const double beamCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
-  const double leftoverCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double upCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
   const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
   const double lon = std::atan2(leftoverCoord, beamCoord);
   return std::pair<double, double>(lat, lon);
 }
 
-std::pair<double, double>
-DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
+std::pair<double, double> DetectorInfo::geographicalAngles(const std::pair<size_t, size_t> &index) const {
   const auto samplePos = samplePosition();
   const auto sampleDetVec = position(index) - samplePos;
-  const double upCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
-  const double beamCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
-  const double leftoverCoord =
-      sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
+  const double upCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingUp()];
+  const double beamCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingAlongBeam()];
+  const double leftoverCoord = sampleDetVec[m_instrument->getReferenceFrame()->pointingHorizontal()];
   const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
   const double lon = std::atan2(leftoverCoord, beamCoord);
   return std::pair<double, double>(lat, lon);
 }
 
 /// Returns the position of the detector with given index.
-Kernel::V3D DetectorInfo::position(const size_t index) const {
-  return Kernel::toV3D(m_detectorInfo->position(index));
-}
+Kernel::V3D DetectorInfo::position(const size_t index) const { return Kernel::toV3D(m_detectorInfo->position(index)); }
 
 /// Returns the position of the detector with given index.
-Kernel::V3D
-DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
+Kernel::V3D DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));
 }
 
@@ -355,19 +304,15 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
 }
 
 /// Returns the rotation of the detector with given index.
-Kernel::Quat
-DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
+Kernel::Quat DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return Kernel::toQuat(m_detectorInfo->rotation(index));
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
-void DetectorInfo::setMasked(const size_t index, bool masked) {
-  m_detectorInfo->setMasked(index, masked);
-}
+void DetectorInfo::setMasked(const size_t index, bool masked) { m_detectorInfo->setMasked(index, masked); }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
-void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
-                             bool masked) {
+void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index, bool masked) {
   m_detectorInfo->setMasked(index, masked);
 }
 
@@ -381,51 +326,39 @@ void DetectorInfo::clearMaskFlags() {
 }
 
 /// Set the absolute position of the detector with given index. Not thread safe.
-void DetectorInfo::setPosition(const size_t index,
-                               const Kernel::V3D &position) {
+void DetectorInfo::setPosition(const size_t index, const Kernel::V3D &position) {
   m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute position of the detector with given index. Not thread safe.
-void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
-                               const Kernel::V3D &position) {
+void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &position) {
   m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
-void DetectorInfo::setRotation(const size_t index,
-                               const Kernel::Quat &rotation) {
+void DetectorInfo::setRotation(const size_t index, const Kernel::Quat &rotation) {
   m_detectorInfo->setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
-void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
-                               const Kernel::Quat &rotation) {
+void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &rotation) {
   m_detectorInfo->setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
 /// Return a const reference to the detector with given index.
-const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
-  return getDetector(index);
-}
+const Geometry::IDetector &DetectorInfo::detector(const size_t index) const { return getDetector(index); }
 
 /// Returns the source position.
-Kernel::V3D DetectorInfo::sourcePosition() const {
-  return Kernel::toV3D(m_detectorInfo->sourcePosition());
-}
+Kernel::V3D DetectorInfo::sourcePosition() const { return Kernel::toV3D(m_detectorInfo->sourcePosition()); }
 
 /// Returns the sample position.
-Kernel::V3D DetectorInfo::samplePosition() const {
-  return Kernel::toV3D(m_detectorInfo->samplePosition());
-}
+Kernel::V3D DetectorInfo::samplePosition() const { return Kernel::toV3D(m_detectorInfo->samplePosition()); }
 
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const { return m_detectorInfo->l1(); }
 
 /// Returns a sorted vector of all detector IDs.
-const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
-  return *m_detectorIDs;
-}
+const std::vector<detid_t> &DetectorInfo::detectorIDs() const { return *m_detectorIDs; }
 
 std::size_t DetectorInfo::indexOf(const detid_t id) const {
   try {
@@ -445,19 +378,14 @@ size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-DetectorInfo::scanIntervals() const {
+const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> DetectorInfo::scanIntervals() const {
   const auto &intervals = m_detectorInfo->scanIntervals();
   return {intervals.begin(), intervals.end()};
 }
 
-const DetectorInfoConstIt DetectorInfo::cbegin() const {
-  return DetectorInfoConstIt(*this, 0, size());
-}
+const DetectorInfoConstIt DetectorInfo::cbegin() const { return DetectorInfoConstIt(*this, 0, size()); }
 
-const DetectorInfoConstIt DetectorInfo::cend() const {
-  return DetectorInfoConstIt(*this, size(), size());
-}
+const DetectorInfoConstIt DetectorInfo::cend() const { return DetectorInfoConstIt(*this, size(), size()); }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
@@ -470,22 +398,17 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 }
 
 /// Helper used by SpectrumInfo.
-std::shared_ptr<const Geometry::IDetector>
-DetectorInfo::getDetectorPtr(const size_t index) const {
+std::shared_ptr<const Geometry::IDetector> DetectorInfo::getDetectorPtr(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
 }
 
 // Begin method for iterator
-DetectorInfoIt DetectorInfo::begin() {
-  return DetectorInfoIt(*this, 0, size());
-}
+DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0, size()); }
 
 // End method for iterator
-DetectorInfoIt DetectorInfo::end() {
-  return DetectorInfoIt(*this, size(), size());
-}
+DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size(), size()); }
 
 } // namespace Geometry
 } // namespace Mantid

@@ -30,8 +30,7 @@ public:
   explicit MiniPlotQwt(QWidget *parent);
   ~MiniPlotQwt() override;
   void setXLabel(QString xunit);
-  void setData(std::vector<double> x, std::vector<double> y, QString xunit,
-               QString curveLabel);
+  void setData(std::vector<double> x, std::vector<double> y, QString xunit, QString curveLabel);
   QString label() const { return m_label; }
   void setYAxisLabelRotation(double degrees);
   void addPeakLabel(const PeakMarker2D * /*marker*/);
@@ -79,8 +78,7 @@ private:
 
 class PeakLabel : public QwtPlotItem {
 public:
-  PeakLabel(const PeakMarker2D *m, const MiniPlotQwt *plot)
-      : m_marker(m), m_plot(plot) {}
+  PeakLabel(const PeakMarker2D *m, const MiniPlotQwt *plot) : m_marker(m), m_plot(plot) {}
   void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &canvasRect) const override;
 

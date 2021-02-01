@@ -16,13 +16,11 @@
 
     Is capable to store/display parameter errors in addition to value.
   */
-class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager
-    : public QtDoublePropertyManager {
+class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager : public QtDoublePropertyManager {
   Q_OBJECT
 
 public:
-  ParameterPropertyManager(QObject *parent = nullptr,
-                           bool hasGlobalOption = false);
+  ParameterPropertyManager(QObject *parent = nullptr, bool hasGlobalOption = false);
 
   /// Get parameter error
   double error(const QtProperty *property) const;

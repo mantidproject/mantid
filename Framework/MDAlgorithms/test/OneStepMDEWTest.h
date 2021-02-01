@@ -34,9 +34,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     IMDEventWorkspace_sptr out;
-    TS_ASSERT_THROWS_NOTHING(
-        out = std::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve("OneStepMDEWTest")););
+    TS_ASSERT_THROWS_NOTHING(out = std::dynamic_pointer_cast<IMDEventWorkspace>(
+                                 AnalysisDataService::Instance().retrieve("OneStepMDEWTest")););
     TS_ASSERT(out);
     if (!out)
       return;

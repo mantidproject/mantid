@@ -44,8 +44,7 @@ public:
   /// (default=0.01)
   TestMinimizer() {
     declareProperty(
-        std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-            "SomeOutput", "abc", Kernel::Direction::Output),
+        std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("SomeOutput", "abc", Kernel::Direction::Output),
         "Name of the output Workspace holding some output.");
   }
 
@@ -56,8 +55,8 @@ public:
     m_data[iter] = iter;
 
     if (iter >= m_data.size() - 1) {
-      API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-          "Workspace2D", 1, m_data.size(), m_data.size());
+      API::MatrixWorkspace_sptr ws =
+          API::WorkspaceFactory::Instance().create("Workspace2D", 1, m_data.size(), m_data.size());
       auto &Y = ws->dataY(0);
       for (size_t i = 0; i < Y.size(); ++i) {
         Y[i] = static_cast<double>(m_data[i]);
@@ -71,9 +70,7 @@ public:
   /// Return current value of the cost function
   double costFunctionVal() override { return 0.0; }
   /// Initialize minimizer.
-  void initialize(API::ICostFunction_sptr, size_t maxIterations = 0) override {
-    m_data.resize(maxIterations);
-  }
+  void initialize(API::ICostFunction_sptr, size_t maxIterations = 0) override { m_data.resize(maxIterations); }
 
 private:
   std::vector<size_t> m_data;
@@ -98,25 +95,21 @@ public:
 
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    TS_ASSERT_THROWS(
-        alg->setProperty("Function",
-                         std::dynamic_pointer_cast<IFunction>(multi)),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(multi)),
+                     const std::invalid_argument &);
   }
 
   void test_empty_function_str() {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""), const std::invalid_argument &);
   }
 
   // Test that Fit copies minimizer's output properties to Fit
   // Test that minimizer's iterate(iter) method is called maxIteration times
   //  and iter passed to iterate() has values within 0 <= iter < maxIterations
   void test_minimizer_output() {
-    API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Fit fit;
     fit.initialize();
 
@@ -129,12 +122,10 @@ public:
     fit.execute();
     TS_ASSERT(fit.existsProperty("SomeOutput"));
     TS_ASSERT_EQUALS(fit.getPropertyValue("SomeOutput"), "MinimizerOutput");
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
 
     API::MatrixWorkspace_sptr outWS =
-        API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "MinimizerOutput");
+        API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MinimizerOutput");
     TS_ASSERT(outWS);
     auto &y = outWS->readY(0);
     TS_ASSERT_EQUALS(y.size(), 99);
@@ -151,8 +142,7 @@ public:
   // To create output either CreateOutput must be set to true or Output be set
   // to non-empty string
   void test_minimizer_output_not_passed_to_Fit() {
-    API::MatrixWorkspace_sptr ws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     Fit fit;
     fit.initialize();
 
@@ -163,16 +153,14 @@ public:
 
     fit.execute();
     TS_ASSERT(!fit.existsProperty("SomeOutput"));
-    TS_ASSERT(
-        !API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
+    TS_ASSERT(!API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
   }
 
   void test_function_Abragam() {
 
     // create mock data to test against
     int ndata = 21;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -180,11 +168,9 @@ public:
       x[i] = static_cast<double>(i);
       e[i] = 0.01;
     }
-    y = {0.212132034,  0.110872429,  -0.004130004, -0.107644046, -0.181984622,
-         -0.218289678, -0.215908947, -0.180739307, -0.123016506, -0.054943061,
-         0.011526466,  0.066481012,  0.103250678,  0.118929645,  0.114251678,
-         0.092934753,  0.060672555,  0.023977227,  -0.010929869, -0.039018774,
-         -0.057037526};
+    y = {0.212132034,  0.110872429,  -0.004130004, -0.107644046, -0.181984622, -0.218289678, -0.215908947,
+         -0.180739307, -0.123016506, -0.054943061, 0.011526466,  0.066481012,  0.103250678,  0.118929645,
+         0.114251678,  0.092934753,  0.060672555,  0.023977227,  -0.010929869, -0.039018774, -0.057037526};
 
     Fit fit;
     fit.initialize();
@@ -209,8 +195,7 @@ public:
 
     // Mock data
     int ndata = 19;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -260,8 +245,7 @@ public:
     int ndata = 20;
     const double sqrh = 0.70710678; // cos( 45 degrees )
 
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -310,8 +294,7 @@ public:
 
     // Mock data
     int ndata = 18;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -319,8 +302,7 @@ public:
       x[i] = static_cast<double>(i - 8);
       e[i] = 1.0;
     }
-    y = {0.01,  0.16,  1.2,   5.6,  18.2, 43.68, 80.08, 114.4, 128.7,
-         114.4, 80.08, 43.68, 18.2, 5.6,  1.2,   0.16,  0.01,  0.00};
+    y = {0.01, 0.16, 1.2, 5.6, 18.2, 43.68, 80.08, 114.4, 128.7, 114.4, 80.08, 43.68, 18.2, 5.6, 1.2, 0.16, 0.01, 0.00};
 
     Fit fit;
     fit.initialize();
@@ -342,8 +324,7 @@ public:
 
     // Mock data
     int ndata = 18;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -352,10 +333,9 @@ public:
       e[i] = 1.0;
     }
     const double sqrh = 0.70710678; // cos( 45 degrees )
-    y = {
-        1.e-4 * sqrh,  0.00,  -1.2e-2 * sqrh, -5.6e-2, -18.2e-2 * sqrh, 0.0,
-        0.8008 * sqrh, 1.144, 1.287 * sqrh,   0.0,     -0.8008 * sqrh,  -0.4368,
-        -0.182 * sqrh, 0.0,   1.2e-2 * sqrh,  0.16e-2, 1.e-4 * sqrh,    0.00};
+    y = {1.e-4 * sqrh,  0.00,  -1.2e-2 * sqrh, -5.6e-2, -18.2e-2 * sqrh, 0.0,
+         0.8008 * sqrh, 1.144, 1.287 * sqrh,   0.0,     -0.8008 * sqrh,  -0.4368,
+         -0.182 * sqrh, 0.0,   1.2e-2 * sqrh,  0.16e-2, 1.e-4 * sqrh,    0.00};
 
     Fit fit;
     fit.initialize();
@@ -380,24 +360,20 @@ public:
 
     // Mock data
     int ndata = 41;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
     for (int i = 0; i < ndata; i++) {
       x[i] = 0.146785 * static_cast<double>(i);
     }
-    y = {1,        0.950342, 0.875263, 0.848565, 0.859885, 0.8632,   0.839704,
-         0.808929, 0.790497, 0.782535, 0.772859, 0.75648,  0.738228, 0.723282,
-         0.711316, 0.69916,  0.685455, 0.671399, 0.658356, 0.646277, 0.634338,
-         0.622165, 0.610055, 0.598363, 0.587083, 0.575999, 0.565007, 0.554178,
-         0.543602, 0.533278, 0.523147, 0.513177, 0.503385, 0.493792, 0.484394,
-         0.475175, 0.466123, 0.45724,  0.448529, 0.439988, 0.43161};
-    e = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
-         0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
-         0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
-         0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+    y = {1,        0.950342, 0.875263, 0.848565, 0.859885, 0.8632,   0.839704, 0.808929, 0.790497, 0.782535, 0.772859,
+         0.75648,  0.738228, 0.723282, 0.711316, 0.69916,  0.685455, 0.671399, 0.658356, 0.646277, 0.634338, 0.622165,
+         0.610055, 0.598363, 0.587083, 0.575999, 0.565007, 0.554178, 0.543602, 0.533278, 0.523147, 0.513177, 0.503385,
+         0.493792, 0.484394, 0.475175, 0.466123, 0.45724,  0.448529, 0.439988, 0.43161};
+    e = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
+         0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
+         0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
 
     Fit fit;
     fit.initialize();
@@ -412,8 +388,7 @@ public:
 
     // check the output
     const double field = 100;
-    const double delta = Mantid::PhysicalConstants::MuonGyromagneticRatio *
-                         field * 2.0 * M_PI * 0.2;
+    const double delta = Mantid::PhysicalConstants::MuonGyromagneticRatio * field * 2.0 * M_PI * 0.2;
     const double fluct = delta;
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Field"), field, 0.001);
@@ -425,8 +400,7 @@ public:
 
     // Mock data
     int ndata = 18;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -435,10 +409,9 @@ public:
       e[i] = 0.01;
     }
     // Calculated with A = 0.24 and Delta = 0.16 on an Excel spreadsheet
-    y = {0.24,        0.233921146, 0.216447929, 0.189737312, 0.156970237,
-         0.121826185, 0.08791249,  0.058260598, 0.034976545, 0.019090369,
-         0.01060189,  0.008680652, 0.011954553, 0.018817301, 0.027696749,
-         0.037247765, 0.046457269, 0.054669182};
+    y = {0.24,        0.233921146, 0.216447929, 0.189737312, 0.156970237, 0.121826185,
+         0.08791249,  0.058260598, 0.034976545, 0.019090369, 0.01060189,  0.008680652,
+         0.011954553, 0.018817301, 0.027696749, 0.037247765, 0.046457269, 0.054669182};
 
     Fit fit;
     fit.initialize();
@@ -460,8 +433,7 @@ public:
 
     // Mock data
     int ndata = 15;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -470,9 +442,8 @@ public:
       e[i] = 1.0;
     }
     // A = 0.24, Delta = 0.16, Lambda = 0.1
-    y = {0.24,       0.211661,   0.177213,   0.140561,   0.10522,
-         0.0738913,  0.0482474,  0.0289314,  0.015716,   0.00776156,
-         0.00390022, 0.00288954, 0.00360064, 0.00512831, 0.00682993};
+    y = {0.24,     0.211661,   0.177213,   0.140561,   0.10522,    0.0738913,  0.0482474, 0.0289314,
+         0.015716, 0.00776156, 0.00390022, 0.00288954, 0.00360064, 0.00512831, 0.00682993};
 
     Fit fit;
     fit.initialize();
@@ -495,8 +466,7 @@ public:
 
     // Mock data
     int ndata = 15;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -505,9 +475,8 @@ public:
       e[i] = 1.0;
     }
     // A = 0.24, Delta = 0.16, Sigma = 0.1
-    y = {0.24,       0.231594,   0.207961,   0.173407,   0.133761,
-         0.0948783,  0.0613345,  0.035692,   0.0184429,  0.0084925,
-         0.00390022, 0.00258855, 0.00283237, 0.00347216, 0.00390132};
+    y = {0.24,      0.231594,  0.207961,   0.173407,   0.133761,   0.0948783,  0.0613345, 0.035692,
+         0.0184429, 0.0084925, 0.00390022, 0.00258855, 0.00283237, 0.00347216, 0.00390132};
 
     Fit fit;
     fit.initialize();
@@ -530,8 +499,7 @@ public:
 
     // Mock data
     int ndata = 18;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -541,10 +509,9 @@ public:
     }
     // Calculated with A = 0.24, Delta = 0.06, Lambda = 0.63 and
     // Beta = 0.63
-    y = {0.24,        0.113248409, 0.074402367, 0.052183632, 0.037812471,
-         0.027927981, 0.020873965, 0.015717258, 0.011885418, 0.009005914,
-         0.006825573, 0.005166593, 0.003900885, 0.002934321, 0.002196637,
-         0.001634742, 0.001208136, 0.000885707};
+    y = {0.24,        0.113248409, 0.074402367, 0.052183632, 0.037812471, 0.027927981,
+         0.020873965, 0.015717258, 0.011885418, 0.009005914, 0.006825573, 0.005166593,
+         0.003900885, 0.002934321, 0.002196637, 0.001634742, 0.001208136, 0.000885707};
 
     Fit fit;
     fit.initialize();
@@ -568,16 +535,14 @@ public:
 
     // Mock data
     int ndata = 20;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
-    y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888,
-         0.65384379, 0.58766531, 0.53273643, 0.48623347, 0.44626032,
-         0.41148132, 0.38092026, 0.35384241, 0.32968143, 0.30799199,
-         0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
+    y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888, 0.65384379, 0.58766531,
+         0.53273643, 0.48623347, 0.44626032, 0.41148132, 0.38092026, 0.35384241, 0.32968143,
+         0.30799199, 0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i);
       e[i] = 0.1 * y[i];
@@ -585,8 +550,7 @@ public:
 
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function",
-                    "name=StretchExpMuon, A=1.5, Lambda=0.2, Beta=0.4");
+    fit.setProperty("Function", "name=StretchExpMuon, A=1.5, Lambda=0.2, Beta=0.4");
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("StartX", "0");
     fit.setPropertyValue("EndX", "19");
@@ -607,8 +571,7 @@ public:
 
     // Mock data
     int ndata = 13;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -645,29 +608,24 @@ public:
 
     // Mock data
     int ndata = 30;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    x = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-         1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
-         2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
-    y = {0.001362, 0.00434468, 0.0127937, 0.0347769, 0.0872653, 0.202138,
-         0.432228, 0.853165,   1.55457,   2.61483,   4.06006,   5.8194,
-         7.69982,  9.40459,    10.6036,   11.0364,   10.6036,   9.40459,
-         7.69982,  5.8194,     4.06006,   2.61483,   1.55457,   0.853165,
-         0.432228, 0.202138,   0.0872653, 0.0347769, 0.0127937, 0.00434468};
+    x = {0,   0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1,   1.1, 1.2, 1.3, 1.4,
+         1.5, 1.6, 1.7, 1.8, 1.9, 2,   2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
+    y = {0.001362, 0.00434468, 0.0127937, 0.0347769, 0.0872653, 0.202138, 0.432228,  0.853165,  1.55457,   2.61483,
+         4.06006,  5.8194,     7.69982,   9.40459,   10.6036,   11.0364,  10.6036,   9.40459,   7.69982,   5.8194,
+         4.06006,  2.61483,    1.55457,   0.853165,  0.432228,  0.202138, 0.0872653, 0.0347769, 0.0127937, 0.00434468};
     e.assign(ndata, 0.1);
 
     Mantid::CurveFitting::Algorithms::Fit fit;
     fit.initialize();
 
-    fit.setPropertyValue(
-        "Function", "composite=ProductFunction,NumDeriv=false;name="
-                    "Gaussian,Height=3,PeakCentre=1,Sigma=0.5,ties=(Height="
-                    "3.0,PeakCentre=1.0,Sigma=0.5);name=Gaussian,Height=15,"
-                    "PeakCentre=2.5,Sigma=0.5,ties=(Sigma=0.5)");
+    fit.setPropertyValue("Function", "composite=ProductFunction,NumDeriv=false;name="
+                                     "Gaussian,Height=3,PeakCentre=1,Sigma=0.5,ties=(Height="
+                                     "3.0,PeakCentre=1.0,Sigma=0.5);name=Gaussian,Height=15,"
+                                     "PeakCentre=2.5,Sigma=0.5,ties=(Sigma=0.5)");
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("WorkspaceIndex", "0");
 
@@ -726,8 +684,8 @@ public:
     const int nX = 100;
     const int nY = nX - 1;
 
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nX, nY));
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, nX, nY));
 
     const double dx = 10 / 99;
 
@@ -735,36 +693,24 @@ public:
     Mantid::MantidVec &Y = ws->dataY(0);
     Mantid::MantidVec &E = ws->dataE(0);
 
-    X = {0.000000, 0.101010, 0.202020, 0.303030, 0.404040, 0.505051, 0.606061,
-         0.707071, 0.808081, 0.909091, 1.010101, 1.111111, 1.212121, 1.313131,
-         1.414141, 1.515152, 1.616162, 1.717172, 1.818182, 1.919192, 2.020202,
-         2.121212, 2.222222, 2.323232, 2.424242, 2.525253, 2.626263, 2.727273,
-         2.828283, 2.929293, 3.030303, 3.131313, 3.232323, 3.333333, 3.434343,
-         3.535354, 3.636364, 3.737374, 3.838384, 3.939394, 4.040404, 4.141414,
-         4.242424, 4.343434, 4.444444, 4.545455, 4.646465, 4.747475, 4.848485,
-         4.949495, 5.050505, 5.151515, 5.252525, 5.353535, 5.454545, 5.555556,
-         5.656566, 5.757576, 5.858586, 5.959596, 6.060606, 6.161616, 6.262626,
-         6.363636, 6.464646, 6.565657, 6.666667, 6.767677, 6.868687, 6.969697,
-         7.070707, 7.171717, 7.272727, 7.373737, 7.474747, 7.575758, 7.676768,
-         7.777778, 7.878788, 7.979798, 8.080808, 8.181818, 8.282828, 8.383838,
-         8.484848, 8.585859, 8.686869, 8.787879, 8.888889, 8.989899, 9.090909,
-         9.191919, 9.292929, 9.393939, 9.494949, 9.595960, 9.696970, 9.797980,
-         9.898990};
-    Y = {0.000000, 0.000000, 0.000000, 0.000000, 0.000001, 0.000001, 0.000002,
-         0.000004, 0.000006, 0.000012, 0.000021, 0.000036, 0.000063, 0.000108,
-         0.000183, 0.000305, 0.000503, 0.000818, 0.001314, 0.002084, 0.003262,
-         0.005041, 0.007692, 0.011586, 0.017229, 0.025295, 0.036664, 0.052465,
-         0.074121, 0.103380, 0.142353, 0.193520, 0.259728, 0.344147, 0.450195,
-         0.581418, 0.741323, 0.933166, 1.159690, 1.422842, 1.723466, 2.061013,
-         2.433271, 2.836167, 3.263660, 3.707743, 4.158590, 4.604836, 5.034009,
-         5.433072, 5.789067, 6.089806, 6.324555, 6.484675, 6.564144, 6.559937,
-         6.472215, 6.304315, 6.062539, 5.755762, 5.394893, 4.992230, 4.560768,
-         4.113514, 3.662855, 3.220017, 2.794656, 2.394584, 2.025646, 1.691721,
-         1.394844, 1.135414, 0.912461, 0.723946, 0.567061, 0.438516, 0.334790,
-         0.252343, 0.187776, 0.137950, 0.100055, 0.071644, 0.050648, 0.035348,
-         0.024356, 0.016568, 0.011127, 0.007378, 0.004829, 0.003121, 0.001991,
-         0.001254, 0.000780, 0.000479, 0.000290, 0.000174, 0.000103, 0.000060,
-         0.000034};
+    X = {0.000000, 0.101010, 0.202020, 0.303030, 0.404040, 0.505051, 0.606061, 0.707071, 0.808081, 0.909091, 1.010101,
+         1.111111, 1.212121, 1.313131, 1.414141, 1.515152, 1.616162, 1.717172, 1.818182, 1.919192, 2.020202, 2.121212,
+         2.222222, 2.323232, 2.424242, 2.525253, 2.626263, 2.727273, 2.828283, 2.929293, 3.030303, 3.131313, 3.232323,
+         3.333333, 3.434343, 3.535354, 3.636364, 3.737374, 3.838384, 3.939394, 4.040404, 4.141414, 4.242424, 4.343434,
+         4.444444, 4.545455, 4.646465, 4.747475, 4.848485, 4.949495, 5.050505, 5.151515, 5.252525, 5.353535, 5.454545,
+         5.555556, 5.656566, 5.757576, 5.858586, 5.959596, 6.060606, 6.161616, 6.262626, 6.363636, 6.464646, 6.565657,
+         6.666667, 6.767677, 6.868687, 6.969697, 7.070707, 7.171717, 7.272727, 7.373737, 7.474747, 7.575758, 7.676768,
+         7.777778, 7.878788, 7.979798, 8.080808, 8.181818, 8.282828, 8.383838, 8.484848, 8.585859, 8.686869, 8.787879,
+         8.888889, 8.989899, 9.090909, 9.191919, 9.292929, 9.393939, 9.494949, 9.595960, 9.696970, 9.797980, 9.898990};
+    Y = {0.000000, 0.000000, 0.000000, 0.000000, 0.000001, 0.000001, 0.000002, 0.000004, 0.000006, 0.000012, 0.000021,
+         0.000036, 0.000063, 0.000108, 0.000183, 0.000305, 0.000503, 0.000818, 0.001314, 0.002084, 0.003262, 0.005041,
+         0.007692, 0.011586, 0.017229, 0.025295, 0.036664, 0.052465, 0.074121, 0.103380, 0.142353, 0.193520, 0.259728,
+         0.344147, 0.450195, 0.581418, 0.741323, 0.933166, 1.159690, 1.422842, 1.723466, 2.061013, 2.433271, 2.836167,
+         3.263660, 3.707743, 4.158590, 4.604836, 5.034009, 5.433072, 5.789067, 6.089806, 6.324555, 6.484675, 6.564144,
+         6.559937, 6.472215, 6.304315, 6.062539, 5.755762, 5.394893, 4.992230, 4.560768, 4.113514, 3.662855, 3.220017,
+         2.794656, 2.394584, 2.025646, 1.691721, 1.394844, 1.135414, 0.912461, 0.723946, 0.567061, 0.438516, 0.334790,
+         0.252343, 0.187776, 0.137950, 0.100055, 0.071644, 0.050648, 0.035348, 0.024356, 0.016568, 0.011127, 0.007378,
+         0.004829, 0.003121, 0.001991, 0.001254, 0.000780, 0.000479, 0.000290, 0.000174, 0.000103, 0.000060, 0.000034};
     E.assign(nY, 1.0);
 
     X.back() = X[98] + dx;
@@ -773,11 +719,10 @@ public:
     Algorithms::Fit fit;
     fit.initialize();
 
-    fit.setPropertyValue(
-        "Function", "composite=Convolution,"
-                    "FixResolution=true,NumDeriv=true;name=Resolution,FileName="
-                    "\"ResolutionTestResolution.res\","
-                    "WorkspaceIndex=0;name=ResolutionTest_Gauss,c=5,h=2,s=1");
+    fit.setPropertyValue("Function", "composite=Convolution,"
+                                     "FixResolution=true,NumDeriv=true;name=Resolution,FileName="
+                                     "\"ResolutionTestResolution.res\","
+                                     "WorkspaceIndex=0;name=ResolutionTest_Gauss,c=5,h=2,s=1");
     fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
     fit.setPropertyValue("WorkspaceIndex", "0");
     fit.execute();
@@ -785,14 +730,11 @@ public:
 
   void getStretchExpMockData(Mantid::MantidVec &y, Mantid::MantidVec &e) {
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
-    y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888,
-         0.65384379, 0.58766531, 0.53273643, 0.48623347, 0.44626032,
-         0.41148132, 0.38092026, 0.35384241, 0.32968143, 0.30799199,
-         0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
+    y = {2,          1.2130613,  0.98613738, 0.84124005, 0.73575888, 0.65384379, 0.58766531,
+         0.53273643, 0.48623347, 0.44626032, 0.41148132, 0.38092026, 0.35384241, 0.32968143,
+         0.30799199, 0.28841799, 0.27067057, 0.25451242, 0.2397465,  0.22620756};
 
-    std::transform(
-        y.begin(), y.end(), e.begin(),
-        std::bind(std::multiplies<double>(), std::placeholders::_1, 0.1));
+    std::transform(y.begin(), y.end(), e.begin(), std::bind(std::multiplies<double>(), std::placeholders::_1, 0.1));
   }
 
   void test_function_StretchExp_Against_MockData() {
@@ -804,8 +746,7 @@ public:
     std::string wsName = "StretchExpMockData";
     int histogramNumber = 1;
     int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, timechannels, timechannels);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     // in this case, x-values are just the running index
     auto &x = ws2D->dataX(0);
@@ -817,12 +758,9 @@ public:
     getStretchExpMockData(y, e);
 
     // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
-    alg2.setPropertyValue(
-        "Function",
-        "name=StretchExp, Height=1.5, Lifetime=5.0, Stretching=0.4");
+    alg2.setPropertyValue("Function", "name=StretchExp, Height=1.5, Lifetime=5.0, Stretching=0.4");
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -864,50 +802,33 @@ public:
     auto &y = data->dataY(0);
     auto &e = data->dataE(0);
 
-    y = {0.00679397551246448, 0.00684266083126313, 0.00698285916556982,
-         0.00719965548825388, 0.00747519954546736, 0.00779445649068509,
-         0.00814796531751759, 0.0085316132498512,  0.00894499942724,
-         0.00938983058044737, 0.0098689280357672,  0.0103857911674609,
-         0.0109444805899566,  0.0115496436468315,  0.0122065986210473,
-         0.0129214505517302,  0.0137012349575442,  0.0145540939647495,
-         0.0154894928726603,  0.0165184880798197,  0.0176540608380039,
-         0.01891153608981,    0.0203091122610038,  0.021868537134057,
-         0.0236159780401305,  0.0255831534292171,  0.0278088202944704,
-         0.0303407524938984,  0.0332384060776671,  0.0365765613911014,
-         0.0404503783689891,  0.0449825362752094,  0.0503335145708212,
-         0.0567167210280417,  0.0644212970503862,  0.0738474209204705,
-         0.085562497139828,   0.10039290319273,    0.119576178650528,
-         0.145011665152563,   0.17965292804199,    0.228047317644744,
-         0.296874083423821,   0.394987350612542,   0.532006328704948,
-         0.714364415633021,   0.938739703160756,   1.18531948194073,
-         1.41603503739802,    1.58257225395956,    1.64354644127685,
-         1.58257225395956,    1.41603503739802,    1.18531948194073,
-         0.938739703160756,   0.714364415633021,   0.532006328704948,
-         0.394987350612542,   0.296874083423821,   0.228047317644743,
-         0.17965292804199,    0.145011665152563,   0.119576178650528,
-         0.10039290319273,    0.085562497139828,   0.0738474209204706,
-         0.0644212970503863,  0.0567167210280418,  0.0503335145708214,
-         0.0449825362752095,  0.0404503783689893,  0.0365765613911016,
-         0.0332384060776675,  0.0303407524938988,  0.0278088202944705,
-         0.0255831534292172,  0.0236159780401305,  0.0218685371340571,
-         0.0203091122610038,  0.0189115360898101,  0.0176540608380039,
-         0.0165184880798196,  0.0154894928726603,  0.0145540939647495,
-         0.0137012349575443,  0.0129214505517302,  0.0122065986210471,
-         0.0115496436468314,  0.0109444805899566,  0.0103857911674609,
-         0.00986892803576708, 0.00938983058044717, 0.00894499942723977,
-         0.00853161324985108, 0.0081479653175175,  0.00779445649068496,
-         0.00747519954546727, 0.00719965548825406, 0.00698285916556974,
-         0.00684266083126313};
+    y = {0.00679397551246448, 0.00684266083126313, 0.00698285916556982, 0.00719965548825388, 0.00747519954546736,
+         0.00779445649068509, 0.00814796531751759, 0.0085316132498512,  0.00894499942724,    0.00938983058044737,
+         0.0098689280357672,  0.0103857911674609,  0.0109444805899566,  0.0115496436468315,  0.0122065986210473,
+         0.0129214505517302,  0.0137012349575442,  0.0145540939647495,  0.0154894928726603,  0.0165184880798197,
+         0.0176540608380039,  0.01891153608981,    0.0203091122610038,  0.021868537134057,   0.0236159780401305,
+         0.0255831534292171,  0.0278088202944704,  0.0303407524938984,  0.0332384060776671,  0.0365765613911014,
+         0.0404503783689891,  0.0449825362752094,  0.0503335145708212,  0.0567167210280417,  0.0644212970503862,
+         0.0738474209204705,  0.085562497139828,   0.10039290319273,    0.119576178650528,   0.145011665152563,
+         0.17965292804199,    0.228047317644744,   0.296874083423821,   0.394987350612542,   0.532006328704948,
+         0.714364415633021,   0.938739703160756,   1.18531948194073,    1.41603503739802,    1.58257225395956,
+         1.64354644127685,    1.58257225395956,    1.41603503739802,    1.18531948194073,    0.938739703160756,
+         0.714364415633021,   0.532006328704948,   0.394987350612542,   0.296874083423821,   0.228047317644743,
+         0.17965292804199,    0.145011665152563,   0.119576178650528,   0.10039290319273,    0.085562497139828,
+         0.0738474209204706,  0.0644212970503863,  0.0567167210280418,  0.0503335145708214,  0.0449825362752095,
+         0.0404503783689893,  0.0365765613911016,  0.0332384060776675,  0.0303407524938988,  0.0278088202944705,
+         0.0255831534292172,  0.0236159780401305,  0.0218685371340571,  0.0203091122610038,  0.0189115360898101,
+         0.0176540608380039,  0.0165184880798196,  0.0154894928726603,  0.0145540939647495,  0.0137012349575443,
+         0.0129214505517302,  0.0122065986210471,  0.0115496436468314,  0.0109444805899566,  0.0103857911674609,
+         0.00986892803576708, 0.00938983058044717, 0.00894499942723977, 0.00853161324985108, 0.0081479653175175,
+         0.00779445649068496, 0.00747519954546727, 0.00719965548825406, 0.00698285916556974, 0.00684266083126313};
 
-    x = {-10,  -9.8, -9.6, -9.4, -9.2, -9,   -8.8, -8.6, -8.4, -8.2, -8,   -7.8,
-         -7.6, -7.4, -7.2, -7,   -6.8, -6.6, -6.4, -6.2, -6,   -5.8, -5.6, -5.4,
-         -5.2, -5,   -4.8, -4.6, -4.4, -4.2, -4,   -3.8, -3.6, -3.4, -3.2, -3,
-         -2.8, -2.6, -2.4, -2.2, -2,   -1.8, -1.6, -1.4, -1.2, -1,   -0.8, -0.6,
-         -0.4, -0.2, 0,    0.2,  0.4,  0.6,  0.8,  1,    1.2,  1.4,  1.6,  1.8,
-         2,    2.2,  2.4,  2.6,  2.8,  3,    3.2,  3.4,  3.6,  3.8,  4,    4.2,
-         4.4,  4.6,  4.8,  5,    5.2,  5.4,  5.6,  5.8,  6,    6.2,  6.4,  6.6,
-         6.8,  7,    7.2,  7.4,  7.6,  7.8,  8,    8.2,  8.4,  8.6,  8.8,  9,
-         9.2,  9.4,  9.6,  9.8};
+    x = {-10,  -9.8, -9.6, -9.4, -9.2, -9,   -8.8, -8.6, -8.4, -8.2, -8,   -7.8, -7.6, -7.4, -7.2, -7,   -6.8,
+         -6.6, -6.4, -6.2, -6,   -5.8, -5.6, -5.4, -5.2, -5,   -4.8, -4.6, -4.4, -4.2, -4,   -3.8, -3.6, -3.4,
+         -3.2, -3,   -2.8, -2.6, -2.4, -2.2, -2,   -1.8, -1.6, -1.4, -1.2, -1,   -0.8, -0.6, -0.4, -0.2, 0,
+         0.2,  0.4,  0.6,  0.8,  1,    1.2,  1.4,  1.6,  1.8,  2,    2.2,  2.4,  2.6,  2.8,  3,    3.2,  3.4,
+         3.6,  3.8,  4,    4.2,  4.4,  4.6,  4.8,  5,    5.2,  5.4,  5.6,  5.8,  6,    6.2,  6.4,  6.6,  6.8,
+         7,    7.2,  7.4,  7.6,  7.8,  8,    8.2,  8.4,  8.6,  8.8,  9,    9.2,  9.4,  9.6,  9.8};
 
     e.assign(y.size(), 1);
 
@@ -915,10 +836,9 @@ public:
     fit.initialize();
     // fit.setPropertyValue("Function", conv->asString());
 
-    fit.setPropertyValue("Function",
-                         "composite=Convolution,FixResolution=true,NumDeriv="
-                         "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
-                         "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit.setPropertyValue("Function", "composite=Convolution,FixResolution=true,NumDeriv="
+                                     "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                                     "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
     fit.setProperty("InputWorkspace", data);
     fit.setProperty("WorkspaceIndex", 0);
     fit.execute();
@@ -934,10 +854,9 @@ public:
 
     Algorithms::Fit fit1;
     fit1.initialize();
-    fit1.setProperty("Function",
-                     "composite=Convolution,FixResolution=false,NumDeriv="
-                     "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
-                     "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
+    fit1.setProperty("Function", "composite=Convolution,FixResolution=false,NumDeriv="
+                                 "true;name=ConvolutionTest_Gauss,c=0,h=0.5,s=0.5;"
+                                 "name=ConvolutionTest_Lorentz,c=0,h=1,w=1");
     fit1.setProperty("InputWorkspace", data);
     fit1.setProperty("WorkspaceIndex", 0);
     fit1.execute();
@@ -967,14 +886,13 @@ public:
 
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function",
-                    "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
-                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,"
-                    "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
-                    "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
-                    "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
-                    "IB22=0,IB41=0,IB42=0,IB43=0,IB44=0,IB61=0,IB62=0,IB63="
-                    "0,IB64=0,IB65=0,IB66=0,IntensityScaling=1");
+    fit.setProperty("Function", "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
+                                "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,"
+                                "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
+                                "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
+                                "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
+                                "IB22=0,IB41=0,IB42=0,IB43=0,IB44=0,IB61=0,IB62=0,IB63="
+                                "0,IB64=0,IB65=0,IB66=0,IntensityScaling=1");
 
     fit.setProperty("Ties", "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ="
                             "0,B21=0,B41=0,B43=0,B60=0,B61=0,B62=0,B63=0,"
@@ -996,9 +914,7 @@ public:
     TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001 * c_mbsr);
     TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001 * c_mbsr);
 
-    ITableWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            "out_Workspace");
+    ITableWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("out_Workspace");
     TS_ASSERT(output);
     if (output) {
       TS_ASSERT_EQUALS(output->rowCount(), 3);
@@ -1030,8 +946,7 @@ public:
     // create mock data to test against
     const int histogramNumber = 1;
     const int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, timechannels, timechannels);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
     Mantid::MantidVec &x = ws2D->dataX(0); // x-values
     for (int i = 0; i < timechannels; i++)
@@ -1206,8 +1121,7 @@ public:
     // to two
     // parts of the workspace
 
-    std::shared_ptr<MultiDomainFunction> mf =
-        std::make_shared<MultiDomainFunction>();
+    std::shared_ptr<MultiDomainFunction> mf = std::make_shared<MultiDomainFunction>();
     mf->addFunction(std::make_shared<MultiDomainFunctionTest_Function>());
     mf->setParameter(0, 0.0);
     mf->setParameter(1, 0.0);
@@ -1217,8 +1131,7 @@ public:
     mf->setDomainIndices(0, ind);
     TS_ASSERT_EQUALS(mf->getMaxIndex(), 1);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     Mantid::API::IAlgorithm &fit = *alg;
     fit.initialize();
     fit.setProperty("Function", std::dynamic_pointer_cast<IFunction>(mf));
@@ -1258,10 +1171,9 @@ public:
      *   1 1 1  3.13570    40.0       0.006
      *   2 2 0  1.92022    110.0      0.004
      */
-    auto ws = getWorkspacePawley(
-        "name=Gaussian,PeakCentre=3.13570166,Height=40.0,Sigma=0.003;name="
-        "Gaussian,PeakCentre=1.92021727,Height=110.0,Sigma=0.002",
-        1.85, 3.2, 400);
+    auto ws = getWorkspacePawley("name=Gaussian,PeakCentre=3.13570166,Height=40.0,Sigma=0.003;name="
+                                 "Gaussian,PeakCentre=1.92021727,Height=110.0,Sigma=0.002",
+                                 1.85, 3.2, 400);
 
     // needs to be a PawleyFunction_sptr to have getPawleyParameterFunction()
     Mantid::CurveFitting::Functions::PawleyFunction_sptr pawleyFn =
@@ -1276,8 +1188,7 @@ public:
     pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
 
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setProperty("Function",
-                     std::dynamic_pointer_cast<IFunction>(pawleyFn));
+    fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();
 
@@ -1294,11 +1205,10 @@ public:
      *   2 2 0  1.92022    110.0      0.004
      *   3 1 1  1.63757    101.0      0.003
      */
-    auto ws = getWorkspacePawley(
-        "name=Gaussian,PeakCentre=3.13870166,Height=40.0,Sigma=0.003;name="
-        "Gaussian,PeakCentre=1.92321727,Height=110.0,Sigma=0.002;name=Gaussian,"
-        "PeakCentre=1.6405667,Height=105.0,Sigma=0.0016",
-        1.6, 3.2, 800);
+    auto ws = getWorkspacePawley("name=Gaussian,PeakCentre=3.13870166,Height=40.0,Sigma=0.003;name="
+                                 "Gaussian,PeakCentre=1.92321727,Height=110.0,Sigma=0.002;name=Gaussian,"
+                                 "PeakCentre=1.6405667,Height=105.0,Sigma=0.0016",
+                                 1.6, 3.2, 800);
 
     Mantid::CurveFitting::Functions::PawleyFunction_sptr pawleyFn =
         std::make_shared<Mantid::CurveFitting::Functions::PawleyFunction>();
@@ -1311,13 +1221,11 @@ public:
     pawleyFn->setParameter("f0.ZeroShift", 0.001);
 
     IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setProperty("Function",
-                     std::dynamic_pointer_cast<IFunction>(pawleyFn));
+    fit->setProperty("Function", std::dynamic_pointer_cast<IFunction>(pawleyFn));
     fit->setProperty("InputWorkspace", ws);
     fit->execute();
 
-    Mantid::CurveFitting::Functions::PawleyParameterFunction_sptr parameters =
-        pawleyFn->getPawleyParameterFunction();
+    Mantid::CurveFitting::Functions::PawleyParameterFunction_sptr parameters = pawleyFn->getPawleyParameterFunction();
 
     TS_ASSERT_DELTA(parameters->getParameter("a"), 5.4311946, 1e-5);
     TS_ASSERT_DELTA(parameters->getParameter("ZeroShift"), 0.003, 1e-4);
@@ -1330,26 +1238,20 @@ public:
 
     // Mock data
     int ndata = 35;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
     // values extracted from y(x)=2*exp(-(x/4)^0.5)
-    x = {54999.094000, 55010.957000, 55022.820000, 55034.684000, 55046.547000,
-         55058.410000, 55070.273000, 55082.137000, 55094.000000, 55105.863000,
-         55117.727000, 55129.590000, 55141.453000, 55153.320000, 55165.184000,
-         55177.047000, 55188.910000, 55200.773000, 55212.637000, 55224.500000,
-         55236.363000, 55248.227000, 55260.090000, 55271.953000, 55283.816000,
-         55295.680000, 55307.543000, 55319.406000, 55331.270000, 55343.133000,
-         55354.996000, 55366.859000, 55378.727000, 55390.590000, 55402.453000};
-    y = {2.628336,    4.034647,   6.193415,   9.507247,   14.594171,
-         22.402889,   34.389721,  52.790192,  81.035973,  124.394840,
-         190.950440,  293.010220, 447.602290, 664.847780, 900.438170,
-         1028.003700, 965.388730, 787.024410, 603.501770, 456.122890,
-         344.132350,  259.611210, 195.848420, 147.746310, 111.458510,
-         84.083313,   63.431709,  47.852318,  36.099365,  27.233042,
-         20.544367,   15.498488,  11.690837,  8.819465,   6.653326};
+    x = {54999.094000, 55010.957000, 55022.820000, 55034.684000, 55046.547000, 55058.410000, 55070.273000,
+         55082.137000, 55094.000000, 55105.863000, 55117.727000, 55129.590000, 55141.453000, 55153.320000,
+         55165.184000, 55177.047000, 55188.910000, 55200.773000, 55212.637000, 55224.500000, 55236.363000,
+         55248.227000, 55260.090000, 55271.953000, 55283.816000, 55295.680000, 55307.543000, 55319.406000,
+         55331.270000, 55343.133000, 55354.996000, 55366.859000, 55378.727000, 55390.590000, 55402.453000};
+    y = {2.628336,   4.034647,   6.193415,   9.507247,   14.594171,  22.402889,  34.389721,   52.790192,  81.035973,
+         124.394840, 190.950440, 293.010220, 447.602290, 664.847780, 900.438170, 1028.003700, 965.388730, 787.024410,
+         603.501770, 456.122890, 344.132350, 259.611210, 195.848420, 147.746310, 111.458510,  84.083313,  63.431709,
+         47.852318,  36.099365,  27.233042,  20.544367,  15.498488,  11.690837,  8.819465,    6.653326};
     for (int i = 0; i < ndata; i++) {
       e[i] = std::sqrt(fabs(y[i]));
     }
@@ -1384,29 +1286,25 @@ public:
 
     // Mock data
     int ndata = 20;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {3.56811123,   3.25921675,  2.69444562,  3.05054488,  2.86077216,
-         2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
-         101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
-         2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
+    y = {3.56811123, 3.25921675,  2.69444562,  3.05054488,   2.86077216,  2.29916480,  2.57468876,
+         3.65843827, 15.31622763, 56.57989073, 101.20662386, 76.30364797, 31.54892552, 8.09166673,
+         3.20615343, 2.95246554,  2.75421444,  3.70180447,   2.77832668,  2.29507565};
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i + 1);
       y[i] -= 2.8765;
     }
-    e = {1.72776328,  1.74157482, 1.73451042, 1.73348562, 1.74405622,
-         1.72626701,  1.75911386, 2.11866496, 4.07631054, 7.65159052,
-         10.09984173, 8.95849024, 5.42231173, 2.64064858, 1.81697576,
-         1.72347732,  1.73406310, 1.73116711, 1.71790285, 1.72734254};
+    e = {1.72776328, 1.74157482, 1.73451042, 1.73348562,  1.74405622, 1.72626701, 1.75911386,
+         2.11866496, 4.07631054, 7.65159052, 10.09984173, 8.95849024, 5.42231173, 2.64064858,
+         1.81697576, 1.72347732, 1.73406310, 1.73116711,  1.71790285, 1.72734254};
 
     Fit fit;
     fit.initialize();
     TS_ASSERT(fit.isInitialized());
-    fit.setProperty("Function",
-                    "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=2.2");
+    fit.setProperty("Function", "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=2.2");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
@@ -1419,38 +1317,32 @@ public:
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Height"), 97.8036, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("PeakCentre"), 11.2356, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2),
-                    2.6237, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2), 2.6237, 0.0001);
   }
 
   void test_function_Gaussian_SimplexMinimizer() {
 
     // Mock data
     int ndata = 20;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {3.56811123,   3.25921675,  2.69444562,  3.05054488,  2.86077216,
-         2.29916480,   2.57468876,  3.65843827,  15.31622763, 56.57989073,
-         101.20662386, 76.30364797, 31.54892552, 8.09166673,  3.20615343,
-         2.95246554,   2.75421444,  3.70180447,  2.77832668,  2.29507565};
+    y = {3.56811123, 3.25921675,  2.69444562,  3.05054488,   2.86077216,  2.29916480,  2.57468876,
+         3.65843827, 15.31622763, 56.57989073, 101.20662386, 76.30364797, 31.54892552, 8.09166673,
+         3.20615343, 2.95246554,  2.75421444,  3.70180447,   2.77832668,  2.29507565};
     for (int i = 0; i < ndata; i++) {
       x[i] = static_cast<double>(i + 1);
       y[i] -= 2.8765;
     }
-    e = {1.72776328,  1.74157482, 1.73451042, 1.73348562, 1.74405622,
-         1.72626701,  1.75911386, 2.11866496, 4.07631054, 7.65159052,
-         10.09984173, 8.95849024, 5.42231173, 2.64064858, 1.81697576,
-         1.72347732,  1.73406310, 1.73116711, 1.71790285, 1.72734254};
+    e = {1.72776328, 1.74157482, 1.73451042, 1.73348562,  1.74405622, 1.72626701, 1.75911386,
+         2.11866496, 4.07631054, 7.65159052, 10.09984173, 8.95849024, 5.42231173, 2.64064858,
+         1.81697576, 1.72347732, 1.73406310, 1.73116711,  1.71790285, 1.72734254};
 
     Fit fit;
     fit.initialize();
     TS_ASSERT(fit.isInitialized());
-    fit.setProperty(
-        "Function",
-        "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=0.934254");
+    fit.setProperty("Function", "name=Gaussian, PeakCentre=11.2, Height=100.7, Sigma=0.934254");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Minimizer", "Simplex");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
@@ -1465,8 +1357,7 @@ public:
     IFunction_sptr out = fit.getProperty("Function");
     TS_ASSERT_DELTA(out->getParameter("Height"), 97.8091, 0.01);
     TS_ASSERT_DELTA(out->getParameter("PeakCentre"), 11.2356, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2),
-                    2.6240, 0.001);
+    TS_ASSERT_DELTA(out->getParameter("Sigma") * 2.0 * sqrt(2.0 * M_LN2), 2.6240, 0.001);
   }
 
   void test_function_Gaussian_HRP38692Data() {
@@ -1478,8 +1369,7 @@ public:
     // and used a starting of Sigma = 100.
 
     int ndata = 41;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -1489,9 +1379,8 @@ public:
     for (int i = 8; i < ndata; i++)
       x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
     // y-values
-    y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
-         105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
-         32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
+    y = {7,   8,   4,  9,  4,  10, 10, 5,  8,  7,  10, 18, 30, 71, 105, 167, 266, 271, 239, 221, 179,
+         133, 126, 88, 85, 52, 37, 51, 32, 31, 17, 21, 15, 13, 12, 12,  10,  7,   5,   9,   6};
     // errors are the square root of the Y-value
     for (int i = 0; i < ndata; i++)
       e[i] = sqrt(y[i]);
@@ -1535,8 +1424,7 @@ public:
     // the correct minimum but not as badly as levenberg-marquardt
 
     int ndata = 41;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
@@ -1546,9 +1434,8 @@ public:
     for (int i = 8; i < ndata; i++)
       x[i] = 79347.625 + 8.0 * (double(i) - 8.0);
     // y-values
-    y = {7,   8,   4,   9,   4,   10,  10,  5,   8,   7,  10, 18, 30, 71,
-         105, 167, 266, 271, 239, 221, 179, 133, 126, 88, 85, 52, 37, 51,
-         32,  31,  17,  21,  15,  13,  12,  12,  10,  7,  5,  9,  6};
+    y = {7,   8,   4,  9,  4,  10, 10, 5,  8,  7,  10, 18, 30, 71, 105, 167, 266, 271, 239, 221, 179,
+         133, 126, 88, 85, 52, 37, 51, 32, 31, 17, 21, 15, 13, 12, 12,  10,  7,   5,   9,   6};
     // errors are the square root of the Y-value
     for (int i = 0; i < ndata; i++)
       e[i] = sqrt(y[i]);
@@ -1586,19 +1473,16 @@ public:
     // not a perfect fit - but pretty ok result
 
     int ndata = 31;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586,
-         21.6529, 43.3558, 69.8781, 91.2856, 97.5646, 86.4481, 64.7703, 42.3348,
-         25.3762, 15.0102, 9.4932,  6.7037,  5.2081,  4.2780,  3.6037,  3.0653,
-         2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938,  1.0206};
-    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435,
-         4.6543, 6.5855, 8.3603, 9.5553, 9.8785, 9.2987, 8.0490, 6.5075,
-         5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693, 1.8993, 1.7518,
-         1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
+    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586, 21.6529, 43.3558, 69.8781,
+         91.2856, 97.5646, 86.4481, 64.7703, 42.3348, 25.3762, 15.0102, 9.4932, 6.7037,  5.2081,  4.2780,
+         3.6037,  3.0653,  2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938, 1.0206};
+    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435, 4.6543, 6.5855, 8.3603,
+         9.5553, 9.8785, 9.2987, 8.0490, 6.5075, 5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693,
+         1.8993, 1.7518, 1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
     for (int i = 0; i < ndata; i++) {
       x[i] = i * 5;
     }
@@ -1606,9 +1490,7 @@ public:
     Fit fit;
     fit.initialize();
     TS_ASSERT(fit.isInitialized());
-    fit.setProperty(
-        "Function",
-        "name=IkedaCarpenterPV, I=3000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+    fit.setProperty("Function", "name=IkedaCarpenterPV, I=3000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("StartX", "30");
     fit.setPropertyValue("EndX", "100");
@@ -1640,8 +1522,7 @@ public:
   void test_Function_IkedaCarpenterPV_FullInstrument_DeltaE() {
     // create mock data to test against
     int ndata = 31;
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        2, ndata, false, false, false);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, ndata, false, false, false);
     ws->getAxis(0)->setUnit("DeltaE");
     for (int i = 0; i < ndata; i++) {
       ws->dataX(0)[i] = i * 5;
@@ -1649,14 +1530,12 @@ public:
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586,
-         21.6529, 43.3558, 69.8781, 91.2856, 97.5646, 86.4481, 64.7703, 42.3348,
-         25.3762, 15.0102, 9.4932,  6.7037,  5.2081,  4.2780,  3.6037,  3.0653,
-         2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938,  1.0206};
-    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435,
-         4.6543, 6.5855, 8.3603, 9.5553, 9.8785, 9.2987, 8.0490, 6.5075,
-         5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693, 1.8993, 1.7518,
-         1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
+    y = {0.0000,  0.0003,  0.0028,  0.0223,  0.1405,  0.6996,  2.7608,  8.6586, 21.6529, 43.3558, 69.8781,
+         91.2856, 97.5646, 86.4481, 64.7703, 42.3348, 25.3762, 15.0102, 9.4932, 6.7037,  5.2081,  4.2780,
+         3.6037,  3.0653,  2.6163,  2.2355,  1.9109,  1.6335,  1.3965,  1.1938, 1.0206};
+    e = {0.0056, 0.0176, 0.0539, 0.1504, 0.3759, 0.8374, 1.6626, 2.9435, 4.6543, 6.5855, 8.3603,
+         9.5553, 9.8785, 9.2987, 8.0490, 6.5075, 5.0385, 3.8753, 3.0821, 2.5902, 2.2831, 2.0693,
+         1.8993, 1.7518, 1.6185, 1.4962, 1.3833, 1.2791, 1.1827, 1.0936, 1.0112};
     for (int i = 0; i < ndata; i++) {
       x[i] = i * 5;
     }
@@ -1669,8 +1548,7 @@ public:
     fitDirect.setProperty("Function", "name=IkedaCarpenterPV, I=1000, "
                                       "SigmaSquared=25.0, Gamma=0.1, X0=50.0");
     fitDirect.setProperty("InputWorkspace", ws);
-    fitDirect.setProperty("Ties",
-                          "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
+    fitDirect.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
     fitDirect.setPropertyValue("StartX", "0");
     fitDirect.setPropertyValue("EndX", "150");
 
@@ -1688,12 +1566,10 @@ public:
     Fit fitIndirect;
     fitIndirect.initialize();
     TS_ASSERT(fitIndirect.isInitialized());
-    fitIndirect.setProperty("Function",
-                            "name=IkedaCarpenterPV, I=1000, "
-                            "SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+    fitIndirect.setProperty("Function", "name=IkedaCarpenterPV, I=1000, "
+                                        "SigmaSquared=25.0, Gamma=0.1, X0=50.0");
     fitIndirect.setProperty("InputWorkspace", ws);
-    fitIndirect.setProperty("Ties",
-                            "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
+    fitIndirect.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
     fitIndirect.setPropertyValue("StartX", "0");
     fitIndirect.setPropertyValue("EndX", "150");
 
@@ -1713,15 +1589,13 @@ public:
 
     // Mock data
     int ndata = 20;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {0.0,        1.52798e-15, 6.4577135e-07, 0.0020337351, 0.12517292,
-         1.2282908,  4.3935083,   8.5229866,     11.127883,    11.110426,
-         9.1925694,  6.6457304,   4.353104,      2.6504159,    1.5279732,
-         0.84552286, 0.45371715,  0.23794487,    0.12268847,   0.0624878};
+    y = {0.0,       1.52798e-15, 6.4577135e-07, 0.0020337351, 0.12517292, 1.2282908, 4.3935083,
+         8.5229866, 11.127883,   11.110426,     9.1925694,    6.6457304,  4.353104,  2.6504159,
+         1.5279732, 0.84552286,  0.45371715,    0.23794487,   0.12268847, 0.0624878};
     for (int i = 0; i < ndata; i++) {
       x[i] = i;
       e[i] = 0.1 * y[i];
@@ -1729,8 +1603,7 @@ public:
 
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function",
-                    "name=LogNormal, Height=90., Location=2., Scale=0.2");
+    fit.setProperty("Function", "name=LogNormal, Height=90., Location=2., Scale=0.2");
     fit.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fit.execute()))
     TS_ASSERT(fit.isExecuted());
@@ -1751,32 +1624,25 @@ public:
 
     // Mock data
     int ndata = 100;
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, ndata, ndata);
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, ndata, ndata);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
     Mantid::MantidVec &e = ws->dataE(0);
-    y = {0.680508, 0.459591, 0.332266, 1.2717,   0.925787, 1.36216,  0.890605,
-         0.983653, 0.965918, 0.916039, 0.979414, 0.861061, 0.973214, 1.53418,
-         1.52668,  1.10537,  1.36965,  1.64708,  1.52887,  2.0042,   2.11257,
-         2.44183,  2.29917,  2.61657,  2.25268,  2.82788,  3.089,    3.45517,
-         3.41001,  4.39168,  5.0277,   5.2431,   6.8158,   7.80098,  9.45674,
-         11.6082,  14.9449,  17.964,   22.4709,  28.9806,  35.2087,  42.7603,
-         51.2697,  61.032,   71.2193,  81.0546,  90.7571,  99.5076,  106.364,
-         111.216,  112.877,  111.288,  106.463,  99.5477,  90.7675,  81.7059,
-         71.0115,  61.3214,  51.5543,  42.6311,  35.1712,  28.3785,  22.593,
-         18.2557,  14.7387,  11.8552,  9.44558,  8.04787,  6.46706,  5.64766,
-         4.62926,  4.28496,  4.01921,  3.85923,  3.15543,  2.44881,  2.2804,
-         2.08211,  2.47078,  2.47588,  2.45599,  1.88098,  1.76205,  1.37918,
-         1.95951,  1.97868,  1.24903,  1.15062,  1.33571,  0.965367, 1.07663,
-         1.40468,  0.982297, 0.85258,  1.23184,  0.882275, 0.911729, 0.614329,
-         1.26008,  1.07271};
+    y = {0.680508, 0.459591, 0.332266, 1.2717,  0.925787, 1.36216,  0.890605, 0.983653, 0.965918, 0.916039,
+         0.979414, 0.861061, 0.973214, 1.53418, 1.52668,  1.10537,  1.36965,  1.64708,  1.52887,  2.0042,
+         2.11257,  2.44183,  2.29917,  2.61657, 2.25268,  2.82788,  3.089,    3.45517,  3.41001,  4.39168,
+         5.0277,   5.2431,   6.8158,   7.80098, 9.45674,  11.6082,  14.9449,  17.964,   22.4709,  28.9806,
+         35.2087,  42.7603,  51.2697,  61.032,  71.2193,  81.0546,  90.7571,  99.5076,  106.364,  111.216,
+         112.877,  111.288,  106.463,  99.5477, 90.7675,  81.7059,  71.0115,  61.3214,  51.5543,  42.6311,
+         35.1712,  28.3785,  22.593,   18.2557, 14.7387,  11.8552,  9.44558,  8.04787,  6.46706,  5.64766,
+         4.62926,  4.28496,  4.01921,  3.85923, 3.15543,  2.44881,  2.2804,   2.08211,  2.47078,  2.47588,
+         2.45599,  1.88098,  1.76205,  1.37918, 1.95951,  1.97868,  1.24903,  1.15062,  1.33571,  0.965367,
+         1.07663,  1.40468,  0.982297, 0.85258, 1.23184,  0.882275, 0.911729, 0.614329, 1.26008,  1.07271};
     for (int i = 0; i < ndata; ++i) {
       x[i] = static_cast<double>(i) * 0.01 - 0.5;
       e[i] = sqrt(fabs(y[i]));
 
-      std::cout << "[D] data_set.append([" << x[i] << ", " << y[i] << ", "
-                << e[i] << "])\n";
+      std::cout << "[D] data_set.append([" << x[i] << ", " << y[i] << ", " << e[i] << "])\n";
     }
 
     Fit fit;
@@ -1809,8 +1675,7 @@ public:
 
   // A test for [-1, 1] range data
   void test_function_Chebyshev() {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
 
     Mantid::MantidVec &X = ws->dataX(0);
     Mantid::MantidVec &Y = ws->dataY(0);
@@ -1841,8 +1706,7 @@ public:
 
   // A test for a random number data
   void test_function_Chebyshev_Background() {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
 
     Mantid::MantidVec &X = ws->dataX(0);
     Mantid::MantidVec &Y = ws->dataY(0);
@@ -1861,8 +1725,7 @@ public:
     Algorithms::Fit fit;
     fit.initialize();
 
-    const std::string funcString =
-        "name=Chebyshev, n=3, StartX=-10.0, EndX=10.0";
+    const std::string funcString = "name=Chebyshev, n=3, StartX=-10.0, EndX=10.0";
     fit.setPropertyValue("Function", funcString);
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("WorkspaceIndex", "0");
@@ -1891,8 +1754,7 @@ public:
     const int timechannels = 1000;
 
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     double tof0 = 8000.;
     double dtof = 5.;
@@ -1937,8 +1799,7 @@ public:
     const int histogramNumber = 1;
     const int timechannels = 5;
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -1974,8 +1835,7 @@ public:
     const int histogramNumber = 1;
     const int timechannels = 5;
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -2013,8 +1873,7 @@ public:
     int histogramNumber = 1;
     int timechannels = 5;
     Mantid::API::MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -2051,8 +1910,7 @@ public:
 
   void test_PeakRadius() {
     size_t nbins = 100;
-    auto ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
     FunctionDomain1DVector x(-10, 10, nbins);
     ws->mutableX(0) = x.toVector();
     {
@@ -2063,8 +1921,7 @@ public:
       fit.setProperty("MaxIterations", 0);
       fit.setProperty("Output", "out");
       fit.execute();
-      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "out_Workspace");
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
       const auto &y = res->y(1);
       TS_ASSERT_DIFFERS(y.front(), 0.0);
       TS_ASSERT_DIFFERS(y.back(), 0.0);
@@ -2078,8 +1935,7 @@ public:
       fit.setProperty("MaxIterations", 0);
       fit.setProperty("Output", "out");
       fit.execute();
-      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          "out_Workspace");
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
       const auto &y = res->y(1);
       for (size_t i = 0; i < 25; ++i) {
         TS_ASSERT_EQUALS(y[i], 0.0);
@@ -2094,11 +1950,9 @@ public:
 
   void test_fit_size_change() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); },
-        1, 0, 1, 0.1);
+        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); }, 1, 0, 1, 0.1);
     {
-      API::IFunction_sptr fun =
-          std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2115,8 +1969,7 @@ public:
       TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
     }
     {
-      API::IFunction_sptr fun =
-          std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2140,11 +1993,10 @@ public:
   }
 
   void test_fit_size_change_1() {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2 + x - 0.1 * x * x; },
+                                                                     1, 0, 1, 0.1);
     {
-      API::IFunction_sptr fun =
-          std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2163,8 +2015,7 @@ public:
       TS_ASSERT_EQUALS(status, "success");
     }
     {
-      API::IFunction_sptr fun =
-          std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2192,20 +2043,15 @@ public:
     HistogramData::Counts counts(points.size(), 0.0);
     // This value should be excluded.
     counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
-                                1, HistogramData::Histogram(points, counts))
-                                .release());
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(1, HistogramData::Histogram(points, counts)).release());
     Fit fit;
     fit.initialize();
     fit.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(
-        fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
     TS_ASSERT_THROWS_NOTHING(fit.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(fit.setPropertyValue("Exclude", "-0.5, 0.5"))
-    TS_ASSERT_THROWS_NOTHING(
-        fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
-    TS_ASSERT_THROWS_NOTHING(
-        fit.setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("CostFunction", "Unweighted least squares"))
     TS_ASSERT_THROWS_NOTHING(fit.setProperty("Output", "fit_test_output"))
     TS_ASSERT_THROWS_NOTHING(fit.execute())
     const std::string status = fit.getProperty("OutputStatus");
@@ -2217,10 +2063,8 @@ public:
 
 private:
   /// build test input workspaces for the Pawley function Fit tests
-  MatrixWorkspace_sptr getWorkspacePawley(const std::string &functionString,
-                                          double xMin, double xMax, size_t n) {
-    IFunction_sptr siFn =
-        FunctionFactory::Instance().createInitialized(functionString);
+  MatrixWorkspace_sptr getWorkspacePawley(const std::string &functionString, double xMin, double xMax, size_t n) {
+    IFunction_sptr siFn = FunctionFactory::Instance().createInitialized(functionString);
 
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, n, n);
 
@@ -2254,98 +2098,70 @@ public:
   static void destroySuite(FitTestPerformance *suite) { delete suite; }
 
   FitTestPerformance() {
-    m_smoothWS = FitTestHelpers::generateCurveDataForFit(
-        FitTestHelpers::SmoothishGaussians);
+    m_smoothWS = FitTestHelpers::generateCurveDataForFit(FitTestHelpers::SmoothishGaussians);
 
-    m_onePeakWS =
-        FitTestHelpers::generateCurveDataForFit(FitTestHelpers::SingleB2BPeak);
+    m_onePeakWS = FitTestHelpers::generateCurveDataForFit(FitTestHelpers::SingleB2BPeak);
   }
 
   // tests for a single peak (BackToBackExponential)
 
   // LM for Levenberg-Marquardt hereafter
-  void test_fit_peaks_LM() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
-                    "Levenberg-MarquardtMD");
-  }
+  void test_fit_peaks_LM() { runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Levenberg-MarquardtMD"); }
 
-  void test_fit_peaks_Simplex() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Simplex");
-  }
+  void test_fit_peaks_Simplex() { runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Simplex"); }
 
   void test_fit_peaks_ConjG_FR() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
-                    "Conjugate gradient (Fletcher-Reeves imp.)");
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Conjugate gradient (Fletcher-Reeves imp.)");
   }
 
   void test_fit_peaks_ConjG_PR() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
-                    "Conjugate gradient (Polak-Ribiere imp.)");
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Conjugate gradient (Polak-Ribiere imp.)");
   }
 
-  void test_fit_peaks_BFGS() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "BFGS");
-  }
+  void test_fit_peaks_BFGS() { runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "BFGS"); }
 
-  void test_fit_peaks_Damping() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
-                    "Damped GaussNewton");
-  }
+  void test_fit_peaks_Damping() { runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Damped GaussNewton"); }
 
   void test_fit_peaks_SteepestDescent() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
-                    "SteepestDescent");
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "SteepestDescent");
   }
 
   // Note: does not converge unless you give a better initial guess of
   // parameters. So this is testing 500 iterations but not convergence.
-  void test_fit_peaks_FABADA() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "FABADA");
-  }
+  void test_fit_peaks_FABADA() { runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "FABADA"); }
 
   // tests for a smooth function (2 Gaussians + linear background)
 
   void test_fit_smooth_LM() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
-                    "Levenberg-MarquardtMD");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Levenberg-MarquardtMD");
   }
 
-  void test_fit_smooth_Simplex() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Simplex");
-  }
+  void test_fit_smooth_Simplex() { runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Simplex"); }
 
   // disabled because it is awfully slow: ~20s while others take <1s
   void disabled_test_fit_smooth_ConjG_FR() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
-                    "Conjugate gradient (Fletcher-Reeves imp.)");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Conjugate gradient (Fletcher-Reeves imp.)");
   }
 
   // disabled: awfully slow: ~20s
   void disabled_test_fit_smooth_ConjG_PR() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
-                    "Conjugate gradient (Polak-Ribiere imp.)");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Conjugate gradient (Polak-Ribiere imp.)");
   }
 
   // disabled: slow: ~5s
-  void disabled_test_fit_smooth_BFGS() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "BFGS");
-  }
+  void disabled_test_fit_smooth_BFGS() { runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "BFGS"); }
 
   void test_fit_smooth_Damping() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
-                    "Damped GaussNewton");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Damped GaussNewton");
   }
 
   // disabled: too slow: ~17s
   void disabled_test_fit_smooth_SteepestDescent() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
-                    "SteepestDescent");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "SteepestDescent");
   }
 
   // disabled: too slow: ~10s (and it doesn't converge)
-  void disabled_test_fit_smooth_FABADA() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "FABADA");
-  }
+  void disabled_test_fit_smooth_FABADA() { runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "FABADA"); }
 
 private:
   API::MatrixWorkspace_sptr m_smoothWS;

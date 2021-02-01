@@ -30,8 +30,7 @@ namespace DynamicPDF {
  * @param workspaceName retrieve the workspace with the Analysis Data Service
  */
 WorkspaceRecord::WorkspaceRecord(const std::string &workspaceName)
-    : m_ws(Mantid::API::AnalysisDataService::Instance()
-               .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName)),
+    : m_ws(Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName)),
       m_name{workspaceName}, m_energy{0.0}, m_label() {}
 
 /**
@@ -67,12 +66,10 @@ std::pair<double, double> WorkspaceRecord::getErange() {
  * @brief Constructor
  */
 SliceSelector::SliceSelector(QWidget *parent)
-    : QMainWindow(parent), m_pickerLine{nullptr},
-      m_loadedWorkspace(), m_selectedWorkspaceIndex{0} {
+    : QMainWindow(parent), m_pickerLine{nullptr}, m_loadedWorkspace(), m_selectedWorkspaceIndex{0} {
   this->observePreDelete(true); // Subscribe to notifications
-  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      Mantid::Kernel::FeatureType::Feature, {"DynamicPDF", "SliceSelector"},
-      false);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
+                                                                {"DynamicPDF", "SliceSelector"}, false);
   this->initLayout();
 }
 
@@ -88,12 +85,10 @@ SliceSelector::~SliceSelector() {
 /**
  * @brief Actions when slices workspace is deleted
  */
-void SliceSelector::preDeleteHandle(
-    const std::string &workspaceName,
-    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
+void SliceSelector::preDeleteHandle(const std::string &workspaceName,
+                                    const std::shared_ptr<Mantid::API::Workspace> &workspace) {
   UNUSED_ARG(workspaceName);
-  Mantid::API::MatrixWorkspace_sptr ws =
-      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
+  Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace);
   if (!ws || (ws != m_loadedWorkspace->m_ws)) {
     return;
   }
@@ -120,20 +115,17 @@ void SliceSelector::preDeleteHandle(
  * @param workspaceName
  */
 void SliceSelector::loadSlices(const QString &workspaceName) {
-  m_loadedWorkspace =
-      std::make_unique<WorkspaceRecord>(workspaceName.toStdString());
+  m_loadedWorkspace = std::make_unique<WorkspaceRecord>(workspaceName.toStdString());
   /// don't process if workspace is not valid
   if (!this->isWorkspaceValid()) {
     return;
   }
   m_selectedWorkspaceIndex = 0;
   m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
-  int maximumWorkspaceIndex =
-      static_cast<int>(m_loadedWorkspace->m_ws->getNumberHistograms()) - 1;
+  int maximumWorkspaceIndex = static_cast<int>(m_loadedWorkspace->m_ws->getNumberHistograms()) - 1;
 
   /// initialize the label displaying the energy
-  m_uiForm.labelSliceEnergy->setText(
-      QString::fromStdString(m_loadedWorkspace->m_label));
+  m_uiForm.labelSliceEnergy->setText(QString::fromStdString(m_loadedWorkspace->m_label));
 
   /// initialize the spin box that selects the energy slice
   m_uiForm.spinboxSliceSelector->setMinimum(0);
@@ -160,9 +152,8 @@ void SliceSelector::loadSlices(const QString &workspaceName) {
  */
 void SliceSelector::updatePreviewPlotSelectedSlice() {
   m_uiForm.previewPlotSelectedSlice->clear();
-  m_uiForm.previewPlotSelectedSlice->addSpectrum(
-      QString::fromStdString(m_loadedWorkspace->m_label),
-      m_loadedWorkspace->m_ws, m_selectedWorkspaceIndex);
+  m_uiForm.previewPlotSelectedSlice->addSpectrum(QString::fromStdString(m_loadedWorkspace->m_label),
+                                                 m_loadedWorkspace->m_ws, m_selectedWorkspaceIndex);
 }
 
 /**
@@ -175,8 +166,7 @@ void SliceSelector::updateSelectedSlice(const int &newSelectedIndex) {
   /// the widgets before (s)he loads any data
   if (m_loadedWorkspace) {
     m_loadedWorkspace->updateMetadata(m_selectedWorkspaceIndex);
-    m_uiForm.labelSliceEnergy->setText(
-        QString::fromStdString(m_loadedWorkspace->m_label));
+    m_uiForm.labelSliceEnergy->setText(QString::fromStdString(m_loadedWorkspace->m_label));
     m_uiForm.spinboxSliceSelector->setValue(newSelectedIndex);
     this->updatePickerLine();
     this->updatePreviewPlotSelectedSlice();
@@ -224,8 +214,7 @@ void SliceSelector::selectSliceForFitting() {
  * @brief Opens the Qt help page for the interface
  */
 void SliceSelector::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Dynamic PDF Background Remover"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Dynamic PDF Background Remover"));
 }
 
 /*        ***********************
@@ -241,11 +230,9 @@ void SliceSelector::initLayout() {
   // user wants help
   connect(m_uiForm.buttonpushHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
   // user wants to fit the selected slice with the Background remover
-  connect(m_uiForm.pushButtonFit, SIGNAL(clicked()), this,
-          SLOT(selectSliceForFitting()));
+  connect(m_uiForm.pushButtonFit, SIGNAL(clicked()), this, SLOT(selectSliceForFitting()));
   // user has loaded slices from a workspace or file
-  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this,
-          SLOT(loadSlices(const QString &)));
+  connect(m_uiForm.dataSelector, SIGNAL(dataReady(const QString &)), this, SLOT(loadSlices(const QString &)));
   this->setupConnections();
 }
 
@@ -254,11 +241,9 @@ void SliceSelector::initLayout() {
  */
 void SliceSelector::setupConnections() {
   // user is selecting a slice with the spin box
-  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
-          SLOT(updateSelectedSlice(int)));
+  connect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this, SLOT(updateSelectedSlice(int)));
   // user is selecting a slice with the picker line
-  connect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
-          SLOT(newIndexFromPickedEnergy(double)));
+  connect(m_pickerLine, SIGNAL(minValueChanged(double)), this, SLOT(newIndexFromPickedEnergy(double)));
 }
 
 /**
@@ -267,11 +252,9 @@ void SliceSelector::setupConnections() {
  */
 void SliceSelector::tearConnections() {
   // user is selecting a slice with the spin box
-  disconnect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this,
-             SLOT(updateSelectedSlice(int)));
+  disconnect(m_uiForm.spinboxSliceSelector, SIGNAL(valueChanged(int)), this, SLOT(updateSelectedSlice(int)));
   // user is selecting a slice with the picker line
-  disconnect(m_pickerLine, SIGNAL(minValueChanged(double)), this,
-             SLOT(newIndexFromPickedEnergy(double)));
+  disconnect(m_pickerLine, SIGNAL(minValueChanged(double)), this, SLOT(newIndexFromPickedEnergy(double)));
 }
 
 /**
@@ -281,8 +264,7 @@ void SliceSelector::tearConnections() {
 void SliceSelector::spawnPickerLine() {
   auto qwtplot = m_uiForm.slices2DPlot->getPlot2D();
   bool isVisible{false};
-  m_pickerLine = new MantidWidgets::RangeSelector(
-      qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
+  m_pickerLine = new MantidWidgets::RangeSelector(qwtplot, MantidWidgets::RangeSelector::YSINGLE, isVisible);
   m_pickerLine->setColour(QColor(Qt::black));
 }
 
@@ -305,8 +287,7 @@ bool SliceSelector::isWorkspaceValid() {
   /// check the pointer to the workspace is not empty
   if (!m_loadedWorkspace->m_ws) {
     auto title = this->objectName();
-    auto error =
-        QString::fromStdString("Workspace must be of type MatrixWorkspace");
+    auto error = QString::fromStdString("Workspace must be of type MatrixWorkspace");
     QMessageBox::warning(this, title, error);
     return false;
   }
@@ -314,8 +295,7 @@ bool SliceSelector::isWorkspaceValid() {
   auto axis = m_loadedWorkspace->m_ws->getAxis(0);
   if (axis->unit()->unitID() != "MomentumTransfer") {
     auto title = this->objectName();
-    auto error =
-        QString::fromStdString("X-axis units must be momentum transfer");
+    auto error = QString::fromStdString("X-axis units must be momentum transfer");
     QMessageBox::warning(this, title, error);
     return false;
   }
@@ -323,8 +303,7 @@ bool SliceSelector::isWorkspaceValid() {
   axis = m_loadedWorkspace->m_ws->getAxis(1);
   if (axis->unit()->unitID() != "DeltaE") {
     auto title = this->objectName();
-    auto error =
-        QString::fromStdString("Y-axis units must be energy transfer (meV)");
+    auto error = QString::fromStdString("Y-axis units must be energy transfer (meV)");
     QMessageBox::warning(this, title, error);
     return false;
   }

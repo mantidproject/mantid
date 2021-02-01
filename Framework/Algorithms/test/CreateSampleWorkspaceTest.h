@@ -32,9 +32,7 @@ class CreateSampleWorkspaceTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CreateSampleWorkspaceTest *createSuite() {
-    return new CreateSampleWorkspaceTest();
-  }
+  static CreateSampleWorkspaceTest *createSuite() { return new CreateSampleWorkspaceTest(); }
   static void destroySuite(CreateSampleWorkspaceTest *suite) { delete suite; }
 
   CreateSampleWorkspaceTest() { FrameworkManager::Instance(); }
@@ -45,13 +43,11 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  MatrixWorkspace_sptr createSampleWorkspace(
-      const std::string &outWSName, const std::string &wsType = "",
-      const std::string &function = "", const std::string &userFunction = "",
-      int numBanks = 2, int bankPixelWidth = 10, int numEvents = 1000,
-      bool isRandom = false, const std::string &xUnit = "TOF",
-      double xMin = 0.0, double xMax = 20000.0, double binWidth = 200.0,
-      int numScanPoints = 1) {
+  MatrixWorkspace_sptr createSampleWorkspace(const std::string &outWSName, const std::string &wsType = "",
+                                             const std::string &function = "", const std::string &userFunction = "",
+                                             int numBanks = 2, int bankPixelWidth = 10, int numEvents = 1000,
+                                             bool isRandom = false, const std::string &xUnit = "TOF", double xMin = 0.0,
+                                             double xMax = 20000.0, double binWidth = 200.0, int numScanPoints = 1) {
 
     CreateSampleWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -62,13 +58,11 @@ public:
     if (!function.empty())
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Function", function));
     if (!userFunction.empty())
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("UserDefinedFunction", userFunction));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UserDefinedFunction", userFunction));
     if (numBanks != 2)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumBanks", numBanks));
     if (bankPixelWidth != 10)
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("BankPixelWidth", bankPixelWidth));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("BankPixelWidth", bankPixelWidth));
     if (numEvents != 1000)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumEvents", numEvents));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Random", isRandom));
@@ -89,9 +83,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
 
     // check the basics
@@ -123,14 +115,9 @@ public:
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     const auto instrument = outWS->getInstrument();
-    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(
-        instrument->getComponentByName("bank1"));
-    TSM_ASSERT_EQUALS(
-        "PixelSpacing on the bank is not the same as the expected default in x",
-        0.008, bank1->xstep());
-    TSM_ASSERT_EQUALS(
-        "PixelSpacing on the bank is not the same as the expected default in y",
-        0.008, bank1->ystep());
+    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+    TSM_ASSERT_EQUALS("PixelSpacing on the bank is not the same as the expected default in x", 0.008, bank1->xstep());
+    TSM_ASSERT_EQUALS("PixelSpacing on the bank is not the same as the expected default in y", 0.008, bank1->ystep());
   }
 
   void test_apply_pixel_spacing() {
@@ -146,12 +133,9 @@ public:
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     const auto instrument = outWS->getInstrument();
-    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(
-        instrument->getComponentByName("bank1"));
-    TSM_ASSERT_EQUALS("Not the specified pixel spacing in x", pixelSpacing,
-                      bank1->xstep());
-    TSM_ASSERT_EQUALS("Not the specified pixel spacing in y", pixelSpacing,
-                      bank1->ystep());
+    auto bank1 = std::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName("bank1"));
+    TSM_ASSERT_EQUALS("Not the specified pixel spacing in x", pixelSpacing, bank1->xstep());
+    TSM_ASSERT_EQUALS("Not the specified pixel spacing in y", pixelSpacing, bank1->ystep());
   }
 
   void test_default_instrument_bank_setup() {
@@ -170,14 +154,12 @@ public:
     const V3D bank1ToSample = bank1->getPos() - sample->getPos();
     const V3D bank2ToSample = bank2->getPos() - sample->getPos();
     auto refFrame = instrument->getReferenceFrame();
-    TSM_ASSERT_EQUALS(
-        "By default bank1 should be offset from the sample in the beam "
-        "direction by 5m",
-        5.0, refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
-    TSM_ASSERT_EQUALS(
-        "By default bank2 should be offset from the sample in the beam "
-        "direction by 2 * 5m",
-        10.0, refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
+    TSM_ASSERT_EQUALS("By default bank1 should be offset from the sample in the beam "
+                      "direction by 5m",
+                      5.0, refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
+    TSM_ASSERT_EQUALS("By default bank2 should be offset from the sample in the beam "
+                      "direction by 2 * 5m",
+                      10.0, refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
   }
 
   void test_apply_offset_instrument_banks() {
@@ -200,12 +182,10 @@ public:
     const V3D bank1ToSample = bank1->getPos() - sample->getPos();
     const V3D bank2ToSample = bank2->getPos() - sample->getPos();
     auto refFrame = instrument->getReferenceFrame();
-    TSM_ASSERT_EQUALS(
-        "Wrong offset applied for bank1", bankToSampleDistance,
-        refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
-    TSM_ASSERT_EQUALS(
-        "Wrong offset applied for bank2", bankToSampleDistance * 2,
-        refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
+    TSM_ASSERT_EQUALS("Wrong offset applied for bank1", bankToSampleDistance,
+                      refFrame->vecPointingAlongBeam().scalar_prod(bank1ToSample));
+    TSM_ASSERT_EQUALS("Wrong offset applied for bank2", bankToSampleDistance * 2,
+                      refFrame->vecPointingAlongBeam().scalar_prod(bank2ToSample));
   }
 
   void test_histogram_defaults() {
@@ -231,8 +211,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("CreateSampleWorkspaceTest_OutputWS_event");
 
-    auto ws = std::dynamic_pointer_cast<IEventWorkspace>(
-        createSampleWorkspace(outWSName, "Event"));
+    auto ws = std::dynamic_pointer_cast<IEventWorkspace>(createSampleWorkspace(outWSName, "Event"));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -261,13 +240,11 @@ public:
 
   void test_event_MoreBanksMoreDetectorsLessEvents() {
     // Name of the output workspace.
-    std::string outWSName(
-        "CreateSampleWorkspaceTest_OutputWS_MoreBanksMoreDetectors");
+    std::string outWSName("CreateSampleWorkspaceTest_OutputWS_MoreBanksMoreDetectors");
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Event", "", "", 4, 30, 100);
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event", "", "", 4, 30, 100);
     if (!ws)
       return;
 
@@ -281,8 +258,7 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Histogram", "Multiple Peaks");
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "Multiple Peaks");
     if (!ws)
       return;
     TS_ASSERT_DELTA(ws->readY(0)[20], 0.3, 0.0001);
@@ -300,8 +276,7 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Event", "Flat background");
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event", "Flat background");
     if (!ws)
       return;
     TS_ASSERT_DELTA(ws->readY(0)[20], 10.0, 0.0001);
@@ -319,8 +294,7 @@ public:
 
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Event", "Exp Decay");
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Event", "Exp Decay");
     if (!ws)
       return;
     TS_ASSERT_DELTA(ws->readY(0)[20], 3.0, 0.0001);
@@ -341,8 +315,7 @@ public:
                          "Sigma=0.5";
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Histogram", "User Defined", myFunc);
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "User Defined", myFunc);
     if (!ws)
       return;
     TS_ASSERT_DELTA(ws->readY(0)[5], 80.5, 0.0001);
@@ -401,29 +374,25 @@ public:
       XUnit="dSpacing",XMin=0, XMax=8, BinWidth=0.1)
     */
     MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50,
-                              true, "dSpacing", 0, 8, 0.1);
+        createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50, true, "dSpacing", 0, 8, 0.1);
     if (!ws)
       return;
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
 
-    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50,
-                               true, "Wavelength", 0, 8, 0.1);
+    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50, true, "Wavelength", 0, 8, 0.1);
     if (!ws)
       return;
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
 
-    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50,
-                               true, "Energy", 100, 1000, 10);
+    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50, true, "Energy", 100, 1000, 10);
     if (!ws)
       return;
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
 
-    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50,
-                               true, "QSquared", 0, 800, 10);
+    ws = createSampleWorkspace(outWSName, "Event", "One Peak", "", 1, 2, 50, true, "QSquared", 0, 800, 10);
     if (!ws)
       return;
     // Remove workspace from the data service.
@@ -435,8 +404,7 @@ public:
       mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4,
       NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15)
     */
-    std::string outWSName =
-        "CreateSampleWorkspaceTest_test_failure_due_to_bad_bin_width";
+    std::string outWSName = "CreateSampleWorkspaceTest_test_failure_due_to_bad_bin_width";
     CreateSampleWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -455,9 +423,7 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
     TS_ASSERT(ws);
     // just one bin
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
@@ -530,13 +496,10 @@ public:
     const int bankPixelWidth = 10;
     const int numScanPoints = 10;
 
-    MatrixWorkspace_sptr ws = createSampleWorkspace(
-        outWSName, "", "", "", numBanks, bankPixelWidth, 1000, false, "TOF",
-        0.0, 20000.0, 200.0, numScanPoints);
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "", "", "", numBanks, bankPixelWidth, 1000, false, "TOF",
+                                                    0.0, 20000.0, 200.0, numScanPoints);
 
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numBanks * bankPixelWidth *
-                                                    bankPixelWidth *
-                                                    numScanPoints);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numBanks * bankPixelWidth * bankPixelWidth * numScanPoints);
 
     const auto &detectorInfo = ws->detectorInfo();
     TS_ASSERT(detectorInfo.isScanning());
@@ -548,10 +511,8 @@ public:
     for (size_t j = 0; j < detectorInfo.scanCount(); ++j) {
       const auto index = std::pair<size_t, size_t>(centreDetector, j);
       TS_ASSERT_DELTA(10.0, detectorInfo.l2(index), 1e-10);
-      TS_ASSERT_DELTA(j, detectorInfo.twoTheta(index) * radiansToDegrees,
-                      1e-10);
-      TS_ASSERT_DELTA(j, detectorInfo.rotation(index).getEulerAngles("XYZ")[1],
-                      1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.twoTheta(index) * radiansToDegrees, 1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.rotation(index).getEulerAngles("XYZ")[1], 1e-10);
     }
 
     // Remove workspace from the data service.

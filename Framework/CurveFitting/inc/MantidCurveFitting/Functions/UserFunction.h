@@ -27,8 +27,7 @@ A user defined function.
 @author Roman Tolchenov, Tessella plc
 @date 15/01/2010
 */
-class MANTID_CURVEFITTING_DLL UserFunction : public API::ParamFunction,
-                                             public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL UserFunction : public API::ParamFunction, public API::IFunction1D {
 public:
   /// Constructor
   UserFunction();
@@ -41,29 +40,22 @@ public:
   const std::string category() const override { return "General"; }
 
   /// Function you want to fit to.
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+  void function1D(double *out, const double *xValues, const size_t nData) const override;
   /// Derivatives of function with respect to active parameters
-  void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) override;
+  void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;
 
   /// Returns the number of attributes associated with the function
   size_t nAttributes() const override { return 1; }
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const override {
-    return std::vector<std::string>(1, "Formula");
-  }
+  std::vector<std::string> getAttributeNames() const override { return std::vector<std::string>(1, "Formula"); }
   /// Return a value of attribute attName
   Attribute getAttribute(const std::string &attName) const override {
     return attName == "Formula" ? Attribute(m_formula) : getAttribute(attName);
   }
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName,
-                    const Attribute &value) override;
+  void setAttribute(const std::string &attName, const Attribute &value) override;
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const override {
-    return attName == "Formula";
-  }
+  bool hasAttribute(const std::string &attName) const override { return attName == "Formula"; }
 
 private:
   /// The formula

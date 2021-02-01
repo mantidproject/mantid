@@ -53,26 +53,19 @@ public:
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
-                    std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-                    double BackgroundStartRadius = 0.0, bool edge = true,
-                    bool cyl = false, std::string fnct = "NoFit",
-                    double adaptive = 0.0, bool ellip = false,
-                    bool fixQAxis = false) {
+                    std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks", double BackgroundStartRadius = 0.0,
+                    bool edge = true, bool cyl = false, std::string fnct = "NoFit", double adaptive = 0.0,
+                    bool ellip = false, bool fixQAxis = false) {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", PeakRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundOuterRadius", BackgroundRadius));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", BackgroundRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", BackgroundStartRadius));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrateIfOnEdge", edge));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ellipsoid", ellip));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixQAxis", fixQAxis));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
@@ -96,21 +89,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(algC.initialize())
     TS_ASSERT(algC.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
-    TS_ASSERT_THROWS_NOTHING(
-        algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," + Mantid::Kernel::Units::Symbol::RLU.ascii() +
+                        "," + Mantid::Kernel::Units::Symbol::RLU.ascii();
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
-    std::string frames = Mantid::Geometry::HKL::HKLName + "," +
-                         Mantid::Geometry::HKL::HKLName + "," +
-                         Mantid::Geometry::HKL::HKLName;
+    std::string frames =
+        Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName;
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
-    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
-        "OutputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue("OutputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algC.execute());
     TS_ASSERT(algC.isExecuted());
   }
@@ -123,30 +112,25 @@ public:
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("PeakParams", mess.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
 
   //-------------------------------------------------------------------------------
   /** Add a fake ellipsoid peak */
-  static void addEllipsoid(size_t num, double x, double y, double z,
-                           std::vector<std::vector<double>> eigvects,
+  static void addEllipsoid(size_t num, double x, double y, double z, std::vector<std::vector<double>> eigvects,
                            std::vector<double> eigvals, double doCounts) {
 
     std::ostringstream mess;
     mess << num << ", " << x << ", " << y << ", " << z << ", ";
     // add in eigenvects
     for (size_t ivect = 0; ivect < eigvects.size(); ivect++) {
-      std::copy(eigvects[ivect].begin(), eigvects[ivect].end(),
-                std::ostream_iterator<double>(mess, ", "));
+      std::copy(eigvects[ivect].begin(), eigvects[ivect].end(), std::ostream_iterator<double>(mess, ", "));
     }
     // add in eigenvalues
-    std::copy(eigvals.begin(), eigvals.end(),
-              std::ostream_iterator<double>(mess, ", "));
+    std::copy(eigvals.begin(), eigvals.end(), std::ostream_iterator<double>(mess, ", "));
     // doCounts
     mess << doCounts;
 
@@ -156,20 +140,16 @@ public:
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("EllipsoidParams", mess.str().c_str()));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("RandomSeed", seed.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("EllipsoidParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("RandomSeed", seed.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
 
   //-------------------------------------------------------------------------------
   /** Add a fake uniform  background*/
-  static void addUniform(size_t num,
-                         std::vector<std::pair<double, double>> range) {
+  static void addUniform(size_t num, std::vector<std::pair<double, double>> range) {
     // each element of range is a pair min max
 
     std::ostringstream mess;
@@ -182,10 +162,8 @@ public:
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("UniformParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("UniformParams", mess.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
   }
@@ -200,15 +178,13 @@ public:
     addPeak(1000, 6., 6., 6., 2.0);
 
     MDEventWorkspace3Lean::sptr mdews =
-        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "IntegratePeaksMD2Test_MDEWS");
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMD2Test_MDEWS");
     mdews->setCoordinateSystem(Mantid::Kernel::HKL);
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100, 0.05);
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS0(new PeaksWorkspace());
@@ -233,8 +209,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
-                   "defaultsave.directory") +
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
                "IntegratePeaksMD2Test_MDEWSGaussian.dat")
         .remove();
 
@@ -246,8 +221,7 @@ public:
     // Error is also calculated
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     // 0.2);
-    Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
-                   "defaultsave.directory") +
+    Poco::File(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory") +
                "IntegratePeaksMD2Test_MDEWSBackToBackExponential.dat")
         .remove();
     /*fnct = "ConvolutionExpGaussian";
@@ -262,8 +236,7 @@ public:
     // ------------- Adaptive Integration r=MQ+b where b is PeakRadius and m is
     // 0.01 ------------------------
     peakWS0->addPeak(Peak(inst, 15050, 1.0, V3D(2., 3., 4.)));
-    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, false, "NoFit",
-          0.01);
+    doRun(0.1, 0.0, "IntegratePeaksMD2Test_peaks", 0.0, true, false, "NoFit", 0.01);
     TS_ASSERT_DELTA(peakWS0->getPeak(1).getIntensity(), 29.0, 1e-2);
 
     // Error is also calculated
@@ -300,8 +273,7 @@ public:
     // Error is also calculated
     TS_ASSERT_DELTA(peakWS->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
     TS_ASSERT_DELTA(peakWS->getPeak(1).getSigmaIntensity(), sqrt(1000.0), 1e-2);
-    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(),
-                    sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(), sqrt(peakWS->getPeak(2).getIntensity()), 1e-2);
 
     // ------------- Let's do it again with 2.0 radius ------------------------
     doRun(2.0, 0.0);
@@ -330,8 +302,7 @@ public:
     //    TS_ASSERT_DELTA( peakWS->getPeak(0).getIntensity(), 1000.0, 10.0);
     // Error on peak is the SUM of the error of peak and the subtracted
     // background
-    TS_ASSERT_DELTA(peakWS->getPeak(0).getSigmaIntensity(),
-                    sqrt(1125.0 + 125.0), 2.0);
+    TS_ASSERT_DELTA(peakWS->getPeak(0).getSigmaIntensity(), sqrt(1125.0 + 125.0), 2.0);
 
     // Had no bg, so they are the same
     TS_ASSERT_DELTA(peakWS->getPeak(1).getIntensity(), 1000.0, 1e-2);
@@ -341,8 +312,7 @@ public:
     // same density! So ~0 total intensity.
     TS_ASSERT_DELTA(peakWS->getPeak(2).getIntensity(), 0.0, 12.0);
     // But the error is large since it is 125 - 125 (with errors)
-    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(), sqrt(125.0 + 25.0),
-                    2.);
+    TS_ASSERT_DELTA(peakWS->getPeak(2).getSigmaIntensity(), sqrt(125.0 + 25.0), 2.);
 
     // ------------- Integrating without the background gives higher counts
     // ------------------------
@@ -366,8 +336,7 @@ public:
     addPeak(1000, 0., 0., 0., 1.0);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
@@ -380,8 +349,7 @@ public:
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
 
     PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "IntegratePeaksMD2Test_peaks_out"));
+        AnalysisDataService::Instance().retrieve("IntegratePeaksMD2Test_peaks_out"));
     TS_ASSERT(newPW);
 
     TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(), 1000.0, 1e-2);
@@ -404,19 +372,16 @@ public:
 
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
-                                                 peakWS);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
     // First, a check with no background
     doRun(1.0, 0.0, "IntegratePeaksMD2Test_peaks", 0.0);
     // approx. + 500 + 333 counts due to 2 backgrounds
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500 + 333, 30.0);
-    TSM_ASSERT_DELTA("Simple sqrt() error",
-                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
+    TSM_ASSERT_DELTA("Simple sqrt() error", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1833.0), 2);
 
     // Set background from 2.0 to 3.0.
     // So the 1/2 density background remains, we subtract the 1/3 density =
@@ -424,8 +389,7 @@ public:
     doRun(1.0, 3.0, "IntegratePeaksMD2Test_peaks", 2.0);
     TS_ASSERT_DELTA(peakWS->getPeak(0).getIntensity(), 1000 + 500, 80.0);
     // Error is larger, since it is error of peak + error of background
-    TSM_ASSERT_DELTA("Error has increased",
-                     peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
+    TSM_ASSERT_DELTA("Error has increased", peakWS->getPeak(0).getSigmaIntensity(), sqrt(1830.0), 2);
 
     // Now do the same without the background start radius
     // So we subtract both densities = a lower count
@@ -438,21 +402,11 @@ public:
   //-------------------------------------------------------------------------------
   //// Tests of ellipsoidal integration
 
-  void test_exec_EllipsoidNoBackground_SingleCount() {
-    EllipsoidTestHelper(-1.0, false, false);
-  }
-  void test_exec_EllipsoidNoBackground_SingleCount_FixQAxis() {
-    EllipsoidTestHelper(-1.0, true, false);
-  }
-  void test_exec_EllipsoidNoBackground_NonSingleCount() {
-    EllipsoidTestHelper(1.0, false, false);
-  }
-  void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() {
-    EllipsoidTestHelper(1.0, true, false);
-  }
-  void test_exec_EllipsoidWithBackground_SingleCount() {
-    EllipsoidTestHelper(-1.0, false, true);
-  }
+  void test_exec_EllipsoidNoBackground_SingleCount() { EllipsoidTestHelper(-1.0, false, false); }
+  void test_exec_EllipsoidNoBackground_SingleCount_FixQAxis() { EllipsoidTestHelper(-1.0, true, false); }
+  void test_exec_EllipsoidNoBackground_NonSingleCount() { EllipsoidTestHelper(1.0, false, false); }
+  void test_exec_EllipsoidNoBackground_NonSingleCount_FixQAxis() { EllipsoidTestHelper(1.0, true, false); }
+  void test_exec_EllipsoidWithBackground_SingleCount() { EllipsoidTestHelper(-1.0, false, true); }
 
   void EllipsoidTestHelper(double doCounts, bool fixQAxis, bool doBkgrd) {
     // doCounts < 0 -> all events have a count of 1
@@ -484,8 +438,7 @@ public:
     if (doBkgrd == true) {
       // add random uniform
       bgInnerRadius = peakRadius;
-      bgOuterRadius =
-          peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
+      bgOuterRadius = peakRadius * pow(2.0, 1.0 / 3.0); // twice vol of peak sphere
       std::vector<std::pair<double, double>> range;
       for (size_t d = 0; d < eigenvals.size(); d++) {
         range.push_back(std::pair(Q[d] - bgOuterRadius, Q[d] + bgOuterRadius));
@@ -494,46 +447,39 @@ public:
     }
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     // --- Make a fake PeaksWorkspace ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->addPeak(Peak(inst, 1, 1.0, Q));
-    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
-                                                 peakWS);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
 
     // Integrate and copy to a new peaks workspace
-    doRun(peakRadius, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out",
-          bgInnerRadius, false, /* edge correction */
-          false,                /* cylinder*/
-          "NoFit", 0.0,         /* adaptive*/
-          true,                 /* ellipsoid integration*/
-          fixQAxis);            /* fix Q axis of ellipsoid*/
+    doRun(peakRadius, bgOuterRadius, "IntegratePeaksMD2Test_peaks_out", bgInnerRadius, false, /* edge correction */
+          false,                                                                              /* cylinder*/
+          "NoFit", 0.0,                                                                       /* adaptive*/
+          true,                                                                               /* ellipsoid integration*/
+          fixQAxis); /* fix Q axis of ellipsoid*/
 
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
 
     PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(
-            "IntegratePeaksMD2Test_peaks_out"));
+        AnalysisDataService::Instance().retrieve("IntegratePeaksMD2Test_peaks_out"));
     TS_ASSERT(newPW);
 
     // test integrated counts
     if (doCounts < 0) {
       if (doBkgrd == true) {
         // use slightly more lenient tolerance
-        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        static_cast<double>(numEvents),
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(), static_cast<double>(numEvents),
                         ceil(0.005 * static_cast<double>(numEvents)));
       } else {
-        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        static_cast<double>(numEvents),
+        TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(), static_cast<double>(numEvents),
                         ceil(0.002 * static_cast<double>(numEvents)));
       }
     } else {
       // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
-      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                      static_cast<double>(numEvents) * 0.2175,
+      TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(), static_cast<double>(numEvents) * 0.2175,
                       static_cast<double>(numEvents) * 0.0015);
     }
 
@@ -557,14 +503,12 @@ public:
     // sort by radius (in descending order)
     std::vector<size_t> isort(radii.size());
     std::iota(isort.begin(), isort.end(), 0);
-    std::sort(isort.begin(), isort.end(),
-              [&](size_t ii, size_t jj) { return radii[ii] > radii[jj]; });
+    std::sort(isort.begin(), isort.end(), [&](size_t ii, size_t jj) { return radii[ii] > radii[jj]; });
 
     // loop over eigen vectors
     for (size_t ivect = 0; ivect < eigenvals.size(); ivect++) {
       auto rad = peakRadius * sqrt(eigenvals[ivect] / eigenvals[0]);
-      double angle = axes[isort[ivect]].angle(V3D(
-          eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
+      double angle = axes[isort[ivect]].angle(V3D(eigenvects[ivect][0], eigenvects[ivect][1], eigenvects[ivect][2]));
       if (angle > M_PI / 2) {
         // axis is flipped
         angle = M_PI - angle;
@@ -595,15 +539,11 @@ public:
 
     doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
 
-    auto outWS =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
-    double actualPeakRadius =
-        std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
-    double actualBackgroundOutterRadius = std::stod(
-        outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
-    double actualBackgroundInnerRadius = std::stod(
-        outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
+    double actualPeakRadius = std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
+    double actualBackgroundOutterRadius = std::stod(outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
+    double actualBackgroundInnerRadius = std::stod(outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOuterRadius, actualBackgroundOutterRadius);
@@ -619,10 +559,8 @@ public:
         dynamic_cast<PeakShapeSpherical *>(const_cast<PeakShape *>(&shape));
     TS_ASSERT(sphericalShape);
     TS_ASSERT_EQUALS(peakRadius, sphericalShape->radius());
-    TS_ASSERT_EQUALS(backgroundOuterRadius,
-                     sphericalShape->backgroundOuterRadius().get());
-    TS_ASSERT_EQUALS(backgroundInnerRadius,
-                     sphericalShape->backgroundInnerRadius().get());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().get());
   }
 
   void test_writes_out_peak_shape() {
@@ -633,8 +571,7 @@ public:
 
     doRun(peakRadius, backgroundOuterRadius, "OutWS", backgroundInnerRadius);
 
-    PeaksWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+    PeaksWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
     // Get a peak.
     IPeak &iPeak = outWS->getPeak(0);
@@ -648,10 +585,8 @@ public:
 
     // Check the shape is what we expect
     TS_ASSERT_EQUALS(peakRadius, sphericalShape->radius());
-    TS_ASSERT_EQUALS(backgroundOuterRadius,
-                     sphericalShape->backgroundOuterRadius().get());
-    TS_ASSERT_EQUALS(backgroundInnerRadius,
-                     sphericalShape->backgroundInnerRadius().get());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().get());
   }
 };
 
@@ -663,12 +598,8 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IntegratePeaksMD2TestPerformance *createSuite() {
-    return new IntegratePeaksMD2TestPerformance();
-  }
-  static void destroySuite(IntegratePeaksMD2TestPerformance *suite) {
-    delete suite;
-  }
+  static IntegratePeaksMD2TestPerformance *createSuite() { return new IntegratePeaksMD2TestPerformance(); }
+  static void destroySuite(IntegratePeaksMD2TestPerformance *suite) { delete suite; }
 
   IntegratePeaksMD2TestPerformance() {
     numPeaks = 1000;
@@ -680,20 +611,17 @@ public:
     FakeMDEventData algF2;
     TS_ASSERT_THROWS_NOTHING(algF2.initialize())
     TS_ASSERT(algF2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(algF2.setPropertyValue(
-        "InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF2.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algF2.setProperty("UniformParams", "100000"));
     TS_ASSERT_THROWS_NOTHING(algF2.execute());
     TS_ASSERT(algF2.isExecuted());
 
     MDEventWorkspace3Lean::sptr mdews =
-        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "IntegratePeaksMD2Test_MDEWS");
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("IntegratePeaksMD2Test_MDEWS");
     mdews->setCoordinateSystem(Mantid::Kernel::HKL);
 
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     std::mt19937 rng;
     std::uniform_real_distribution<double> flat(-9.0, 9.0);

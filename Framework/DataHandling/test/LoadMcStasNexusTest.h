@@ -54,18 +54,13 @@ public:
     TS_ASSERT(algToBeTested.isExecuted());
     //
     //  test workspace created by LoadMcStasNexus
-    WorkspaceGroup_sptr output =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
+    WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputSpace);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(), 4);
     // int ii;
     // std::cin >> ii;
-    MatrixWorkspace_sptr outputItem1 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_1");
+    MatrixWorkspace_sptr outputItem1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_1");
     TS_ASSERT_EQUALS(outputItem1->getNumberHistograms(), 1);
-    MatrixWorkspace_sptr outputItem2 =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputSpace + "_2");
+    MatrixWorkspace_sptr outputItem2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace + "_2");
     TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 128);
 
     AnalysisDataService::Instance().remove(outputSpace + "_1");
@@ -80,13 +75,9 @@ private:
 
 class LoadMcStasNexusTestPerformance : public CxxTest::TestSuite {
 public:
-  static LoadMcStasNexusTestPerformance *createSuite() {
-    return new LoadMcStasNexusTestPerformance();
-  }
+  static LoadMcStasNexusTestPerformance *createSuite() { return new LoadMcStasNexusTestPerformance(); }
 
-  static void destroySuite(LoadMcStasNexusTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(LoadMcStasNexusTestPerformance *suite) { delete suite; }
 
   void setUp() override {
     if (!loadMcStasNexusAlg.isInitialized())

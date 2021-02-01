@@ -33,16 +33,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 class IAlgorithmProgressWidget;
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressPresenter
-    : public AlgorithmProgressPresenterBase {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
   Q_OBJECT
 
 public:
   AlgorithmProgressPresenter(QWidget *parent, IAlgorithmProgressWidget *);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double,
-                             const QString, const double, const int) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, const double, const QString, const double, const int) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
   AlgorithmProgressModel &model() { return m_model; }

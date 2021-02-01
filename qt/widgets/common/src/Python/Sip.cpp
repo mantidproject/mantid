@@ -25,8 +25,7 @@ const sipAPIDef *sipAPI() {
     // Some configs have a private sip module inside PyQt. Try this first
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt4.sip._C_API", 0);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                               \
-    QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt5.sip._C_API", 0);
 #else
 #error "Unknown sip module for Qt >= 6"

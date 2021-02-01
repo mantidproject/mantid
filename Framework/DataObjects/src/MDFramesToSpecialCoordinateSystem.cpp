@@ -17,8 +17,7 @@ namespace DataObjects {
  * @param workspace: the workspace which is being queried
  * @returns either a special coordinate or an empty optional
  */
-boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
-MDFramesToSpecialCoordinateSystem::
+boost::optional<Mantid::Kernel::SpecialCoordinateSystem> MDFramesToSpecialCoordinateSystem::
 operator()(const Mantid::API::IMDWorkspace *workspace) const {
   // Make sure that the workspaces are either an MDHisto or MDEvent workspaces
   if (!dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace) &&

@@ -37,20 +37,15 @@ private:
   /// testing purposes.
   class WritableHistoWorkspace : public Mantid::DataObjects::MDHistoWorkspace {
   public:
-    WritableHistoWorkspace(MDHistoDimension_sptr x)
-        : Mantid::DataObjects::MDHistoWorkspace(std::move(x)) {}
+    WritableHistoWorkspace(MDHistoDimension_sptr x) : Mantid::DataObjects::MDHistoWorkspace(std::move(x)) {}
     void setMaskValueAt(size_t at, bool value) { m_masks[at] = value; }
   };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDHistoWorkspaceIteratorTest *createSuite() {
-    return new MDHistoWorkspaceIteratorTest();
-  }
-  static void destroySuite(MDHistoWorkspaceIteratorTest *suite) {
-    delete suite;
-  }
+  static MDHistoWorkspaceIteratorTest *createSuite() { return new MDHistoWorkspaceIteratorTest(); }
+  static void destroySuite(MDHistoWorkspaceIteratorTest *suite) { delete suite; }
 
   void test_bad_constructor() {
     MDHistoWorkspace_sptr ws;
@@ -58,13 +53,11 @@ public:
   }
 
   void do_test_iterator(size_t nd, size_t numPoints) {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     for (size_t i = 0; i < numPoints; i++) {
       ws->setSignalAt(i, double(i));
     }
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(
-        new MDHistoWorkspaceIterator(ws));
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
     size_t i = 0;
 
@@ -111,11 +104,9 @@ public:
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(normal_vector, bound_vector));
 
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     WritableHistoWorkspace *ws =
-        new WritableHistoWorkspace(MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", frame, 0.0, 10, 11)));
+        new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, 0.0, 10, 11)));
 
     ws->setMaskValueAt(0, true);  // Masked
     ws->setMaskValueAt(1, true);  // Masked
@@ -147,11 +138,9 @@ public:
     // MDImplicitFunction *function = new MDImplicitFunction();
     // function->addPlane(MDPlane(normal_vector, bound_vector));
 
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     WritableHistoWorkspace *ws =
-        new WritableHistoWorkspace(MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
+        new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, 0.0, 10.0, 10)));
 
     ws->setSignalAt(0, 3.0);
     ws->setSignalAt(1, 3.0);
@@ -174,8 +163,7 @@ public:
                       " are unmasked",
                       3.0, histoIt->getNormalizedSignal());
     histoIt->jumpTo(2);
-    TSM_ASSERT("Should return NaN here as data at the iterator are masked",
-               std::isnan(histoIt->getNormalizedSignal()));
+    TSM_ASSERT("Should return NaN here as data at the iterator are masked", std::isnan(histoIt->getNormalizedSignal()));
     histoIt->jumpTo(3);
     TSM_ASSERT_EQUALS("Should get the signal value here as data at the iterator"
                       " are unmasked",
@@ -196,8 +184,7 @@ public:
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(VMD(-1., -1.), VMD(4.5, 0.)));
 
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
@@ -231,8 +218,7 @@ public:
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(VMD(+1., +1.), VMD(4.5, 0.)));
 
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
@@ -260,8 +246,7 @@ public:
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(VMD(-1., -1.), VMD(-4.5, 0.)));
 
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < 100; i++)
       ws->setSignalAt(i, double(i));
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, function);
@@ -272,8 +257,7 @@ public:
   /** Create several parallel iterators */
   void test_parallel_iterators() {
     size_t numPoints = 100;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     for (size_t i = 0; i < numPoints; i++)
       ws->setSignalAt(i, double(i));
 
@@ -303,26 +287,22 @@ public:
   }
 
   void test_predictable_steps() {
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 10);
     auto it = ws->createIterator();
     auto histoIt = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     size_t expected = 0;
     for (size_t i = 0; i < histoIt->getDataSize(); ++i) {
       size_t current = histoIt->getLinearIndex();
-      TSM_ASSERT_EQUALS("Has not proceeded in a incremental manner.", expected,
-                        current);
+      TSM_ASSERT_EQUALS("Has not proceeded in a incremental manner.", expected, current);
       expected = current + 1;
       histoIt->next();
     }
   }
 
   void test_skip_masked_detectors() {
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     WritableHistoWorkspace *ws =
-        new WritableHistoWorkspace(MDHistoDimension_sptr(
-            new MDHistoDimension("x", "x", frame, 0.0, 10, 100)));
+        new WritableHistoWorkspace(MDHistoDimension_sptr(new MDHistoDimension("x", "x", frame, 0.0, 10, 100)));
 
     ws->setMaskValueAt(0, true);  // Mask the first bin
     ws->setMaskValueAt(1, true);  // Mask the second bin
@@ -336,27 +316,22 @@ public:
     auto it = ws_sptr->createIterator();
     auto histoIt = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     histoIt->next();
-    TSM_ASSERT_EQUALS(
-        "The first index hit should be 2 since that is the first unmasked one",
-        2, histoIt->getLinearIndex());
+    TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 2,
+                      histoIt->getLinearIndex());
     histoIt->next();
-    TSM_ASSERT_EQUALS(
-        "The next index hit should be 5 since that is the next unmasked one", 5,
-        histoIt->getLinearIndex());
+    TSM_ASSERT_EQUALS("The next index hit should be 5 since that is the next unmasked one", 5,
+                      histoIt->getLinearIndex());
   }
 
   // template<typename ContainerType, typename ElementType>
   template <class ContainerType>
-  bool doesContainIndex(const ContainerType &container,
-                        const typename ContainerType::value_type element) {
-    return std::find(container.begin(), container.end(), element) !=
-           container.end();
+  bool doesContainIndex(const ContainerType &container, const typename ContainerType::value_type element) {
+    return std::find(container.begin(), container.end(), element) != container.end();
   }
 
   void test_isWithinBounds() {
     const size_t nd = 1;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
 
     size_t begin = 1;
     size_t end = 5;
@@ -368,11 +343,9 @@ public:
   }
 
   void do_test_neighbours_1d(
-      const boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-          &findNeighbourMemberFunction) {
+      const boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> &findNeighbourMemberFunction) {
     const size_t nd = 1;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     /*
      1D MDHistoWorkspace
 
@@ -388,12 +361,10 @@ public:
      ^
      |
      */
-    std::vector<size_t> neighbourIndexes =
-        findNeighbourMemberFunction(it.get());
+    std::vector<size_t> neighbourIndexes = findNeighbourMemberFunction(it.get());
     TS_ASSERT_EQUALS(1, neighbourIndexes.size());
     // should be on edge
-    TSM_ASSERT("Neighbour at index 0 is 1",
-               doesContainIndex(neighbourIndexes, size_t(1)));
+    TSM_ASSERT("Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, size_t(1)));
 
     // Go to intermediate position
     /*
@@ -405,10 +376,8 @@ public:
     neighbourIndexes = findNeighbourMemberFunction(it.get());
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // should be on edge
-    TSM_ASSERT("Neighbours at index 1 includes 0",
-               doesContainIndex(neighbourIndexes, 0));
-    TSM_ASSERT("Neighbours at index 1 includes 2",
-               doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbours at index 1 includes 0", doesContainIndex(neighbourIndexes, 0));
+    TSM_ASSERT("Neighbours at index 1 includes 2", doesContainIndex(neighbourIndexes, 2));
 
     // Go to last position
     /*
@@ -418,28 +387,24 @@ public:
                                          */
     it->jumpTo(9);
     neighbourIndexes = findNeighbourMemberFunction(it.get());
-    TSM_ASSERT("Neighbour at index 9 is 8",
-               doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT("Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
   }
 
   void test_neighbours_1d_face_touching() {
-    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-        findNeighbourIndexesFaceTouching =
-            &MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching;
+    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesFaceTouching =
+        &MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching;
     do_test_neighbours_1d(findNeighbourIndexesFaceTouching);
   }
 
   void test_neighours_1d_vertex_touching() {
-    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-        findNeighbourIndexesVertexTouching =
-            &MDHistoWorkspaceIterator::findNeighbourIndexes;
+    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesVertexTouching =
+        &MDHistoWorkspaceIterator::findNeighbourIndexes;
     do_test_neighbours_1d(findNeighbourIndexesVertexTouching);
   }
 
   void test_neighbours_2d_face_touching() {
     const size_t nd = 2;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      2D MDHistoWorkspace
 
@@ -457,14 +422,11 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesFaceTouching();
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index 0 is 1",
-               doesContainIndex(neighbourIndexes, 1));
-    TSM_ASSERT("Neighbour at index 0 is 4",
-               doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbour at index 0 is 4", doesContainIndex(neighbourIndexes, 4));
 
     // At first position
     /*
@@ -476,12 +438,9 @@ public:
     it->next();
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
-    TSM_ASSERT("Neighbour at index 1 is 0",
-               doesContainIndex(neighbourIndexes, 0));
-    TSM_ASSERT("Neighbour at index 1 is 2",
-               doesContainIndex(neighbourIndexes, 2));
-    TSM_ASSERT("Neighbour at index 1 is 5",
-               doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 1 is 0", doesContainIndex(neighbourIndexes, 0));
+    TSM_ASSERT("Neighbour at index 1 is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbour at index 1 is 5", doesContainIndex(neighbourIndexes, 5));
 
     // At index 9 position
     /*
@@ -494,14 +453,10 @@ public:
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(4, neighbourIndexes.size());
 
-    TSM_ASSERT("Neighbour at index 9 is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index 9 is 8",
-               doesContainIndex(neighbourIndexes, 8));
-    TSM_ASSERT("Neighbour at index 9 is 10",
-               doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT("Neighbour at index 9 is 13",
-               doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT("Neighbour at index 9 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT("Neighbour at index 9 is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index 9 is 13", doesContainIndex(neighbourIndexes, 13));
 
     // At last position
     /*
@@ -514,16 +469,13 @@ public:
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index 15 is 11",
-               doesContainIndex(neighbourIndexes, 11));
-    TSM_ASSERT("Neighbour at index 15 is 14",
-               doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT("Neighbour at index 15 is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT("Neighbour at index 15 is 14", doesContainIndex(neighbourIndexes, 14));
   }
 
   void test_neighbours_2d_vertex_touching() {
     const size_t nd = 2;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      2D MDHistoWorkspace
 
@@ -544,12 +496,9 @@ public:
     std::vector<size_t> neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index 0 is 1",
-               doesContainIndex(neighbourIndexes, 1));
-    TSM_ASSERT("Neighbour at index 0 is 4",
-               doesContainIndex(neighbourIndexes, 4));
-    TSM_ASSERT("Neighbour at index 0 is 5",
-               doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbour at index 0 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index 0 is 5", doesContainIndex(neighbourIndexes, 5));
 
     // At first position
     /*
@@ -561,16 +510,11 @@ public:
     it->next();
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(5, neighbourIndexes.size());
-    TSM_ASSERT("Neighbour at index 1 is 0",
-               doesContainIndex(neighbourIndexes, 0));
-    TSM_ASSERT("Neighbour at index 1 is 2",
-               doesContainIndex(neighbourIndexes, 2));
-    TSM_ASSERT("Neighbour at index 1 is 4",
-               doesContainIndex(neighbourIndexes, 4));
-    TSM_ASSERT("Neighbour at index 1 is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index 1 is 6",
-               doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT("Neighbour at index 1 is 0", doesContainIndex(neighbourIndexes, 0));
+    TSM_ASSERT("Neighbour at index 1 is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbour at index 1 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index 1 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 1 is 6", doesContainIndex(neighbourIndexes, 6));
 
     // At index 9 position
     /*
@@ -583,22 +527,14 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(8, neighbourIndexes.size());
 
-    TSM_ASSERT("Neighbour at index 9 is 4",
-               doesContainIndex(neighbourIndexes, 4));
-    TSM_ASSERT("Neighbour at index 9 is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index 9 is 6",
-               doesContainIndex(neighbourIndexes, 6));
-    TSM_ASSERT("Neighbour at index 9 is 8",
-               doesContainIndex(neighbourIndexes, 8));
-    TSM_ASSERT("Neighbour at index 9 is 10",
-               doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT("Neighbour at index 9 is 12",
-               doesContainIndex(neighbourIndexes, 12));
-    TSM_ASSERT("Neighbour at index 9 is 13",
-               doesContainIndex(neighbourIndexes, 13));
-    TSM_ASSERT("Neighbour at index 9 is 14",
-               doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT("Neighbour at index 9 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index 9 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 9 is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT("Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT("Neighbour at index 9 is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index 9 is 12", doesContainIndex(neighbourIndexes, 12));
+    TSM_ASSERT("Neighbour at index 9 is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT("Neighbour at index 9 is 14", doesContainIndex(neighbourIndexes, 14));
 
     // At last position
     /*
@@ -611,18 +547,14 @@ public:
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index 15 is 10",
-               doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT("Neighbour at index 15 is 11",
-               doesContainIndex(neighbourIndexes, 11));
-    TSM_ASSERT("Neighbour at index 15 is 14",
-               doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT("Neighbour at index 15 is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index 15 is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT("Neighbour at index 15 is 14", doesContainIndex(neighbourIndexes, 14));
   }
 
   void test_neighbours_3d_face_touching() {
     const size_t nd = 3;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      3D MDHistoWorkspace
 
@@ -650,8 +582,7 @@ public:
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesFaceTouching();
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesFaceTouching();
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
     // Is on an edge
     TS_ASSERT(doesContainIndex(neighbourIndexes, 1));
@@ -670,8 +601,7 @@ public:
     // Move to index 21
     it->jumpTo(21);
     neighbourIndexes = it->findNeighbourIndexesFaceTouching();
-    TSM_ASSERT_EQUALS("Should have 2*n neighbours here", 6,
-                      neighbourIndexes.size());
+    TSM_ASSERT_EQUALS("Should have 2*n neighbours here", 6, neighbourIndexes.size());
     // Is completely enclosed
     expected_neighbours = {17, 20, 22, 25, 5, 37};
 
@@ -693,8 +623,7 @@ public:
 
   void test_neighbours_3d_vertex_touching() {
     const size_t nd = 3;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      3D MDHistoWorkspace
 
@@ -737,8 +666,7 @@ public:
     it->jumpTo(1);
     neighbourIndexes = it->findNeighbourIndexes();
     TS_ASSERT_EQUALS(11, neighbourIndexes.size());
-    std::vector<size_t> expected_neighbours = {0,  2,  4,  5,  6,  16,
-                                               17, 18, 20, 21, 22, 22};
+    std::vector<size_t> expected_neighbours = {0, 2, 4, 5, 6, 16, 17, 18, 20, 21, 22, 22};
     for (auto &expected_neighbour : expected_neighbours) {
       TS_ASSERT(doesContainIndex(neighbourIndexes, expected_neighbour));
     }
@@ -746,8 +674,7 @@ public:
     // Move to index 21
     it->jumpTo(21);
     neighbourIndexes = it->findNeighbourIndexes();
-    TSM_ASSERT_EQUALS("Should have 3^n-1 neighbours here", 26,
-                      neighbourIndexes.size());
+    TSM_ASSERT_EQUALS("Should have 3^n-1 neighbours here", 26, neighbourIndexes.size());
     // Is completely enclosed
     expected_neighbours = {0,  1,  2,  4,  5,  6,  8,  9,  10, 16, 17, 18, 22,
                            20, 24, 25, 26, 32, 33, 34, 37, 38, 36, 41, 40, 42};
@@ -774,8 +701,7 @@ public:
     const int width = 5;
 
     const size_t nd = 1;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     /*
      1D MDHistoWorkspace
 
@@ -792,14 +718,11 @@ public:
      |
      */
 
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesByWidth(width);
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
     // should be on edge
-    TSM_ASSERT("Neighbours at index 0 includes 1",
-               doesContainIndex(neighbourIndexes, 1));
-    TSM_ASSERT("Neighbours at index 0 includes 2",
-               doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbours at index 0 includes 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbours at index 0 includes 2", doesContainIndex(neighbourIndexes, 1));
 
     // Go to intermediate position
     /*
@@ -811,12 +734,9 @@ public:
     neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(3, neighbourIndexes.size());
     // should be on edge
-    TSM_ASSERT("Neighbours at index 1 includes 0",
-               doesContainIndex(neighbourIndexes, 0));
-    TSM_ASSERT("Neighbours at index 1 includes 2",
-               doesContainIndex(neighbourIndexes, 2));
-    TSM_ASSERT("Neighbours at index 1 includes 3",
-               doesContainIndex(neighbourIndexes, 3));
+    TSM_ASSERT("Neighbours at index 1 includes 0", doesContainIndex(neighbourIndexes, 0));
+    TSM_ASSERT("Neighbours at index 1 includes 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbours at index 1 includes 3", doesContainIndex(neighbourIndexes, 3));
 
     // Go to last position
     /*
@@ -827,17 +747,14 @@ public:
     it->jumpTo(9);
     neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
-    TSM_ASSERT("Neighbours at index 9 includes 8",
-               doesContainIndex(neighbourIndexes, 8));
-    TSM_ASSERT("Neighbours at index 9 includes 7",
-               doesContainIndex(neighbourIndexes, 7));
+    TSM_ASSERT("Neighbours at index 9 includes 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT("Neighbours at index 9 includes 7", doesContainIndex(neighbourIndexes, 7));
   }
 
   void test_neighbours_2d_vertex_touching_by_width() {
     const size_t nd = 2;
     const int width = 5;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      2D MDHistoWorkspace
 
@@ -855,26 +772,17 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesByWidth(width);
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(8, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index 0 is 1",
-               doesContainIndex(neighbourIndexes, 1));
-    TSM_ASSERT("Neighbour at index 0 is 2",
-               doesContainIndex(neighbourIndexes, 2));
-    TSM_ASSERT("Neighbour at index 0 is 4",
-               doesContainIndex(neighbourIndexes, 4));
-    TSM_ASSERT("Neighbour at index 0 is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index 0 is 6",
-               doesContainIndex(neighbourIndexes, 6));
-    TSM_ASSERT("Neighbour at index 0 is 8",
-               doesContainIndex(neighbourIndexes, 8));
-    TSM_ASSERT("Neighbour at index 0 is 9",
-               doesContainIndex(neighbourIndexes, 9));
-    TSM_ASSERT("Neighbour at index 0 is 10",
-               doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbour at index 0 is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbour at index 0 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index 0 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index 0 is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT("Neighbour at index 0 is 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT("Neighbour at index 0 is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT("Neighbour at index 0 is 10", doesContainIndex(neighbourIndexes, 10));
 
     // At centreish position
     /*
@@ -907,22 +815,14 @@ public:
     neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(8, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index is 6",
-               doesContainIndex(neighbourIndexes, 6));
-    TSM_ASSERT("Neighbour at index is 7",
-               doesContainIndex(neighbourIndexes, 7));
-    TSM_ASSERT("Neighbour at index is 9",
-               doesContainIndex(neighbourIndexes, 9));
-    TSM_ASSERT("Neighbour at index is 10",
-               doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT("Neighbour at index is 11",
-               doesContainIndex(neighbourIndexes, 11));
-    TSM_ASSERT("Neighbour at index is 13",
-               doesContainIndex(neighbourIndexes, 13));
-    TSM_ASSERT("Neighbour at index is 14",
-               doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT("Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT("Neighbour at index is 7", doesContainIndex(neighbourIndexes, 7));
+    TSM_ASSERT("Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT("Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT("Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT("Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
   }
 
   void test_neighbours_2d_vertex_touching_by_width_vector() {
@@ -931,8 +831,7 @@ public:
     widthVector.emplace_back(5);
     widthVector.emplace_back(3);
 
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      2D MDHistoWorkspace
 
@@ -950,20 +849,14 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesByWidth(widthVector);
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
     TS_ASSERT_EQUALS(5, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is 1",
-               doesContainIndex(neighbourIndexes, 1));
-    TSM_ASSERT("Neighbour at index is 2",
-               doesContainIndex(neighbourIndexes, 2));
-    TSM_ASSERT("Neighbour at index is 4",
-               doesContainIndex(neighbourIndexes, 4));
-    TSM_ASSERT("Neighbour at index is 5",
-               doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT("Neighbour at index is 6",
-               doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT("Neighbour at index is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT("Neighbour at index is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT("Neighbour at index is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT("Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT("Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
 
     // At centreish position
     /*
@@ -996,23 +889,17 @@ public:
     neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
     TS_ASSERT_EQUALS(5, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is 9",
-               doesContainIndex(neighbourIndexes, 9));
-    TSM_ASSERT("Neighbour at index is 10",
-               doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT("Neighbour at index is 11",
-               doesContainIndex(neighbourIndexes, 11));
-    TSM_ASSERT("Neighbour at index is 13",
-               doesContainIndex(neighbourIndexes, 13));
-    TSM_ASSERT("Neighbour at index is 14",
-               doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT("Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT("Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT("Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT("Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT("Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
   }
 
   void test_neighbours_3d_vertex_touching_width() {
     const size_t nd = 3;
     const int width = 5;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      3D MDHistoWorkspace
 
@@ -1040,8 +927,7 @@ public:
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // Start at Index = 0
-    std::vector<size_t> neighbourIndexes =
-        it->findNeighbourIndexesByWidth(width);
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(26, neighbourIndexes.size());
     // Is on an edge
     TS_ASSERT(doesContainIndex(neighbourIndexes, 1));
@@ -1065,8 +951,7 @@ public:
 
   void test_cache() {
     const size_t nd = 1;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     /*
      1D MDHistoWorkspace
 
@@ -1079,12 +964,10 @@ public:
     it->findNeighbourIndexesByWidth(3);
     TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize());
     it->findNeighbourIndexesByWidth(3);
-    TSM_ASSERT_EQUALS(
-        "One cache item expected", 1,
-        it->permutationCacheSize()); // Same item, no change to cache
+    TSM_ASSERT_EQUALS("One cache item expected", 1,
+                      it->permutationCacheSize()); // Same item, no change to cache
     it->findNeighbourIndexesByWidth(5);
-    TSM_ASSERT_EQUALS("Two cache entries expected", 2,
-                      it->permutationCacheSize());
+    TSM_ASSERT_EQUALS("Two cache entries expected", 2, it->permutationCacheSize());
   }
 
   void test_getBoxExtents_1d() {
@@ -1095,8 +978,7 @@ public:
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
-    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 1D.", 1,
-                      extents.size());
+    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 1D.", 1, extents.size());
     TS_ASSERT_DELTA(extents[0].get<0>(), 0, 1e-4);
     TS_ASSERT_DELTA(extents[0].get<1>(), 10.0 * 1.0 / 3.0, 1e-4);
 
@@ -1115,14 +997,12 @@ public:
 
   void test_getBoxExtents_3d() {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1.0 /*signal*/, 3 /*nd*/, 4 /*nbins per dim*/, 6 /*max*/,
-        1.0 /*error sq*/);
+        1.0 /*signal*/, 3 /*nd*/, 4 /*nbins per dim*/, 6 /*max*/, 1.0 /*error sq*/);
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws);
 
     // At zeroth position
     VecMDExtents extents = it->getBoxExtents();
-    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3,
-                      extents.size());
+    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3, extents.size());
     TS_ASSERT_DELTA(extents[0].get<0>(), 0, 1e-4);
     TS_ASSERT_DELTA(extents[0].get<1>(), 6.0 / 4.0, 1e-4);
     TS_ASSERT_DELTA(extents[1].get<0>(), 0, 1e-4);
@@ -1133,8 +1013,7 @@ public:
     // At last position
     it->jumpTo((4 * 4 * 4) - 1);
     extents = it->getBoxExtents();
-    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3,
-                      extents.size());
+    TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3, extents.size());
     TS_ASSERT_DELTA(extents[0].get<0>(), 3.0 / 4 * 6.0, 1e-4);
     TS_ASSERT_DELTA(extents[0].get<1>(), 4.0 / 4 * 6.0, 1e-4);
     TS_ASSERT_DELTA(extents[1].get<0>(), 3.0 / 4 * 6.0, 1e-4);
@@ -1145,10 +1024,10 @@ public:
 
   void test_jump_to_nearest_1d() {
 
-    MDHistoWorkspace_sptr wsIn = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        1.0 /*signal*/, 1 /*nd*/, 4 /*nbins per dim*/, 12 /*max*/);
-    MDHistoWorkspace_sptr wsOut = MDEventsTestHelper::makeFakeMDHistoWorkspace(
-        0.0 /*signal*/, 1 /*nd*/, 3 /*nbins per dim*/, 12 /*max*/);
+    MDHistoWorkspace_sptr wsIn =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 4 /*nbins per dim*/, 12 /*max*/);
+    MDHistoWorkspace_sptr wsOut =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0 /*signal*/, 1 /*nd*/, 3 /*nbins per dim*/, 12 /*max*/);
 
     /*
 
@@ -1206,8 +1085,7 @@ public:
     const int width = 5;
 
     const size_t nd = 1;
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     /*
      1D MDHistoWorkspace
 
@@ -1224,28 +1102,21 @@ public:
      |
      */
 
-    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
-        it->findNeighbourIndexesByWidth1D(width, 0);
+    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 0);
     std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
     std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
 
     TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
                       "to the product of the widths",
                       width, neighbourIndexes.size());
-    TSM_ASSERT_EQUALS(
-        "Three of the indexes should be valid", 3,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Three of the indexes should be valid", 3,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
     // should be on edge
-    TSM_ASSERT("Neighbours include -2",
-               doesContainIndex(neighbourIndexes, -2)); // Invalid
-    TSM_ASSERT("Neighbours include -1",
-               doesContainIndex(neighbourIndexes, -1)); // Invalid
-    TSM_ASSERT("Neighbours include 0",
-               doesContainIndex(neighbourIndexes, 0)); // Valid
-    TSM_ASSERT("Neighbours include 1",
-               doesContainIndex(neighbourIndexes, 1)); // Valid
-    TSM_ASSERT("Neighbours include 2",
-               doesContainIndex(neighbourIndexes, 2)); // Valid
+    TSM_ASSERT("Neighbours include -2", doesContainIndex(neighbourIndexes, -2)); // Invalid
+    TSM_ASSERT("Neighbours include -1", doesContainIndex(neighbourIndexes, -1)); // Invalid
+    TSM_ASSERT("Neighbours include 0", doesContainIndex(neighbourIndexes, 0));   // Valid
+    TSM_ASSERT("Neighbours include 1", doesContainIndex(neighbourIndexes, 1));   // Valid
+    TSM_ASSERT("Neighbours include 2", doesContainIndex(neighbourIndexes, 2));   // Valid
 
     // Go to intermediate position
     /*
@@ -1261,20 +1132,14 @@ public:
     TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
                       "to the product of the widths",
                       width, neighbourIndexes.size());
-    TSM_ASSERT_EQUALS(
-        "Four of the indexes should be valid", 4,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Four of the indexes should be valid", 4,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
     // should be on edge
-    TSM_ASSERT("Neighbours include -1",
-               doesContainIndex(neighbourIndexes, -1)); // Invalid
-    TSM_ASSERT("Neighbours include 0",
-               doesContainIndex(neighbourIndexes, 0)); // Valid
-    TSM_ASSERT("Neighbours include 1",
-               doesContainIndex(neighbourIndexes, 1)); // Valid
-    TSM_ASSERT("Neighbours include 2",
-               doesContainIndex(neighbourIndexes, 2)); // Valid
-    TSM_ASSERT("Neighbours include 3",
-               doesContainIndex(neighbourIndexes, 3)); // Valid
+    TSM_ASSERT("Neighbours include -1", doesContainIndex(neighbourIndexes, -1)); // Invalid
+    TSM_ASSERT("Neighbours include 0", doesContainIndex(neighbourIndexes, 0));   // Valid
+    TSM_ASSERT("Neighbours include 1", doesContainIndex(neighbourIndexes, 1));   // Valid
+    TSM_ASSERT("Neighbours include 2", doesContainIndex(neighbourIndexes, 2));   // Valid
+    TSM_ASSERT("Neighbours include 3", doesContainIndex(neighbourIndexes, 3));   // Valid
 
     // Go to last position
     /*
@@ -1290,28 +1155,21 @@ public:
     TSM_ASSERT_EQUALS(" Function should always return a list of indexes equal "
                       "to the product of the widths",
                       width, neighbourIndexes.size());
-    TSM_ASSERT_EQUALS(
-        "Three of the indexes should be valid", 3,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Three of the indexes should be valid", 3,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
     // should be on edge
-    TSM_ASSERT("Neighbours include -1",
-               doesContainIndex(neighbourIndexes, 7)); // Valid
-    TSM_ASSERT("Neighbours include 0",
-               doesContainIndex(neighbourIndexes, 8)); // Valid
-    TSM_ASSERT("Neighbours include 1",
-               doesContainIndex(neighbourIndexes, 9)); // Valid
-    TSM_ASSERT("Neighbours include 2",
-               doesContainIndex(neighbourIndexes, 10)); // Invalid
-    TSM_ASSERT("Neighbours include 3",
-               doesContainIndex(neighbourIndexes, 11)); // Invalid
+    TSM_ASSERT("Neighbours include -1", doesContainIndex(neighbourIndexes, 7)); // Valid
+    TSM_ASSERT("Neighbours include 0", doesContainIndex(neighbourIndexes, 8));  // Valid
+    TSM_ASSERT("Neighbours include 1", doesContainIndex(neighbourIndexes, 9));  // Valid
+    TSM_ASSERT("Neighbours include 2", doesContainIndex(neighbourIndexes, 10)); // Invalid
+    TSM_ASSERT("Neighbours include 3", doesContainIndex(neighbourIndexes, 11)); // Invalid
   }
 
   void test_neighbours_2d_vertex_touching_by_width_including_out_of_bounds() {
     const size_t nd = 2;
     const int width = 5;
 
-    MDHistoWorkspace_sptr ws =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
     /*
      2D MDHistoWorkspace
 
@@ -1329,26 +1187,19 @@ public:
      8 - 9 -10 -11
      12-13 -14 -15
      */
-    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity =
-        it->findNeighbourIndexesByWidth1D(width, 1);
+    std::pair<std::vector<size_t>, std::vector<bool>> indexesAndValidity = it->findNeighbourIndexesByWidth1D(width, 1);
     std::vector<size_t> neighbourIndexes = std::get<0>(indexesAndValidity);
     std::vector<bool> indexValidity = std::get<1>(indexesAndValidity);
 
-    TSM_ASSERT_EQUALS(
-        "Three of the indexes should be valid", 3,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Three of the indexes should be valid", 3,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
 
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is -8",
-               doesContainIndex(neighbourIndexes, -8)); // Invalid
-    TSM_ASSERT("Neighbours include -4",
-               doesContainIndex(neighbourIndexes, -4)); // Invalid
-    TSM_ASSERT("Neighbour at index is 0",
-               doesContainIndex(neighbourIndexes, 0)); // Valid
-    TSM_ASSERT("Neighbour at index is 4",
-               doesContainIndex(neighbourIndexes, 4)); // Valid
-    TSM_ASSERT("Neighbour at index is 8",
-               doesContainIndex(neighbourIndexes, 8)); // Valid
+    TSM_ASSERT("Neighbour at index is -8", doesContainIndex(neighbourIndexes, -8)); // Invalid
+    TSM_ASSERT("Neighbours include -4", doesContainIndex(neighbourIndexes, -4));    // Invalid
+    TSM_ASSERT("Neighbour at index is 0", doesContainIndex(neighbourIndexes, 0));   // Valid
+    TSM_ASSERT("Neighbour at index is 4", doesContainIndex(neighbourIndexes, 4));   // Valid
+    TSM_ASSERT("Neighbour at index is 8", doesContainIndex(neighbourIndexes, 8));   // Valid
 
     // At centreish position
     /*
@@ -1362,21 +1213,15 @@ public:
     neighbourIndexes = std::get<0>(indexesAndValidity);
     indexValidity = std::get<1>(indexesAndValidity);
 
-    TSM_ASSERT_EQUALS(
-        "Four of the indexes should be valid", 4,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Four of the indexes should be valid", 4,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
 
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is -3",
-               doesContainIndex(neighbourIndexes, -3)); // Invalid
-    TSM_ASSERT("Neighbours include 1",
-               doesContainIndex(neighbourIndexes, 1)); // Valid
-    TSM_ASSERT("Neighbour at index is 5",
-               doesContainIndex(neighbourIndexes, 5)); // Valid
-    TSM_ASSERT("Neighbour at index is 9",
-               doesContainIndex(neighbourIndexes, 9)); // Valid
-    TSM_ASSERT("Neighbour at index is 13",
-               doesContainIndex(neighbourIndexes, 13)); // Valid
+    TSM_ASSERT("Neighbour at index is -3", doesContainIndex(neighbourIndexes, -3)); // Invalid
+    TSM_ASSERT("Neighbours include 1", doesContainIndex(neighbourIndexes, 1));      // Valid
+    TSM_ASSERT("Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));   // Valid
+    TSM_ASSERT("Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));   // Valid
+    TSM_ASSERT("Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13)); // Valid
 
     // At end position
     /*
@@ -1390,21 +1235,15 @@ public:
     neighbourIndexes = std::get<0>(indexesAndValidity);
     indexValidity = std::get<1>(indexesAndValidity);
 
-    TSM_ASSERT_EQUALS(
-        "Three of the indexes should be valid", 3,
-        std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
+    TSM_ASSERT_EQUALS("Three of the indexes should be valid", 3,
+                      std::accumulate(indexValidity.cbegin(), indexValidity.cend(), 0));
 
     // Is on an edge
-    TSM_ASSERT("Neighbour at index is 7",
-               doesContainIndex(neighbourIndexes, 7)); // Valid
-    TSM_ASSERT("Neighbours include 11",
-               doesContainIndex(neighbourIndexes, 11)); // Valid
-    TSM_ASSERT("Neighbour at index is 15",
-               doesContainIndex(neighbourIndexes, 15)); // Valid
-    TSM_ASSERT("Neighbour at index is 19",
-               doesContainIndex(neighbourIndexes, 19)); // Invalid
-    TSM_ASSERT("Neighbour at index is 23",
-               doesContainIndex(neighbourIndexes, 23)); // Invalid
+    TSM_ASSERT("Neighbour at index is 7", doesContainIndex(neighbourIndexes, 7));   // Valid
+    TSM_ASSERT("Neighbours include 11", doesContainIndex(neighbourIndexes, 11));    // Valid
+    TSM_ASSERT("Neighbour at index is 15", doesContainIndex(neighbourIndexes, 15)); // Valid
+    TSM_ASSERT("Neighbour at index is 19", doesContainIndex(neighbourIndexes, 19)); // Invalid
+    TSM_ASSERT("Neighbour at index is 23", doesContainIndex(neighbourIndexes, 23)); // Invalid
   }
 };
 
@@ -1415,9 +1254,7 @@ public:
   static MDHistoWorkspaceIteratorTestPerformance *createSuite() {
     return new MDHistoWorkspaceIteratorTestPerformance();
   }
-  static void destroySuite(MDHistoWorkspaceIteratorTestPerformance *suite) {
-    delete suite;
-  }
+  static void destroySuite(MDHistoWorkspaceIteratorTestPerformance *suite) { delete suite; }
 
   MDHistoWorkspace_sptr ws;
   MDHistoWorkspace_sptr small_ws;
@@ -1480,13 +1317,11 @@ public:
   }
 
   void test_masked_get_vertexes_call_throws() {
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(
-        new MDHistoWorkspaceIterator(ws, new SkipNothing));
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws, new SkipNothing));
     size_t numVertexes;
     size_t outDimensions = 1;
     bool maskDim[] = {true};
-    TSM_ASSERT_THROWS("Not implemented yet, should throw",
-                      it->getVertexesArray(numVertexes, outDimensions, maskDim),
+    TSM_ASSERT_THROWS("Not implemented yet, should throw", it->getVertexesArray(numVertexes, outDimensions, maskDim),
                       const std::runtime_error &);
   }
 
@@ -1496,8 +1331,7 @@ public:
     for (size_t i = 0; i < small_ws->getNPoints(); ++i) {
       std::stringstream stream;
       stream << "Masking is different from the workspace at index: " << i;
-      TSM_ASSERT_EQUALS(stream.str(), small_ws->getIsMaskedAt(i),
-                        iterator.getIsMasked());
+      TSM_ASSERT_EQUALS(stream.str(), small_ws->getIsMaskedAt(i), iterator.getIsMasked());
       iterator.next();
     }
   }

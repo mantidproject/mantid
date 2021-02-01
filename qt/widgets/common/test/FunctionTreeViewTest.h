@@ -34,17 +34,14 @@ using namespace MantidQt::MantidWidgets;
 class FunctionTreeViewTest : public CxxTest::TestSuite {
 
 public:
-  static FunctionTreeViewTest *createSuite() {
-    return new FunctionTreeViewTest;
-  }
+  static FunctionTreeViewTest *createSuite() { return new FunctionTreeViewTest; }
   static void destroySuite(FunctionTreeViewTest *suite) { delete suite; }
 
   void setUp() override { m_numberOfTries = 100u; }
 
   void tearDown() override { m_functionTreeView.reset(); }
 
-  void
-  test_that_the_FunctionTreeView_can_be_instantiated_many_times_without_instability() {
+  void test_that_the_FunctionTreeView_can_be_instantiated_many_times_without_instability() {
     for (auto i = 0u; i < m_numberOfTries; ++i)
       m_functionTreeView = std::make_unique<FunctionTreeView>(nullptr, true);
   }

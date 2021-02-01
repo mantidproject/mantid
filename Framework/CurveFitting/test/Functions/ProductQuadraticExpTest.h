@@ -33,8 +33,7 @@ private:
     const double m_step;
 
   public:
-    LinearIncrementingAssignment(double min, double step)
-        : m_current(min), m_step(step) {}
+    LinearIncrementingAssignment(double min, double step) : m_current(min), m_step(step) {}
     double operator()() {
       double temp = m_current;
       m_current += m_step;
@@ -52,8 +51,7 @@ so simple.
 4) For each point on the domain, compares the outputs of (1) (2) and (3) above
 to check that the results are equal.
 */
-  void do_test_function_calculation(const double &A0, const double &A1,
-                                    const double &A2, const double &Height,
+  void do_test_function_calculation(const double &A0, const double &A1, const double &A2, const double &Height,
                                     const double &Lifetime) {
     // Create the Product linear exponential function
     ProductQuadraticExp func;
@@ -81,8 +79,7 @@ to check that the results are equal.
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.0001));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.0001));
 
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesBenchmark(domain);
@@ -95,8 +92,7 @@ to check that the results are equal.
       double x = xValues[i];
       // Mimic workings of ProductLinearExp function to product comparison
       // output.
-      double expected =
-          ((A2 * x * x) + (A1 * x) + A0) * Height * std::exp(-x / Lifetime);
+      double expected = ((A2 * x * x) + (A1 * x) + A0) * Height * std::exp(-x / Lifetime);
       TS_ASSERT_DELTA(expected, valuesLinExpDecay[i], 0.0001);
 
       // Verify that the output is also the same for the Linear algorithm.
@@ -107,9 +103,7 @@ to check that the results are equal.
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProductQuadraticExpTest *createSuite() {
-    return new ProductQuadraticExpTest();
-  }
+  static ProductQuadraticExpTest *createSuite() { return new ProductQuadraticExpTest(); }
   static void destroySuite(ProductQuadraticExpTest *suite) { delete suite; }
 
   void test_name() {
@@ -123,8 +117,7 @@ public:
   }
 
   void test_registered_with_factory() {
-    IFunction_sptr func =
-        FunctionFactory::Instance().createFunction("ProductQuadraticExp");
+    IFunction_sptr func = FunctionFactory::Instance().createFunction("ProductQuadraticExp");
     TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductQuadraticExp");
     TS_ASSERT(std::dynamic_pointer_cast<ProductQuadraticExp>(func) != nullptr);
@@ -174,8 +167,7 @@ public:
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.1));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
 
     FunctionDomain1DVector domain(xValues);
     FunctionValues valuesExpDecay(domain);
@@ -199,8 +191,7 @@ public:
     const size_t nResults = 10;
     using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(),
-                  LinearIncrementingAssignment(0, 0.1));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
     FunctionDomain1DVector domain(xValues);
 
     Mantid::CurveFitting::Jacobian jacobian(nResults, 5);

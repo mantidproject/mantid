@@ -52,9 +52,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class FitScriptGeneratorViewTest : public CxxTest::TestSuite {
 
 public:
-  static FitScriptGeneratorViewTest *createSuite() {
-    return new FitScriptGeneratorViewTest;
-  }
+  static FitScriptGeneratorViewTest *createSuite() { return new FitScriptGeneratorViewTest; }
   static void destroySuite(FitScriptGeneratorViewTest *suite) { delete suite; }
 
   void setUp() override {
@@ -68,8 +66,7 @@ public:
     AnalysisDataService::Instance().addOrReplace(m_wsName, m_workspace);
 
     m_view = std::make_unique<FitScriptGeneratorView>();
-    m_presenter =
-        std::make_unique<MockFitScriptGeneratorPresenter>(m_view.get());
+    m_presenter = std::make_unique<MockFitScriptGeneratorPresenter>(m_view.get());
   }
 
   void tearDown() override {
@@ -90,8 +87,7 @@ public:
   void test_that_clicking_the_remove_button_will_notify_the_presenter() {
     openFitScriptGeneratorWidget();
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::RemoveClicked))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::RemoveClicked)).Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
     QApplication::sendPostedEvents();
@@ -106,8 +102,7 @@ public:
     QApplication::sendPostedEvents();
   }
 
-  void
-  test_that_adding_a_domain_to_the_view_will_change_the_number_of_table_rows() {
+  void test_that_adding_a_domain_to_the_view_will_change_the_number_of_table_rows() {
     openFitScriptGeneratorWidget();
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 0);
 
@@ -116,8 +111,7 @@ public:
     TS_ASSERT_EQUALS(m_view->tableWidget()->rowCount(), 1);
   }
 
-  void
-  test_that_adding_a_domain_to_the_view_will_show_the_correct_data_in_the_table() {
+  void test_that_adding_a_domain_to_the_view_will_show_the_correct_data_in_the_table() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
@@ -127,8 +121,7 @@ public:
     TS_ASSERT_EQUALS(m_view->endX(0), 2.0);
   }
 
-  void
-  test_that_removing_a_domain_in_the_view_will_change_the_number_of_table_rows() {
+  void test_that_removing_a_domain_in_the_view_will_change_the_number_of_table_rows() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
@@ -142,8 +135,7 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged)).Times(1);
 
     changeValueInTableCell(0, ColumnIndex::StartX);
   }
@@ -172,8 +164,7 @@ public:
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
-  void
-  test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
+  void test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
 
@@ -181,8 +172,7 @@ public:
     TS_ASSERT_EQUALS(selectedIndices.size(), 0);
   }
 
-  void
-  test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
+  void test_that_getDialogWorkspaces_returns_the_expected_workspace_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -217,13 +207,11 @@ public:
     TS_ASSERT_EQUALS(workspaces.size(), 3);
     for (auto i = 0u; i < workspaces.size(); ++i) {
       TS_ASSERT_EQUALS(workspaces[i]->getNumberHistograms(), 3);
-      TS_ASSERT_EQUALS(workspaces[i]->getName(),
-                       "GroupName_" + std::to_string(i));
+      TS_ASSERT_EQUALS(workspaces[i]->getName(), "GroupName_" + std::to_string(i));
     }
   }
 
-  void
-  test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
+  void test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -237,8 +225,7 @@ public:
 
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 1);
-    TS_ASSERT_EQUALS(workspaceIndices[0],
-                     MantidQt::MantidWidgets::WorkspaceIndex(1));
+    TS_ASSERT_EQUALS(workspaceIndices[0], MantidQt::MantidWidgets::WorkspaceIndex(1));
   }
 
   void
@@ -257,19 +244,16 @@ public:
     auto const workspaceIndices = m_view->getDialogWorkspaceIndices();
     TS_ASSERT_EQUALS(workspaceIndices.size(), 3);
     for (auto i = 0u; i < workspaceIndices.size(); ++i)
-      TS_ASSERT_EQUALS(workspaceIndices[i],
-                       MantidQt::MantidWidgets::WorkspaceIndex(i));
+      TS_ASSERT_EQUALS(workspaceIndices[i], MantidQt::MantidWidgets::WorkspaceIndex(i));
   }
 
-  void
-  test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
+  void test_that_resetSelection_will_reset_the_selected_rows_value_to_its_previous_value() {
     int rowIndex(1);
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
     m_view->addWorkspaceDomain("Name2", m_wsIndex, 0.0, 2.0);
 
-    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged))
-        .Times(1);
+    EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::StartXChanged)).Times(1);
 
     // Change the value of StartX to 5.0
     changeValueInTableCell(rowIndex, ColumnIndex::StartX);
@@ -287,13 +271,9 @@ private:
     m_presenter->openFitScriptGenerator();
   }
 
-  void assertWidgetCreated() {
-    TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size());
-  }
+  void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
-  void assertNoTopLevelWidgets() {
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
-  }
+  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
 
   void changeValueInTableCell(int row, int column) {
     // Retrieve the pixel position of a StartX cell

@@ -26,31 +26,25 @@ See ConvertUnits for the details of this transformations
 if necessary, also sets up the proper units converter pointers which do the
 actual conversion.
 */
-CnvrtToMD::ConvertUnits
-UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
-                                              const std::string &UnitsTo,
-                                              bool forceViaTOF) {
+CnvrtToMD::ConvertUnits UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
+                                                                      const std::string &UnitsTo, bool forceViaTOF) {
   // if units are equal, no conversion is necessary;
   if (UnitsFrom == UnitsTo)
     return CnvrtToMD::ConvertNo;
 
   // get all known units:
-  std::vector<std::string> AllKnownUnits =
-      Kernel::UnitFactory::Instance().getKeys();
+  std::vector<std::string> AllKnownUnits = Kernel::UnitFactory::Instance().getKeys();
 
   // check if unit conversion is possible at all:
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
-    throw(std::invalid_argument(
-        " Can not initate conversion from unknown unit: " + UnitsFrom));
+    throw(std::invalid_argument(" Can not initate conversion from unknown unit: " + UnitsFrom));
 
   if (Kernel::Strings::isMember(AllKnownUnits, UnitsFrom) < 0)
-    throw(std::invalid_argument(
-        " Can not initiate conversion to unknown unit: " + UnitsTo));
+    throw(std::invalid_argument(" Can not initiate conversion to unknown unit: " + UnitsTo));
 
   // is a quick conversion available?
   m_SourceWSUnit = Kernel::UnitFactory::Instance().create(UnitsFrom);
-  if (m_SourceWSUnit->quickConversion(UnitsTo, m_Factor, m_Power) &&
-      !forceViaTOF) {
+  if (m_SourceWSUnit->quickConversion(UnitsTo, m_Factor, m_Power) && !forceViaTOF) {
     return CnvrtToMD::ConvertFast;
   } else {
     // are the input units TOF?
@@ -64,9 +58,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
 }
 /** Test and check if units conversion really occurs. Return true if unit
  * conversion happens or false if noConversion mode is selected*/
-bool UnitsConversionHelper::isUnitConverted() const {
-  return m_UnitCnvrsn != CnvrtToMD::ConvertNo;
-}
+bool UnitsConversionHelper::isUnitConverted() const { return m_UnitCnvrsn != CnvrtToMD::ConvertNo; }
 /** Initialize unit conversion helper
  * This method is interface to internal initialize method, which actually takes
  all parameters UnitConversion helper needs from
@@ -82,8 +74,7 @@ bool UnitsConversionHelper::isUnitConverted() const {
  quick conversion exist (by default, false)
  *
 */
-void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
-                                       const std::string &unitsTo,
+void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, const std::string &unitsTo,
                                        bool forceViaTOF) {
   // obtain input workspace units
   API::MatrixWorkspace_const_sptr inWS2D = targetWSDescr.getInWS();
@@ -92,12 +83,9 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
                              "able to call this function when workpsace is "
                              "undefined"));
 
-  API::NumericAxis *pAxis =
-      dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(0));
+  API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(0));
   if (!pAxis)
-    throw(std::invalid_argument(
-        "Cannot retrieve numeric X axis from the input workspace: " +
-        inWS2D->getName()));
+    throw(std::invalid_argument("Cannot retrieve numeric X axis from the input workspace: " + inWS2D->getName()));
 
   std::string unitsFrom = inWS2D->getAxis(0)->unit()->unitID();
 
@@ -107,8 +95,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
 
   auto Emode = static_cast<int>(targetWSDescr.getEMode());
 
-  this->initialize(unitsFrom, unitsTo, targetWSDescr.m_PreprDetTable, Emode,
-                   forceViaTOF);
+  this->initialize(unitsFrom, unitsTo, targetWSDescr.m_PreprDetTable, Emode, forceViaTOF);
 }
 // the helper function which used in the code below to simplify check if the
 // variable is in range
@@ -117,9 +104,7 @@ inline bool inRange(const std::pair<double, double> &range, const double &val) {
 }
 // the helper function which used in the code below to simplify check if the
 // variable is in range
-inline bool inRange(const double &xMin, const double &xMax, const double &val) {
-  return val >= xMin && val <= xMax;
-}
+inline bool inRange(const double &xMin, const double &xMax, const double &val) { return val >= xMin && val <= xMax; }
 
 /** Method verify if the Units transformation is well defined in the range
 provided and if not
@@ -130,8 +115,7 @@ other way
 @param x1 -- the initial point of the units conversion range to verify
 @param x2 -- the final point of the units conversion range to verify
 */
-std::pair<double, double>
-UnitsConversionHelper::getConversionRange(double x1, double x2) const {
+std::pair<double, double> UnitsConversionHelper::getConversionRange(double x1, double x2) const {
   std::pair<double, double> range;
   range.first = std::min(x1, x2);
   range.second = std::max(x1, x2);
@@ -145,8 +129,7 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
     double u1 = this->convertUnits(x1);
     double u2 = this->convertUnits(x2);
 
-    if (!inRange(trRange, u1) ||
-        !inRange(trRange, u2)) // hopefully it is a rare event
+    if (!inRange(trRange, u1) || !inRange(trRange, u2)) // hopefully it is a rare event
     {
       double uMin = std::min(u1, u2);
       double uMax = std::max(u1, u2);
@@ -177,8 +160,7 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
   }
   case (CnvrtToMD::ConvertByTOF): {
     auto source_range = m_SourceWSUnit->conversionRange();
-    if (!inRange(source_range, range.first) ||
-        !inRange(source_range, range.second)) {
+    if (!inRange(source_range, range.first) || !inRange(source_range, range.second)) {
       if (inRange(range, source_range.first))
         range.first = source_range.first;
       if (inRange(range, source_range.second))
@@ -212,8 +194,7 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
     return range;
   }
   default:
-    throw std::runtime_error(
-        "updateConversion: unknown type of conversion requested");
+    throw std::runtime_error("updateConversion: unknown type of conversion requested");
   }
 }
 
@@ -233,10 +214,9 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
  *
 */
 
-void UnitsConversionHelper::initialize(
-    const std::string &unitsFrom, const std::string &unitsTo,
-    const DataObjects::TableWorkspace_const_sptr &DetWS, int Emode,
-    bool forceViaTOF) {
+void UnitsConversionHelper::initialize(const std::string &unitsFrom, const std::string &unitsTo,
+                                       const DataObjects::TableWorkspace_const_sptr &DetWS, int Emode,
+                                       bool forceViaTOF) {
   m_Emode = Emode;
 
   if (!DetWS)
@@ -250,8 +230,7 @@ void UnitsConversionHelper::initialize(
   // create target units class
   m_TargetUnit = Kernel::UnitFactory::Instance().create(unitsTo);
   if (!m_TargetUnit)
-    throw(std::runtime_error(
-        " Cannot retrieve target unit from the units factory"));
+    throw(std::runtime_error(" Cannot retrieve target unit from the units factory"));
 
   // get access to all values used by unit conversion.
   m_pTwoThetas = &(DetWS->getColVector<double>("TwoTheta"));
@@ -310,8 +289,7 @@ void UnitsConversionHelper::updateConversion(size_t i) {
     return;
   }
   default:
-    throw std::runtime_error(
-        "updateConversion: unknown type of conversion requested");
+    throw std::runtime_error("updateConversion: unknown type of conversion requested");
   }
 }
 /** do actual unit conversion from  input to oputput data
@@ -334,13 +312,11 @@ double UnitsConversionHelper::convertUnits(double val) const {
     return m_TargetUnit->singleFromTOF(tof);
   }
   default:
-    throw std::runtime_error(
-        "updateConversion: unknown type of conversion requested");
+    throw std::runtime_error("updateConversion: unknown type of conversion requested");
   }
 }
 // copy constructor;
-UnitsConversionHelper::UnitsConversionHelper(
-    const UnitsConversionHelper &another) {
+UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &another) {
   m_UnitCnvrsn = another.m_UnitCnvrsn;
   m_Factor = another.m_Factor;
   m_Power = another.m_Power;
@@ -361,10 +337,8 @@ UnitsConversionHelper::UnitsConversionHelper(
 }
 
 UnitsConversionHelper::UnitsConversionHelper()
-    : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
-      m_Emode(-1), // undefined
-      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr),
-      m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
+    : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1), m_Emode(-1), // undefined
+      m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(nullptr), m_pL2s(nullptr), m_pEfixedArray(nullptr) {}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

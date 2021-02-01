@@ -24,12 +24,10 @@ using namespace API;
 void ModifyData::init() {
 
   // Declare a 2D input workspace property.
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                        Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
 
   // Declare a 2D output workspace property.
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output));
 
   // Switches between two ways of accessing the data in the input workspace
   declareProperty("UseVectors", false);
@@ -40,8 +38,7 @@ void ModifyData::init() {
 void ModifyData::exec() {
   // g_log is a reference to the logger. It is used to print out information,
   // warning, and error messages
-  g_log.information() << "Running algorithm " << name() << " version "
-                      << version() << std::endl;
+  g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
   // Get the input workspace
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
@@ -65,9 +62,8 @@ void ModifyData::exec() {
     // Iterate over i-th spectrum and modify the data
     const auto numBins = YValues.size();
     for (size_t j = 0; j < numBins; j++) {
-      g_log.information() << "Spectrum " << i << " Point " << j
-                          << " values: " << XValues[j] << ' ' << YValues[j]
-                          << ' ' << EValues[j] << std::endl;
+      g_log.information() << "Spectrum " << i << " Point " << j << " values: " << XValues[j] << ' ' << YValues[j] << ' '
+                          << EValues[j] << std::endl;
       newX[j] = XValues[j] + static_cast<double>(i + j);
       newY[j] = YValues[j] * (2. + 0.1 * static_cast<double>(j));
       newE[j] = EValues[j] + 0.1;
@@ -88,9 +84,8 @@ void ModifyData::exec() {
     const auto numBins = YValues.size();
     for (size_t j = 0; j < numBins; ++j) {
       // Get the reference to a data point
-      g_log.information() << "Point number " << count++
-                          << " values: " << XValues[j] << ' ' << YValues[j]
-                          << ' ' << EValues[j] << std::endl;
+      g_log.information() << "Point number " << count++ << " values: " << XValues[j] << ' ' << YValues[j] << ' '
+                          << EValues[j] << std::endl;
     }
   }
 }

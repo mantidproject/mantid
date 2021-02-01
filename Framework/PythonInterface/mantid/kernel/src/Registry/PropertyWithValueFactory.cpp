@@ -35,8 +35,7 @@ namespace PythonInterface {
 namespace Registry {
 namespace {
 /// Lookup map type
-using PyTypeIndex =
-    std::map<const PyTypeObject *, std::shared_ptr<PropertyValueHandler>>;
+using PyTypeIndex = std::map<const PyTypeObject *, std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -86,8 +85,7 @@ const PyTypeIndex &getTypeIndex() {
 }
 
 // Lookup map for arrays
-using PyArrayIndex =
-    std::map<std::string, std::shared_ptr<PropertyValueHandler>>;
+using PyArrayIndex = std::map<std::string, std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -133,9 +131,10 @@ const PyArrayIndex &getArrayIndex() {
  * @param direction :: Specifies whether the property is Input, InOut or Output
  * @returns A pointer to a new Property object
  */
-std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(
-    const std::string &name, const boost::python::object &defaultValue,
-    const boost::python::object &validator, const unsigned int direction) {
+std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(const std::string &name,
+                                                                   const boost::python::object &defaultValue,
+                                                                   const boost::python::object &validator,
+                                                                   const unsigned int direction) {
   const auto &propHandle = lookup(defaultValue.ptr());
   return propHandle.create(name, defaultValue, validator, direction);
 }
@@ -149,10 +148,9 @@ std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(
  * @param direction :: Specifies whether the property is Input, InOut or Output
  * @returns A pointer to a new Property object
  */
-std::unique_ptr<Kernel::Property>
-PropertyWithValueFactory::create(const std::string &name,
-                                 const boost::python::object &defaultValue,
-                                 const unsigned int direction) {
+std::unique_ptr<Kernel::Property> PropertyWithValueFactory::create(const std::string &name,
+                                                                   const boost::python::object &defaultValue,
+                                                                   const unsigned int direction) {
   boost::python::object validator; // Default construction gives None object
   return create(name, defaultValue, validator, direction);
 }
@@ -164,9 +162,8 @@ PropertyWithValueFactory::create(const std::string &name,
  * @param defaultValue :: A default value for this property.
  * @returns A pointer to a new Property object
  */
-std::unique_ptr<Mantid::Kernel::Property>
-PropertyWithValueFactory::createTimeSeries(const std::string &name,
-                                           const list &defaultValue) {
+std::unique_ptr<Mantid::Kernel::Property> PropertyWithValueFactory::createTimeSeries(const std::string &name,
+                                                                                     const list &defaultValue) {
 
   // Use a PyObject pointer to determine the type stored in the list
   auto obj = object(defaultValue[0]).ptr();
@@ -189,8 +186,7 @@ PropertyWithValueFactory::createTimeSeries(const std::string &name,
 
   // If we reach here an error has occurred as there are no type to create
   // a TimeSeriesProperty from
-  throw std::runtime_error(
-      "Cannot create a TimeSeriesProperty with that data type!");
+  throw std::runtime_error("Cannot create a TimeSeriesProperty with that data type!");
 }
 
 //-------------------------------------------------------------------------
@@ -201,8 +197,7 @@ PropertyWithValueFactory::createTimeSeries(const std::string &name,
  * @param object :: A pointer to a PyObject that represents the type
  * @returns A pointer to handler that can be used to instantiate a property
  */
-const PropertyValueHandler &
-PropertyWithValueFactory::lookup(PyObject *const object) {
+const PropertyValueHandler &PropertyWithValueFactory::lookup(PyObject *const object) {
   // Check if object is array.
   const auto arrayType = isArray(object);
   if (!arrayType.empty()) {
@@ -217,8 +212,7 @@ PropertyWithValueFactory::lookup(PyObject *const object) {
   auto cit = typeIndex.find(object->ob_type);
   if (cit == typeIndex.end()) {
     std::ostringstream os;
-    os << "Cannot create PropertyWithValue from Python type "
-       << object->ob_type->tp_name
+    os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name
        << ". No converter registered in PropertyWithValueFactory.";
     throw std::invalid_argument(os.str());
   }
@@ -235,16 +229,14 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     // If we are dealing with an empty list/tuple, then we cannot deduce the
     // ArrayType. We need to throw at this point.
     if (PySequence_Size(object) < 1) {
-      throw std::runtime_error(
-          "Cannot have a sequence type of length zero in a mapping type.");
+      throw std::runtime_error("Cannot have a sequence type of length zero in a mapping type.");
     }
 
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
     GNU_DIAG_OFF("parentheses-equality")
     if (PyBool_Check(item)) {
-      throw std::runtime_error(
-          "Unable to support extracting arrays of booleans.");
+      throw std::runtime_error("Unable to support extracting arrays of booleans.");
     }
     if (PyLong_Check(item)) {
       return std::string("LongIntArray");
@@ -271,10 +263,8 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     // If we get here, we've found a sequence and we can't interpret the item
     // type.
     std::ostringstream os;
-    os << "Cannot create PropertyWithValue from Python type "
-       << object->ob_type->tp_name << " containing items of type "
-       << item->ob_type
-       << ". No converter registered in PropertyWithValueFactory.";
+    os << "Cannot create PropertyWithValue from Python type " << object->ob_type->tp_name
+       << " containing items of type " << item->ob_type << ". No converter registered in PropertyWithValueFactory.";
 
     throw std::invalid_argument(os.str());
   } else {

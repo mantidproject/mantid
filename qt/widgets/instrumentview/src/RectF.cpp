@@ -61,9 +61,7 @@ bool RectF::contains(double x, double y) const {
   return !(dy < 0 || dy > height());
 }
 
-bool RectF::contains(const RectF &rect) {
-  return contains(rect.p0()) && contains(rect.p1());
-}
+bool RectF::contains(const RectF &rect) { return contains(rect.p0()) && contains(rect.p1()); }
 
 /**
  * Create a transformation from this rectangle to a QRectF.

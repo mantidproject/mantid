@@ -33,8 +33,7 @@ class BinDialog;
 /**
  * Implements the Render tab in InstrumentWidget.
  */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
-    : public InstrumentWidgetTab {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab : public InstrumentWidgetTab {
   Q_OBJECT
 
 public:
@@ -48,8 +47,7 @@ public:
   void setScaleType(ColorMap::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
-  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/,
-                     double /*maxValue*/, double /*minPositive*/,
+  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/, double /*maxValue*/, double /*minPositive*/,
                      bool /*autoscaling*/);
   /// Load the render window tab settings from file.
   virtual void loadFromProject(const std::string &lines) override;

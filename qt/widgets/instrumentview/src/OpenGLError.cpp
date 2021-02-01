@@ -26,8 +26,7 @@ bool OpenGLError::check(const std::string &funName) {
   GLuint err = glGetError();
   if (err) {
     std::ostringstream ostr;
-    ostr << "OpenGL error detected in " << funName << ": "
-         << gluErrorString(err);
+    ostr << "OpenGL error detected in " << funName << ": " << gluErrorString(err);
     g_log.error() << ostr.str() << '\n';
     // throw OpenGLError(ostr.str());
     return true;

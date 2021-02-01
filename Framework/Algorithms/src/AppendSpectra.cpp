@@ -34,29 +34,22 @@ int AppendSpectra::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void AppendSpectra::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace1", "", Direction::Input,
-                      std::make_shared<CommonBinsValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::Input,
+                                                        std::make_shared<CommonBinsValidator>()),
                   "The name of the first input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace2", "", Direction::Input,
-                      std::make_shared<CommonBinsValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input,
+                                                        std::make_shared<CommonBinsValidator>()),
                   "The name of the second input workspace");
 
-  declareProperty(
-      "ValidateInputs", true,
-      "Perform a set of checks that the two input workspaces are compatible.");
+  declareProperty("ValidateInputs", true, "Perform a set of checks that the two input workspaces are compatible.");
 
-  declareProperty("Number", 1,
-                  std::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
+  declareProperty("Number", 1, std::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
                   "Append the spectra from InputWorkspace2 multiple times.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
-  declareProperty("MergeLogs", false,
-                  "Whether to combine the logs of the two input workspaces");
+  declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
 }
 
 /** Execute the algorithm.
@@ -65,10 +58,8 @@ void AppendSpectra::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  DataObjects::EventWorkspace_const_sptr eventWs1 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  DataObjects::EventWorkspace_const_sptr eventWs2 =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr eventWs1 = std::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr eventWs2 = std::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
@@ -93,8 +84,7 @@ void AppendSpectra::exec() {
 
   if (eventWs1 && eventWs2) {
     // Both are event workspaces. Use the special method
-    DataObjects::EventWorkspace_sptr eOutput =
-        this->execEvent(*eventWs1, *eventWs2);
+    DataObjects::EventWorkspace_sptr eOutput = this->execEvent(*eventWs1, *eventWs2);
     for (int i = 1; i < number; i++) {
       eOutput = this->execEvent(*eOutput, *eventWs2);
     }
@@ -102,8 +92,7 @@ void AppendSpectra::exec() {
   } else { // So it is a workspace 2D.
     // The only restriction, even with ValidateInputs=false
     if (ws1->blocksize() != ws2->blocksize())
-      throw std::runtime_error(
-          "Workspace2D's must have the same number of bins.");
+      throw std::runtime_error("Workspace2D's must have the same number of bins.");
 
     output = execWS2D(*ws1, *ws2);
     for (int i = 1; i < number; i++) {
@@ -115,8 +104,7 @@ void AppendSpectra::exec() {
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 
   // Set the output workspace
-  setProperty("OutputWorkspace",
-              std::dynamic_pointer_cast<MatrixWorkspace>(output));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(output));
 }
 
 /** If there is an overlap in spectrum numbers between ws1 and ws2,
@@ -127,8 +115,7 @@ void AppendSpectra::exec() {
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
-                                       const MatrixWorkspace &ws2,
+void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2,
                                        MatrixWorkspace &output) {
   specnum_t ws1min;
   specnum_t ws1max;
@@ -143,8 +130,7 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
     return;
 
   auto indexInfo = output.indexInfo();
-  indexInfo.setSpectrumNumbers(
-      0, static_cast<int32_t>(output.getNumberHistograms() - 1));
+  indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
   output.setIndexInfo(indexInfo);
 
   const int yAxisNum = 1;
@@ -160,21 +146,18 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1,
   for (size_t i = 0; i < output.getNumberHistograms(); ++i) {
     if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
-      const std::string inputLabel =
-          i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
+      const std::string inputLabel = i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
       outputTextAxis->setLabel(i, !inputLabel.empty() ? inputLabel : "");
 
     } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace
-      const double inputVal =
-          i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
+      const double inputVal = i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
       outputYAxis->setValue(i, inputVal);
     }
   }
 }
 
-void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,
-                                API::Run &ans) {
+void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs, API::Run &ans) {
   // No need to worry about ordering here as for Plus - they have to be
   // different workspaces
   if (&lhs != &rhs) {

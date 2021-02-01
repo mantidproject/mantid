@@ -32,8 +32,7 @@ public:
   T &operator*=(const T &other) & {
     auto &derived = static_cast<T &>(*this);
     checkLengths(derived, other);
-    std::transform(derived.cbegin(), derived.cend(), other.begin(),
-                   derived.begin(), std::multiplies<double>());
+    std::transform(derived.cbegin(), derived.cend(), other.begin(), derived.begin(), std::multiplies<double>());
     return derived;
   }
 
@@ -41,8 +40,7 @@ public:
   T &operator/=(const T &other) & {
     auto &derived = static_cast<T &>(*this);
     checkLengths(derived, other);
-    std::transform(derived.cbegin(), derived.cend(), other.begin(),
-                   derived.begin(), std::divides<double>());
+    std::transform(derived.cbegin(), derived.cend(), other.begin(), derived.begin(), std::divides<double>());
     return derived;
   }
 

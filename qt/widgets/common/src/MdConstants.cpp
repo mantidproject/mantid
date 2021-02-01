@@ -13,13 +13,10 @@
 namespace MantidQt {
 namespace API {
 // Specifiers for ParaView filters
-const QString MdConstants::MantidParaViewSplatterPlot =
-    "MantidParaViewSplatterPlot";
-const QString MdConstants::MantidParaViewSpecialCoordinates =
-    "SpecialCoordinates";
+const QString MdConstants::MantidParaViewSplatterPlot = "MantidParaViewSplatterPlot";
+const QString MdConstants::MantidParaViewSpecialCoordinates = "SpecialCoordinates";
 const QString MdConstants::MDPeaksFilter = "MDPeaksFilter";
-const QString MdConstants::MantidParaViewPeaksFilter =
-    "MantidParaViewPeaksFilter";
+const QString MdConstants::MantidParaViewPeaksFilter = "MantidParaViewPeaksFilter";
 const QString MdConstants::PeakDimensions = "Peak Dimensions";
 const QString MdConstants::PeaksWorkspace = "PeaksWorkspace";
 const QString MdConstants::Delimiter = "Delimiter";
@@ -27,8 +24,7 @@ const QString MdConstants::WorkspaceName = "WorkspaceName";
 const QString MdConstants::ProbePoint = "ProbePoint";
 const QString MdConstants::Threshold = "Threshold";
 
-MdConstants::MdConstants()
-    : m_colorScaleStandardMax(0.1), m_logScaleDefaultValue(0.1) {
+MdConstants::MdConstants() : m_colorScaleStandardMax(0.1), m_logScaleDefaultValue(0.1) {
   initializeSettingsConstants();
   initializeViewConstants();
 }
@@ -64,17 +60,13 @@ void MdConstants::initializeViewConstants() {
  * Gets the general MD color map.
  *@returns The general MD color map.
  */
-QString MdConstants::getGeneralMdColorMap() const {
-  return m_generalMdColorMap;
-}
+QString MdConstants::getGeneralMdColorMap() const { return m_generalMdColorMap; }
 
 /**
  * Gets the label for the background color.
  *@returns The label for the background color.
  */
-QColor MdConstants::getDefaultBackgroundColor() const {
-  return m_defaultBackgroundColor;
-}
+QColor MdConstants::getDefaultBackgroundColor() const { return m_defaultBackgroundColor; }
 
 /**
  * Gets a list of VSI color maps.
@@ -106,9 +98,7 @@ QString MdConstants::getThreeSliceView() const { return m_threeSliceView; }
  */
 QString MdConstants::getSplatterPlotView() const { return m_splatterPlotView; }
 
-double MdConstants::getColorScaleStandardMax() {
-  return m_colorScaleStandardMax;
-}
+double MdConstants::getColorScaleStandardMax() { return m_colorScaleStandardMax; }
 
 double MdConstants::getLogScaleDefaultValue() { return m_logScaleDefaultValue; }
 
@@ -116,9 +106,7 @@ double MdConstants::getLogScaleDefaultValue() { return m_logScaleDefaultValue; }
  * Get the technique dependence.
  *@returns The technique dependence.
  */
-QString MdConstants::getTechniqueDependence() const {
-  return m_techniqueDependence;
-}
+QString MdConstants::getTechniqueDependence() const { return m_techniqueDependence; }
 
 /**
  * Get a list of all initial views.

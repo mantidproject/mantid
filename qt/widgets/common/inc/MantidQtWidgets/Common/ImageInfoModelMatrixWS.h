@@ -31,20 +31,16 @@ namespace MantidWidgets {
  * Model to support looking up information about a given point with a
  * MatrixWorkspace
  */
-class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS
-    : public ImageInfoModel {
+class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS : public ImageInfoModel {
 
 public:
   ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr workspace);
 
-  ImageInfoModel::ImageInfo info(const double x, const double y,
-                                 const double signal) const override;
+  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const override;
 
 private:
-  void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex,
-                    const size_t wsIndex, const double x) const;
-  std::tuple<Mantid::Kernel::DeltaEMode::Type, double>
-  efixedAt(const size_t wsIndex) const;
+  void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex, const size_t wsIndex, const double x) const;
+  std::tuple<Mantid::Kernel::DeltaEMode::Type, double> efixedAt(const size_t wsIndex) const;
   void cacheWorkspaceInfo();
   void createItemNames();
 

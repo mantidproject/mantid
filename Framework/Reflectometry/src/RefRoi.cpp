@@ -24,35 +24,24 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-RefRoi::RefRoi()
-    : API::Algorithm(), m_xMin(0), m_xMax(0), m_yMin(0), m_yMax(0),
-      m_nXPixel(0), m_nYPixel(0) {}
+RefRoi::RefRoi() : API::Algorithm(), m_xMin(0), m_xMax(0), m_yMin(0), m_yMax(0), m_nXPixel(0), m_nYPixel(0) {}
 
 void RefRoi::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      std::make_shared<CommonBinsValidator>()),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<CommonBinsValidator>()),
                   "Workspace to calculate the ROI from");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Workspace containing the summed up region of interest");
-  declareProperty("NXPixel", 304, "Number of pixels in the X direction",
-                  Kernel::Direction::Input);
-  declareProperty("NYPixel", 256, "Number of pixels in the Y direction",
-                  Kernel::Direction::Input);
-  declareProperty("XPixelMin", EMPTY_INT(), "Lower bound of ROI in X",
-                  Kernel::Direction::Input);
-  declareProperty("XPixelMax", EMPTY_INT(), "Upper bound of ROI in X",
-                  Kernel::Direction::Input);
-  declareProperty("YPixelMin", EMPTY_INT(), "Lower bound of ROI in Y",
-                  Kernel::Direction::Input);
-  declareProperty("YPixelMax", EMPTY_INT(), "Upper bound of ROI in Y",
-                  Kernel::Direction::Input);
+  declareProperty("NXPixel", 304, "Number of pixels in the X direction", Kernel::Direction::Input);
+  declareProperty("NYPixel", 256, "Number of pixels in the Y direction", Kernel::Direction::Input);
+  declareProperty("XPixelMin", EMPTY_INT(), "Lower bound of ROI in X", Kernel::Direction::Input);
+  declareProperty("XPixelMax", EMPTY_INT(), "Upper bound of ROI in X", Kernel::Direction::Input);
+  declareProperty("YPixelMin", EMPTY_INT(), "Lower bound of ROI in Y", Kernel::Direction::Input);
+  declareProperty("YPixelMax", EMPTY_INT(), "Upper bound of ROI in Y", Kernel::Direction::Input);
 
-  declareProperty(
-      "SumPixels", false,
-      "If true, all the pixels will be summed,"
-      " so that the resulting workspace will be a single histogram");
+  declareProperty("SumPixels", false,
+                  "If true, all the pixels will be summed,"
+                  " so that the resulting workspace will be a single histogram");
   declareProperty("NormalizeSum", false,
                   "If true, and SumPixels is true, the"
                   " resulting histogram will be divided "
@@ -61,15 +50,13 @@ void RefRoi::init() {
                   "If true, and SumPixels and NormalizeSum are true, the"
                   " resulting histogram will also be divided by the number of "
                   "pixels integrated over");
-  declareProperty("ErrorWeighting", false,
-                  "If true, error weighting will be used when normalizing");
-  declareProperty(
-      "IntegrateY", true,
-      "If true, the Y direction will be"
-      " considered the low-resolution direction and will be integrated over."
-      " If false, the X direction will be integrated over. The result will be"
-      " a histogram for each of the pixels in the hi-resolution direction of"
-      " the 2D detector");
+  declareProperty("ErrorWeighting", false, "If true, error weighting will be used when normalizing");
+  declareProperty("IntegrateY", true,
+                  "If true, the Y direction will be"
+                  " considered the low-resolution direction and will be integrated over."
+                  " If false, the X direction will be integrated over. The result will be"
+                  " a histogram for each of the pixels in the hi-resolution direction of"
+                  " the 2D detector");
   declareProperty("ConvertToQ", true,
                   "If true, the X-axis will be converted"
                   " to momentum transfer");
@@ -129,8 +116,8 @@ void RefRoi::extract2D() {
   }
 
   // Create output workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
-      inputWS, nHisto, inputWS->x(0).size(), inputWS->blocksize());
+  MatrixWorkspace_sptr outputWS =
+      WorkspaceFactory::Instance().create(inputWS, nHisto, inputWS->x(0).size(), inputWS->blocksize());
 
   // Process X axis
   auto &XOut0 = outputWS->mutableX(0);
@@ -140,16 +127,14 @@ void RefRoi::extract2D() {
     const std::string unit = inputWS->getAxis(0)->unit()->caption();
     if (Poco::icompare(unit, "Wavelength") != 0) {
       g_log.error() << "RefRoi expects units of wavelength to convert to Q\n";
-      throw std::runtime_error(
-          "RefRoi expects units of wavelength to convert to Q");
+      throw std::runtime_error("RefRoi expects units of wavelength to convert to Q");
     }
 
     for (size_t t = 0; t < XOut0.size(); t++) {
       size_t t_index = XIn0.size() - 1 - t;
       XOut0[t] = 4.0 * M_PI * sin(theta * M_PI / 180.0) / XIn0[t_index];
     }
-    outputWS->getAxis(0)->unit() =
-        UnitFactory::Instance().create("MomentumTransfer");
+    outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Reflectivity");
     outputWS->setDistribution(true);
   } else {
@@ -192,8 +177,7 @@ void RefRoi::extract2D() {
     if (sum_pixels && normalize && error_weighting) {
       for (size_t t = 0; t < YOut.size(); t++) {
         size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
-        double error_squared =
-            error_vector[t_index] == 0 ? 1 : error_vector[t_index];
+        double error_squared = error_vector[t_index] == 0 ? 1 : error_vector[t_index];
         YOut[t] += signal_vector[t_index] / error_squared;
         EOut[t] += 1.0 / error_squared;
       }
@@ -219,10 +203,8 @@ void RefRoi::extract2D() {
           EOut[t] = sqrt(1.0 / EOut[t]) / n_integrated;
         } else {
           EOut[t] = sqrt(EOut[t]);
-          YOut[t] =
-              YOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
-          EOut[t] =
-              EOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+          YOut[t] = YOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+          EOut[t] = EOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
         }
       } else {
         EOut[t] = sqrt(EOut[t]);

@@ -39,38 +39,32 @@ using Geometry::Instrument_sptr;
 using Kernel::V3D;
 
 /// Empty default constructor
-UpdateInstrumentFromFile::UpdateInstrumentFromFile()
-    : m_workspace(), m_ignorePhi(false), m_ignoreMonitors(true) {}
+UpdateInstrumentFromFile::UpdateInstrumentFromFile() : m_workspace(), m_ignorePhi(false), m_ignoreMonitors(true) {}
 
 /// Initialisation method.
 void UpdateInstrumentFromFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "Workspace", "Anonymous", Direction::InOut),
-      "The name of the workspace in which to store the imported instrument");
-  declareProperty(std::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Load,
-                      std::vector<std::string>{".raw", ".nxs", ".s*"}),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous", Direction::InOut),
+                  "The name of the workspace in which to store the imported instrument");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                                 std::vector<std::string>{".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"
                   "Currently supports RAW, ISIS NeXus, DAT & multi-column (at "
                   "least 2) ascii files");
   declareProperty("MoveMonitors", (!m_ignoreMonitors),
                   "If true the positions of any detectors marked as monitors "
                   "in the IDF will be moved also");
-  declareProperty("IgnorePhi", m_ignorePhi,
-                  "If true the phi values form the file will be ignored ");
-  declareProperty(
-      "AsciiHeader", "",
-      "If the file is a simple text file, then this property is used to"
-      "define the values in each column of the file. For example: "
-      "spectrum,theta,t0,-,R"
-      "Keywords=spectrum,ID,R,theta,phi. A dash means skip column. Keywords "
-      "are recognised"
-      "as identifying components to move to new positions. Any other names in "
-      "the list"
-      "are added as instrument parameters.");
+  declareProperty("IgnorePhi", m_ignorePhi, "If true the phi values form the file will be ignored ");
+  declareProperty("AsciiHeader", "",
+                  "If the file is a simple text file, then this property is used to"
+                  "define the values in each column of the file. For example: "
+                  "spectrum,theta,t0,-,R"
+                  "Keywords=spectrum,ID,R,theta,phi. A dash means skip column. Keywords "
+                  "are recognised"
+                  "as identifying components to move to new positions. Any other names in "
+                  "the list"
+                  "are added as instrument parameters.");
   declareProperty("SkipFirstNLines", 0,
                   "If the file is ASCII, then skip this "
                   "number of lines at the start of the "
@@ -103,14 +97,11 @@ void UpdateInstrumentFromFile::exec() {
     // we open and close the HDF5 file.
     // there is an issue with how HDF5 files are opened (only one at a time)
     // swap the order of descriptors
-    boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(
-        new Kernel::NexusHDF5Descriptor(filename));
+    boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(new Kernel::NexusHDF5Descriptor(filename));
 
-    boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(
-        new Kernel::NexusDescriptor(filename));
+    boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(new Kernel::NexusDescriptor(filename));
 
-    if (isisNexus.confidence(*descriptor) > 0 ||
-        eventNexus.confidence(*descriptorNexusHDF5) > 0) {
+    if (isisNexus.confidence(*descriptor) > 0 || eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       auto &nxFile = descriptor->data();
       const auto &rootEntry = descriptor->firstEntryNameType();
       nxFile.openGroup(rootEntry.first, rootEntry.second);
@@ -123,10 +114,8 @@ void UpdateInstrumentFromFile::exec() {
     // If no header specified & the extension is .dat or .sca, then assume ISIS
     // DAT file structure
     if (getPropertyValue("AsciiHeader").empty() &&
-        (boost::iends_with(filename, ".dat") ||
-         boost::iends_with(filename, ".sca"))) {
-      this->setPropertyValue("AsciiHeader",
-                             "ID,-,R,-,theta,phi,-,-,-,-,-,-,-,-,-,-,-,-,-");
+        (boost::iends_with(filename, ".dat") || boost::iends_with(filename, ".sca"))) {
+      this->setPropertyValue("AsciiHeader", "ID,-,R,-,theta,phi,-,-,-,-,-,-,-,-,-,-,-,-,-");
       this->setProperty("SkipFirstNLines", 2);
     }
     updateFromAscii(filename);
@@ -138,8 +127,7 @@ void UpdateInstrumentFromFile::exec() {
   if (isisRAW.confidence(*descriptor) > 0) {
     updateFromRaw(filename);
   } else {
-    throw std::invalid_argument("File \"" + filename +
-                                "\" is not a valid input file.");
+    throw std::invalid_argument("File \"" + filename + "\" is not a valid input file.");
   }
 }
 
@@ -212,8 +200,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
   const bool isSpectrum = parseAsciiHeader(header);
 
   // Throws for multiple detectors
-  const spec2index_map specToIndex(
-      m_workspace->getSpectrumToWorkspaceIndexMap());
+  const spec2index_map specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
 
   std::ifstream datfile(filename.c_str(), std::ios_base::in);
   const int skipNLines = getProperty("SkipFirstNLines");
@@ -237,8 +224,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     is >> detOrSpec;
     // If first thing read is not a number then skip the line
     if (is.fail()) {
-      g_log.debug() << "Skipping \"" << line
-                    << "\". Cannot interpret as list of numbers.\n";
+      g_log.debug() << "Skipping \"" << line << "\". Cannot interpret as list of numbers.\n";
       continue;
     }
 
@@ -255,8 +241,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
           skip = true;
         }
       } else {
-        g_log.debug() << "Skipping \"" << line
-                      << "\". Spectrum is not in workspace.\n";
+        g_log.debug() << "Skipping \"" << line << "\". Spectrum is not in workspace.\n";
         continue;
       }
     } else {
@@ -268,9 +253,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       }
     }
     if (skip || index == static_cast<size_t>(-1)) {
-      g_log.debug()
-          << "Skipping \"" << line
-          << "\". Spectrum in workspace but cannot find associated detector.\n";
+      g_log.debug() << "Skipping \"" << line << "\". Spectrum in workspace but cannot find associated detector.\n";
       continue;
     }
 
@@ -337,8 +320,8 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       phi = p;
 
     for (const auto detIndex : indices)
-      setDetectorPosition(detectorInfo, detIndex, static_cast<float>(R),
-                          static_cast<float>(theta), static_cast<float>(phi));
+      setDetectorPosition(detectorInfo, detIndex, static_cast<float>(R), static_cast<float>(theta),
+                          static_cast<float>(phi));
   }
 }
 
@@ -349,19 +332,16 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
  * header
  * @returns True if the header is spectrum based, false otherwise
  */
-bool UpdateInstrumentFromFile::parseAsciiHeader(
-    UpdateInstrumentFromFile::AsciiFileHeader &headerInfo) {
+bool UpdateInstrumentFromFile::parseAsciiHeader(UpdateInstrumentFromFile::AsciiFileHeader &headerInfo) {
   const std::string header = getProperty("AsciiHeader");
   if (header.empty()) {
     throw std::invalid_argument("Ascii file provided but the AsciiHeader "
                                 "property is empty, cannot interpret columns");
   }
 
-  Mantid::Kernel::StringTokenizer splitter(
-      header, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer splitter(header, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   headerInfo.colCount = splitter.count();
-  auto it =
-      splitter.begin(); // First column must be spectrum number or detector ID
+  auto it = splitter.begin(); // First column must be spectrum number or detector ID
   const std::string &col0 = *it;
   bool isSpectrum(false);
   if (boost::iequals("spectrum", col0))
@@ -402,12 +382,10 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
  * @param theta :: A vector of theta distances
  * @param phi :: A vector of phi values
  */
-void UpdateInstrumentFromFile::setDetectorPositions(
-    const std::vector<int32_t> &detID, const std::vector<float> &l2,
-    const std::vector<float> &theta, const std::vector<float> &phi) {
+void UpdateInstrumentFromFile::setDetectorPositions(const std::vector<int32_t> &detID, const std::vector<float> &l2,
+                                                    const std::vector<float> &theta, const std::vector<float> &phi) {
   const auto numDetector = static_cast<int>(detID.size());
-  g_log.information() << "Setting new positions for " << numDetector
-                      << " detectors\n";
+  g_log.information() << "Setting new positions for " << numDetector << " detectors\n";
 
   auto &detectorInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDetector; ++i) {
@@ -418,14 +396,12 @@ void UpdateInstrumentFromFile::setDetectorPositions(
         double r, t;
         detectorInfo.position(index).getSpherical(r, t, p);
       }
-      setDetectorPosition(detectorInfo, index, l2[i], theta[i],
-                          static_cast<float>(p));
+      setDetectorPosition(detectorInfo, index, l2[i], theta[i], static_cast<float>(p));
     } catch (std::out_of_range &) {
       // Invalid detID[i]
       continue;
     }
-    progress(static_cast<double>(i) / numDetector,
-             "Updating Detector Positions from File");
+    progress(static_cast<double>(i) / numDetector, "Updating Detector Positions from File");
   }
 }
 
@@ -437,9 +413,8 @@ void UpdateInstrumentFromFile::setDetectorPositions(
  * @param theta :: A single theta
  * @param phi :: A single phi
  */
-void UpdateInstrumentFromFile::setDetectorPosition(
-    Geometry::DetectorInfo &detectorInfo, const size_t index, const float l2,
-    const float theta, const float phi) {
+void UpdateInstrumentFromFile::setDetectorPosition(Geometry::DetectorInfo &detectorInfo, const size_t index,
+                                                   const float l2, const float theta, const float phi) {
   if (m_ignoreMonitors && detectorInfo.isMonitor(index))
     return;
 

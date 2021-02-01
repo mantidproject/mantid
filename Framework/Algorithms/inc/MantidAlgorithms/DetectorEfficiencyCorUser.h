@@ -46,17 +46,14 @@ public:
   }
 
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"DetectorEfficiencyCor"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"DetectorEfficiencyCor"}; }
   const std::string category() const override;
 
 private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  void correctHistogram(const size_t index, const double eff0, double &e,
-                        mu::Parser &parser);
+  void correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser);
 
   double evaluate(const mu::Parser &parser) const;
 

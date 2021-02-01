@@ -45,12 +45,9 @@ using namespace Mantid::API;
 
 /// Constructor
 StepScan::StepScan(QWidget *parent)
-    : UserSubWindow(parent),
-      m_instrument(ConfigService::Instance().getInstrument().name()),
-      m_algRunner(new API::AlgorithmRunner(this)),
-      m_addObserver(*this, &StepScan::handleAddEvent),
-      m_replObserver(*this, &StepScan::handleReplEvent),
-      m_replaceObserverAdded(false) {}
+    : UserSubWindow(parent), m_instrument(ConfigService::Instance().getInstrument().name()),
+      m_algRunner(new API::AlgorithmRunner(this)), m_addObserver(*this, &StepScan::handleAddEvent),
+      m_replObserver(*this, &StepScan::handleReplEvent), m_replaceObserverAdded(false) {}
 
 StepScan::~StepScan() {
   // Stop any async algorithm
@@ -58,10 +55,8 @@ StepScan::~StepScan() {
   // Stop live data collection, if running
   m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
-  AnalysisDataService::Instance().notificationCenter.removeObserver(
-      m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.removeObserver(
-      m_replObserver);
+  AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+  AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
   // Clean up any hidden workspaces created
   cleanupWorkspaces();
 }
@@ -76,26 +71,20 @@ void StepScan::initLayout() {
 
   setWindowTitle(windowTitle() + " - " + QString::fromStdString(m_instrument));
 
-  connect(m_uiForm.mWRunFiles, SIGNAL(liveButtonPressed(bool)),
-          SLOT(triggerLiveListener(bool)), Qt::QueuedConnection);
+  connect(m_uiForm.mWRunFiles, SIGNAL(liveButtonPressed(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection);
 
-  connect(m_uiForm.launchInstView, SIGNAL(clicked()),
-          SLOT(launchInstrumentWindow()));
+  connect(m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()));
 
   connect(m_uiForm.mWRunFiles, SIGNAL(filesFound()), SLOT(loadFile()));
-  connect(
-      this,
-      SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
-      SLOT(fillPlotVarCombobox(
-          const Mantid::API::MatrixWorkspace_const_sptr &)));
+  connect(this, SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
+          SLOT(fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)));
 
   connect(m_uiForm.helpButton, SIGNAL(clicked()), SLOT(helpClicked()));
   connect(m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()));
   if (this->parent()) {
     // note connection to the parent window, otherwise an empty frame window
     // may remain open and visible after this close.
-    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(),
-            SLOT(close()));
+    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(), SLOT(close()));
   } else {
     // In MantidWorkbench this->parent() returns NULL. Connecting to
     // this->close() appears to work.
@@ -117,18 +106,15 @@ void StepScan::cleanupWorkspaces() {
     if (ADS.doesExist(m_plotWSName))
       ADS.remove(m_plotWSName);
     m_plotWSName.clear();
-    disconnect(
-        SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)));
+    disconnect(SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)));
   }
 
   m_uiForm.startButton->setEnabled(false);
   m_uiForm.launchInstView->setEnabled(false);
   m_uiForm.plotVariable->setEnabled(false);
   // Disconnect anything listening to the comboboxes
-  m_uiForm.plotVariable->disconnect(
-      SIGNAL(currentIndexChanged(const QString &)));
-  m_uiForm.normalization->disconnect(
-      SIGNAL(currentIndexChanged(const QString &)));
+  m_uiForm.plotVariable->disconnect(SIGNAL(currentIndexChanged(const QString &)));
+  m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
 }
 
 /** Slot that is called when the live data button is clicked
@@ -144,13 +130,10 @@ void StepScan::triggerLiveListener(bool checked) {
 }
 
 void StepScan::startLiveListener() {
-  if (!LiveListenerFactory::Instance()
-           .create(m_instrument, false)
-           ->buffersEvents()) {
-    QMessageBox::critical(
-        this, "Invalid live stream",
-        "This interface requires event data.\nThe live data for " +
-            QString::fromStdString(m_instrument) + " is in histogram form");
+  if (!LiveListenerFactory::Instance().create(m_instrument, false)->buffersEvents()) {
+    QMessageBox::critical(this, "Invalid live stream",
+                          "This interface requires event data.\nThe live data for " +
+                              QString::fromStdString(m_instrument) + " is in histogram form");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
     return;
   }
@@ -158,11 +141,9 @@ void StepScan::startLiveListener() {
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  connect(m_algRunner, SIGNAL(algorithmComplete(bool)),
-          SLOT(startLiveListenerComplete(bool)));
+  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(startLiveListenerComplete(bool)));
 
-  IAlgorithm_sptr startLiveData =
-      AlgorithmManager::Instance().create("StartLiveData");
+  IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery", 5.0);
   startLiveData->setProperty("FromNow", false);
   startLiveData->setProperty("FromStartOfRun", true);
@@ -170,8 +151,7 @@ void StepScan::startLiveListener() {
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace", m_inputWSName);
   if (!startLiveData->validateInputs().empty()) {
-    QMessageBox::critical(this, "StartLiveData failed",
-                          "Unable to start live data collection");
+    QMessageBox::critical(this, "StartLiveData failed", "Unable to start live data collection");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
     return;
   }
@@ -180,24 +160,18 @@ void StepScan::startLiveListener() {
 }
 
 void StepScan::startLiveListenerComplete(bool error) {
-  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
-             SLOT(startLiveListenerComplete(bool)));
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(startLiveListenerComplete(bool)));
   if (!error) {
     // Keep track of the algorithm that's pulling in the live data
-    m_uiForm.mWRunFiles->setLiveAlgorithm(
-        m_algRunner->getAlgorithm()->getProperty("MonitorLiveData"));
+    m_uiForm.mWRunFiles->setLiveAlgorithm(m_algRunner->getAlgorithm()->getProperty("MonitorLiveData"));
 
     setupOptionControls();
 
     addReplaceObserverOnce();
-    connect(
-        this,
-        SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
-        SLOT(expandPlotVarCombobox(
-            const Mantid::API::MatrixWorkspace_const_sptr &)));
+    connect(this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+            SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)));
   } else {
-    QMessageBox::critical(this, "StartLiveData failed",
-                          "Unable to start live data collection");
+    QMessageBox::critical(this, "StartLiveData failed", "Unable to start live data collection");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
   }
 }
@@ -226,17 +200,14 @@ void StepScan::loadFile(bool async) {
     } catch (std::exception &) // Have to catch at this level as different
                                // exception types can happen
     {
-      QMessageBox::warning(this, "File loading failed",
-                           "Is this an event nexus file?");
+      QMessageBox::warning(this, "File loading failed", "Is this an event nexus file?");
       return;
     }
 
-    m_uiForm.statusText->setText(
-        "<i><font color='darkblue'>Loading data...</font></i>");
+    m_uiForm.statusText->setText("<i><font color='darkblue'>Loading data...</font></i>");
 
     if (async) {
-      connect(m_algRunner, SIGNAL(algorithmComplete(bool)),
-              SLOT(loadFileComplete(bool)));
+      connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
       m_algRunner->startAlgorithm(alg);
     } else {
       alg->execute();
@@ -247,8 +218,7 @@ void StepScan::loadFile(bool async) {
 
 void StepScan::loadFileComplete(bool error) {
   m_uiForm.statusText->clear();
-  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
-             SLOT(loadFileComplete(bool)));
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
 
   if (m_inputWSName == "__multifiles" && !error)
     error = mergeRuns();
@@ -256,18 +226,15 @@ void StepScan::loadFileComplete(bool error) {
   if (!error) {
     setupOptionControls();
   } else {
-    QMessageBox::warning(this, "File loading failed",
-                         "Is this an event nexus file?");
+    QMessageBox::warning(this, "File loading failed", "Is this an event nexus file?");
   }
 }
 
 namespace {
 class ScopedStatusText {
 public:
-  ScopedStatusText(QLabel *label, const QString &labelText)
-      : status_label(label) {
-    status_label->setText("<i><font color='darkblue'>" + labelText +
-                          "</font></i>");
+  ScopedStatusText(QLabel *label, const QString &labelText) : status_label(label) {
+    status_label->setText("<i><font color='darkblue'>" + labelText + "</font></i>");
   }
 
   ~ScopedStatusText() { status_label->clear(); }
@@ -307,20 +274,17 @@ bool StepScan::mergeRuns() {
 
   // Get hold of the group workspace and go through the entries adding an
   // incrementing scan_index variable
-  WorkspaceGroup_const_sptr wsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_inputWSName);
+  WorkspaceGroup_const_sptr wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_inputWSName);
   if (!wsGroup)
     return true; // Shouldn't be possible, but be defensive
 
   for (size_t i = 0; i < wsGroup->size(); ++i) {
     // Add a scan_index variable to each workspace, counting from 1
-    MatrixWorkspace_sptr ws =
-        std::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+    MatrixWorkspace_sptr ws = std::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (!ws)
       return true; // Again, shouldn't be possible (unless there's a group
                    // within a group?)
-    IAlgorithm_sptr addScanIndex =
-        AlgorithmManager::Instance().create("AddSampleLog");
+    IAlgorithm_sptr addScanIndex = AlgorithmManager::Instance().create("AddSampleLog");
     addScanIndex->setPropertyValue("Workspace", ws->getName());
     addScanIndex->setProperty("LogName", "scan_index");
     addScanIndex->setProperty("LogType", "Number Series");
@@ -334,9 +298,7 @@ bool StepScan::mergeRuns() {
 
     // Add a scan_index = 0 to the end time for each workspace
     try {
-      ws->run()
-          .getTimeSeriesProperty<int>("scan_index")
-          ->addValue(ws->run().endTime(), 0);
+      ws->run().getTimeSeriesProperty<int>("scan_index")->addValue(ws->run().endTime(), 0);
     } catch (std::runtime_error &) {
       /* Swallow the error if there's no run end time. It shouldn't happen for
        * real data. */
@@ -359,9 +321,7 @@ bool StepScan::mergeRuns() {
 }
 
 void StepScan::setupOptionControls() {
-  MatrixWorkspace_const_sptr outWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWSName);
+  MatrixWorkspace_const_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
   // Trigger population of the logs combobox
   emit logsAvailable(outWS);
   fillNormalizationCombobox();
@@ -379,13 +339,12 @@ void StepScan::launchInstrumentWindow() {
   runPythonCode(QString::fromStdString(pyCode));
 
 #else
-  std::string pyCode =
-      "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
-      "instrument_view = get_instrumentview('" +
-      m_inputWSName +
-      "')\n"
-      "instrument_view.select_tab(2)\n"
-      "instrument_view.show_view()";
+  std::string pyCode = "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
+                       "instrument_view = get_instrumentview('" +
+                       m_inputWSName +
+                       "')\n"
+                       "instrument_view.select_tab(2)\n"
+                       "instrument_view.show_view()";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   PyRun_SimpleString(pyCode.c_str());
 #endif
@@ -410,31 +369,26 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr &ws) {
   // doesn't
   try {
     auto scan_index_prop = ws->run().getTimeSeriesProperty<int>(scan_index);
-    if (!m_uiForm.mWRunFiles->liveButtonIsChecked() &&
-        scan_index_prop->realSize() < 2) {
-      QMessageBox::warning(this, "scan_index log empty",
-                           "This data does not appear to be an alignment scan");
+    if (!m_uiForm.mWRunFiles->liveButtonIsChecked() && scan_index_prop->realSize() < 2) {
+      QMessageBox::warning(this, "scan_index log empty", "This data does not appear to be an alignment scan");
       return;
     }
   } catch (std::exception &) {
-    QMessageBox::warning(this, "scan_index log not found",
-                         "Is this an ADARA-style dataset?");
+    QMessageBox::warning(this, "scan_index log not found", "Is this an ADARA-style dataset?");
     return;
   }
 
   expandPlotVarCombobox(ws);
 
   // Set back to whatever it was set to before
-  m_uiForm.plotVariable->setCurrentIndex(
-      m_uiForm.plotVariable->findText(currentSetting));
+  m_uiForm.plotVariable->setCurrentIndex(m_uiForm.plotVariable->findText(currentSetting));
   // Now that this has been populated, allow the user to select from it
   m_uiForm.plotVariable->setEnabled(true);
   // Now's the time to enable the start button as well
   m_uiForm.startButton->setEnabled(true);
 }
 
-void StepScan::expandPlotVarCombobox(
-    const Mantid::API::MatrixWorkspace_const_sptr &ws) {
+void StepScan::expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   // This is unfortunately more or less a copy of
   // SumEventsByLogValue::getNumberSeriesLogs
   // but I want to populate the box before running the algorithm
@@ -453,8 +407,7 @@ void StepScan::expandPlotVarCombobox(
     if (tsp->realSize() < 2)
       continue;
     // Now make sure it's either an int or double tsp
-    if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
-        dynamic_cast<TimeSeriesProperty<int> *>(log)) {
+    if (dynamic_cast<TimeSeriesProperty<double> *>(log) || dynamic_cast<TimeSeriesProperty<int> *>(log)) {
       // Add it to the list if it isn't already there
       if (m_uiForm.plotVariable->findText(logName) == -1) {
         m_uiForm.plotVariable->addItem(logName);
@@ -467,9 +420,7 @@ void StepScan::fillNormalizationCombobox() {
   clearNormalizationCombobox();
 
   // Add the monitors to the normalization combobox
-  const auto inputWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_inputWSName);
+  const auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
 
   try {
     const auto monWS = inputWS->monitorWorkspace();
@@ -477,8 +428,7 @@ void StepScan::fillNormalizationCombobox() {
 
     if (monWS) {
       for (std::size_t i = 0; i < monWS->getNumberHistograms(); ++i) {
-        const std::string monitorName =
-            monitorSpectrumInfo.detector(i).getName();
+        const std::string monitorName = monitorSpectrumInfo.detector(i).getName();
         m_uiForm.normalization->addItem(QString::fromStdString(monitorName));
       }
     }
@@ -513,9 +463,7 @@ IAlgorithm_sptr StepScan::setupStepScanAlg() {
   const double xmax = xmaxStr.toDouble();
   // If both set, check that xmax > xmin
   if (!xminStr.isEmpty() && !xmaxStr.isEmpty() && xmin >= xmax) {
-    QMessageBox::critical(
-        this, "Invalid filtering range set",
-        "For the filtering range, min has to be less than max");
+    QMessageBox::critical(this, "Invalid filtering range set", "For the filtering range, min has to be less than max");
     return IAlgorithm_sptr();
   }
   if (!xminStr.isEmpty())
@@ -569,19 +517,16 @@ void StepScan::runStepScanAlg() {
 
   // Now that the algorithm's been run, connect up the signal to change the plot
   // variable
-  connect(m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)),
-          SLOT(generateCurve(const QString &)));
+  connect(m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)), SLOT(generateCurve(const QString &)));
   // and the one if the normalisation's been changed
-  connect(m_uiForm.normalization, SIGNAL(currentIndexChanged(const QString &)),
-          SLOT(updateForNormalizationChange()));
+  connect(m_uiForm.normalization, SIGNAL(currentIndexChanged(const QString &)), SLOT(updateForNormalizationChange()));
   // Create the plot for the first time
   generateCurve(m_uiForm.plotVariable->currentText());
 }
 
 bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
   // First stop the currently running live algorithm
-  IAlgorithm_const_sptr oldMonitorLiveData =
-      m_uiForm.mWRunFiles->stopLiveAlgorithm();
+  IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
 
   Json::Value root;
   Json::Reader reader;
@@ -596,8 +541,7 @@ bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
   }
   std::string ssp = prop.toStyledString();
 
-  IAlgorithm_sptr startLiveData =
-      AlgorithmManager::Instance().create("StartLiveData");
+  IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("Instrument", m_instrument);
   startLiveData->setProperty("FromNow", false);
   startLiveData->setProperty("FromStartOfRun", true);
@@ -620,30 +564,23 @@ bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
     return false;
 
   // Keep track of the algorithm that's pulling in the live data
-  m_uiForm.mWRunFiles->setLiveAlgorithm(
-      startLiveData->getProperty("MonitorLiveData"));
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
-  connect(this, SIGNAL(updatePlot(const QString &)),
-          SLOT(generateCurve(const QString &)));
+  connect(this, SIGNAL(updatePlot(const QString &)), SLOT(generateCurve(const QString &)));
   return true;
 }
 
-void StepScan::updateForNormalizationChange() {
-  generateCurve(m_uiForm.plotVariable->currentText());
-}
+void StepScan::updateForNormalizationChange() { generateCurve(m_uiForm.plotVariable->currentText()); }
 
 void StepScan::generateCurve(const QString &var) {
   if (!AnalysisDataService::Instance().doesExist(m_tableWSName)) {
     QMessageBox::critical(this, "Unable to generate plot",
-                          "Table workspace " +
-                              QString::fromStdString(m_tableWSName) +
-                              "\nhas been deleted!");
+                          "Table workspace " + QString::fromStdString(m_tableWSName) + "\nhas been deleted!");
     return;
   }
 
   // Create a matrix workspace out of the variable that's asked for
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm
   alg->setPropertyValue("InputWorkspace", m_tableWSName);
   m_plotWSName = m_tableWSName + "_plot";
@@ -656,8 +593,7 @@ void StepScan::generateCurve(const QString &var) {
 
   // Now create one for the normalisation, if required
   if (m_uiForm.normalization->currentIndex() != 0) {
-    IAlgorithm_sptr norm =
-        AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
+    IAlgorithm_sptr norm = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
     norm->setChild(true);
     norm->setLogging(false); // Don't log this algorithm
     norm->setPropertyValue("InputWorkspace", m_tableWSName);
@@ -665,14 +601,11 @@ void StepScan::generateCurve(const QString &var) {
     norm->setPropertyValue("ColumnX", var.toStdString());
     // TODO: Protect against column being missing (e.g. if monitor not found in
     // data)
-    norm->setPropertyValue("ColumnY",
-                           m_uiForm.normalization->currentText().toStdString());
+    norm->setPropertyValue("ColumnY", m_uiForm.normalization->currentText().toStdString());
     if (!norm->execute())
       return;
 
-    MatrixWorkspace_sptr top =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_plotWSName);
+    MatrixWorkspace_sptr top = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_plotWSName);
     MatrixWorkspace_sptr bottom = norm->getProperty("OutputWorkspace");
     top /= bottom;
   }
@@ -683,16 +616,15 @@ void StepScan::generateCurve(const QString &var) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 namespace {
 auto get_fig_ax(boost::optional<int> fignum) {
-  std::string pyCode =
-      "import matplotlib.pyplot as plt\n"
-      "from mantid import plots\n"
-      "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"
-      "if GlobalFigureManager.has_fignum(fig_num):\n"
-      "    fig = plt.figure(fig_num)\n"
-      "    ax = plt.gca()\n"
-      "    ax.clear()\n"
-      "else:\n"
-      "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
+  std::string pyCode = "import matplotlib.pyplot as plt\n"
+                       "from mantid import plots\n"
+                       "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"
+                       "if GlobalFigureManager.has_fignum(fig_num):\n"
+                       "    fig = plt.figure(fig_num)\n"
+                       "    ax = plt.gca()\n"
+                       "    ax.clear()\n"
+                       "else:\n"
+                       "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   using namespace MantidQt::Widgets::Common;
   using namespace MantidQt::Widgets::MplCpp;
@@ -704,10 +636,8 @@ auto get_fig_ax(boost::optional<int> fignum) {
     main_namespace["fig_num"] = Python::Object();
   }
   auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
-  auto fig =
-      Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
-  auto ax =
-      MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
+  auto fig = Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
+  auto ax = MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
   return std::make_tuple(fig, ax);
 }
 } // namespace
@@ -720,11 +650,9 @@ void StepScan::plotCurve() {
   std::replace(title.begin(), title.end(), '_', '-');
 
   // Figure out the axis titles
-  const std::string xAxisTitle =
-      m_uiForm.plotVariable->currentText().toStdString();
+  const std::string xAxisTitle = m_uiForm.plotVariable->currentText().toStdString();
   std::string yAxisTitle = "Counts";
-  const std::string normalization =
-      m_uiForm.normalization->currentText().toStdString();
+  const std::string normalization = m_uiForm.normalization->currentText().toStdString();
   if (normalization == "nothing") /* Do nothing */
     ;
   else if (normalization == "time")
@@ -760,9 +688,7 @@ void StepScan::plotCurve() {
 #else
   auto [fig, ax] = get_fig_ax(m_fignum);
   m_fignum = fig.number();
-  auto ws =
-      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-          m_plotWSName);
+  auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(m_plotWSName);
   title += " - Step Scan";
   fig.setWindowTitle(title.c_str());
   QHash<QString, QVariant> hash;
@@ -781,8 +707,7 @@ void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
   checkForMaskWorkspace(pNf->objectName());
 }
 
-void StepScan::handleReplEvent(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
+void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf) {
   checkForMaskWorkspace(pNf->objectName());
   checkForResultTableUpdate(pNf->objectName());
   checkForVaryingLogs(pNf->objectName());
@@ -790,8 +715,7 @@ void StepScan::handleReplEvent(
 
 void StepScan::addReplaceObserverOnce() {
   if (!m_replaceObserverAdded) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_replObserver);
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
     m_replaceObserverAdded = true;
   }
 }
@@ -815,16 +739,13 @@ void StepScan::checkForResultTableUpdate(const std::string &wsName) {
 
 void StepScan::checkForVaryingLogs(const std::string &wsName) {
   if (wsName == m_inputWSName) {
-    MatrixWorkspace_const_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            m_inputWSName);
+    MatrixWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
     emit logsUpdated(ws);
   }
 }
 
 void StepScan::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
+  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
 }
 
 } // namespace CustomInterfaces

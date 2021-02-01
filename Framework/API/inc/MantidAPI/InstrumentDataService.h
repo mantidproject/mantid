@@ -19,8 +19,7 @@ Class to store shared_pointer to Instrument Objects.
 @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
 @date 30/05/2008
 */
-class MANTID_API_DLL InstrumentDataServiceImpl
-    : public Mantid::Kernel::DataService<Mantid::Geometry::Instrument> {
+class MANTID_API_DLL InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::Geometry::Instrument> {
 private:
   friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;
   /// Constructor
@@ -28,19 +27,16 @@ private:
   /// Private, unimplemented copy constructor
   InstrumentDataServiceImpl(const InstrumentDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
-  InstrumentDataServiceImpl &
-  operator=(const InstrumentDataServiceImpl &) = delete;
+  InstrumentDataServiceImpl &operator=(const InstrumentDataServiceImpl &) = delete;
 };
 
-using InstrumentDataService =
-    Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
+using InstrumentDataService = Mantid::Kernel::SingletonHolder<InstrumentDataServiceImpl>;
 
 } // Namespace API
 } // Namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<Mantid::API::InstrumentDataServiceImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::InstrumentDataServiceImpl>;
 }
 } // namespace Mantid

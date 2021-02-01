@@ -22,13 +22,11 @@ namespace MantidWidgets {
 class IFitScriptGeneratorModel;
 class IFitScriptGeneratorView;
 
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorPresenter
-    : public IFitScriptGeneratorPresenter {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
 public:
-  FitScriptGeneratorPresenter(IFitScriptGeneratorView *view,
-                              IFitScriptGeneratorModel *model,
-                              QStringList const &workspaceNames = QStringList(),
-                              double startX = 0.0, double endX = 0.0);
+  FitScriptGeneratorPresenter(IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
+                              QStringList const &workspaceNames = QStringList(), double startX = 0.0,
+                              double endX = 0.0);
   ~FitScriptGeneratorPresenter() override;
 
   void notifyPresenter(ViewEvent const &event) override;
@@ -41,24 +39,17 @@ private:
   void handleStartXChanged();
   void handleEndXChanged();
 
-  void setWorkspaces(QStringList const &workspaceNames, double startX,
-                     double endX);
-  void addWorkspaces(
-      std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
-      std::vector<WorkspaceIndex> const &workspaceIndices);
-  void addWorkspace(std::string const &workspaceName, double startX,
-                    double endX);
-  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+  void setWorkspaces(QStringList const &workspaceNames, double startX, double endX);
+  void addWorkspaces(std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+                     std::vector<WorkspaceIndex> const &workspaceIndices);
+  void addWorkspace(std::string const &workspaceName, double startX, double endX);
+  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, double startX, double endX);
+  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace, WorkspaceIndex workspaceIndex,
                     double startX, double endX);
-  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
-                    WorkspaceIndex workspaceIndex, double startX, double endX);
-  void addWorkspace(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, double startX, double endX);
+  void addWorkspace(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX, double endX);
 
-  void updateStartX(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, double startX);
-  void updateEndX(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex, double endX);
+  void updateStartX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double startX);
+  void updateEndX(std::string const &workspaceName, WorkspaceIndex workspaceIndex, double endX);
 
   void checkForWarningMessages();
 

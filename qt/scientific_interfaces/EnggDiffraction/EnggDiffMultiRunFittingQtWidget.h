@@ -20,14 +20,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget
-    : public QWidget,
-      public IEnggDiffMultiRunFittingWidgetView {
+class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffMultiRunFittingQtWidget : public QWidget,
+                                                                     public IEnggDiffMultiRunFittingWidgetView {
   Q_OBJECT
 
 public:
-  EnggDiffMultiRunFittingQtWidget(
-      std::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
+  EnggDiffMultiRunFittingQtWidget(std::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
@@ -35,15 +33,12 @@ public:
 
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
-  void
-  plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) override;
+  void plotFittedPeaks(const std::vector<std::shared_ptr<QwtData>> &curve) override;
 
-  void
-  plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) override;
+  void plotFocusedRun(const std::vector<std::shared_ptr<QwtData>> &curve) override;
 
-  void plotToSeparateWindow(
-      const std::string &focusedRunName,
-      const boost::optional<std::string> fittedPeaksName) override;
+  void plotToSeparateWindow(const std::string &focusedRunName,
+                            const boost::optional<std::string> fittedPeaksName) override;
 
   void reportNoRunSelectedForPlot() override;
 
@@ -55,11 +50,9 @@ public:
 
   void setEnabled(const bool enabled) override;
 
-  void setMessageProvider(
-      std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
+  void setMessageProvider(std::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
 
-  void setPresenter(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
-                        presenter) override;
+  void setPresenter(std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> presenter) override;
 
   bool showFitResultsSelected() const override;
 
@@ -84,8 +77,7 @@ private:
 
   void setupUI();
 
-  void userError(const std::string &errorTitle,
-                 const std::string &errorDescription);
+  void userError(const std::string &errorTitle, const std::string &errorDescription);
 
   std::vector<std::unique_ptr<QwtPlotCurve>> m_fittedPeaksCurves;
 

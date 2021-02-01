@@ -17,37 +17,31 @@ class MatrixVectorPairParserTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MatrixVectorPairParserTest *createSuite() {
-    return new MatrixVectorPairParserTest();
-  }
+  static MatrixVectorPairParserTest *createSuite() { return new MatrixVectorPairParserTest(); }
   static void destroySuite(MatrixVectorPairParserTest *suite) { delete suite; }
 
   void test_throws_on_additional_input() {
     std::string tooLong("1/2x,-4y,-2-z,x");
 
-    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooLong),
-                     const Exception::ParseError &);
+    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooLong), const Exception::ParseError &);
   }
 
   void test_throws_on_short_input() {
     std::string tooShort("2/3x,-x+y");
 
-    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooShort),
-                     const Exception::ParseError &);
+    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooShort), const Exception::ParseError &);
   }
 
   void test_throws_on_empty_element() {
     std::string emptyY("2/3x, ,-x+y");
 
-    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(emptyY),
-                     const Exception::ParseError &);
+    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(emptyY), const Exception::ParseError &);
   }
 
   void test_throws_on_zero_division() {
     std::string zeroDivision("2/0x,-4y,-2-z,x");
 
-    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(zeroDivision),
-                     const Exception::ParseError &);
+    TS_ASSERT_THROWS(parseMatrixVectorPair<double>(zeroDivision), const Exception::ParseError &);
   }
 
   void test_parse_many_directions() {

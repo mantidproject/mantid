@@ -37,8 +37,7 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
 
   // Checkbco
   mEntireRange = new QCheckBox("Use the entire X range", this);
-  connect(mEntireRange, SIGNAL(toggled(bool)), this,
-          SLOT(mEntireRange_toggled(bool)));
+  connect(mEntireRange, SIGNAL(toggled(bool)), this, SLOT(mEntireRange_toggled(bool)));
 
   // Create a grid layout
   auto *gridbox = new QGridLayout;
@@ -71,8 +70,7 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
 BinDialog::~BinDialog() {}
 
 /** Set the values in the GUI. */
-void BinDialog::setIntegralMinMax(double minBin, double maxBin,
-                                  bool useEverything) {
+void BinDialog::setIntegralMinMax(double minBin, double maxBin, bool useEverything) {
 
   QString strBinNum;
   mIntegralMinValue->setText(strBinNum.setNum(minBin));
@@ -84,8 +82,7 @@ void BinDialog::setIntegralMinMax(double minBin, double maxBin,
 
 /** Called when the OK button is pressed. */
 void BinDialog::btnOKClicked() {
-  emit IntegralMinMax(mIntegralMinValue->displayText().toDouble(),
-                      mIntegralMaxValue->displayText().toDouble(),
+  emit IntegralMinMax(mIntegralMinValue->displayText().toDouble(), mIntegralMaxValue->displayText().toDouble(),
                       mEntireRange->isChecked());
   accept();
 }

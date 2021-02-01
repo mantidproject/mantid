@@ -14,16 +14,12 @@
 
 class FindDetectorsInShapeTest : public CxxTest::TestSuite {
 public:
-  static FindDetectorsInShapeTest *createSuite() {
-    return new FindDetectorsInShapeTest();
-  }
+  static FindDetectorsInShapeTest *createSuite() { return new FindDetectorsInShapeTest(); }
   static void destroySuite(FindDetectorsInShapeTest *suite) { delete suite; }
 
   FindDetectorsInShapeTest() { loadTestWS(); }
 
-  ~FindDetectorsInShapeTest() override {
-    Mantid::API::AnalysisDataService::Instance().clear();
-  }
+  ~FindDetectorsInShapeTest() override { Mantid::API::AnalysisDataService::Instance().clear(); }
 
   void testCuboidMiss() {
     std::string xmlShape = "<cuboid id=\"shape\"> ";
@@ -117,8 +113,7 @@ public:
     runTest(xmlShape, "320,340,360,380", false);
   }
 
-  void runTest(const std::string &xmlShape, std::string expectedHits,
-               bool includeMonitors = true) {
+  void runTest(const std::string &xmlShape, std::string expectedHits, bool includeMonitors = true) {
     Mantid::DataHandling::FindDetectorsInShape alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());

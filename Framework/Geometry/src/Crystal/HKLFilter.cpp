@@ -26,29 +26,22 @@ std::function<bool(const Kernel::V3D &)> HKLFilter::fn() const noexcept {
 }
 
 /// Stores the supplied filter, throws exception if filter is null.
-HKLFilterUnaryLogicOperation::HKLFilterUnaryLogicOperation(
-    const HKLFilter_const_sptr &filter)
-    : m_operand(filter) {
+HKLFilterUnaryLogicOperation::HKLFilterUnaryLogicOperation(const HKLFilter_const_sptr &filter) : m_operand(filter) {
   if (!m_operand) {
-    throw std::runtime_error(
-        "Cannot create HKLFilterUnaryLogicOperation from null operand.");
+    throw std::runtime_error("Cannot create HKLFilterUnaryLogicOperation from null operand.");
   }
 }
 
 /// Returns a description of the HKLFilterNot.
-std::string HKLFilterNot::getDescription() const noexcept {
-  return "!" + m_operand->getDescription();
-}
+std::string HKLFilterNot::getDescription() const noexcept { return "!" + m_operand->getDescription(); }
 
 /// Returns true if the wrapped filter returns false and false otherwise.
-bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const noexcept {
-  return !(m_operand->isAllowed(hkl));
-}
+bool HKLFilterNot::isAllowed(const Kernel::V3D &hkl) const noexcept { return !(m_operand->isAllowed(hkl)); }
 
 /// Stores the left-hand and right-hand side operators, throws exception if
 /// either is null.
-HKLFilterBinaryLogicOperation::HKLFilterBinaryLogicOperation(
-    const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
+HKLFilterBinaryLogicOperation::HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
+                                                             const HKLFilter_const_sptr &rhs)
     : m_lhs(lhs), m_rhs(rhs) {
   if (!m_lhs || !m_rhs) {
     throw std::runtime_error("Cannot construct HKLFilterBinaryLogicOperation "
@@ -99,8 +92,7 @@ const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter) {
  * @param rhs :: Right-hand side HKLFilter operand.
  * @return HKLFilterAnd with two wrapped filters.
  */
-const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
-                                     const HKLFilter_const_sptr &rhs) {
+const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs) {
   return std::make_shared<const HKLFilterAnd>(lhs, rhs);
 }
 
@@ -114,8 +106,7 @@ const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
  * @param rhs :: Right-hand side HKLFilter operand.
  * @return HKLFilterOr with two wrapped filters.
  */
-const HKLFilter_const_sptr operator|(const HKLFilter_const_sptr &lhs,
-                                     const HKLFilter_const_sptr &rhs) {
+const HKLFilter_const_sptr operator|(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs) {
   return std::make_shared<HKLFilterOr>(lhs, rhs);
 }
 

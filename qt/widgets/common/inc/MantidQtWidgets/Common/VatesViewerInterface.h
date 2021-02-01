@@ -26,9 +26,7 @@ namespace API {
   @author Michael Reuter
   @date 08/09/2011
  */
-class EXPORT_OPT_MANTIDQT_COMMON VatesViewerInterface
-    : public QWidget,
-      public IProjectSerialisable {
+class EXPORT_OPT_MANTIDQT_COMMON VatesViewerInterface : public QWidget, public IProjectSerialisable {
   Q_OBJECT
 public:
   /// Default constructor for plugin mode.
@@ -47,17 +45,14 @@ public:
    * @param workspaceType the type of workspace being visualized
    * @param instrumentName The Name of the instrument.
    */
-  virtual void renderWorkspace(QString workspaceName, int workspaceType,
-                               std::string instrumentName);
+  virtual void renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName);
   /**
    * Special function of correct widget invocation for plugin mode.
    */
   virtual void setupPluginMode(int WsType, const std::string &instrumentName);
 
   /// Static method to create a handle to new window instance
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion);
   /// Load the VATES gui from a Mantid project string
   virtual void loadFromProject(const std::string &lines) = 0;
 

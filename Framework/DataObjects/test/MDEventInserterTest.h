@@ -33,14 +33,11 @@ private:
   /// specified event type.
   IMDEventWorkspace_sptr createInputWorkspace(const std::string &eventType) {
     using Mantid::Geometry::MDHistoDimension;
-    Mantid::Geometry::GeneralFrame frame(
-        Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
+    Mantid::Geometry::GeneralFrame frame(Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
     IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(2, eventType);
     coord_t min(-10.0f), max(10.0f);
-    ws->addDimension(
-        std::make_shared<MDHistoDimension>("A", "A", frame, min, max, 1));
-    ws->addDimension(
-        std::make_shared<MDHistoDimension>("B", "B", frame, min, max, 1));
+    ws->addDimension(std::make_shared<MDHistoDimension>("A", "A", frame, min, max, 1));
+    ws->addDimension(std::make_shared<MDHistoDimension>("B", "B", frame, min, max, 1));
     ws->initialize();
     // Split to level 1
     ws->splitBox();
@@ -51,21 +48,17 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventInserterTest *createSuite() {
-    return new MDEventInserterTest();
-  }
+  static MDEventInserterTest *createSuite() { return new MDEventInserterTest(); }
   static void destroySuite(MDEventInserterTest *suite) { delete suite; }
 
   void test_add_md_lean_events() {
     using MDEW_LEAN_2D = MDEventWorkspace<MDLeanEvent<2>, 2>;
 
     // Check the type deduction used internally in the MDEventInserter template.
-    TS_ASSERT_EQUALS(sizeof(MDEW_LEAN_2D::MDEventType),
-                     sizeof(MDEventInserter<MDEW_LEAN_2D::sptr>::MDEventType));
+    TS_ASSERT_EQUALS(sizeof(MDEW_LEAN_2D::MDEventType), sizeof(MDEventInserter<MDEW_LEAN_2D::sptr>::MDEventType));
 
     // Create an input workspace
-    MDEW_LEAN_2D::sptr ws2d = std::dynamic_pointer_cast<MDEW_LEAN_2D>(
-        createInputWorkspace("MDLeanEvent"));
+    MDEW_LEAN_2D::sptr ws2d = std::dynamic_pointer_cast<MDEW_LEAN_2D>(createInputWorkspace("MDLeanEvent"));
 
     // Create the inserter.
     MDEventInserter<MDEW_LEAN_2D::sptr> inserter(ws2d);
@@ -92,12 +85,10 @@ public:
     using MDEW_2D = MDEventWorkspace<MDEvent<2>, 2>;
 
     // Check the type deduction used internally in the MDEventInserter template.
-    TS_ASSERT_EQUALS(sizeof(MDEW_2D::MDEventType),
-                     sizeof(MDEventInserter<MDEW_2D::sptr>::MDEventType));
+    TS_ASSERT_EQUALS(sizeof(MDEW_2D::MDEventType), sizeof(MDEventInserter<MDEW_2D::sptr>::MDEventType));
 
     // Create an input workspace.
-    MDEW_2D::sptr ws2d =
-        std::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
+    MDEW_2D::sptr ws2d = std::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
 
     // Create the inserter.
     MDEventInserter<MDEW_2D::sptr> inserter(ws2d);

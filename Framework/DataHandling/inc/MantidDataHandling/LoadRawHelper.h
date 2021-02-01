@@ -37,8 +37,7 @@ namespace DataHandling {
 /** @class LoadRawHelper DataHandling/LoadRawHelper.h
  * Helper class for LoadRaw algorithms.
  */
-class DLLExport LoadRawHelper
-    : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadRawHelper : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadRawHelper();
@@ -50,14 +49,11 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Helper class for LoadRaw algorithms.";
-  }
+  const std::string summary() const override { return "Helper class for LoadRaw algorithms."; }
   /// Opens Raw File
   FILE *openRawFile(const std::string &fileName);
   /// Read in run parameters Public so that LoadRaw2 can use it
-  void loadRunParameters(const API::MatrixWorkspace_sptr &localWorkspace,
-                         ISISRAW *const = nullptr) const;
+  void loadRunParameters(const API::MatrixWorkspace_sptr &localWorkspace, ISISRAW *const = nullptr) const;
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
@@ -69,45 +65,35 @@ public:
   ///  returns true if the Include Monitor Option  selected
   static bool isIncludeMonitors(const std::string &monitorOption);
 
-  static void ProcessLoadMonitorOptions(bool &bincludeMonitors,
-                                        bool &bseparateMonitors,
-                                        bool &bexcludeMonitors,
+  static void ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bseparateMonitors, bool &bexcludeMonitors,
                                         API::Algorithm *const pAlgo);
   /// creates monitor workspace
-  static void
-  createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
-                         DataObjects::Workspace2D_sptr &normalws_sptr,
-                         API::WorkspaceGroup_sptr &mongrp_sptr,
-                         const int64_t mwsSpecs, const int64_t nwsSpecs,
-                         const int64_t numberOfPeriods, const int64_t lengthIn,
-                         const std::string &title, API::Algorithm *const pAlg);
+  static void createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
+                                     DataObjects::Workspace2D_sptr &normalws_sptr,
+                                     API::WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
+                                     const int64_t nwsSpecs, const int64_t numberOfPeriods, const int64_t lengthIn,
+                                     const std::string &title, API::Algorithm *const pAlg);
   /// creates  shared pointer to group workspace
   static API::WorkspaceGroup_sptr createGroupWorkspace();
 
   /// creates shared pointer to workspace from parent workspace
-  static DataObjects::Workspace2D_sptr
-  createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
-                  int64_t nVectors = -1, int64_t xLengthIn = -1,
-                  int64_t yLengthIn = -1);
+  static DataObjects::Workspace2D_sptr createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
+                                                       int64_t nVectors = -1, int64_t xLengthIn = -1,
+                                                       int64_t yLengthIn = -1);
 
   /// overloaded method to create shared pointer to workspace
-  static DataObjects::Workspace2D_sptr
-  createWorkspace(int64_t nVectors, int64_t xlengthIn, int64_t ylengthIn,
-                  const std::string &title);
+  static DataObjects::Workspace2D_sptr createWorkspace(int64_t nVectors, int64_t xlengthIn, int64_t ylengthIn,
+                                                       const std::string &title);
 
   /// sets the workspace property
-  static void setWorkspaceProperty(const std::string &propertyName,
-                                   const std::string &title,
+  static void setWorkspaceProperty(const std::string &propertyName, const std::string &title,
                                    const API::WorkspaceGroup_sptr &grpws_sptr,
-                                   const DataObjects::Workspace2D_sptr &ws_sptr,
-                                   int64_t numberOfPeriods,
-                                   [[maybe_unused]] bool bMonitor,
-                                   API::Algorithm *const pAlg);
+                                   const DataObjects::Workspace2D_sptr &ws_sptr, int64_t numberOfPeriods,
+                                   [[maybe_unused]] bool bMonitor, API::Algorithm *const pAlg);
 
   /// overloaded method to set the workspace property
   static void setWorkspaceProperty(const DataObjects::Workspace2D_sptr &ws_sptr,
-                                   const API::WorkspaceGroup_sptr &grpws_sptr,
-                                   const int64_t period, bool bmonitors,
+                                   const API::WorkspaceGroup_sptr &grpws_sptr, const int64_t period, bool bmonitors,
                                    API::Algorithm *const pAlg);
 
   /// Extract the start time from a raw file
@@ -122,8 +108,8 @@ protected:
   /// Reads title from the isisraw class
   void readTitle(FILE *file, std::string &title);
   /// reads workspace parameters like number of histograms,size of vectors etc
-  void readworkspaceParameters(specnum_t &numberOfSpectra, int &numberOfPeriods,
-                               int64_t &lengthIn, int64_t &noTimeRegimes);
+  void readworkspaceParameters(specnum_t &numberOfSpectra, int &numberOfPeriods, int64_t &lengthIn,
+                               int64_t &noTimeRegimes);
 
   /// skips histrogram data from raw file.
   void skipData(FILE *file, int hist);
@@ -137,36 +123,27 @@ protected:
   bool readData(FILE *file, int64_t hist);
 
   // Constructs the time channel (X) vector(s)
-  std::vector<std::shared_ptr<HistogramData::HistogramX>>
-  getTimeChannels(const int64_t &regimes, const int64_t &lengthIn);
+  std::vector<std::shared_ptr<HistogramData::HistogramX>> getTimeChannels(const int64_t &regimes,
+                                                                          const int64_t &lengthIn);
   /// loadinstrument Child Algorithm
-  void runLoadInstrument(const std::string &fileName,
-                         const DataObjects::Workspace2D_sptr &, double, double);
+  void runLoadInstrument(const std::string &fileName, const DataObjects::Workspace2D_sptr &, double, double);
   /// loadinstrumentfromraw algorithm
-  void runLoadInstrumentFromRaw(const std::string &fileName,
-                                const DataObjects::Workspace2D_sptr &);
+  void runLoadInstrumentFromRaw(const std::string &fileName, const DataObjects::Workspace2D_sptr &);
   /// loadinstrumentfromraw Child Algorithm
-  void runLoadMappingTable(const std::string &fileName,
-                           const DataObjects::Workspace2D_sptr &);
+  void runLoadMappingTable(const std::string &fileName, const DataObjects::Workspace2D_sptr &);
   /// load log algorithm
-  void runLoadLog(const std::string &fileName,
-                  const DataObjects::Workspace2D_sptr &, double, double);
+  void runLoadLog(const std::string &fileName, const DataObjects::Workspace2D_sptr &, double, double);
 
   /// Create the period specific logs
-  void createPeriodLogs(int64_t period,
-                        const DataObjects::Workspace2D_sptr &local_workspace);
+  void createPeriodLogs(int64_t period, const DataObjects::Workspace2D_sptr &local_workspace);
 
   /// gets the monitor spectrum list from the workspace
-  std::vector<specnum_t>
-  getmonitorSpectrumList(const API::SpectrumDetectorMapping &mapping);
+  std::vector<specnum_t> getmonitorSpectrumList(const API::SpectrumDetectorMapping &mapping);
 
   /// This method sets the raw file data to workspace vectors
-  void
-  setWorkspaceData(const DataObjects::Workspace2D_sptr &newWorkspace,
-                   const std::vector<std::shared_ptr<HistogramData::HistogramX>>
-                       &timeChannelsVec,
-                   int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
-                   int64_t lengthIn, int64_t binStart);
+  void setWorkspaceData(const DataObjects::Workspace2D_sptr &newWorkspace,
+                        const std::vector<std::shared_ptr<HistogramData::HistogramX>> &timeChannelsVec, int64_t wsIndex,
+                        specnum_t nspecNum, int64_t noTimeRegimes, int64_t lengthIn, int64_t binStart);
 
   /// get proton charge from raw file
   float getProtonCharge() const;
@@ -183,21 +160,17 @@ protected:
   void reset();
 
   /// sets optional properties like spec_min,spec_max etc
-  void setOptionalProperties(const int &spec_min, const int &spec_max,
-                             const std::vector<int> &spec_list);
+  void setOptionalProperties(const int &spec_min, const int &spec_max, const std::vector<int> &spec_list);
   /// Validates the optional 'spectra to read' properties, if they have been set
   void checkOptionalProperties();
   /// calculate workspace size
   specnum_t calculateWorkspaceSize();
   /// calculate workspace sizes if separate or exclude monitors are selected
-  void calculateWorkspacesizes(const std::vector<specnum_t> &monitorSpecList,
-                               specnum_t &normalwsSpecs,
+  void calculateWorkspacesizes(const std::vector<specnum_t> &monitorSpecList, specnum_t &normalwsSpecs,
                                specnum_t &monitorwsSpecs);
   /// load the spectra
-  void
-  loadSpectra(FILE *file, const int &period, const int &total_specs,
-              const DataObjects::Workspace2D_sptr &ws_sptr,
-              const std::vector<std::shared_ptr<HistogramData::HistogramX>> &);
+  void loadSpectra(FILE *file, const int &period, const int &total_specs, const DataObjects::Workspace2D_sptr &ws_sptr,
+                   const std::vector<std::shared_ptr<HistogramData::HistogramX>> &);
 
   /// Has the spectrum_list property been set?
   bool m_list;

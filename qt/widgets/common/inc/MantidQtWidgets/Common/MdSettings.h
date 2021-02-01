@@ -85,8 +85,7 @@ public:
    * @param colorMapName The name of the general color map.
    * @param colorMapFile The file name of the general color map.
    */
-  void setGeneralMdColorMap(const QString &colorMapName,
-                            const QString &colorMapFile);
+  void setGeneralMdColorMap(const QString &colorMapName, const QString &colorMapFile);
 
   /**
    * Get the general MD color map file

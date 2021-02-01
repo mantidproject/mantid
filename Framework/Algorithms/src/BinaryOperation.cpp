@@ -37,37 +37,29 @@ namespace Algorithms {
  *
  */
 void BinaryOperation::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName1(), "",
-                                                           Direction::Input),
-      "The name of the input workspace on the left hand side of the operation");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      inputPropName2(), "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName1(), "", Direction::Input),
+                  "The name of the input workspace on the left hand side of the operation");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(inputPropName2(), "", Direction::Input),
                   "The name of the input workspace on the right hand side of "
                   "the operation");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      outputPropName(), "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(outputPropName(), "", Direction::Output),
                   "The name to call the output workspace");
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra",
-                                                false, Direction::Input),
-      "Are workspaces with different number of spectra allowed? "
-      "For example, the LHSWorkspace might have one spectrum per detector, "
-      "but the RHSWorkspace could have its spectra averaged per bank. If true, "
-      "then matching between the LHS and RHS spectra is performed (all "
-      "detectors "
-      "in a LHS spectrum have to be in the corresponding RHS) in order to "
-      "apply the RHS spectrum to the LHS.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("AllowDifferentNumberSpectra", false, Direction::Input),
+                  "Are workspaces with different number of spectra allowed? "
+                  "For example, the LHSWorkspace might have one spectrum per detector, "
+                  "but the RHSWorkspace could have its spectra averaged per bank. If true, "
+                  "then matching between the LHS and RHS spectra is performed (all "
+                  "detectors "
+                  "in a LHS spectrum have to be in the corresponding RHS) in order to "
+                  "apply the RHS spectrum to the LHS.");
 
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false,
-                                                Direction::Input),
-      "For EventWorkspaces only. This will clear out event lists "
-      "from the RHS workspace as the binary operation is applied. "
-      "This can prevent excessive memory use, e.g. when subtracting "
-      "an EventWorkspace from another: memory use will be approximately "
-      "constant instead of increasing by 50%. At completion, the RHS workspace "
-      "will be empty.");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("ClearRHSWorkspace", false, Direction::Input),
+                  "For EventWorkspaces only. This will clear out event lists "
+                  "from the RHS workspace as the binary operation is applied. "
+                  "This can prevent excessive memory use, e.g. when subtracting "
+                  "an EventWorkspace from another: memory use will be approximately "
+                  "constant instead of increasing by 50%. At completion, the RHS workspace "
+                  "will be empty.");
 }
 
 /** Special handling for 1-WS and 1/WS.
@@ -76,10 +68,8 @@ void BinaryOperation::init() {
  */
 bool BinaryOperation::handleSpecialDivideMinus() {
   // Is the LHS operand a single number?
-  WorkspaceSingleValue_const_sptr lhs_singleVal =
-      std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_lhs);
-  WorkspaceSingleValue_const_sptr rhs_singleVal =
-      std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_rhs);
+  WorkspaceSingleValue_const_sptr lhs_singleVal = std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_lhs);
+  WorkspaceSingleValue_const_sptr rhs_singleVal = std::dynamic_pointer_cast<const WorkspaceSingleValue>(m_rhs);
 
   if (lhs_singleVal) {
     MatrixWorkspace_sptr out = getProperty("OutputWorkspace");
@@ -87,20 +77,17 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       // x / workspace = Power(workspace, -1) * x
       // workspace ^ -1
       IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
-      pow->setProperty("InputWorkspace",
-                       std::const_pointer_cast<MatrixWorkspace>(m_rhs));
+      pow->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       pow->setProperty("Exponent", -1.0);
       pow->setProperty("OutputWorkspace", out);
       pow->executeAsChildAlg();
       out = pow->getProperty("OutputWorkspace");
 
       // Multiply by x
-      IAlgorithm_sptr mult =
-          this->createChildAlgorithm("Multiply", 0.5, 1.0, true);
+      IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.5, 1.0, true);
       mult->setProperty(inputPropName1(), out); //(workspace^-1)
       mult->setProperty(inputPropName2(),
-                        std::const_pointer_cast<MatrixWorkspace>(
-                            m_lhs)); // (1.0) or other number
+                        std::const_pointer_cast<MatrixWorkspace>(m_lhs)); // (1.0) or other number
       mult->setProperty(outputPropName(), out);
       mult->executeAsChildAlg();
       out = mult->getProperty("OutputWorkspace");
@@ -108,16 +95,13 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       return true;
     } else if (this->name() == "Minus") {
       // x - workspace = x + (workspace * -1)
-      MatrixWorkspace_sptr minusOne =
-          create<WorkspaceSingleValue>(1, Points(1));
+      MatrixWorkspace_sptr minusOne = create<WorkspaceSingleValue>(1, Points(1));
       minusOne->dataY(0)[0] = -1.0;
       minusOne->dataE(0)[0] = 0.0;
 
       // workspace * -1
-      IAlgorithm_sptr mult =
-          this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
-      mult->setProperty(inputPropName1(),
-                        std::const_pointer_cast<MatrixWorkspace>(m_rhs));
+      IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
+      mult->setProperty(inputPropName1(), std::const_pointer_cast<MatrixWorkspace>(m_rhs));
       mult->setProperty(inputPropName2(), minusOne);
       mult->setProperty("OutputWorkspace", out);
       mult->executeAsChildAlg();
@@ -127,8 +111,7 @@ bool BinaryOperation::handleSpecialDivideMinus() {
       IAlgorithm_sptr plus = this->createChildAlgorithm("Plus", 0.5, 1.0, true);
       plus->setProperty(inputPropName1(), out); //(workspace^-1)
       plus->setProperty(inputPropName2(),
-                        std::const_pointer_cast<MatrixWorkspace>(
-                            m_lhs)); // (1.0) or other number
+                        std::const_pointer_cast<MatrixWorkspace>(m_lhs)); // (1.0) or other number
       plus->setProperty(outputPropName(), out);
       plus->executeAsChildAlg();
       out = plus->getProperty("OutputWorkspace");
@@ -170,8 +153,7 @@ void BinaryOperation::exec() {
   //  and out is not rhs.
   m_ClearRHSWorkspace = getProperty("ClearRHSWorkspace");
   if (m_ClearRHSWorkspace) {
-    if (m_AllowDifferentNumberSpectra || (!m_erhs) || (m_rhs == m_lhs) ||
-        (m_out == m_rhs)) {
+    if (m_AllowDifferentNumberSpectra || (!m_erhs) || (m_rhs == m_lhs) || (m_out == m_rhs)) {
       // std::cout << "m_ClearRHSWorkspace = false\n";
       m_ClearRHSWorkspace = false;
     }
@@ -195,8 +177,7 @@ void BinaryOperation::exec() {
   // Check that the input workspaces are compatible
   if (!checkCompatibility(m_lhs, m_rhs)) {
     std::ostringstream ostr;
-    ostr << "The two workspaces are not compatible for algorithm "
-         << this->name();
+    ostr << "The two workspaces are not compatible for algorithm " << this->name();
     g_log.error() << ostr.str() << '\n';
     throw std::invalid_argument(ostr.str());
   }
@@ -215,11 +196,10 @@ void BinaryOperation::exec() {
     if (m_out == m_lhs) {
       // Will be modifying the EventWorkspace in-place on the lhs. Good.
       if (!m_eout)
-        throw std::runtime_error(
-            "BinaryOperation:: the output was set to be lhs, and to be an "
-            "EventWorkspace (m_keepEventWorkspace == true), but the output is "
-            "not an EventWorkspace. There must be a mistake in the algorithm. "
-            "Contact the developers.");
+        throw std::runtime_error("BinaryOperation:: the output was set to be lhs, and to be an "
+                                 "EventWorkspace (m_keepEventWorkspace == true), but the output is "
+                                 "not an EventWorkspace. There must be a mistake in the algorithm. "
+                                 "Contact the developers.");
     } else {
       // You HAVE to copy the data from lhs to to the output!
       m_out = m_lhs->clone();
@@ -240,8 +220,7 @@ void BinaryOperation::exec() {
     // We need to create a new workspace for the output if:
     //   (a) the output workspace hasn't been set to one of the input ones, or
     //   (b) it has been, but it's not the correct dimensions
-    if ((m_out != m_lhs && m_out != m_rhs) ||
-        (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
+    if ((m_out != m_lhs && m_out != m_rhs) || (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
       // if the input workspace are specialworkspace2d, then we need to ensure
       // the map is set
       auto specialLHS = dynamic_cast<const SpecialWorkspace2D *>(m_lhs.get());
@@ -258,8 +237,7 @@ void BinaryOperation::exec() {
   operateOnRun(m_lhs->run(), m_rhs->run(), m_out->mutableRun());
 
   // Initialise the progress reporting object
-  m_progress =
-      std::make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_lhs->getNumberHistograms());
 
   // There are now 4 possible scenarios, shown schematically here:
   // xxx x   xxx xxx   xxx xxx   xxx x
@@ -283,8 +261,7 @@ void BinaryOperation::exec() {
          // event workspace)
   {
     bool mismatchedSpectra =
-        (m_AllowDifferentNumberSpectra &&
-         (m_rhs->getNumberHistograms() != m_lhs->getNumberHistograms()));
+        (m_AllowDifferentNumberSpectra && (m_rhs->getNumberHistograms() != m_lhs->getNumberHistograms()));
     do2D(mismatchedSpectra);
   }
 
@@ -304,8 +281,7 @@ void BinaryOperation::execEvent(DataObjects::EventWorkspace_const_sptr lhs,
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhs);
   // This should never happen
-  throw Exception::NotImplementedError(
-      "BinaryOperation::execEvent() is not implemented for this operation.");
+  throw Exception::NotImplementedError("BinaryOperation::execEvent() is not implemented for this operation.");
 }
 
 /**
@@ -315,9 +291,8 @@ void BinaryOperation::execEvent(DataObjects::EventWorkspace_const_sptr lhs,
  * @param rhs :: right-hand workspace to check
  * @return flag for the compatibility to the two workspaces
  */
-bool BinaryOperation::checkCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                         const API::MatrixWorkspace_const_sptr rhs) const {
   Unit_const_sptr lhs_unit;
   Unit_const_sptr rhs_unit;
   if (lhs->axes() && rhs->axes()) // If one of these is a WorkspaceSingleValue
@@ -338,8 +313,7 @@ bool BinaryOperation::checkCompatibility(
   }
 
   // Check the size compatibility
-  const std::string checkSizeCompatibilityResult =
-      checkSizeCompatibility(lhs, rhs);
+  const std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs, rhs);
   if (!checkSizeCompatibilityResult.empty()) {
     throw std::invalid_argument(checkSizeCompatibilityResult);
   }
@@ -354,9 +328,8 @@ bool BinaryOperation::checkCompatibility(
  * @param rhs :: right-hand event workspace to check
  * @return false by default; will be overridden by specific algorithms
  */
-bool BinaryOperation::checkEventCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) {
+bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                              const API::MatrixWorkspace_const_sptr rhs) {
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhs);
   return false;
@@ -372,9 +345,8 @@ bool BinaryOperation::checkEventCompatibility(
  *  @retval "<reason why not compatible>" The two workspaces are NOT size
  * compatible
  */
-std::string BinaryOperation::checkSizeCompatibility(
-    const API::MatrixWorkspace_const_sptr lhs,
-    const API::MatrixWorkspace_const_sptr rhs) const {
+std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
+                                                    const API::MatrixWorkspace_const_sptr rhs) const {
   const size_t lhsSize = lhs->size();
   const size_t rhsSize = rhs->size();
   // A SingleValueWorkspace on the right matches anything
@@ -396,8 +368,7 @@ std::string BinaryOperation::checkSizeCompatibility(
   }
   // Otherwise they must match both ways, or horizontally or vertically with the
   // other rhs dimension=1
-  if (m_rhsBlocksize == 1 &&
-      lhs->getNumberHistograms() == rhs->getNumberHistograms())
+  if (m_rhsBlocksize == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms())
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
   // the first spectrum
@@ -444,17 +415,12 @@ std::string BinaryOperation::checkSizeCompatibility(
  * @returns True if further processing is not required on the spectra, false if
  * the binary operation should be performed.
  */
-bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo,
-                                           const SpectrumInfo &rhsSpectrumInfo,
-                                           const int64_t index,
-                                           MatrixWorkspace &out,
-                                           SpectrumInfo &outSpectrumInfo) {
+bool BinaryOperation::propagateSpectraMask(const SpectrumInfo &lhsSpectrumInfo, const SpectrumInfo &rhsSpectrumInfo,
+                                           const int64_t index, MatrixWorkspace &out, SpectrumInfo &outSpectrumInfo) {
   bool continueOp(true);
 
-  if ((lhsSpectrumInfo.hasDetectors(index) &&
-       lhsSpectrumInfo.isMasked(index)) ||
-      (rhsSpectrumInfo.hasDetectors(index) &&
-       rhsSpectrumInfo.isMasked(index))) {
+  if ((lhsSpectrumInfo.hasDetectors(index) && lhsSpectrumInfo.isMasked(index)) ||
+      (rhsSpectrumInfo.hasDetectors(index) && rhsSpectrumInfo.isMasked(index))) {
     continueOp = false;
     out.getSpectrum(index).clearData();
     PARALLEL_CRITICAL(setMasked) { outSpectrumInfo.setMasked(index, true); }
@@ -532,8 +498,7 @@ void BinaryOperation::doSingleColumn() {
       PARALLEL_START_INTERUPT_REGION
       const double rhsY = m_rhs->y(i)[0];
       const double rhsE = m_rhs->e(i)[0];
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
-                               outSpectrumInfo)) {
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo)) {
         performEventBinaryOperation(m_eout->getSpectrum(i), rhsY, rhsE);
       }
       m_progress->report(this->name());
@@ -549,8 +514,7 @@ void BinaryOperation::doSingleColumn() {
       const double rhsE = m_rhs->e(i)[0];
 
       m_out->setSharedX(i, m_lhs->sharedX(i));
-      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
-                               outSpectrumInfo)) {
+      if (propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo)) {
         // Get reference to output vectors here to break any sharing outside the
         // function call below
         // where the order of argument evaluation is not guaranteed (if it's
@@ -689,14 +653,12 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
-                                    outSpectrumInfo))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo))
             continue;
         }
         // Reach here? Do the division
         // Perform the operation on the event list on the output (== lhs)
-        performEventBinaryOperation(m_eout->getSpectrum(i),
-                                    m_erhs->getSpectrum(rhs_wi));
+        performEventBinaryOperation(m_eout->getSpectrum(i), m_erhs->getSpectrum(rhs_wi));
 
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
@@ -722,14 +684,12 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
             continue;
         } else {
           // Check for masking except when mismatched sizes
-          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
-                                    outSpectrumInfo))
+          if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo))
             continue;
         }
 
         // Reach here? Do the division
-        performEventBinaryOperation(m_eout->getSpectrum(i),
-                                    m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
+        performEventBinaryOperation(m_eout->getSpectrum(i), m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
                                     m_rhs->readE(rhs_wi));
 
         // Free up memory on the RHS if that is possible
@@ -761,8 +721,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
           continue;
       } else {
         // Check for masking except when mismatched sizes
-        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out,
-                                  outSpectrumInfo))
+        if (!propagateSpectraMask(lhsSpectrumInfo, rhsSpectrumInfo, i, *m_out, outSpectrumInfo))
           continue;
       }
       // Reach here? Do the division
@@ -772,8 +731,7 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       // there would be a data race)
       HistogramData::HistogramY &outY = m_out->mutableY(i);
       HistogramData::HistogramE &outE = m_out->mutableE(i);
-      performBinaryOperation(m_lhs->histogram(i), m_rhs->histogram(rhs_wi),
-                             outY, outE);
+      performBinaryOperation(m_lhs->histogram(i), m_rhs->histogram(rhs_wi), outY, outE);
 
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
@@ -794,9 +752,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
  *  @param rhs :: The workspace which is the right hand operand
  *  @param out :: The result workspace
  */
-void BinaryOperation::propagateBinMasks(
-    const API::MatrixWorkspace_const_sptr &rhs,
-    const API::MatrixWorkspace_sptr &out) {
+void BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr &rhs,
+                                        const API::MatrixWorkspace_sptr &out) {
   const int64_t outHists = out->getNumberHistograms();
   const int64_t rhsHists = rhs->getNumberHistograms();
   for (int64_t i = 0; i < outHists; ++i) {
@@ -804,8 +761,7 @@ void BinaryOperation::propagateBinMasks(
     // If rhs is single spectrum, copy masks from that to all spectra in the
     // output.
     if (rhs->hasMaskedBins((rhsHists == 1) ? 0 : i)) {
-      const MatrixWorkspace::MaskList &masks =
-          rhs->maskedBins((rhsHists == 1) ? 0 : i);
+      const MatrixWorkspace::MaskList &masks = rhs->maskedBins((rhsHists == 1) ? 0 : i);
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = masks.begin(); it != masks.end(); ++it) {
         out->flagMasked(i, it->first, it->second);
@@ -824,12 +780,10 @@ void BinaryOperation::propagateBinMasks(
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void BinaryOperation::performEventBinaryOperation(
-    DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
+void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhs);
-  throw Exception::NotImplementedError(
-      "BinaryOperation::performEventBinaryOperation() not implemented.");
+  throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
 /**
@@ -841,16 +795,13 @@ void BinaryOperation::performEventBinaryOperation(
  *  @param rhsY :: Rhs data values
  *  @param rhsE :: Rhs error values
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                                  const MantidVec &rhsX,
-                                                  const MantidVec &rhsY,
-                                                  const MantidVec &rhsE) {
+void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX,
+                                                  const MantidVec &rhsY, const MantidVec &rhsE) {
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhsX);
   UNUSED_ARG(rhsY);
   UNUSED_ARG(rhsE);
-  throw Exception::NotImplementedError(
-      "BinaryOperation::performEventBinaryOperation() not implemented.");
+  throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
 /**
@@ -861,14 +812,11 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
-                                                  const double &rhsY,
-                                                  const double &rhsE) {
+void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
   UNUSED_ARG(lhs);
   UNUSED_ARG(rhsY);
   UNUSED_ARG(rhsE);
-  throw Exception::NotImplementedError(
-      "BinaryOperation::performEventBinaryOperation() not implemented.");
+  throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
 /**
@@ -876,11 +824,9 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
  * @param ws :: workspace to check
  * @return OperandType describing what type of workspace it will be operated as.
  */
-OperandType
-BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr &ws) {
+OperandType BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr &ws) {
   // An event workspace?
-  EventWorkspace_const_sptr ews =
-      std::dynamic_pointer_cast<const EventWorkspace>(ws);
+  EventWorkspace_const_sptr ews = std::dynamic_pointer_cast<const EventWorkspace>(ws);
   if (ews)
     return eEventList;
 
@@ -929,9 +875,8 @@ void BinaryOperation::checkRequirements() {
  *(e.g more than one detector per pixel).
  */
 BinaryOperation::BinaryOperationTable_sptr
-BinaryOperation::buildBinaryOperationTable(
-    const MatrixWorkspace_const_sptr &lhs,
-    const MatrixWorkspace_const_sptr &rhs) {
+BinaryOperation::buildBinaryOperationTable(const MatrixWorkspace_const_sptr &lhs,
+                                           const MatrixWorkspace_const_sptr &rhs) {
   // An addition table is a list of pairs:
   //  First int = workspace index in the EW being added
   //  Second int = workspace index to which it will be added in the OUTPUT EW.
@@ -964,8 +909,7 @@ BinaryOperation::buildBinaryOperationTable(
       const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
       // Checks that lhsDets is a subset of rhsDets
-      if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
-                        lhsDets.end())) {
+      if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(), lhsDets.end())) {
         // We found the workspace index right away. No need to keep looking
         (*table)[lhsWI] = rhsWI;
         done = true;
@@ -1012,8 +956,7 @@ BinaryOperation::buildBinaryOperationTable(
         const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
 
         // Checks that lhsDets is a subset of rhsDets
-        if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
-                          lhsDets.end())) {
+        if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(), lhsDets.end())) {
           // This one is right. Now we can stop looking.
           (*table)[lhsWI] = rhsWI;
           done = true;
@@ -1037,8 +980,8 @@ BinaryOperation::buildBinaryOperationTable(
   return table;
 }
 
-Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+Parallel::ExecutionMode
+BinaryOperation::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))
     return Parallel::ExecutionMode::Invalid;
   auto lhs = storageModes.find(inputPropName1())->second;

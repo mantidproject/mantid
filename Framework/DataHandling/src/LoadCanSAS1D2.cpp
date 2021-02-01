@@ -36,11 +36,9 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
-                                                Direction::Input),
-      "Load the transmission related data from the file if it is present "
-      "(optional, default False).");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadTransmission", false, Direction::Input),
+                  "Load the transmission related data from the file if it is present "
+                  "(optional, default False).");
 }
 
 void LoadCanSAS1D2::exec() {
@@ -67,12 +65,10 @@ void LoadCanSAS1D2::exec() {
    @param output_name: The name of the OutputWorkspace, in order to create the
    workspaces with similar names.
  */
-void LoadCanSAS1D2::processTransmission(
-    std::vector<MatrixWorkspace_sptr> &trans_gp, const std::string &name,
-    const std::string &output_name) {
+void LoadCanSAS1D2::processTransmission(std::vector<MatrixWorkspace_sptr> &trans_gp, const std::string &name,
+                                        const std::string &output_name) {
 
-  std::string trans_wsname =
-      std::string(output_name).append("_trans_").append(name);
+  std::string trans_wsname = std::string(output_name).append("_trans_").append(name);
   const std::string fileName = getPropertyValue("Filename");
 
   std::string propertyWS;
@@ -85,8 +81,7 @@ void LoadCanSAS1D2::processTransmission(
   if (trans_gp.size() == 1) {
     MatrixWorkspace_sptr WS = trans_gp[0];
     WS->mutableRun().addProperty("Filename", fileName);
-    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                        propertyWS, trans_wsname, Direction::Output),
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(propertyWS, trans_wsname, Direction::Output),
                     doc);
 
     setProperty(propertyWS, WS);
@@ -100,16 +95,13 @@ void LoadCanSAS1D2::processTransmission(
       std::stringstream name;
       pname << propertyWS << i;
       name << trans_wsname << i;
-      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                          pname.str(), name.str(), Direction::Output),
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(pname.str(), name.str(), Direction::Output),
                       doc);
       setProperty(pname.str(), newWork);
       group->addWorkspace(newWork);
     }
     std::string pname = std::string(propertyWS).append("GP");
-    declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                        pname, trans_wsname, Direction::Output),
-                    doc);
+    declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(pname, trans_wsname, Direction::Output), doc);
     setProperty(pname, group);
   }
 }
@@ -125,11 +117,8 @@ void LoadCanSAS1D2::processTransmission(
  * @throw NotFoundError if any expected elements couldn't be read
  * @throw NotImplementedError if the entry doesn't contain exactly one run
  */
-MatrixWorkspace_sptr
-LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
-                         std::string &runName) {
-  MatrixWorkspace_sptr main_out =
-      LoadCanSAS1D::loadEntry(workspaceData, runName);
+MatrixWorkspace_sptr LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData, std::string &runName) {
+  MatrixWorkspace_sptr main_out = LoadCanSAS1D::loadEntry(workspaceData, runName);
   bool loadTrans = getProperty("LoadTransmission");
   if (!loadTrans)
     return main_out; // all done. It is not to load the transmission, nor check
@@ -138,32 +127,26 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
   auto *workspaceElem = dynamic_cast<Element *>(workspaceData);
   //  check(workspaceElem, "<SASentry>"); // already done at
   //  LoadCanSAS1D::loadEntry
-  Poco::AutoPtr<NodeList> sasTransList =
-      workspaceElem->getElementsByTagName("SAStransmission_spectrum");
+  Poco::AutoPtr<NodeList> sasTransList = workspaceElem->getElementsByTagName("SAStransmission_spectrum");
   if (!sasTransList->length()) {
-    g_log.warning() << "There is no transmission data for this file "
-                    << getPropertyValue("Filename") << '\n';
+    g_log.warning() << "There is no transmission data for this file " << getPropertyValue("Filename") << '\n';
     return main_out;
   }
 
-  for (unsigned short trans_index = 0; trans_index < sasTransList->length();
-       trans_index++) {
+  for (unsigned short trans_index = 0; trans_index < sasTransList->length(); trans_index++) {
     // foreach SAStransmission_spectrum
     Node *idataElem = sasTransList->item(trans_index);
     auto *sasTrasElem = dynamic_cast<Element *>(idataElem);
     if (!sasTrasElem)
       continue;
     std::vector<API::MatrixWorkspace_sptr> &group =
-        (sasTrasElem->getAttribute("name") == "sample") ? trans_gp
-                                                        : trans_can_gp;
+        (sasTrasElem->getAttribute("name") == "sample") ? trans_gp : trans_can_gp;
 
     // getting number of Tdata elements in the xml file
-    Poco::AutoPtr<NodeList> tdataElemList =
-        sasTrasElem->getElementsByTagName("Tdata");
+    Poco::AutoPtr<NodeList> tdataElemList = sasTrasElem->getElementsByTagName("Tdata");
     size_t nBins = tdataElemList->length();
 
-    MatrixWorkspace_sptr dataWS =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
+    MatrixWorkspace_sptr dataWS = WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
 
     createLogs(workspaceElem, dataWS);
 

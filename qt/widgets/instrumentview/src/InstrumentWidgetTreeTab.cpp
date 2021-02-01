@@ -19,21 +19,16 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget) {
+InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget) : InstrumentWidgetTab(instrWidget) {
   auto *layout = new QVBoxLayout(this);
   // Tree Controls
   m_instrumentTree = new InstrumentTreeWidget(nullptr);
   layout->addWidget(m_instrumentTree);
-  connect(m_instrumentTree, SIGNAL(componentSelected(size_t)), m_instrWidget,
-          SLOT(componentSelected(size_t)));
-  connect(m_instrWidget, SIGNAL(requestSelectComponent(QString)), this,
-          SLOT(selectComponentByName(QString)));
+  connect(m_instrumentTree, SIGNAL(componentSelected(size_t)), m_instrWidget, SLOT(componentSelected(size_t)));
+  connect(m_instrWidget, SIGNAL(requestSelectComponent(QString)), this, SLOT(selectComponentByName(QString)));
 }
 
-void InstrumentWidgetTreeTab::initSurface() {
-  m_instrumentTree->setInstrumentWidget(m_instrWidget);
-}
+void InstrumentWidgetTreeTab::initSurface() { m_instrumentTree->setInstrumentWidget(m_instrWidget); }
 
 /**
  * Find an instrument component by its name. This is used from the
@@ -54,8 +49,7 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 
   m_instrumentTree->clearSelection();
   m_instrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible);
-  m_instrumentTree->selectionModel()->select(component,
-                                             QItemSelectionModel::Select);
+  m_instrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
   m_instrumentTree->sendComponentSelectedSignal(component);
 }
 
@@ -96,8 +90,7 @@ void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "InstrumentWidgetTreeTab::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("InstrumentWidgetTreeTab::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -126,8 +119,7 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
   tsv.writeSection("treetab", tab.outputLines());
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "InstrumentWidgetTreeTab::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("InstrumentWidgetTreeTab::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 

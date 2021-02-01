@@ -101,8 +101,7 @@ public:
    * properly.
    * @throws std::runtime_error If authentication fails
    */
-  virtual void authenticate(const std::string &username,
-                            const std::string &password) = 0;
+  virtual void authenticate(const std::string &username, const std::string &password) = 0;
 
   /**
    * Logout from the remote resource (close session). Depending on the
@@ -147,10 +146,9 @@ public:
    * properly.
    * @throws std::runtime_error if job submission fails.
    */
-  virtual std::string
-  submitRemoteJob(const std::string &transactionID, const std::string &runnable,
-                  const std::string &param, const std::string &taskName = "",
-                  const int numNodes = 1, const int coresPerNode = 1) = 0;
+  virtual std::string submitRemoteJob(const std::string &transactionID, const std::string &runnable,
+                                      const std::string &param, const std::string &taskName = "",
+                                      const int numNodes = 1, const int coresPerNode = 1) = 0;
 
   /**
    * Get/download a file from the (remote) compute resource.
@@ -168,8 +166,7 @@ public:
    * properly.
    * @throws std::runtime_error If the download operation fails
    */
-  virtual void downloadRemoteFile(const std::string &transactionID,
-                                  const std::string &remoteFileName,
+  virtual void downloadRemoteFile(const std::string &transactionID, const std::string &remoteFileName,
                                   const std::string &localFileName) = 0;
 
   /**
@@ -197,8 +194,7 @@ public:
    *
    * @throws std::runtime_error If the query fails
    */
-  virtual std::vector<std::string>
-  queryRemoteFile(const std::string &transactionID) const = 0;
+  virtual std::vector<std::string> queryRemoteFile(const std::string &transactionID) const = 0;
 
   /**
    * Get information (status etc.) for an (in principle) running job
@@ -267,8 +263,7 @@ public:
    * arguments passed
    * @throws std::runtime_error If the upload fails
    */
-  virtual void uploadRemoteFile(const std::string &transactionID,
-                                const std::string &remoteFileName,
+  virtual void uploadRemoteFile(const std::string &transactionID, const std::string &remoteFileName,
                                 const std::string &localFileName) = 0;
 };
 

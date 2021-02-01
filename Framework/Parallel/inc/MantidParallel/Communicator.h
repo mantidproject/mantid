@@ -59,8 +59,7 @@ public:
   detail::ThreadingBackend &backend() const;
 
 private:
-  Communicator(std::shared_ptr<detail::ThreadingBackend> backend,
-               const int rank);
+  Communicator(std::shared_ptr<detail::ThreadingBackend> backend, const int rank);
 
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;

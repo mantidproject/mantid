@@ -48,12 +48,10 @@ public:
   /// Triggered when the algorithm is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
   /// Triggered when the algorithm reports progress
-  void progressHandle(const Mantid::API::IAlgorithm *alg, double progress,
-                      const std::string &message, const double estimatedTime,
-                      const int progressPrecision) override;
+  void progressHandle(const Mantid::API::IAlgorithm *alg, double progress, const std::string &message,
+                      const double estimatedTime, const int progressPrecision) override;
   /// Triggered when the algorithm encounters an error
-  void errorHandle(const Mantid::API::IAlgorithm *alg,
-                   const std::string &what) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) override;
   /// Removes itself as an observer from the algorithm
   void removeFrom(const Mantid::API::IAlgorithm *alg);
   void setDialog(AlgorithmProgressDialogPresenter * /*presenter*/);

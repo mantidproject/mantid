@@ -28,9 +28,7 @@ public:
   void doTest(const std::string &outWSName) {
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
@@ -58,15 +56,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "POWGEN"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     doTest(outWSName);
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 0);
   }
 
   void test_exec_withInstrumentFileName() {
@@ -75,17 +70,13 @@ public:
     CreateGroupingWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InstrumentFilename", "POWGEN_Definition_2011-02-25.xml"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename", "POWGEN_Definition_2011-02-25.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
     doTest(outWSName);
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 0);
   }
 
   void test_exec_WithBankNames() {
@@ -95,28 +86,21 @@ public:
     CreateGroupingWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InstrumentFilename", "CNCS_Definition.xml"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("GroupNames", "bank1,bank2, bank3,bank4"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename", "CNCS_Definition.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2, bank3,bank4"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 4096);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     4);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 4096);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 4);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 51200);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     for (int i = 1; i <= 4; ++i) {
@@ -138,28 +122,21 @@ public:
     CreateGroupingWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InstrumentFilename", "POWGEN_Definition_2010.xml"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OldCalFilename", "pg3_mantid_det.cal"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentFilename", "POWGEN_Definition_2010.xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OldCalFilename", "pg3_mantid_det.cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 18750);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     4);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 18750);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 4);
 
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -174,30 +151,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "IRIS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixedGroupCount", 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ComponentName", "graphite"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 50);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     10);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 50);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 10);
 
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void
-  test_creating_a_grouping_workpsace_will_work_when_using_a_custom_grouping_string() {
+  void test_creating_a_grouping_workpsace_will_work_when_using_a_custom_grouping_string() {
     auto &ads = AnalysisDataService::Instance();
 
     const std::string outputWS("CreateGroupingWorkspaceTest_OutputWS");
@@ -235,8 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "IRIS"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FixedGroupCount", 52));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ComponentName", "graphite"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Should fail as IRIS graphite component has only 51 spectra
@@ -256,8 +226,7 @@ public:
   void setUp() override {
     outWSName = "CreateGroupingWorkspaceTestPerformance_OutputWS";
     // Load a small test file
-    FrameworkManager::Instance().exec("LoadEmptyInstrument", 4, "Filename",
-                                      "TOPAZ_Definition_2010.xml",
+    FrameworkManager::Instance().exec("LoadEmptyInstrument", 4, "Filename", "TOPAZ_Definition_2010.xml",
                                       "OutputWorkspace", "TOPAZ_2010");
   }
 
@@ -272,30 +241,22 @@ public:
     CreateGroupingWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "TOPAZ_2010"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "GroupNames", "bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,"
-                      "bank10,bank11,bank12,bank13,bank14,bank15"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "TOPAZ_2010"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupNames", "bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,"
+                                                                "bank10,bank11,bank12,bank13,bank14,bank15"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName));
     TS_ASSERT(ws);
     if (!ws)
       return;
 
-    TS_ASSERT_EQUALS(
-        static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")),
-        983040);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")),
-                     15);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 983040);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 15);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 65536 * 15);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     // Check one entry in each group

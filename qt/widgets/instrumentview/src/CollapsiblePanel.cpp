@@ -16,8 +16,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-CaptionLabel::CaptionLabel(const QString &caption, QWidget *parent)
-    : QLabel(caption, parent), m_collapsed(false) {
+CaptionLabel::CaptionLabel(const QString &caption, QWidget *parent) : QLabel(caption, parent), m_collapsed(false) {
   setFrameStyle(QFrame::WinPanel);
   setFrameShadow(QFrame::Raised);
 }
@@ -67,14 +66,12 @@ void CaptionLabel::expand() {
   emit collapseOrExpand(m_collapsed);
 }
 
-CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent)
-    : QWidget(parent), m_widget(nullptr) {
+CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent) : QWidget(parent), m_widget(nullptr) {
   m_layout = new QVBoxLayout(this);
   m_label = new CaptionLabel(caption, this);
   m_layout->addWidget(m_label);
   m_layout->setMargin(0);
-  connect(m_label, SIGNAL(collapseOrExpand(bool)), this,
-          SLOT(collapseOrExpand(bool)));
+  connect(m_label, SIGNAL(collapseOrExpand(bool)), this, SLOT(collapseOrExpand(bool)));
 }
 
 void CollapsiblePanel::setWidget(QWidget *widget) {
@@ -86,9 +83,7 @@ void CollapsiblePanel::setWidget(QWidget *widget) {
   m_layout->addWidget(m_widget);
 }
 
-void CollapsiblePanel::setCaption(const QString &caption) {
-  m_label->setText(caption);
-}
+void CollapsiblePanel::setCaption(const QString &caption) { m_label->setText(caption); }
 
 void CollapsiblePanel::collapseOrExpand(bool collapse) {
   if (!m_widget)
@@ -118,8 +113,7 @@ CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
  * Add a new panel to the bottom of the stack and set its caption and the inner
  * widget
  */
-CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
-                                             QWidget *widget) {
+CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption, QWidget *widget) {
   auto *panel = new CollapsiblePanel(caption, this);
   panel->setWidget(widget);
   m_layout->addWidget(panel);
@@ -131,8 +125,7 @@ CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
 bool CollapsibleStack::allCollapsed() const {
   int n = m_layout->count();
   for (int i = 0; i < n; ++i) {
-    auto *panel =
-        dynamic_cast<CollapsiblePanel *>(m_layout->itemAt(i)->widget());
+    auto *panel = dynamic_cast<CollapsiblePanel *>(m_layout->itemAt(i)->widget());
     if (panel && !panel->isCollapsed()) {
       return false;
     }

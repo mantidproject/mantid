@@ -47,12 +47,8 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  void
-  addInterpolationStep(const Mantid::API::MatrixWorkspace_sptr &toInterpolate,
-                       std::string toMatch);
-  void plotInPreview(const QString &curveName,
-                     Mantid::API::MatrixWorkspace_sptr &ws,
-                     const QColor &curveColor);
+  void addInterpolationStep(const Mantid::API::MatrixWorkspace_sptr &toInterpolate, std::string toMatch);
+  void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
   void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);

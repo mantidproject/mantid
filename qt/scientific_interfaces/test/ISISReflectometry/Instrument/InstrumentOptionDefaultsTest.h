@@ -27,40 +27,28 @@ class InstrumentOptionDefaultsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentOptionDefaultsTest *createSuite() {
-    return new InstrumentOptionDefaultsTest();
-  }
-  static void destroySuite(InstrumentOptionDefaultsTest *suite) {
-    delete suite;
-  }
+  static InstrumentOptionDefaultsTest *createSuite() { return new InstrumentOptionDefaultsTest(); }
+  static void destroySuite(InstrumentOptionDefaultsTest *suite) { delete suite; }
 
   InstrumentOptionDefaultsTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void testDefaultMonitorOptions() {
     auto result = getDefaults();
-    auto expected = MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
-                                       RangeInLambda(0.0, 0.0));
+    auto expected = MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
     TS_ASSERT_EQUALS(result.monitorCorrections(), expected);
   }
 
   void testValidMonitorOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Instrument");
-    auto expected = MonitorCorrections(2, true, RangeInLambda(17.0, 18.0),
-                                       RangeInLambda(4.0, 10.0));
+    auto expected = MonitorCorrections(2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0));
     TS_ASSERT_EQUALS(result.monitorCorrections(), expected);
   }
 
-  void testInvalidMonitorIndexFromParamsFile() {
-    getDefaultsFromParamsFileThrows("MonitorIndex_Invalid");
-  }
+  void testInvalidMonitorIndexFromParamsFile() { getDefaultsFromParamsFileThrows("MonitorIndex_Invalid"); }
 
-  void testInvalidMonitorBackgroundFromParamsFile() {
-    getDefaultsFromParamsFileThrows("MonitorBackground_Invalid");
-  }
+  void testInvalidMonitorBackgroundFromParamsFile() { getDefaultsFromParamsFileThrows("MonitorBackground_Invalid"); }
 
-  void testInvalidMonitorIntegralFromParamsFile() {
-    getDefaultsFromParamsFileThrows("MonitorIntegral_Invalid");
-  }
+  void testInvalidMonitorIntegralFromParamsFile() { getDefaultsFromParamsFileThrows("MonitorIntegral_Invalid"); }
 
   void testWavelengthRangeIsMandatory() { getDefaultsThrows(); }
 
@@ -70,27 +58,21 @@ public:
     TS_ASSERT_EQUALS(result.wavelengthRange(), expected);
   }
 
-  void testInvalidWavelengthRangeFromParamsFile() {
-    getDefaultsFromParamsFileThrows("WavelengthRange_Invalid");
-  }
+  void testInvalidWavelengthRangeFromParamsFile() { getDefaultsFromParamsFileThrows("WavelengthRange_Invalid"); }
 
   void testDefaultDetectorOptions() {
     auto result = getDefaults();
-    auto expected =
-        DetectorCorrections(true, DetectorCorrectionType::VerticalShift);
+    auto expected = DetectorCorrections(true, DetectorCorrectionType::VerticalShift);
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }
 
   void testValidDetectorOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Instrument");
-    auto expected =
-        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
+    auto expected = DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }
 
-  void testInvalidDetectorCorrectionFromParamsFile() {
-    getDefaultsFromParamsFileThrows("DetectorCorrection_Invalid");
-  }
+  void testInvalidDetectorCorrectionFromParamsFile() { getDefaultsFromParamsFileThrows("DetectorCorrection_Invalid"); }
 
 private:
   Instrument getDefaults() {
@@ -100,8 +82,7 @@ private:
     // Note that we use an instrument suffix here because otherwise
     // the workspace instrument can pick up settings from a previously-loaded
     // parameters file for the same instrument for another test!
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "MANDATORY");
+    auto workspace = Mantid::TestHelpers::createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "MANDATORY");
     auto instrument = workspace->getInstrument();
     InstrumentOptionDefaults instrumentDefaults;
     return instrumentDefaults.get(instrument);
@@ -114,8 +95,7 @@ private:
     // Note that we use an instrument suffix here because otherwise
     // the workspace instrument can pick up settings from a previously-loaded
     // parameters file for the same instrument for another test!
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "EMPTY");
+    auto workspace = Mantid::TestHelpers::createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "EMPTY");
     auto instrument = workspace->getInstrument();
     InstrumentOptionDefaults instrumentDefaults;
     TS_ASSERT_THROWS_ANYTHING(instrumentDefaults.get(instrument));
@@ -126,19 +106,16 @@ private:
     // paramsType is appended to "REFL_Parameters_" to form the name for the
     // file
     // to load. See ReflectometryHelper.h for details.
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
+    auto workspace = Mantid::TestHelpers::createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
     auto instrument = workspace->getInstrument();
     InstrumentOptionDefaults instrumentDefaults;
     return instrumentDefaults.get(instrument);
   }
 
   void getDefaultsFromParamsFileThrows(std::string const &paramsType) {
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
+    auto workspace = Mantid::TestHelpers::createREFL_WS(5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
     auto instrument = workspace->getInstrument();
     InstrumentOptionDefaults instrumentDefaults;
-    TS_ASSERT_THROWS(instrumentDefaults.get(instrument),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(instrumentDefaults.get(instrument), const std::invalid_argument &);
   }
 };

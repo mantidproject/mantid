@@ -13,27 +13,19 @@
 namespace {
 
 double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
-double wavelength(const Mantid::Geometry::IPeak &p) {
-  return p.getWavelength();
-}
+double wavelength(const Mantid::Geometry::IPeak &p) { return p.getWavelength(); }
 double dspacing(const Mantid::Geometry::IPeak &p) { return p.getDSpacing(); }
 double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
 
-double HKLSum(const Mantid::Geometry::IPeak &p) {
-  return p.getH() + p.getK() + p.getL();
-}
+double HKLSum(const Mantid::Geometry::IPeak &p) { return p.getH() + p.getK() + p.getL(); }
 
 double HKL2(const Mantid::Geometry::IPeak &p) {
   return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
 }
 
-double QMOD(const Mantid::Geometry::IPeak &p) {
-  return p.getQSampleFrame().norm();
-}
+double QMOD(const Mantid::Geometry::IPeak &p) { return p.getQSampleFrame().norm(); }
 
-double SN(const Mantid::Geometry::IPeak &p) {
-  return p.getIntensity() / p.getSigmaIntensity();
-}
+double SN(const Mantid::Geometry::IPeak &p) { return p.getIntensity() / p.getSigmaIntensity(); }
 
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 } // namespace
@@ -59,35 +51,29 @@ const std::string FilterPeaks::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void FilterPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
-  std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
-                                   "Signal/Noise", "QMod",        "Wavelength",
-                                   "DSpacing",     "TOF",         "RunNumber"};
-  declareProperty("FilterVariable", "",
-                  std::make_shared<StringListValidator>(filters),
+  std::vector<std::string> filters{"h+k+l",      "h^2+k^2+l^2", "Intensity", "Signal/Noise", "QMod",
+                                   "Wavelength", "DSpacing",    "TOF",       "RunNumber"};
+  declareProperty("FilterVariable", "", std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
 
-  declareProperty("FilterValue", EMPTY_DBL(),
-                  std::make_shared<MandatoryValidator<double>>(),
+  declareProperty("FilterValue", EMPTY_DBL(), std::make_shared<MandatoryValidator<double>>(),
                   "The value of the FilterVariable to compare each peak to");
 
   std::vector<std::string> operation{"<", ">", "=", "!=", "<=", ">="};
-  declareProperty("Operator", "<",
-                  std::make_shared<StringListValidator>(operation), "");
+  declareProperty("Operator", "<", std::make_shared<StringListValidator>(operation), "");
 }
 
 /** Execute the algorithm.
  */
 void FilterPeaks::exec() {
   PeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  PeaksWorkspace_sptr filteredWS = std::dynamic_pointer_cast<PeaksWorkspace>(
-      WorkspaceFactory::Instance().createPeaks());
+  PeaksWorkspace_sptr filteredWS =
+      std::dynamic_pointer_cast<PeaksWorkspace>(WorkspaceFactory::Instance().createPeaks());
 
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
@@ -100,23 +86,17 @@ void FilterPeaks::exec() {
 
   // Choose which version of the function to use based on the operator
   if (Operator == "<")
-    filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
-                                   filterValue);
+    filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else if (Operator == ">")
-    filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
-                                      filterValue);
+    filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else if (Operator == "=")
-    filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
-                                       filterValue);
+    filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else if (Operator == "!=")
-    filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
-                                           filterFunction, filterValue);
+    filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else if (Operator == "<=")
-    filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction,
-                                         filterValue);
+    filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else if (Operator == ">=")
-    filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
-                                            filterFunction, filterValue);
+    filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS, filterFunction, filterValue);
   else
     throw std::invalid_argument("Unknown Operator " + Operator);
 
@@ -133,8 +113,7 @@ void FilterPeaks::exec() {
  * e.g. "h+k+l" or "TOF".
  * @return a function object which will return the a value for a given peak
  */
-FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(
-    const std::string &filterVariable) const {
+FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(const std::string &filterVariable) const {
   FilterFunction filterFunction;
   if (filterVariable == "h+k+l")
     filterFunction = &HKLSum;

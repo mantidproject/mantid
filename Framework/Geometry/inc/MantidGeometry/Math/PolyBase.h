@@ -35,8 +35,7 @@ private:
   double Eaccuracy;            ///< Polynomic accuracy
 
   int solveQuadratic(std::complex<double> &, std::complex<double> &) const;
-  int solveCubic(std::complex<double> &, std::complex<double> &,
-                 std::complex<double> &) const;
+  int solveCubic(std::complex<double> &, std::complex<double> &, std::complex<double> &) const;
 
 public:
   explicit PolyBase(int const);
@@ -87,8 +86,7 @@ public:
 
   void compress(double const);
 
-  void divide(const PolyBase &, PolyBase &, PolyBase &,
-              double const = -1.0) const;
+  void divide(const PolyBase &, PolyBase &, PolyBase &, double const = -1.0) const;
 
   std::vector<double> realRoots(double const = -1.0);
   std::vector<std::complex<double>> calcRoots(double const = -1.0);

@@ -49,9 +49,7 @@ class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ISISHistoDataListenerTest *createSuite() {
-    return new ISISHistoDataListenerTest();
-  }
+  static ISISHistoDataListenerTest *createSuite() { return new ISISHistoDataListenerTest(); }
   static void destroySuite(ISISHistoDataListenerTest *suite) { delete suite; }
 
   ISISHistoDataListenerTest() { Mantid::API::FrameworkManager::Instance(); }
@@ -59,8 +57,7 @@ public:
   void test_Receiving_data() {
 // cannot make it work for linux
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -68,15 +65,13 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList", ""));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
     alg.setProperty("SpectraList", specs);
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &alg);
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -144,16 +139,14 @@ public:
 
   void test_Receiving_multiperiod_data() {
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
     dae.setProperty("NPeriods", 2);
     auto res = dae.executeAsync();
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true);
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -251,8 +244,7 @@ public:
 
   void test_Receiving_selected_periods() {
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -261,15 +253,13 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
     alg.setProperty("PeriodList", periods);
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &alg);
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -301,8 +291,7 @@ public:
 
   void test_Receiving_selected_monitors() {
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -312,17 +301,14 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
     alg.setProperty("SpectraList", "11-13");
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &alg);
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -358,8 +344,7 @@ public:
 
   void test_invalid_spectra_numbers() {
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -369,24 +354,20 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
     alg.setProperty("SpectraList", "14-17");
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &alg);
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
       return;
 
-    TS_ASSERT_THROWS(auto outWS = listener->extractData(),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(auto outWS = listener->extractData(), const std::invalid_argument &);
 
     dae.cancel();
     res.wait();
@@ -397,8 +378,7 @@ public:
 
   void test_no_period() {
 #ifdef _WIN32
-    FacilityHelper::ScopedFacilities loadTESTFacility(
-        "unit_testing/UnitTestFacilities.xml", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST");
 
     FakeISISHistoDAE dae;
     dae.initialize();
@@ -406,16 +386,14 @@ public:
     auto res = dae.executeAsync();
 
     FakeAlgorithm alg;
-    alg.declareProperty(
-        std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
+    alg.declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae
     alg.setProperty("PeriodList", periods);
 
     TS_ASSERT_THROWS(auto listener =
-                         Mantid::API::LiveListenerFactory::Instance().create(
-                             "TESTHISTOLISTENER", true, &alg),
+                         Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER", true, &alg),
                      const std::invalid_argument &);
 
     dae.cancel();

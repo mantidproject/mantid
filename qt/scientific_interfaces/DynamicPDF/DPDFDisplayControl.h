@@ -40,8 +40,7 @@ class MANTIDQT_DYNAMICPDF_DLL DisplayControl : public QObject {
   Q_OBJECT
 
 public:
-  DisplayControl(InputDataControl *inputDataControl,
-                 MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit);
+  DisplayControl(InputDataControl *inputDataControl, MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit);
   ~DisplayControl();
   void init();
   std::pair<double, double> getFitMinMax();

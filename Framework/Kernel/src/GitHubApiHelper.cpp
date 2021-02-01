@@ -36,15 +36,13 @@ Logger g_log("GitHubApiHelper");
 
 const std::string RATE_LIMIT_URL("https://api.github.com/rate_limit");
 
-std::string formatRateLimit(const int rateLimit, const int remaining,
-                            const int expires) {
+std::string formatRateLimit(const int rateLimit, const int remaining, const int expires) {
   DateAndTime expiresDateAndTime;
   expiresDateAndTime.set_from_time_t(expires);
 
   std::stringstream msg;
-  msg << "GitHub API limited to " << remaining << " of " << rateLimit
-      << " calls left. Resets at " << expiresDateAndTime.toISO8601String()
-      << "Z";
+  msg << "GitHub API limited to " << remaining << " of " << rateLimit << " calls left. Resets at "
+      << expiresDateAndTime.toISO8601String() << "Z";
   return msg.str();
 }
 } // namespace
@@ -52,46 +50,34 @@ std::string formatRateLimit(const int rateLimit, const int remaining,
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
-  addAuthenticationToken();
-}
+GitHubApiHelper::GitHubApiHelper() : InternetHelper() { addAuthenticationToken(); }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
-    : InternetHelper(proxy) {
-  addAuthenticationToken();
-}
+GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy) : InternetHelper(proxy) { addAuthenticationToken(); }
 
 void GitHubApiHelper::reset() {
   InternetHelper::reset();
   addAuthenticationToken();
 }
 
-bool GitHubApiHelper::isAuthenticated() {
-  return (m_headers.find("Authorization") != m_headers.end());
-}
+bool GitHubApiHelper::isAuthenticated() { return (m_headers.find("Authorization") != m_headers.end()); }
 
-void GitHubApiHelper::processResponseHeaders(
-    const Poco::Net::HTTPResponse &res) {
+void GitHubApiHelper::processResponseHeaders(const Poco::Net::HTTPResponse &res) {
   // get github api rate limit information if available;
   int rateLimitRemaining = 0;
   int rateLimitLimit;
   int rateLimitReset;
   try {
-    rateLimitLimit =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
-    rateLimitRemaining =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
-    rateLimitReset =
-        boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0"));
+    rateLimitLimit = boost::lexical_cast<int>(res.get("X-RateLimit-Limit", "-1"));
+    rateLimitRemaining = boost::lexical_cast<int>(res.get("X-RateLimit-Remaining", "-1"));
+    rateLimitReset = boost::lexical_cast<int>(res.get("X-RateLimit-Reset", "0"));
   } catch (boost::bad_lexical_cast const &) {
     rateLimitLimit = -1;
   }
   if (rateLimitLimit > -1) {
-    g_log.debug(
-        formatRateLimit(rateLimitLimit, rateLimitRemaining, rateLimitReset));
+    g_log.debug(formatRateLimit(rateLimitLimit, rateLimitRemaining, rateLimitReset));
   }
 }
 
@@ -115,35 +101,29 @@ std::string GitHubApiHelper::getRateLimitDescription() {
   return formatRateLimit(limit, remaining, expires);
 }
 
-int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
-                                             std::ostream &responseStream) {
+int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream) {
   g_log.debug("Repeating API call anonymously\n");
   removeHeader("Authorization");
   return this->sendRequest(uri.toString(), responseStream);
 }
 
-int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session,
-                                           Poco::URI &uri,
-                                           std::ostream &responseStream) {
+int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
   int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " "
-                << m_response->getReason() << "\n";
+  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << "\n";
 
-  if (retStatus == HTTP_OK ||
-      (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
     return retStatus;
-  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) ||
-             (retStatus == HTTP_UNAUTHORIZED) ||
+  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) || (retStatus == HTTP_UNAUTHORIZED) ||
              (retStatus == HTTP_NOT_FOUND)) {
     // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
     // If the limit runs out you can get HTTP_FORBIDDEN

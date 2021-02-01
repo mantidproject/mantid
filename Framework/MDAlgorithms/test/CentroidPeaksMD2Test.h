@@ -47,34 +47,28 @@ public:
     // ---- Start with empty MDEW ----
     std::string frames;
     if (CoordinatesToUse == "Q (lab frame)") {
-      frames = Mantid::Geometry::QLab::QLabName + "," +
-               Mantid::Geometry::QLab::QLabName + "," +
+      frames = Mantid::Geometry::QLab::QLabName + "," + Mantid::Geometry::QLab::QLabName + "," +
                Mantid::Geometry::QLab::QLabName;
     } else if (CoordinatesToUse == "Q (sample frame)") {
-      frames = Mantid::Geometry::QSample::QSampleName + "," +
-               Mantid::Geometry::QSample::QSampleName + "," +
+      frames = Mantid::Geometry::QSample::QSampleName + "," + Mantid::Geometry::QSample::QSampleName + "," +
                Mantid::Geometry::QSample::QSampleName;
     } else if (CoordinatesToUse == "HKL") {
-      frames = Mantid::Geometry::HKL::HKLName + "," +
-               Mantid::Geometry::HKL::HKLName + "," +
-               Mantid::Geometry::HKL::HKLName;
+      frames =
+          Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName + "," + Mantid::Geometry::HKL::HKLName;
     }
     CreateMDWorkspace algC;
     TS_ASSERT_THROWS_NOTHING(algC.initialize())
     TS_ASSERT(algC.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
-    TS_ASSERT_THROWS_NOTHING(
-        algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-10,10,-10,10,-10,10"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
-    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +
-                        Mantid::Kernel::Units::Symbol::RLU.ascii();
+    std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," + Mantid::Kernel::Units::Symbol::RLU.ascii() +
+                        "," + Mantid::Kernel::Units::Symbol::RLU.ascii();
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", units));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", frames));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "2"));
-    TS_ASSERT_THROWS_NOTHING(
-        algC.setPropertyValue("OutputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue("OutputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
     TS_ASSERT_THROWS_NOTHING(algC.execute());
     TS_ASSERT(algC.isExecuted());
   }
@@ -87,10 +81,8 @@ public:
     FakeMDEventData algF;
     TS_ASSERT_THROWS_NOTHING(algF.initialize())
     TS_ASSERT(algF.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        algF.setProperty("PeakParams", mess.str().c_str()));
+    TS_ASSERT_THROWS_NOTHING(algF.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algF.setProperty("PeakParams", mess.str().c_str()));
     TS_ASSERT_THROWS_NOTHING(algF.setProperty("RandomSeed", "1234"));
     TS_ASSERT_THROWS_NOTHING(algF.execute());
     TS_ASSERT(algF.isExecuted());
@@ -98,13 +90,10 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the CentroidPeaksMD2 with the given peak radius param */
-  void
-  doRun(V3D startPos, double PeakRadius, double binCount, V3D expectedResult,
-        const std::string &message,
-        const std::string &OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
+  void doRun(V3D startPos, double PeakRadius, double binCount, V3D expectedResult, const std::string &message,
+             const std::string &OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
     // Make a fake instrument - doesn't matter, we won't use it really
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     // --- Make a fake PeaksWorkspace in the given coordinate space ---
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
@@ -119,24 +108,19 @@ public:
     peakWS->addPeak(pIn);
 
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
-    AnalysisDataService::Instance().addOrReplace("CentroidPeaksMD2Test_Peaks",
-                                                 peakWS);
+    AnalysisDataService::Instance().addOrReplace("CentroidPeaksMD2Test_Peaks", peakWS);
 
     CentroidPeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMD2Test_Peaks"));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "CentroidPeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "CentroidPeaksMD2Test_Peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", OutputWorkspace));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", PeakRadius));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    peakWS = std::dynamic_pointer_cast<PeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve(OutputWorkspace));
+    peakWS = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(OutputWorkspace));
     TS_ASSERT(peakWS);
     if (!peakWS)
       return;
@@ -169,37 +153,30 @@ public:
     addPeak(1000, 6., 6., 6., 2.0);
 
     MDEventWorkspace3Lean::sptr mdews =
-        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(
-            "CentroidPeaksMD2Test_MDEWS");
+        AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("CentroidPeaksMD2Test_MDEWS");
     TS_ASSERT_EQUALS(mdews->getNPoints(), 3000);
     TS_ASSERT_DELTA(mdews->getBox()->getSignal(), 3000.0, 1e-2);
 
     if (CoordinatesToUse == "HKL") {
       mdews->setCoordinateSystem(Mantid::Kernel::HKL);
-      doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
-            "Start at the center, get the center");
+      doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.), "Start at the center, get the center");
 
-      doRun(V3D(0.2, 0.2, 0.2), 1.8, 1000., V3D(0., 0., 0.),
-            "Somewhat off center");
+      doRun(V3D(0.2, 0.2, 0.2), 1.8, 1000., V3D(0., 0., 0.), "Somewhat off center");
     } else if (CoordinatesToUse == "Q (lab frame)") {
       mdews->setCoordinateSystem(Mantid::Kernel::QLab);
     } else if (CoordinatesToUse == "Q (sample frame)") {
       mdews->setCoordinateSystem(Mantid::Kernel::QSample);
     }
 
-    doRun(V3D(2., 3., 4.), 1.0, 1000., V3D(2., 3., 4.),
-          "Start at the center, get the center");
+    doRun(V3D(2., 3., 4.), 1.0, 1000., V3D(2., 3., 4.), "Start at the center, get the center");
 
     doRun(V3D(1.5, 2.5, 3.5), 3.0, 1000., V3D(2., 3., 4.), "Pretty far off");
 
-    doRun(V3D(1.0, 1.5, 2.0), 4.0, 2000., V3D(1.0, 1.5, 2.0),
-          "Include two peaks, get the centroid of the two");
+    doRun(V3D(1.0, 1.5, 2.0), 4.0, 2000., V3D(1.0, 1.5, 2.0), "Include two peaks, get the centroid of the two");
 
-    doRun(V3D(8.0, 0.0, 1.0), 1.0, 0., V3D(8.0, 0.0, 1.0),
-          "Include no events, get no change");
+    doRun(V3D(8.0, 0.0, 1.0), 1.0, 0., V3D(8.0, 0.0, 1.0), "Include no events, get no change");
 
-    doRun(V3D(6., 6., 6.), 0.1, 0., V3D(6., 6., 6.),
-          "Small radius still works");
+    doRun(V3D(6., 6., 6.), 0.1, 0., V3D(6., 6., 6.), "Small radius still works");
 
     AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_MDEWS");
   }
@@ -223,8 +200,7 @@ public:
     CoordinatesToUse = "HKL";
     createMDEW(CoordinatesToUse);
     addPeak(1000, 0, 0., 0., 1.0);
-    doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
-          "Start at the center, get the center",
+    doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.), "Start at the center, get the center",
           "CentroidPeaksMD2Test_MDEWS_outputCopy");
   }
 

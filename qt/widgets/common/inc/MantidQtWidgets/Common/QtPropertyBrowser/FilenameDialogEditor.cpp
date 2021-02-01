@@ -19,8 +19,7 @@ namespace MantidWidgets {
 void FilenameDialogEditor::runDialog() {
   QSettings settings;
   QString dir = settings.value("Mantid/FitBrowser/ResolutionDir").toString();
-  QString StringDialog =
-      QFileDialog::getOpenFileName(this, tr("Open File"), dir);
+  QString StringDialog = QFileDialog::getOpenFileName(this, tr("Open File"), dir);
   if (!StringDialog.isEmpty()) {
     setText(StringDialog);
     updateProperty();

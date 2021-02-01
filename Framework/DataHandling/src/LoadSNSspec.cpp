@@ -50,8 +50,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
 
     try {
       // if it's comment line
-      tokenizer tok(str, sep,
-                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      tokenizer tok(str, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       if (str.at(0) == '#') {
         if (str.at(1) == 'L') {
           axiscols = tok.count();
@@ -88,19 +87,15 @@ LoadSNSspec::LoadSNSspec() : API::DeprecatedAlgorithm() {
 /// Initialisation method.
 void LoadSNSspec::init() {
   const std::vector<std::string> exts{".dat", ".txt"};
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
-      "The name of the text file to read, including its full or "
-      "relative path. The file extension must be .txt or .dat.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                            Direction::Output),
-      "The name of the workspace that will be created, filled with the read-in "
-      "data and stored in the [[Analysis Data Service]].");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+                  "The name of the text file to read, including its full or "
+                  "relative path. The file extension must be .txt or .dat.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+                  "The name of the workspace that will be created, filled with the read-in "
+                  "data and stored in the [[Analysis Data Service]].");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
-  declareProperty("Unit", "Energy",
-                  std::make_shared<Kernel::StringListValidator>(units),
+  declareProperty("Unit", "Energy", std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\") (default: Energy)");
 }

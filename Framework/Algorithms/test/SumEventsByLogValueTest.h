@@ -22,9 +22,7 @@ class SumEventsByLogValueTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SumEventsByLogValueTest *createSuite() {
-    return new SumEventsByLogValueTest();
-  }
+  static SumEventsByLogValueTest *createSuite() { return new SumEventsByLogValueTest(); }
   static void destroySuite(SumEventsByLogValueTest *suite) { delete suite; }
 
   void test_validators() {
@@ -32,16 +30,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     // InputWorkspace has to be an EventWorkspace
-    TS_ASSERT_THROWS(
-        alg.setProperty("InputWorkspace",
-                        WorkspaceCreationHelper::create2DWorkspace(1, 1)),
-        const std::invalid_argument &);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", WorkspaceCreationHelper::create2DWorkspace(1, 1)),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
-    TS_ASSERT_THROWS(alg.setProperty("LogName", ""),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogName", ""), const std::invalid_argument &);
   }
 
   void test_validateInputs() {
@@ -102,8 +96,7 @@ public:
     TS_ASSERT(alg->execute());
 
     Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-    MatrixWorkspace_const_sptr outWS =
-        std::dynamic_pointer_cast<const MatrixWorkspace>(out);
+    MatrixWorkspace_const_sptr outWS = std::dynamic_pointer_cast<const MatrixWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWS->y(0)[0], 300);
   }
@@ -142,8 +135,7 @@ private:
   IAlgorithm_sptr setupAlg(const std::string &logName) {
     IAlgorithm_sptr alg = std::make_shared<SumEventsByLogValue>();
     alg->initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("InputWorkspace", createWorkspace()));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", createWorkspace()));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("LogName", logName));
 
@@ -151,8 +143,7 @@ private:
   }
 
   EventWorkspace_sptr createWorkspace() {
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::createEventWorkspace(3, 1);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(3, 1);
     Run &run = ws->mutableRun();
 
     DateAndTime run_start("2010-01-01T00:00:00");
@@ -185,12 +176,8 @@ class SumEventsByLogValueTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SumEventsByLogValueTestPerformance *createSuite() {
-    return new SumEventsByLogValueTestPerformance();
-  }
-  static void destroySuite(SumEventsByLogValueTestPerformance *suite) {
-    delete suite;
-  }
+  static SumEventsByLogValueTestPerformance *createSuite() { return new SumEventsByLogValueTestPerformance(); }
+  static void destroySuite(SumEventsByLogValueTestPerformance *suite) { delete suite; }
 
   SumEventsByLogValueTestPerformance() {
     ws = WorkspaceCreationHelper::createEventWorkspace(100, 100, 1000);

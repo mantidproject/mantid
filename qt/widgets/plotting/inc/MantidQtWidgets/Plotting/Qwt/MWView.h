@@ -49,9 +49,7 @@ using MWDimension_const_sptr = std::shared_ptr<const Mantid::API::MWDimension>;
 
   @date 2016-02-05
 */
-class EXPORT_OPT_MANTIDQT_PLOTTING MWView
-    : public QWidget,
-      public MantidQt::API::WorkspaceObserver {
+class EXPORT_OPT_MANTIDQT_PLOTTING MWView : public QWidget, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -68,9 +66,8 @@ public slots:
   void setTransparentZerosSlot(bool transparent);
 
 protected:
-  void preDeleteHandle(
-      const std::string &workspaceName,
-      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
+  void preDeleteHandle(const std::string &workspaceName,
+                       const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 private:
   void initLayout();

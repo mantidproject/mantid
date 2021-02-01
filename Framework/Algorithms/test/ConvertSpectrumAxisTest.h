@@ -19,8 +19,7 @@ using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite {
 private:
-  void do_algorithm_run(const std::string &target, const std::string &inputWS,
-                        const std::string &outputWS) {
+  void do_algorithm_run(const std::string &target, const std::string &inputWS, const std::string &outputWS) {
     Mantid::Algorithms::ConvertSpectrumAxis conv;
     conv.initialize();
 
@@ -34,8 +33,7 @@ private:
     loader.execute();
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
 
     TS_ASSERT_THROWS_NOTHING(conv.execute());
@@ -66,12 +64,8 @@ public:
     do_algorithm_run("theta", inputWS, outputWS);
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
     const Axis *thetaAxis = nullptr;
@@ -82,8 +76,7 @@ public:
     TS_ASSERT_DELTA((*thetaAxis)(0), 6.0883, 0.0001);
     TS_ASSERT_DELTA((*thetaAxis)(1), 180.0, 0.0001);
     // Check axis is correct length
-    TS_ASSERT_THROWS((*thetaAxis)(2),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*thetaAxis)(2), const Mantid::Kernel::Exception::IndexError &);
 
     // Data should be swapped over
     TS_ASSERT_EQUALS(input->x(0), output->x(1));
@@ -105,10 +98,8 @@ public:
     do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
 
     MatrixWorkspace_const_sptr outputSignedTheta;
-    TS_ASSERT_THROWS_NOTHING(
-        outputSignedTheta =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                outputSignedThetaAxisWS));
+    TS_ASSERT_THROWS_NOTHING(outputSignedTheta =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSignedThetaAxisWS));
 
     // Check the signed theta axis
     const Axis *thetaAxis = nullptr;
@@ -137,8 +128,7 @@ public:
     loader.execute();
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        conv.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", "DeltaE"));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EMode", "Indirect"));
     conv.setRethrows(true);
@@ -149,12 +139,8 @@ public:
     TS_ASSERT(conv.isExecuted());
 
     MatrixWorkspace_const_sptr input, output;
-    TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            outputWS));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
     const Axis *thetaAxis = nullptr;
@@ -166,8 +152,7 @@ public:
     TS_ASSERT_DELTA((*thetaAxis)(0), 0.00311225, 1e-08);
     TS_ASSERT_DELTA((*thetaAxis)(1), 0.00311225, 1e-08);
     // Check axis is correct length
-    TS_ASSERT_THROWS((*thetaAxis)(2),
-                     const Mantid::Kernel::Exception::IndexError &);
+    TS_ASSERT_THROWS((*thetaAxis)(2), const Mantid::Kernel::Exception::IndexError &);
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
@@ -179,12 +164,8 @@ private:
   Workspace_sptr m_inputWorkspace;
 
 public:
-  static ConvertSpectrumAxisTestPerformance *createSuite() {
-    return new ConvertSpectrumAxisTestPerformance();
-  }
-  static void destroySuite(ConvertSpectrumAxisTestPerformance *suite) {
-    delete suite;
-  }
+  static ConvertSpectrumAxisTestPerformance *createSuite() { return new ConvertSpectrumAxisTestPerformance(); }
+  static void destroySuite(ConvertSpectrumAxisTestPerformance *suite) { delete suite; }
 
   ConvertSpectrumAxisTestPerformance() {
     Mantid::DataHandling::LoadRaw3 loader;

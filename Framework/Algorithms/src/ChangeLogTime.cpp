@@ -31,24 +31,18 @@ const string ChangeLogTime::name() const { return "ChangeLogTime"; }
 int ChangeLogTime::version() const { return 1; }
 
 /// Algorithm's category for identification
-const std::string ChangeLogTime::category() const {
-  return "DataHandling\\Logs";
-}
+const std::string ChangeLogTime::category() const { return "DataHandling\\Logs"; }
 
 /// Declares the parameters for running the algorithm.
 void ChangeLogTime::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "A workspace");
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   this->declareProperty("LogName", "", "Name of the log to add the offset to");
-  this->declareProperty(
-      std::make_unique<PropertyWithValue<double>>("TimeOffset",
-                                                  Direction::Input),
-      "Number of seconds (a float) to add to the time of each log value. "
-      "Required.");
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
+                        "Number of seconds (a float) to add to the time of each log value. "
+                        "Required.");
 }
 
 /// Do the actual work of modifying the log in the workspace.
@@ -63,12 +57,11 @@ void ChangeLogTime::exec() {
 
   // make sure the log is in the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  auto *oldlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-      inputWS->run().getLogData(logname));
+  auto *oldlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inputWS->run().getLogData(logname));
   if (!oldlog) {
     stringstream msg;
-    msg << "InputWorkspace \'" << this->getPropertyValue("InputWorkspace")
-        << "\' does not have LogName \'" << logname << "\'";
+    msg << "InputWorkspace \'" << this->getPropertyValue("InputWorkspace") << "\' does not have LogName \'" << logname
+        << "\'";
     throw std::runtime_error(msg.str());
   }
 
@@ -87,8 +80,7 @@ void ChangeLogTime::exec() {
   if (outputWS != inputWS) {
     IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
     duplicate->initialize();
-    duplicate->setProperty<Workspace_sptr>(
-        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWS));
+    duplicate->setProperty<Workspace_sptr>("InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWS));
     duplicate->execute();
     Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
     outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);

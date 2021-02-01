@@ -12,8 +12,7 @@ using namespace boost::python;
 
 void export_MemoryStats() {
 
-  class_<MemoryStats>("MemoryStats",
-                      init<>(arg("self"), "Construct MemoryStats object."))
+  class_<MemoryStats>("MemoryStats", init<>(arg("self"), "Construct MemoryStats object."))
       .def("update", &MemoryStats::update, arg("self"))
       .def("totalMem", &MemoryStats::totalMem, arg("self"))
       .def("availMem", &MemoryStats::availMem, arg("self"))

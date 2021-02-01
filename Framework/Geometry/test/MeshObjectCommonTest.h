@@ -19,9 +19,7 @@ class MeshObjectCommonTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MeshObjectCommonTest *createSuite() {
-    return new MeshObjectCommonTest();
-  }
+  static MeshObjectCommonTest *createSuite() { return new MeshObjectCommonTest(); }
   static void destroySuite(MeshObjectCommonTest *suite) { delete suite; }
 
   void test_ray_intersect_triangle_simple() {
@@ -35,9 +33,8 @@ public:
     TrackDirection entryExitFlag;
 
     // Direct intersection through triangle body
-    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                                 intersectionPoint, entryExitFlag);
     TS_ASSERT(doesIntersect);
     TS_ASSERT_EQUALS(entryExitFlag, TrackDirection::LEAVING);
     TS_ASSERT((start + (direction * 1) - intersectionPoint).norm2() < 1e-9);
@@ -60,31 +57,27 @@ public:
 
     // Test ray going through vertex of triangle
     V3D start = vertex1 - direction;
-    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                                 intersectionPoint, entryExitFlag);
     TS_ASSERT(doesIntersect);
 
     // Check another vertex
     start = vertex3 - direction;
-    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                            intersectionPoint, entryExitFlag);
     TS_ASSERT(doesIntersect);
 
     // Check an edge
     start = (vertex1 + vertex2) / 2 - direction; // along edge
-    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                            intersectionPoint, entryExitFlag);
     TS_ASSERT(doesIntersect);
 
     // Sanity check just outside.
     start = (vertex1 + vertex2) / 2 - direction; // along edge
     start += V3D(0, -1e-6, 0);                   // minor shift down in y
-    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                            intersectionPoint, entryExitFlag);
     TS_ASSERT(!doesIntersect);
   }
 
@@ -98,9 +91,8 @@ public:
     TrackDirection entryExitFlag;
     // Triangle now behind start. Should not intersect
     start = V3D{0, 0, 10};
-    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
-        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
-        entryExitFlag);
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
+                                                                 intersectionPoint, entryExitFlag);
     TS_ASSERT(!doesIntersect);
   }
   void test_isOnTriangle() {
@@ -111,23 +103,15 @@ public:
     TS_ASSERT(MeshObjectCommon::isOnTriangle(p1, p1, p2, p3));
     TS_ASSERT(MeshObjectCommon::isOnTriangle(p2, p1, p2, p3));
     TS_ASSERT(MeshObjectCommon::isOnTriangle(p3, p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(
-        !MeshObjectCommon::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(!MeshObjectCommon::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
   }
 
   void testTooManyVertices() {
-    TS_ASSERT_THROWS(MeshObjectCommon::checkVertexLimit(
-                         std::numeric_limits<uint32_t>::max()),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(MeshObjectCommon::checkVertexLimit(std::numeric_limits<uint32_t>::max()), std::invalid_argument &);
   }
 };

@@ -41,12 +41,9 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  Instrument_sptr createInstrument() {
-    return ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK);
-  }
+  Instrument_sptr createInstrument() { return ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK); }
 
-  GroupingWorkspace_sptr createGrouping(Instrument_sptr instr,
-                                        bool single = true) {
+  GroupingWorkspace_sptr createGrouping(Instrument_sptr instr, bool single = true) {
     GroupingWorkspace_sptr groupWS = std::make_shared<GroupingWorkspace>(instr);
     if (single) {
       // set all of the groups to one
@@ -126,8 +123,7 @@ public:
     Instrument_sptr inst = createInstrument();
     GroupingWorkspace_sptr groupWS = createGrouping(inst);
     MaskWorkspace_sptr maskWS = createMasking(inst);
-    TableWorkspace_sptr calWS =
-        createCalibration(NUM_BANK * 9); // nine components per bank
+    TableWorkspace_sptr calWS = createCalibration(NUM_BANK * 9); // nine components per bank
 
     SaveDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -151,8 +147,7 @@ public:
     Instrument_sptr inst = createInstrument();
     GroupingWorkspace_sptr groupWS = createGrouping(inst);
     MaskWorkspace_sptr maskWS = createMasking(inst);
-    TableWorkspace_sptr calWS =
-        createCalibration(NUM_BANK * 9); // nine components per bank
+    TableWorkspace_sptr calWS = createCalibration(NUM_BANK * 9); // nine components per bank
 
     SaveDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -176,8 +171,7 @@ public:
     Instrument_sptr inst = createInstrument();
     GroupingWorkspace_sptr groupWS = createGrouping(inst);
     MaskWorkspace_sptr maskWS = createMasking(inst);
-    TableWorkspace_sptr calWS =
-        createCalibration(NUM_BANK * 9); // nine components per bank
+    TableWorkspace_sptr calWS = createCalibration(NUM_BANK * 9); // nine components per bank
 
     SaveDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

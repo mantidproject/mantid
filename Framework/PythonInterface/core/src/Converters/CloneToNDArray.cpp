@@ -41,8 +41,7 @@ namespace Impl {
  * @param cvector :: A reference to the cvector to clone
  * @return The new cloned array
  */
-template <typename ElementType>
-PyObject *clone1D(const std::vector<ElementType> &cvector) {
+template <typename ElementType> PyObject *clone1D(const std::vector<ElementType> &cvector) {
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
   return cloneND(cvector.data(), 1, dims);
 }
@@ -52,20 +51,17 @@ PyObject *clone1D(const std::vector<ElementType> &cvector) {
  * differently
  * Returns a new numpy array with the a copy of the data vector of np.datetime64
  */
-template <>
-MANTID_PYTHONINTERFACE_CORE_DLL PyObject *
-clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
+template <> MANTID_PYTHONINTERFACE_CORE_DLL PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
   // create an empty array
   PyArray_Descr *descr = Converters::descr_ns();
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
-  auto *nparray = reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
-      &PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
+  auto *nparray = reinterpret_cast<PyArrayObject *>(
+      PyArray_NewFromDescr(&PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
 
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
     npy_datetime abstime = Converters::to_npy_datetime(cvector[i]);
-    auto scalar =
-        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
+    auto scalar = PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
     PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), scalar);
     Py_DECREF(scalar);
   }
@@ -78,9 +74,7 @@ clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
  * @param cvector :: A reference to the cvector to clone
  * @return The new cloned array
  */
-template <>
-MANTID_PYTHONINTERFACE_CORE_DLL PyObject *
-clone1D(const std::vector<bool> &cvector) {
+template <> MANTID_PYTHONINTERFACE_CORE_DLL PyObject *clone1D(const std::vector<bool> &cvector) {
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
   int datatype = NDArrayTypeIndex<bool>::typenum;
   PyArrayObject *nparray = func_PyArray_NewFromDescr(datatype, 1, &dims[0]);
@@ -103,9 +97,7 @@ clone1D(const std::vector<bool> &cvector) {
  * @param dims :: The length of the arrays in each dimension
  * @return
  */
-template <typename ElementType>
-PyObject *cloneND(const ElementType *carray, const int ndims,
-                  Py_intptr_t *dims) {
+template <typename ElementType> PyObject *cloneND(const ElementType *carray, const int ndims, Py_intptr_t *dims) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
   PyArrayObject *nparray = func_PyArray_NewFromDescr(datatype, ndims, &dims[0]);
   // Compute total number of elements
@@ -130,9 +122,7 @@ PyObject *cloneND(const ElementType *carray, const int ndims,
  * @param dims :: The length of the arrays in each dimension
  * @return
  */
-template <>
-PyObject *cloneND(const std::string *carray, const int ndims,
-                  Py_intptr_t *dims) {
+template <> PyObject *cloneND(const std::string *carray, const int ndims, Py_intptr_t *dims) {
   boost::python::list pystrs;
   const std::string *iter = carray;
   for (int i = 0; i < ndims; ++i) {
@@ -143,24 +133,21 @@ PyObject *cloneND(const std::string *carray, const int ndims,
     }
   }
   PyObject *rawptr = pystrs.ptr();
-  Py_INCREF(
-      rawptr); // Make sure it survives after the wrapper decrefs the count
+  Py_INCREF(rawptr); // Make sure it survives after the wrapper decrefs the count
   return rawptr;
 }
 
 //-----------------------------------------------------------------------
 // Explicit instantiations
 //-----------------------------------------------------------------------
-#define INSTANTIATE_CLONE1D(ElementType)                                       \
-  template DLLExport PyObject *clone1D<ElementType>(                           \
-      const std::vector<ElementType> &cvector);
+#define INSTANTIATE_CLONE1D(ElementType)                                                                               \
+  template DLLExport PyObject *clone1D<ElementType>(const std::vector<ElementType> &cvector);
 
-#define INSTANTIATE_CLONEND(ElementType)                                       \
-  template DLLExport PyObject *cloneND<ElementType>(                           \
-      const ElementType *, const int ndims, Py_intptr_t *dims);
+#define INSTANTIATE_CLONEND(ElementType)                                                                               \
+  template DLLExport PyObject *cloneND<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
 
-#define INSTANTIATE_CLONE(ElementType)                                         \
-  INSTANTIATE_CLONE1D(ElementType)                                             \
+#define INSTANTIATE_CLONE(ElementType)                                                                                 \
+  INSTANTIATE_CLONE1D(ElementType)                                                                                     \
   INSTANTIATE_CLONEND(ElementType)
 
 ///@cond Doxygen doesn't seem to like this...

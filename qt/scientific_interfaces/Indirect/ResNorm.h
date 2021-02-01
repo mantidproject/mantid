@@ -51,10 +51,8 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   void processLogs();
-  void
-  addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
-  void
-  addAdditionalLogs(const Mantid::API::Workspace_sptr &resultWorkspace) const;
+  void addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
+  void addAdditionalLogs(const Mantid::API::Workspace_sptr &resultWorkspace) const;
   std::map<std::string, std::string> getAdditionalLogStrings() const;
   std::map<std::string, std::string> getAdditionalLogNumbers() const;
   double getDoubleManagerProperty(QString const &propName) const;

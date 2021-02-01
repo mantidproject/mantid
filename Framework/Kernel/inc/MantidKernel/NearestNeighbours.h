@@ -45,9 +45,7 @@ public:
    * @param nPts :: the number of data points
    * @param nElems :: the number of elements for each point
    */
-  NNDataPoints(const int nPts, const int nElems) : m_nPts(nPts) {
-    m_data = annAllocPts(m_nPts, nElems);
-  }
+  NNDataPoints(const int nPts, const int nElems) : m_nPts(nPts) { m_data = annAllocPts(m_nPts, nElems); }
 
   ~NNDataPoints() { annDeallocPts(m_data); }
 
@@ -88,8 +86,7 @@ template <int N = 3> class DLLExport NearestNeighbours {
 public:
   // typedefs for code brevity
   using VectorType = Eigen::Matrix<double, N, 1>;
-  using NearestNeighbourResults =
-      std::vector<std::tuple<VectorType, size_t, double>>;
+  using NearestNeighbourResults = std::vector<std::tuple<VectorType, size_t, double>>;
 
   /** Create a nearest neighbour search object
    *
@@ -98,18 +95,14 @@ public:
   NearestNeighbours(const std::vector<VectorType> &points) {
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
-      std::runtime_error(
-          "Need at least one point to initialise NearestNeighbours.");
+      std::runtime_error("Need at least one point to initialise NearestNeighbours.");
 
-    m_dataPoints =
-        std::make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
+    m_dataPoints = std::make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
 
     for (size_t i = 0; i < points.size(); ++i) {
-      Eigen::Map<VectorType>(m_dataPoints->mutablePoint(static_cast<int>(i)), N,
-                             1) = points[i];
+      Eigen::Map<VectorType>(m_dataPoints->mutablePoint(static_cast<int>(i)), N, 1) = points[i];
     }
-    m_kdTree = std::make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints,
-                                            static_cast<int>(N));
+    m_kdTree = std::make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints, static_cast<int>(N));
   }
 
   ~NearestNeighbours() { annClose(); }
@@ -126,8 +119,7 @@ public:
    * 	zero then exact neighbours will be found. (default = 0.0).
    * @return vector neighbours as tuples of (position, index, distance)
    */
-  NearestNeighbourResults findNearest(const VectorType &pos, const size_t k = 1,
-                                      const double error = 0.0) {
+  NearestNeighbourResults findNearest(const VectorType &pos, const size_t k = 1, const double error = 0.0) {
     const auto numNeighbours = static_cast<int>(k);
     // create arrays to store the indices & distances of nearest neighbours
     auto nnIndexList = std::unique_ptr<ANNidx[]>(new ANNidx[numNeighbours]);
@@ -138,8 +130,7 @@ public:
     Eigen::Map<VectorType>(point.get(), N, 1) = pos;
 
     // find the k nearest neighbours
-    m_kdTree->annkSearch(point.get(), numNeighbours, nnIndexList.get(),
-                         nnDistList.get(), error);
+    m_kdTree->annkSearch(point.get(), numNeighbours, nnIndexList.get(), nnDistList.get(), error);
 
     return makeResults(k, std::move(nnIndexList), std::move(nnDistList));
   }
@@ -154,9 +145,8 @@ private:
    *neighbours
    * @return a new NearestNeighbourResults object from the found items
    */
-  NearestNeighbourResults
-  makeResults(const size_t k, const std::unique_ptr<ANNidx[]> nnIndexList,
-              const std::unique_ptr<ANNdist[]> nnDistList) {
+  NearestNeighbourResults makeResults(const size_t k, const std::unique_ptr<ANNidx[]> nnIndexList,
+                                      const std::unique_ptr<ANNdist[]> nnDistList) {
     NearestNeighbourResults results;
     results.reserve(k);
 

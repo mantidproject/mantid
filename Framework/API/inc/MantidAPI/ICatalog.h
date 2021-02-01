@@ -30,17 +30,14 @@ public:
   /// Virtual destructor
   virtual ~ICatalog() = default;
   /// method to login to a catalog
-  virtual CatalogSession_sptr login(const std::string &, const std::string &,
-                                    const std::string &,
+  virtual CatalogSession_sptr login(const std::string &, const std::string &, const std::string &,
                                     const std::string &) = 0;
   /// logout from catalog
   virtual void logout() = 0;
   /// Search investigations
-  virtual void search(const ICat::CatalogSearchParam &, ITableWorkspace_sptr &,
-                      const int &, const int &) = 0;
+  virtual void search(const ICat::CatalogSearchParam &, ITableWorkspace_sptr &, const int &, const int &) = 0;
   /// Obtain the number of results returned by the search method.
-  virtual int64_t
-  getNumberOfSearchResults(const ICat::CatalogSearchParam &) = 0;
+  virtual int64_t getNumberOfSearchResults(const ICat::CatalogSearchParam &) = 0;
   /// search logged in users data
   virtual void myData(ITableWorkspace_sptr &) = 0;
   /// get datasets.

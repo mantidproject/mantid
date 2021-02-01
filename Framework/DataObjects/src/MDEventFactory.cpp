@@ -196,15 +196,13 @@ which derive
                                     from this event workspace
 @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
-API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(
-    size_t nd, const std::string &eventType,
-    const Mantid::API::MDNormalization &preferredNormalization,
-    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
+API::IMDEventWorkspace_sptr
+MDEventFactory::CreateMDWorkspace(size_t nd, const std::string &eventType,
+                                  const Mantid::API::MDNormalization &preferredNormalization,
+                                  const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   if (nd > MAX_MD_DIMENSIONS_NUM)
-    throw std::invalid_argument(
-        " there are more dimensions requested then instantiated");
-  API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(
-      eventType, preferredNormalization, preferredNormalizationHisto);
+    throw std::invalid_argument(" there are more dimensions requested then instantiated");
+  API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(eventType, preferredNormalization, preferredNormalizationHisto);
   return std::shared_ptr<API::IMDEventWorkspace>(pWs);
 }
 
@@ -225,45 +223,37 @@ accept events -- not used for MDGridBox
 @return pointer to the IMDNode with proper box created.
 */
 
-API::IMDNode *MDEventFactory::createBox(
-    size_t nDimensions, MDEventFactory::BoxType Type,
-    API::BoxController_sptr &splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector,
-    const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
+API::IMDNode *MDEventFactory::createBox(size_t nDimensions, MDEventFactory::BoxType Type,
+                                        API::BoxController_sptr &splitter,
+                                        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+                                        const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
 
   if (nDimensions > MAX_MD_DIMENSIONS_NUM)
-    throw std::invalid_argument(
-        " there are more dimensions requested then instantiated");
+    throw std::invalid_argument(" there are more dimensions requested then instantiated");
 
   size_t id = nDimensions * MDEventFactory::NumBoxTypes + Type;
   if (extentsVector.size() != nDimensions) // set defaults
   {
-    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> defaultExtents(
-        nDimensions);
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> defaultExtents(nDimensions);
     for (size_t i = 0; i < nDimensions; i++) {
       // set to smaller than float max, so the entire range fits in a float.
       defaultExtents[i].setExtents(-1e30f, 1e30f);
     }
-    return (*(boxCreatorFP[id]))(splitter.get(), defaultExtents, depth,
-                                 nBoxEvents, boxID);
+    return (*(boxCreatorFP[id]))(splitter.get(), defaultExtents, depth, nBoxEvents, boxID);
   }
 
-  return (*(boxCreatorFP[id]))(splitter.get(), extentsVector, depth, nBoxEvents,
-                               boxID);
+  return (*(boxCreatorFP[id]))(splitter.get(), extentsVector, depth, nBoxEvents, boxID);
 }
 
 //------------------------------- FACTORY METHODS END
 //--------------------------------------------------------------------------------------------------------------
 
 /// static vector, conaining the pointers to the functions creating MD boxes
-std::vector<MDEventFactory::fpCreateBox> MDEventFactory::boxCreatorFP(
-    MDEventFactory::NumBoxTypes *(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1),
-    nullptr);
+std::vector<MDEventFactory::fpCreateBox>
+MDEventFactory::boxCreatorFP(MDEventFactory::NumBoxTypes *(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1), nullptr);
 // static vector, conaining the pointers to the functions creating MD Workspaces
-std::vector<MDEventFactory::fpCreateMDWS>
-    MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1,
-                                nullptr);
+std::vector<MDEventFactory::fpCreateMDWS> MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM + 1,
+                                                                      nullptr);
 
 //########### Teplate methaprogrammed CODE SOURCE start:
 //-------------------------------------
@@ -278,19 +268,16 @@ std::vector<MDEventFactory::fpCreateMDWS>
  * histo workspace
  */
 template <size_t nd>
-API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
-    const std::string &eventType,
-    const Mantid::API::MDNormalization &preferredNormalization,
-    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
+API::IMDEventWorkspace *
+MDEventFactory::createMDWorkspaceND(const std::string &eventType,
+                                    const Mantid::API::MDNormalization &preferredNormalization,
+                                    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   if (eventType == "MDEvent")
-    return new MDEventWorkspace<MDEvent<nd>, nd>(preferredNormalization,
-                                                 preferredNormalizationHisto);
+    return new MDEventWorkspace<MDEvent<nd>, nd>(preferredNormalization, preferredNormalizationHisto);
   else if (eventType == "MDLeanEvent")
-    return new MDEventWorkspace<MDLeanEvent<nd>, nd>(
-        preferredNormalization, preferredNormalizationHisto);
+    return new MDEventWorkspace<MDLeanEvent<nd>, nd>(preferredNormalization, preferredNormalizationHisto);
   else
-    throw std::invalid_argument("Unknown event type " + eventType +
-                                " passed to CreateMDWorkspace.");
+    throw std::invalid_argument("Unknown event type " + eventType + " passed to CreateMDWorkspace.");
 }
 /** Template to create md workspace w ith 0 number of dimentisons. As this is
  * wrong, just throws. Used as terminator and check for the wrong dimensions
@@ -302,10 +289,10 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND(
  * derived histo workspace
  */
 template <>
-API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
-    const std::string &eventType,
-    const Mantid::API::MDNormalization &preferredNormalization,
-    const Mantid::API::MDNormalization &preferredNormalizationHisto) {
+API::IMDEventWorkspace *
+MDEventFactory::createMDWorkspaceND<0>(const std::string &eventType,
+                                       const Mantid::API::MDNormalization &preferredNormalization,
+                                       const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   UNUSED_ARG(eventType);
   UNUSED_ARG(preferredNormalization);
   UNUSED_ARG(preferredNormalizationHisto);
@@ -316,12 +303,10 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
 // constructor wrapper
 /** Method to create any MDBox type with 0 number of dimensions. As it is wrong,
  * just throws */
-API::IMDNode *MDEventFactory::createMDBoxWrong(
-    API::BoxController * /*unused*/,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        & /*unused*/,
-    const uint32_t /*unused*/, const size_t /*unused*/,
-    const size_t /*unused*/) {
+API::IMDNode *
+MDEventFactory::createMDBoxWrong(API::BoxController * /*unused*/,
+                                 const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> & /*unused*/,
+                                 const uint32_t /*unused*/, const size_t /*unused*/, const size_t /*unused*/) {
   throw std::invalid_argument("MDBox/MDGridBox can not have 0 dimensions");
 }
 /**Method to create MDBox for lean events (Constructor wrapper) with given
@@ -334,13 +319,11 @@ API::IMDNode *MDEventFactory::createMDBoxWrong(
  * @param boxID :: id for the given box
  */
 template <size_t nd>
-API::IMDNode *MDEventFactory::createMDBoxLean(
-    API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector,
-    const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
-  return new MDBox<MDLeanEvent<nd>, nd>(splitter, depth, extentsVector,
-                                        nBoxEvents, boxID);
+API::IMDNode *
+MDEventFactory::createMDBoxLean(API::BoxController *splitter,
+                                const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+                                const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
+  return new MDBox<MDLeanEvent<nd>, nd>(splitter, depth, extentsVector, nBoxEvents, boxID);
 }
 /**Method to create MDBox for events (Constructor wrapper) with given number of
  * dimensions
@@ -352,13 +335,11 @@ API::IMDNode *MDEventFactory::createMDBoxLean(
  * @param boxID :: id for the given box
  */
 template <size_t nd>
-API::IMDNode *MDEventFactory::createMDBoxFat(
-    API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector,
-    const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
-  return new MDBox<MDEvent<nd>, nd>(splitter, depth, extentsVector, nBoxEvents,
-                                    boxID);
+API::IMDNode *
+MDEventFactory::createMDBoxFat(API::BoxController *splitter,
+                               const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+                               const uint32_t depth, const size_t nBoxEvents, const size_t boxID) {
+  return new MDBox<MDEvent<nd>, nd>(splitter, depth, extentsVector, nBoxEvents, boxID);
 }
 /**Method to create MDGridBox for lean events (Constructor wrapper) with given
  * number of dimensions
@@ -370,11 +351,10 @@ API::IMDNode *MDEventFactory::createMDBoxFat(
  * @param boxID ::   --- not used
  */
 template <size_t nd>
-API::IMDNode *MDEventFactory::createMDGridBoxLean(
-    API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector,
-    const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
+API::IMDNode *
+MDEventFactory::createMDGridBoxLean(API::BoxController *splitter,
+                                    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+                                    const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
   return new MDGridBox<MDLeanEvent<nd>, nd>(splitter, depth, extentsVector);
 }
 /**Method to create MDGridBox for events (Constructor wrapper) with given number
@@ -387,11 +367,10 @@ API::IMDNode *MDEventFactory::createMDGridBoxLean(
  * @param boxID ::   --- not used
  */
 template <size_t nd>
-API::IMDNode *MDEventFactory::createMDGridBoxFat(
-    API::BoxController *splitter,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-        &extentsVector,
-    const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
+API::IMDNode *
+MDEventFactory::createMDGridBoxFat(API::BoxController *splitter,
+                                   const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
+                                   const uint32_t depth, const size_t /*nBoxEvents*/, const size_t /*boxID*/) {
   return new MDGridBox<MDEvent<nd>, nd>(splitter, depth, extentsVector);
 }
 //-------------------------------------------------------------- MD BOX
@@ -407,17 +386,13 @@ public:
     LOOP<nd - 1>::EXEC();
     MDEventFactory::wsCreatorFP[nd] = &MDEventFactory::createMDWorkspaceND<nd>;
 
-    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd +
-                                 MDEventFactory::MDBoxWithLean] =
+    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd + MDEventFactory::MDBoxWithLean] =
         &MDEventFactory::createMDBoxLean<nd>;
-    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd +
-                                 MDEventFactory::MDBoxWithFat] =
+    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd + MDEventFactory::MDBoxWithFat] =
         &MDEventFactory::createMDBoxFat<nd>;
-    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd +
-                                 MDEventFactory::MDGridBoxWithLean] =
+    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd + MDEventFactory::MDGridBoxWithLean] =
         &MDEventFactory::createMDGridBoxLean<nd>;
-    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd +
-                                 MDEventFactory::MDGridBoxWithFat] =
+    MDEventFactory::boxCreatorFP[MDEventFactory::NumBoxTypes * nd + MDEventFactory::MDGridBoxWithFat] =
         &MDEventFactory::createMDGridBoxFat<nd>;
   }
 };
@@ -428,14 +403,10 @@ public:
   static inline void EXEC() {
     MDEventFactory::wsCreatorFP[0] = &MDEventFactory::createMDWorkspaceND<0>;
 
-    MDEventFactory::boxCreatorFP[MDEventFactory::MDBoxWithLean] =
-        &MDEventFactory::createMDBoxWrong;
-    MDEventFactory::boxCreatorFP[MDEventFactory::MDBoxWithFat] =
-        &MDEventFactory::createMDBoxWrong;
-    MDEventFactory::boxCreatorFP[MDEventFactory::MDGridBoxWithLean] =
-        &MDEventFactory::createMDBoxWrong;
-    MDEventFactory::boxCreatorFP[MDEventFactory::MDGridBoxWithFat] =
-        &MDEventFactory::createMDBoxWrong;
+    MDEventFactory::boxCreatorFP[MDEventFactory::MDBoxWithLean] = &MDEventFactory::createMDBoxWrong;
+    MDEventFactory::boxCreatorFP[MDEventFactory::MDBoxWithFat] = &MDEventFactory::createMDBoxWrong;
+    MDEventFactory::boxCreatorFP[MDEventFactory::MDGridBoxWithLean] = &MDEventFactory::createMDBoxWrong;
+    MDEventFactory::boxCreatorFP[MDEventFactory::MDGridBoxWithFat] = &MDEventFactory::createMDBoxWrong;
   }
 };
 //########### Teplate methaprogrammed CODE SOURCE END:

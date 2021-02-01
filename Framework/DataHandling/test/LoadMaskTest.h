@@ -42,8 +42,7 @@ public:
     try {
       TS_ASSERT_EQUALS(loadfile.execute(), true);
       DataObjects::MaskWorkspace_sptr maskws =
-          AnalysisDataService::Instance()
-              .retrieveWS<DataObjects::MaskWorkspace>("PG3Mask");
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("PG3Mask");
     } catch (std::runtime_error &e) {
       TS_FAIL(e.what());
     }
@@ -95,8 +94,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(), true);
     DataObjects::MaskWorkspace_sptr maskws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask_Detectors");
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     for (size_t iws = 0; iws < 6468; iws++) {
@@ -128,9 +126,7 @@ public:
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(), true);
-    auto maskws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask_Detectors");
+    auto maskws = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
@@ -149,9 +145,7 @@ public:
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(), true);
-    maskws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask_Detectors");
+    maskws = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
@@ -188,8 +182,7 @@ public:
     pairspectra.emplace_back(37);
     pairspectra.emplace_back(40);
 
-    auto isisMaskFile =
-        genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
+    auto isisMaskFile = genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
 
     // 2. Run
     LoadMask loadfile;
@@ -201,15 +194,13 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(), true);
     DataObjects::MaskWorkspace_sptr maskws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask_Detectors");
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     size_t errorcounts = 0;
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
       double y = maskws->y(iws)[0];
-      if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
-          (iws >= 1001 && iws <= 1004)) {
+      if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) || (iws >= 1001 && iws <= 1004)) {
         // All these workspace index are masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
       } else {
@@ -217,8 +208,7 @@ public:
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
         if (fabs(y) > 1.0E-5) {
           errorcounts++;
-          std::cout << "Workspace Index " << iws
-                    << " has a wrong set on masks\n";
+          std::cout << "Workspace Index " << iws << " has a wrong set on masks\n";
         }
       }
     }
@@ -240,8 +230,7 @@ public:
   }
 
   void test_ISISWithRefWS() {
-    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
-        "CreateSimulationWorkspace");
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged("CreateSimulationWorkspace");
     ws_creator->initialize();
     ws_creator->setChild(true);
 
@@ -260,8 +249,7 @@ public:
     for (auto it = detIDs.rbegin(); it != detIDs.rend(); ++it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
-      Mantid::specnum_t specNo =
-          static_cast<Mantid::specnum_t>(calc_spec_num(index));
+      Mantid::specnum_t specNo = static_cast<Mantid::specnum_t>(calc_spec_num(index));
       spec.setSpectrumNo(specNo);
       spec.setDetectorID(detId);
 
@@ -315,8 +303,7 @@ public:
 
     TS_ASSERT_EQUALS(loadMask.execute(), true);
 
-    DataObjects::MaskWorkspace_sptr maskWs =
-        loadMask.getProperty("OutputWorkspace");
+    DataObjects::MaskWorkspace_sptr maskWs = loadMask.getProperty("OutputWorkspace");
 
     // check that mask ws contains different spectra but the same detectors
     // masked
@@ -349,8 +336,7 @@ public:
   }
 
   void test_IDF_acceptedAsFileName() {
-    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
-        "CreateSimulationWorkspace");
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged("CreateSimulationWorkspace");
     ws_creator->initialize();
     ws_creator->setChild(true);
 
@@ -363,8 +349,7 @@ public:
     MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
     TS_ASSERT(source);
 
-    std::string IDF_name =
-        API::InstrumentFileFinder::getInstrumentFilename("MARI", "");
+    std::string IDF_name = API::InstrumentFileFinder::getInstrumentFilename("MARI", "");
 
     /*Fake export mask algorithm: */
     std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
@@ -382,8 +367,7 @@ public:
 
     TS_ASSERT_EQUALS(loadMask.execute(), true);
 
-    DataObjects::MaskWorkspace_sptr maskWs =
-        loadMask.getProperty("OutputWorkspace");
+    DataObjects::MaskWorkspace_sptr maskWs = loadMask.getProperty("OutputWorkspace");
     TS_ASSERT(maskWs);
   }
 
@@ -420,8 +404,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile.execute(), true);
     DataObjects::MaskWorkspace_sptr maskws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask1");
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask1");
 
     // 2. Generate Region of Interest Workspace
     LoadMask loadfile2;
@@ -433,8 +416,7 @@ public:
 
     TS_ASSERT_EQUALS(loadfile2.execute(), true);
     DataObjects::MaskWorkspace_sptr interestws =
-        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-            "VULCAN_Mask2");
+        AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask2");
 
     // 3. Check
     size_t sizemask = maskws->getNumberHistograms();
@@ -474,12 +456,9 @@ public:
     const std::vector<int> detIDs = {2, 10};
     auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
 
-    auto byInstName =
-        loadMask("EMU", maskFile.getFileName(), "LoadedByInstName");
-    auto withOldIDF =
-        loadMask(oldEmuIdf, maskFile.getFileName(), "LoadWithOldIDF");
-    auto withNewIDF =
-        loadMask(newEmuIdf, maskFile.getFileName(), "LoadWithNewIDF");
+    auto byInstName = loadMask("EMU", maskFile.getFileName(), "LoadedByInstName");
+    auto withOldIDF = loadMask(oldEmuIdf, maskFile.getFileName(), "LoadWithOldIDF");
+    auto withNewIDF = loadMask(newEmuIdf, maskFile.getFileName(), "LoadWithNewIDF");
 
     TS_ASSERT_EQUALS(byInstName->getNumberHistograms(), 96);
     TS_ASSERT_EQUALS(withOldIDF->getNumberHistograms(), 32);
@@ -497,8 +476,7 @@ public:
     TS_ASSERT_EQUALS(withNewIDF->getNumberMasked(), 2);
   }
 
-  DataObjects::MaskWorkspace_sptr loadMask(const std::string &instrument,
-                                           const std::string &inputFile,
+  DataObjects::MaskWorkspace_sptr loadMask(const std::string &instrument, const std::string &inputFile,
                                            const std::string &outputWsName) {
     LoadMask loadMask;
     loadMask.initialize();
@@ -509,15 +487,13 @@ public:
 
     TS_ASSERT_EQUALS(loadMask.execute(), true);
 
-    return AnalysisDataService::Instance()
-        .retrieveWS<DataObjects::MaskWorkspace>(outputWsName);
+    return AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(outputWsName);
   }
 
   /*
    * Create a masking file
    */
-  ScopedFileHelper::ScopedFile genMaskingFile(const std::string &maskfilename,
-                                              std::vector<int> detids,
+  ScopedFileHelper::ScopedFile genMaskingFile(const std::string &maskfilename, std::vector<int> detids,
                                               const std::vector<int> &banks) {
     std::stringstream ss;
 
@@ -551,10 +527,9 @@ public:
   /*
    * Create an ISIS format masking file
    */
-  ScopedFileHelper::ScopedFile
-  genISISMaskingFile(const std::string &maskfilename,
-                     const std::vector<specnum_t> &singlespectra,
-                     std::vector<specnum_t> pairspectra) {
+  ScopedFileHelper::ScopedFile genISISMaskingFile(const std::string &maskfilename,
+                                                  const std::vector<specnum_t> &singlespectra,
+                                                  std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 
     // 1. Single spectra
@@ -585,9 +560,7 @@ class LoadMaskTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadMaskTestPerformance *createSuite() {
-    return new LoadMaskTestPerformance();
-  }
+  static LoadMaskTestPerformance *createSuite() { return new LoadMaskTestPerformance(); }
 
   static void destroySuite(LoadMaskTestPerformance *suite) { delete suite; }
 
@@ -598,9 +571,7 @@ public:
     loadFile.setProperty("OutputWorkspace", "outputWS");
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove("outputWS");
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove("outputWS"); }
 
   void testDefaultLoad() { loadFile.execute(); }
 

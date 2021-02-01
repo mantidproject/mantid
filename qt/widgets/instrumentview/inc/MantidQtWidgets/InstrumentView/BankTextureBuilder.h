@@ -25,29 +25,21 @@ namespace MantidWidgets {
 namespace detail {
 class BankTextureBuilder {
 public:
-  BankTextureBuilder(const Mantid::Geometry::ComponentInfo &compInfo,
-                     size_t index);
+  BankTextureBuilder(const Mantid::Geometry::ComponentInfo &compInfo, size_t index);
   ~BankTextureBuilder();
-  void buildColorTextures(const std::vector<GLColor> &colors,
-                          bool isUsingLayer = false, size_t layer = 0);
-  void buildPickTextures(const std::vector<GLColor> &colors,
-                         bool isUsingLayer = false, size_t layer = 0);
-  void uploadTextures(bool picking,
-                      GridTextureFace gridFace = GridTextureFace::Front);
+  void buildColorTextures(const std::vector<GLColor> &colors, bool isUsingLayer = false, size_t layer = 0);
+  void buildPickTextures(const std::vector<GLColor> &colors, bool isUsingLayer = false, size_t layer = 0);
+  void uploadTextures(bool picking, GridTextureFace gridFace = GridTextureFace::Front);
   void bindTextures(bool picking) const;
   void unbindTextures() const;
 
 private:
-  void buildOpenGLTextures(bool picking, const std::vector<GLColor> &colors,
-                           bool isUsingLayer, size_t layer);
+  void buildOpenGLTextures(bool picking, const std::vector<GLColor> &colors, bool isUsingLayer, size_t layer);
   void buildTubeBankTextures(const std::vector<GLColor> &colors, bool picking);
   void buildGridBankFull(const std::vector<GLColor> &colors, bool picking);
-  void buildGridBankLayer(const std::vector<GLColor> &colors, bool picking,
-                          size_t layer);
-  void buildGridBankTextures(const std::vector<GLColor> &colors, bool picking,
-                             bool isUsingLayer, size_t layer);
-  void buildRectangularBankTextures(const std::vector<GLColor> &colors,
-                                    bool picking);
+  void buildGridBankLayer(const std::vector<GLColor> &colors, bool picking, size_t layer);
+  void buildGridBankTextures(const std::vector<GLColor> &colors, bool picking, bool isUsingLayer, size_t layer);
+  void buildRectangularBankTextures(const std::vector<GLColor> &colors, bool picking);
   void uploadTubeBankTextures(bool picking);
   void uploadGridBankTexture(bool picking, GridTextureFace gridFace);
   void uploadRectangularBankTextures(bool picking);

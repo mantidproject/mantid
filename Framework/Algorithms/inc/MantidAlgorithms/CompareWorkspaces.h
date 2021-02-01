@@ -78,9 +78,8 @@ public:
   }
 
 protected:
-  Parallel::ExecutionMode getParallelExecutionMode(
-      const std::map<std::string, Parallel::StorageMode> &storageModes)
-      const override;
+  Parallel::ExecutionMode
+  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
   void execMasterOnly() override;
 
 private:
@@ -95,45 +94,30 @@ private:
   bool processGroups() override;
 
   /// Process the two groups
-  void
-  processGroups(const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
-                const std::shared_ptr<const API::WorkspaceGroup> &groupTwo);
+  void processGroups(const std::shared_ptr<const API::WorkspaceGroup> &groupOne,
+                     const std::shared_ptr<const API::WorkspaceGroup> &groupTwo);
 
   void doComparison();
 
-  void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1,
-                         DataObjects::PeaksWorkspace_sptr tws2);
-  void doTableComparison(const API::ITableWorkspace_const_sptr &tws1,
-                         const API::ITableWorkspace_const_sptr &tws2);
-  void doMDComparison(const API::Workspace_sptr &w1,
-                      const API::Workspace_sptr &w2);
-  bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1,
-                              const DataObjects::EventWorkspace &ews2);
-  bool checkData(const API::MatrixWorkspace_const_sptr &ws1,
-                 const API::MatrixWorkspace_const_sptr &ws2);
-  bool checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
-                 const API::MatrixWorkspace_const_sptr &ws2);
-  bool checkSpectraMap(const API::MatrixWorkspace_const_sptr &ws1,
-                       const API::MatrixWorkspace_const_sptr &ws2);
-  bool checkInstrument(const API::MatrixWorkspace_const_sptr &ws1,
-                       const API::MatrixWorkspace_const_sptr &ws2);
-  bool checkMasking(const API::MatrixWorkspace_const_sptr &ws1,
-                    const API::MatrixWorkspace_const_sptr &ws2);
+  void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1, DataObjects::PeaksWorkspace_sptr tws2);
+  void doTableComparison(const API::ITableWorkspace_const_sptr &tws1, const API::ITableWorkspace_const_sptr &tws2);
+  void doMDComparison(const API::Workspace_sptr &w1, const API::Workspace_sptr &w2);
+  bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1, const DataObjects::EventWorkspace &ews2);
+  bool checkData(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkAxes(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkSpectraMap(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkInstrument(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
+  bool checkMasking(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2);
   bool checkSample(const API::Sample &sample1, const API::Sample &sample2);
   bool checkRunProperties(const API::Run &run1, const API::Run &run2);
 
   /// Compare 2 EventsList
-  int compareEventsListInDetails(const DataObjects::EventList &el1,
-                                 const DataObjects::EventList &el2,
-                                 double tolTof, double tolWeight,
-                                 int64_t tolPulse, bool printdetails,
-                                 size_t &numdiffpulse, size_t &numdifftof,
-                                 size_t &numdiffboth,
-                                 size_t &numdiffweight) const;
+  int compareEventsListInDetails(const DataObjects::EventList &el1, const DataObjects::EventList &el2, double tolTof,
+                                 double tolWeight, int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
+                                 size_t &numdifftof, size_t &numdiffboth, size_t &numdiffweight) const;
 
   /// Records a mismatch in the Messages workspace and sets Result to false
-  void recordMismatch(const std::string &msg, std::string ws1 = "",
-                      std::string ws2 = "");
+  void recordMismatch(const std::string &msg, std::string ws1 = "", std::string ws2 = "");
 
   bool relErr(double x1, double x2, double errorVal) const;
 
