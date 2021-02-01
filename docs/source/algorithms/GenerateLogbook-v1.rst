@@ -55,7 +55,7 @@ Output:
 .. testoutput:: ExGenerateLogbook_D7
 
    Number of numors in the logbook: 3
-   Number of headers in the logbook: 5
+   Number of headers in the logbook: 8
 
 .. categories::
 
