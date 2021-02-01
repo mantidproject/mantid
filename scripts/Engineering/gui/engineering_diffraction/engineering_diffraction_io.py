@@ -38,6 +38,7 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
         if data_widget.presenter.get_loaded_workspaces():
             obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
+            obj_dic["background_params"] = data_widget.model.get_bg_params()
             if plot_widget.view.fit_browser.get_fitprop():
                 obj_dic["fit_properties"] = plot_widget.view.fit_browser.read_current_fitprop()
                 obj_dic["plot_diff"] = str(plot_widget.view.fit_browser.plotDiff())
@@ -63,11 +64,14 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         gui = EngineeringDiffractionGui()
         presenter = gui.presenter
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
-        presenter.fitting_presenter.data_widget.model.restore_files(ws_names)
-        presenter.fitting_presenter.data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
-        presenter.fitting_presenter.data_widget.presenter.restore_table()
         presenter.settings_presenter.model.set_settings_dict(obj_dic["settings_dict"])
         presenter.settings_presenter.settings = obj_dic["settings_dict"]
+        fit_data_widget = presenter.fitting_presenter.data_widget
+        fit_data_widget.model._bg_params = obj_dic["background_params"]
+        fit_data_widget.model.restore_bg_workspaces(obj_dic["background_params"])
+        fit_data_widget.model.restore_files(ws_names)
+        fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
+        fit_data_widget.presenter.restore_table()
 
         if obj_dic["fit_properties"]:
             fit_browser = presenter.fitting_presenter.plot_widget.view.fit_browser

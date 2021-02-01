@@ -360,6 +360,12 @@ class FittingDataModel(object):
         Plus(LHSWorkspace=ws_name, RHSWorkspace=self.get_background_workspaces()[ws_name],
              OutputWorkspace=ws_name)
 
+    def restore_bg_workspaces(self, bg_params):
+        # this is to be used to create the dict of background workspaces after a restoration
+        for ws_name in bg_params:
+            params_list = bg_params[ws_name]
+            self.estimate_background(ws_name, params_list[1], params_list[2], params_list[3])
+
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
