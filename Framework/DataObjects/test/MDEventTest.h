@@ -201,12 +201,15 @@ public:
   }
 
   void test_serialize_deserializeFat() {
+    // number of events
     size_t nPoints = 100; // the number should not be nPoints%3=0 to hold test
                           // TS_ASSERT_THROWS below
-    std::vector<MDEvent<4>> events(nPoints);
+    size_t nd = 4; // 4-dimensional coordinates
+    // traits are: signal, errorSquared, runIndex, detectorId, goniometerIndex
+    size_t trait_count = 5;
+    std::vector<MDEvent<nd>> events(nPoints);
     double sumGuess(0), errGuess(0);
     for (size_t i = 0; i < nPoints; i++) {
-
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
       events[i].setRunIndex(uint16_t(i / 10));
@@ -226,8 +229,9 @@ public:
     double totalErrSq(0);
     TS_ASSERT_THROWS_NOTHING(
         MDEvent<4>::eventsToData(events, data, ncols, totalSignal, totalErrSq));
-    TS_ASSERT_EQUALS(4 + 4, ncols);
-    TS_ASSERT_EQUALS((4 + 4) * nPoints, data.size());
+    size_t ncols_expected = nd + trait_count;
+    TS_ASSERT_EQUALS(ncols_expected, ncols);
+    TS_ASSERT_EQUALS(ncols_expected * nPoints, data.size());
     TS_ASSERT_DELTA(sumGuess, totalSignal, 1.e-7);
     TS_ASSERT_DELTA(errGuess, totalErrSq, 1.e-7);
 
@@ -240,18 +244,22 @@ public:
       TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
                        uint16_t(data[ncols * i + 4]));
 
-      TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 4], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 5], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(2), data[ncols * i + 6], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(3), data[ncols * i + 7], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(0),
+                      data[ncols * i + trait_count], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(1),
+                      data[ncols * i + trait_count + 1], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(2),
+                      data[ncols * i + trait_count + 2], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(3),
+                      data[ncols * i + trait_count + 3], 1.e-6);
     }
 
-    std::vector<MDEvent<3>> transfEvents3;
-    TS_ASSERT_THROWS(MDEvent<3>::dataToEvents(data, transfEvents3),
+    std::vector<MDEvent<nd-1>> transfEvents3;
+    TS_ASSERT_THROWS(MDEvent<nd-1>::dataToEvents(data, transfEvents3),
                      const std::invalid_argument &);
 
-    std::vector<MDEvent<4>> transfEvents;
-    TS_ASSERT_THROWS_NOTHING(MDEvent<4>::dataToEvents(data, transfEvents));
+    std::vector<MDEvent<nd>> transfEvents;
+    TS_ASSERT_THROWS_NOTHING(MDEvent<nd>::dataToEvents(data, transfEvents));
     for (size_t i = 0; i < nPoints; i++) {
       TS_ASSERT_DELTA(events[i].getSignal(), transfEvents[i].getSignal(),
                       1.e-6);
@@ -276,7 +284,7 @@ public:
     /// test append
     transfEvents.reserve(2 * nPoints);
     TS_ASSERT_THROWS_NOTHING(
-        MDEvent<4>::dataToEvents(data, transfEvents, false));
+        MDEvent<nd>::dataToEvents(data, transfEvents, false));
     TS_ASSERT_EQUALS(2 * nPoints, transfEvents.size());
     for (size_t i = 0; i < nPoints; i++) {
       TS_ASSERT_DELTA(transfEvents[i].getSignal(),
