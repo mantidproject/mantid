@@ -204,13 +204,13 @@ from the tool bar.
 .. image:: ../images/drill-export.png
    :align: center
 
-For each acquision mode, a list of adapated algorithms will be displayed in that
-dialog. Some of them are activated by default but the user is free to select the
-ones he wants. All checked algorithms will be applied on all output workspaces
-of all processed rows. The exported files are saved in the Mantid default save
-directory. If the algorithm is not adapted to the data, it will be skiped. For
-further information, the documentation of each algorithm can be obtained using
-the help button associated to it in the dialog.
+For each acquisition mode, a list of adapated algorithms will be displayed in
+that dialog. Some of them are activated by default but the user is free to
+select the ones he wants. All checked algorithms will be applied on all output
+workspaces of all processed rows. The exported files are saved in the Mantid
+default save directory. If the algorithm is not adapted to the data, it will be
+skipped. For further information, the documentation of each algorithm can be
+obtained using the help button associated to it in the dialog.
 
 
 Import and export as Rundex file
