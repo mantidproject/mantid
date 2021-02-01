@@ -252,6 +252,14 @@ public:
   void setDetectorId(int32_t id) { detectorId = id; }
 
   //---------------------------------------------------------------------------------------------
+  /** @return the goniometerIndex of this event. */
+  uint16_t getGoniometerIndex() const { return goniometerIndex; }
+
+  /** Sets the goniometerIndex of this event
+   * @param id :: new goniometerIndex value. */
+  void setGoniometerIndex(uint16_t id) { goniometerIndex = id; }
+
+  //---------------------------------------------------------------------------------------------
   /** @returns a string identifying the type of event this is. */
   static std::string getTypeName() { return "MDEvent"; }
 
