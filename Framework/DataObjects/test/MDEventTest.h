@@ -204,7 +204,7 @@ public:
     // number of events
     size_t nPoints = 100; // the number should not be nPoints%3=0 to hold test
                           // TS_ASSERT_THROWS below
-    size_t nd = 4; // 4-dimensional coordinates
+    size_t nd = 4;        // 4-dimensional coordinates
     // traits are: signal, errorSquared, runIndex, detectorId, goniometerIndex
     size_t trait_count = 5;
     std::vector<MDEvent<nd>> events(nPoints);
@@ -244,18 +244,18 @@ public:
       TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
                        uint16_t(data[ncols * i + 4]));
 
-      TS_ASSERT_DELTA(events[i].getCenter(0),
-                      data[ncols * i + trait_count], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(1),
-                      data[ncols * i + trait_count + 1], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(2),
-                      data[ncols * i + trait_count + 2], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(3),
-                      data[ncols * i + trait_count + 3], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + trait_count],
+                      1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + trait_count + 1],
+                      1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(2), data[ncols * i + trait_count + 2],
+                      1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(3), data[ncols * i + trait_count + 3],
+                      1.e-6);
     }
 
-    std::vector<MDEvent<nd-1>> transfEvents3;
-    TS_ASSERT_THROWS(MDEvent<nd-1>::dataToEvents(data, transfEvents3),
+    std::vector<MDEvent<nd - 1>> transfEvents3;
+    TS_ASSERT_THROWS(MDEvent<nd - 1>::dataToEvents(data, transfEvents3),
                      const std::invalid_argument &);
 
     std::vector<MDEvent<nd>> transfEvents;
