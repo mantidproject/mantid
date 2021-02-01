@@ -217,10 +217,10 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/FlatPlatePaalmanPingsCorrection.py
     algorithms/WorkflowAlgorithms/HFIRSANSReduction.py
     algorithms/WorkflowAlgorithms/ILL_utils/ILL_utilities.py
-    algorithms/WorkflowAlgorithms/ILL_utils/diff.py
-    algorithms/WorkflowAlgorithms/ILL_utils/refl.py
-    algorithms/WorkflowAlgorithms/ILL_utils/sans.py
-    algorithms/WorkflowAlgorithms/ILL_utils/spec.py
+    algorithms/WorkflowAlgorithms/ILL_utils/ILL_diff.py
+    algorithms/WorkflowAlgorithms/ILL_utils/ILL_refl.py
+    algorithms/WorkflowAlgorithms/ILL_utils/ILL_sans.py
+    algorithms/WorkflowAlgorithms/ILL_utils/ILL_spec.py
     algorithms/WorkflowAlgorithms/ISISIndirectDiffractionReduction.py
     algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransfer.py
     algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransferWrapper.py
