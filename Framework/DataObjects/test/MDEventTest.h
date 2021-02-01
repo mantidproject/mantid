@@ -204,7 +204,7 @@ public:
     // number of events
     size_t nPoints = 100; // the number should not be nPoints%3=0 to hold test
                           // TS_ASSERT_THROWS below
-    constexpr size_t nd = 4;  // 4-dimensional coordinates
+    constexpr size_t nd = 4; // 4-dimensional coordinates
     // traits are: signal, errorSquared, runIndex, detectorId, goniometerIndex
     size_t trait_count = 5;
     std::vector<MDEvent<nd>> events(nPoints);
