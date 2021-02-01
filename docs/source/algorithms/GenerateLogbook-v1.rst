@@ -25,6 +25,10 @@ The files in the directory are expected to be uniquely raw data for the chosen i
 `Facility` and `Instrument`, respectively. The range of files to be logged can be specified through `NumorRange` property,
 where both edges of the range are inclusive.
 
+Basic binary arithmetic operations: addition (the only one supported if the data in the entry is a string), subtraction,
+multiplication and division on entries data are supported. No support is offered for organizing the operations using parentheses
+or scaling by read data by constant numbers.
+
 The logbook can be stored as a CSV file and read outside of the Mantid using spreadsheet software, such as Microsoft Excel.
 
 Usage
