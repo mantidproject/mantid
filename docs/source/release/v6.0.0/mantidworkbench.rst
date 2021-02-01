@@ -45,6 +45,7 @@ Plotting
 
 
 - Wireframe plots no longer spill over the axes when their limits are reduced
+- Colorbar limits on colorfill plots allow greater precision and scientific notation
 - The zoom selection box has greater contrast with the image for SliceViewer and colorfill plots
 
 .. figure:: ../../images/step_scan_analysis.png
@@ -58,7 +59,7 @@ SliceViewer
 - Replots when the underlying workspace is modified .
 - Improved spectra selection, which should ensure that high counting spectra are shown immediately when opened.
 - Dynamic binning has been enabled for MDHistoWorkspaces with an attached original in the SliceViewer. Manual rebinning options are now also shown.
-- Opening SliceViewer for a workspace with a text axis is now handled correctly.
+
 
 Sample Logs
 -----------
@@ -87,6 +88,7 @@ Miscellaneous
 - Remove Load and Fit algorithm dialogs from autocompletion
 
 
+
 Bugfixes
 ########
 
@@ -96,6 +98,7 @@ SliceViewer
 - Displayed data updates correctly when changing axis selection
 - The axis limits for non-orthogonal data are now calculated to display all data for that zoom level
 - Now monitor spectra and spectra with nan or inf values are ignored in determining axes limits
+- Opening SliceViewer for a workspace with a text axis is now handled correctly.
 
 - Cursor data now work for Direct or Indirect data
 - It is now not possible to zoom in too far on MDE workspaces

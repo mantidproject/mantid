@@ -11,8 +11,9 @@ Powder Diffraction
 New Algorithms
 ##############
 
-- :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalman Pings terms
 - :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the d-Spacing of the Lead (111) peak and the sample temperature
+- :ref:`PEARLTransfit <algm-PEARLTransfit>` for PEARL that uses a TransVoigt function to determine the temperature of a given sample
+- :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalman Pings terms
 - :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save CORELLI geometry calibration to database
 - :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of CORELLI banks in order to optimize the comparison of observed peaks to reference data
@@ -33,16 +34,16 @@ Improvements
    :width: 500px
    :align: right
 
-- **Files from ILL's instrument D1B can now be loaded**
+- **Nexus files from ILL's instrument D1B can now be loaded (see InstrumentViewer)**
 - Powder diffraction support (instruments D2B and D20) has been added to DrILL interface. See :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 - **The height of the** :ref:`func-BackToBackExponential` **peak is now preserved when changing the FWHM sliders during fitting**
 - :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` can now use tabulated density values, and allows for overridden X Sections
 
-- Add ability to store multiple alternative attenuation file paths in the Pearl YAML configuration file
+- Add ability to store multiple alternative attenuation file paths in the PEARL YAML configuration file
 - Add ``sample_empty`` and ``sample_empty_scale`` into PEARL powder diffraction scripts
 - Modify filenames of XYE outputs from running a focus in the PEARL powder diffraction scripts
-- Remove ``_noatten`` workspace that was produced by the Pearl powder diffraction scripts when run with ``perform_attenuation=True``
+- Remove ``_noatten`` workspace that was produced by the PEARL powder diffraction scripts when run with ``perform_attenuation=True``
 - Speed up focus action in ISIS powder diffraction scripts by saving pre-summed empty instrument workspace during calibration step
 
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now includes several different absorption correction methods
@@ -73,10 +74,9 @@ New features
 ############
 
 - Added refined :ref:`func-BackToBackExponential` coefficients (from standard Ceria run) to ENGIN-X Parameters.xml so A, B and S are guessed automatically.
-
 - The plot pane in the Engineering Diffraction GUI can now be undocked from the main window, making this more clear, especially with the fit browser open.
 - The fitting tab now creates a WorkspaceGroup that stores the model string, the fit value and error on each parameter for each loaded workspace.
-- Sequential fitting now provided in fitting tab by average value of a log set in settings.
+- Sequential fitting now provided in fitting tab by average value of a log set in settings
 
 
 Improvements
@@ -96,8 +96,10 @@ Improvements
 - The generic Sequential Fit button removed from fit menu (users should use sequential fit button below the table in the fitting tab).
 
 Bugfixes
-############
+########
+
 - GUI Settings are now saved only when the ``Apply`` or ``OK`` button are clicked (i.e. clicking ``Cancel`` will not update the settings).
+- For focussed data in the fitting tab, each sample log will only be averaged if the log exists
 
 
 Single Crystal Diffraction

@@ -27,11 +27,14 @@ Algorithms
 ----------
 
 - :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>` allow setting the packing fraction and effective number density
-- The calculation of a distance is now correct for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affects algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`.
+- The calculation of distance is now correct for tracks passing through objects have multiple intercepting surfaces, e.g. hollow cylinder. This affects algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`.
 - :ref:`AlignComponents <algm-AlignComponents>` now minimizes a set of peak-center deviations in d-spacing, instead of the geometrical DIFC parameters.
 - :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` now produces a ragged workspace and can now be used on large data sets.
 - :ref:`CreateGroupingWorkspace <algm-CreateGroupingWorkspace>` now has the ability to specify a ``CustomGroupingString``.
 - :ref:`LoadLamp <algm-LoadLamp>` is corrected to load sample logs with python3.
+- :ref:`CalculateEfficiency <algm-CalculateEfficiency>` has a new property ``MergeGroups`` that merges and averages the input group 
+  Masked spectra will be filled with data (if available) from other entries of the input group instead of processing them 
+  entry-by-entry. The algorithm now also overwrites the ``processGroups`` method. These features aide the calculation of sensitivity maps.
 
 Fitting
 -------
