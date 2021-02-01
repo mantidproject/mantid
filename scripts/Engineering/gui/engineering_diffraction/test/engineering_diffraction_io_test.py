@@ -50,8 +50,8 @@ SETTINGS_DICT = {
 }
 
 ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces':
-                [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff': True,
-                'settings_dict': SETTINGS_DICT}
+                [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff': 'True',
+                'settings_dict': SETTINGS_DICT, 'background_params': {}}
 
 
 def _create_fit_workspace():
@@ -117,22 +117,21 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def test_loaded_workspaces_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
-        self.fitprop_browser.get_fitprop.return_value = None
+        self.fitprop_browser.read_current_fitprop.return_value = None
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
                          [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'settings_dict':
-                         SETTINGS_DICT}, test_dic)
+                         SETTINGS_DICT, 'background_params': {}}, test_dic)
 
     def test_fits_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
-        self.fitprop_browser.get_fitprop.return_value = FIT_DICT
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
         self.fitprop_browser.plotDiff.return_value = True
         self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
                           [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
-                          'True', 'settings_dict': SETTINGS_DICT}, test_dic)
+                          'True', 'settings_dict': SETTINGS_DICT, 'background_params': {}}, test_dic)
 
 
 @start_qapplication
