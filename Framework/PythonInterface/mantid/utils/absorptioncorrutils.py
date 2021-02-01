@@ -384,7 +384,11 @@ def create_absorption_input(
     absName = metaws
     if metaws is None:
         absName = '__{}_abs'.format(_getBasename(filename))
-        Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
+        allowed_log = " ".join([
+            'SampleFormula', 'SampleDensity', "BL11A:CS:ITEMS:HeightInContainerUnits",
+            "SampleContainer"
+        ])
+        Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True, AllowList=allowed_log)
 
     # first attempt to get the wavelength range from the properties file
     wl_min, wl_max = props['wavelength_min'].value, props['wavelength_max'].value
