@@ -8,7 +8,7 @@ import unittest
 from mantid.api import mtd, ITableWorkspace
 from mantid.simpleapi import config, GenerateLogbook
 import os
-
+from tempfile import gettempdir
 
 class GenerateLogbookTest(unittest.TestCase):
 
@@ -28,8 +28,8 @@ class GenerateLogbookTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         mtd.clear()
-        if os.path.exists("/tmp/logbook.csv"):
-            os.remove("/tmp/logbook.csv")
+        if os.path.exists(os.path.join(gettempdir(), 'logbook.csv')):
+            os.remove(os.path.join(gettempdir(), 'logbook.csv'))
 
     def test_instrument_facility_mismatch(self):
         self.assertTrue(os.path.exists(self._data_directory))
@@ -69,7 +69,7 @@ class GenerateLogbookTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self._data_directory))
         GenerateLogbook(Directory=self._data_directory,
                         OutputWorkspace='__unused', Facility='ILL', Instrument='D7',
-                        NumorRange=[396990,396994], OutputFile='/tmp/logbook.csv')
+                        NumorRange=[396990,396994], OutputFile=os.path.join(gettempdir(), 'logbook.csv'))
         self.assertTrue(os.path.exists('/tmp/logbook.csv'))
 
     def _check_output(self, ws, numberEntries, numberColumns):
