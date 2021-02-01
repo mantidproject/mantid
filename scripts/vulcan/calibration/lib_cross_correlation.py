@@ -16,17 +16,19 @@ import h5py
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
-
+# TODO NOW FIXME - need to make it work with mask workspace
 def verify_vulcan_difc(ws_name: str,
                        cal_table_name: str,
                        mask_ws_name: str,
-                       correct: bool):
+                       correct: bool,
+                       discard_bad: bool):
     """Verify and possibly correct DIFCs if necessary
 
     Renamed from check_correct_difcs_3banks
 
     :param ws_name:
     :param cal_table_name: name of Calibration workspace (a TableWorkspace)
+    :param discard_bad: if correct==False, choice to discard (aka mask) bad pixels
     :return:
     """
     # Define const parameterr
@@ -66,6 +68,8 @@ def verify_vulcan_difc(ws_name: str,
         # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
         if correct:
             correct_difc_to_default(bank_idf_vec, bank_cal_vec, cal_table_ws, pid_0, 20, 1, mask_ws)
+        elif discard_bad:
+            mask_bad_difc()
 
     # Close file
     difc_h5.close()

@@ -1,6 +1,7 @@
-from mantid.simpleapi import (LoadEventAndCompress, LoadEventNeXus, CropWorkspace,
+from mantid.simpleapi import (LoadEventAndCompress, LoadEventNexus, CropWorkspace,
                               PDCalibration, SaveDiffCal, mtd,
-                              AlignDetectors, Rebin, SaveNexusProcessed)
+                              AlignDetectors, Rebin, SaveNexusProcessed, CreateGroupingWorkspace)
+
 instrument = "VULCAN"
 
 
@@ -44,9 +45,18 @@ def main_calibration(load_full=False, bin_step=-.001):
 
     # Save
     mask_ws_name = f'{instrument}_mask'
-    assert mtd.doesExists(mask_ws_name)
+    assert mtd.doesExist(mask_ws_name)
+
+    # 3 group mode
+    group_ws_name = 'VULCAN_3Banks_Group'
+    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan', 
+                                       GroupDetectorsBy='Group', 
+                                       OutputWorkspace=group_ws_name) 
+    assert group_ws
+
     SaveDiffCal(CalibrationWorkspace=instrument,
                 MaskWorkspace=mask_ws_name,
+                GroupingWorkspace=group_ws_name,
                 Filename="%s_pdcalibration.h5" % instrument)
 
     SaveNexusProcessed(InputWorkspace='%s_diag' % dia_wksp, Filename=f'{instrument}_pdcalib_diag.nxs')

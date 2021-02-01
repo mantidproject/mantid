@@ -132,7 +132,9 @@ def calibrate_vulcan(diamond_nexus: str,
         # check the difference between DIFCs
         verify_vulcan_difc(ws_name=diamond_ws_name,
                            cal_table_name=calib_ws_name,
-                           mask_ws_name=str(mask_ws), correct=False)
+                           mask_ws_name=str(mask_ws),
+                           correct=False,
+                           discard_bad=True)
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
@@ -155,7 +157,8 @@ def test_main_report_calibration():
     """(Testing) main to import a calibration file and make reports
     """
     # Set up
-    calib_file = 'pdcalibration/VULCAN_pdcalibration.h5'
+    # calib_file = 'pdcalibration/VULCAN_pdcalibration.h5'
+    calib_file = 'vulcan_cc_1fit.h5'
     counts_file = 'VULCAN_164960_matrix.nxs'
 
     # Load counts for each pixel
@@ -195,6 +198,7 @@ def test_main_apply_calibration():
     diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time, unit_dspace=False)
 
     calib_file_name = 'vulcan_cc_1fit.h5'
+    # calib_file_name = 'VULCAN_pdcalibration.h5'
 
     calib_tuple = load_calibration_file(calib_file_name, 'Vulcan_Testing_Calib', diamond_ws_name)
     calib_cal_ws = calib_tuple.OutputCalWorkspace
@@ -215,7 +219,7 @@ def test_main_apply_calibration():
 
 
 if __name__ == '__main__':
-    choice = '2'
+    choice = '1'
     if choice == '1':
         test_main_calibrate()
     elif choice == '2':
