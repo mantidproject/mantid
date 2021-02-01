@@ -343,8 +343,6 @@ dimension are required and are detailed below.
 Preset
 ######
 
-.. interface:: Corrections
-
 This option will use the Sample and Container geometries as defined in the input workspace. No further geometry inputs will be taken, though the Sample material can still be overridden.
 
 Flat Plate
