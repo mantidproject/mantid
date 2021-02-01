@@ -224,7 +224,8 @@ class GenerateLogbook(PythonAlgorithm):
                 if values[ind2] == 0:
                     self.log().warning("Divisor is equal to 0.")
                     new_val = 'N/A'
-                new_val = values[ind1] / values[ind2]
+                else:
+                    new_val = values[ind1] / values[ind2]
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
             values[ind1] = new_val
@@ -279,13 +280,16 @@ class GenerateLogbook(PythonAlgorithm):
                                 index = self._get_index(split_entry)
                                 data = f.get(split_entry)[index]
                             except TypeError:
-                                rowData[entry_no] = "Not found"
+                                values[0] = "Not found"
+                                binary_operations = []
                                 self.log().warning(entry_not_found_msg.format(entry))
+                                break
                             else:
                                 if isinstance(data, numpy.bytes_):
                                     if any(op in operators[1:] for op in binary_operations):
                                         self.log().warning("Only 'sum' operation is supported for string entries")
-                                        data = "N/A"
+                                        values[0] = "N/A"
+                                        binary_operations = []
                                         break
                                     else:
                                         data = data.decode('utf-8')
