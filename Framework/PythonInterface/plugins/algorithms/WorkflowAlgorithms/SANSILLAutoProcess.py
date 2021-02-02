@@ -701,12 +701,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         # create the sample suffix
         logs = mtd[sample_name].run().getProperties()
         logs = {log.name:log.value for log in logs}
-        distance = logs["L2"]
-        collimation = logs["collimation.actual_position"]
-        wavelength = logs["selector.wavelength"]
-        suffix = "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(float(distance),
-                                                     float(collimation),
-                                                     float(wavelength))
+        suffix = ""
+        if "L2" in logs:
+            distance = float(logs["L2"])
+            suffix += "_d{:.1f}m".format(distance)
+        if "collimation.actual_position" in logs:
+            collimation = float(logs["collimation.actual_position"])
+            suffix += "_c{:.1f}m".format(collimation)
+        if "selector.wavelength" in logs:
+            wavelength = float(logs["selector.wavelength"])
+            suffix += "_w{:.1f}A".format(wavelength)
+        if not suffix:
+            suffix = "_{}".format(i + 1)
 
         if self.getProperty('OutputPanels').value:
             panel_ws_group = self.output_panels + '_' + str(i + 1)
@@ -748,7 +754,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 )
 
         # rename samples to add the suffix
-        sampleSuffix = output[0:-len(str(i))] + suffix
+        sampleSuffix = output[0:-len('_' + str(i))] + suffix
         RenameWorkspace(InputWorkspace=output,
                         OutputWorkspace=sampleSuffix)
         output = sampleSuffix
@@ -757,8 +763,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if self.n_wedges and self.output_type == "I(Q)":
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
-            wedges_new_names = [self.output + "_wedge_" + str(w + 1)
-                                + "_" + suffix
+            wedges_new_names = [self.output + "_wedge_" + str(w + 1) + suffix
                                 for w in range(self.n_wedges)]
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
