@@ -710,8 +710,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             collimation = float(logs["collimation.actual_position"])
             if collimation > 0.0:
                 suffix += "_c{:.1f}m".format(collimation)
-        if "selector.wavelength" in logs:
-            wavelength = float(logs["selector.wavelength"])
+        if "wavelength" in logs:
+            wavelength = float(logs["wavelength"])
+            if wavelength <= 0.0 and "selector.wavelength" in logs:
+                wavelength = float(logs["selector.wavelength"])
             if wavelength > 0.0:
                 suffix += "_w{:.1f}A".format(wavelength)
         if not suffix:
