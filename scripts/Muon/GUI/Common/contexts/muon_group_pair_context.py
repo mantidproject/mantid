@@ -167,7 +167,6 @@ class MuonGroupPairContext(object):
 
     @property
     def selected_groups_and_pairs(self):
-        print("moo", self._selected_diffs)
         return self.selected_groups+self.selected_pairs+self.selected_diffs
 
     def clear(self):
