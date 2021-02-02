@@ -31,7 +31,7 @@ class RunTest(unittest.TestCase):
         gm = run.getGoniometer()
         self.assertTrue(isinstance(gm, Goniometer))
         self.assertEqual(run.getNumGoniometers(), 1)
-        gm = run.getGoniometerByIndex(0)
+        gm = run.getGoniometer(0)
         self.assertTrue(isinstance(gm, Goniometer))
 
     def test_proton_charge_returns_a_double(self):
