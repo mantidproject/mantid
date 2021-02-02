@@ -94,6 +94,14 @@ class DrillRundexIO:
                            "Default settings will be used."
                            .format(self._filename))
 
+        # export settings
+        if (RundexSettings.EXPORT_JSON_KEY in json_data):
+            algos = json_data[RundexSettings.EXPORT_JSON_KEY]
+            exportModel = drill.getExportModel()
+            if exportModel:
+                for algo in algos:
+                    exportModel.activateAlgorithm(algo)
+
         # samples
         if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
                 and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
@@ -140,6 +148,13 @@ class DrillRundexIO:
         settings = drill.getSettings()
         if settings:
             json_data[RundexSettings.SETTINGS_JSON_KEY] = settings
+
+        # export settings
+        exportModel = drill.getExportModel()
+        if exportModel:
+            algos = [algo for algo in exportModel.getAlgorithms()
+                     if exportModel.isAlgorithmActivated(algo)]
+            json_data[RundexSettings.EXPORT_JSON_KEY] = algos
 
         # samples
         samples = drill.getSamples()

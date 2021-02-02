@@ -55,6 +55,7 @@ New Features
 Improvements
 ############
 - An x label has been added to the plot in data loading.
+- Imported data will now be loaded into all three pages on the ALC interface.
 
 Bug fixes
 ##########

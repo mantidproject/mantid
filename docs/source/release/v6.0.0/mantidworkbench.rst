@@ -78,6 +78,7 @@ Interfaces
 - Add a Python function to replace the workspace being shown by InstrumentViewer
 
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
+- Automatic data export in DrILL. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 Miscellaneous
 -------------
