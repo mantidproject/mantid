@@ -380,19 +380,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 sample, panels, sensitivity = self.processSample(d, flux,
                                                                  sample_transmission, beam,
                                                                  absorber, container)
-                # set the sample suffix
-                logs = mtd[sample].run().getProperties()
-                logs = {log.name:log.value for log in logs}
-                distance = logs["L2"]
-                collimation = logs["collimation.actual_position"]
-                wavelength = logs["wavelength"]
-                suffix = "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(float(distance),
-                                                             float(collimation),
-                                                             float(wavelength))
-                sampleSuffix = sample[0:-len(str(d))] + suffix
-                RenameWorkspace(InputWorkspace=sample,
-                                OutputWorkspace=sampleSuffix)
-                outputs.append(sampleSuffix)
+                outputs.append(sample)
 
                 if sensitivity:
                     sensitivity_outputs.append(sensitivity)
@@ -715,6 +703,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
+        # create the sample suffix
+        logs = mtd[sample_name].run().getProperties()
+        logs = {log.name:log.value for log in logs}
+        distance = logs["L2"]
+        collimation = logs["collimation.actual_position"]
+        wavelength = logs["wavelength"]
+        suffix = "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(float(distance),
+                                                     float(collimation),
+                                                     float(wavelength))
+
         if self.getProperty('OutputPanels').value:
             panel_ws_group = self.output_panels + '_' + str(i + 1)
         else:
@@ -753,6 +751,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value,
                 WavelengthRange=self.getProperty('WavelengthRange').value
                 )
+
+        # rename samples to add the suffix
+        sampleSuffix = output[0:-len(str(i))] + suffix
+        RenameWorkspace(InputWorkspace=output,
+                        OutputWorkspace=sampleSuffix)
+        output = sampleSuffix
 
         # wedges ungrouping and renaming
         if self.n_wedges and self.output_type == "I(Q)":
