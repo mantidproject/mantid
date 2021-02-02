@@ -410,7 +410,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # convert to point data and remove nan and 0 from wedges
         for i in range(self.dimensionality):
-            for j in range(self.n_wedges):
+            for j in range(len(outputWedges[i])):
                 ws = outputWedges[i][j]
                 ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                 ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
@@ -423,7 +423,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                               XMax=x[nonzero][-1], OutputWorkspace=ws)
 
         # stitch if possible and group
-        for i in range(self.n_wedges):
+        for i in range(len(outputWedges[0])):
             inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
             try:
                 stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
