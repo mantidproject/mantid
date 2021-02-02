@@ -302,7 +302,7 @@ class GenerateLogbook(PythonAlgorithm):
                                                                                     operations=['*', '//'])
                         values, _ = self._perform_binary_operations(values, binary_operations,
                                                                     operations=['+', '-'])
-                        rowData[entry_no] = str(values[0])
+                        rowData[entry_no] = str(values[0]).strip()
                     else:
                         try:
                             entry, index = self._get_index(entry)
@@ -312,11 +312,14 @@ class GenerateLogbook(PythonAlgorithm):
                             self.log().warning(entry_not_found_msg.format(entry))
                         else:
                             if isinstance(data, numpy.ndarray):
-                                data = ''.join([repr(num) for num in data])
+                                tmp_data = ""
+                                for array in data:
+                                    tmp_data += ",".join(array)
+                                data = tmp_data
                             elif isinstance(data, numpy.bytes_):
                                 data = data.decode('utf-8')
                                 data = data.replace(',', ';') # needed for CSV output
-                            rowData[entry_no] = str(data)
+                            rowData[entry_no] = str(data).strip()
                 mtd[logbook_ws].addRow(rowData)
 
     def _store_logbook_as_csv(self, logbook_ws):
