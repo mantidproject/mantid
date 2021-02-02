@@ -360,7 +360,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     def PyExec(self):
 
         self.setUp()
-        outputs = []
+        outputSamples = []
+        outputWedges = []
         panel_output_groups = []
         sensitivity_outputs = []
 
@@ -377,10 +378,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     beam, flux = self.processBeam(d, absorber)
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
-                sample, panels, sensitivity = self.processSample(d, flux,
-                                                                 sample_transmission, beam,
-                                                                 absorber, container)
-                outputs.append(sample)
+                sample, wedges, panels, sensitivity = \
+                        self.processSample(d, flux, sample_transmission, beam,
+                                           absorber, container)
+                outputSamples.append(sample)
+                outputWedges.append(wedges)
 
                 if sensitivity:
                     sensitivity_outputs.append(sensitivity)
@@ -389,56 +391,49 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
-        for output in outputs:
+        for output in outputSamples:
             ConvertToPointData(InputWorkspace=output,
                                OutputWorkspace=output)
-        if len(outputs) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
+        if (len(outputSamples) > 1
+            and self.getPropertyValue('OutputType') == 'I(Q)'):
             try:
                 stitched = self.output + "_stitched"
-                Stitch1DMany(InputWorkspaces=outputs,
+                Stitch1DMany(InputWorkspaces=outputSamples,
                              OutputWorkspace=stitched)
-                outputs.append(stitched)
+                outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
                                    "stitching manually: " + str(re))
 
-        GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
+        GroupWorkspaces(InputWorkspaces=outputSamples,
+                        OutputWorkspace=self.output)
 
-        # group wedge workspaces
-        if self.output_type == "I(Q)":
-            for w in range(self.n_wedges):
-                wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
-                            for d in range(self.dimensionality)]
-                # convert to point data and remove nan and 0 from edges
-                for ws in wedge_ws:
-                    ConvertToPointData(InputWorkspace=ws,
-                                       OutputWorkspace=ws)
-                    ReplaceSpecialValues(InputWorkspace=ws,
-                                         OutputWorkspace=ws,
-                                         NaNValue=0)
-                    y = mtd[ws].readY(0)
-                    x = mtd[ws].readX(0)
-                    nonzero = np.nonzero(y)
+        # convert to point data and remove nan and 0 from wedges
+        for i in range(self.dimensionality):
+            for j in range(self.n_wedges):
+                ws = outputWedges[i][j]
+                ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+                ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                                     NaNValue=0)
+                y = mtd[ws].readY(0)
+                x = mtd[ws].readX(0)
+                nonzero = np.nonzero(y)
 
-                    CropWorkspace(InputWorkspace=ws,
-                                  XMin=x[nonzero][0] - 1,
-                                  XMax=x[nonzero][-1],
-                                  OutputWorkspace=ws)
+                CropWorkspace(InputWorkspace=ws, XMin=x[nonzero][0] - 1,
+                              XMax=x[nonzero][-1], OutputWorkspace=ws)
 
-                # and stitch if possible
-                if len(wedge_ws) > 1:
-                    try:
-                        stitched = self.output + "_wedge_" + str(w + 1) \
-                                   + "_stitched"
-                        Stitch1DMany(InputWorkspaces=wedge_ws,
-                                     OutputWorkspace=stitched)
-                        wedge_ws.append(stitched)
-                    except RuntimeError as re:
-                        self.log().warning("Unable to stitch automatically, "
-                                           "consider stitching manually: "
-                                           + str(re))
-                GroupWorkspaces(InputWorkspaces=wedge_ws,
-                                OutputWorkspace=self.output + "_wedge_" + str(w + 1))
+        # stitch if possible and group
+        for i in range(self.n_wedges):
+            inWs = [outputWedges[d][i] for d in range(self.dimensionality)]
+            try:
+                stitched = self.output + "_wedge_" + str(i + 1) + "_stitched"
+                Stitch1DMany(InputWorkspaces=inWs, OutputWorkspace=stitched)
+                inWs.append(stitched)
+            except RuntimeError as re:
+                self.log().warning("Unable to stitch automatically, consider "
+                                   "stitching manually: "+ str(re))
+            GroupWorkspaces(InputWorkspaces=inWs, OutputWorkspace=self.output
+                            + "_wedge_" + str(i + 1))
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
@@ -768,6 +763,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
                              WorkspaceNames=wedges_new_names)
+        else:
+            wedges_new_names = []
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
@@ -775,7 +772,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if not mtd.doesExist(panel_ws_group):
             panel_ws_group = ""
 
-        return output, panel_ws_group, output_sens
+        return output, wedges_new_names, panel_ws_group, output_sens
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
