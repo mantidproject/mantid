@@ -69,7 +69,6 @@ public:
   void setAvailableInfoToEmpty() override;
   void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
-  void enablePlotByLogGroup(bool enable) override;
   void setPath(const std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
   void setInstrument(const std::string &instrument) override;
