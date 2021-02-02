@@ -465,9 +465,8 @@ public:
     runInfo.clearGoniometers();
     TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
 
-    TS_ASSERT_THROWS(runInfo.getGoniometer(0), const std::invalid_argument &);
-    TS_ASSERT_THROWS(runInfo.getGoniometerMatrix(0),
-                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(runInfo.getGoniometer(0), const std::out_of_range &);
+    TS_ASSERT_THROWS(runInfo.getGoniometerMatrix(0), const std::out_of_range &);
   }
 
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
