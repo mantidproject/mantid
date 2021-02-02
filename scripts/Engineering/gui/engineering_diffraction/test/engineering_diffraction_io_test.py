@@ -107,7 +107,8 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         settings_view = mock.create_autospec(SettingsView)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
-        settings_model.set_settings_dict(SETTINGS_DICT)
+        settings_presenter.settings = SETTINGS_DICT
+        settings_presenter._save_settings_to_file()
 
     def test_blank_gui_encodes(self):
         self.mock_tabs.currentIndex.return_value = 0
