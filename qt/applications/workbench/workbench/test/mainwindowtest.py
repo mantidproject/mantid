@@ -102,23 +102,37 @@ class MainWindowTest(unittest.TestCase):
 
     @patch('workbench.app.mainwindow.add_actions')
     def test_file_view_and_help_menus_are_correct(self, mock_add_actions):
+        def convert_action_to_text(menu_item):
+            """Takes an item on a mainwindow menu, and returns a representation of the item
+            so we can assert whether menus look right to the user. """
+            if isinstance(menu_item, QAction):
+                return menu_item.text()
+            if not menu_item:
+                return None
+            return type(menu_item)
+
         self.main_window.editor = Mock()
         self.main_window.populate_interfaces_menu = Mock()
-        expected_file_menu_items = ['Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu, 'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None, 'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit']
-        expected_view_menu_items = ['Restore Default Layout', None]  # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
-        expected_help_menu_items = ['Mantid Help', 'Mantid Concepts', 'Algorithm Descriptions', None, 'Mantid Homepage', 'Mantid Forum', None, 'About Mantid Workbench']
-
-        convert_actions_to_texts = lambda menu_actions: \
-            [a.text() if isinstance(a, QAction) else a if not a else type(a) for a in menu_actions]
+        expected_file_menu_items = [
+            'Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu,
+            'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None,
+            'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit'
+        ]
+        # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
+        expected_view_menu_items = ['Restore Default Layout', None]
+        expected_help_menu_items = [
+            'Mantid Help', 'Mantid Concepts', 'Algorithm Descriptions', None, 'Mantid Homepage', 'Mantid Forum', None,
+            'About Mantid Workbench'
+        ]
 
         self.main_window.create_menus()
         self.main_window.create_actions()
         self.main_window.populate_menus()
 
         self.main_window.populate_interfaces_menu.assert_called()
-        actual_file_menu_items = convert_actions_to_texts(self.main_window.file_menu_actions)
-        actual_view_menu_items = convert_actions_to_texts(self.main_window.view_menu_actions)
-        actual_help_menu_items = convert_actions_to_texts(self.main_window.help_menu_actions)
+        actual_file_menu_items = list(map(convert_action_to_text, self.main_window.file_menu_actions))
+        actual_view_menu_items = list(map(convert_action_to_text, self.main_window.view_menu_actions))
+        actual_help_menu_items = list(map(convert_action_to_text, self.main_window.help_menu_actions))
         self.assertEqual(expected_file_menu_items, actual_file_menu_items)
         self.assertEqual(expected_view_menu_items, actual_view_menu_items)
         self.assertEqual(expected_help_menu_items, actual_help_menu_items)
