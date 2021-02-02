@@ -273,3 +273,79 @@ class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         GenerateLogbook(Directory=self._data_directory, OutputWorkspace='in6_logbook',
                         Facility='ILL', Instrument='IN6', NumorRange='224436,224437',
                         OptionalHeaders='all')
+
+
+class D33_GenerateLogbook_Test(systemtesting.MantidSystemTest):
+    """
+    Tests generating logbook for D33 data.
+    """
+
+    _data_directory = None
+
+    def __init__(self):
+        super(D33_GenerateLogbook_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config['logging.loggers.root.level'] = 'Warning'
+
+        data_dirs = config['datasearch.directories'].split(';')
+        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
+        d33_dir = 'ILL/D33'
+        if 'ILL' in test_data_dir:
+            d33_dir = 'D33'
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d33_dir))
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['d33_logbook', 'D33_Logbook_Reference.nxs']
+
+    def runTest(self):
+        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d33_logbook',
+                        Facility='ILL', Instrument='D33', NumorRange='162689,162690',
+                        OptionalHeaders='all')
+
+
+class D16_GenerateLogbook_Test(systemtesting.MantidSystemTest):
+    """
+    Tests generating logbook for D16 data.
+    """
+
+    _data_directory = None
+
+    def __init__(self):
+        super(D16_GenerateLogbook_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D16'
+        config['logging.loggers.root.level'] = 'Warning'
+
+        data_dirs = config['datasearch.directories'].split(';')
+        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
+        d33_dir = 'ILL/D16'
+        if 'ILL' in test_data_dir:
+            d33_dir = 'D16'
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d33_dir))
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['d16_logbook', 'D16_Logbook_Reference.nxs']
+
+    def runTest(self):
+        GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d16_logbook',
+                        Facility='ILL', Instrument='D16', NumorRange='000245,000246',
+                        OptionalHeaders='all')
