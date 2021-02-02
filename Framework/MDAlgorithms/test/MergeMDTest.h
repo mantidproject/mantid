@@ -150,6 +150,7 @@ public:
   void test_runIndex() {
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
+    const size_t traits_count = 8;  // number of items per event
 
     MergeMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -176,17 +177,20 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 7 columns: I, err^2, run_num, det_id, x, y, z
-    TS_ASSERT_EQUALS(ncols, 7);
-    // 7*3 = 21
-    TS_ASSERT_EQUALS(events.size(), 21);
+    // 8 columns: I, err^2, run_num, det_id, goniometerIndex, x, y, z
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    // traits_count * 3 events = 24 items
+    TS_ASSERT_EQUALS(events.size(), 24);
 
-    // reference vector, 3 identical events except for incremented run numbers
-    const std::vector<coord_t> ref = {1, 1, 0, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 1, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 2, 0, 6.25, 6.25, 6.25};
+    /** reference vector, 3 identical events except for incremented run numbers
+     * vector traits are, in this order: 0 signal, 1 errorSquared, 2 runIndex,
+     * 3 detectorId, 4 goniometerIndex, 5 to 7 three-Dimensional coordinates
+    */
+    const std::vector<coord_t> ref = {1, 1, 0, 0, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 2, 0, 0, 6.25, 6.25, 6.25};
 
-    for (auto i = 0; i < 21; i++) {
+    for (size_t i = 0; i < ref.size(); i++) {
       TS_ASSERT_EQUALS(events[i], ref[i]);
     }
 
@@ -213,18 +217,18 @@ public:
     API::IMDNode *box2 = boxes2[0];
     TS_ASSERT_EQUALS(box2->getNPoints(), 6);
     box2->getEventsData(events, ncols);
-    // 7 columns: I, err^2, run_num, det_id, x, y, z
-    TS_ASSERT_EQUALS(ncols, 7);
-    // 7*6 = 42
-    TS_ASSERT_EQUALS(events.size(), 42);
+    // 8 columns: I, err^2, run_num, det_id, goinometerIndex, x, y, z
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    // traits_count * 6 events = 48 items
+    TS_ASSERT_EQUALS(events.size(), 48);
 
     // reference vector, 6 identical events except for incremented run numbers
     const std::vector<coord_t> ref2 = {
-        1, 1, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 6.25, 6.25, 6.25,
-        1, 1, 2, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 6.25, 6.25, 6.25,
-        1, 1, 4, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 6.25, 6.25, 6.25};
+        1, 1, 0, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
+        1, 1, 2, 0, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 0, 6.25, 6.25, 6.25,
+        1, 1, 4, 0, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 0, 6.25, 6.25, 6.25};
 
-    for (auto i = 0; i < 42; i++) {
+    for (size_t i = 0; i < ref2.size(); i++) {
       TS_ASSERT_EQUALS(events[i], ref2[i]);
     }
 
