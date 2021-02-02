@@ -28,11 +28,11 @@ using Mantid::Kernel::V3D;
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
-  const std::string m_d17File{"ILL/D17/317370.nxs"};
-  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
-  const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
+  const std::string m_d17File{"ILL/D17/317370.nxs"};  
   const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
-  const std::string m_figaroFile_2018{"ILL/Figaro/000002.nxs"};
+  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
+  const std::string m_figaroDirectBeamFile{"ILL/Figaro/709922.nxs"};
+  const std::string m_figaroReflectedBeamFile{"ILL/Figaro/709886.nxs"};
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 

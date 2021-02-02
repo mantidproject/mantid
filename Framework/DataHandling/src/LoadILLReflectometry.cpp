@@ -311,10 +311,11 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
 }
 
-/// Call child algorithm ConvertUnits for conversion from TOF to wavelength
-/// Note that DAN calibration is done in preprocess, since it needs information
-/// also from the direct beam so converting to wavelength in the loader will not
-/// be accurate
+/** Call child algorithm ConvertUnits for conversion from TOF to wavelength
+* Note that DAN calibration is done in preprocess, since it needs information
+* also from the direct beam so converting to wavelength in the loader will not
+* be accurate
+*/
 void LoadILLReflectometry::convertTofToWavelength() {
   if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
     auto convertToWavelength =
@@ -345,17 +346,10 @@ void LoadILLReflectometry::initWorkspace(
                     << monitorsData[i].size() << '\n';
   }
   // create the workspace
-  try {
-    m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
-        m_numberOfHistograms + monitorsData.size(),
-        HistogramData::BinEdges(m_numberOfChannels + 1));
-  } catch (std::out_of_range &) {
-    throw std::runtime_error(
-        "Workspace2D cannot be created, check number of histograms (" +
-        std::to_string(m_numberOfHistograms) + "), monitors (" +
-        std::to_string(monitorsData.size()) + "), and channels (" +
-        std::to_string(m_numberOfChannels) + '\n');
-  }
+  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+      m_numberOfHistograms + monitorsData.size(),
+      HistogramData::BinEdges(m_numberOfChannels + 1));
+
   if (m_acqMode)
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
@@ -729,13 +723,13 @@ double LoadILLReflectometry::detectorRotation() {
   return two_theta;
 }
 
-/** Returns the sample angle (i.e. bragg angle) [degrees]
- * Used when measurement type is reflecteed beam (otherwise must be zero)
+/** Sets the sample angle (i.e. bragg angle) [degrees]
+ * Used when measurement type is reflected beam (otherwise must be zero)
  * Note that DAN calibration needs information also from the corresponding
- * direct beam, hence it cannot be done in the loader, but is done in
- * preprocessing algorithm. However loader should still support loading reflected
- * beams standalone, hence sample angle is taken if BraggAngle is not manually
- * specified.
+ * direct beam, hence it cannot be done in the loader, but it is done in
+ * preprocessing algorithm. However loader should still support loading
+ * reflected beams standalone, hence sample angle is the only option if
+ * BraggAngle is not manually specified.
  */
 void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
   if (m_instrument == Supported::D17) {
@@ -751,35 +745,20 @@ void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
   }
 }
 
-/// Initialize m_pixelWidth from the IDF and check for NeXus consistency.
+/// Initialize m_pixelWidth from the IDF as the step of rectangular detector
 void LoadILLReflectometry::initPixelWidth() {
-  auto instrument = m_localWorkspace->getInstrument();
-  auto detectorPanels = instrument->getAllComponentsWithName("detector");
+  const auto &instrument = m_localWorkspace->getInstrument();
+  const auto &detectorPanels = instrument->getAllComponentsWithName("detector");
   if (detectorPanels.size() != 1) {
     throw std::runtime_error("IDF should have a single 'detector' component.");
   }
-  auto detector =
+  const auto &detector =
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(
           detectorPanels.front());
-  double widthInLogs;
-  if (m_instrument != Supported::FIGARO) {
+  if (m_instrument == Supported::D17) {
     m_pixelWidth = std::abs(detector->xstep());
-    widthInLogs = mmToMeter(
-        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppx"));
-    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.information() << "NeXus pixel width (mppx) " << widthInLogs
-                          << " differs from the IDF. Using the IDF value "
-                          << m_pixelWidth << '\n';
-    }
   } else {
     m_pixelWidth = std::abs(detector->ystep());
-    widthInLogs = mmToMeter(
-        m_localWorkspace->run().getPropertyValueAsType<double>("PSD.mppy"));
-    if (std::abs(widthInLogs - m_pixelWidth) > 1e-10) {
-      m_log.information() << "NeXus pixel width (mppy) " << widthInLogs
-                          << " differs from the IDF. Using the IDF value "
-                          << m_pixelWidth << '\n';
-    }
   }
 }
 
@@ -806,38 +785,36 @@ void LoadILLReflectometry::placeDetector() {
 void LoadILLReflectometry::placeSlits() {
   double slit1ToSample{0.0};
   double slit2ToSample{0.0};
+  const auto &run = m_localWorkspace->run();
   if (m_instrument == Supported::FIGARO) {
     const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     const double offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
-    // For the moment, the position information for S3 is missing in the
-    // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
-    // when the NeXus files are
-    double slitSeparation;
-    if (m_localWorkspace->run().hasProperty(
-            "Distance.inter-slit_distance")) // Valid from 2018.
-      slitSeparation = mmToMeter(doubleFromRun("Distance.inter-slit_distance"));
-    else // Valid before 2018.
-      slitSeparation = mmToMeter(doubleFromRun("Theta.inter-slit_distance"));
-    slit2ToSample = 0.368 + offset;
-    slit1ToSample = slit2ToSample + slitSeparation;
-  } else {
-    try {
-      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
-    } catch (std::runtime_error &) {
-      try {
-        slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
-      } catch (std::runtime_error &) {
-        throw std::runtime_error("Unable to find slit 1 to sample distance");
-      }
+    if (run.hasProperty("Distance.S2_Sample")) {
+      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
+    } else {
+      throw std::runtime_error("Unable to find slit 2 to sample distance");
     }
-    try {
+    if (run.hasProperty("Distance.S3_Sample")) {
+      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
+    } else {
+      throw std::runtime_error("Unable to find slit 3 to sample distance");
+    }
+    slit2ToSample += offset;
+    slit1ToSample += offset;
+  } else {
+    if (run.hasProperty("Distance.S2toSample")) {
+      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
+    } else if (run.hasProperty("Distance.S2_Sample")) {
+      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
+    } else {
+      throw std::runtime_error("Unable to find slit 2 to sample distance");
+    }
+    if (run.hasProperty("Distance.S3toSample")) {
       slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
-    } catch (std::runtime_error &) {
-      try {
-        slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
-      } catch (std::runtime_error &) {
-        throw std::runtime_error("Unable to find slit 2 to sample distance");
-      }
+    } else if (run.hasProperty("Distance.S3_Sample")) {
+      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
+    } else {
+      throw std::runtime_error("Unable to find slit 3 to sample distance");
     }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
