@@ -214,10 +214,10 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // verify repo info was downloaded correctly
   if (gitHubJsonFile.getSize() == 0) {
-      std::stringstream msg;
-      msg << "Encountered empty file \"" << gitHubJson.toString()
-          << "\" while determining what to download";
-      throw std::runtime_error(msg.str());
+    std::stringstream msg;
+    msg << "Encountered empty file \"" << gitHubJson.toString()
+        << "\" while determining what to download";
+    throw std::runtime_error(msg.str());
   }
 
   // Parse the server JSON response
