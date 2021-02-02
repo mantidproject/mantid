@@ -233,7 +233,8 @@ class IN5_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
     def runTest(self):
         GenerateLogbook(Directory=self._data_directory, OutputWorkspace='in5_logbook',
-                        Facility='ILL', Instrument='IN5', NumorRange='199728,199729')
+                        Facility='ILL', Instrument='IN5', NumorRange='199728,199729',
+                        OptionalHeaders='all')
 
 
 class IN6_GenerateLogbook_Test(systemtesting.MantidSystemTest):
