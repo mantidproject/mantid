@@ -315,9 +315,16 @@ public:
 
   /**
    * static method converts a vector of data items into a vector of events.
-   * It is assumed the data items for each event are ordered as follows:
+   * It is assumed the data traits for each event are ordered as follows:
    * 1 signal, 2 errorSquared, 3 runIndex, 4 detectorId, 5 goniometerIndex,
    * 6 to 6+nd-1 nd-Dimensional coordinates.
+   *
+   * Legacy data do not contain goniometerIndex. Hence, a first attempt is
+   * tried assuming the data contains goniometerIndex info, by assessing
+   * if the size of the data is divisible by the number of traits (5) plus
+   * the event's dimension. If that fails, a retry is done assuming the number
+   * of traits is 4.
+   *
    * @param data : vector data items, all as type coord_t
    * @param events : resulting vector of events
    * @param reserveMemory : reserve memory for events copying. Set to false if
@@ -328,20 +335,16 @@ public:
                                   bool reserveMemory = true) {
     std::vector<std::string> trait_names = {
         "signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
+
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
 
-    // Check if the data was produced before attribute "goniometerIndex" was
-    // introduced
-    if (numEvents * (numColumns - 1) == data.size()) {
+    // is data.size() not divisible by numColumns?
+    if (numEvents * numColumns != data.size()) {
+      // retry assuming no goniometerIndex info in `data`
       legacyDataToEvents(data, events, reserveMemory);
       return;
     }
-
-    if (numEvents * numColumns != data.size())
-      throw(std::invalid_argument("wrong input array of data to convert to "
-                                  "lean events, suspected column data for "
-                                  "different dimensions/(type of) events "));
 
     if (reserveMemory) // Reserve the amount of space needed. Significant speed
                        // up (~30% thanks to this)
@@ -381,13 +384,15 @@ public:
                                         bool reserveMemory = true) {
     std::vector<std::string> trait_names = {"signal", "errorSquared",
                                             "runIndex", "detectorId"};
+
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
 
-    if (numEvents * numColumns != data.size())
+    if (numEvents * numColumns != data.size()) {
       throw(std::invalid_argument("wrong input array of data to convert to "
-                                  "lean events, suspected column data for "
+                                  "events, suspected column data for "
                                   "different dimensions/(type of) events "));
+    }
 
     if (reserveMemory) // Reserve the amount of space needed. Significant speed
                        // up (~30% thanks to this)
