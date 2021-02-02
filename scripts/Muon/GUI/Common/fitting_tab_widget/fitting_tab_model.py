@@ -688,8 +688,6 @@ class FittingTabModel(object):
                 elif group_or_pair in self.context.group_pair_context.selected_diffs:
                     workspace_names += [get_diff_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fitting_options["fit_to_raw"])]
-                    print("hi",get_diff_asymmetry_name(self.context, group_or_pair, run,
-                                                                not self.fitting_options["fit_to_raw"]) )
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
                     period_string = run_list_to_string(
                         self.context.group_pair_context[group_or_pair].periods)

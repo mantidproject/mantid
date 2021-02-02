@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
 from Muon.GUI.Common.muon_base import MuonBase
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_pair_asymmetry_name
+
 
 class MuonBasePair(MuonBase):
     def __init__(self, pair_name, periods=[1]):

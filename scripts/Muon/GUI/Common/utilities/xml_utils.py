@@ -57,14 +57,14 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
     return diff_nodes
 
 
-def save_grouping_to_XML(groups, diffs, pairs, filename, save=True, description=''):
+def save_grouping_to_XML(groups,  pairs, diffs, filename, save=True, description=''):
     """
     Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
     than with the XML loading.
 
     :param groups: A list of MuonGroup objects to save.
-    :param diffs: A list of MuonDiff objects to save
     :param pairs: A list of MuonPair objects to save.
+    :param diffs: A list of MuonDiff objects to save
     :param filename: The name of the XML file to save to.
     :param save: Whether to actually save the file.
     :return: the XML tree (used in testing).
@@ -157,7 +157,8 @@ def _get_diffs_from_XML(root):
     for child in root:
         if child.tag == "diff":
             names += [child.attrib['name']]
-            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val'],child.find('group-or-pair').attrib['val'], child.find('periods').attrib['val'] ]]
+            groups += [[child.find('positive-group').attrib['val'], child.find('negative-group').attrib['val'],
+                        child.find('group-or-pair').attrib['val'], child.find('periods').attrib['val'] ]]
     return names, groups
 
 

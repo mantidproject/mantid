@@ -262,7 +262,7 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.diffs, self._model.pairs, filename,
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, self._model.diffs, filename,
                                            description=self._view.get_description_text())
 
     def create_update_thread(self):

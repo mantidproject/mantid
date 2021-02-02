@@ -4,12 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore, QtGui
-from qtpy.QtCore import Signal
-
+from qtpy import QtWidgets
 from Muon.GUI.Common import message_box
-from Muon.GUI.Common.utilities import table_utils
-
 
 
 class DifferenceView(QtWidgets.QWidget):

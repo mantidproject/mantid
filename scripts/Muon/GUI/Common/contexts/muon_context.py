@@ -487,13 +487,12 @@ class MuonContext(object):
             group = [
                 group for group in group_pair_list if group in self.group_pair_context.group_names]
             # add group diffs
-            diffs = self.group_pair_context.get_diffs("group")
-            group += [diff for diff in group_pair_list if diff in self.group_pair_context.diff_names]
-
+            diffs = [diff.name for diff in self.group_pair_context.get_diffs("group")]
+            group += [diff for diff in group_pair_list if diff in diffs]
             pair = [
                 pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
-            diffs = self.group_pair_context.get_diffs("pair")
-            pair += [diff for diff in group_pair_list if diff in self.group_pair_context.diff_names]
+            diffs = [diff.name for diff in self.group_pair_context.get_diffs("pair")]
+            pair += [diff for diff in group_pair_list if diff in diffs]
         return group, pair
 
     def get_runs(self, runs):
