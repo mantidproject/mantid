@@ -75,5 +75,6 @@ BugFixes
 - A bug has been fixed in MSlice that caused a crash by ignoring the workspace selected by default for subtracting
   workspaces.
 - A bug has been fixed in MSlice that caused a crash when entering unexpected values into the width box for cuts.
+- A bug has been fixed that ignored the workspace selected by the user when subtracting workspaces.
 
 :ref:`Release 6.0.0 <v6.0.0>`
