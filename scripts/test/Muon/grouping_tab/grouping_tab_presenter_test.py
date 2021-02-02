@@ -73,7 +73,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.add_three_groups()
         self.add_two_pairs()
 
-        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, self.diff_view)
+        self.view = GroupingTabView(self.grouping_table_view, self.pairing_table_view, self.diff_widget.view)
         self.presenter = GroupingTabPresenter(self.view, self.model,
                                               self.grouping_table_widget,
                                               self.pairing_table_widget, self.diff_widget)
