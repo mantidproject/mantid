@@ -703,7 +703,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         logs = {log.name:log.value for log in logs}
         distance = logs["L2"]
         collimation = logs["collimation.actual_position"]
-        wavelength = logs["wavelength"]
+        wavelength = logs["selector.wavelength"]
         suffix = "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(float(distance),
                                                      float(collimation),
                                                      float(wavelength))
