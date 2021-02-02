@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
@@ -36,6 +37,9 @@ Logger g_log("GitHubApiHelper");
 
 const std::string RATE_LIMIT_URL("https://api.github.com/rate_limit");
 
+// key to retreive api token from ConfigService
+const std::string CONFIG_KEY_GITHUB_TOKEN("network.github.api_token");
+
 std::string formatRateLimit(const int rateLimit, const int remaining,
                             const int expires) {
   DateAndTime expiresDateAndTime;
@@ -47,12 +51,58 @@ std::string formatRateLimit(const int rateLimit, const int remaining,
       << "Z";
   return msg.str();
 }
+
+/*
+ * Small function to encapsulate getting the token from everything else
+ */
+std::string getApiToken() {
+  // default token is empty string meaning do unauthenticated calls
+  std::string token(DEFAULT_GITHUB_TOKEN);
+  // get the token from configservice if it has been set
+  if (ConfigService::Instance().hasProperty(CONFIG_KEY_GITHUB_TOKEN)) {
+    token = ConfigService::Instance().getString(CONFIG_KEY_GITHUB_TOKEN);
+  }
+
+  // unset is the user's way of intentionally turning of authentication
+  if (token.empty() || token == "unset") {
+      token = "";
+  } else {
+      // error check that token is possibly valid - 40 char
+      // TODO example: 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9
+      if (token.size() != 40) {
+          g_log.notice() << "GitHub API token is not 40 characters (found "
+                         << token.size() << ") with token =\""
+                         << token << "\" using unauthenticated connection\n";
+          token = "";
+      }
+  }
+
+  // log what the token is and create final string to set in header
+  if (token.empty()) {
+      // only unauthenticated calls
+      g_log.information("Making unauthenticated calls to GitHub");
+      return "";
+  } else {
+    g_log.information("Attempting authenticated calls to GitHub");
+    g_log.debug() << "Using token \"" << token << "\"\n";
+
+    // create full header using token
+    std::stringstream token_header;
+    token_header << "token " << token;
+    return token_header.str();
+  }
+
+  return token;
+}
 } // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
+  // set up the api token so it can be quickly added to the authentication
+  m_api_token = getApiToken();
+
   addAuthenticationToken();
 }
 
@@ -61,12 +111,22 @@ GitHubApiHelper::GitHubApiHelper() : InternetHelper() {
  */
 GitHubApiHelper::GitHubApiHelper(const Kernel::ProxyInfo &proxy)
     : InternetHelper(proxy) {
+  // set up the api token so it can be quickly added to the authentication
+  m_api_token = getApiToken();
+
   addAuthenticationToken();
 }
 
 void GitHubApiHelper::reset() {
   InternetHelper::reset();
   addAuthenticationToken();
+}
+
+void GitHubApiHelper::addAuthenticationToken() {
+  // only add the token if it has been set
+  if (!m_api_token.empty()) {
+     addHeader("Authorization", m_api_token);
+  }
 }
 
 bool GitHubApiHelper::isAuthenticated() {
