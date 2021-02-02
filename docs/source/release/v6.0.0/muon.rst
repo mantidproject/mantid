@@ -61,6 +61,8 @@ Bug fixes
 ##########
 - Stopped scientific notation when plotting run numbers on x axis.
 - A bug has been fixed where exported results were unintentionally being mixed together in their group workspaces.
+- A bug has been fixed where the Load button had to be pressed twice after an initial batch of runs had already been loaded.
+- A bug has been fixed where the log was being reset when loading runs after an initial batch of runs.
 
 Elemental Analysis
 ------------------
