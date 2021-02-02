@@ -27,11 +27,11 @@ class D11_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         config['logging.loggers.root.level'] = 'Warning'
 
         data_dirs = config['datasearch.directories'].split(';')
-        unit_test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
+        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
         d11_dir = 'ILL/D11'
-        if 'ILL' in unit_test_data_dir:
+        if 'ILL' in test_data_dir:
             d11_dir = 'D11'
-        self._data_directory = os.path.abspath(os.path.join(unit_test_data_dir,  d11_dir))
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -64,11 +64,11 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
         config['logging.loggers.root.level'] = 'Warning'
 
         data_dirs = config['datasearch.directories'].split(';')
-        unit_test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
+        test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
         d11_dir = 'ILL/D11'
-        if 'ILL' in unit_test_data_dir:
+        if 'ILL' in test_data_dir:
             d11_dir = 'D11'
-        self._data_directory = os.path.abspath(os.path.join(unit_test_data_dir,  d11_dir))
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11_dir))
 
     def cleanup(self):
         mtd.clear()
