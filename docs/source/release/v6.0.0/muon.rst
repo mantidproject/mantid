@@ -60,6 +60,7 @@ Improvements
 Bug fixes
 ##########
 - Stopped scientific notation when plotting run numbers on x axis.
+- A bug has been fixed where exported results were unintentionally being mixed together in their group workspaces.
 
 Elemental Analysis
 ------------------
