@@ -716,8 +716,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 wavelength = float(logs["selector.wavelength"])
             if wavelength > 0.0:
                 suffix += "_w{:.1f}A".format(wavelength)
-        if not suffix:
-            suffix = "_{}".format(i + 1)
+        suffix += "_{}".format(i + 1)
 
         if self.getProperty('OutputPanels').value:
             panel_ws_group = self.output_panels + '_' + str(i + 1)

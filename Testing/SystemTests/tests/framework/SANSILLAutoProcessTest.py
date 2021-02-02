@@ -124,15 +124,15 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
             )
 
         GroupWorkspaces(
-            InputWorkspaces=['iq_d39.0m_c40.5m_w5.6A',
-                             'iq_d8.0m_c8.0m_w5.6A',
-                             'iq_d2.0m_c5.5m_w5.6A',
-                             'iq_wedge_1_d39.0m_c40.5m_w5.6A',
-                             'iq_wedge_1_d8.0m_c8.0m_w5.6A',
-                             'iq_wedge_1_d2.0m_c5.5m_w5.6A',
-                             'iq_wedge_2_d39.0m_c40.5m_w5.6A',
-                             'iq_wedge_2_d8.0m_c8.0m_w5.6A',
-                             'iq_wedge_2_d2.0m_c5.5m_w5.6A'],
+            InputWorkspaces=['iq_d39.0m_c40.5m_w5.6A_1',
+                             'iq_d8.0m_c8.0m_w5.6A_2',
+                             'iq_d2.0m_c5.5m_w5.6A_3',
+                             'iq_wedge_1_d39.0m_c40.5m_w5.6A_1',
+                             'iq_wedge_1_d8.0m_c8.0m_w5.6A_2',
+                             'iq_wedge_1_d2.0m_c5.5m_w5.6A_3',
+                             'iq_wedge_2_d39.0m_c40.5m_w5.6A_1',
+                             'iq_wedge_2_d8.0m_c8.0m_w5.6A_2',
+                             'iq_wedge_2_d2.0m_c5.5m_w5.6A_3'],
             OutputWorkspace='out'
             )
 
