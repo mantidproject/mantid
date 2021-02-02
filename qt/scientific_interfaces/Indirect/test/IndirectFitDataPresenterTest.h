@@ -103,8 +103,7 @@ public:
                                            IDA::WorkspaceIndex spectrum));
   MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
   MOCK_CONST_METHOD0(getFitParameterNames, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getFittingFunction,
-                     Mantid::API::MultiDomainFunction_sptr());
+  MOCK_CONST_METHOD0(getFitFunction, Mantid::API::MultiDomainFunction_sptr());
   MOCK_CONST_METHOD2(getParameterValues,
                      std::unordered_map<std::string, IDA::ParameterValue>(
                          TableDatasetIndex dataIndex,

@@ -79,13 +79,14 @@ public:
     TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{5});
   }
 
-  void test_that_getFittingFunction_will_return_the_fitting_function_which_has_been_set() {
+  void
+  test_that_getFitFunction_will_return_the_fitting_function_which_has_been_set() {
     FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitFunction(getFunction(getFunctionString("Name")));
 
-    auto const fittingFunction = m_model->getFittingFunction();
+    auto const fittingFunction = m_model->getFitFunction();
     TS_ASSERT(fittingFunction);
     TS_ASSERT_EQUALS(fittingFunction->getAttributeNames()[0], "NumDeriv");
   }

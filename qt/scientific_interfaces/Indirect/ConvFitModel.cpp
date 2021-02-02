@@ -226,8 +226,8 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
-  return IndirectFittingModel::getFittingFunction();
+Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
+  return IndirectFittingModel::getFitFunction();
 }
 
 boost::optional<double> ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {

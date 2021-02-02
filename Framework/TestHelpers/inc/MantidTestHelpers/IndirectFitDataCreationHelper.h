@@ -45,14 +45,23 @@ Mantid::API::WorkspaceGroup_sptr createGroupWorkspaceWithTextAxes(std::size_t co
 Mantid::API::TextAxis *getTextAxis(int const &numberOfSpectra, std::vector<std::string> const &labels);
 Mantid::API::NumericAxis *getNumericAxis(int const &numberOfLabels, std::vector<double> const &values);
 
-Mantid::API::MatrixWorkspace_sptr setWorkspaceEFixed(Mantid::API::MatrixWorkspace_sptr workspace, int const &xLength);
-Mantid::API::MatrixWorkspace_sptr setWorkspaceBinEdges(Mantid::API::MatrixWorkspace_sptr workspace, int const &yLength,
-                                                       Mantid::HistogramData::BinEdges const &binEdges);
-Mantid::API::MatrixWorkspace_sptr setWorkspaceBinEdges(Mantid::API::MatrixWorkspace_sptr workspace, int const &xLength,
-                                                       int const &yLength);
-Mantid::API::MatrixWorkspace_sptr setWorkspaceProperties(Mantid::API::MatrixWorkspace_sptr workspace,
-                                                         int const &xLength, int const &yLength);
-Mantid::API::MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength, int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+setWorkspaceEFixed(Mantid::API::MatrixWorkspace_sptr workspace,
+                   int const &xLength);
+Mantid::API::MatrixWorkspace_sptr
+setWorkspaceBinEdges(Mantid::API::MatrixWorkspace_sptr workspace,
+                     int const &yLength,
+                     Mantid::HistogramData::BinEdges const &binEdges);
+Mantid::API::MatrixWorkspace_sptr
+setWorkspaceBinEdges(Mantid::API::MatrixWorkspace_sptr workspace,
+                     int const &xLength, int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+setWorkspaceProperties(Mantid::API::MatrixWorkspace_sptr workspace,
+                       int const &xLength, int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithInstrument(int const &xLength, int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithInelasticInstrument(int const &xLength, int const &yLength);
 
 /// Simple struct used to access features of the ADS
 /// No destructor so ensure you tearDown the ADS

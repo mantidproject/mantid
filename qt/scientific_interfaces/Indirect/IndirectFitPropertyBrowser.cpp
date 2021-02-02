@@ -181,7 +181,8 @@ void IndirectFitPropertyBrowser::setFunction(const QString &funStr) {
   }
 }
 
-MultiDomainFunction_sptr IndirectFitPropertyBrowser::getFittingFunction() const {
+MultiDomainFunction_sptr
+IndirectFitPropertyBrowser::getFitFunction() const {
   try {
     if (getNumberOfDatasets() > 0) {
       return getGlobalFunction();

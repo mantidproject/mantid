@@ -325,7 +325,10 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
   return std::vector<std::string>();
 }
 
-Mantid::API::MultiDomainFunction_sptr IndirectFittingModel::getFittingFunction() const { return m_activeFunction; }
+Mantid::API::MultiDomainFunction_sptr
+IndirectFittingModel::getFitFunction() const {
+  return m_activeFunction;
+}
 
 void IndirectFittingModel::setSpectra(const std::string &spectra, TableDatasetIndex dataIndex) {
   setSpectra(FunctionModelSpectra(spectra), dataIndex);
@@ -470,7 +473,7 @@ IndirectFittingModel::getDefaultParameters(TableDatasetIndex index) const {
 
 std::unordered_map<std::string, std::string> IndirectFittingModel::mapDefaultParameterNames() const {
   if (m_activeFunction)
-    return shortToLongParameterNames(getFittingFunction());
+    return shortToLongParameterNames(getFitFunction());
   return std::unordered_map<std::string, std::string>();
 }
 
@@ -495,7 +498,9 @@ WorkspaceGroup_sptr IndirectFittingModel::getResultWorkspace() const { return m_
 WorkspaceGroup_sptr IndirectFittingModel::getResultGroup() const { return m_fitOutput->getLastResultGroup(); }
 
 bool IndirectFittingModel::isPreviousModelSelected() const {
-  return m_fitFunction && equivalentFunctions(extractFirstInnerFunction(getFittingFunction()), m_fitFunction);
+  return m_fitFunction &&
+         equivalentFunctions(extractFirstInnerFunction(getFitFunction()),
+                             m_fitFunction);
 }
 
 MultiDomainFunction_sptr IndirectFittingModel::getMultiDomainFunction() const { return m_activeFunction; }
@@ -507,9 +512,9 @@ IAlgorithm_sptr IndirectFittingModel::getFittingAlgorithm(FittingMode mode) cons
     if (m_activeFunction->getNumberDomains() == 0) {
       throw std::runtime_error("Function is undefined");
     }
-    return createSequentialFit(getFittingFunction());
+    return createSequentialFit(getFitFunction());
   } else
-    return createSimultaneousFit(getFittingFunction());
+    return createSimultaneousFit(getFitFunction());
 }
 
 IAlgorithm_sptr IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex, WorkspaceIndex spectrum) const {
@@ -523,9 +528,10 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(TableDatasetIndex dataIndex, 
   return fitAlgorithm;
 }
 
-Mantid::API::IFunction_sptr IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
-                                                                    WorkspaceIndex spectrum) const {
-  auto function = getFittingFunction();
+Mantid::API::IFunction_sptr
+IndirectFittingModel::getSingleFunction(TableDatasetIndex dataIndex,
+                                        WorkspaceIndex spectrum) const {
+  auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   if (function->getNumberDomains() == 0) {
     throw std::runtime_error("Cannot set up a fit: is the function defined?");
@@ -533,14 +539,16 @@ Mantid::API::IFunction_sptr IndirectFittingModel::getSingleFunction(TableDataset
   return function->getFunction(getDomainIndex(dataIndex, spectrum).value);
 }
 
-Mantid::API::IAlgorithm_sptr IndirectFittingModel::sequentialFitAlgorithm() const {
-  auto function = getFittingFunction();
+Mantid::API::IAlgorithm_sptr
+IndirectFittingModel::sequentialFitAlgorithm() const {
+  auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   return AlgorithmManager::Instance().create("QENSFitSequential");
 }
 
-Mantid::API::IAlgorithm_sptr IndirectFittingModel::simultaneousFitAlgorithm() const {
-  auto function = getFittingFunction();
+Mantid::API::IAlgorithm_sptr
+IndirectFittingModel::simultaneousFitAlgorithm() const {
+  auto function = getFitFunction();
   assert(function->getNumberDomains() == getNumberOfDomains());
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }

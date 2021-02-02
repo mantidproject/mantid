@@ -140,7 +140,7 @@ public:
   MOCK_CONST_METHOD1(createDisplayName, std::string(TableDatasetIndex dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
-  MOCK_CONST_METHOD0(getFittingFunction, Mantid::API::MultiDomainFunction_sptr());
+  MOCK_CONST_METHOD0(getFitFunction, Mantid::API::MultiDomainFunction_sptr());
 
   MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
   MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));
@@ -346,9 +346,12 @@ public:
     auto const range = std::make_pair(1.0, 2.0);
     auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
 
-    ON_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0))).WillByDefault(Return(range));
-    ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
-    ON_CALL(*m_fittingModel, getWorkspace(index)).WillByDefault(Return(m_ads->retrieveWorkspace(workspaceName)));
+    ON_CALL(*m_fittingModel, getFittingRange(index, IDA::WorkspaceIndex(0)))
+        .WillByDefault(Return(range));
+    ON_CALL(*m_fittingModel, getFitFunction())
+        .WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getWorkspace(index))
+        .WillByDefault(Return(m_ads->retrieveWorkspace(workspaceName)));
 
     EXPECT_CALL(*m_view, removeFromTopPreview(QString::fromStdString("Guess"))).Times(0);
 
@@ -393,11 +396,15 @@ public:
     double const background(1.2);
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
-    ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getFitFunction())
+        .WillByDefault(Return(fitFunction));
 
     Expectation setDefault =
-        EXPECT_CALL(*m_fittingModel, setDefaultParameterValue("A0", background, TableDatasetIndex(0))).Times(1);
-    EXPECT_CALL(*m_fittingModel, getFittingFunction()).Times(1).After(setDefault);
+        EXPECT_CALL(
+            *m_fittingModel,
+            setDefaultParameterValue("A0", background, TableDatasetIndex(0)))
+            .Times(1);
+    EXPECT_CALL(*m_fittingModel, getFitFunction()).Times(1).After(setDefault);
 
     m_view->emitBackgroundChanged(background);
   }
@@ -444,7 +451,8 @@ public:
   void test_that_updateRangeSelectors_will_update_the_background_selector() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
-    ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getFitFunction())
+        .WillByDefault(Return(fitFunction));
 
     Expectation setVisible = EXPECT_CALL(*m_view, setBackgroundRangeVisible(true)).Times(1);
     EXPECT_CALL(*m_view, setBackgroundLevel(0.0)).Times(1).After(setVisible);
@@ -455,7 +463,8 @@ public:
   void test_that_updateRangeSelectors_will_update_the_hwhm_selector() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
-    ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getFitFunction())
+        .WillByDefault(Return(fitFunction));
 
     Expectation setVisible = EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
     EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);

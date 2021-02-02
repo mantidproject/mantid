@@ -51,7 +51,7 @@ public:
   void setFunction(const QString &funStr);
   int getNumberOfDatasets() const;
   QString getSingleFunctionStr() const;
-  MultiDomainFunction_sptr getFittingFunction() const;
+  MultiDomainFunction_sptr getFitFunction() const;
   std::string minimizer(bool withProperties = false) const;
   int maxIterations() const;
   int getPeakRadius() const;
