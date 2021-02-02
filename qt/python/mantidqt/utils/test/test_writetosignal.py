@@ -67,5 +67,6 @@ class WriteToSignalTest(unittest.TestCase):
             writer = WriteToSignal(mock_stdout)
             self.assertEqual(writer._original_out, None)
 
+
 if __name__ == "__main__":
     unittest.main()

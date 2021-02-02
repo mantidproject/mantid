@@ -128,21 +128,18 @@ class MainWindowTest(unittest.TestCase):
             call(self.main_window.help_menu, self.main_window.help_menu_actions),
         ])
 
-    @patch('workbench.app.mainwindow.ConfigService')
     @patch('workbench.app.mainwindow.add_actions')
-    def test_interfaces_menu_texts_are_correct(self, _, mock_ConfigService):
+    def test_interfaces_menu_texts_are_correct(self, _):
         interface_dir = './interfaces/'
         example_interfaces = {
             'General': ['TOFCalculator'],
             'Direct': ['DGS_Reduction.py', 'DGSPlanner.py', 'PyChop.py', 'MSlice.py', 'ALF View']
         }
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: \
-                '' if arg == 'interfaces.categories.hidden' else \
-                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
-                None
-        self.main_window._discover_python_interfaces = Mock(return_value=example_interfaces)
-        self.main_window._discover_cpp_interfaces = Mock()
+
+        with patch('workbench.app.mainwindow.ConfigService',
+                   new={'interfaces.categories.hidden': '', 'mantidqt.python_interfaces_directory': interface_dir}):
+            self.main_window._discover_python_interfaces = Mock(return_value=example_interfaces)
+            self.main_window._discover_cpp_interfaces = Mock()
 
         self.main_window.create_menus()
         self.main_window.populate_interfaces_menu()
@@ -158,20 +155,17 @@ class MainWindowTest(unittest.TestCase):
         self.assertEqual(expected_direct_texts, actual_direct_texts)
         self.assertEqual(expected_general_texts, actual_general_texts)
 
-    @patch('workbench.app.mainwindow.ConfigService')
     @patch('workbench.app.mainwindow.add_actions')
-    def test_that_populate_interfaces_menu_discovers_interfaces(self, _, mock_ConfigService):
+    def test_that_populate_interfaces_menu_discovers_interfaces(self, _):
         interface_dir = './interfaces/'
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: \
-                '' if arg == 'interfaces.categories.hidden' else \
-                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
-                None
+
         self.main_window._discover_python_interfaces = Mock(return_value={'category': ['interface.py']})
         self.main_window._discover_cpp_interfaces = Mock()
 
-        self.main_window.create_menus()
-        self.main_window.populate_interfaces_menu()
+        with patch('workbench.app.mainwindow.ConfigService',
+                   new={'interfaces.categories.hidden': '', 'mantidqt.python_interfaces_directory': interface_dir}):
+            self.main_window.create_menus()
+            self.main_window.populate_interfaces_menu()
 
         self.main_window._discover_python_interfaces.assert_called_with(
             interface_dir, self.main_window.PYTHON_GUI_BLACKLIST
@@ -180,21 +174,21 @@ class MainWindowTest(unittest.TestCase):
             self.main_window._discover_python_interfaces.return_value
         )
 
-    @patch('workbench.app.mainwindow.ConfigService')
-    def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self, mock_ConfigService):
+    def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self):
         interface_dir = './interfaces/'
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: \
-                'category1;category2' if arg == 'interfaces.categories.hidden' else \
-                interface_dir if arg == 'mantidqt.python_interfaces_directory' else \
-                None
         self.main_window._discover_python_interfaces = Mock(return_value={
             'category1': ['interface1.py'], 'category2': ['interface2.py']
         })
         self.main_window._discover_cpp_interfaces = Mock()
+        self.main_window.interfaces_menu = Mock()
+        ConfigService_dict = {
+            'interfaces.categories.hidden': 'category1;category2',
+            'mantidqt.python_interfaces_directory': interface_dir
+        }
 
         with patch.object(self.main_window, 'interfaces_menu') as mock_interfaces_menu:
-            self.main_window.populate_interfaces_menu()
+            with patch('workbench.app.mainwindow.ConfigService', new=ConfigService_dict):
+                self.main_window.populate_interfaces_menu()
 
             mock_interfaces_menu.addMenu.assert_not_called()
 
@@ -268,44 +262,38 @@ class MainWindowTest(unittest.TestCase):
         mock_event.accept.assert_called()
 
     @patch('workbench.app.mainwindow.logger')
-    @patch('workbench.app.mainwindow.ConfigService')
     @patch('os.path.exists')
-    def test_python_interfaces_are_discovered_correctly(self, mock_os_path_exists, mock_ConfigService, _):
+    def test_python_interfaces_are_discovered_correctly(self, mock_os_path_exists, _):
         interfaces = ['Muon/Frequency_Domain_Analysis.py', 'ILL/Drill.py']
         interfaces_str = " ".join(interfaces)  # config service returns them as a whole string.
         mock_os_path_exists.return_value = lambda path: path in interfaces
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: interfaces_str if arg == 'mantidqt.python_interfaces' else None
 
-        returned_interfaces = self.main_window._discover_python_interfaces('', [])
+        with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interfaces_str}):
+            returned_interfaces = self.main_window._discover_python_interfaces('', [])
 
         expected_interfaces = {'Muon': ['Frequency_Domain_Analysis.py'], 'ILL': ['Drill.py']}
         self.assertDictEqual(expected_interfaces, returned_interfaces)
 
     @patch('workbench.app.mainwindow.logger')
-    @patch('workbench.app.mainwindow.ConfigService')
     @patch('os.path.exists')
-    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
+    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
         interface_str = 'fake/interface.py'
         mock_os_path_exists.return_value = False
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: interface_str if arg == 'mantidqt.python_interfaces' else None
 
-        returned_interfaces = self.main_window._discover_python_interfaces('', [])
+        with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
+            returned_interfaces = self.main_window._discover_python_interfaces('', [])
 
         self.assertDictEqual({}, returned_interfaces)
         mock_logger.warning.assert_called()
 
     @patch('workbench.app.mainwindow.logger')
-    @patch('workbench.app.mainwindow.ConfigService')
     @patch('os.path.exists')
-    def test_that_blacklisted_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_ConfigService, mock_logger):
+    def test_that_blacklisted_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
         interface_str = 'blacklisted/interface.py'
         mock_os_path_exists.return_value = True
-        mock_ConfigService.__getitem__.side_effect = \
-            lambda arg: interface_str if arg == 'mantidqt.python_interfaces' else None
 
-        returned_interfaces = self.main_window._discover_python_interfaces('', 'interface.py')
+        with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
+            returned_interfaces = self.main_window._discover_python_interfaces('', 'interface.py')
 
         self.assertDictEqual({}, returned_interfaces)
         mock_logger.information.assert_called()
