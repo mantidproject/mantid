@@ -179,6 +179,7 @@ int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
                                              std::ostream &responseStream) {
   g_log.debug("Repeating API call anonymously\n");
   removeHeader("Authorization");
+  m_api_token = "";  // all future calls are anonymous
   return this->sendRequest(uri.toString(), responseStream);
 }
 
