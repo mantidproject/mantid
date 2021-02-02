@@ -380,7 +380,20 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 sample, panels, sensitivity = self.processSample(d, flux,
                                                                  sample_transmission, beam,
                                                                  absorber, container)
-                outputs.append(sample)
+                # set the sample suffix
+                logs = mtd[sample].run().getProperties()
+                logs = {log.name:log.value for log in logs}
+                distance = logs["L2"]
+                collimation = logs["collimation.actual_position"]
+                wavelength = logs["wavelength"]
+                suffix = "d{:.1f}m_c{:.1f}m_w{:.1f}A".format(float(distance),
+                                                             float(collimation),
+                                                             float(wavelength))
+                sampleSuffix = sample[0:-len(str(d))] + suffix
+                RenameWorkspace(InputWorkspace=sample,
+                                OutputWorkspace=sampleSuffix)
+                outputs.append(sampleSuffix)
+
                 if sensitivity:
                     sensitivity_outputs.append(sensitivity)
                 if panels:
