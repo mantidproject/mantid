@@ -196,6 +196,10 @@ Network Properties
 | ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
 |                                           |repository, this overrides the default timeout.    |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``network.github.api_token``              |The api token for github calls used by             | (not shown)                     |
+|                                           |``DownloadInstrument``. Setting this to ``unset``  |                                 |
+|                                           |or an empty string will turn off authentication.   |                                 |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
 |                                           | set mantid will use the system proxy              |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
