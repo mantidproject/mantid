@@ -409,7 +409,7 @@ void Run::clearGoniometers() { m_goniometers.clear(); }
  */
 const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
   if (index >= m_goniometers.size())
-    throw std::invalid_argument(
+    throw std::out_of_range(
         "Run::getGoniometer() const: index is out of range.");
   return *m_goniometers[index];
 }
@@ -422,7 +422,7 @@ const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
  */
 Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
   if (index >= m_goniometers.size())
-    throw std::invalid_argument(
+    throw std::out_of_range(
         "Run::getGoniometer() const: index is out of range.");
   return *m_goniometers[index];
 }
@@ -437,7 +437,7 @@ Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
 const Mantid::Kernel::DblMatrix &
 Run::getGoniometerMatrix(const size_t index) const {
   if (index >= m_goniometers.size())
-    throw std::invalid_argument(
+    throw std::out_of_range(
         "Run::getGoniometer() const: index is out of range.");
   return m_goniometers[index]->getR();
 }
