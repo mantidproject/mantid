@@ -86,9 +86,6 @@
 			      end_time:/entry0/end_time,
 			      Fermi:/entry0/instrument/Fermi/rotation_speed,
 			      Ph:/entry0/instrument/Fermi/setpoint_phase,
-			      NCH:/entry0/monitor/time_of_flight/1,
-			      CHW:/entry0/monitor/time_of_flight/0,
-			      delay:/entry0/monitor/time_of_flight/2,
 			      Mon2rate:/entry0/monitor2/monrate,
 			      cps:/entry0/instrument/Detector/detrate,
 			      Treg:/entry0/sample/regulation_temperature,
@@ -97,6 +94,9 @@
 		</parameter>
 		<parameter name="logbook_optional_parameters" type="string">
 		  <value val="lambda:/entry0/wavelength,
+			      NCH:/entry0/monitor1/time_of_flight/1,
+			      CHW:/entry0/monitor1/time_of_flight/0,
+			      delay:/entry0/monitor1/time_of_flight/2,
 			      duration:/entry0/duration,
 			      Suppressor:/entry0/instrument/Suppressor/rotation_speed,
 			      SuppressorPh:/entry0/instrument/Suppressor/setpoint_phase,

@@ -64,7 +64,7 @@
 		    Guide11:/entry0/D11/collimation/col11_actual_state,
 		    Guide12:/entry0/D11/collimation/col12_actual_state,
 		    Guide13:/entry0/D11/collimation/col13_actual_state,
-		    TotalCountsMonitor1:/entry0/monitor1/data,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum,
 		    ReactorPower:/entry0/reactor_power,
 		    BeamstopX:/entry0/D11/beamstop/bx_actual,
 		    TotalCountsDetLeft:/entry0/D11/detectorLeft/detsum,

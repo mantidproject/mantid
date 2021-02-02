@@ -91,7 +91,7 @@
 			      FO:/entry0/instrument/FO/rotation_speed,
 			      PhF:/entry0/instrument/FO/setpoint_phase,
 			      Monrate:/entry0/monitor/monrate,
-			      cps:/entry0/instrument/Detector/detsum/,
+			      cps:/entry0/instrument/Detector/detrate,
 			      Treg:/entry0/sample/regulation_temperature,
 			      Tsamp:/entry0/sample/temperature,
 			      subtitle:/entry0/experiment_identifier" />
