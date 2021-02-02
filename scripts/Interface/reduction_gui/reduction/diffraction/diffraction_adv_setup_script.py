@@ -74,8 +74,15 @@ class AdvancedSetupScript(BaseScriptElement):
     typeofcorrection = ""
     parnamelist = None
     # Caching options
-    cache_dir = ''  # directory containing the cache files
+    cache_dir1 = ''  # Cache search candidate 1
+    cache_dir2 = ''  # Cache search candidate 2
+    cache_dir3 = ''  # Cache search candidate 3
     clean_cache = False  # determines whether to delete all cache files within the cache directory
+
+    @property
+    def cache_dir(self):
+        """Passing all three candidates back as one list"""
+        return [self.cache_dir1, self.cache_dir2, self.cache_dir3]
 
     def __init__(self, inst_name):
         """ Initialization
@@ -177,18 +184,22 @@ class AdvancedSetupScript(BaseScriptElement):
     def to_xml(self):
         """ 'Public' method to create XML from the current data.
         """
-        pardict = self.buildParameterDict()
 
         xml = "<AdvancedSetup>\n"
-        for parname in self.parnamelist:
-            value = pardict[parname]
-            keyname = parname.lower()
-            if str(value) == "True":
-                value = '1'
-            elif str(value) == "False":
-                value = '0'
-            xml += " <%s>%s</%s>\n" % (keyname, str(value), keyname)
-        # ENDFOR
+        for keyname, value in self.buildParameterDict().items():
+            # casting value to string
+            if isinstance(value, bool):
+                # special map for bool type
+                value = '1' if value else '0'
+            else:
+                value = str(value)
+
+            # convert cache dir list into a single string using ; as
+            # separator between path
+            if keyname == "CacheDir":
+                value = ";".join(value)
+
+            xml += f"<{keyname.lower()}>{str(value)}</{keyname.lower()}>\n"
         xml += "</AdvancedSetup>\n"
 
         return xml
@@ -279,6 +290,10 @@ class AdvancedSetupScript(BaseScriptElement):
             # Caching options
             self.cache_dir = BaseScriptElement.getStringElement(
                 instrument_dom, 'cache_directory', default=self.__class__.cache_dir)
+            # split it into the three cache dirs
+            # NOTE: there should only be three entries, if not, let it fail early
+            self.cache_dir = self.cache_dir.split(";")
+            self.cache_dir1, self.cache_dir2, self.cache_dir3 = self.cache_dir
 
             tempbool = BaseScriptElement.getStringElement(
                 instrument_dom, "clean_cache", default=str(int(self.__class__.clean_cache)))
@@ -287,24 +302,28 @@ class AdvancedSetupScript(BaseScriptElement):
     def reset(self):
         r"""reset instance's attributes with the values of the class' attributes
         """
-        class_attrs_selected = ['pushdatapositive',
-                                'unwrapref',
-                                'lowresref',
-                                'cropwavelengthmin',
-                                'cropwavelengthmax',
-                                'removepropmppulsewidth',
-                                'maxchunksize',
-                                'filterbadpulses',
-                                'bkgdsmoothpars',
-                                'stripvanadiumpeaks',
-                                'vanadiumfwhm',
-                                'vanadiumpeaktol',
-                                'vanadiumsmoothparams',
-                                'preserveevents',
-                                'extension',
-                                'outputfileprefix',
-                                # Caching options
-                                'cache_dir',
-                                'clean_cache']
+        class_attrs_selected = [
+            'pushdatapositive',
+            'unwrapref',
+            'lowresref',
+            'cropwavelengthmin',
+            'cropwavelengthmax',
+            'removepropmppulsewidth',
+            'maxchunksize',
+            'filterbadpulses',
+            'bkgdsmoothpars',
+            'stripvanadiumpeaks',
+            'vanadiumfwhm',
+            'vanadiumpeaktol',
+            'vanadiumsmoothparams',
+            'preserveevents',
+            'extension',
+            'outputfileprefix',
+            # Caching options
+            'cache_dir1',
+            'cache_dir2',
+            'cache_dir3',
+            'clean_cache'
+        ]
         [setattr(self, attr, getattr(self.__class__, attr)) for attr in class_attrs_selected]
         return
