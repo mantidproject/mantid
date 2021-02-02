@@ -25,6 +25,11 @@ public:
   static CreateMDTest *createSuite() { return new CreateMDTest(); }
   static void destroySuite(CreateMDTest *suite) { delete suite; }
 
+
+/** Create two identical workspaces of type Workspace2D for instrument "MARI".
+ * The workspace has 918 histograms, each having 6 bins. Signal is 1 and
+ * error is 0 for every single histogram bin. A single log, "Ei", is introduced.
+ */
   void createTwoTestWorkspaces() {
     auto sim_alg = Mantid::API::AlgorithmManager::Instance().create(
         "CreateSimulationWorkspace");
@@ -206,6 +211,7 @@ public:
   }
 
   void test_execute_filebackend() {
+    // creates workspaces data_source_1 and data_source_2
     createTwoTestWorkspaces();
 
     CreateMD alg;
