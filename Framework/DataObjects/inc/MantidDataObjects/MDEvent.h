@@ -330,6 +330,13 @@ public:
         "signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
+
+    // Check if the data was produced before attribute "goniometerIndex" was introduced
+    if (numEvents * (numColumns - 1) == data.size()){
+      legacyDataToEvents(data, events, reserveMemory);
+      return;
+    }
+
     if (numEvents * numColumns != data.size())
       throw(std::invalid_argument("wrong input array of data to convert to "
                                   "lean events, suspected column data for "
@@ -356,6 +363,53 @@ public:
                           static_cast<uint16_t>(data[ii + 4]), centers);
     }
   }
+
+  /**
+   * static method converts a vector of data items into a vector of events.
+   * It is assumed the data items for each event are ordered as follows:
+   * 1 signal, 2 errorSquared, 3 runIndex, 4 detectorId,
+   * 5 to 5+nd-1 nd-Dimensional coordinates. When creating the event, a value
+   * of zero is assigned to attribute "goniometerIndex".
+   * @param data : vector data items, all as type coord_t
+   * @param events : resulting vector of events
+   * @param reserveMemory : reserve memory for events copying. Set to false if
+   * one wants to add new events to the existing one.
+   */
+  static inline void legacyDataToEvents(const std::vector<coord_t> &data,
+                                        std::vector<MDEvent<nd>> &events,
+                                        bool reserveMemory = true) {
+    std::vector<std::string> trait_names = {
+        "signal", "errorSquared", "runIndex", "detectorId"};
+    size_t numColumns = trait_names.size() + nd;
+    size_t numEvents = data.size() / numColumns;
+
+    if (numEvents * numColumns != data.size())
+      throw(std::invalid_argument("wrong input array of data to convert to "
+                                  "lean events, suspected column data for "
+                                  "different dimensions/(type of) events "));
+
+    if (reserveMemory) // Reserve the amount of space needed. Significant speed
+      // up (~30% thanks to this)
+    {
+      events.clear();
+      events.reserve(numEvents);
+    }
+    for (size_t i = 0; i < numEvents; i++) {
+      // Index into the data array
+      size_t ii = i * numColumns;
+
+      // Point directly into the data block for the centers.
+      coord_t const *const centers = &(data[ii + trait_names.size()]);
+
+      // Create the event with the traits and the coordinates. Uses the constructor that assigns a value of zero to attribute goniometerIndex
+      events.emplace_back(static_cast<signal_t>(data[ii]),
+                          static_cast<signal_t>(data[ii + 1]),
+                          static_cast<uint16_t>(data[ii + 2]),
+                          static_cast<int32_t>(data[ii + 3]),
+                          centers);
+    }
+  }
+
 };
 
 } // namespace DataObjects
