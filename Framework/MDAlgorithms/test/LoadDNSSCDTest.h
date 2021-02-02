@@ -33,24 +33,29 @@ using namespace Mantid::MDAlgorithms;
 
 bool cmp_Events(const std::vector<coord_t> &ev1,
                 const std::vector<coord_t> &ev2) {
+  const size_t traits_count = 9; // data items per event
+  const size_t detectorID_index = 3;  // trait index for detectorID
   // event1 < event2 if it has smaller det_id and dE
-  assert(ev1.size() == 8);
-  assert(ev2.size() == 8);
+  assert(ev1.size() == traits_count);
+  assert(ev2.size() == traits_count);
   float eps = 1.0e-07f;
-  if (std::abs(ev1[3] - ev2[3]) > eps) {
-    return ev1[3] < ev2[3];
+  if (std::abs(ev1[detectorID_index] - ev2[detectorID_index]) > eps) {
+    // compare detector ID values
+    return ev1[detectorID_index] < ev2[detectorID_index];
   } else {
-    return ev1[7] < ev2[7];
+    // compare value of last dimension
+    return ev1[traits_count - 1] < ev2[traits_count - 1];
   }
 }
 
 void sort_Events(std::vector<coord_t> &events) {
-  // 1. split the events vector into 8-sized chunks
+  const size_t traits_count = 9; // data items per event
+  // 1. split the events vector into traits_count-sized chunks
   std::vector<std::vector<coord_t>> sub_events;
   auto itr = events.cbegin();
   while (itr < events.cend()) {
-    sub_events.emplace_back(std::vector<coord_t>(itr, itr + 8));
-    itr += 8;
+    sub_events.emplace_back(std::vector<coord_t>(itr, itr + traits_count));
+    itr += traits_count;
   }
   // 2. sort the vector of chunks
   std::sort(sub_events.begin(), sub_events.end(), cmp_Events);
@@ -305,13 +310,13 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*24 = 192
-    TS_ASSERT_EQUALS(events.size(), 192);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 24);
     // reference vector
     double d(1.0e-06);
-    for (auto i = 0; i < 192; i++) {
+    for (size_t i = 0; i < traits_count * 24; i++) {
       TS_ASSERT_DELTA(events[i], test_DataWS_ref[i], d);
     }
 
@@ -354,13 +359,13 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 7 columns: I, err^2, run_num, det_id, theta, omega, tof
-    TS_ASSERT_EQUALS(ncols, 7);
-    // 7*24 = 192
-    TS_ASSERT_EQUALS(events.size(), 168);
+    // 8 columns: I, err^2, run_num, det_id, goniometerIndex, theta, omega, tof
+    const size_t traits_count = 8; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 24);
     // reference vector
     double d(1.0e-02);
-    for (auto i = 0; i < 168; i++) {
+    for (size_t i = 0; i < test_RawWS_ref.size(); i++) {
       TS_ASSERT_DELTA(events[i], test_RawWS_ref[i], d);
     }
 
@@ -460,12 +465,12 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*24 = 192
-    TS_ASSERT_EQUALS(events.size(), 192);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 24);
     double d(1.0e-06);
-    for (auto i = 0; i < 192; i++) {
+    for (size_t i = 0; i < test_NormMonitor_ref.size(); i++) {
       TS_ASSERT_DELTA(events[i], test_NormMonitor_ref[i], d);
     }
 
@@ -515,12 +520,12 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*24 = 192
-    TS_ASSERT_EQUALS(events.size(), 192);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 24);
     double d(1.0e-06);
-    for (auto i = 0; i < 192; i++) {
+    for (size_t i = 0; i < test_NormTime_ref.size(); i++) {
       TS_ASSERT_DELTA(events[i], test_NormTime_ref[i], d);
     }
 
@@ -672,12 +677,12 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*7 = 56
-    TS_ASSERT_EQUALS(events.size(), 56);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 7);
     double d(1.0e-06);
-    for (auto i = 0; i < 56; i++) {
+    for (size_t i = 0; i < test_2ThetaLimits_ref.size(); i++) {
       TS_ASSERT_DELTA(events[i], test_2ThetaLimits_ref[i], d);
     }
 
@@ -800,13 +805,13 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*574 = 4592
-    TS_ASSERT_EQUALS(events.size(), 4592);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 574);
     double d(1.0e-06);
     sort_Events(events);
-    for (auto i = 0; i < 82 * 8; i++) {
+    for (size_t i = 0; i < 82 * traits_count; i++) {
       TS_ASSERT_DELTA(events[i], test_TOFWSData_ref[i], d);
     }
 
@@ -870,13 +875,13 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, h, k, l, dE
-    TS_ASSERT_EQUALS(ncols, 8);
-    // 8*574 = 4592
-    TS_ASSERT_EQUALS(events.size(), 4592);
+    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    const size_t traits_count = 9; // data items per event
+    TS_ASSERT_EQUALS(ncols, traits_count);
+    TS_ASSERT_EQUALS(events.size(), traits_count * 574);
     double d(1.0e-06);
     sort_Events(events);
-    for (auto i = 0; i < 82 * 8; i++) {
+    for (size_t i = 0; i < 82 * traits_count; i++) {
       TS_ASSERT_DELTA(events[i], test_TOFWSDataRotateEPP_ref[i], d);
     }
 
