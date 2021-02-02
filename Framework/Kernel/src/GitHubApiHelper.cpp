@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Net/HTTPClientSession.h>
@@ -65,23 +65,23 @@ std::string getApiToken() {
 
   // unset is the user's way of intentionally turning of authentication
   if (token.empty() || token == "unset") {
-      token = "";
+    token = "";
   } else {
-      // error check that token is possibly valid - 40 char
-      // TODO example: 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9
-      if (token.size() != 40) {
-          g_log.notice() << "GitHub API token is not 40 characters (found "
-                         << token.size() << ") with token =\""
-                         << token << "\" using unauthenticated connection\n";
-          token = "";
-      }
+    // error check that token is possibly valid - 40 char
+    // TODO example: 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9
+    if (token.size() != 40) {
+      g_log.notice() << "GitHub API token is not 40 characters (found "
+                     << token.size() << ") with token =\"" << token
+                     << "\" using unauthenticated connection\n";
+      token = "";
+    }
   }
 
   // log what the token is and create final string to set in header
   if (token.empty()) {
-      // only unauthenticated calls
-      g_log.information("Making unauthenticated calls to GitHub");
-      return "";
+    // only unauthenticated calls
+    g_log.information("Making unauthenticated calls to GitHub");
+    return "";
   } else {
     g_log.information("Attempting authenticated calls to GitHub");
     g_log.debug() << "Using token \"" << token << "\"\n";
@@ -125,7 +125,7 @@ void GitHubApiHelper::reset() {
 void GitHubApiHelper::addAuthenticationToken() {
   // only add the token if it has been set
   if (!m_api_token.empty()) {
-     addHeader("Authorization", m_api_token);
+    addHeader("Authorization", m_api_token);
   }
 }
 
@@ -179,7 +179,7 @@ int GitHubApiHelper::processAnonymousRequest(Poco::URI &uri,
                                              std::ostream &responseStream) {
   g_log.debug("Repeating API call anonymously\n");
   removeHeader("Authorization");
-  m_api_token = "";  // all future calls are anonymous
+  m_api_token = ""; // all future calls are anonymous
   return this->sendRequest(uri.toString(), responseStream);
 }
 
