@@ -150,7 +150,7 @@ public:
   void test_runIndex() {
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
-    const size_t traits_count = 8;  // number of items per event
+    const size_t traits_count = 8; // number of items per event
 
     MergeMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -185,7 +185,7 @@ public:
     /** reference vector, 3 identical events except for incremented run numbers
      * vector traits are, in this order: 0 signal, 1 errorSquared, 2 runIndex,
      * 3 detectorId, 4 goniometerIndex, 5 to 7 three-Dimensional coordinates
-    */
+     */
     const std::vector<coord_t> ref = {1, 1, 0, 0, 0, 6.25, 6.25, 6.25,
                                       1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
                                       1, 1, 2, 0, 0, 6.25, 6.25, 6.25};
