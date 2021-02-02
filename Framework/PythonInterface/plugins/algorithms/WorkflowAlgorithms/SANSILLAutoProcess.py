@@ -758,7 +758,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1)
-                                + "_" + str(i + 1)
+                                + "_" + suffix
                                 for w in range(self.n_wedges)]
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
