@@ -82,7 +82,7 @@ Output:
    print('Number of goniometers =', ws.run().getNumGoniometers())
 
    for i in range(ws.run().getNumGoniometers()):
-       print(f'{i} omega = {ws.run().getGoniometerByIndex(i).getEulerAngles("YZY")[0]:.1f}')
+       print(f'{i} omega = {ws.run().getGoniometer(i).getEulerAngles("YZY")[0]:.1f}')
 
 Output:
 
