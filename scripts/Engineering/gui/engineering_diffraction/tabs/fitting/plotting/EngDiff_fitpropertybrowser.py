@@ -44,7 +44,8 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         if dict_str:
             # evaluate string to make a dict (replace case of bool values)
             fitprop = eval(dict_str.replace('true', 'True').replace('false', 'False'))
-            fitprop['peak_centre_params'] = self.get_center_param_names()
+            fitprop['peak_centre_params'] = self._get_center_param_names()
+            print(fitprop['peak_centre_params'])
             return fitprop
         else:
             # if no fit has been performed
@@ -65,7 +66,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         exclude = self.getExcludeRange()
         if exclude:
             fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
-        fitprop['peak_centre_params'] = self.get_center_param_names()
+        fitprop['peak_centre_params'] = self._get_center_param_names()
         return fitprop
 
     def save_current_setup(self, name):
