@@ -704,13 +704,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         suffix = ""
         if "L2" in logs:
             distance = float(logs["L2"])
-            suffix += "_d{:.1f}m".format(distance)
+            if distance > 0.0:
+                suffix += "_d{:.1f}m".format(distance)
         if "collimation.actual_position" in logs:
             collimation = float(logs["collimation.actual_position"])
-            suffix += "_c{:.1f}m".format(collimation)
+            if collimation > 0.0:
+                suffix += "_c{:.1f}m".format(collimation)
         if "selector.wavelength" in logs:
             wavelength = float(logs["selector.wavelength"])
-            suffix += "_w{:.1f}A".format(wavelength)
+            if wavelength > 0.0:
+                suffix += "_w{:.1f}A".format(wavelength)
         if not suffix:
             suffix = "_{}".format(i + 1)
 
