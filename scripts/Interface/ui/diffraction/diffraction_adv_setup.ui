@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1077</width>
-    <height>815</height>
+    <width>976</width>
+    <height>837</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -78,8 +78,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1077</width>
-        <height>815</height>
+        <width>982</width>
+        <height>848</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -651,6 +651,68 @@
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Cache Dir2 (Scan Only)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLineEdit" name="cache_dir_edit_3">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid path for the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="statusTip">
+                 <string>Enter a valid path for the beam monitor reference file.</string>
+                </property>
+                <property name="text">
+                 <string>/SNS/PG3/shared/CALIBRATION</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cache_dir_browse_4">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="cache_dir_label">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Instrument calibration file to time focus diffraction data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Cache Dir1 (Scan&amp;Save)</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="3">
              <spacer name="horizontalSpacer_13">
               <property name="orientation">
@@ -675,6 +737,29 @@
               <property name="statusTip">
                <string>Enter a valid path for the beam monitor reference file.</string>
               </property>
+              <property name="text">
+               <string>/SNS/PG3/IPTS-1234/shared</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="cache_dir_edit_2">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid path for the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>Enter a valid path for the beam monitor reference file.</string>
+              </property>
+              <property name="text">
+               <string>/SNS/PG3/IPTS-1234/shared/autoreduce</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QCheckBox" name="clean_cache_box">
+              <property name="text">
+               <string>Purge All Cache</string>
+              </property>
              </widget>
             </item>
             <item row="1" column="2">
@@ -693,35 +778,26 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="cache_dir_label">
-              <property name="minimumSize">
-               <size>
-                <width>160</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>160</width>
-                <height>16777215</height>
-               </size>
+            <item row="2" column="2">
+             <widget class="QPushButton" name="cache_dir_browse_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Instrument calibration file to time focus diffraction data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>File Cache Directory</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="clean_cache_box">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_19">
               <property name="text">
-               <string>Clean Cache Files</string>
+               <string>Cache Dir3 (Scan Only)</string>
               </property>
              </widget>
             </item>
