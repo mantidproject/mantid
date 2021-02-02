@@ -130,5 +130,6 @@ Miscellaneous
 - Deleting rows or columns in a TableWorkspace is handled smoothly
 - The fit button in the fit browser is now disabled when all functions are removed
 - Pressing ``Esc`` to close ManageUserDirectories is now handled correctly
+- Fixed a crash when selecting Show Detectors on a workspace with a spectrum which is missing an EFixed and is not a monitor.
 
 :ref:`Release 6.0.0 <v6.0.0>`
