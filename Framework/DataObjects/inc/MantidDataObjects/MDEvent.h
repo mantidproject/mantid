@@ -331,8 +331,9 @@ public:
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
 
-    // Check if the data was produced before attribute "goniometerIndex" was introduced
-    if (numEvents * (numColumns - 1) == data.size()){
+    // Check if the data was produced before attribute "goniometerIndex" was
+    // introduced
+    if (numEvents * (numColumns - 1) == data.size()) {
       legacyDataToEvents(data, events, reserveMemory);
       return;
     }
@@ -378,8 +379,8 @@ public:
   static inline void legacyDataToEvents(const std::vector<coord_t> &data,
                                         std::vector<MDEvent<nd>> &events,
                                         bool reserveMemory = true) {
-    std::vector<std::string> trait_names = {
-        "signal", "errorSquared", "runIndex", "detectorId"};
+    std::vector<std::string> trait_names = {"signal", "errorSquared",
+                                            "runIndex", "detectorId"};
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
 
@@ -389,7 +390,7 @@ public:
                                   "different dimensions/(type of) events "));
 
     if (reserveMemory) // Reserve the amount of space needed. Significant speed
-      // up (~30% thanks to this)
+                       // up (~30% thanks to this)
     {
       events.clear();
       events.reserve(numEvents);
@@ -401,15 +402,14 @@ public:
       // Point directly into the data block for the centers.
       coord_t const *const centers = &(data[ii + trait_names.size()]);
 
-      // Create the event with the traits and the coordinates. Uses the constructor that assigns a value of zero to attribute goniometerIndex
+      // Create the event with the traits and the coordinates. Uses the
+      // constructor that assigns a value of zero to attribute goniometerIndex
       events.emplace_back(static_cast<signal_t>(data[ii]),
                           static_cast<signal_t>(data[ii + 1]),
                           static_cast<uint16_t>(data[ii + 2]),
-                          static_cast<int32_t>(data[ii + 3]),
-                          centers);
+                          static_cast<int32_t>(data[ii + 3]), centers);
     }
   }
-
 };
 
 } // namespace DataObjects
