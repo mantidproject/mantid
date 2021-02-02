@@ -236,10 +236,13 @@ class GenerateLogbook(PythonAlgorithm):
     @staticmethod
     def _get_index(entry_name):
         try:
-            index = int(entry_name[entry_name.rfind('/'):])
+            index = int(entry_name[entry_name.rfind('/')+1:])
         except ValueError:
             index = 0
-        return index
+            new_name = entry_name
+        else:
+            new_name = entry_name[:entry_name.rfind('/')]
+        return new_name, index
 
     def _fill_logbook(self, logbook_ws, data_array, progress):
         """Fills out the logbook with the requested meta-data."""
@@ -277,7 +280,7 @@ class GenerateLogbook(PythonAlgorithm):
                         values = [0]*len(list_entries)
                         for split_entry_no, split_entry in enumerate(list_entries):
                             try:
-                                index = self._get_index(split_entry)
+                                split_entry, index = self._get_index(split_entry)
                                 data = f.get(split_entry)[index]
                             except TypeError:
                                 values[0] = "Not found"
@@ -302,7 +305,7 @@ class GenerateLogbook(PythonAlgorithm):
                         rowData[entry_no] = str(values[0])
                     else:
                         try:
-                            index = self._get_index(entry)
+                            entry, index = self._get_index(entry)
                             data = f.get(entry)[index]
                         except TypeError:
                             rowData[entry_no] = "Not found"
