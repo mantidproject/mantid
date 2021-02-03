@@ -92,6 +92,11 @@ void Stitch1DMany::init() {
 
   setPropertySettings("ScaleFactorFromPeriod",
                       std::move(scaleFactorFromPeriodVisible));
+
+  declareProperty(
+      std::make_unique<PropertyWithValue<int>>("IndexOfReference", 0,
+                                               Direction::Input),
+      "Index of the workspace to be used as reference for scaling.");
 }
 
 /// Load and validate the algorithm's properties.
@@ -130,6 +135,14 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
           auto inputMatrix =
               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws);
           column.emplace_back(inputMatrix);
+        }
+      }
+      if (!isDefault("IndexOfReference")) {
+        m_indexOfReference = this->getProperty("IndexOfReference");
+        if (m_indexOfReference >= static_cast<int>(column.size())) {
+          issues["IndexOfReference"] =
+              "The index of reference workspace is larger than the number of "
+              "provided workspaces.";
         }
       }
 
@@ -314,11 +327,20 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
 
   auto lhsWS = toStitch.front();
   outName += "_" + lhsWS->getName();
+  auto scaleRHSWorkspace = m_scaleRHSWorkspace;
 
   for (size_t i = 1; i < toStitch.size(); i++) {
-
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
+
+    if (static_cast<const int>(i) >= m_indexOfReference) {
+      if (static_cast<const int>(i) == m_indexOfReference) {
+        // don't scale the RHS unless the desired index is the first ws
+        scaleRHSWorkspace = false;
+      } else { // after scaling to the desired ws, keep the scaling
+        scaleRHSWorkspace = true;
+      }
+    }
 
     IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
     alg->initialize();
@@ -329,7 +351,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
       alg->setProperty("EndOverlap", m_endOverlaps[i - 1]);
     }
     alg->setProperty("Params", m_params);
-    alg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
+    alg->setProperty("ScaleRHSWorkspace", scaleRHSWorkspace);
     alg->setProperty("UseManualScaleFactor", m_useManualScaleFactors);
     if (m_useManualScaleFactors)
       alg->setProperty("ManualScaleFactor", manualScaleFactors[i - 1]);
