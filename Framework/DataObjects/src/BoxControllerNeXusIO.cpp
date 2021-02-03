@@ -20,9 +20,9 @@ namespace Mantid {
 namespace DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
-const char *EventHeaders[] = {
-    "signal, errorSquared, center (each dim.)",
-    "signal, errorSquared, runIndex, detectorId, goniometerIndex, center (each dim.)"};
+const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
+                              "signal, errorSquared, runIndex, detectorId, "
+                              "goniometerIndex, center (each dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
