@@ -98,31 +98,35 @@ class AdvancedSetupScript(BaseScriptElement):
     def createParametersList(self):
         """ Create a list of parameter names for SNSPowderReductionPlus()
         """
-        self.parnamelist = ['UnwrapRef',
-                            'LowResRef',
-                            'CropWavelengthMin',
-                            'CropWavelengthMax',
-                            'RemovePromptPulseWidth',
-                            'MaxChunkSize',
-                            'StripVanadiumPeaks',
-                            'VanadiumFWHM',
-                            'VanadiumPeakTol',
-                            'VanadiumSmoothParams',
-                            'VanadiumRadius',
-                            'FilterBadPulses',
-                            'BackgroundSmoothParams',
-                            'PushDataPositive',
-                            'PreserveEvents',
-                            'OutputFilePrefix',
-                            'ScaleData',
-                            'TypeOfCorrection',
-                            'SampleFormula',
-                            'MeasuredMassDensity',
-                            'SampleNumberDensity',
-                            'ContainerShape',
-                            # Caching options
-                            'CacheDir',
-                            'CleanCache']
+        self.parnamelist = [
+            'UnwrapRef',
+            'LowResRef',
+            'CropWavelengthMin',
+            'CropWavelengthMax',
+            'RemovePromptPulseWidth',
+            'MaxChunkSize',
+            'StripVanadiumPeaks',
+            'VanadiumFWHM',
+            'VanadiumPeakTol',
+            'VanadiumSmoothParams',
+            'VanadiumRadius',
+            'FilterBadPulses',
+            'BackgroundSmoothParams',
+            'PushDataPositive',
+            'PreserveEvents',
+            'OutputFilePrefix',
+            'ScaleData',
+            'TypeOfCorrection',
+            'SampleFormula',
+            'MeasuredMassDensity',
+            'SampleNumberDensity',
+            'ContainerShape',
+            # Caching options
+            'CacheDir1',
+            'CacheDir2',
+            'CacheDir3',
+            'CleanCache'
+        ]
 
     def set_default_pars(self, inst_name):
         """ Set default values
@@ -176,7 +180,9 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
         #Caching options
-        pardict['CacheDir'] = self.cache_dir
+        pardict['CacheDir1'] = self.cache_dir1
+        pardict['CacheDir2'] = self.cache_dir2
+        pardict['CacheDir3'] = self.cache_dir3
         pardict['CleanCache'] = str(int(self.clean_cache))
 
         return pardict
@@ -194,12 +200,7 @@ class AdvancedSetupScript(BaseScriptElement):
             else:
                 value = str(value)
 
-            # convert cache dir list into a single string using ; as
-            # separator between path
-            if keyname == "CacheDir":
-                value = ";".join(value)
-
-            xml += f"<{keyname.lower()}>{str(value)}</{keyname.lower()}>\n"
+            xml += f"<{keyname.lower()}>{value}</{keyname.lower()}>\n"
         xml += "</AdvancedSetup>\n"
 
         return xml
@@ -288,15 +289,22 @@ class AdvancedSetupScript(BaseScriptElement):
                                                                        default=AdvancedSetupScript.typeofcorrection)
 
             # Caching options
-            self.cache_dir = BaseScriptElement.getStringElement(
-                instrument_dom, 'cache_directory', default=self.__class__.cache_dir)
             # split it into the three cache dirs
             # NOTE: there should only be three entries, if not, let it fail early
-            self.cache_dir = self.cache_dir.split(";")
-            self.cache_dir1, self.cache_dir2, self.cache_dir3 = self.cache_dir
+            self.cache_dir1 = BaseScriptElement.getStringElement(instrument_dom,
+                                                                 'cachedir1',
+                                                                 default=self.__class__.cache_dir1)
+            self.cache_dir2 = BaseScriptElement.getStringElement(instrument_dom,
+                                                                 'cachedir2',
+                                                                 default=self.__class__.cache_dir2)
+            self.cache_dir3 = BaseScriptElement.getStringElement(instrument_dom,
+                                                                 'cachedir3',
+                                                                 default=self.__class__.cache_dir3)
 
-            tempbool = BaseScriptElement.getStringElement(
-                instrument_dom, "clean_cache", default=str(int(self.__class__.clean_cache)))
+            tempbool = BaseScriptElement.getStringElement(instrument_dom,
+                                                          "cleancache",
+                                                          default=str(
+                                                              int(self.__class__.clean_cache)))
             self.clean_cache = bool(int(tempbool))
 
     def reset(self):

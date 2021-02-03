@@ -674,7 +674,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="cache_dir_browse_4">
+               <widget class="QPushButton" name="cache_dir_browse_3">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -730,7 +730,7 @@
              </spacer>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="cache_dir_edit">
+             <widget class="QLineEdit" name="cache_dir_edit_1">
               <property name="toolTip">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid path for the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -763,23 +763,7 @@
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QPushButton" name="cache_dir_browse">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Browse</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QPushButton" name="cache_dir_browse_2">
+             <widget class="QPushButton" name="cache_dir_browse_1">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -798,6 +782,22 @@
              <widget class="QLabel" name="label_19">
               <property name="text">
                <string>Cache Dir3 (Scan Only)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QPushButton" name="cache_dir_browse_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Browse</string>
               </property>
              </widget>
             </item>
