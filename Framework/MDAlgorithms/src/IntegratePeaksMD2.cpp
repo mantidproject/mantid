@@ -541,24 +541,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           std::vector<double> backgroundOuterRadii(3, 0.0);
           for (size_t irad = 0; irad < peakRadii.size(); irad++) {
             auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
-            if (manualEllip) {
-              peakRadii[irad] = PeakRadius[irad];
-            } else {
-              peakRadii[irad] = PeakRadiusVector[i] * scale;
-            }
-
-            if (BackgroundInnerRadius.size() == 1) {
-              backgroundInnerRadii[irad] =
-                  BackgroundInnerRadiusVector[i] * scale;
-            } else {
-              backgroundInnerRadii[irad] = BackgroundInnerRadius[irad];
-            }
-            if (BackgroundOuterRadius.size() == 1) {
-              backgroundOuterRadii[irad] =
-                  BackgroundOuterRadiusVector[i] * scale;
-            } else {
-              backgroundOuterRadii[irad] = BackgroundOuterRadius[irad];
-            }
+            peakRadii[irad] = PeakRadiusVector[i] * scale;
+            backgroundInnerRadii[irad] = BackgroundInnerRadiusVector[i] * scale;
+            backgroundOuterRadii[irad] = BackgroundOuterRadiusVector[i] * scale;
           }
           PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
               eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
