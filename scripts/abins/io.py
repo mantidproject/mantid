@@ -108,18 +108,18 @@ class IO(object):
 
         for section in sections:
             if section in diff:
-                logger.notice(f"Differences in Abins {section} parameters:")
+                logger.information(f"Differences in Abins {section} parameters:")
                 new_group, old_group = diff[section]
                 for key in new_group:
                     if key not in old_group:
                         old_group[key] = '<key not present>'
 
                     if new_group[key] != old_group[key]:
-                        logger.notice(key)
-                        logger.notice("New values:")
-                        logger.notice(str(new_group[key]))
-                        logger.notice("Previous values:")
-                        logger.notice(str(old_group[key]))
+                        logger.information(key)
+                        logger.information("New values:")
+                        logger.information(str(new_group[key]))
+                        logger.information("Previous values:")
+                        logger.information(str(old_group[key]))
         if diff:
             return False
         else:
