@@ -122,9 +122,7 @@ class AdvancedSetupScript(BaseScriptElement):
             'SampleNumberDensity',
             'ContainerShape',
             # Caching options
-            'CacheDir1',
-            'CacheDir2',
-            'CacheDir3',
+            'CacheDir',
             'CleanCache'
         ]
 
@@ -180,9 +178,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
         #Caching options
-        pardict['CacheDir1'] = self.cache_dir1
-        pardict['CacheDir2'] = self.cache_dir2
-        pardict['CacheDir3'] = self.cache_dir3
+        pardict['CacheDir'] = ";".join(self.cache_dir)
         pardict['CleanCache'] = str(int(self.clean_cache))
 
         return pardict
@@ -198,7 +194,7 @@ class AdvancedSetupScript(BaseScriptElement):
                 # special map for bool type
                 value = '1' if value else '0'
             else:
-                value = str(value)
+                value = ";".join(self.cache_dir) if keyname == "CacheDir" else str(value)
 
             xml += f"<{keyname.lower()}>{value}</{keyname.lower()}>\n"
         xml += "</AdvancedSetup>\n"
@@ -291,15 +287,8 @@ class AdvancedSetupScript(BaseScriptElement):
             # Caching options
             # split it into the three cache dirs
             # NOTE: there should only be three entries, if not, let it fail early
-            self.cache_dir1 = BaseScriptElement.getStringElement(instrument_dom,
-                                                                 'cachedir1',
-                                                                 default=self.__class__.cache_dir1)
-            self.cache_dir2 = BaseScriptElement.getStringElement(instrument_dom,
-                                                                 'cachedir2',
-                                                                 default=self.__class__.cache_dir2)
-            self.cache_dir3 = BaseScriptElement.getStringElement(instrument_dom,
-                                                                 'cachedir3',
-                                                                 default=self.__class__.cache_dir3)
+            self.cache_dir1, self.cache_dir2, self.cache_dir3 = BaseScriptElement.getStringElement(
+                instrument_dom, 'cachedir', default=";;").split(";")
 
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
                                                           "cleancache",
