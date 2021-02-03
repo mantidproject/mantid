@@ -34,25 +34,22 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
       const int algorithmVersion(root["algorithm_version"].asInt());
       const auto frame(
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
-      std::vector<double> abcRadii, abcRadiiBackgroundInner,
-          abcRadiiBackgroundOuter;
-      abcRadii.emplace_back(root["radius0"].asDouble());
-      abcRadii.emplace_back(root["radius1"].asDouble());
-      abcRadii.emplace_back(root["radius2"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius0"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius1"].asDouble());
-      abcRadiiBackgroundInner.emplace_back(
-          root["background_inner_radius2"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius0"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius1"].asDouble());
-      abcRadiiBackgroundOuter.emplace_back(
-          root["background_outer_radius2"].asDouble());
+      std::array<double, 3> abcRadii;
+      abcRadii[0] = root["radius0"].asDouble();
+      abcRadii[1] = root["radius1"].asDouble();
+      abcRadii[2] = root["radius2"].asDouble();
 
-      std::vector<V3D> directions(3);
+      std::array<double, 3> abcRadiiBackgroundInner;
+      abcRadiiBackgroundInner[0] = root["background_inner_radius0"].asDouble();
+      abcRadiiBackgroundInner[1] = root["background_inner_radius1"].asDouble();
+      abcRadiiBackgroundInner[2] = root["background_inner_radius2"].asDouble();
+
+      std::array<double, 3> abcRadiiBackgroundOuter;
+      abcRadiiBackgroundOuter[0] = root["background_outer_radius0"].asDouble();
+      abcRadiiBackgroundOuter[1] = root["background_outer_radius1"].asDouble();
+      abcRadiiBackgroundOuter[2] = root["background_outer_radius2"].asDouble();
+
+      std::array<V3D, 3> directions;
       directions[0].fromString(root["direction0"].asString());
       directions[1].fromString(root["direction1"].asString());
       directions[2].fromString(root["direction2"].asString());
