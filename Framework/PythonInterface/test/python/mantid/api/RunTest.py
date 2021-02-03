@@ -23,12 +23,15 @@ class RunTest(unittest.TestCase):
             run.addProperty("gd_prtn_chrg", 10.05, True)
             run.addProperty("nspectra", self._nspec, True)
             run.setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"),
-                                        DateAndTime("2008-12-18T17:59:40"))
+                                   DateAndTime("2008-12-18T17:59:40"))
             self.__class__._run = run
 
     def test_get_goniometer(self):
         run = Run()
         gm = run.getGoniometer()
+        self.assertTrue(isinstance(gm, Goniometer))
+        self.assertEqual(run.getNumGoniometers(), 1)
+        gm = run.getGoniometer(0)
         self.assertTrue(isinstance(gm, Goniometer))
 
     def test_proton_charge_returns_a_double(self):

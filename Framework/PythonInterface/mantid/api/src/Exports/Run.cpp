@@ -227,10 +227,15 @@ void export_Run() {
            "getProperties.")
 
       .def("getGoniometer",
-           (const Mantid::Geometry::Goniometer &(Run::*)() const) &
+           (const Mantid::Geometry::Goniometer &(Run::*)(const size_t) const) &
                Run::getGoniometer,
-           arg("self"), return_value_policy<reference_existing_object>(),
-           "Return the Goniometer object associated with this run.")
+           (arg("self"), arg("index") = 0),
+           return_value_policy<reference_existing_object>(),
+           "Return Goniometer object associated with this run by index, "
+           "default first goniometer.")
+
+      .def("getNumGoniometers", &Run::getNumGoniometers, arg("self"),
+           "Return the number of goniometer objects associated with this run.")
 
       .def("addProperty", &addProperty,
            (arg("self"), arg("name"), arg("value"), arg("replace")),
