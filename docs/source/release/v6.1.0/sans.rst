@@ -19,4 +19,14 @@ Improvements
 
 - With SANSILLAutoProcess, the detector distance, the collimation position and the wavelength are appended to the names of the output workspaces (values are taken from the sample logs).
 
+Algorithms and instruments
+--------------------------
+
+Improvements
+############
+
+- :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` has new property:
+  `StitchReferenceIndex` to denote the index of ws that should be a reference
+  for scaling during stitching
+
 :ref:`Release 6.1.0 <v6.1.0>`
