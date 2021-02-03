@@ -40,11 +40,12 @@ std::vector<std::string> convertToStdVector(QStringList const &qList) {
   return vec;
 }
 
-QStringList convertToQStringList(std::vector<GlobalParameter> const &vec) {
+QStringList convertToQStringList(
+    std::vector<MantidQt::MantidWidgets::GlobalParameter> const &vec) {
   QStringList qList;
   qList.reserve(static_cast<int>(vec.size()));
   std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList),
-                 [](GlobalParameter const &element) {
+                 [](MantidQt::MantidWidgets::GlobalParameter const &element) {
                    return QString::fromStdString(element.m_parameter);
                  });
   return qList;
