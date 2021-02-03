@@ -283,14 +283,14 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
-    NXFloat firstChopper =
-        entry.openNXFloat("instrument/ChopperSetting/firstChopper");
+    NXInt firstChopper =
+        entry.openNXInt("instrument/ChopperSetting/firstChopper");
     firstChopper.load();
-    NXFloat secondChopper =
-        entry.openNXFloat("instrument/ChopperSetting/secondChopper");
+    NXInt secondChopper =
+        entry.openNXInt("instrument/ChopperSetting/secondChopper");
     secondChopper.load();
-    m_chopper1Name = "CH" + std::to_string(int(firstChopper[0]));
-    m_chopper2Name = "CH" + std::to_string(int(secondChopper[0]));
+    m_chopper1Name = "chopper" + std::to_string(firstChopper[0]);
+    m_chopper2Name = "chopper" + std::to_string(secondChopper[0]);
   }
   // get acquisition mode
   NXInt acqMode = entry.openNXInt("acquisition_mode");
@@ -428,92 +428,33 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  */
 std::vector<double> LoadILLReflectometry::getXValues() {
   const auto &instrument = m_localWorkspace->getInstrument();
+  const auto &run = m_localWorkspace->run();
   std::vector<double> xVals;             // no initialisation
   xVals.reserve(m_numberOfChannels + 1); // reserve memory
-  try {
-    if (m_acqMode) {
-      if (m_instrument == Supported::FIGARO) {
-        if (m_localWorkspace->run().hasProperty(
-                "Distance.edelay_delay")) // Valid from 2018.
-          m_tofDelay += doubleFromRun("Distance.edelay_delay");
-        else // Valid before 2018.
-          m_tofDelay += doubleFromRun("Theta.edelay_delay");
-      }
-      g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
-      std::string chopper{"Chopper"};
-      double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
-      if (m_instrument == Supported::D17) {
-        chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-        chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
-        chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
-        chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
-        if (chop1Phase > 360.) {
-          // This is an ugly workaround for pre-2018 D17 files which have
-          // chopper 1 phase and chopper 2 speed swapped.
-          std::swap(chop1Phase, chop2Speed);
-        }
-      } else if (m_instrument == Supported::FIGARO) {
-        chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
-        // Chopper 1 phase on FIGARO is set to an arbitrary value (999.9)
-        if (chop1Phase > 360.0)
-          chop1Phase = 0.0;
-      }
-      double POFF;
-      try {
-        POFF = doubleFromRun(m_offsetFrom + ".poff");
-      } catch (std::runtime_error &) {
-        try {
-          POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
-        } catch (std::runtime_error &) {
-          throw std::runtime_error(
-              "Unable to find VirtualChopper pickup offset");
-        }
-      }
-      double openOffset;
-      if (m_localWorkspace->run().hasProperty(
-              m_offsetFrom + ".open_offset")) // Valid from 2018.
-        openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
-      else // Figaro 2017 / 2018
-        openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
-      if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
-          chop2Speed != 0.0 && chop2Phase != 0.0) {
-        // virtual chopper entries are valid
-        chopper = "Virtual chopper";
+  if (m_acqMode) {
+    if (m_instrument == Supported::FIGARO) {
+      if (run.hasProperty("Distance.edelay_delay"))
+        m_tofDelay += doubleFromRun("Distance.edelay_delay");
+      else if (run.hasProperty("Theta.edelay_delay"))
+        m_tofDelay += doubleFromRun("Theta.edelay_delay");
+      else if (run.hasProperty("MainParameters.edelay_delay")) {
+        m_tofDelay += doubleFromRun("MainParameters.edelay_delay");
       } else {
-        // use chopper values
-        chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
-        chop2Speed = doubleFromRun(m_chopper2Name + ".rotation_speed");
-        chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
+        g_log.warning() << "Unable to find edelay_delay from the file\n";
       }
-      // logging
-      g_log.debug() << "Poff: " << POFF << '\n';
-      g_log.debug() << "Open offset: " << openOffset << '\n';
-      g_log.debug() << "Chopper 1 phase: " << chop1Phase << '\n';
-      g_log.debug() << chopper << " 1 speed: " << chop1Speed << '\n';
-      g_log.debug() << chopper << " 2 phase: " << chop2Phase << '\n';
-      g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
-
-      if (chop1Speed <= 0.0) {
-        g_log.error() << "First chopper velocity " << chop1Speed
-                      << ". Check you NeXus file.\n";
-      }
-
-      const double chopWindow = instrument->getNumberParameter("chopper_window_opening")[0];
-      m_localWorkspace->mutableRun().addProperty("ChopperWindow", chopWindow,
-                                                 "degree", true);
-      g_log.debug() << "Chopper Opening Window [degrees]" << chopWindow << '\n';
-
-      const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
-                                             (POFF - chopWindow + chop2Phase -
-                                              chop1Phase + openOffset) /
-                                             (2.0 * 360 * chop1Speed);
-      g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
-      // compute tof values
-      for (int channelIndex = 0;
-           channelIndex < static_cast<int>(m_numberOfChannels) + 1;
-           ++channelIndex) {
-        const double t_TOF1 = channelIndex * m_channelWidth;
-        xVals.emplace_back(t_TOF1 + t_TOF2);
+    }
+    g_log.debug() << "TOF delay: " << m_tofDelay << '\n';
+    std::string chopper{"Chopper"};
+    double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
+    if (m_instrument == Supported::D17) {
+      chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
+      chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
+      chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
+      chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
+      if (chop1Phase > 360.) {
+        // Pre-2018 D17 files which have chopper 1 phase and chopper 2 speed
+        // swapped.
+        std::swap(chop1Phase, chop2Speed);
       }
     } else if (m_instrument == Supported::FIGARO) {
       chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
@@ -527,13 +468,61 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     } else if (run.hasProperty(m_offsetFrom + ".pickup_offset")) {
       POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
     } else {
-      g_log.debug("Time channel index for axis description \n");
-      for (size_t t = 0; t <= m_numberOfChannels; ++t)
-        xVals.emplace_back(static_cast<double>(t));
+      throw std::runtime_error("Unable to find chopper pickup offset");
     }
-  } catch (std::runtime_error &e) {
-    g_log.information() << "Unable to access NeXus file entry: " << e.what()
-                        << '\n';
+    double openOffset;
+    if (run.hasProperty(m_offsetFrom + ".open_offset")) {
+      openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
+    } else if (run.hasProperty(m_offsetFrom + ".openOffset")) {
+      openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
+    } else {
+      throw std::runtime_error("Unable to find chopper open offset");
+    }
+    if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
+        chop2Speed != 0.0 && chop2Phase != 0.0) {
+      // virtual chopper entries are valid
+      chopper = "Virtual chopper";
+    } else {
+      // use chopper values
+      chop1Speed = doubleFromRun(m_chopper1Name + ".rotation_speed");
+      chop2Speed = doubleFromRun(m_chopper2Name + ".rotation_speed");
+      chop2Phase = doubleFromRun(m_chopper2Name + ".phase");
+    }
+    // logging
+    g_log.debug() << "Poff: " << POFF << '\n';
+    g_log.debug() << "Open offset: " << openOffset << '\n';
+    g_log.debug() << "Chopper 1 phase: " << chop1Phase << '\n';
+    g_log.debug() << chopper << " 1 speed: " << chop1Speed << '\n';
+    g_log.debug() << chopper << " 2 phase: " << chop2Phase << '\n';
+    g_log.debug() << chopper << " 2 speed: " << chop2Speed << '\n';
+
+    if (chop1Speed <= 0.0) {
+      g_log.error() << "First chopper velocity " << chop1Speed
+                    << ". Check you NeXus file.\n";
+    }
+
+    const double chopWindow =
+        instrument->getNumberParameter("chopper_window_opening")[0];
+    m_localWorkspace->mutableRun().addProperty("ChopperWindow", chopWindow,
+                                               "degree", true);
+    g_log.debug() << "Chopper Opening Window [degrees]" << chopWindow << '\n';
+
+    const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
+                                           (POFF - chopWindow + chop2Phase -
+                                            chop1Phase + openOffset) /
+                                           (2.0 * 360 * chop1Speed);
+    g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
+    // compute tof values
+    for (int channelIndex = 0;
+         channelIndex < static_cast<int>(m_numberOfChannels) + 1;
+         ++channelIndex) {
+      const double t_TOF1 = channelIndex * m_channelWidth;
+      xVals.emplace_back(t_TOF1 + t_TOF2);
+    }
+  } else {
+    g_log.debug("Time channel index for axis description \n");
+    for (size_t t = 0; t <= m_numberOfChannels; ++t)
+      xVals.emplace_back(static_cast<double>(t));
   }
 
   return xVals;
@@ -857,7 +846,6 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre,
 }
 
 /** Return the sample to detector distance for the current instrument.
- *  Valid before 2018.
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
