@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, IntBoundedValidator
 from mantid.simpleapi import *
 import numpy as np
 from os import path
@@ -218,6 +218,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
         self.deltaq = self.getPropertyValue('DeltaQ').split(',')
         self.output_type = self.getPropertyValue('OutputType')
+        self.stitch_reference_index = self.getProperty('StitchReferenceIndex').value
 
     def PyInit(self):
 
@@ -357,6 +358,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
 
+        self.declareProperty('StitchReferenceIndex', defaultValue=1,
+                             validator=IntBoundedValidator(lower=0),
+                             doc='Index of reference workspace during stitching.')
+
     def PyExec(self):
 
         self.setUp()
@@ -395,7 +400,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             try:
                 stitched = self.output + "_stitched"
                 Stitch1DMany(InputWorkspaces=outputs,
-                             OutputWorkspace=stitched)
+                             OutputWorkspace=stitched,
+                             ScaleRHSWorkspace=True,
+                             indexOfReference=self.stitch_reference_index)
                 outputs.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
