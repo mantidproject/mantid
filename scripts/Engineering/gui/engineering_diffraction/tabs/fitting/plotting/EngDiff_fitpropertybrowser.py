@@ -53,17 +53,20 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
         :return: dict in style of self.getFitAlgorithmParameters()
         """
-        fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                                  'Output': self.outputName(),
-                                  'StartX': self.startX(),
-                                  'EndX': self.endX(),
-                                  'Function': self.getFunctionString(),
-                                  'ConvolveMembers': True,
-                                  'OutputCompositeMembers': True}}
-        exclude = self.getExcludeRange()
-        if exclude:
-            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
-        return fitprop
+        try:
+            fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
+                              'Output': self.outputName(),
+                              'StartX': self.startX(),
+                              'EndX': self.endX(),
+                              'Function': self.getFunctionString(),
+                              'ConvolveMembers': True,
+                              'OutputCompositeMembers': True}}
+            exclude = self.getExcludeRange()
+            if exclude:
+                fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
+            return fitprop
+        except BaseException:  # The cpp passes up an 'unknown' error if getFunctionString() fails, i.e. if no fit
+            return None
 
     def save_current_setup(self, name):
         self.executeCustomSetupRemove(name)
