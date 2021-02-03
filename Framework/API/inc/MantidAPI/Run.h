@@ -81,7 +81,7 @@ public:
   void setGoniometer(const Geometry::Goniometer &goniometer,
                      const bool useLogValues);
   /// Set the gonoimeters using the individual values
-  void setGoniometer(const Geometry::Goniometer &goniometer);
+  void setGoniometers(const Geometry::Goniometer &goniometer);
   /// Return reference to the first const Goniometer object for this run
   const Geometry::Goniometer &getGoniometer() const;
 

@@ -164,7 +164,7 @@ void SetGoniometer::exec() {
     if (getProperty("Average"))
       ei->mutableRun().setGoniometer(gon, true);
     else
-      ei->mutableRun().setGoniometer(gon);
+      ei->mutableRun().setGoniometers(gon);
   } catch (std::runtime_error &) {
     g_log.error("No log values for goniometers");
   }

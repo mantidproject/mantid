@@ -361,7 +361,7 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
  * Set the gonoimeter & read the individual values from the logs
  * @param goniometer :: A reference to a goniometer
  */
-void Run::setGoniometer(const Geometry::Goniometer &goniometer) {
+void Run::setGoniometers(const Geometry::Goniometer &goniometer) {
   auto old = std::move(m_goniometers);
   try {
     calculateGoniometerMatrices(goniometer);
