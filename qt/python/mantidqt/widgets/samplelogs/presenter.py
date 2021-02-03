@@ -11,7 +11,7 @@ from .model import SampleLogsModel
 from .view import SampleLogsView
 
 
-class SampleLogs(object):
+class SampleLogs():
     """
     """
     def __init__(self, ws, parent=None, model=None, view=None):
