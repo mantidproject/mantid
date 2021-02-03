@@ -55,12 +55,12 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         try:
             fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
-                              'Output': self.outputName(),
-                              'StartX': self.startX(),
-                              'EndX': self.endX(),
-                              'Function': self.getFunctionString(),
-                              'ConvolveMembers': True,
-                              'OutputCompositeMembers': True}}
+                                      'Output': self.outputName(),
+                                      'StartX': self.startX(),
+                                      'EndX': self.endX(),
+                                      'Function': self.getFunctionString(),
+                                      'ConvolveMembers': True,
+                                      'OutputCompositeMembers': True}}
             exclude = self.getExcludeRange()
             if exclude:
                 fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
