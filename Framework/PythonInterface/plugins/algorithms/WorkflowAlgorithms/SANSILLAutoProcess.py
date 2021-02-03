@@ -612,6 +612,54 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         return container_name
 
+    def createCustomSuffix(self, ws, i):
+        logs = mtd[ws].run().getProperties()
+        logs = {log.name:log.value for log in logs}
+
+        distance = None
+        try:
+            distance = float(logs["L2"])
+            if distance < 0.0:
+                distance = None
+                raise ValueError
+        except:
+            logger.notice("Unable to get a valid detector distance value from "
+                          "the sample logs.")
+        collimation = None
+        try:
+            collimation = float(logs["collimation.actual_position"])
+            if collimation < 0.0:
+                collimation = None
+                raise ValueError
+        except:
+            logger.notice("Unable to get a valid collimation distance from "
+                          "the sample logs.")
+        wavelength = None
+        try:
+            wavelength = float(logs["wavelength"])
+            if wavelength < 0.0:
+                wavelength = None
+                raise ValueError
+        except:
+            try:
+                wavelength = float(logs["selector.wavelength"])
+                if wavelength < 0.0:
+                    wavelength = None
+                    raise ValueError
+            except:
+                logger.notice("Unable to get a valid wavelength from the "
+                              "sample logs.")
+        suffix = ""
+        if distance:
+            suffix += "_d{:.1f}m".format(distance)
+        if collimation:
+            suffix += "_c{:.1f}m".format(collimation)
+        if wavelength:
+            suffix += "_w{:.1f}A".format(wavelength)
+
+        suffix += "_{}".format(i + 1)
+        return suffix
+
     def processSample(self, i, flux_name, sample_transmission_names, beam_name,
                       absorber_name, container_name):
         # this is the default mask, the same for all the distance configurations
@@ -666,7 +714,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # sample
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
-        output = self.output + '_' + str(i + 1)
         self.progress.report('Processing sample at detector configuration '
                              + str(i + 1))
 
@@ -698,26 +745,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
-        # create the sample suffix
-        logs = mtd[sample_name].run().getProperties()
-        logs = {log.name:log.value for log in logs}
-        suffix = ""
-        if "L2" in logs:
-            distance = float(logs["L2"])
-            if distance > 0.0:
-                suffix += "_d{:.1f}m".format(distance)
-        if "collimation.actual_position" in logs:
-            collimation = float(logs["collimation.actual_position"])
-            if collimation > 0.0:
-                suffix += "_c{:.1f}m".format(collimation)
-        if "wavelength" in logs:
-            wavelength = float(logs["wavelength"])
-            if wavelength <= 0.0 and "selector.wavelength" in logs:
-                wavelength = float(logs["selector.wavelength"])
-            if wavelength > 0.0:
-                suffix += "_w{:.1f}A".format(wavelength)
-        suffix += "_{}".format(i + 1)
-
         if self.getProperty('OutputPanels').value:
             panel_ws_group = self.output_panels + '_' + str(i + 1)
         else:
@@ -728,12 +755,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         else:
             output_wedges = ""
 
+        suffix = self.createCustomSuffix(sample_name, i)
+        output_sample = self.output + suffix
+
         if self.getProperty('SensitivityWithOffsets').value:
             CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
 
         SANSILLIntegration(
                 InputWorkspace=sample_name,
-                OutputWorkspace=output,
+                OutputWorkspace=output_sample,
                 OutputType=self.output_type,
                 CalculateResolution=
                 self.getPropertyValue('CalculateResolution'),
@@ -757,14 +787,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 WavelengthRange=self.getProperty('WavelengthRange').value
                 )
 
-        # rename samples to add the suffix
-        sampleSuffix = output[0:-len('_' + str(i))] + suffix
-        RenameWorkspace(InputWorkspace=output,
-                        OutputWorkspace=sampleSuffix)
-        output = sampleSuffix
-
         # wedges ungrouping and renaming
-        if self.n_wedges and self.output_type == "I(Q)":
+        if output_wedges:
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
             wedges_new_names = [self.output + "_wedge_" + str(w + 1) + suffix
@@ -772,8 +796,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
                              WorkspaceNames=wedges_new_names)
+            output_wedges = wedges_new_names
         else:
-            wedges_new_names = []
+            output_wedges = []
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
@@ -781,7 +806,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if not mtd.doesExist(panel_ws_group):
             panel_ws_group = ""
 
-        return output, wedges_new_names, panel_ws_group, output_sens
+        return output_sample, output_wedges, panel_ws_group, output_sens
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
