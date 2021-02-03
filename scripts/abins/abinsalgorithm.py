@@ -144,7 +144,6 @@ class AbinsAlgorithm:
                         (instrument in abins.parameters.instruments)
                         and (parameter_name in abins.parameters.instruments[instrument])):
                     valid_choices += sorted(list(abins.parameters.instruments[instrument][parameter_name]))
-            valid_choices = sorted(list(set(valid_choices)))
 
             self.declareProperty(name=property_name,
                                  direction=Direction.Input,
