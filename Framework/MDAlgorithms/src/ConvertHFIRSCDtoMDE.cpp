@@ -197,8 +197,9 @@ void ConvertHFIRSCDtoMDE::exec() {
       }
     }
   } else { // HB2C
-    s1 = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-        expInfo.getLog("s1"))))();
+    auto s1Log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        expInfo.run().getLogData("s1"));
+    s1 = s1Log->valuesAsVector();
     azimuthal =
         (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
             expInfo.getLog("azimuthal"))))();

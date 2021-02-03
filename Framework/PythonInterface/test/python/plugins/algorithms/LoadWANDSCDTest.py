@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import LoadWANDSCD
+from mantid.simpleapi import LoadWANDSCD, SetGoniometer
 import unittest
 
 
@@ -55,6 +55,9 @@ class LoadWANDTest(unittest.TestCase):
         self.assertEqual(len(duration), 2)
         self.assertAlmostEqual(duration[0], 40.05, 5)
         self.assertAlmostEqual(duration[1], 40.05, 5)
+
+        # test that you can run SetGoniometer, testing the s1 log
+        SetGoniometer(LoadWANDTest_ws, Axis0='s1,0,1,0,1')
 
         LoadWANDTest_ws.delete()
 
