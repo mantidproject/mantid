@@ -27,10 +27,10 @@ instruments = {
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
         # The forward detector angle israther specific as test-data was based on truncated value in radians
-        'settings': {'forward': {'angles': [134.98885653282196]},
-                     'backward': {'angles': [45.]},
-                     'both': {'angles': [45., 134.98885653282196]}},
-        'settings_default': 'forward',
+        'settings': {'Forward (TOSCA)': {'angles': [134.98885653282196]},
+                     'Backward (TOSCA)': {'angles': [45.]},
+                     'All detectors (TOSCA)': {'angles': [45., 134.98885653282196]}},
+        'settings_default': 'Forward (TOSCA)',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
@@ -43,19 +43,14 @@ instruments = {
         'scattering_angle_range': [10, 90],
         'angles_per_detector': 5,
         'settings_default': 'Cu(220)',
-        'settings': {'Cu(220)': {'Ei_range_meV': [26, 500],
-                                 'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
-                                 'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
-                     # 'Cu(220) simple': {'Ei_range_meV': (26, 500), 'ei_resolution': 0.025},
-                     # 'Cu(331) simple': {'Ei_range_meV': [67, 500], 'ei_resolution': 0.0175},
-                     'Cu(331)': {'Ei_range_meV': [67, 500],
-                                 'abs_resolution_meV': [-8.60511597e-08,  1.11911095e-04,
-                                                        5.15925386e-04,  6.58362118e-01]},
-                     # 'Cu(331) best expected': {'Ei_range_meV': [67, 500],
-                     #                           'abs_resolution_meV': [-4.31019791e-08,  5.83291918e-05,
-                     #                                                  -1.82073324e-03,  7.30888552e-01]},
-                     'Si(311)': {'Ei_range_meV': [16.5, 60], 'abs_resolution_meV': 0.8},
-                     'Si(111)': {'Ei_range_meV': [4.5, 20], 'abs_resolution_meV': 0.8}}}
+        'settings': {'Cu(220) (Lagrange)': {'Ei_range_meV': [26, 500],
+                                            'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
+                                            'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
+                     'Cu(331) (Lagrange)': {'Ei_range_meV': [67, 500],
+                                            'abs_resolution_meV': [-8.60511597e-08,  1.11911095e-04,
+                                                                   5.15925386e-04,  6.58362118e-01]},
+                     'Si(311) (Lagrange)': {'Ei_range_meV': [16.5, 60], 'abs_resolution_meV': 0.8},
+                     'Si(111) (Lagrange)': {'Ei_range_meV': [4.5, 20], 'abs_resolution_meV': 0.8}}}
     }
 
 # Names of groups in HDF5 cache/output file ################

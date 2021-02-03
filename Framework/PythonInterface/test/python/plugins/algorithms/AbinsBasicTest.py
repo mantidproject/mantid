@@ -163,7 +163,7 @@ class AbinsBasicTest(unittest.TestCase):
               TemperatureInKelvin=self._temperature,
               SampleForm=self._sample_form,
               Instrument="Lagrange",
-              Setting="Cu(331)",
+              Setting="Cu(331) (Lagrange)",
               Atoms=self._atoms,
               Scale=self._scale,
               SumContributions=self._sum_contributions,
