@@ -664,7 +664,7 @@ public:
     TS_ASSERT_EQUALS(gm.getAxis(2).angle, 45.6);
   }
 
-  void test_setGoniometerWithLogsUsesTimeSeries() {
+  void test_setGoniometersWithLogsUsesTimeSeries() {
     Run run;
 
     auto omega = std::make_unique<TimeSeriesProperty<double>>("omega");
@@ -683,7 +683,7 @@ public:
 
     Goniometer gm;
     gm.makeUniversalGoniometer();
-    TS_ASSERT_THROWS(run.setGoniometer(gm), const std::runtime_error &);
+    TS_ASSERT_THROWS(run.setGoniometers(gm), const std::runtime_error &);
 
     auto phi = std::make_unique<TimeSeriesProperty<double>>("phi");
     phi->addValue("2018-01-01T00:00:00", 0.0);
@@ -691,7 +691,7 @@ public:
     phi->addValue("2018-01-01T02:00:00", 90.0);
     run.addProperty(phi.release(), true);
 
-    run.setGoniometer(gm);
+    run.setGoniometers(gm);
 
     TS_ASSERT_EQUALS(run.getNumGoniometers(), 3);
 
