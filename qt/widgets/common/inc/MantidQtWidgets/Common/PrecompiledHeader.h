@@ -9,10 +9,14 @@
 // Mantid
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/System.h"
 
 // STL
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
+
+// Qt
+#include <QApplication>
+#include <QDialog>
+#include <QObject>
+#include <QPushButton>
+#include <QString>
+#include <QStringList>
+#include <QWidget>

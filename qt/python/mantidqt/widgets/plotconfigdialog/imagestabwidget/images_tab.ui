@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>361</width>
-    <height>367</height>
+    <height>390</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -176,25 +176,6 @@
        </property>
       </spacer>
      </item>
-     <item row="4" column="2">
-      <widget class="QDoubleSpinBox" name="min_value_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="1">
       <spacer name="horizontalSpacer_29">
        <property name="orientation">
@@ -301,31 +282,18 @@
        </property>
       </spacer>
      </item>
-     <item row="5" column="2">
-      <widget class="QDoubleSpinBox" name="max_value_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="2">
       <widget class="QCheckBox" name="reverse_colormap_check_box">
        <property name="text">
         <string>Reverse colormap</string>
        </property>
       </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QLineEdit" name="min_value_line_edit"/>
+     </item>
+     <item row="5" column="2">
+      <widget class="QLineEdit" name="max_value_line_edit"/>
      </item>
     </layout>
    </item>
@@ -395,8 +363,6 @@
   <tabstop>label_line_edit</tabstop>
   <tabstop>colormap_combo_box</tabstop>
   <tabstop>reverse_colormap_check_box</tabstop>
-  <tabstop>min_value_spin_box</tabstop>
-  <tabstop>max_value_spin_box</tabstop>
   <tabstop>interpolation_combo_box</tabstop>
   <tabstop>scale_combo_box</tabstop>
  </tabstops>

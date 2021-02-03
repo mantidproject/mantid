@@ -25,6 +25,8 @@ Concepts
 Algorithms
 ----------
 
+- :ref:`CalculateEfficiency <algm-CalculateEfficiency>` has now overwritten `processGroups` method and  a new property, MergeGroups, that is used to flag that the input group
+  should be merged and averaged, and masked spectra be filled with data (if available) from other entries of the input group instead of processing them entry-by-entry.
 - The calculation of a distance has been updated in Track to correctly calculate the distance for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affect algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` where you may now get slightly different values.
 - Added the ability to specify the packing fraction and effective number density to :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
 - :ref:`AlignComponents <algm-AlignComponents>` now minimizes a set of peak-center deviations in d-spacing, instead of the geometrical DIFC parameters.
@@ -35,7 +37,7 @@ Algorithms
 Fitting
 -------
 
-- Corrected a bug in the calculation of uncertainty bands on the calculated fit curve. This correction has been tested against the python fitting package `kmpfit`, where an agreement between the two was seen.
+- Corrected a bug in the calculation of uncertainty bands on the calculated fit curve. This correction has been tested against the python fitting package ``kmpfit``, where an agreement between the two was seen.
 - Added button to clear all custom setups in Setup > Manage Setups menu
 
 Data Objects

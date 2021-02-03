@@ -28,6 +28,7 @@ class RundexSettings(object):
 
     # acquisition modes
     SANS_ACQ =     "SANS"
+    SANS_PSCAN =   "Sample scan"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
@@ -52,7 +53,7 @@ class RundexSettings(object):
     ACQUISITION_MODES = {
             D11:    [SANS_ACQ],
             D11B:    [SANS_ACQ],
-            D16:    [SANS_ACQ],
+            D16:    [SANS_ACQ, SANS_PSCAN],
             D22:    [SANS_ACQ],
             D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ],
@@ -79,6 +80,14 @@ class RundexSettings(object):
                 "ReferenceFiles",
                 "OutputWorkspace",
                 "SampleThickness",
+                "CustomOptions"
+                ],
+            SANS_PSCAN: [
+                "SampleRuns",
+                "AbsorberRuns",
+                "ContainerRuns",
+                "OutputWorkspace",
+                "OutputJoinedWorkspace",
                 "CustomOptions"
                 ],
             REFL_POL: [
@@ -123,6 +132,7 @@ class RundexSettings(object):
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
+            SANS_PSCAN:   "SANSILLParameterScan",
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
@@ -134,6 +144,7 @@ class RundexSettings(object):
     # for the moment, limit those to 1 until the algorithms are made truly thread safe
     THREADS_NUMBER = {
             SANS_ACQ:     1,
+            SANS_PSCAN:   1,
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
@@ -166,6 +177,15 @@ class RundexSettings(object):
                 "IQxQyLogBinning",
                 "OutputPanels",
                 "WavelengthRange"
+                ],
+            SANS_PSCAN : [
+                "SensitivityMap",
+                "DefaultMaskFile",
+                "NormaliseBy",
+                "Observable",
+                "PixelYMin",
+                "PixelYMax",
+                "Wavelength"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",

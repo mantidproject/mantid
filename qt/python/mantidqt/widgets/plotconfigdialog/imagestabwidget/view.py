@@ -15,6 +15,7 @@ from qtpy.QtWidgets import QWidget
 
 from mantid.plots.utility import get_colormap_names
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 
 INTERPOLATIONS = [
@@ -40,18 +41,12 @@ class ImagesTabWidgetView(QWidget):
         self._populate_interpolation_combo_box()
         self._populate_scale_combo_box()
 
-        self.set_min_max_ranges(self.get_scale())
-
         self.max_min_value_warning.setVisible(False)
 
-    def set_min_max_ranges(self, scale):
-        # Set maximum and minimum for the min/max spin boxes
-        for bound in ['min', 'max']:
-            spin_box = getattr(self, '%s_value_spin_box' % bound)
-            if scale == "Linear":
-                spin_box.setRange(np.finfo(np.float32).min, np.finfo(np.float32).max)
-            else:
-                spin_box.setRange(0.0001, np.finfo(np.float32).max)
+        self.min_value_validator = LineEditDoubleValidator(self.min_value_line_edit, 0.0)
+        self.max_value_validator = LineEditDoubleValidator(self.max_value_line_edit, 1.0)
+        self.min_value_line_edit.setValidator(self.min_value_validator)
+        self.max_value_line_edit.setValidator(self.max_value_validator)
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():
@@ -100,16 +95,18 @@ class ImagesTabWidgetView(QWidget):
         self.reverse_colormap_check_box.setCheckState(qt_checked)
 
     def get_min_value(self):
-        return self.min_value_spin_box.value()
+        return float(self.min_value_line_edit.text())
 
     def set_min_value(self, value):
-        self.min_value_spin_box.setValue(value)
+        self.min_value_validator.last_valid_value = str(value)
+        self.min_value_line_edit.setText(str(value))
 
     def get_max_value(self):
-        return self.max_value_spin_box.value()
+        return float(self.max_value_line_edit.text())
 
     def set_max_value(self, value):
-        self.max_value_spin_box.setValue(value)
+        self.max_value_validator.last_valid_value = str(value)
+        self.max_value_line_edit.setText(str(value))
 
     def get_interpolation(self):
         return self.interpolation_combo_box.currentText()

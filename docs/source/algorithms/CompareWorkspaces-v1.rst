@@ -32,6 +32,14 @@ workspaces matched, the message workspace will be empty.
 
 Please note that details about the comparisons will be only available when the log level is set to debug.
 
+Checking option `CheckInstrument` will enable the following comparisons between the instruments embedded
+in each of the two workspaces:
+
+- instrument name
+- positions and rotations of detectors
+- mask of detectors
+- position of the source and sample
+- instrument parameters
 
 Usage
 -----

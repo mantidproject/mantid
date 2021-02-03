@@ -42,11 +42,7 @@ void ALCBaselineModellingView::initialize() {
           SLOT(sectionsContextMenu(const QPoint &)));
 
   // Make columns non-resizeable and to fill all the available space
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   m_ui.sections->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
 
   connect(m_ui.sections, SIGNAL(cellChanged(int, int)),
           SIGNAL(sectionRowModified(int)));
@@ -102,15 +98,10 @@ ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot,
                                         const QString &curveName) {
   // Ensures the plot is plotted only with data points and no lines
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  plot->setCurveStyle(curveName, -1);
-  plot->setCurveSymbol(curveName, 0);
-#else
   UNUSED_ARG(plot);
   UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
   return kwargs;
 }
 

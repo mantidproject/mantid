@@ -123,13 +123,17 @@ class FittingDataModel(object):
             if log in self._log_values[ws_name]:
                 avg, stdev = self._log_values[ws_name][log]
             else:
-                try:
-                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                    self._log_values[ws_name][log] = [avg, stdev]
-                except RuntimeError:
-                    avg, stdev = full(2, nan)
-                    logger.error(
-                        f"File {ws.name()} does not contain log {log}")
+                avg, stdev = full(2, nan)  # default unless value can be calculated
+                if log in [l.name for l in run.getLogData()]:
+                    try:
+                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    except RuntimeError:
+                        # sometimes happens in old data if proton_charge log called something different
+                        logger.warning(
+                            f"Average value of log {log} could not be calculated for file {ws.name()}")
+                else:
+                    logger.warning(f"File {ws.name()} does not contain log {log}")
+                self._log_values[ws_name][log] = [avg, stdev]
             self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
         self.update_log_group_name()
 

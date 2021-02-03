@@ -197,6 +197,18 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
 }
 
 /**
+ * Adds a deprecation warning to the getNumberBins call to warn about using
+ * blocksize instead
+ * @param self A reference to the calling object
+ * @returns The blocksize()
+ */
+std::size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
+  return self.blocksize();
+}
+
+/**
  * Adds a deprecation warning to the binIndexOf call to warn about using
  * yIndexOfX instead
  * @param self A reference to the calling object
@@ -341,6 +353,10 @@ void export_MatrixWorkspace() {
       .def("getNumberBins", &MatrixWorkspace::getNumberBins,
            (arg("self"), arg("index")),
            "Returns the number of bins for a given histogram index.")
+      .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
+           "Returns size of the Y data array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
+           "instead)")
       .def("getMaxNumberBins", &MatrixWorkspace::getMaxNumberBins, arg("self"),
            "Returns the maximum number of bins in a workspace (works on ragged "
            "data).")

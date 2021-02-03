@@ -13,14 +13,19 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/PDCalibration.h"
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/Diffraction.h"
 
+using Mantid::Algorithms::ConvertToMatrixWorkspace;
 using Mantid::Algorithms::CreateSampleWorkspace;
+using Mantid::Algorithms::CropWorkspace;
 using Mantid::Algorithms::PDCalibration;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::FrameworkManager;
@@ -29,6 +34,7 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::Workspace_sptr;
+using Mantid::DataHandling::GroupDetectors2;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
 
@@ -337,6 +343,122 @@ public:
 
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
+  }
+
+  // Crop workspace so that final peak is evaluated over a range that includes
+  // the last bin (stop regression out of range bug for histo workspaces)
+  void test_exec_difc_histo() {
+    // convert to histo
+    ConvertToMatrixWorkspace convMatWS;
+    convMatWS.initialize();
+    convMatWS.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+    convMatWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+    convMatWS.execute();
+    // crop
+    std::string xmax = "15104"; // only keep TOF < xmax
+    CropWorkspace cropWS;
+    cropWS.initialize();
+    cropWS.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+    cropWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+    cropWS.setPropertyValue("XMin", "300");
+    cropWS.setPropertyValue("XMax", xmax);
+    cropWS.execute();
+
+    // setup the peak postions based on transformation from detID=155
+    std::vector<double> dValues(PEAK_TOFS.size());
+    std::transform(
+        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
+        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+
+    const std::string prefix{"PDCalibration_difc"};
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "TofBinning", std::to_string(TOF_BINNING[0]) + "," +
+                          std::to_string(TOF_BINNING[1]) + "," + xmax));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // test that the difc values are the same as for event
+    ITableWorkspace_sptr calTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
+
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+  }
+
+  void test_exec_grouped_detectors() {
+    // group detectors
+    GroupDetectors2 groupDet;
+    groupDet.initialize();
+    groupDet.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+    groupDet.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
+    groupDet.setPropertyValue("DetectorList", "100,101,102,103");
+    groupDet.execute();
+
+    // setup the peak postions based on transformation from detID=155
+    std::vector<double> dValues(PEAK_TOFS.size());
+    std::transform(
+        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
+        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+
+    const std::string prefix{"PDCalibration_difc"};
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
+    TS_ASSERT(calTable);
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+    // test that the cal table has the same difc value for grouped dets
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 100) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1),
+                    calTable->cell<double>(index, 1), 1E-5); // det 101
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1),
+                    calTable->cell<double>(index, 1), 1E-5); // det 102
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1),
+                    calTable->cell<double>(index, 1), 1E-5); // det 103
   }
 };
 
