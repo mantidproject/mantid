@@ -124,8 +124,6 @@ class ArrayPropertyTest(unittest.TestCase):
         Python 3 range() returns a range object that behaves like a sequence
         whereas it just returned a list in Python 2
         """
-        if sys.version_info[0] < 3:
-            return
         class AlgWithFloatArrayProperty(PythonAlgorithm):
             _input_values = None
             def PyInit(self):
