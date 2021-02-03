@@ -503,7 +503,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
-          eigenvals = PeakRadius;
+          std::transform(PeakRadius.begin(), PeakRadius.end(),
+                         std::back_inserter(eigenvals),
+                         [](double &r) { return std::pow(r, 2.0); });
           eigenvects.push_back(V3D(1.0, 0.0, 0.0));
           eigenvects.push_back(V3D(0.0, 1.0, 0.0));
           eigenvects.push_back(V3D(0.0, 0.0, 1.0));
