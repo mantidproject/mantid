@@ -561,7 +561,6 @@ public:
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 2000000;
     V3D pos(0.0, 0.0, 0.0); // peak position
-    double peakRad = 1.0;
 
     createMDEW();
 
@@ -570,7 +569,6 @@ public:
     PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
                            std::make_pair(-0.5, 0.5)});
-    // addPeak(numEvents, pos[0], pos[1], pos[2], peakRad);
     peakWS->addPeak(Peak(inst, 1, 1.0, pos));
     AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
                                                  peakWS);
@@ -586,7 +584,7 @@ public:
     TS_ASSERT(peakResult);
 
     double ellipInten = peakResult->getPeak(0).getIntensity();
-    double ellipVol = (4.0 / 3.0) * M_PI * numEvents *
+    double ellipVol = (4.0 / 3.0) * M_PI * static_cast<double>(numEvents) *
                       std::accumulate(radii.begin(), radii.end(), 1.0,
                                       std::multiplies<double>());
     TS_ASSERT_DELTA(ellipInten, ellipVol,
