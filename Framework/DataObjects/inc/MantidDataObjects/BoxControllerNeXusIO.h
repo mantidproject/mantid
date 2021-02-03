@@ -101,7 +101,7 @@ private:
   enum EventType {
     LeanEvent = 0, //< the event consisting of signal error and event coordinate
     FatEvent =
-        1 //< the event having the same as lean event plus RunID and detID
+        1 //< lean event endowed with runIndex, detectorID, and goniometerIndex
     /// the type of event (currently MD event or MDLean event this class deals
     /// with. )
   } m_EventType;

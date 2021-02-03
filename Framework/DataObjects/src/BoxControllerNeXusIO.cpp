@@ -22,7 +22,7 @@ namespace DataObjects {
 // this class
 const char *EventHeaders[] = {
     "signal, errorSquared, center (each dim.)",
-    "signal, errorSquared, runIndex, detectorId, center (each dim.)"};
+    "signal, errorSquared, runIndex, detectorId, goniometerIndex, center (each dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
@@ -35,7 +35,9 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
       m_BlockStart(2, 0), m_BlockSize(2, 0), m_CoordSize(sizeof(coord_t)),
       m_EventType(FatEvent), m_EventsVersion("1.0"),
       m_ReadConversion(noConversion) {
-  m_BlockSize[1] = 4 + m_bc->getNDims();
+  /** Traits of the serialized events are, in this order: signal, errorSquared,
+   * runIndex, detectorId, goniometerIndex, and nd-Dimensional coordinates */
+  m_BlockSize[1] = 5 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
     m_EventsTypeHeaders.emplace_back(EventHeader);
@@ -82,7 +84,10 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
       m_BlockSize[1] = 2 + m_bc->getNDims();
       break;
     case (FatEvent):
-      m_BlockSize[1] = 4 + m_bc->getNDims();
+      /** Traits of the serialized events are, in this order: signal,
+       * errorSquared, runIndex, detectorId, goniometerIndex, and
+       * nd-Dimensional coordinates */
+      m_BlockSize[1] = 5 + m_bc->getNDims();
       break;
     default:
       throw std::invalid_argument(" Unsupported event kind Identified  ");
@@ -267,7 +272,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   }
 
   // check if the number of dimensions in the file corresponds to the number of
-  // dimesnions to read.
+  // dimensions to read.
   size_t nFileDim;
   auto ndim2 = static_cast<size_t>(info.dims[1]);
   switch (m_EventType) {
@@ -275,7 +280,10 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
     nFileDim = ndim2 - 2;
     break;
   case (FatEvent):
-    nFileDim = ndim2 - 4;
+    /** Traits of the serialized event are, in this order: signal,
+     * errorSquared, runIndex, detectorId, goniometerIndex, and nd-Dimensional
+     * coordinates */
+    nFileDim = ndim2 - 5;
     break;
   default:
     throw Kernel::Exception::FileError(
