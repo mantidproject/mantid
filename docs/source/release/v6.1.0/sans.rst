@@ -9,4 +9,9 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Improvements
+############
+
+- With SANSILLAutoProcess, the detector distance, the collimation position and the wavelength are appended to the names of the output workspaces (values are taken from the sample logs).
+
 :ref:`Release 6.1.0 <v6.1.0>`
