@@ -379,8 +379,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
                 sample, wedges, panels, sensitivity = \
-                        self.processSample(d, flux, sample_transmission, beam,
-                                           absorber, container)
+                    self.processSample(d, flux, sample_transmission, beam,
+                                       absorber, container)
                 outputSamples.append(sample)
                 outputWedges.append(wedges)
 
@@ -395,7 +395,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             ConvertToPointData(InputWorkspace=output,
                                OutputWorkspace=output)
         if (len(outputSamples) > 1
-            and self.getPropertyValue('OutputType') == 'I(Q)'):
+           and self.getPropertyValue('OutputType') == 'I(Q)'):
             try:
                 stitched = self.output + "_stitched"
                 Stitch1DMany(InputWorkspaces=outputSamples,
