@@ -557,13 +557,76 @@ public:
                     ceil(0.002 * static_cast<double>(sphereInten)));
   }
 
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol() {
+    // Test an ellipsoid against theoretical vol
+    size_t numEvents = 2000000;
+    V3D pos(0.0, 0.0, 0.0); // peak position
+    double peakRad = 1.0;
+
+    createMDEW();
+
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+    // addPeak(numEvents, pos[0], pos[1], pos[2], peakRad);
+    peakWS->addPeak(Peak(inst, 1, 1.0, pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    // Major axis along z
+    std::vector<double> radii = {0.03, 0.04, 0.05};
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    PeaksWorkspace_sptr peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    double ellipVol = (4.0 / 3.0) * M_PI * numEvents *
+                      std::accumulate(radii.begin(), radii.end(), 1.0,
+                                      std::multiplies<double>());
+    TS_ASSERT_DELTA(ellipInten, ellipVol,
+                    ceil(0.05 * static_cast<double>(ellipVol)));
+
+    // Major axis along y
+    radii = {0.04, 0.05, 0.03};
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, ellipVol,
+                    ceil(0.05 * static_cast<double>(ellipVol)));
+
+    // Major axis along x
+    radii = {0.05, 0.04, 0.03};
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, ellipVol,
+                    ceil(0.05 * static_cast<double>(ellipVol)));
+  }
+
   void EllipsoidTestHelper(
       double doCounts, bool fixQAxis, bool doBkgrd,
       std::vector<double> peakEigenvals = std::vector<double>(),
       std::vector<double> ellipsoidRadii = std::vector<double>(),
       std::vector<double> ellipsoidBgInnerRad = std::vector<double>(),
-      std::vector<double> ellipsoidBgOuterRad = std::vector<double>(),
-      double expected = 1.0) {
+      std::vector<double> ellipsoidBgOuterRad = std::vector<double>()) {
     // doCounts < 0 -> all events have a count of 1
     // doCounts > 0 -> counts follow multivariate normal dist
 
@@ -664,17 +727,17 @@ public:
       if (doBkgrd == true) {
         // use slightly more lenient tolerance
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        expected * static_cast<double>(numEvents),
+                        static_cast<double>(numEvents),
                         ceil(0.005 * static_cast<double>(numEvents)));
       } else {
         TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                        expected * static_cast<double>(numEvents),
+                        static_cast<double>(numEvents),
                         ceil(0.002 * static_cast<double>(numEvents)));
       }
     } else {
       // sum = 0.2175*Npts (for 3D from simulation regardless of covar etc.)
       TS_ASSERT_DELTA(newPW->getPeak(0).getIntensity(),
-                      expected * static_cast<double>(numEvents) * 0.2175,
+                      static_cast<double>(numEvents) * 0.2175,
                       static_cast<double>(numEvents) * 0.0015);
     }
 
