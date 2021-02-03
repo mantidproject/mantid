@@ -74,7 +74,7 @@ void IndirectDataAnalysisFqFitTab::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(updateModelFitTypeString()));
 }
 
-void IndirectDataAnalysisFqFitTab::updateModelFitTypeString() { m_FqFittingModel->setFitType(getFitTypeString()); }
+  m_FqFittingModel->setFitTypeString(getFitTypeString());
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
   if (!m_FqFittingModel->getFitFunction() ||
