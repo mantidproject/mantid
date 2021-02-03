@@ -745,8 +745,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
+        suffix = self.createCustomSuffix(sample_name, i)
+        output_sample = self.output + suffix
+
         if self.getProperty('OutputPanels').value:
-            panel_ws_group = self.output_panels + '_' + str(i + 1)
+            panel_ws_group = self.output_panels + suffix
         else:
             panel_ws_group = ""
 
@@ -754,9 +757,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             output_wedges = self.output + "_wedge_d" + str(i + 1)
         else:
             output_wedges = ""
-
-        suffix = self.createCustomSuffix(sample_name, i)
-        output_sample = self.output + suffix
 
         if self.getProperty('SensitivityWithOffsets').value:
             CloneWorkspace(InputWorkspace=sample_name, OutputWorkspace=output_sens)
