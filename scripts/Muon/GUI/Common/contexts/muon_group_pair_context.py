@@ -320,7 +320,7 @@ class MuonGroupPairContext(object):
                     for pair in default_pairs:
                         odd_period = index*2 + 1
                         even_period = odd_period+1
-                        self._diffs.append(MuonDiff(pair.name+"_"+str(odd_period)+"_minus_"+str(even_period),
+                        self._diffs.append(MuonDiff("pair_diff"+str(index+1),
                                                     pair.name + str(odd_period), pair.name + str(even_period), group_or_pair="pair",
                                                     periods=[odd_period,even_period]))
 

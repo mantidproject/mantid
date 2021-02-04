@@ -77,8 +77,7 @@ class DifferenceTablePresenter(object):
             table = self._view.get_table_contents()
         self._model.clear_diffs(self._group_or_pair)
         for entry in table:
-            periods = self._model._context.group_pair_context[entry[2]].periods
-            periods += self._model._context.group_pair_context[entry[3]].periods
+            periods = self._model._context.group_pair_context[entry[2]].periods + self._model._context.group_pair_context[entry[3]].periods
             diff = MuonDiff(diff_name=str(entry[0]),
                             positive=str(entry[2]),
                             negative=str(entry[3]), group_or_pair = self._group_or_pair, periods=periods)

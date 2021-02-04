@@ -677,7 +677,6 @@ class FittingTabModel(object):
         workspace_names = []
         for run in runs:
             for group_or_pair in groups_and_pairs:
-                print("no", group_or_pair, self.context.group_pair_context.selected_diffs)
                 if check_phasequad_name(
                         group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_phasequad_name(self.context, group_or_pair, run,

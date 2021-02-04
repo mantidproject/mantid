@@ -129,6 +129,34 @@ class GroupingTabModel(object):
     def select_all_groups_to_analyse(self):
         self._groups_and_pairs.set_selected_groups_to_all()
 
+    def check_group_in_use(self, name):
+        used_by = ""
+        # check pairs
+        for pair in self._groups_and_pairs.pairs:
+            if name == pair.forward_group or name == pair.backward_group:
+                used_by += pair.name + ", "
+        for diff in self._groups_and_pairs.diffs:
+            if name == diff.forward_group or name == diff.backward_group:
+                used_by += diff.name +", "
+        if used_by:
+            # the -2 removes the space and comma
+            return name + " is used by: "+ used_by[0:-2]
+        else:
+            return used_by
+
+    def check_pair_in_use(self, name):
+        used_by = ""
+        # check diffs
+        for diff in self._groups_and_pairs.diffs:
+            if name == diff.forward_group or name == diff.backward_group:
+                used_by += diff.name +", "
+        if used_by:
+            # the -2 removes the space and comma
+            return name + " is used by: "+ used_by[0:-2]
+        else:
+            return used_by
+
+
     def remove_group_from_analysis(self, group):
         self._groups_and_pairs.remove_group_from_selected_groups(group)
 
