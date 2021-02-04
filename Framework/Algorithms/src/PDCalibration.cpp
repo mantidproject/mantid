@@ -13,6 +13,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
@@ -261,6 +263,12 @@ void PDCalibration::init() {
                   "Range for allowable DIFA from calibration (default "
                   "is all)");
 
+  declareProperty("UseChiSq", false,
+                  "By default the square of the peak height is used as weights "
+                  "in the least-squares fit to find the diffractometer "
+                  "constants, if UseChiSq is true then the square of "
+                  "the error on the fitted peak centres will be used instead.");
+
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "Output table workspace containing the calibration");
@@ -294,6 +302,7 @@ void PDCalibration::init() {
   setPropertyGroup("CalibrationParameters", calGroup);
   setPropertyGroup("TZEROrange", calGroup);
   setPropertyGroup("DIFArange", calGroup);
+  setPropertyGroup("UseChiSq", calGroup);
 }
 
 std::map<std::string, std::string> PDCalibration::validateInputs() {
@@ -493,8 +502,10 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("Minimizer", "Levenberg-Marquardt");
   algFitPeaks->setProperty("CostFunction", "Least squares");
 
-  // FitPeaks will abstract the peak parameters if you ask
-  algFitPeaks->setProperty("RawPeakParameters", false);
+  // FitPeaks will abstract the peak parameters if you ask (if using chisq then
+  // need FitPeaks to output fitted params rather than height, width)
+  const bool useChiSq = getProperty("UseChiSq");
+  algFitPeaks->setProperty("RawPeakParameters", useChiSq);
 
   // Analysis output
   // If using a Gaussian peak shape plus a constant background, then
@@ -513,6 +524,10 @@ void PDCalibration::exec() {
   // evaluating the peak function (e.g. a Gaussian peak function)
   algFitPeaks->setPropertyValue("FittedPeaksWorkspace",
                                 diagnostic_prefix + "_fitted");
+  if (useChiSq) {
+    algFitPeaks->setPropertyValue("OutputParameterFitErrorsWorkspace",
+                                  diagnostic_prefix + "_fiterrors");
+  }
 
   // run and get the result
   algFitPeaks->executeAsChildAlg();
@@ -523,6 +538,10 @@ void PDCalibration::exec() {
       algFitPeaks->getProperty("OutputPeakParametersWorkspace");
   API::MatrixWorkspace_sptr calculatedWS =
       algFitPeaks->getProperty("FittedPeaksWorkspace");
+  API::ITableWorkspace_sptr errorTable; // or nullptr as in FitPeaks L1997
+  if (useChiSq) {
+    errorTable = algFitPeaks->getProperty("OutputParameterFitErrorsWorkspace");
+  }
 
   // check : for Pete
   if (!fittedTable)
@@ -593,15 +612,35 @@ void PDCalibration::exec() {
          throw std::runtime_error(
              "peak index mismatch but workspace index matched");
 
-       // get the effective peak parameters
-       const double centre =
-           fittedTable->getRef<double>("centre", rowIndexInFitTable);
-       const double width =
-           fittedTable->getRef<double>("width", rowIndexInFitTable);
-       const double height =
-           fittedTable->getRef<double>("height", rowIndexInFitTable);
        const double chi2 =
            fittedTable->getRef<double>("chi2", rowIndexInFitTable);
+       double centre = 0.0;
+       double width = 0.0;
+       double height = 0.0;
+       if (!useChiSq) {
+         // get the effective peak parameters from FitPeaks output
+         centre =
+             fittedTable->getRef<double>("centre", rowIndexInFitTable);
+         width =
+             fittedTable->getRef<double>("width", rowIndexInFitTable);
+         height =
+             fittedTable->getRef<double>("height", rowIndexInFitTable);
+       } else {
+         // FitPeaks outputs actual fitting parameters
+         // extract these from the peak function (not efficient)
+         auto peakfunc =
+             std::dynamic_pointer_cast<API::IPeakFunction>(
+             API::FunctionFactory::Instance().createFunction(peakFunction));
+         // set peak functio nparameters from fit
+         for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
+           peakfunc->setParameter(
+               ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar),
+                                                 rowIndexInFitTable));
+         }
+         centre = peakfunc->centre();
+         width = peakfunc->fwhm();
+         height = peakfunc->height();
+       }
 
        // check chi-square
        if (chi2 > maxChiSquared || chi2 < 0.) {
@@ -723,6 +762,11 @@ void PDCalibration::exec() {
    API::AnalysisDataService::Instance().addOrReplace(
        diagnostic_prefix + "_fitted", calculatedWS);
    diagnosticGroup->addWorkspace(calculatedWS);
+   if (useChiSq) {
+     API::AnalysisDataService::Instance().addOrReplace(
+         diagnostic_prefix + "_fiterror", errorTable);
+     diagnosticGroup->addWorkspace(errorTable);
+   }
 
    // add workspaces calculated by PDCalibration
    API::AnalysisDataService::Instance().addOrReplace(
