@@ -95,6 +95,7 @@ SliceViewer
 
 - Displayed data updates correctly when changing axis selection
 - The axis limits for non-orthogonal data are now calculated to display all data for that zoom level
+- Axes limits of sliceviewer are now updated correctly when orthogonal axes were transposed.
 - Now monitor spectra and spectra with nan or inf values are ignored in determining axes limits
 - Opening SliceViewer for a workspace with a text axis is now handled correctly.
 
@@ -131,5 +132,6 @@ Miscellaneous
 - The fit button in the fit browser is now disabled when all functions are removed
 - Pressing ``Esc`` to close ManageUserDirectories is now handled correctly
 - Fixed a crash when selecting Show Detectors on a workspace with a spectrum which is missing an EFixed and is not a monitor.
+
 
 :ref:`Release 6.0.0 <v6.0.0>`
