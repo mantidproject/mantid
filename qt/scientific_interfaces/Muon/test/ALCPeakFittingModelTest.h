@@ -16,7 +16,7 @@
 
 #include "../Muon/ALCPeakFittingModel.h"
 
-#include <QtTest/QSignalSpy>
+#include <QSignalSpy>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -51,7 +51,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
 
-    TS_ASSERT_EQUALS(spy.size(), 1);
+    TS_ASSERT_EQUALS(spy.count(), 1);
     TS_ASSERT_EQUALS(m_model->data(), data);
   }
 

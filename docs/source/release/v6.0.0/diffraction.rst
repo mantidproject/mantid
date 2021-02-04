@@ -50,6 +50,7 @@ Improvements
 - The :ref:`HB2AReduce <algm-HB2AReduce>` now can save reduced data to GSAS or XYE file.
 - The :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` now can do the YIG Bragg peak fitting individually or simultaneously, or not at all and provide feedback on the initial guess quality
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
+- PaalmanPingsMonteCarloAbsorption can now make use of predefined sample and container geometries
 
 Bugfixes
 ########
@@ -70,7 +71,9 @@ Engineering Diffraction
 
 Bugfixes
 ############
+- Check if log in settings exists in workspace before averaging when focussed data is loaded in EngDiff UI fitting tab.
 - Settings are now saved only when the Apply or OK button are clicked (i.e. clicking cancel will not update the settings).
+
 
 Improvements
 ############

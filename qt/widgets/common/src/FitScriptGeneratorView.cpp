@@ -15,11 +15,8 @@
 
 #include <QMessageBox>
 
-using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
-
 namespace {
-
+using MantidQt::MantidWidgets::WorkspaceIndex;
 std::vector<WorkspaceIndex>
 convertToWorkspaceIndex(std::vector<int> const &indices) {
   std::vector<WorkspaceIndex> workspaceIndices;
