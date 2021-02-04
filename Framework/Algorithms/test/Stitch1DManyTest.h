@@ -576,6 +576,58 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_three_workspaces_scale_to_second() {
+    // Three matrix workspaces with two spectra each,
+    // scale the stiched output to the second workspace.
+
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws2");
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws3");
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("StartOverlaps", "0.8, 1.6");
+    alg.setProperty("EndOverlaps", "1.1, 1.8");
+    alg.setProperty("OutputWorkspace", "outws");
+    alg.setProperty("IndexOfReference", "1");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
+    const auto stitched = std::dynamic_pointer_cast<MatrixWorkspace>(outws);
+
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(0)[10], 1.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(0)[18], 1.10, 0.01);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(1)[10], 2.10, 0.01);
+    TS_ASSERT_DELTA(stitched->y(1)[18], 2.10, 0.01);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1.41, 0.01);
+    TS_ASSERT_DELTA(stitched->e(0)[10], 1.05, 0.01);
+    TS_ASSERT_DELTA(stitched->e(0)[18], 1.33, 0.01);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.91, 0.01);
+    TS_ASSERT_DELTA(stitched->e(1)[10], 1.45, 0.01);
+    TS_ASSERT_DELTA(stitched->e(1)[18], 1.92, 0.01);
+
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
+    // Remove workspaces from ADS
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_one_group_two_workspaces() {
     // One group with two workspaces
     // Wrong: this algorithm can't stitch workspaces within a group
