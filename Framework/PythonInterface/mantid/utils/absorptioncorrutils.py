@@ -232,6 +232,8 @@ def abs_cache(func):
         SNSPowderReduction successful, Duration 5 minutes 53.54 seconds
     with caching (disk):
         SNSPowderReduction successful, Duration 1 minutes 14.18 seconds
+    Speedup by
+        4.7660x
     """
     @wraps(func)
     def inner(*args, **kwargs):
@@ -248,8 +250,12 @@ def abs_cache(func):
         #         baseon given kwargs
         cache_filename, signature = __get_cache_name(wksp_name, abs_method, cache_dir)
 
-        # step_2: try load the cached data
-        found_sample, found_container, abs_wksp_sample, abs_wksp_container = __load_cached_data(cache_filename, signature, abs_method)
+        # step_2: try load the cached data from disk
+        found_sample, found_container, abs_wksp_sample, abs_wksp_container = __load_cached_data(
+            cache_filename,
+            signature,
+            abs_method,
+        )
 
         # step_3: calculation
         if (abs_method == "SampleOnly") and found_sample:
