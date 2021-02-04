@@ -197,11 +197,6 @@ class MuonDataContext(object):
             return 1
 
     def num_periods(self, run):
-        print("i am run")
-        temp =  self._loaded_data.get_data(run=run, instrument=self.instrument)
-        temp1 = temp['workspace']
-        temp2 = temp1['OutputWorkspace']
-        print("success " + str(len(temp2)))
         return len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'])
 
     @property
