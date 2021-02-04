@@ -47,7 +47,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                        Frames='HKL,HKL,HKL',
                                        OutputWorkspace='hkl_ws')
         expt_info = CreateSampleWorkspace()
-        self.hkl_ws.addExperimentInfo(expt_info)
+        cls.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
 
     def tearDown(self):
