@@ -81,6 +81,10 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  &DataServiceExporter::getObjectNamesEndWithAsList,
                  (arg("self"), arg("txt")), "Return the list of names known to "
                  "the ADS that end with a specific string")
+             .def("getObjectNamesContain",
+                 &DataServiceExporter::getObjectNamesContainAsList,
+                 (arg("self"), arg("txt")), "Return the list of names known to "
+                 "the ADS that contain a specific string")
 
             // Make it act like a dictionary
             .def("__len__", &SvcType::size, arg("self"))
@@ -208,6 +212,24 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
           const std::string &txt) {
     boost::python::list names;
     const auto keys = self.getObjectNamesEndWith(txt);
+    for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
+      names.append(*itr);
+    }
+    assert(names.attr("__len__")() == keys.size());
+    return names;
+  }
+
+  /**
+   * Return a Python list of object names that contain a specific string from
+   * the ADS.
+   * @param self A reference to the ADS
+   * @param txt The search string
+   * @return A python list of object names
+   */
+  static boost::python::list getObjectNamesContainAsList(SvcType &self,
+          const std::string &txt) {
+    boost::python::list names;
+    const auto keys = self.getObjectNamesContain(txt);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }
