@@ -207,7 +207,7 @@ if(GIT_FOUND)
     # otherwise the variable is "Unknown"
     if (ENABLE_CONDA)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} branch --show-current
+        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
         OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_BRANCHNAME
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       )
