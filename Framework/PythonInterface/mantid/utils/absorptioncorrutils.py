@@ -34,6 +34,7 @@ def _getBasename(filename):
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def _getInstrName(filename, wksp=None):
     """
     Infers the instrument name from the given filename, uses wksp to fallback on
@@ -116,9 +117,12 @@ def _getCacheName(wkspname, wksp_prefix, cache_dir, abs_method):
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
 =======
 def __get_cache_name(wksp_name="", cache_dir="", abs_method="SampleAndContainer"):
+=======
+def __get_cache_name(meta_wksp_name, abs_method, cache_dir=""):
+>>>>>>> switch abs va call
     """generate cachefile name (full path) and sha1
 
-    :param wksp_name: name of workspace contains relevant meta data for hashing
+    :param meta_wksp_name: name of workspace contains relevant meta data for hashing
     :param cache_dir: cache directory to scan/load cache data
     :param abs_method: method used to perform the absorption calculation
     
@@ -127,11 +131,11 @@ def __get_cache_name(wksp_name="", cache_dir="", abs_method="SampleAndContainer"
 >>>>>>> try the decorator approach
     """
     # grab the workspace
-    if wksp_name in mtd:
-        ws = mtd[wksp_name]
+    if meta_wksp_name in mtd:
+        ws = mtd[meta_wksp_name]
     else:
         raise ValueError(
-            f"Cannot find workspace {wksp_name} to extract meta data for hashing, aborting")
+            f"Cannot find workspace {meta_wksp_name} to extract meta data for hashing, aborting")
 
     # requires cache_dir
     if cache_dir == "":
@@ -221,24 +225,31 @@ def __load_cached_data(cache_file_name, sha1, abs_method=""):
 #  In order to use the decorator, we must have consistent naming
 #  or kwargs as this is probably the most reliable way to get
 #  the desired data piped in multiple location
+#  -- bare minimum signaure of the function
+#    func(wksp_name: str, abs_method:str, cache_dir="")
 def abs_cache(func):
     """decorator to make the caching process easier"""
     @wraps(func)
     def inner(*args, **kwargs):
+        # unpack key arguments
+        wksp_name = args[0]
+        abs_method = args[1]
+        cache_dir = kwargs.get("cache_dir", "")
+
         # prompt return if no cache_dir specified
-        if kwargs.get("cache_dir", "") == "":
+        if cache_dir == "":
             return func(*args, **kwargs)
 
         # step_1: generate the SHA1 and cachefile name
         #         baseon given kwargs
-        cache_filename, signature = __get_cache_name(**kwargs)
+        cache_filename, signature = __get_cache_name(wksp_name, abs_method, cache_dir)
 
         # step_2: try load the cached data
         abs_wksp_sample, abs_wksp_container = __load_cached_data(cache_filename, signature,
-                                                                 **kwargs)
+                                                                 abs_method)
 
         # step_3: calculation
-        if (kwargs.get("abs_method", "") == "SampleOnly") and (abs_wksp_sample != ""):
+        if (abs_method == "SampleOnly") and (abs_wksp_sample != ""):
             return abs_wksp_sample
         else:
             if (abs_wksp_sample != "") and (abs_wksp_container != ""):
@@ -418,7 +429,7 @@ def calculate_absorption_correction(
 def calc_absorption_corr_using_wksp(donor_wksp,
                                     abs_method,
                                     element_size=1,
-                                    prefix_name='',
+                                    prefix_name="",
                                     cache_dir=""):
     """
     Calculates absorption correction on the specified donor workspace. See the documentation
@@ -428,6 +439,8 @@ def calc_absorption_corr_using_wksp(donor_wksp,
     :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
     :param element_size: Size of one side of the integration element cube in mm
     :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
+    :param cache_dir: Cache directory to store cached abs workspace.
+
     :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
     """
     log = Logger('calc_absorption_corr_using_wksp')
@@ -435,7 +448,7 @@ def calc_absorption_corr_using_wksp(donor_wksp,
         log.information(f"Storing cached data in {cache_dir}")
 
     if abs_method == "None":
-        return None, None
+        return "", ""
 
     if isinstance(donor_wksp, str):
         if not mtd.doesExist(donor_wksp):
@@ -451,7 +464,7 @@ def calc_absorption_corr_using_wksp(donor_wksp,
                              OutputWorkspace=absName + '_ass',
                              ScatterFrom='Sample',
                              ElementSize=element_size)
-        return absName + '_ass', None
+        return absName + '_ass', ""
     elif abs_method == "SampleAndContainer":
         AbsorptionCorrection(donor_wksp,
                              OutputWorkspace=absName + '_ass',
