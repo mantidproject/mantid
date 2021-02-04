@@ -490,6 +490,35 @@ public:
     return foundNames;
   }
 
+  /**
+   * Returns the object names of the ADS that end with a specific string.
+   * @param txt The search string
+   * @return A vector of strings containing object names in the ADS
+   */
+  std::vector<std::string> getObjectNamesEndWith(
+      const std::string &txt) const {
+    std::vector<std::string> foundNames;
+    bool showHidden;
+
+    showHidden = showingHiddenObjects();
+
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+    for (const auto &item : datamap) {
+      if ((!showHidden) && (isHiddenDataServiceObject(item.first))) {
+        continue;
+      }
+      if (txt.length() > item.first.length()) {
+        continue;
+      }
+      if (item.first.compare(item.first.length() - txt.length(), txt.length(),
+            txt) == 0) {
+        foundNames.push_back(item.first);
+      }
+    }
+
+    return foundNames;
+  }
+
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector<std::shared_ptr<T>>
   getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
