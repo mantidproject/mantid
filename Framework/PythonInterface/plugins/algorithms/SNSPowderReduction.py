@@ -13,7 +13,7 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import (
     ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
-    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator)
+    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator, StringTimeSeriesProperty)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -1357,6 +1357,19 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                                   opt_wl_max=self._wavelengthMax)
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
+            # NOTE: somehow most of the information that create_absorption_input should provide is missing, so
+            #       we are forced to add them dynamically here.
+            missing_value_dict = {
+                "SampleFormula": 'V',
+                "SampleDensity": str(absorptioncorrutils.VAN_SAMPLE_DENSITY),
+                "BL11A:CS:ITEMS:HeightInContainerUnits": "mm",  # or cm? not sure which one
+                "BL11A:CS:ITEMS:HeightInContainer": "7.0",
+                "SampleContainer": "None",
+            }
+            for key, value in missing_value_dict.items():
+                mtd[absWksp].mutableRun()[key] = StringTimeSeriesProperty(key)
+                mtd[absWksp].mutableRun()[key].addValue(0, value)
+
             abs_v_wsn, _ = absorptioncorrutils.calc_absorption_corr_using_wksp(
                 absWksp,
                 "SampleOnly",
@@ -1364,10 +1377,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 cache_dir=self.getProperty('CacheDir').value,
             )
             api.RenameWorkspace(abs_v_wsn, '__V_corr_abs')
-            # api.AbsorptionCorrection(absWksp,
-            #                          OutputWorkspace='__V_corr_abs',
-            #                          ScatterFrom='Sample',
-            #                          ElementSize=self._elementSize)
 
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
                                                    CylinderSampleRadius=self._vanRadius,
