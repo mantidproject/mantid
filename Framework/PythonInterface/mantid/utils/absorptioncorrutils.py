@@ -12,6 +12,7 @@ from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Loa
 import mantid.simpleapi
 import numpy as np
 import os
+from functools import wraps
 
 VAN_SAMPLE_DENSITY = 0.0721
 _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -32,6 +33,7 @@ def _getBasename(filename):
     return name
 
 
+<<<<<<< HEAD
 def _getInstrName(filename, wksp=None):
     """
     Infers the instrument name from the given filename, uses wksp to fallback on
@@ -112,76 +114,154 @@ def _getCacheName(wkspname, wksp_prefix, cache_dir, abs_method):
 
 
 def _getCachedData(absName, abs_method, sha1, cache_file_name):
+=======
+def __get_cache_name(wksp_name="", cache_dir="", abs_method="SampleAndContainer"):
+    """generate cachefile name (full path) and sha1
+
+    :param wksp_name: name of workspace contains relevant meta data for hashing
+    :param cache_dir: cache directory to scan/load cache data
+    :param abs_method: method used to perform the absorption calculation
+    
+    return cachefile_name: full path of the cache file
+           sha1: MD5 value based on selected property
+>>>>>>> try the decorator approach
     """
-    Check both memory and disk to locate cache data.  Returns ("", "")
-    if no cache can be found.
+    # grab the workspace
+    if wksp_name in mtd:
+        ws = mtd[wksp_name]
+    else:
+        raise ValueError(
+            f"Cannot find workspace {wksp_name} to extract meta data for hashing, aborting")
 
-    :params absName: absorption workspace name base
-    :params abs_method: absorption calculation method
-    :params sha1: SHA1 that identify cached workspace
-    :params cache_file_name: cache file name to search
+    # requires cache_dir
+    if cache_dir == "":
+        cache_filename, signature = "", ""
+    else:
+        # generate the property string for hashing
+        property_string = [
+            f"{key}={val}" for key, val in {
+                'wavelength_min': ws.readX(0).min(),
+                'wavelength_max': ws.readX(0).max(),
+                "num_wl_bins": len(ws.readX(0)) - 1,
+                "sample_formula": ws.run()['SampleFormula'].lastValue().strip(),
+                "mass_density": ws.run()['SampleDensity'].lastValue(),
+                "height_unit": ws.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue(),
+                "height": ws.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(),
+                "sample_container": ws.run()['SampleContainer'].lastValue().replace(" ", ""),
+                "abs_method": abs_method,
+            }.items()
+        ]
 
-    return cached_absorption_correction_workspace_name_sample,
-           cached_absorption_correction_workspace_name_container
+        # use mantid build-in alg to generate the cache filename and sha1
+        cache_filename, signature = mantid.simpleapi.CreateCacheFilename(
+            OtherProperties=property_string,
+            CacheDir=cache_dir,
+        )
+
+    return cache_filename, signature
+
+
+def __load_cached_data(cache_file_name, sha1, abs_method=""):
+    """try to load cached data from memory and disk
+
+    :param abs_method: absorption calculation method
+    :param sha1: SHA1 that identify cached workspace
+    :param cache_file_name: cache file name to search
+
+    return abs_wksp_sample,
+           abs_wksp_container
     """
-    wsn_as = ""  # absorption workspace sample
-    wsn_ac = ""  # absorption workspace container
-    found_as = False
-    found_ac = False
+    # init
+    abs_wksp_sample, abs_wksp_container = "", ""
+    found_abs_wksp_sample, found_abs_wksp_container = False, False
 
-    # step_0: depending on the abs_method, suffix will be different
+    # step_0: depending on the abs_method, prefix will be different
+    # NOTE:
+    #  This is our internal naming convention for abs workspaces
     if abs_method == "SampleOnly":
-        wsn_as = f"{absName}_ass"
-        found_ac = True
+        abs_wksp_sample = f"abs_ass_{sha1}"
+        found_abs_wksp_container = True
     elif abs_method == "SampleAndContainer":
-        wsn_as = f"{absName}_ass"
-        wsn_ac = f"{absName}_acc"
+        abs_wksp_sample = f"abs_ass_{sha1}"
+        abs_wksp_container = f"abs_acc_{sha1}"
     elif abs_method == "FullPaalmanPings":
-        wsn_as = f"{absName}_assc"
-        wsn_ac = f"{absName}_ac"
+        abs_wksp_sample = f"abs_assc_{sha1}"
+        abs_wksp_container = f"abs_ac_{sha1}"
     else:
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
-    # step_1: check memory to see if the ws is already there
-    # -- check SHA1
-    # NOTE: The new attribute absSHA1 should be there.
-    if mtd.doesExist(wsn_as):
-        found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
-    if mtd.doesExist(wsn_ac):
-        found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
+    # step_1: check memory
+    found_abs_wksp_sample = mtd.doesExist(abs_wksp_sample)
+    found_abs_wksp_container = mtd.doesExist(abs_wksp_container)
 
-    # step_2: try to load from cache_file provided
-    if (not found_as) or (not found_ac):
-        # disk -> memory
+    # step_2: load from disk if either is not found in memory
+    if (not found_abs_wksp_sample) or (not found_abs_wksp_container):
         if os.path.exists(cache_file_name):
-            # LoadNexus(Filename=cache_file_name, OutputWorkspace=wsn_as)
-            # if mtd[wsn_as].id() == "WorkspaceGroup":
-            #     UnGroupWorkspace(InputWorkspace=wsn_as)
-            wsntmp = f"{wsn_as}_wsg"
+            wsntmp = f"tmpwsg"
             Load(Filename=cache_file_name, OutputWorkspace=wsntmp)
             wstype = mtd[wsntmp].id()
             if wstype == "Workspace2D":
-                RenameWorkspace(InputWorkspace=wsntmp, OutputWorkspace=wsn_as)
+                RenameWorkspace(InputWorkspace=wsntmp, OutputWorkspace=abs_wksp_sample)
             elif wstype == "WorkspaceGroup":
-                # there should be exactly two workspaces inside, ungroup them will
-                # restore them with the orignal name (wsn_as, wsn_ac)
                 UnGroupWorkspace(InputWorkspace=wsntmp)
             else:
                 raise ValueError(f"Unsupported cached workspace type: {wstype}")
 
-        # now check the memory again
-        # -- wsn_as exist for all three methods
-        # NOTE: The new attribute absSHA1 should be there.
-        if mtd.doesExist(wsn_as):
-            found_as = mtd[wsn_as].run()["absSHA1"].value == sha1
-        if mtd.doesExist(wsn_ac):
-            found_ac = mtd[wsn_ac].run()["absSHA1"].value == sha1
+    # step_3: check memory again
+    found_abs_wksp_sample = mtd.doesExist(abs_wksp_sample)
+    found_abs_wksp_container = mtd.doesExist(abs_wksp_container)
 
-    # step_3: if we did not find the cache, set both to empty string
-    wsn_as = wsn_as if found_as else ""
-    wsn_ac = wsn_ac if found_ac else ""
+    abs_wksp_sample = abs_wksp_sample if found_abs_wksp_sample else ""
+    abs_wksp_container = abs_wksp_container if found_abs_wksp_container else ""
 
-    return wsn_as, wsn_ac
+    return abs_wksp_sample, abs_wksp_container
+
+
+# NOTE:
+#  In order to use the decorator, we must have consistent naming
+#  or kwargs as this is probably the most reliable way to get
+#  the desired data piped in multiple location
+def abs_cache(func):
+    """decorator to make the caching process easier"""
+    @wraps(func)
+    def inner(*args, **kwargs):
+        # prompt return if no cache_dir specified
+        if kwargs.get("cache_dir", "") == "":
+            return func(*args, **kwargs)
+
+        # step_1: generate the SHA1 and cachefile name
+        #         baseon given kwargs
+        cache_filename, signature = __get_cache_name(**kwargs)
+
+        # step_2: try load the cached data
+        abs_wksp_sample, abs_wksp_container = __load_cached_data(cache_filename, signature,
+                                                                 **kwargs)
+
+        # step_3: calculation
+        if (kwargs.get("abs_method", "") == "SampleOnly") and (abs_wksp_sample != ""):
+            return abs_wksp_sample
+        else:
+            if (abs_wksp_sample != "") and (abs_wksp_container != ""):
+                # cache is available in memory now, skip calculation
+                return abs_wksp_sample, abs_wksp_container
+            else:
+                # no cache found, need calculation
+                abs_wksp_sample_nosha, abs_wksp_container_nosha = func(*args, **kwargs)
+                # need to add the sha in the workspace name
+                mantid.simpleapi.RenameWorkspace(abs_wksp_sample_nosha, abs_wksp_sample)
+                SaveNexusProcessed(InputWorkspace=abs_wksp_sample, Filename=cache_filename)
+
+                if abs_wksp_container_nosha != "":
+                    mantid.simpleapi.RenameWorkspace(abs_wksp_container_nosha, abs_wksp_container)
+                    SaveNexusProcessed(InputWorkspace=abs_wksp_container,
+                                       Filename=cache_filename,
+                                       Append=True)
+                else:
+                    abs_wksp_container = ""
+
+                return abs_wksp_sample, abs_wksp_container
+
+    return inner
 
 
 # ----------------------------- #
@@ -242,8 +322,6 @@ def calculate_absorption_correction(
     :return:
         Two workspaces (A_s, A_c) names
     """
-    log = Logger('CalculateAbsorptionCorrection')
-
     if abs_method == "None":
         return None, None
 
@@ -329,9 +407,19 @@ def calculate_absorption_correction(
                 log.information(f"-- Locate cached container absorption correction: {wsn_ac}")
 
     return wsn_as, wsn_ac
+    return calc_absorption_corr_using_wksp(donorWS,
+                                           abs_method,
+                                           element_size,
+                                           absName,
+                                           cache_dir=cache_dir)
 
 
-def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, prefix_name=''):
+@abs_cache
+def calc_absorption_corr_using_wksp(donor_wksp,
+                                    abs_method,
+                                    element_size=1,
+                                    prefix_name='',
+                                    cache_dir=""):
     """
     Calculates absorption correction on the specified donor workspace. See the documentation
     for the ``calculate_absorption_correction`` function above for more details.
@@ -342,6 +430,9 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
     :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
     :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
     """
+    log = Logger('calc_absorption_corr_using_wksp')
+    if cache_dir != "":
+        log.information(f"Storing cached data in {cache_dir}")
 
     if abs_method == "None":
         return None, None
