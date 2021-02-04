@@ -85,9 +85,8 @@ public:
     PeakShapeSpherical badShape(radius, radius, radius, frame, algorithmName,
                                 algorithmVersion);
 
-    TSM_ASSERT(
-        "Background inner radius should be unset since is same as radius",
-        !badShape.backgroundInnerRadius().is_initialized());
+    TSM_ASSERT("Background inner radius should be set even when same as radius",
+               badShape.backgroundInnerRadius().is_initialized());
     TSM_ASSERT(
         "Background outer radius should be unset since is same as radius",
         !badShape.backgroundOuterRadius().is_initialized());

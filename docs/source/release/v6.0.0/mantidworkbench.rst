@@ -106,6 +106,7 @@ SliceViewer
 - Ellipsoid axes of integrated peaks are correctly transformed when axes swapped
 - A number of issues with displaying ellipsoid peak shapes have been fixed
 - For the elliptical shell of integrated peaks, the inner background radius is now correct
+- The background shell of spherical peaks is now plotted if inner radius equals the peak radius
 - The sort order of peaks in the peaks overlay has been corrected
 - Now the correct view is displayed for orthogonal axis indices in non-orthogonal view
 - Displayed peaks update if the underlying PeaksWorkspace has been changed, removed or cleared
