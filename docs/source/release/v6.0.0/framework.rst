@@ -22,6 +22,7 @@ Concepts
 - Time-dependent values for individual instrument parameters are now allowed
 - Added a ``PythonStdOutChannel`` and the ability to change the :ref:`logging channel <Properties File>` without restarting mantid framework
 - Added packing fraction to :ref:`Material <Materials>` for separate and effective number density
+- Bugfix :ref:`DownloadInstrument <algm-DownloadInstrument>` to try unauthenticated connections if authenticated failes. Also added the ability to allow for setting the github api token in the :ref:`properties file <Properties File>`
 
 Algorithms
 ----------
@@ -32,8 +33,8 @@ Algorithms
 - :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` now produces a ragged workspace and can now be used on large data sets.
 - :ref:`CreateGroupingWorkspace <algm-CreateGroupingWorkspace>` now has the ability to specify a ``CustomGroupingString``.
 - :ref:`LoadLamp <algm-LoadLamp>` is corrected to load sample logs with python3.
-- :ref:`CalculateEfficiency <algm-CalculateEfficiency>` has a new property ``MergeGroups`` that merges and averages the input group 
-  Masked spectra will be filled with data (if available) from other entries of the input group instead of processing them 
+- :ref:`CalculateEfficiency <algm-CalculateEfficiency>` has a new property ``MergeGroups`` that merges and averages the input group
+  Masked spectra will be filled with data (if available) from other entries of the input group instead of processing them
   entry-by-entry. The algorithm now also overwrites the ``processGroups`` method. These features aide the calculation of sensitivity maps.
 
 Fitting
