@@ -19,13 +19,15 @@
 
 using namespace Mantid::API;
 
+const QString DEFAULT_LOG("run_number");
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI",
                                            "MUSR"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
+    : m_widget(widget), m_selectedLog(DEFAULT_LOG) {}
 
 ALCDataLoadingView::~ALCDataLoadingView() {}
 
@@ -43,7 +45,10 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
           SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
+  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)),
+          SIGNAL(runsEditingSignal()));
+  connect(m_ui.runs, SIGNAL(findingFiles()),
+          SIGNAL(runsEditingFinishedSignal()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
   connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
           SIGNAL(manageDirectoriesClicked()));
@@ -186,13 +191,8 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
                                       std::size_t const &workspaceIndex) {
   // These kwargs ensure only the data points are plotted with no line
   QHash<QString, QVariant> kwargs;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_ui.dataPlot->setCurveStyle("Data", -1);
-  m_ui.dataPlot->setCurveSymbol("Data", 0);
-#else
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
-#endif
 
   m_ui.dataPlot->clear();
   auto _log = log();
@@ -229,14 +229,28 @@ bool ALCDataLoadingView::displayWarning(const std::string &warning) {
  */
 void ALCDataLoadingView::setAvailableLogs(
     const std::vector<std::string> &logs) {
+  const auto currentLog = m_ui.logValueSelector->getLog();
+  if (!currentLog.isEmpty())
+    m_selectedLog = currentLog;
+
   setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
-  // Set defualt as run number
-  if (!logs.empty()) {
-    auto index =
-        m_ui.logValueSelector->getLogComboBox()->findText("run_number");
-    if (index >= 0)
-      m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+
+  if (!setCurrentLog(m_selectedLog))
+    setCurrentLog(DEFAULT_LOG);
+}
+
+/**
+ * Set the currently selected log
+ * @param log :: The log to search for and select.
+ * @returns true if the log was found and selected.
+ */
+bool ALCDataLoadingView::setCurrentLog(const QString &log) {
+  const auto index = m_ui.logValueSelector->getLogComboBox()->findText(log);
+  if (index >= 0) {
+    m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+    m_selectedLog = log;
   }
+  return index >= 0;
 }
 
 /**
@@ -308,6 +322,7 @@ void ALCDataLoadingView::help() {
 void ALCDataLoadingView::disableAll() {
 
   // Disable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(false);
   m_ui.dataGroup->setEnabled(false);
   m_ui.deadTimeGroup->setEnabled(false);
   m_ui.detectorGroupingGroup->setEnabled(false);
@@ -319,6 +334,7 @@ void ALCDataLoadingView::disableAll() {
 void ALCDataLoadingView::enableAll() {
 
   // Enable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(true);
   m_ui.deadTimeGroup->setEnabled(true);
   m_ui.dataGroup->setEnabled(true);
   m_ui.detectorGroupingGroup->setEnabled(true);
@@ -381,6 +397,7 @@ void ALCDataLoadingView::setLoadStatus(const std::string &status,
   m_ui.loadStatusLabel->setText(QString::fromStdString("Status: " + status));
   m_ui.loadStatusLabel->setStyleSheet(
       QString::fromStdString("color: " + colour));
+  m_ui.loadStatusLabel->adjustSize();
 }
 
 void ALCDataLoadingView::runsAutoAddToggled(bool on) {

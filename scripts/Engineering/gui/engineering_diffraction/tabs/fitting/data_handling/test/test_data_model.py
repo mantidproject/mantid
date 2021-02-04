@@ -23,12 +23,15 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_inst.getFullName.return_value = 'instrument'
         mock_prop = mock.MagicMock()
         mock_prop.value = 1  # bank-id
-        mock_run = mock.MagicMock()
-        mock_run.getProtonCharge.return_value = 1.0
-        mock_run.getProperty.return_value = mock_prop
+        mock_log_data = mock.MagicMock()
+        mock_log_data.name = "LogName"
+        self.mock_run = mock.MagicMock()
+        self.mock_run.getProtonCharge.return_value = 1.0
+        self.mock_run.getProperty.return_value = mock_prop
+        self.mock_run.getLogData.return_value = [mock_log_data]
         self.mock_ws = mock.MagicMock()
         self.mock_ws.getNumberHistograms.return_value = 1
-        self.mock_ws.getRun.return_value = mock_run
+        self.mock_ws.getRun.return_value = self.mock_run
         self.mock_ws.getInstrument.return_value = self.mock_inst
         self.mock_ws.getRunNumber.return_value = 1
         self.mock_ws.getTitle.return_value = 'title'
@@ -301,11 +304,8 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".ADS")
     @patch(data_model_path + ".FittingDataModel.update_log_group_name")
     @patch(data_model_path + ".AverageLogData")
-    def test_add_log_to_table(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
-        # grouped ws acts like a container/list of ws here
-        self.model._log_workspaces = [mock.MagicMock(), mock.MagicMock()]
-        self.model._log_workspaces[0].name.return_value = "run_info"
-        self.model._log_workspaces[1].name.return_value = "LogName"
+    def test_add_log_to_table_already_averaged(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
+        self._setup_model_log_workspaces()
         mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._log_workspaces if ws.name() == ws_name][0]
         self.model._log_values = {"name1": {"LogName": [2, 1]}}
         self.model._log_names = ["LogName"]
@@ -313,6 +313,42 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.add_log_to_table("name1", self.mock_ws, 3)
         mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 1, 1.0, 'title'], 3)
         mock_writerow.assert_any_call(self.model._log_workspaces[1], [2, 1], 3)
+        mock_avglogs.assert_not_called()
+        mock_update_logname.assert_called_once()
+
+    @patch(data_model_path + ".FittingDataModel.write_table_row")
+    @patch(data_model_path + ".ADS")
+    @patch(data_model_path + ".FittingDataModel.update_log_group_name")
+    @patch(data_model_path + ".AverageLogData")
+    def test_add_log_to_table_not_already_averaged(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
+        self._setup_model_log_workspaces()
+        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._log_workspaces if ws.name() == ws_name][0]
+        self.model._log_values = {"name1": {}}
+        self.model._log_names = ["LogName"]
+        mock_avglogs.return_value = [1.0, 1.0]
+
+        self.model.add_log_to_table("name1", self.mock_ws, 3)
+
+        self.assertEqual(self.model._log_values["name1"]["LogName"], [1.0, 1.0])
+        mock_writerow.assert_any_call(self.model._log_workspaces[1], [1.0, 1.0], 3)
+        mock_avglogs.assert_called_with("name1", LogName="LogName", FixZero=False)
+        mock_update_logname.assert_called_once()
+
+    @patch(data_model_path + ".FittingDataModel.write_table_row")
+    @patch(data_model_path + ".ADS")
+    @patch(data_model_path + ".FittingDataModel.update_log_group_name")
+    @patch(data_model_path + ".AverageLogData")
+    def test_add_log_to_table_not_existing_in_ws(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
+        self._setup_model_log_workspaces()
+        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._log_workspaces if ws.name() == ws_name][0]
+        self.model._log_values = {"name1": {}}
+        self.model._log_names = ["LogName"]
+        self.mock_run.getLogData.return_value = []  # no logs present in ws
+
+        self.model.add_log_to_table("name1", self.mock_ws, 3)
+
+        self.assertTrue(all(isnan(self.model._log_values["name1"]["LogName"])))
+        self.assertTrue(len(self.model._log_values["name1"]["LogName"]), 2)
         mock_avglogs.assert_not_called()
         mock_update_logname.assert_called_once()
 
@@ -539,6 +575,12 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertEqual(ws_list, list(self.model._loaded_workspaces.keys())[::-1])
         mock_ads.retrieve.assert_not_called()
+
+    def _setup_model_log_workspaces(self):
+        # grouped ws acts like a container/list of ws here
+        self.model._log_workspaces = [mock.MagicMock(), mock.MagicMock()]
+        self.model._log_workspaces[0].name.return_value = "run_info"
+        self.model._log_workspaces[1].name.return_value = "LogName"
 
 
 if __name__ == '__main__':

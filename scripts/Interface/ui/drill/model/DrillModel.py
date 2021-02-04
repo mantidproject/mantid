@@ -19,6 +19,7 @@ from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
+from .DrillExportModel import DrillExportModel
 from .DrillRundexIO import DrillRundexIO
 
 
@@ -121,6 +122,7 @@ class DrillModel(QObject):
         self.controller = None
         self.visualSettings = dict()
         self.rundexIO = None
+        self.exportModel = None
 
         # set the instrument and default acquisition mode
         self.tasksPool = DrillAlgorithmPool()
@@ -161,6 +163,7 @@ class DrillModel(QObject):
         self.instrument = None
         self.acquisitionMode = None
         self.algorithm = None
+        self.exportModel = None
 
         # When the user changes the facility after DrILL has been started
         if config['default.facility'] != 'ILL':
@@ -213,6 +216,7 @@ class DrillModel(QObject):
         self.settings = dict.fromkeys(
                 RundexSettings.SETTINGS[self.acquisitionMode])
         self._setDefaultSettings()
+        self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
 
     def getAcquisitionMode(self):
@@ -231,6 +235,15 @@ class DrillModel(QObject):
         if (self.instrument is None):
             return list()
         return RundexSettings.ACQUISITION_MODES[self.instrument]
+
+    def getExportModel(self):
+        """
+        Get the export model.
+
+        Returns:
+            DrillExportModel: export model
+        """
+        return self.exportModel
 
     def setCycleAndExperiment(self, cycle, experiment):
         """
@@ -600,6 +613,7 @@ class DrillModel(QObject):
         # add the output workspace param
         if "OutputWorkspace" not in params:
             params["OutputWorkspace"] = "sample_" + str(sample + 1)
+        self.samples[sample].setOutputName(params["OutputWorkspace"])
         return params
 
     def process(self, elements):
@@ -614,7 +628,7 @@ class DrillModel(QObject):
             if (e >= len(self.samples)) or (not self.samples[e]):
                 continue
             kwargs = self.getProcessingParameters(e)
-            tasks.append(DrillTask(e, self.algorithm, **kwargs))
+            tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
         self.tasksPool.addProcesses(tasks)
 
     def _onTaskStarted(self, ref):
@@ -624,6 +638,7 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.information("Starting of sample {0} processing"
                            .format(name))
@@ -636,10 +651,12 @@ class DrillModel(QObject):
         Args:
             ref (int): sample index
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.information("Processing of sample {0} finished with sucess"
                            .format(name))
         self.processSuccess.emit(ref)
+        self.exportModel.run(self.samples[ref])
 
     def _onTaskError(self, ref, msg):
         """
@@ -650,6 +667,7 @@ class DrillModel(QObject):
             ref (int): sample index
             msg (str): error msg
         """
+        ref = int(ref)
         name = str(ref + 1)
         logger.error("Error while processing sample {0}: {1}"
                      .format(name, msg))

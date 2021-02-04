@@ -299,7 +299,8 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
             double q = UnitConversion::convertToElasticQ(usignTheta, efixed);
             colValues << q;
           } catch (std::runtime_error &) {
-            colValues << "No Efixed";
+            // No Efixed
+            colValues << std::nan("");
           }
         }
       }

@@ -7,10 +7,10 @@
 #  This file is part of the mantid workbench.
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import QWidget, QTabBar
 
 from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 
@@ -36,11 +36,10 @@ class AxesTabWidgetView(QWidget):
         self.x_tab = self.axis_tab_bar.addTab("z")
         self.axis_tab_bar_layout.replaceWidget(self.dummy_axis_tab_bar, self.axis_tab_bar)
 
-        # Set validator for the axis limit spin boxes
-        for limit in ['upper', 'lower']:
-            line_edit = getattr(self, f'{limit}_limit_line_edit')
-            validator = QDoubleValidator()
-            line_edit.setValidator(validator)
+        self.lower_limit_validator = LineEditDoubleValidator(self.lower_limit_line_edit, 0.0)
+        self.upper_limit_validator = LineEditDoubleValidator(self.upper_limit_line_edit, 1.0)
+        self.lower_limit_line_edit.setValidator(self.lower_limit_validator)
+        self.upper_limit_line_edit.setValidator(self.upper_limit_validator)
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
@@ -78,14 +77,14 @@ class AxesTabWidgetView(QWidget):
         self.show_minor_gridlines_check_box.setVisible(visible)
         self.show_minor_ticks_check_box.setVisible(visible)
 
-    def set_minor_gridlines_check_box_enabled(self, eneabled):
-        self.show_minor_gridlines_check_box.setEnabled(eneabled)
+    def set_minor_gridlines_check_box_enabled(self, enabled):
+        self.show_minor_gridlines_check_box.setEnabled(enabled)
 
     def get_lower_limit(self):
-        return self.lower_limit_line_edit.text()
+        return float(self.lower_limit_line_edit.text())
 
     def get_upper_limit(self):
-        return self.upper_limit_line_edit.text()
+        return float(self.upper_limit_line_edit.text())
 
     def get_label(self):
         return self.label_line_edit.text()
@@ -103,9 +102,11 @@ class AxesTabWidgetView(QWidget):
         return self.axis_tab_bar.currentIndex() == 2
 
     def set_lower_limit(self, limit):
+        self.lower_limit_validator.last_valid_value = str(limit)
         self.lower_limit_line_edit.setText(str(limit))
 
     def set_upper_limit(self, limit):
+        self.upper_limit_validator.last_valid_value = str(limit)
         self.upper_limit_line_edit.setText(str(limit))
 
     def set_label(self, label):
