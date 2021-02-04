@@ -393,6 +393,7 @@ public:
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setProperty("OutputWorkspace", "outws");
+    alg.setProperty("IndexOfReference", "0");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -476,6 +477,7 @@ public:
     alg.setProperty("OutputWorkspace", "outws");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5");
+    alg.setProperty("IndexOfReference", "0");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
@@ -532,6 +534,7 @@ public:
     alg.setProperty("OutputWorkspace", "outws");
     alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ManualScaleFactors", "0.5, 0.7");
+    alg.setProperty("IndexOfReference", "0");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
