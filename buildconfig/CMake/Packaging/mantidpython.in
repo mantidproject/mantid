@@ -47,3 +47,8 @@ else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
     set -- @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
 fi
+
+LD_PRELOAD=${LOCAL_PRELOAD} \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    @QT_QPA@QT_API=${LOCAL_QT_API} \
+    LD_LIBRARY_PATH=${LOCAL_LDPATH} exec "$@"
