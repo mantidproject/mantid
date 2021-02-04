@@ -172,8 +172,8 @@ def __load_cached_data(cache_file_name, sha1, abs_method=""):
     :param sha1: SHA1 that identify cached workspace
     :param cache_file_name: cache file name to search
 
-    return abs_wksp_sample,
-           abs_wksp_container
+    return  found_abs_wksp_sample, found_abs_wksp_container
+            abs_wksp_sample, abs_wksp_container
     """
     # init
     abs_wksp_sample, abs_wksp_container = "", ""
@@ -215,10 +215,7 @@ def __load_cached_data(cache_file_name, sha1, abs_method=""):
     found_abs_wksp_sample = mtd.doesExist(abs_wksp_sample)
     found_abs_wksp_container = mtd.doesExist(abs_wksp_container)
 
-    abs_wksp_sample = abs_wksp_sample if found_abs_wksp_sample else ""
-    abs_wksp_container = abs_wksp_container if found_abs_wksp_container else ""
-
-    return abs_wksp_sample, abs_wksp_container
+    return found_abs_wksp_sample, found_abs_wksp_container, abs_wksp_sample, abs_wksp_container
 
 
 # NOTE:
@@ -228,7 +225,14 @@ def __load_cached_data(cache_file_name, sha1, abs_method=""):
 #  -- bare minimum signaure of the function
 #    func(wksp_name: str, abs_method:str, cache_dir="")
 def abs_cache(func):
-    """decorator to make the caching process easier"""
+    """decorator to make the caching process easier
+    
+    example:
+    without caching:
+        SNSPowderReduction successful, Duration 5 minutes 53.54 seconds
+    with caching (disk):
+        SNSPowderReduction successful, Duration 1 minutes 14.18 seconds
+    """
     @wraps(func)
     def inner(*args, **kwargs):
         # unpack key arguments
@@ -245,14 +249,13 @@ def abs_cache(func):
         cache_filename, signature = __get_cache_name(wksp_name, abs_method, cache_dir)
 
         # step_2: try load the cached data
-        abs_wksp_sample, abs_wksp_container = __load_cached_data(cache_filename, signature,
-                                                                 abs_method)
+        found_sample, found_container, abs_wksp_sample, abs_wksp_container = __load_cached_data(cache_filename, signature, abs_method)
 
         # step_3: calculation
-        if (abs_method == "SampleOnly") and (abs_wksp_sample != ""):
-            return abs_wksp_sample
+        if (abs_method == "SampleOnly") and found_sample:
+            return abs_wksp_sample, ""
         else:
-            if (abs_wksp_sample != "") and (abs_wksp_container != ""):
+            if found_sample and found_container:
                 # cache is available in memory now, skip calculation
                 return abs_wksp_sample, abs_wksp_container
             else:
