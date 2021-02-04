@@ -53,12 +53,8 @@ def attach_binary_operators_to_workspace():
         "And": "__and__",
         "Xor": "__xor__"
     }
-    # The division operator changed in Python 3
+
     divops = ["__truediv__", "__rtruediv__", "__itruediv__"]
-    if sys.version_info[0] < 3:
-        # For Python 2 add the older methods so that modules without __future__
-        # still work
-        divops.extend(["__div__", "__rdiv__", "__idiv__"])
     operations["Divide"] = divops
 
     # Loop through and add each one in turn
