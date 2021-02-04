@@ -1357,10 +1357,17 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                                   opt_wl_max=self._wavelengthMax)
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
-            api.AbsorptionCorrection(absWksp,
-                                     OutputWorkspace='__V_corr_abs',
-                                     ScatterFrom='Sample',
-                                     ElementSize=self._elementSize)
+            abs_v_wsn, _ = absorptioncorrutils.calc_absorption_corr_using_wksp(
+                absWksp,
+                "SampleOnly",
+                element_size=self._elementSize,
+                cache_dir=self.getProperty('CacheDir').value,
+            )
+            api.RenameWorkspace(abs_v_wsn, '__V_corr_abs')
+            # api.AbsorptionCorrection(absWksp,
+            #                          OutputWorkspace='__V_corr_abs',
+            #                          ScatterFrom='Sample',
+            #                          ElementSize=self._elementSize)
 
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
                                                    CylinderSampleRadius=self._vanRadius,
