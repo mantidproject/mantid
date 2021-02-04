@@ -74,15 +74,15 @@ class AdvancedSetupScript(BaseScriptElement):
     typeofcorrection = ""
     parnamelist = None
     # Caching options
-    cache_dir1 = ''  # Cache search candidate 1
-    cache_dir2 = ''  # Cache search candidate 2
-    cache_dir3 = ''  # Cache search candidate 3
+    cache_dir_scan_save = ''  # Cache search candidate 1
+    cache_dir_scan_1 = ''  # Cache search candidate 2
+    cache_dir_scan_2 = ''  # Cache search candidate 3
     clean_cache = False  # determines whether to delete all cache files within the cache directory
 
     @property
     def cache_dir(self):
         """Passing all three candidates back as one list"""
-        return [self.cache_dir1, self.cache_dir2, self.cache_dir3]
+        return [self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2]
 
     def __init__(self, inst_name):
         """ Initialization
@@ -287,7 +287,7 @@ class AdvancedSetupScript(BaseScriptElement):
             # Caching options
             # split it into the three cache dirs
             # NOTE: there should only be three entries, if not, let it fail early
-            self.cache_dir1, self.cache_dir2, self.cache_dir3 = BaseScriptElement.getStringElement(
+            self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2 = BaseScriptElement.getStringElement(
                 instrument_dom, 'cachedir', default=";;").split(";")
 
             tempbool = BaseScriptElement.getStringElement(instrument_dom,
@@ -317,9 +317,9 @@ class AdvancedSetupScript(BaseScriptElement):
             'extension',
             'outputfileprefix',
             # Caching options
-            'cache_dir1',
-            'cache_dir2',
-            'cache_dir3',
+            'cache_dir_scan_save',
+            'cache_dir_scan_1',
+            'cache_dir_scan_2',
             'clean_cache'
         ]
         [setattr(self, attr, getattr(self.__class__, attr)) for attr in class_attrs_selected]
