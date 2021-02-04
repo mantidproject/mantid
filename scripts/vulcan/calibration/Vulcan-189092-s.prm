@@ -1,0 +1,57 @@
+Vulcan prm file from HR template                                                
+ID  Si 20Hz HI LF, 2020 Si 189090 Vanadium 189092 20 Hz                         
+INS   BANK      3                                                               
+INS   FPATH1     43.754                                                         
+INS   HTYPE   PNTR                                                              
+INS   NSPEC     6                                                               
+INS  1 ICONS  16352.24     -0.52     10.95   0     0.000                        
+INS  1 IRAD     0                                                               
+INS  1BNKPAR    2.0000    -90.00      0.00    .00000     .3000    1    1        
+INS  1I HEAD  No title                                                          
+INS  1I ITYP   10    7.5000   55.0000     42432                                 
+INS  1INAME   Vulcan                                                            
+INS  1PRCF1     3   21   0.00050                                                
+INS  1PRCF11   0.100000E+01   0.381119E-01   0.856975E-02   0.000000E+00        
+INS  1PRCF12   0.527898E+03   0.200103E+03   0.000000E+00   0.483957E+01        
+INS  1PRCF13  0.258743E+001  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  1PRCF14  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  1PRCF15  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  1PRCF16  0.000000E+000                                                     
+INS  1  MFIL  189092-s.gda                                                      
+INS  1BAKGD     1    6    Y    0    Y                                           
+INS  1BAKGD1   1.000000E+01   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  1BAKGD2   0.000000E+00   0.000000E+00                                      
+INS  2 ICONS  16344.74      6.20      4.25   0     0.000                        
+INS  2 IRAD     0                                                               
+INS  2BNKPAR    2.0000     90.00      0.00    .00000     .3000    1    1        
+INS  2I HEAD  No title                                                          
+INS  2I ITYP   10    7.5000   55.0000     40348                                 
+INS  2INAME   Vulcan                                                            
+INS  2PRCF1     3   21   0.00050                                                
+INS  2PRCF11   0.100000E+01   0.490241E-01   0.110525E-01   0.000000E+00        
+INS  2PRCF12   0.545824E+03   0.155099E+03   0.000000E+00   0.651911E+01        
+INS  2PRCF13  0.137962E+001  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  2PRCF14  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  2PRCF15  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  2PRCF16  0.000000E+000                                                     
+INS  2  MFIL  189092-s.gda                                                      
+INS  2BAKGD     1    6    Y    0    Y                                           
+INS  2BAKGD1   1.000000E+01   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  2BAKGD2   0.000000E+00   0.000000E+00                                      
+INS  3 ICONS  22353.10     -1.12     -2.66   0     0.000                        
+INS  3 IRAD     0                                                               
+INS  3BNKPAR    2.0000     150.00     0.00    .00000     .3000    1    1        
+INS  3I HEAD  No title                                                          
+INS  3I ITYP   10    7.5000   55.0000     40358                                 
+INS  3INAME   Vulcan                                                            
+INS  3PRCF1     3   21   0.0003                                                 
+INS  3PRCF11   0.100000E+01   0.564324E-01   0.169720E-02   0.000000E+00        
+INS  3PRCF12   0.104293E+03   0.280255E+02   0.000000E+00   0.249764E+01        
+INS  3PRCF13  0.273843E+001  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  3PRCF14  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  3PRCF15  0.000000E+000  0.000000E+000  0.000000E+000  0.000000E+000        
+INS  3PRCF16  0.000000E+000                                                     
+INS  3  MFIL  189092-s.gda                                                      
+INS  3BAKGD     1    6    Y    0    Y                                           
+INS  3BAKGD1   1.000000E+01   0.000000E+00   0.000000E+00   0.000000E+00        
+INS  3BAKGD2   0.000000E+00   0.000000E+00                                      
