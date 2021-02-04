@@ -84,7 +84,6 @@ std::string getApiToken() {
     return "";
   } else {
     g_log.information("Attempting authenticated calls to GitHub");
-    g_log.debug() << "Using token \"" << token << "\"\n";
 
     // create full header using token
     std::stringstream token_header;
