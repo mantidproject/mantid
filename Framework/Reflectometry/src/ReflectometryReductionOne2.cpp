@@ -255,17 +255,11 @@ void ReflectometryReductionOne2::exec() {
   findTheta0();
 
   // Check whether conversion, normalisation, summation etc. need to be done
-  m_convertUnits = true;
+  m_convertUnits = (xUnitID != "Wavelength");
   m_normaliseMonitors = true;
   m_normaliseTransmission = true;
-  m_sum = true;
-  if (xUnitID == "Wavelength") {
-    // Already converted converted to wavelength
-    m_convertUnits = false;
-    // Assume it's also already been normalised by monitors and summed
-    m_normaliseMonitors = false;
-    m_sum = false;
-  }
+  m_normaliseMonitors = true;
+  m_sum = (m_runWS->getNumberHistograms() > 1);
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
