@@ -168,8 +168,7 @@ class DifferenceTablePresenter(object):
             elif self.validate_diff_name(new_diff_name):
                 group1 = self._model.get_names(self._group_or_pair)[0] if not group_1 else group_1
                 group2 = self._model.get_names(self._group_or_pair)[1] if not group_2 else group_2
-                periods = self._model._context.group_pair_context[group1].periods
-                periods += self._model._context.group_pair_context[group2].periods
+                periods = self._model._context.group_pair_context[group1].periods + self._model._context.group_pair_context[group2].periods
                 diff = MuonDiff(diff_name=str(new_diff_name),
                                 positive=group1, negative=group2, group_or_pair = self._group_or_pair, periods=periods)
                 self.add_diff(diff)
