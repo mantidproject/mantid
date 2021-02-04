@@ -301,12 +301,11 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         # use standard method
         return (self.wksp_mem, self.wksp_file)
 
-class VulcanRaggedCompare(systemtesting.MantidSystemTest):
+
+class VulcanRaggedInD(systemtesting.MantidSystemTest):
+    '''This is identically to VulcanInD except the binning is done in d-space'''
     cal_file  = "VULCAN_calibrate_2019_06_27.h5"
     data_file = 'VULCAN_189186.nxs.h5'
-
-    def cleanup(self):
-        return do_cleanup(self.cacheDir)
 
     def requiredMemoryMB(self):
         return 3*1024  # GiB
@@ -315,30 +314,110 @@ class VulcanRaggedCompare(systemtesting.MantidSystemTest):
         return [self.cal_file, self.data_file]
 
     def runTest(self):
-        self.cacheDir = getCacheDir()
+        # put together then names
+        basename = os.path.basename(self.data_file).split('.')[0]
+        self.wksp_obs, self.wksp_exp = basename + '_allinone', basename + '_separate'
 
-        self.wksp_mem = os.path.basename(self.data_file).split('.')[0]
-        self.wksp_mem, self.wksp_file = self.wksp_mem + '_mem', self.wksp_mem + '_file'
+        dmin = np.array((0.306,0.306,0.22))
+        dmax = np.array((4.280, 4.280, 3.133))
+        delta = np.array((-0.001,-0.001,-0.0003))
 
-        # load then process
-        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
-        LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName='PG3')
-        AlignAndFocusPowder(InputWorkspace=self.wksp_mem, OutputWorkspace=self.wksp_mem,
-                            GroupingWorkspace='PG3_group', CalibrationWorkspace='PG3_cal', MaskWorkspace='PG3_mask',
-                            Params=-.0002, CompressTolerance=0.01,
-                            PrimaryFlightPath=60, SpectrumIDs='1,2,3', L2='3.18,3.18,3.18', Polar='90,270,145', Azimuthal='0,0,0')
+        # wksp_exp is doing the reduction in event mode then calling RebinRagged
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=True,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     DMin=dmin.min(), DMax=dmax.max())
+        ConvertUnits(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp, Target='dSpacing')
+        RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
+                    XMin=dmin, XMax=dmax, Delta=delta)
+        wksp_exp = mtd[self.wksp_exp]  # may be unnecessary to have this check
+        for i, exp_length in enumerate([2639, 2639, 8855]):
+            msg = 'index={} {} != {}'.format(i, len(wksp_exp.readY(i)), exp_length)
+            assert len(wksp_exp.readY(i)) == exp_length, msg
 
-        # everything inside the algorithm
-        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_file,
-                                     GroupingWorkspace='PG3_group', CalibrationWorkspace='PG3_cal',
-                                     MaskWorkspace='PG3_mask',
-                                     Params=-.0002, CompressTolerance=0.01,
-                                     PrimaryFlightPath=60, SpectrumIDs='1,2,3', L2='3.18,3.18,3.18', Polar='90,270,145', Azimuthal='0,0,0',
-                                     ReductionProperties='__snspowderreduction_inner')
+        # wksp_obs is doing the reduction with RebinRagged internal
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=True,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     DMin=dmin, DMax=dmax, Delta=delta)  # bonus bit for RebinRagged
+        ConvertUnits(InputWorkspace=self.wksp_obs, OutputWorkspace=self.wksp_obs, Target='dSpacing')
 
     def validateMethod(self):
         self.tolerance = 1.0e-2
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        return (self.wksp_mem, self.wksp_file)
+        # first check that the data arrays are the same length
+        wksp_obs = mtd[self.wksp_obs]
+        wksp_exp = mtd[self.wksp_exp]
+
+        for i in range(3):
+            msg = 'index={} {}(obs) != {}(exp)'.format(i, len(wksp_obs.readY(i)), len(wksp_exp.readY(i)))
+            assert len(wksp_obs.readY(i)) == len(wksp_exp.readY(i)), msg
+
+        # return the workspaces so normal comparison can happen
+        return (self.wksp_obs, self.wksp_exp)
+
+
+class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
+    '''This is identically to VulcanInD except the binning is done in time-of-flight'''
+    cal_file  = "VULCAN_calibrate_2019_06_27.h5"
+    data_file = 'VULCAN_189186.nxs.h5'
+
+    def requiredMemoryMB(self):
+        return 3*1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.data_file]
+
+    def runTest(self):
+        # put together then names
+        basename = os.path.basename(self.data_file).split('.')[0]
+        self.wksp_obs, self.wksp_exp = basename + '_allinone', basename + '_separate'
+
+        dmin = np.array((0.306,0.306,0.22))
+        dmax = np.array((4.280, 4.280, 3.133))
+        delta = np.array((-0.001,-0.001,-0.0003))
+
+        # wksp_exp is doing the reduction in event mode then calling RebinRagged
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=False,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     DMin=dmin.min(), DMax=dmax.max())
+        RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
+                    XMin=dmin, XMax=dmax, Delta=delta)
+
+        wksp_exp = mtd[self.wksp_exp]  # may be unnecessary to have this check
+        for i, exp_length in enumerate([2639, 2639, 8855]):
+            msg = 'index={} {} != {}'.format(i, len(wksp_exp.readY(i)), exp_length)
+            assert len(wksp_exp.readY(i)) == exp_length, msg
+
+        # wksp_obs is doing the reduction with RebinRagged internal
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=False,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     DMin=dmin, DMax=dmax, Delta=delta)  # bonus bit for RebinRagged
+
+    def validateMethod(self):
+        self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        # first check that the data arrays are the same length
+        wksp_obs = mtd[self.wksp_obs]
+        wksp_exp = mtd[self.wksp_exp]
+
+        for i in range(3):
+            msg = 'index={} {}(obs) != {}(exp)'.format(i, len(wksp_obs.readY(i)), len(wksp_exp.readY(i)))
+            assert len(wksp_obs.readY(i)) == len(wksp_exp.readY(i)), msg
+
+        # return the workspaces so normal comparison can happen
+        return (self.wksp_obs, self.wksp_exp)
