@@ -129,6 +129,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         self.editCell(0, "SampleThickness", sampleThickness[0])
         self.editCell(0, "MaskFiles", maskFiles)
         self.editCell(0, "OutputWorkspace", "iq_s1")
+        self.editCell(0, "CustomOptions", "StitchReferenceIndex=0")
 
         self.editCell(1, "SampleRuns", sampleRuns[1])
         self.editCell(1, "SampleTransmissionRuns", sampleTransmissionRuns[1])
@@ -139,6 +140,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         self.editCell(1, "SampleThickness", sampleThickness[1])
         self.editCell(1, "MaskFiles", maskFiles)
         self.editCell(1, "OutputWorkspace", "iq_s2")
+        self.editCell(1, "CustomOptions", "StitchReferenceIndex=0")
 
         self.editCell(2, "SampleRuns", sampleRuns[2])
         self.editCell(2, "SampleTransmissionRuns", sampleTransmissionRuns[2])
@@ -149,6 +151,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
         self.editCell(2, "SampleThickness", sampleThickness[2])
         self.editCell(2, "MaskFiles", maskFiles)
         self.editCell(2, "OutputWorkspace", "iq_s3")
+        self.editCell(2, "CustomOptions", "StitchReferenceIndex=0")
 
         QTest.mouseClick(self.drill.buttonProcessAll, Qt.LeftButton)
 
