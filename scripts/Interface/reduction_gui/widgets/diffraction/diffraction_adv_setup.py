@@ -182,9 +182,9 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.lineEdit_croppedWavelengthMax.setText(str(state.cropwavelengthmax))
 
         # populate Caching options
-        self._content.cache_dir_edit_1.setText(state.cache_dir1)
-        self._content.cache_dir_edit_2.setText(state.cache_dir2)
-        self._content.cache_dir_edit_3.setText(state.cache_dir3)
+        self._content.cache_dir_edit_1.setText(state.cache_dir_scan_save)
+        self._content.cache_dir_edit_2.setText(state.cache_dir_scan_1)
+        self._content.cache_dir_edit_3.setText(state.cache_dir_scan_2)
         self._content.clean_cache_box.setChecked(state.clean_cache)
 
         return
@@ -225,9 +225,9 @@ class AdvancedSetupWidget(BaseWidget):
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
         # Caching options
-        s.cache_dir1 = self._content.cache_dir_edit_1.text()
-        s.cache_dir2 = self._content.cache_dir_edit_2.text()
-        s.cache_dir3 = self._content.cache_dir_edit_3.text()
+        s.cache_dir_scan_save = self._content.cache_dir_edit_1.text()
+        s.cache_dir_scan_1 = self._content.cache_dir_edit_2.text()
+        s.cache_dir_scan_2 = self._content.cache_dir_edit_3.text()
         s.clean_cache = self._content.clean_cache_box.isChecked()
 
         return s
@@ -289,19 +289,19 @@ class AdvancedSetupWidget(BaseWidget):
 
     def _cache_dir_browse_1(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory')
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan&save)')
         if dir_path:
             self._content.cache_dir_edit_1.setText(dir_path)
 
     def _cache_dir_browse_2(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory')
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
         if dir_path:
             self._content.cache_dir_edit_2.setText(dir_path)
 
     def _cache_dir_browse_3(self):
         r"""Event handling for browsing the cache directory"""
-        dir_path = self.dir_browse_dialog(title='Select the Cache Directory')
+        dir_path = self.dir_browse_dialog(title='Select the Cache Directory (scan only)')
         if dir_path:
             self._content.cache_dir_edit_3.setText(dir_path)
 
