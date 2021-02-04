@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import ValuesView
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
@@ -33,18 +32,43 @@ def _getBasename(filename):
     return name
 
 
-def _getCacheName(wkspname, cache_dir, abs_method):
+def _getInstrName(filename, wksp=None):
+    """
+    Infers the instrument name from the given filename, uses wksp to fallback on
+    if the instrument from the filename was invalid. In the worst case, get the
+    instrument from the ConfigService.
+
+    :param filename: Filename to use when finding instrument (ex: PG3_123 should return PG3)
+    :param wksp: Optional workspace to get the instrument from
+    :return: instrument name (shortname)
+    """
+    # First, strip off path and extensions
+    base = _getBasename(filename)
+    # Assume files are named as "<instr>_<id>"
+    name = base.split("_")[0]
+    # Check whether it is a valid instrument
+    try:
+        instr = mantid.kernel.ConfigService.getInstrument(name)
+    except RuntimeError:
+        if wksp is not None:
+            # Use config service to lookup InstrumentInfo obj from workspace Instrument
+            instr = mantid.kernel.ConfigService.getInstrument(wksp.getInstrument().getName())
+        else:
+            # Use default instrument name
+            instr = mantid.kernel.ConfigService.getInstrument()
+    return instr.shortName()
+
+
+def _getCacheName(wkspname, wksp_prefix, cache_dir, abs_method):
     """
     Generate a MDF5 string based on given key properties.
 
     :param wkspname: donor workspace containing absorption correction info
+    :param wksp_prefix: prefix to add to wkspname for caching
     :param cache_dir: location to store the cached absorption correction
-    
+
     return fileName(full path), sha1
     """
-
-    # fix up the workspace name
-    prefix = wkspname.replace('__', '')
 
     # parse algorithm used for absorption calculation
     # NOTE: the actual algorithm used depends on selected abs_method, therefore
@@ -57,6 +81,9 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     }[abs_method]
 
     # key property to generate the HASH
+    if not mtd.doesExist(wkspname):
+        raise RuntimeError(
+            "Could not find workspace '{}' in ADS to create cache name".format(wkspname))
     ws = mtd[wkspname]
     # NOTE:
     #  - The query for height is tied to a beamline, which is not a good design as it
@@ -76,7 +103,7 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     ]
 
     cache_path, signature = mantid.simpleapi.CreateCacheFilename(
-        Prefix=prefix,
+        Prefix=wksp_prefix,
         OtherProperties=property_string,
         CacheDir=cache_dir,
     )
@@ -84,7 +111,7 @@ def _getCacheName(wkspname, cache_dir, abs_method):
     return cache_path, signature
 
 
-def _getCachedData(absName, abs_method, sha1, cache_file_name):
+def _getCachedData(absName, abs_method, sha1, cache_file_name, wksp_prefix=""):
     """
     Check both memory and disk to locate cache data.  Returns ("", "")
     if no cache can be found.
@@ -161,17 +188,18 @@ def _getCachedData(absName, abs_method, sha1, cache_file_name):
 # ---- Core functionality ----- #
 # ------------------------------#
 def calculate_absorption_correction(
-    filename,
-    abs_method,
-    props,
-    sample_formula,
-    mass_density,
-    number_density=Property.EMPTY_DBL,
-    container_shape="PAC06",
-    num_wl_bins=1000,
-    element_size=1,
-    metaws=None,
-    cache_dir="",
+        filename,
+        abs_method,
+        props,
+        sample_formula,
+        mass_density,
+        number_density=Property.EMPTY_DBL,
+        container_shape="PAC06",
+        num_wl_bins=1000,
+        element_size=1,
+        metaws=None,
+        cache_dir="",
+        prefix="FILENAME",
 ):
     """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
 
@@ -209,6 +237,7 @@ def calculate_absorption_correction(
     :param element_size: Size of one side of the integration element cube in mm
     :param metaws: Optional workspace containing metadata to use instead of reading from filename
     :param cache_dir: cache directory for storing cached absorption correction workspace
+    :param prefix: How the prefix of cache file is determined - FILENAME to use file, or SHA prefix
 
     :return:
         Two workspaces (A_s, A_c) names
@@ -239,10 +268,15 @@ def calculate_absorption_correction(
         return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
     else:
         # -- Caching -- #
+        # -- Generate cache file prefix: defaults to use base filename unless prefix arg is set to SHA
+        cache_prefix = _getInstrName(filename, donorWS)
+        if prefix != "SHA":
+            # Append the filename to the instrument name for the cache file
+            cache_prefix = cache_prefix + _getBasename(filename).replace(cache_prefix, '')
         # -- Generate the cache file name based on
-        #    - input filename (embedded in donorWS)
+        #    - input filename (embedded in donorWS) or SHA depending on prefix determined above
         #    - SNSPowderReduction Options (mostly passed in as args)
-        cache_filename, sha1 = _getCacheName(donorWS, cache_dir, abs_method)
+        cache_filename, sha1 = _getCacheName(donorWS, cache_prefix, cache_dir, abs_method)
         log.information(f"SHA1: {sha1}")
         # -- Try to use cache
         #    - if cache is found, wsn_as and wsn_ac will be valid string (workspace name)
@@ -250,7 +284,7 @@ def calculate_absorption_correction(
         #      - load from cache nxs file
         #    - if cache is not found, wsn_as and wsn_ac will both be None
         #      - standard calculation will be kicked off as before
-        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename)
+        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename, cache_prefix)
 
         # NOTE:
         # -- one algorithm with three very different behavior, why not split them to
@@ -276,13 +310,13 @@ def calculate_absorption_correction(
                 # set the SHA1 to workspace in memory (for in-memory cache search)
                 mtd[wsn_as].mutableRun()["absSHA1"] = sha1
                 # case SampleOnly is the annoying one
-                if wsn_ac != "":
+                if wsn_ac is not None:
                     mtd[wsn_ac].mutableRun()["absSHA1"] = sha1
 
                 # save the cache to file (for hard-disk cache)
                 SaveNexusProcessed(InputWorkspace=wsn_as, Filename=cache_filename)
                 # case SampleOnly is the annoying one
-                if wsn_ac != "":
+                if wsn_ac is not None:
                     SaveNexusProcessed(InputWorkspace=wsn_ac, Filename=cache_filename, Append=True)
             else:
                 # found the cache, let's use the cache instead
@@ -348,15 +382,15 @@ def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, pref
 
 
 def create_absorption_input(
-    filename,
-    props,
-    num_wl_bins=1000,
-    material=None,
-    geometry=None,
-    environment=None,
-    opt_wl_min=0,
-    opt_wl_max=Property.EMPTY_DBL,
-    metaws=None,
+        filename,
+        props,
+        num_wl_bins=1000,
+        material=None,
+        geometry=None,
+        environment=None,
+        opt_wl_min=0,
+        opt_wl_max=Property.EMPTY_DBL,
+        metaws=None,
 ):
     """
     Create an input workspace for carpenter or other absorption corrections
