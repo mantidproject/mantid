@@ -113,6 +113,18 @@ Custom Spectra
     A comma separated list of spectra to restrict the calibration to. Can be provided as single spectrum numbers
     or ranges using hyphens (e.g. 14-150, 405, 500-600).
 
+.. image:: ../images/EngDiff_Calibration.png
+    :width: 600px
+    :align: center
+
+.. image:: ../../../dev-docs/source/images/EngineeringDiffractionTest/EnggDiffExpectedVanCurve.png
+    :width: 900px
+    :align: center
+
+.. image:: ../../../dev-docs/source/images/EngineeringDiffractionTest/EnggDiffExpectedLinear.png
+    :width: 900px
+    :align: center
+
 Focus
 -----
 
@@ -161,6 +173,14 @@ Custom Spectra
     A comma separated list of spectra to restrict the calibration to. Can be provided as single spectrum numbers
     or ranges using hyphens (e.g. 14-150, 405, 500-600).
 
+.. image:: ../images/EngDiff_Focus.png
+    :width: 600px
+    :align: center
+
+.. image:: ../../../dev-docs/source/images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
+    :width: 900px
+    :align: center
+
 Fitting
 -------
 
@@ -189,5 +209,9 @@ Focused Run Files
 
 Peak Positions
     A comma separated list of peak positions to be used when performing the fit.
+
+.. image:: ../images/EngDiff_Fitting.png
+    :width: 600px
+    :align: center
 
 .. categories:: Interfaces Diffraction
