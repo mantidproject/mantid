@@ -591,6 +591,7 @@ if bundle_path.to_s.include?('MantidWorkbench')
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
   executables << "#{contents_macos}/#{bundle_path.basename}"
+  fatal("MantidWorkbechUnstable? #{contents_macos}/#{bundle_path.basename}")
 elsif bundle_path.to_s.include?('MantidPlot')
   bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
