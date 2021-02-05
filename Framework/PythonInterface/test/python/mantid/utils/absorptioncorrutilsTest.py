@@ -12,18 +12,27 @@ from mantid.utils import absorptioncorrutils
 
 
 class AbsorptionCorrUtilsTest(unittest.TestCase):
-    def test_correction_props(self):
-        self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
+    @classmethod
+    def setUpClass(cls):
+        # Load common data used in several tests
+        Load(Filename="PG3_46577.nxs.h5", MetaDataOnly=True, OutputWorkspace="data")
 
         charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
         charTable = PDLoadCharacterizations(Filename=charfile)
         char = charTable[0]
 
-        data = Load(Filename="PG3_46577.nxs.h5", MetaDataOnly=True)
-
-        PDDetermineCharacterizations(InputWorkspace=data,
+        PDDetermineCharacterizations(InputWorkspace=mtd["data"],
                                      Characterizations=char,
                                      ReductionProperties="props")
+
+    @classmethod
+    def tearDownClass(cls):
+        mtd.clear()
+        PropertyManagerDataService.remove('props')
+
+    def test_correction_props(self):
+        self.assertRaises(RuntimeError, absorptioncorrutils.create_absorption_input, '', None)
+
         props = PropertyManagerDataService.retrieve("props")
 
         # Sample only absorption correction
@@ -34,9 +43,7 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
                                                                          1.165,
                                                                          element_size=2)
         self.assertIsNotNone(abs_sample[0])
-
-        DeleteWorkspaces([char, data, abs_sample[0]])
-        PropertyManagerDataService.remove('props')
+        DeleteWorkspaces([abs_sample[0]])
 
     def test_correction_methods(self):
         # no caching
@@ -61,20 +68,11 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         self.assertEqual("PG3", instr_name)
 
         # Use dummy file name but make sure it is retrieved from workspace
-        data = Load(Filename=fname, MetaDataOnly=True, AllowList="SampleFormula")
-        instr_name = absorptioncorrutils._getInstrName("fakeinstrument", data)
+        instr_name = absorptioncorrutils._getInstrName("fakeinstrument", mtd["data"])
         self.assertEqual("PG3", instr_name)
 
     def test_cache_filename_prefix(self):
         fname = "PG3_46577.nxs.h5"
-        charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
-        charTable = PDLoadCharacterizations(Filename=charfile)
-        char = charTable[0]
-
-        data = Load(Filename=fname, MetaDataOnly=True)
-        PDDetermineCharacterizations(InputWorkspace=data,
-                                     Characterizations=char,
-                                     ReductionProperties="props")
         props = PropertyManagerDataService.retrieve("props")
 
         cachedir = tempfile.gettempdir()
@@ -107,14 +105,6 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
 
     def test_cache_sha_prefix(self):
         fname = "PG3_46577.nxs.h5"
-        charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
-        charTable = PDLoadCharacterizations(Filename=charfile)
-        char = charTable[0]
-
-        data = Load(Filename=fname, MetaDataOnly=True)
-        PDDetermineCharacterizations(InputWorkspace=data,
-                                     Characterizations=char,
-                                     ReductionProperties="props")
         props = PropertyManagerDataService.retrieve("props")
 
         cachedir = tempfile.gettempdir()
