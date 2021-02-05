@@ -310,7 +310,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 24);
@@ -359,7 +359,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 8 columns: I, err^2, run_num, det_id, goniometerIndex, theta, omega, tof
+    // 8 columns: I, err^2, run_num, goniometerIndex, det_id, theta, omega, tof
     const size_t traits_count = 8; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 24);
@@ -465,7 +465,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 24);
@@ -520,7 +520,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 24);
@@ -677,7 +677,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 7);
@@ -805,7 +805,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 574);
@@ -875,7 +875,7 @@ public:
     std::vector<coord_t> events;
     size_t ncols;
     box->getEventsData(events, ncols);
-    // 9 columns: I, err^2, run_num, det_id, goniometerIndex, h, k, l, dE
+    // 9 columns: I, err^2, run_num, goniometerIndex, det_id, h, k, l, dE
     const size_t traits_count = 9; // data items per event
     TS_ASSERT_EQUALS(ncols, traits_count);
     TS_ASSERT_EQUALS(events.size(), traits_count * 574);
