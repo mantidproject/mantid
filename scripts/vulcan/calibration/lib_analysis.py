@@ -1,6 +1,7 @@
 # Zoo of methods that are develooped for analyze the calibration
 from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, DiffractionFocussing, Rebin,
-                              ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed)
+                              ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed,
+                              MaskDetectors)
 from mantid.simpleapi import mtd
 import numpy as np
 
@@ -176,11 +177,10 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
     return report
 
 
-def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
+def align_focus_event_ws(event_ws_name, calib_ws_name: str, group_ws_name: str, mask_ws_name: str):
     """
     overwrite the input
     """
-
     # Align detector
     print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
 
@@ -199,11 +199,17 @@ def align_focus_event_ws(event_ws_name, calib_ws_name, group_ws_name):
     assert event_ws.getAxis(0).getUnit().unitID() == 'dSpacing', f'Expecting {event_ws_name} to be dSpacing but ' \
                                                                  f'it is {event_ws.getAxis(0).getUnit().unitID()}'
 
+    # Mask group worksapce
+    MaskDetectors(Workspace=group_ws_name, MaskedWorkspace=mask_ws_name)
+
+    # Diffraction focus
     DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                          GroupingWorkspace=group_ws_name)
 
+    # Convert from event workspace to workspace 2D
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
 
+    # Edit instrument geometry
     EditInstrumentGeometry(Workspace=event_ws_name, PrimaryFlightPath=42, SpectrumIDs='1-3', L2='2,2,2',
                            Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
                            InstrumentName='vulcan_3bank')
