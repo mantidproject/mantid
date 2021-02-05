@@ -61,7 +61,8 @@ def main():
     #     title = f'Diamond Cross Correlation (Fallback erroneous DIFC)'
     # #
     # PD
-    diamond_dir = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/pdcalib_0003'
+    # diamond_dir = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/pdcalib_0003'
+    diamond_dir = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/LatestTestPD2Round'
     diamond_ws_name = 'VULCAN_164960_PDCalibrationG_3banks'
     title = f'Diamond PDCalibration (Gaussian)'
 
@@ -78,10 +79,10 @@ def main():
     fit_90degree_banks(diamond_ws_name, title, 1)
 
     # Fit high angle bank
-    fit_high_angle_bank(diamond_ws_name)
+    fit_high_angle_bank(diamond_ws_name, title)
 
 
-def fit_90degree_banks(diamond_ws_name, ws_index, title):
+def fit_90degree_banks(diamond_ws_name, title: str, ws_index: int):
     # Choose Bank
     if not 0 <= ws_index <= 1:
         raise RuntimeError(f'This fitting method works for only West (0) and East (1) bank, '
