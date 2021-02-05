@@ -42,11 +42,12 @@ protected:
    */
   uint16_t runIndex;
 
+  /** 0-based index defining the goniometer settings when the event took place*/
+  // attribute right after uint16_t runIndex to avoid padding arising from missaligment
+  uint16_t goniometerIndex;
+
   /** Detector ID of the pixel that measured this event. */
   int32_t detectorId;
-
-  /** 0-based index defining the goniometer settings when the event took place*/
-  uint16_t goniometerIndex;
 
 public:
   // Enum to flag this templated type as a full md event type.
