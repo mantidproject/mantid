@@ -4,6 +4,11 @@
 # Output will be
 # 1. each peak's observed intensity, position, width and position error
 # 2. plot with difference curve
+#
+# Peak list:
+# 0.31173, 0.32571, 0.34987, 0.42049, 0.46451, 0.47679, 0.49961, 0.51499, 0.54411,
+# 0.56414, 0.63073, .68665, .72830,
+# Peak List: 0.63073, .68665, .72830, .81854, .89198, 1.07577, 1.26146,
 
 # TODO this is better to run in Mantid first!
 
@@ -41,8 +46,8 @@ def cal_fwhm(param_ws):
 
 def main():
     # Load data
-    print()
-    # diamond_nxs = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/pdcalib_0003/VULCAN_164960_diamond_3banks.nxs'
+    # diamond_nxs =
+    # '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/pdcalib_0003/VULCAN_164960_diamond_3banks.nxs'
     # Specify diamond processed nexus and workspace name
 
     # CC mask
@@ -60,25 +65,30 @@ def main():
     diamond_ws_name = 'VULCAN_164960_PDCalibrationG_3banks'
     title = f'Diamond PDCalibration (Gaussian)'
 
-    diamond_nxs = os.path.join(diamond_dir, 'VULCAN_164960_diamond_3banks.nxs')
-    LoadNexusProcessed(Filename=diamond_nxs, OutputWorkspace=diamond_ws_name)
+    if not mtd.doesExist(diamond_ws_name):
+        diamond_nxs = os.path.join(diamond_dir, 'VULCAN_164960_diamond_3banks.nxs')
+        LoadNexusProcessed(Filename=diamond_nxs, OutputWorkspace=diamond_ws_name)
     diamond_ws = mtd[diamond_ws_name]
+    assert diamond_ws
 
-    fit_west_bank()
+    # Fit west bank
+    fit_90degree_banks(diamond_ws_name, title, 0)
+
+    # Fit east bank
+    fit_90degree_banks(diamond_ws_name, title, 1)
+
+    # Fit high angle bank
+    fit_high_angle_bank(diamond_ws_name)
 
 
-def fit_west_bank():
+def fit_90degree_banks(diamond_ws_name, ws_index, title):
     # Choose Bank
-    ws_index = 1
+    if not 0 <= ws_index <= 1:
+        raise RuntimeError(f'This fitting method works for only West (0) and East (1) bank, '
+                           f'but not for ws index = {ws_index}')
 
-    # Main .......
-
+    # Construct output
     peak_info_list = list()
-
-    # 0.31173, 0.32571, 0.34987, 0.42049, 0.46451, 0.47679, 0.49961, 0.51499, 0.54411,
-    # 0.56414, 0.63073, .68665, .72830,
-
-    # Peak List: 0.63073, .68665, .72830, .81854, .89198, 1.07577, 1.26146,
 
     # Peak 0
     peak = Peak()
@@ -150,26 +160,6 @@ def fit_west_bank():
     peak.a0_obs = 1.49818e+08
     peak_info_list.append(peak)
 
-    # # Peak 7
-    # peak = Peak()
-    # peak.tag = 'peak07'
-    # peak.obs_pos = 0.56414
-    # peak.start_x = 0.555
-    # peak.end_x = 0.575
-    # peak.intensity = 7.7859e+07
-    # peak.a0_obs = 1.49818e+09
-    # peak_info_list.append(peak)
-    #
-    # # Peak 8
-    # peak = Peak()
-    # peak.tag = 'peak08'
-    # peak.obs_pos = 0.54411
-    # peak.start_x = 0.530
-    # peak.end_x = 0.555
-    # peak.intensity = 7.7859e+07
-    # peak.a0_obs = 1.49818e+09
-    # peak_info_list.append(peak)
-
     param_dict = dict()
 
     # Overiew plot
@@ -183,7 +173,7 @@ def fit_west_bank():
                        f'S=0.0019;name=LinearBackground,A0={pi.a0_obs},A1=0.'
 
         out = Fit(Function=fit_function,
-                  InputWorkspace=diamond_ws,
+                  InputWorkspace=diamond_ws_name,
                   Output=f'VULCAN_164960_pd0003_3banks_{pi.tag}',
                   OutputCompositeMembers=True,
                   WorkspaceIndex=ws_index,
@@ -204,15 +194,9 @@ def fit_west_bank():
         fitted_data_ws = out.OutputWorkspace
         fitted_data_ws = ConvertToPointData(InputWorkspace=fitted_data_ws, OutputWorkspace=str(fitted_data_ws))
 
-        # collect fitted peak values
-        if True:
-            # back to back
-            fwhm = cal_fwhm(fit_param_table_ws)
-            x0 = fit_param_table_ws.cell(3, 1)
-        else:
-            # gaussian
-            fwhm = fit_param_table_ws.cell(2, 1)
-            x0 = fit_param_table_ws.cell(1, 1)
+        # collect fitted peak values: back to back
+        fwhm = cal_fwhm(fit_param_table_ws)
+        x0 = fit_param_table_ws.cell(3, 1)
 
         # maximum value and peak range
         max_y = np.max(fitted_data_ws.extractY()[1])
@@ -245,7 +229,7 @@ def fit_west_bank():
         print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}')
 
     # Plot overview
-    diamond_pt_ws = ConvertToPointData(InputWorkspace=diamond_ws, OutputWorkspace='diamond_point_data')
+    diamond_pt_ws = ConvertToPointData(InputWorkspace=diamond_ws_name, OutputWorkspace='diamond_point_data')
 
     plt.cla()
     plt.plot(diamond_pt_ws.readX(ws_index), diamond_pt_ws.readY(ws_index), color='black', linestyle='None', marker='.',
@@ -258,6 +242,179 @@ def fit_west_bank():
     plt.legend()
     plt.savefig(f'overview_fit_bank{ws_index + 1}.png')
     plt.show()
+
+
+def fit_high_angle_bank(diamond_ws_name, title):
+    # Main .......
+    ws_index = 2
+
+    peak_info_list = list()
+
+    # 0.31173, 0.32571, 0.34987, 0.42049, 0.46451, 0.47679, 0.49961, 0.51499, 0.54411,
+    # 0.56414, 0.63073, .68665, .72830,
+
+    # Peak List: 0.63073, .68665, .72830, .81854, .89198, 1.07577, 1.26146,
+
+    # Peak 1
+    peak = Peak()
+    peak.tag = 'peak01'
+    peak.obs_pos = 1.07577
+    peak.start_x = 1.050
+    peak.end_x = 1.100
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 2
+    peak = Peak()
+    peak.tag = 'peak02'
+    peak.obs_pos = 0.89198
+    peak.start_x = 0.87
+    peak.end_x = 0.93
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 3
+    peak = Peak()
+    peak.tag = 'peak03'
+    peak.obs_pos = 0.81854
+    peak.start_x = 0.79306519523147423
+    peak.end_x = 0.84385086920977437
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 4
+    peak = Peak()
+    peak.tag = 'peak04'
+    peak.obs_pos = 0.72830
+    peak.start_x = 0.705
+    peak.end_x = 0.750
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 5
+    peak = Peak()
+    peak.tag = 'peak05'
+    peak.obs_pos = 0.68665
+    peak.start_x = 0.675
+    peak.end_x = 0.700
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 6
+    peak = Peak()
+    peak.tag = 'peak06'
+    peak.obs_pos = 0.63073
+    peak.start_x = 0.620
+    peak.end_x = 0.645
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 7
+    peak = Peak()
+    peak.tag = 'peak07'
+    peak.obs_pos = 0.56414
+    peak.start_x = 0.555
+    peak.end_x = 0.575
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    # Peak 8
+    peak = Peak()
+    peak.tag = 'peak08'
+    peak.obs_pos = 0.54411
+    peak.start_x = 0.530
+    peak.end_x = 0.555
+    peak.intensity = 7.7859e+07
+    peak.a0_obs = 1.49818e+09
+    peak_info_list.append(peak)
+
+    param_dict = dict()
+
+    # Overiew plot
+    cal_vec_x_list = []
+    cal_vec_y_list = []
+    cal_vec_diff_list = []
+
+    for pi in peak_info_list:
+
+        out = Fit(
+            Function=f'name=BackToBackExponential,I={pi.intensity},A=3423.58,B=1336.86,X0={pi.obs_pos},S=0.000393873;name=LinearBackground,A0={pi.a0_obs},A1=0.',
+            InputWorkspace=diamond_ws_name,
+            Output=f'VULCAN_164960_pd0003_3banks_{pi.tag}',
+            OutputCompositeMembers=True,
+            WorkspaceIndex=ws_index,
+            StartX=pi.start_x,
+            EndX=pi.end_x,
+            Normalise=True)
+
+        # summarize the fitting result
+        fit_chi2 = out.OutputChi2overDoF
+        fit_status = out.OutputStatus
+        print(f'Fit {pi.obs_pos}: {fit_status}, Chi2 = {fit_chi2}')
+
+        if fit_status.lower().count('success') == 0 and fit_status.lower().count('too small') == 0:
+            continue
+
+        cov_matrix_table_ws = out.OutputNormalisedCovarianceMatrix
+        fit_param_table_ws = out.OutputParameters
+        fitted_data_ws = out.OutputWorkspace
+        fitted_data_ws = ConvertToPointData(InputWorkspace=fitted_data_ws, OutputWorkspace=str(fitted_data_ws))
+
+        # collect fitted peak values
+        fwhm = cal_fwhm(fit_param_table_ws)
+        x0 = fit_param_table_ws.cell(3, 1)
+        x0_error = fit_param_table_ws.cell(3, 2)
+
+        # maximum value and peak range
+        max_y = np.max(fitted_data_ws.extractY()[1])
+
+        # output
+        param_dict[pi.obs_pos] = x0, max_y, fwhm, x0_error
+
+        # overview plot
+        cal_vec_x_list.append(fitted_data_ws.readX(1))
+        cal_vec_y_list.append(fitted_data_ws.readY(1))
+        cal_vec_diff_list.append(fitted_data_ws.readY(2))
+
+        # plot result
+        plt.cla()
+        for plot_index, color_label in enumerate([('black', 'Data'), ('red', 'Calc'), ('green', 'Diff')]):
+            color, label = color_label
+            plt.plot(fitted_data_ws.extractX()[plot_index], fitted_data_ws.extractY()[plot_index], color=color,
+                     label=label)
+        plt.legend()
+        plt.title(f'{pi.tag} Peak Pos = {pi.obs_pos}')
+        plt.savefig(f'bank{ws_index}_{pi.tag}.png')
+
+    # output fitted parameters
+    print('\n\n')
+    for exp_pos in sorted(param_dict.keys()):
+        obs_pos, max_y, obs_fwhm, obs_pos_error = param_dict[exp_pos]
+        diff = obs_pos - exp_pos
+        print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}  {obs_pos_error}')
+
+    # Plot overview
+    diamond_pt_ws = ConvertToPointData(InputWorkspace=diamond_ws_name, OutputWorkspace='diamond_point_data')
+
+    plt.plot(diamond_pt_ws.readX(ws_index), diamond_pt_ws.readY(ws_index), color='black', linestyle='None', marker='.',
+             label=diamond_ws_name)
+    plt.plot(np.concatenate(cal_vec_x_list), np.concatenate(cal_vec_y_list), color='red', label='Fitted')
+    plt.plot(np.concatenate(cal_vec_x_list), np.concatenate(cal_vec_diff_list), color='green', label='Diff')
+    plt.title(title)
+    plt.xlabel('dSpacing')
+    plt.ylabel('Intensity')
+    plt.legend()
+    plt.savefig(f'overview_fit_bank{ws_index + 1}.png')
+    plt.show()
+
+    return
 
 
 if __name__ == '__main__':
