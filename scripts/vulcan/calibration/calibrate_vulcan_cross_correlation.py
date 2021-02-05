@@ -144,12 +144,6 @@ def calibrate_vulcan(diamond_nexus: str,
                      calib_file_prefix='vulcan_cc_1fit')
 
 
-def test_main_calibrate():
-    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5',
-                     load_cutoff_time=300,   #None,
-                     difc_file_name='vulcan_cc_21356.h5')
-
-
 def test_main_report_calibration():
     """(Testing) main to import a calibration file and make reports
     """
@@ -195,12 +189,16 @@ def test_main_apply_calibration():
     load_cutoff_time = None   # seconds
     diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time, unit_dspace=False)
 
-    calib_file_name = 'vulcan_cc_1fit.h5'
+    # calib_file_name = 'vulcan_cc_1fit.h5'
     # calib_file_name = 'VULCAN_pdcalibration.h5'
+    calib_file_name = 'vulcan_pd0003_round2.h5'
+    # TODO  - why PDCalibrated does not have proper grouping workspace.
+    # FIXME - how does the previously PD-calibrated data get proper groups? 
+    grouping_ws_name = create_groups()
 
     calib_tuple = load_calibration_file(calib_file_name, 'Vulcan_Testing_Calib', diamond_ws_name)
     calib_cal_ws = calib_tuple.OutputCalWorkspace
-    calib_group_ws = calib_tuple.OutputGroupingWorkspace
+    # calib_group_ws = calib_tuple.OutputGroupingWorkspace
     calib_mask_ws = calib_tuple.OutputMaskWorkspace
     # print(f'Type: {type(calib_tuple)}')
     # print(f'Function: {dir(calib_tuple)}')
@@ -211,13 +209,19 @@ def test_main_apply_calibration():
         print(ws_name)
 
     # Align, focus and export
-    align_focus_event_ws(diamond_ws_name, str(calib_cal_ws), str(calib_group_ws))
+    align_focus_event_ws(diamond_ws_name, str(calib_cal_ws), grouping_ws_name)
 
     return
 
 
+def test_main_calibrate():
+    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5',
+                     load_cutoff_time=None,  # 300
+                     difc_file_name='vulcan_cc_21356.h5')
+
+
 if __name__ == '__main__':
-    choice = '1'
+    choice = '3'
     if choice == '1':
         test_main_calibrate()
     elif choice == '2':

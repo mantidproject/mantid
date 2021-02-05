@@ -75,8 +75,7 @@ def verify_vulcan_difc(ws_name: str,
         # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
         param_dict = {}
         if fallback_incorrect_difc_pixels:
-            param_dict['cal_table_ws'] = cal_table_ws
-            param_dict['start_row_number'] = pid_0
+            param_dict['cal_table'] = cal_table_ws
             param_dict['difc_col_index'] = 1
 
         correct_difc_to_default(bank_idf_vec, bank_cal_vec, difc_tol=20,
@@ -340,13 +339,14 @@ def cross_correlate_calibrate(ws_name: str,
     return offset_ws_name, mask_ws_name
 
 
+# FIXME - this method needs a better name
 def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
                             start_row_number: int,
-                            cal_table: Union[Any, None],
-                            difc_col_index: Union[int, None],
                             mask_ws,
-                            mask_erroneous_pixels: bool):
-    """
+                            mask_erroneous_pixels: bool,
+                            cal_table: Union[Any, None]=None,
+                            difc_col_index: Union[int, None]=None):
+    """Process DIFC if calbirated value is out of tolerance
 
     Parameters
     ----------
@@ -405,7 +405,7 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
                        ''.format(index, index + start_row_number, difc_diff_vec[index], mask_sig)
         # END-IF
     # END-FOR
-    print(f'[INFO] Number of corrected DIFC = {num_wild_difc} out of {cal_difc_vec.shape}\n{message}')
+    print(f'[INFO] Number of DIFC incorrect = {num_wild_difc} out of {cal_difc_vec.shape}\n{message}')
 
     # Mask detectors
     if mask_erroneous_pixels and num_wild_difc > 0:
