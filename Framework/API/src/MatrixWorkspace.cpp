@@ -1485,7 +1485,7 @@ public:
         m_frame(std::make_unique<Geometry::GeneralFrame>(
             m_axis.unit()->label(), m_axis.unit()->label())) {}
 
-  /// the name of the dimennlsion as can be displayed along the axis
+  /// the name of the dimension as can be displayed along the axis
   std::string getName() const override {
     const auto &unit = m_axis.unit();
     if (unit && unit->unitID() != "Empty")

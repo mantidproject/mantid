@@ -170,7 +170,7 @@ void LoadMD::exec() {
   m_file->openGroup(entryName, "NXentry");
   const std::map<std::string, std::string> levelEntries = m_file->getEntries();
 
-  // Check is SaveMD version 2 was used
+  // Check if SaveMD version 2 was used
   m_saveMDVersion = 0;
   if (m_file->hasAttr("SaveMDVersion"))
     m_file->getAttr("SaveMDVersion", m_saveMDVersion);

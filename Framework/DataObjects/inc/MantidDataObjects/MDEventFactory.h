@@ -84,7 +84,7 @@ private:
       API::IMDEventWorkspace *(*)(const std::string &,
                                   const Mantid::API::MDNormalization &,
                                   const Mantid::API::MDNormalization &);
-  // vector of function pointers to the funcions
+  // vector of function pointers to the functions
   static std::vector<fpCreateMDWS> wsCreatorFP;
 
   // local wrapper around the MDWorkspace constructor as the constructor's
