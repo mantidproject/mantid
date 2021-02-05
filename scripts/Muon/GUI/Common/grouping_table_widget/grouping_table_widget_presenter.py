@@ -161,7 +161,6 @@ class GroupingTablePresenter(object):
         self._model.remove_groups_by_name([name for _,name in safe_to_rm])
         if warnings:
             self._view.warning_popup(warnings)
-        
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:

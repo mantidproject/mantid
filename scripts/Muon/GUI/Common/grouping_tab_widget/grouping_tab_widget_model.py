@@ -156,7 +156,6 @@ class GroupingTabModel(object):
         else:
             return used_by
 
-
     def remove_group_from_analysis(self, group):
         self._groups_and_pairs.remove_group_from_selected_groups(group)
 
