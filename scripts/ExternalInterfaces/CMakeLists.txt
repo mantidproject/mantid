@@ -8,7 +8,7 @@ externalproject_add(mslice
                     GIT_REPOSITORY
                     "https://github.com/mantidproject/mslice.git"
                     GIT_TAG
-                    aaa667906e109cdd3574242b98e8b2345853e428
+                    877b26caed984614ea7fe029668c0e237bb3e955
                     EXCLUDE_FROM_ALL 1
                     CONFIGURE_COMMAND ""
                     BUILD_COMMAND ""

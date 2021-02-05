@@ -299,6 +299,10 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
         fi
+
+        if [[ -n "${GITHUB_AUTHORIZATION_TOKEN}" ]]; then
+            PACKAGINGVARS="${PACKAGINGVARS} -DGITHUB_AUTHORIZATION_TOKEN=${GITHUB_AUTHORIZATION_TOKEN}"
+        fi
     fi
 fi
 

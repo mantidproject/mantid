@@ -50,8 +50,11 @@ private slots:
   /// Updates the list of logs and number of periods
   void updateAvailableInfo();
 
-  /// Handle for when runs line edit changed
-  void handleRunsChanged();
+  /// Handle for when runs editing starts
+  void handleRunsEditing();
+
+  /// Handle for when runs editing finishes
+  void handleRunsEditingFinished();
 
   /// Handle for when instrument changed
   void handleInstrumentChanged(std::string instrument);

@@ -180,8 +180,11 @@ signals:
   /// Request to load data
   void loadRequested();
 
-  /// User has changed runs
-  void runsChangedSignal();
+  /// User has started editing the runs
+  void runsEditingSignal();
+
+  /// User has finished editing the runs
+  void runsEditingFinishedSignal();
 
   /// New data have been loaded
   void dataChanged();

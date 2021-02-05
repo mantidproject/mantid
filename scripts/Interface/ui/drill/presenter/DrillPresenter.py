@@ -10,6 +10,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 from ..model.DrillSample import DrillSample
+from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
 
@@ -382,6 +383,10 @@ class DrillPresenter:
                 lambda : self.model.setSettings(sw.getSettings())
                 )
         sw.show()
+
+    def onShowExportDialog(self, dialog):
+        exportModel = self.model.getExportModel()
+        DrillExportPresenter(dialog, exportModel)
 
     def onShowContextMenu(self, menu):
         """
