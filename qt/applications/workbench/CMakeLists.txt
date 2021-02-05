@@ -131,7 +131,7 @@ install (FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BU
 install (CODE "
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
                             \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${ParaView_DIR}
-                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE STDOUT ERROR_VARIABLE STDOUT COMMAND_ECHO STDOUT)
+                    RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
     if(NOT install_name_tool_result EQUAL 0)
       message(\"\${_out}\")
       message(FATAL_ERROR \"Package script failed!!!\n\")
