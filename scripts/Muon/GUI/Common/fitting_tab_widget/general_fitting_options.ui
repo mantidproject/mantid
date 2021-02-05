@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>general_fitting_widget</class>
- <widget class="QWidget" name="general_fitting_widget">
+ <class>general_fitting_options</class>
+ <widget class="QWidget" name="general_fitting_options">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>583</height>
+    <height>73</height>
    </rect>
   </property>
   <property name="windowTitle">
