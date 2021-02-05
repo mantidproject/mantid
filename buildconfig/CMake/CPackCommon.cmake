@@ -12,6 +12,11 @@ set ( CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR} )
 set ( CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR} )
 set ( CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH}${VERSION_TWEAK} )
 
+# Sets install for the /opt/mantid* directory
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+endif()
+
 # RPM information - only used if generating a rpm
 # the release number is an option set in LinuxPackageScripts.cmake
 set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
