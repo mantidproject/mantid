@@ -198,12 +198,13 @@ def fit_90degree_banks(diamond_ws_name, title: str, ws_index: int):
         # collect fitted peak values: back to back
         fwhm = cal_fwhm(fit_param_table_ws)
         x0 = fit_param_table_ws.cell(3, 1)
+        x0_error = fit_param_table_ws.cell(3, 2)
 
         # maximum value and peak range
         max_y = np.max(fitted_data_ws.extractY()[1])
 
         # output
-        param_dict[pi.obs_pos] = x0, max_y, fwhm
+        param_dict[pi.obs_pos] = x0, max_y, fwhm, x0_error
 
         # overview plot
         cal_vec_x_list.append(fitted_data_ws.readX(1))
@@ -225,9 +226,9 @@ def fit_90degree_banks(diamond_ws_name, title: str, ws_index: int):
     # output fitted parameters
     print('\n\n')
     for exp_pos in sorted(param_dict.keys()):
-        obs_pos, max_y, obs_fwhm = param_dict[exp_pos]
+        obs_pos, max_y, obs_fwhm, obs_pos_error = param_dict[exp_pos]
         diff = obs_pos - exp_pos
-        print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}')
+        print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}  {obs_pos_error}')
 
     # Plot overview
     diamond_pt_ws = ConvertToPointData(InputWorkspace=diamond_ws_name, OutputWorkspace='diamond_point_data')
