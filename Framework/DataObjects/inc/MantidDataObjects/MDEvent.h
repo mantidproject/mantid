@@ -56,7 +56,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Empty constructor */
   MDEvent()
-      : MDLeanEvent<nd>(), runIndex(0), detectorId(0), goniometerIndex(0) {}
+      : MDLeanEvent<nd>(), runIndex(0), goniometerIndex(0), detectorId(0) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error
@@ -65,8 +65,8 @@ public:
    * @param errorSquared :: square of the error on the weight
    * */
   MDEvent(const float signal, const float errorSquared)
-      : MDLeanEvent<nd>(signal, errorSquared), runIndex(0), detectorId(0),
-        goniometerIndex(0) {}
+      : MDLeanEvent<nd>(signal, errorSquared), runIndex(0), goniometerIndex(0),
+        detectorId(0) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error
@@ -75,8 +75,8 @@ public:
    * @param errorSquared :: square of the error on the weight
    * */
   MDEvent(const double signal, const double errorSquared)
-      : MDLeanEvent<nd>(signal, errorSquared), runIndex(0), detectorId(0),
-        goniometerIndex(0) {}
+      : MDLeanEvent<nd>(signal, errorSquared), runIndex(0), goniometerIndex(0),
+        detectorId(0) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal, error, runIndex and detectorId
@@ -90,7 +90,7 @@ public:
   MDEvent(const double signal, const double errorSquared,
           const uint16_t runIndex, const int32_t detectorId)
       : MDLeanEvent<nd>(signal, errorSquared), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(detectorId) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal, error, runIndex and detectorId
@@ -104,39 +104,40 @@ public:
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
           const int32_t detectorId)
       : MDLeanEvent<nd>(signal, errorSquared), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(detectorId) {}
 
   //---------------------------------------------------------------------------------------------
-  /** Constructor with signal, error, runIndex, detectorId, and goniometerIndex
+  /** Constructor with signal, error, runIndex, goniometerIndex, and detectorId
    *
    * @param signal :: signal (aka weight)
    * @param errorSquared :: square of the error on the weight
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
-   * @param detectorId :: ID of the detector that measured this event.
    * @param goniometerIndex :: 0-based index defining the goniometer settings
    *when the event took place
+   * @param detectorId :: ID of the detector that measured this event.
    */
   MDEvent(const double signal, const double errorSquared,
-          const uint16_t runIndex, const int32_t detectorId,
-          const uint16_t goniometerIndex)
+          const uint16_t runIndex, const uint16_t goniometerIndex,
+          const int32_t detectorId)
       : MDLeanEvent<nd>(signal, errorSquared), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(goniometerIndex) {}
+        goniometerIndex(goniometerIndex), detectorId(detectorId) {}
 
   //---------------------------------------------------------------------------------------------
-  /** Constructor with signal, error, runIndex, detectorId, and goniometerIndex
+  /** Constructor with signal, error, runIndex, goniometerIndex, and detectorId
    *
    * @param signal :: signal (aka weight)
    * @param errorSquared :: square of the error on the weight
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
-   * @param detectorId :: ID of the detector that measured this event.
    * @param goniometerIndex :: 0-based index defining the goniometer settings
-   *when the event took place   */
+   *when the event took place
+   * @param detectorId :: ID of the detector that measured this event.
+   */
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
-          const int32_t detectorId, const uint16_t goniometerIndex)
+          const uint16_t goniometerIndex, const int32_t detectorId)
       : MDLeanEvent<nd>(signal, errorSquared), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(goniometerIndex) {}
+        goniometerIndex(goniometerIndex), detectorId(detectorId) {}
 
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers
@@ -148,7 +149,7 @@ public:
    * */
   MDEvent(const float signal, const float errorSquared, const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(0),
-        detectorId(0), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(0) {}
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers
    *
@@ -160,7 +161,7 @@ public:
   MDEvent(const double signal, const double errorSquared,
           const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(0),
-        detectorId(0), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(0) {}
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers, and the
    *runIndex and detectorID
@@ -176,38 +177,38 @@ public:
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
           const int32_t detectorId, const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(detectorId) {}
 
   MDEvent(const double signal, const double errorSquared,
           const uint16_t runIndex, const int32_t detectorId,
           const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(detectorId) {}
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers, and the
-   *runIndex, detectorID, and goniometerIndex
+   *runIndex, goniometerIndex, and detectorID
    *
    * @param signal :: signal (aka weight)
    * @param errorSquared :: square of the error on the weight
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
-   * @param detectorId :: ID of the detector that measured this event.
    * @param goniometerIndex :: 0-based index defining the goniometer settings
    *when the event took place
+   * @param detectorId :: ID of the detector that measured this event.
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    * */
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
-          const int32_t detectorId, const uint16_t goniometerIndex,
+          const uint16_t goniometerIndex, const int32_t detectorId,
           const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(goniometerIndex) {}
+        goniometerIndex(goniometerIndex), detectorId(detectorId) {}
 
   MDEvent(const double signal, const double errorSquared,
-          const uint16_t runIndex, const int32_t detectorId,
-          const uint16_t goniometerIndex, const coord_t *centers)
+          const uint16_t runIndex, const uint16_t goniometerIndex,
+          const int32_t detectorId, const coord_t *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(goniometerIndex) {}
+        goniometerIndex(goniometerIndex), detectorId(detectorId) {}
 #ifdef COORDT_IS_FLOAT
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers, and the
@@ -224,26 +225,26 @@ public:
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
           const int32_t detectorId, const double *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(0) {}
+        goniometerIndex(0), detectorId(detectorId) {}
   //---------------------------------------------------------------------------------------------
   /** Constructor with signal and error and an array of centers, and the
-   *runIndex, detectorID, and goniometerIndex
+   *runIndex, goniometerIndex, detectorID
    *
    * @param signal :: signal (aka weight)
    * @param errorSquared :: square of the error on the weight
    * @param runIndex :: 0-based index of which run in the containing
    *MDEventWorkspace
-   * @param detectorId :: ID of the detector that measured this event.
    * @param goniometerIndex :: 0-based index defining the goniometer settings
    *when the event took place
+   * @param detectorId :: ID of the detector that measured this event.
    * @param centers :: pointer to a nd-sized array of values to set for all
    *coordinates.
    */
   MDEvent(const float signal, const float errorSquared, const uint16_t runIndex,
-          const int32_t detectorId, const uint16_t goniometerIndex,
+          const uint16_t goniometerIndex, const int32_t detectorId,
           const double *centers)
       : MDLeanEvent<nd>(signal, errorSquared, centers), runIndex(runIndex),
-        detectorId(detectorId), goniometerIndex(goniometerIndex) {}
+        goniometerIndex(goniometerIndex), detectorId(detectorId) {}
 #endif
 
   //---------------------------------------------------------------------------------------------
@@ -276,7 +277,7 @@ public:
 
   /**
    * Static method used to convert a vector of events into a list of their
-   * signal, errorSquared, runIndex, detectorId, goniometerIndex, and
+   * signal, errorSquared, runIndex, goniometerIndex, detectorId, and
    * nd-Dimensional coordinates. All list items are casted into coord_t type.
    * @param events : vector of events
    * @param data : resulting list (of type std::vector) of data events
@@ -288,7 +289,7 @@ public:
                                   std::vector<coord_t> &data, size_t &ncols,
                                   double &totalSignal, double &totalErrSq) {
     std::vector<std::string> trait_names = {
-        "signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
+        "signal", "errorSquared", "runIndex", "goniometerIndex", "detectorId"};
     ncols = trait_names.size() + nd; // number of data items per event
     size_t nEvents = events.size();
     data.resize(nEvents * ncols);
@@ -304,8 +305,8 @@ public:
       data[index++] = static_cast<coord_t>(errorSquared);
       // Additional stuff for MDEvent
       data[index++] = static_cast<coord_t>(event.runIndex);
-      data[index++] = static_cast<coord_t>(event.detectorId);
       data[index++] = static_cast<coord_t>(event.goniometerIndex);
+      data[index++] = static_cast<coord_t>(event.detectorId);
       for (size_t d = 0; d < nd; d++)
         data[index++] = event.center[d]; // add event's coordinates
       // Track the total signal
@@ -317,7 +318,7 @@ public:
   /**
    * static method converts a vector of data items into a vector of events.
    * It is assumed the data traits for each event are ordered as follows:
-   * 1 signal, 2 errorSquared, 3 runIndex, 4 detectorId, 5 goniometerIndex,
+   * 1 signal, 2 errorSquared, 3 runIndex, 4 goniometerIndex, 5 detectorId,
    * 6 to 6+nd-1 nd-Dimensional coordinates.
    *
    * Legacy data do not contain goniometerIndex. Hence, a first attempt is
@@ -335,7 +336,7 @@ public:
                                   std::vector<MDEvent<nd>> &events,
                                   bool reserveMemory = true) {
     std::vector<std::string> trait_names = {
-        "signal", "errorSquared", "runIndex", "detectorId", "goniometerIndex"};
+        "signal", "errorSquared", "runIndex", "goniometerIndex", "detectorId"};
 
     size_t numColumns = trait_names.size() + nd;
     size_t numEvents = data.size() / numColumns;
@@ -364,8 +365,9 @@ public:
       events.emplace_back(static_cast<signal_t>(data[ii]),
                           static_cast<signal_t>(data[ii + 1]),
                           static_cast<uint16_t>(data[ii + 2]),
+                          static_cast<uint16_t>(data[ii + 4]),
                           static_cast<int32_t>(data[ii + 3]),
-                          static_cast<uint16_t>(data[ii + 4]), centers);
+                          centers);
     }
   }
 
