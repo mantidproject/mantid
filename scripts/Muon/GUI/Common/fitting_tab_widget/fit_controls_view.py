@@ -41,10 +41,6 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
         self.fit_status_success_failure.setStyleSheet("color: black")
         self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared}")
 
-    def update_global_fit_state(self, output_list):
-        """Updates the global fit status label."""
-        self.update_global_fit_status_label([output == "success" for output in output_list if output])
-
     def update_global_fit_status_label(self, success_list):
         """Updates the global fit status label."""
         if not success_list:
