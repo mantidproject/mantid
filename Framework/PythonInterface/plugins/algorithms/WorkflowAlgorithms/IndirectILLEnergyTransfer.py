@@ -632,9 +632,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         pattern = ''
         for i in range(N_TUBES):
-            for j in range(int(N_PIXELS_PER_TUBE/by)):
+            for j in range(N_PIXELS_PER_TUBE // by):
                 start = i * N_PIXELS_PER_TUBE + j * by + 1
-                end = start + by
+                end = start + by - 1
                 pattern += str(start)+'-'+str(end)+','
         return pattern[:-1]
 
