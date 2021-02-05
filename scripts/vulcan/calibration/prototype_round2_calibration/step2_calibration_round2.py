@@ -39,6 +39,9 @@ def main():
     [1.07577,  1.0752509282311888,   -0.0005190717688110524 ,  15183443.85147539,  0.001978951533954768 ,  4.7056051878319607e-07],
     """
 
+    # Source calibration file
+    source_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/diagnostic_history/pdcalibration/VULCAN_pdcalibration.h5'
+
     # Set up inputs
     west_bank_dataset = np.array([
             [0.63073,  0.6303803847550561,   -0.0003496152449439238,    553577.6291306695,  0.0025397920738331925],
@@ -69,39 +72,44 @@ def main():
             [0.89198,  0.8915720486296965,   -0.00040795137030347206,  5964867.915248313, -0.0001302392985283653,  6.627982521449077e-07 ],
             [1.07577,  1.0752509282311888,   -0.0005190717688110524 ,  15183443.85147539,  0.001978951533954768 ,  4.7056051878319607e-07]])
 
+    # Load calibration file 
+    calib_tuple = LoadDiffCal(Filename=source_cal_h5, InstrumentName='vulcan', WorkspaceName='DiffCal_Vulcan')
+
     # 2nd-round calibration
-    for bank_dataset in [west_bank_dataset, east_bank_dataset, highangle_bank_dataset]:
+    for bank_dataset, start_index, end_index in [(west_bank_dataset, 0, 3234),
+                                                 (east_bank_dataset, 3234, 6468),
+                                                 (highangle_bank_dataset, 6469, 24900)]:
 
         # linear fitting
         residual = calibrate_peak_positions(bank_dataset, plot=False)
 
+        # update calibration table
+        update_calibration_table(calib_tuple.OutputCalibrationWorkspace, residual, start_index, end_index)
 
-def update_calibration_table(res_west, rest_east, rest_highangle):
-    # import mantid algorithms, numpy and matplotlib
-    source_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/diagnostic_history/pdcalibration/VULCAN_pdcalibration.h5'
-    out = LoadDiffCal(Filename=source_cal_h5, InstrumentName='vulcan', WorkspaceName='DiffCal_Vulcan')
+    # Save to new diffraction calibration file
+    SaveDiffCal(CalibrationWorkspace=f'DiffCal_Vulcan_cal', GroupingWorkspace=f'DiffCal_Vulcan_group',
+                MaskWorkspace=f'DiffCal_Vulcan_mask', Filename='vulcan_pd0003_round2.h5')
 
-    cal_table = mtd['DiffCal_Vulcan_cal']
-    print(cal_table.getColumnNames())
-    print(cal_table.rowCount())
+
+def update_calibration_table(calib_ws, residual, start_index, end_index):
 
     # theory
     # DIFC^(2)(i) = DIFC(i) / b
     # T0^(2)(i) = - DIFC(i) * a
 
     # west bank
-    print('before: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
+    # print('before: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
     # This is the linear regression for focused peaks from PDCalibration
     # slope:
-    b = 1.0005157396059512
+    b = residual.slope   # 1.0005157396059512
     # interception:
-    a = -5.642400138239356e-05
-    for i_r in range(3234):
+    a = residual.intercept  # -5.642400138239356e-05
+    for i_r in range(start_index, end_index):
         # original difc
         difc = cal_table.cell(i_r, 1)
         tzero = cal_table.cell(i_r, 3)
         if abs(tzero) > 1E-6:
-            print('..... bug bug ....')
+            raise RuntimeError(f'Calibration table row {i_r}, Found non-zero TZERO {tzero}')
         # apply 2nd round correction
         new_difc = difc / b
         tzero = - difc * a
@@ -109,11 +117,7 @@ def update_calibration_table(res_west, rest_east, rest_highangle):
         cal_table.setCell(i_r, 1, new_difc)
         cal_table.setCell(i_r, 3, tzero)
 
-    print('after: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
-
-    SaveDiffCal(CalibrationWorkspace=f'DiffCal_Vulcan_cal', GroupingWorkspace=f'DiffCal_Vulcan_group',
-                MaskWorkspace=f'DiffCal_Vulcan_mask', Filename='vulcan_pd0003_round2.h5')
-
+    # print('after: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
 
 
 def calibrate_peak_positions(bank_dataset, plot=False):
@@ -132,7 +136,7 @@ def calibrate_peak_positions(bank_dataset, plot=False):
         new_x = res.slope * x + res.intercept
     else:
         # polynomial regression
-        poly_order = 2
+        poly_order = 1  # TODO can be changed to 2 only after we find out how to do the math to superpose with DIFC
         mymodel = np.poly1d(np.polyfit(x, y, poly_order))
         # print(type(mymodel))  numpy.poly1d
         # print(dir(mymodel))
