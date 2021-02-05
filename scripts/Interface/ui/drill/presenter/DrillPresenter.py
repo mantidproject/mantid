@@ -568,3 +568,4 @@ class DrillPresenter:
         if vs:
             self.view.setVisualSettings(vs)
         self.view.blockSignals(False)
+        self.view.setWindowModified(False)
