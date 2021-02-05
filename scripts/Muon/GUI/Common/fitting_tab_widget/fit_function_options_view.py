@@ -67,26 +67,14 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
 
-    # def set_slot_for_display_workspace_changed(self, slot):
-    #     self.parameter_display_combo.currentIndexChanged.connect(slot)
-    #
     # def set_slot_for_use_raw_changed(self, slot):
     #     self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
-    #
-    # def set_slot_for_fit_type_changed(self, slot):
-    #     self.simul_fit_checkbox.toggled.connect(slot)
     #
     # def set_slot_for_start_x_updated(self, slot):
     #     self.time_start.editingFinished.connect(slot)
     #
     # def set_slot_for_end_x_updated(self, slot):
     #     self.time_end.editingFinished.connect(slot)
-    #
-    # def set_slot_for_simul_fit_by_changed(self, slot):
-    #     self.simul_fit_by_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_simul_fit_specifier_changed(self, slot):
-    #     self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
     #
     # def set_slot_for_minimiser_changed(self, slot):
     #     self.minimizer_combo.currentIndexChanged.connect(slot)
