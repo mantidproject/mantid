@@ -105,6 +105,53 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
                                                                            prefix="FILENAME")
         self.assertIsNotNone(abs_s)
 
+    def test_cache_sha_prefix(self):
+        fname = "PG3_46577.nxs.h5"
+        charfile = "PG3_char_2020_01_04_PAC_limit_1.4MW.txt"
+        charTable = PDLoadCharacterizations(Filename=charfile)
+        char = charTable[0]
+
+        data = Load(Filename=fname, MetaDataOnly=True)
+        PDDetermineCharacterizations(InputWorkspace=data,
+                                     Characterizations=char,
+                                     ReductionProperties="props")
+        props = PropertyManagerDataService.retrieve("props")
+
+        cachedir = tempfile.gettempdir()
+        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
+                                                                           "SampleOnly",
+                                                                           props,
+                                                                           "Si",
+                                                                           1.165,
+                                                                           element_size=2,
+                                                                           cache_dir=cachedir,
+                                                                           prefix="SHA")
+        self.assertIsNotNone(abs_s)
+
+        # Get what the cache SHA should be - verify the donor WS exists since that is used to make cache SHA
+        donorws = "__{}_abs".format(absorptioncorrutils._getBasename(fname))
+        self.assertEqual(mtd.doesExist(donorws), True)
+        cache_prefix = absorptioncorrutils._getInstrName(fname, mtd[donorws])
+        cachefile, sha = absorptioncorrutils._getCacheName(donorws, cache_prefix, cachedir,
+                                                           "SampleOnly")
+
+        # Compare against expected name using SHA prefix
+        cached_wsname = cache_prefix + "_" + sha + "_abs_correction_ass"
+        self.assertEqual(mtd.doesExist(cached_wsname), True)
+
+        # Remove the workspace from ADS and verify it can be found from disk
+        DeleteWorkspaces(cached_wsname)
+
+        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
+                                                                           "SampleOnly",
+                                                                           props,
+                                                                           "Si",
+                                                                           1.165,
+                                                                           element_size=2,
+                                                                           cache_dir=cachedir,
+                                                                           prefix="SHA")
+        self.assertIsNotNone(abs_s)
+
 
 if __name__ == '__main__':
     unittest.main()

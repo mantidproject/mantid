@@ -111,7 +111,7 @@ def _getCacheName(wkspname, wksp_prefix, cache_dir, abs_method):
     return cache_path, signature
 
 
-def _getCachedData(absName, abs_method, sha1, cache_file_name, wksp_prefix=""):
+def _getCachedData(absName, abs_method, sha1, cache_file_name):
     """
     Check both memory and disk to locate cache data.  Returns ("", "")
     if no cache can be found.
@@ -284,7 +284,12 @@ def calculate_absorption_correction(
         #      - load from cache nxs file
         #    - if cache is not found, wsn_as and wsn_ac will both be None
         #      - standard calculation will be kicked off as before
-        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename, cache_prefix)
+        # Update absName with the cache prefix to find workspaces in memory
+        if prefix == "SHA":
+            absName = cache_prefix + "_" + sha1 + "_abs_correction"
+        else:
+            absName = cache_prefix + "_abs_correction"
+        wsn_as, wsn_ac = _getCachedData(absName, abs_method, sha1, cache_filename)
 
         # NOTE:
         # -- one algorithm with three very different behavior, why not split them to
