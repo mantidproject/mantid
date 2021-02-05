@@ -30,27 +30,31 @@ class FittingDataModel(object):
         self._log_workspaces = None
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
-        self._background_workspaces = {}
+        self._bg_sub_workspaces = {}  # Map as above, this contains the workspaces with the background sub applied
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
-    def restore_files(self, files):
-        for file in files:
+    def restore_files(self, ws_names):
+        for ws_name in ws_names:
             try:
-                ws = ADS.retrieve(file)
+                ws = ADS.retrieve(ws_name)
                 if ws.getNumberHistograms() == 1:
-                    self._loaded_workspaces[file] = ws
-                    if file not in self._background_workspaces:
-                        self._background_workspaces[file] = None
-                    self._last_added.append(file)
+                    self._loaded_workspaces[ws_name] = ws
+                    if self._bg_params[ws_name]:
+                        self._bg_sub_workspaces[ws_name] = ADS.retrieve(ws_name + "_bgsub")
+                    else:
+                        self._bg_sub_workspaces[ws_name] = None
+                    if ws_name not in self._bg_params:
+                        self._bg_params[ws_name] = []
+                    self._last_added.append(ws_name)
                 else:
                     logger.warning(
-                        f"Invalid number of spectra in workspace {file}. Skipping restoration of workspace.")
+                        f"Invalid number of spectra in workspace {ws_name}. Skipping restoration of workspace.")
             except RuntimeError as e:
                 logger.error(
-                    f"Failed to restore workspace: {file}. Error: {e}. \n Continuing loading of other files.")
+                    f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
         self.update_log_workspace_group()
 
     def load_files(self, filenames_string, xunit):
@@ -68,8 +72,10 @@ class FittingDataModel(object):
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
                         self._loaded_workspaces[ws_name] = ws
-                        if ws_name not in self._background_workspaces:
-                            self._background_workspaces[ws_name] = None
+                        if ws_name not in self._bg_sub_workspaces:
+                            self._bg_sub_workspaces[ws_name] = None
+                        if ws_name not in self._bg_params:
+                            self._bg_params[ws_name] = []
                         self._last_added.append(ws_name)
                     else:
                         logger.warning(
@@ -318,8 +324,8 @@ class FittingDataModel(object):
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self._loaded_workspaces:
             self._loaded_workspaces[new_name] = self._loaded_workspaces.pop(old_name)
-            if old_name in self._background_workspaces:
-                self._background_workspaces[new_name] = self._background_workspaces.pop(old_name)
+            if old_name in self._bg_sub_workspaces:
+                self._bg_sub_workspaces[new_name] = self._bg_sub_workspaces.pop(old_name)
             if old_name in self._bg_params:
                 self._bg_params[new_name] = self._bg_params.pop(old_name)
             if old_name in self._log_values:
@@ -333,54 +339,40 @@ class FittingDataModel(object):
     def get_log_workspaces_name(self):
         return [ws.name() for ws in self._log_workspaces] if self._log_workspaces else ''
 
-    def get_background_workspaces(self):
-        return self._background_workspaces
+    def get_bgsub_workspaces(self):
+        return self._bg_sub_workspaces
 
     def get_bg_params(self):
         return self._bg_params
 
-    def do_background_subtraction(self, ws_name, bg_params):
+    def create_or_update_bgsub_ws(self, ws_name, bg_params):
         ws = self._loaded_workspaces[ws_name]
-        ws_bg = self._background_workspaces[ws_name]
-        bg_changed = False
-        if ws_bg and bg_params[1:] != self._bg_params[ws_name][1:]:
-            # add bg back on to data (but don't change bgsub status)
-            self.undo_background_subtraction(ws_name, isBGsub=bg_params[0])
-            bg_changed = True
-        if bg_changed or not ws_bg:
-            # re-evaluate background (or evaluate for first time)
+        ws_bg = self._bg_sub_workspaces[ws_name]
+        if not ws_bg or self._bg_params[ws_name] == [] or bg_params[1:] != self._bg_params[ws_name][1:]:
+            background = self.estimate_background(ws_name, *bg_params[1:])
             self._bg_params[ws_name] = bg_params
-            ws_bg = self.estimate_background(ws_name, *bg_params[1:])
-        # update bg sub status before Minus (updates plot which repopulates table)
-        self._bg_params[ws_name][0] = bg_params[0]
-        Minus(LHSWorkspace=ws, RHSWorkspace=ws_bg, OutputWorkspace=ws_name)
-
-    def undo_background_subtraction(self, ws_name, isBGsub=False):
-        self._bg_params[ws_name][0] = isBGsub  # must do this before plotting which refreshes table
-        Plus(LHSWorkspace=ws_name, RHSWorkspace=self.get_background_workspaces()[ws_name],
-             OutputWorkspace=ws_name)
-
-    def restore_bg_workspaces(self, bg_params):
-        # this is to be used to create the dict of background workspaces after a restoration
-        for ws_name in bg_params:
-            params_list = bg_params[ws_name]
-            self.estimate_background(ws_name, params_list[1], params_list[2], params_list[3])
+            bgsub_ws_name = ws_name + "_bgsub"
+            bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
+            self._bg_sub_workspaces[ws_name] = bgsub_ws
+            DeleteWorkspace(background)
+        else:
+            logger.notice("Background workspace already calculated")
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         ws_bg = EnggEstimateFocussedBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg",
                                                NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter)
-        self._background_workspaces[ws_name] = ws_bg
+        self._bg_sub_workspaces[ws_name] = ws_bg
         return ws_bg
 
     def plot_background_figure(self, ws_name):
         ws = self._loaded_workspaces[ws_name]
-        ws_bg = self._background_workspaces[ws_name]
-        if ws_bg:
+        ws_bgsub = self._bg_sub_workspaces[ws_name]
+        if ws_bgsub:
             fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
-            tmp = Plus(LHSWorkspace=ws_name, RHSWorkspace=ws_bg, StoreInADS=False)
-            ax[0].plot(tmp, 'x')
-            ax[0].plot(ws_bg, '-r')
+            tmp = Minus(LHSWorkspace=ws_name, RHSWorkspace=ws_bgsub, StoreInADS=False)
+            ax[0].plot(ws_bgsub, 'x')
+            ax[0].plot(tmp, '-r')
             ax[1].plot(ws, 'x')
             fig.show()
 

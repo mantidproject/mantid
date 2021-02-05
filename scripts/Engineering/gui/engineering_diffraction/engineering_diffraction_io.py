@@ -68,7 +68,6 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         presenter.settings_presenter.settings = obj_dic["settings_dict"]
         fit_data_widget = presenter.fitting_presenter.data_widget
         fit_data_widget.model._bg_params = obj_dic["background_params"]
-        fit_data_widget.model.restore_bg_workspaces(obj_dic["background_params"])
         fit_data_widget.model.restore_files(ws_names)
         fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
         fit_data_widget.presenter.restore_table()

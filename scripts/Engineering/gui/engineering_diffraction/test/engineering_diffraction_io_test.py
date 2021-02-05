@@ -61,6 +61,7 @@ def _create_fit_workspace():
 
 def _load_test_file():
     Load(TEST_FILE, OutputWorkspace=TEST_WS)
+    Load(TEST_FILE, OutputWorkspace=(TEST_WS+"_bgsub"))
 
 
 class EngineeringDiffractionEncoderTest(unittest.TestCase):
@@ -122,7 +123,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
                          [TEST_WS], 'plotted_workspaces': [], 'fit_properties': None, 'settings_dict':
-                         SETTINGS_DICT, 'background_params': {}}, test_dic)
+                         SETTINGS_DICT, 'background_params': {'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
 
     def test_background_params_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE, 'TOF')
@@ -141,7 +142,8 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         test_dic = self.encoder.encode(self.mock_view)
         self.assertEqual({'encoder_version': self.io_version, 'current_tab': 0, 'data_loaded_workspaces':
                           [TEST_WS], 'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'plot_diff':
-                          'True', 'settings_dict': SETTINGS_DICT, 'background_params': {}}, test_dic)
+                          'True', 'settings_dict': SETTINGS_DICT, 'background_params': {
+                                'ENGINX_277208_focused_bank_2_TOF': []}}, test_dic)
 
 
 @start_qapplication

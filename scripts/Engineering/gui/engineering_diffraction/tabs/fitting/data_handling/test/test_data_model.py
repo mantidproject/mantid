@@ -151,54 +151,57 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_TOF")
         self.assertEqual(2, mock_logger.error.call_count)
 
+    @patch(data_model_path + ".DeleteWorkspace")
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     @patch(data_model_path + ".Plus")
-    def test_do_background_subtraction_first_time(self, mock_plus, mock_minus, mock_estimate_bg):
+    def test_do_background_subtraction_first_time(self, mock_plus, mock_minus, mock_estimate_bg, mock_delete_ws):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._background_workspaces = {"name1": None}
+        self.model._bg_sub_workspaces = {"name1": None}
         self.model._bg_params = dict()
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
-        self.model.do_background_subtraction("name1", bg_params)
+        self.model.create_or_update_bgsub_ws("name1", bg_params)
 
         self.assertEqual(self.model._bg_params["name1"], bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
         mock_plus.assert_not_called()
+        mock_delete_ws.assert_called_once()
 
+    @patch(data_model_path + ".DeleteWorkspace")
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     @patch(data_model_path + ".Plus")
-    def test_do_background_subtraction_bgparams_changed(self, mock_plus, mock_minus, mock_estimate_bg):
+    def test_do_background_subtraction_bgparams_changed(self, mock_plus, mock_minus, mock_estimate_bg, mock_delete_ws):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._background_workspaces = {"name1": self.mock_ws}
+        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         self.model._bg_params = {"name1": [True, 80, 1000, False]}
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
-        self.model.do_background_subtraction("name1", bg_params)
+        self.model.create_or_update_bgsub_ws("name1", bg_params)
 
         self.assertEqual(self.model._bg_params["name1"], bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
-        mock_plus.assert_called_once()
+        mock_delete_ws.assert_called_once()
 
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     @patch(data_model_path + ".Plus")
     def test_do_background_subtraction_no_change(self, mock_plus, mock_minus, mock_estimate_bg):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._background_workspaces = {"name1": self.mock_ws}
+        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         bg_params = [True, 80, 1000, False]
         self.model._bg_params = {"name1": bg_params}
         mock_estimate_bg.return_value = self.mock_ws
 
-        self.model.do_background_subtraction("name1", bg_params)
+        self.model.create_or_update_bgsub_ws("name1", bg_params)
 
         self.assertEqual(self.model._bg_params["name1"], bg_params)
-        mock_minus.assert_called_once()
+        mock_minus.assert_not_called()
         mock_estimate_bg.assert_not_called()
         mock_plus.assert_not_called()
 
@@ -239,14 +242,14 @@ class TestFittingDataModel(unittest.TestCase):
 
     def test_update_workspace_name(self):
         self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
-        self.model._background_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
+        self.model._bg_sub_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
         self.model._bg_params = {"name1": [True, 80, 1000, False]}
         self.model._log_values = {"name1": 1, "name2": 2}
 
         self.model.update_workspace_name("name1", "new_name")
 
         self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._loaded_workspaces)
-        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._background_workspaces)
+        self.assertEqual({"new_name": self.mock_ws, "name2": self.mock_ws}, self.model._bg_sub_workspaces)
         self.assertEqual({"new_name": [True, 80, 1000, False]}, self.model._bg_params)
         self.assertEqual({"new_name": 1, "name2": 2}, self.model._log_values)
 
