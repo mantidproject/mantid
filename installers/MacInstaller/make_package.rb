@@ -590,13 +590,12 @@ if bundle_path.to_s.include?('MantidWorkbench')
   requirements_files << REQUIREMENTS_WORKBENCH_FILE
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'printsupport', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
-  executables << "#{contents_macos}/#{bundle_path.basename}"
-  fatal("MantidWorkbechUnstable? #{contents_macos}/#{bundle_path.basename}")
+  executables << "#{contents_macos}/#{bundle_path.basename.to_s.split('.')[0]}"
 elsif bundle_path.to_s.include?('MantidPlot')
   bundled_packages += BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
   host_qt_plugins_dir = QT4_PLUGINS_DIR
-  executables << "#{contents_macos}/#{bundle_path.basename}"
+  executables << "#{contents_macos}/MantidPlot"
 else
   fatal("Unknown bundle type #{bundle_path}. Expected MantidPlot.app or MantidWorkbench.app.")
 end
