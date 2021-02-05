@@ -219,16 +219,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                                                                 self.presenter.error_callback)
         self.presenter.update_thread.start.assert_called_once_with()
 
-    def test_removing_group_removes_linked_pairs(self):
-        self.group_context.clear_pairs()
-        self.group_context.clear_groups()
-        self.add_three_groups()
-        self.add_two_pairs()
-
-        self.presenter.grouping_table_widget.remove_last_row_in_view_and_model()
-
-        self.assertEqual(self.model.pair_names, ['long1'])
-
     def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
         self.presenter.add_pair_from_grouping_table("first", "second")
         self.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with("first", "second")
