@@ -21,6 +21,8 @@ Improvements
 - Input validation has been added to First and Last good Data in the Phase Table tab.
 - When using co-add and creating a phasequad, the deadtime table will now be taken from the first file only.
 - If the start time of a fit is greater than the end time the interface will swap the two.
+- Number of Periods has now been added to the end of Run Information.
+- The tool tip for periods in the grouping table has been updated for more clarification.
 
 Bug fixes
 #########

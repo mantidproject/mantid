@@ -133,7 +133,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
                                                                "\n    - The name must be unique across all groups/pairs"
                                                                "\n    - The name can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("Periods to use when calculating this group.")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("Sum of periods to use when calculating this group.")
         self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
 
         self.grouping_table.horizontalHeaderItem(3).setToolTip("The sorted list of detectors :"
