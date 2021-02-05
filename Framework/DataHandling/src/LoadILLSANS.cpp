@@ -29,7 +29,6 @@
 #include <cmath>
 #include <limits>
 #include <numeric>
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace Mantid {
 namespace DataHandling {
