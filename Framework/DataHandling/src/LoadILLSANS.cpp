@@ -28,7 +28,7 @@
 #include <Poco/Path.h>
 #include <cmath>
 #include <limits>
-#include <numeric> // std::accumulate
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -171,24 +171,24 @@ void LoadILLSANS::exec() {
     // first we move the central detector
     double distance =
         firstEntry.getFloat(instrumentPath + "/Detector 2/det2_calc");
-    moveDetectorDistance(distance, "detector");
+    moveDetectorDistance(distance, "detector_back");
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", distance, true);
 
     double offset =
         firstEntry.getFloat(instrumentPath + "/Detector 2/dtr2_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+    moveDetectorHorizontal(-offset / 1000, "detector_back"); // mm to meter
 
     // then the right one
     distance = firstEntry.getFloat(instrumentPath + "/Detector 1/det1_calc");
-    moveDetectorDistance(distance, "detector_right");
+    moveDetectorDistance(distance, "detector_front");
 
     // mm to meter
     offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector_right");
+    moveDetectorHorizontal(-offset / 1000, "detector_front");
     double angle =
         firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
-    rotateInstrument(-angle, "detector_right");
+    rotateInstrument(-angle, "detector_front");
 
   } else {
     // D11 and D22
@@ -626,8 +626,10 @@ void LoadILLSANS::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   if (m_resMode == "nominal") {
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setPropertyValue("Filename",
+                               getInstrumentFilePath(m_instrumentName));
   } else if (m_resMode == "low") {
+    // low resolution mode we have only defined for the old D11 and D22
     loadInst->setPropertyValue("Filename",
                                getInstrumentFilePath(m_instrumentName + "lr"));
   }

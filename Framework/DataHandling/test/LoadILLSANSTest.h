@@ -204,7 +204,8 @@ public:
     const auto &instrument = outputWS->getInstrument();
     const auto &run = outputWS->run();
 
-    IComponent_const_sptr comp = instrument->getComponentByName("detector");
+    IComponent_const_sptr comp =
+        instrument->getComponentByName("detector_back");
     V3D pos = comp->getPos();
     TS_ASSERT(run.hasProperty("Detector 2.det2_calc"))
     double det2_calc = run.getLogAsSingleValue("Detector 2.det2_calc");
@@ -216,7 +217,7 @@ public:
     double l2 = run.getLogAsSingleValue("L2");
     TS_ASSERT_DELTA(l2, det2_calc, 1E-6)
 
-    comp = instrument->getComponentByName("detector_right");
+    comp = instrument->getComponentByName("detector_front");
     pos = comp->getPos();
     TS_ASSERT(run.hasProperty("Detector 1.det1_calc"))
     double det1_calc = run.getLogAsSingleValue("Detector 1.det1_calc");
