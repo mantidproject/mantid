@@ -431,6 +431,8 @@ Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
  * previously set Goniometer object as well as the angles
  * loaded in the run (if any).
  *
+ * As of now, it uses the MEAN angle.
+ *
  * @param index :: index of the run to get.
  * @return 3x3 double rotation matrix
  */
