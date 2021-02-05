@@ -92,7 +92,7 @@ public:
     parameters.hasSampleRuns = true;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -102,8 +102,8 @@ public:
     transmissionParameters.usesTransmission = true;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspaceWithPointData(
-        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin,
+                            transmissionParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, nullptr);
@@ -128,7 +128,7 @@ public:
     parameters.hasCanRuns = true;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -138,9 +138,8 @@ public:
     transmissionCanParameters.usesTransmission = true;
 
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
-                                         transmissionCanParameters.xmin,
-                                         transmissionCanParameters.xmax);
+    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin,
+                            transmissionCanParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, nullptr, transmissionCan);
@@ -166,7 +165,7 @@ public:
     parameters.hasSampleRuns = true;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -180,13 +179,12 @@ public:
     transmissionCanParameters.usesTransmission = true;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspaceWithPointData(
-        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin,
+                            transmissionParameters.xmax);
 
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
-                                         transmissionCanParameters.xmin,
-                                         transmissionCanParameters.xmax);
+    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin,
+                            transmissionCanParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
@@ -208,7 +206,7 @@ public:
     parameters.invalidDetectors = false;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -233,7 +231,7 @@ public:
 
     auto ws = provide1DWorkspace(parameters);
 
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -260,7 +258,7 @@ public:
     parameters.hasDx = false;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
     parameters.idf = getIDFfromWorkspace(ws);
 
@@ -274,7 +272,19 @@ public:
     removeFile(parameters.filename);
   }
 
-  void test_that_1D_workspace_with_transmissions_is_saved_correctly() {
+  void test_that_1D_workspace_with_point_transmissions_is_saved_correctly() {
+    const bool isHistogram{false};
+    run_test_1D_workspace_with_transmissions_is_saved_correctly(isHistogram);
+  }
+
+  void
+  test_that_1D_workspace_with_histogram_transmissions_is_saved_as_points() {
+    const bool isHistogram{true};
+    run_test_1D_workspace_with_transmissions_is_saved_correctly(isHistogram);
+  }
+
+  void run_test_1D_workspace_with_transmissions_is_saved_correctly(
+      const bool isHistogram) {
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
@@ -282,31 +292,24 @@ public:
     parameters.detectors.emplace_back("front-detector");
     parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
-
+    parameters.isHistogram = isHistogram;
     parameters.hasDx = true;
-
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
-
     parameters.idf = getIDFfromWorkspace(ws);
 
     // Create transmission
     NXcanSASTestTransmissionParameters transmissionParameters;
     transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
     transmissionParameters.usesTransmission = true;
+    transmissionParameters.isHistogram = isHistogram;
 
     NXcanSASTestTransmissionParameters transmissionCanParameters;
     transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
     transmissionCanParameters.usesTransmission = true;
+    transmissionCanParameters.isHistogram = isHistogram;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspaceWithPointData(
-        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
-
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
-                                         transmissionCanParameters.xmin,
-                                         transmissionCanParameters.xmax);
 
     // Act
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
@@ -354,7 +357,7 @@ public:
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
-    parameters.isHistogram = true; // The new bit
+    parameters.isHistogram = true;
 
     auto ws = provide2DWorkspace(parameters);
     set2DValues(ws);
@@ -660,7 +663,7 @@ private:
   void do_assert_1D_vector_with_increasing_entries(H5::DataSet &dataSet,
                                                    double min, double increment,
                                                    int size) {
-    auto data =
+    const auto data =
         Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataSet);
     TS_ASSERT_EQUALS(data.size(), static_cast<size_t>(size));
     for (size_t index = 0; index < data.size(); ++index) {
@@ -960,6 +963,23 @@ private:
                        static_cast<double>(parameters.size - 1);
     do_assert_1D_vector_with_increasing_entries(lambdaDataSet, parameters.xmin,
                                                 increment, parameters.size);
+
+    // Size check for matching T/Tdev/lambda
+    do_assert_data_array_sizes_match(tDataSet, tErrorDataSet, lambdaDataSet);
+  }
+
+  void do_assert_data_array_sizes_match(const H5::DataSet &tDataSet,
+                                        const H5::DataSet &tErrorDataSet,
+                                        const H5::DataSet &lambdaDataSet) {
+    auto arraySize = [](const H5::DataSet &dataSet) {
+      const auto dataSpace = dataSet.getSpace();
+      return dataSpace.getSelectNpoints();
+    };
+
+    TSM_ASSERT_EQUALS("Expected T and Tdev array lengths to match",
+                      arraySize(tDataSet), arraySize(tErrorDataSet));
+    TSM_ASSERT_EQUALS("Expected T and Lambda array lengths to match",
+                      arraySize(lambdaDataSet), arraySize(tDataSet));
   }
 
   void do_assert(NXcanSASTestParameters &parameters,

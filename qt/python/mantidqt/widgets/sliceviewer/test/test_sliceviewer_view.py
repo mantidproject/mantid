@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -9,13 +10,12 @@ import io
 import sys
 import unittest
 from unittest.mock import patch
-from numpy import hstack
 
 import matplotlib as mpl
-
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
+from numpy import hstack
 
 mpl.use('Agg')
+from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace,
     FakeMDEventData, ConvertToDistribution, Scale, SetUB, RenameWorkspace)
@@ -41,7 +41,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
                                               OutputWorkspace='ws_MD_2d')
         cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                       Extents='-10,10,-10,10,-10,10',
+                                       Extents='-10,10,-9,9,-8,8',
                                        Names='A,B,C',
                                        Units='r.l.u.,r.l.u.,r.l.u.',
                                        Frames='HKL,HKL,HKL',
@@ -49,6 +49,13 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         expt_info = CreateSampleWorkspace()
         cls.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
+
+    def tearDown(self):
+        for ii in QApplication.topLevelWidgets():
+            ii.close()
+        QApplication.sendPostedEvents()
+        QApplication.sendPostedEvents()
+        self.assert_no_toplevel_widgets()
 
     def test_deleted_on_close(self):
         pres = SliceViewer(self.histo_ws)
@@ -122,6 +129,25 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
+
+        pres.view.close()
+
+    def test_update_plot_data_updates_axes_limits_when_orthog_data_tranposed(self):
+        pres = SliceViewer(self.hkl_ws)
+
+        # not transpose
+        pres.view.data_view.dimensions.transpose = False
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+
+        # transpose
+        pres.view.data_view.dimensions.transpose = True
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))
+        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
+        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
 
         pres.view.close()
 
@@ -262,7 +288,6 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres.view.data_view.plot_matrix(ws)
 
         self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
-
 
 # private helper functions
 

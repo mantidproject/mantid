@@ -135,10 +135,6 @@ class DrillTest(unittest.TestCase):
     ###########################################################################
 
     def setUp(self):
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D11"
         # avoid popup messages
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
@@ -167,6 +163,11 @@ class DrillTest(unittest.TestCase):
         # shown window
         self.view.isHidden = mock.Mock()
         self.view.isHidden.return_value = False
+
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        config['default.facility'] = "ILL"
+        config['default.instrument'] = "D11"
 
     def tearDown(self):
         config['default.facility'] = self.facility
@@ -296,6 +297,11 @@ class DrillTest(unittest.TestCase):
                     'ColumnsOrder': RundexSettings.COLUMNS['SANS']
                     },
                 'GlobalSettings': self.model.settings,
+                'ExportAlgorithms' : [
+                    algo
+                    for algo in RundexSettings.EXPORT_ALGORITHMS['SANS'].keys()
+                    if RundexSettings.EXPORT_ALGORITHMS['SANS'][algo]
+                    ]
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 

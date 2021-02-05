@@ -7,33 +7,15 @@
 #pragma once
 
 // Mantid
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 
 // STL
-#include <cfloat>
-#include <cmath>
-#include <cstddef>
-#include <map>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
 
 // Boost
 #include <boost/variant.hpp>
-#include <memory>
 
 // Poco
 #include <Poco/DOM/DOMParser.h>
-#include <Poco/XML/XML.h>
