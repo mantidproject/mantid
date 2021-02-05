@@ -619,7 +619,6 @@ LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
   return fullPath.toString();
 }
 
-
 /**
  * Loads the instrument from the IDF
  */
