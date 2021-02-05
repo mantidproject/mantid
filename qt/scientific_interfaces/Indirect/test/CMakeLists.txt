@@ -14,6 +14,7 @@ set(
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitDataTableModelTest.h
+  IndirectFitOutputModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h

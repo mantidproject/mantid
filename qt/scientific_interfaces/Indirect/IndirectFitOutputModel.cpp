@@ -86,8 +86,14 @@ bool IndirectFitOutputModel::isSpectrumFit(FitDomainIndex index) const {
   return static_cast<size_t>(index.value) < m_parameters.size();
 }
 
-std::unordered_map<std::string, ParameterValue> IndirectFitOutputModel::getParameters(FitDomainIndex index) const {
-  return m_parameters.at(index.value);
+std::unordered_map<std::string, ParameterValue>
+IndirectFitOutputModel::getParameters(FitDomainIndex index) const {
+  if (isSpectrumFit(index)) {
+    return m_parameters.at(index.value);
+  } else {
+    throw std::invalid_argument(
+        "Could not get Paramiters, not fit exists for index: " + index.value);
+  }
 }
 
 boost::optional<ResultLocationNew> IndirectFitOutputModel::getResultLocation(FitDomainIndex index) const {
