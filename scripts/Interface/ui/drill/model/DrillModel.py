@@ -28,7 +28,7 @@ class DrillModel(QObject):
     """
     Data directory on Linux.
     """
-    LINUX_BASE_DATA_PATH = "/net/serdon/illdata/"
+    LINUX_BASE_DATA_PATH = "/net4/serdon/illdata/"
 
     """
     Data directory on MacOS.
