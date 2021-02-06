@@ -720,7 +720,7 @@ public:
 
     std::cout << input_ws_name << "\n";
     for (size_t i = 0; i < peakparnames.size(); ++i)
-        std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
+      std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
 
     // Initialize FitPeak
     FitPeaks fitpeaks;

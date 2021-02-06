@@ -1069,7 +1069,6 @@ void FitPeaks::fitSpectrumPeaks(
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
 
-
   // Copy result from last fitting
   std::vector<double> localPrevGoodResults(m_peakFunction->nParams(), 0.0);
   bool somePeakFit = false;
@@ -1092,18 +1091,20 @@ void FitPeaks::fitSpectrumPeaks(
                              lastGoodPeakParameters[fit_index].end(),
                              [&](auto const &val) { return val <= 1e-10; })));
 
-    g_log.warning() << "WS-index = " << wi << " Peak " << fit_index << ", Found-any-peak = " << foundAnyPeak << "; Local monitor = " << somePeakFit << "\n";
-
+    g_log.warning() << "WS-index = " << wi << " Peak " << fit_index
+                    << ", Found-any-peak = " << foundAnyPeak
+                    << "; Local monitor = " << somePeakFit << "\n";
 
     if (somePeakFit) {
-        // Get from local best result
-        g_log.warning() << "Set peak parameters: number = " << localPrevGoodResults.size() << "\n";
-        for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
-          peakfunction->setParameter(i, localPrevGoodResults[i]);
-          g_log.warning() << "Set parameter " << i << " with value " << localPrevGoodResults[i] << "\n";
-        }
-    }
-    else if (foundAnyPeak) {
+      // Get from local best result
+      g_log.warning() << "Set peak parameters: number = "
+                      << localPrevGoodResults.size() << "\n";
+      for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
+        peakfunction->setParameter(i, localPrevGoodResults[i]);
+        g_log.warning() << "Set parameter " << i << " with value "
+                        << localPrevGoodResults[i] << "\n";
+      }
+    } else if (foundAnyPeak) {
       // set the peak parameters from last good fit to that peak
       for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
@@ -1127,8 +1128,8 @@ void FitPeaks::fitSpectrumPeaks(
       std::pair<double, double> peak_window_i =
           getPeakFitWindow(wi, peak_index);
 
-      bool observe_peak_params =
-          decideToEstimatePeakParams(!foundAnyPeak && !somePeakFit, peakfunction);
+      bool observe_peak_params = decideToEstimatePeakParams(
+          !foundAnyPeak && !somePeakFit, peakfunction);
 
       if (observe_peak_params &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
@@ -1476,7 +1477,9 @@ int FitPeaks::estimatePeakParameters(
   // use values from background to locate FWHM
   peakfunction->setHeight(peak_height);
 
-  g_log.warning() << "Observed peak @ " << peak_center << "inside specified window " << peak_window.first << ", " << peak_window.second << "\n";
+  g_log.warning() << "Observed peak @ " << peak_center
+                  << "inside specified window " << peak_window.first << ", "
+                  << peak_window.second << "\n";
 
   peakfunction->setCentre(peak_center);
 
@@ -1487,7 +1490,9 @@ int FitPeaks::estimatePeakParameters(
     double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
     if (peak_fwhm > 0.0) {
-      g_log.warning() << "Peak function " << peakfunction->name() << " still set estimated FWHM" << "\n";
+      g_log.warning() << "Peak function " << peakfunction->name()
+                      << " still set estimated FWHM"
+                      << "\n";
       peakfunction->setFwhm(peak_fwhm);
     }
   }
@@ -1679,8 +1684,9 @@ FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
     return cost;
 
   // Check peak function values
-  for (size_t i  = 0; i < peakfunction->nParams(); ++i) {
-    g_log.warning() << "FitIndividualPeaks Peak function param " << i << " = " << peakfunction->getParameter(i) << "\n";
+  for (size_t i = 0; i < peakfunction->nParams(); ++i) {
+    g_log.warning() << "FitIndividualPeaks Peak function param " << i << " = "
+                    << peakfunction->getParameter(i) << "\n";
   }
   g_log.warning() << "High background = " << m_highBackground << "\n";
 
