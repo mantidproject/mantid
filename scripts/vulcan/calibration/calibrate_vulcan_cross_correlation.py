@@ -192,10 +192,10 @@ def test_main_apply_calibration():
     # Specify a specific calibration file
     # Round 1:
     # calib_file_name = 'vulcan_cc_1fit.h5'
-    calib_file_name = 'VULCAN_pdcalibration.h5'
+    # calib_file_name = 'VULCAN_pdcalibration.h5'
 
     # Round 2:
-    # calib_file_name = 'vulcan_pd0003_round2.h5'
+    calib_file_name = 'VULCAN_calibration_pd2.h5'
 
     # Load calibration file
     calib_tuple = load_calibration_file(calib_file_name, 'Vulcan_Testing_Calib', diamond_ws_name)

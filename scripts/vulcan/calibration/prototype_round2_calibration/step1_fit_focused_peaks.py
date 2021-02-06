@@ -66,6 +66,11 @@ def main():
     diamond_ws_name = 'VULCAN_164960_PDCalibrationG_3banks'
     title = f'Diamond PDCalibration (Gaussian)'
 
+    # 2nd round calibration verification
+    diamond_dir = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/'
+    diamond_ws_name = 'VULCAN_164960_PDCalibrationG_3banks'
+    title = f'Diamond PDCalibration (Gaussian) Round 2 Calibration'
+
     if not mtd.doesExist(diamond_ws_name):
         diamond_nxs = os.path.join(diamond_dir, 'VULCAN_164960_diamond_3banks.nxs')
         LoadNexusProcessed(Filename=diamond_nxs, OutputWorkspace=diamond_ws_name)
@@ -224,10 +229,10 @@ def fit_90degree_banks(diamond_ws_name, title: str, ws_index: int):
         plt.savefig(f'bank{plot_index}_{pi.tag}.png')
 
     # output fitted parameters
-    print('\n\n')
+    print('\n\nexp_d    obs_d    diff_d/exp_d ... ...')
     for exp_pos in sorted(param_dict.keys()):
         obs_pos, max_y, obs_fwhm, obs_pos_error = param_dict[exp_pos]
-        diff = obs_pos - exp_pos
+        diff = (obs_pos - exp_pos) / exp_pos * 10000
         print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}  {obs_pos_error}')
 
     # Plot overview
@@ -399,7 +404,8 @@ def fit_high_angle_bank(diamond_ws_name, title):
     print('\n\n')
     for exp_pos in sorted(param_dict.keys()):
         obs_pos, max_y, obs_fwhm, obs_pos_error = param_dict[exp_pos]
-        diff = obs_pos - exp_pos
+        diff = (obs_pos - exp_pos) / exp_pos * 10000
+        # diff = obs_pos - exp_pos
         print(f'{exp_pos}  {obs_pos}   {diff}   {max_y}  {obs_fwhm}  {obs_pos_error}')
 
     # Plot overview

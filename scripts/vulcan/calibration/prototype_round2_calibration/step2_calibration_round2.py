@@ -40,7 +40,8 @@ def main():
     """
 
     # Source calibration file
-    source_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/diagnostic_history/pdcalibration/VULCAN_pdcalibration.h5'
+    source_cal_h5 = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/LatestTestPD2Round/VULCAN_pdcalibration.h5'
+    output_calib_file = 'VULCAN_calibration_pd2.h5'
 
     # Set up inputs
     west_bank_dataset = np.array([
@@ -74,6 +75,9 @@ def main():
 
     # Load calibration file 
     calib_tuple = LoadDiffCal(Filename=source_cal_h5, InstrumentName='vulcan', WorkspaceName='DiffCal_Vulcan')
+    print(f'type of returns from LoadDiffCal: {type(calib_tuple)}')
+    print(f'dir for LoadDiffCal: {dir(calib_tuple)}')
+    calib_ws_name = str(calib_tuple.OutputCalWorkspace)
 
     # 2nd-round calibration
     for bank_dataset, start_index, end_index in [(west_bank_dataset, 0, 3234),
@@ -84,14 +88,16 @@ def main():
         residual = calibrate_peak_positions(bank_dataset, plot=False)
 
         # update calibration table
-        update_calibration_table(calib_tuple.OutputCalibrationWorkspace, residual, start_index, end_index)
+        update_calibration_table(calib_tuple.OutputCalWorkspace, residual, start_index, end_index)
 
     # Save to new diffraction calibration file
-    SaveDiffCal(CalibrationWorkspace=f'DiffCal_Vulcan_cal', GroupingWorkspace=f'DiffCal_Vulcan_group',
-                MaskWorkspace=f'DiffCal_Vulcan_mask', Filename='vulcan_pd0003_round2.h5')
+    SaveDiffCal(CalibrationWorkspace=calib_ws_name,
+                GroupingWorkspace=calib_tuple.OutputGroupingWorkspace,
+                MaskWorkspace=calib_tuple.OutputMaskWorkspace,
+                Filename=output_calib_file)
 
 
-def update_calibration_table(calib_ws, residual, start_index, end_index):
+def update_calibration_table(cal_table, residual, start_index, end_index):
 
     # theory
     # DIFC^(2)(i) = DIFC(i) / b
@@ -104,6 +110,9 @@ def update_calibration_table(calib_ws, residual, start_index, end_index):
     b = residual.slope   # 1.0005157396059512
     # interception:
     a = residual.intercept  # -5.642400138239356e-05
+
+    print(f'Calibrate with from d = {b} * d\' + {a}')
+
     for i_r in range(start_index, end_index):
         # original difc
         difc = cal_table.cell(i_r, 1)
@@ -155,8 +164,8 @@ def calibrate_peak_positions(bank_dataset, plot=False):
                 return
 
         res = Res()
-        res.intercept = mymodel.coefficients[0]
-        res.slope = mymodel.coefficients[1]
+        res.intercept = mymodel.coefficients[1]
+        res.slope = mymodel.coefficients[0]
 
     percent_relative_diff = (new_x - y) / y * 10000.
     prev_percent_relative_diff = (x - y) / y * 10000.
