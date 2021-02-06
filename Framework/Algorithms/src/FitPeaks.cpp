@@ -792,7 +792,7 @@ void FitPeaks::processInputPeakCenters() {
   API::MatrixWorkspace_const_sptr peakcenterws =
       getProperty(PropertyNames::PEAK_CENTERS_WKSP);
   if (!peakcenterws)
-    g_log.error("There is no peak center workspace");
+    g_log.notice("Peak centers are not specified by peak center workspace");
 
   std::string peakpswsname = getPropertyValue(PropertyNames::PEAK_CENTERS_WKSP);
   if ((!m_peakCenters.empty()) && peakcenterws == nullptr) {
@@ -1042,6 +1042,7 @@ void FitPeaks::fitSpectrumPeaks(
       fit_result->setBadRecord(i, -1.);
     return; // don't do anything
   }
+
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
   try {
@@ -1067,6 +1068,12 @@ void FitPeaks::fitSpectrumPeaks(
 
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
+
+
+  // Copy result from last fitting
+  std::vector<double> localPrevGoodResults(m_peakFunction->nParams(), 0.0);
+  bool somePeakFit = false;
+
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
     // convert fit index to peak index (in ascending order)
     size_t peak_index(fit_index);
@@ -1084,7 +1091,19 @@ void FitPeaks::fitSpectrumPeaks(
                              lastGoodPeakParameters[fit_index].begin(),
                              lastGoodPeakParameters[fit_index].end(),
                              [&](auto const &val) { return val <= 1e-10; })));
-    if (foundAnyPeak) {
+
+    g_log.warning() << "WS-index = " << wi << " Peak " << fit_index << ", Found-any-peak = " << foundAnyPeak << "; Local monitor = " << somePeakFit << "\n";
+
+
+    if (somePeakFit) {
+        // Get from local best result
+        g_log.warning() << "Set peak parameters: number = " << localPrevGoodResults.size() << "\n";
+        for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
+          peakfunction->setParameter(i, localPrevGoodResults[i]);
+          g_log.warning() << "Set parameter " << i << " with value " << localPrevGoodResults[i] << "\n";
+        }
+    }
+    else if (foundAnyPeak) {
       // set the peak parameters from last good fit to that peak
       for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
@@ -1109,7 +1128,7 @@ void FitPeaks::fitSpectrumPeaks(
           getPeakFitWindow(wi, peak_index);
 
       bool observe_peak_params =
-          decideToEstimatePeakParams(!foundAnyPeak, peakfunction);
+          decideToEstimatePeakParams(!foundAnyPeak && !somePeakFit, peakfunction);
 
       if (observe_peak_params &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
@@ -1123,8 +1142,11 @@ void FitPeaks::fitSpectrumPeaks(
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_params, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
-        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i)
+        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
           lastGoodPeakParameters[fit_index][i] = peakfunction->getParameter(i);
+          localPrevGoodResults[i] = peakfunction->getParameter(i);
+          somePeakFit = true;
+        }
       }
     }
 
@@ -1453,14 +1475,19 @@ int FitPeaks::estimatePeakParameters(
 
   // use values from background to locate FWHM
   peakfunction->setHeight(peak_height);
+
+  g_log.warning() << "Observed peak @ " << peak_center << "inside specified window " << peak_window.first << ", " << peak_window.second << "\n";
+
   peakfunction->setCentre(peak_center);
 
   // Estimate FHWM (peak width)
   if (observe_peak_width &&
-      m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
+      m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation &&
+      peakfunction->name() != "BackToBackExponential") {
     double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
     if (peak_fwhm > 0.0) {
+      g_log.warning() << "Peak function " << peakfunction->name() << " still set estimated FWHM" << "\n";
       peakfunction->setFwhm(peak_fwhm);
     }
   }
@@ -1650,6 +1677,12 @@ FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
   if (numberCounts(m_inputMatrixWS->histogram(wi), fitwindow.first,
                    fitwindow.second) <= m_minPeakHeight)
     return cost;
+
+  // Check peak function values
+  for (size_t i  = 0; i < peakfunction->nParams(); ++i) {
+    g_log.warning() << "FitIndividualPeaks Peak function param " << i << " = " << peakfunction->getParameter(i) << "\n";
+  }
+  g_log.warning() << "High background = " << m_highBackground << "\n";
 
   if (m_highBackground) {
     // fit peak with high background!

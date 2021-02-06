@@ -364,7 +364,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on partial spectra
    */
-  void Ntest_singlePeakMultiSpectra() {
+  void Failed_test_singlePeakMultiSpectra() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -708,7 +708,7 @@ public:
    */
   void test_multiple_peak_profiles() {
     // Generate input workspace
-    std::string input_ws_name = loadVulcanHighAngleData();
+    std::string input_ws_name = genBk2BkTestData();
     API::MatrixWorkspace_sptr input_ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(input_ws_name));
@@ -717,6 +717,10 @@ public:
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
     gen_PeakParameters(peakparnames, peakparvalues);
+
+    std::cout << input_ws_name << "\n";
+    for (size_t i = 0; i < peakparnames.size(); ++i)
+        std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -794,6 +798,9 @@ public:
     AnalysisDataService::Instance().remove("PeakPositionsWS2");
     AnalysisDataService::Instance().remove("FittedPeaksWS2");
     AnalysisDataService::Instance().remove("PeakParametersWS2");
+
+    // Stop
+    TS_ASSERT(false);
 
     return;
   }
@@ -1080,7 +1087,7 @@ public:
    * exponenential convoluted
    * by Gaussian
    */
-  std::string loadVulcanHighAngleData() {
+  std::string genBk2BkTestData() {
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();
 
