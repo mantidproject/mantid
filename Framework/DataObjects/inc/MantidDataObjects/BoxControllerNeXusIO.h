@@ -51,10 +51,16 @@ public:
   void closeFile() override;
 
   ~BoxControllerNeXusIO() override;
-  // Auxiliary functions. Used to change default state of this object which is
-  // not fully supported. Should be replaced by some IBoxControllerIO factory
+  /**
+   * @brief
+   * @param blockSize : byte count of elemental data (4-float, 8-double)
+   * @param typeName : "LeanEvent" or "FatEvent"
+   * @param typeVersion : determines number of attributes to expect for a
+   * LeanEvent or FatEvent
+   * */
   void setDataType(const size_t blockSize,
-                   const std::string &typeName) override;
+                   const std::string &typeName,
+                   const uint8_t typeVersion=2) override;
   void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)
@@ -101,7 +107,7 @@ private:
   enum EventType {
     LeanEvent = 0, //< the event consisting of signal error and event coordinate
     FatEvent =
-        1 //< lean event endowed with runIndex, detectorID, and goniometerIndex
+        1 //< lean event endowed with runIndex, goniometerIndex, and detectorID
     /// the type of event (currently MD event or MDLean event this class deals
     /// with. )
   } m_EventType;

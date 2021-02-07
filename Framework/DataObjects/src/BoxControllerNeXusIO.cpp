@@ -21,8 +21,7 @@ namespace DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
 const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
-                              "signal, errorSquared, runIndex, detectorId, "
-                              "goniometerIndex, center (each dim.)"};
+                              "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
@@ -35,8 +34,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
       m_BlockStart(2, 0), m_BlockSize(2, 0), m_CoordSize(sizeof(coord_t)),
       m_EventType(FatEvent), m_EventsVersion("1.0"),
       m_ReadConversion(noConversion) {
-  /** Traits of the serialized events are, in this order: signal, errorSquared,
-   * runIndex, detectorId, goniometerIndex, and nd-Dimensional coordinates */
+  // signal, errorSquared, runIndex, goniometerIndex, detectorId
   m_BlockSize[1] = 5 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
@@ -73,7 +71,8 @@ BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
                         The events described in the class header are supported
   only  */
 void BoxControllerNeXusIO::setDataType(const size_t blockSize,
-                                       const std::string &typeName) {
+                                       const std::string &typeName,
+                                       const uint8_t typeVersion) {
   if (blockSize == 4 || blockSize == 8) {
 
     m_CoordSize = static_cast<unsigned int>(blockSize);
@@ -84,11 +83,18 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
       m_BlockSize[1] = 2 + m_bc->getNDims();
       break;
     case (FatEvent):
-      /** Traits of the serialized events are, in this order: signal,
-       * errorSquared, runIndex, detectorId, goniometerIndex, and
-       * nd-Dimensional coordinates */
-      m_BlockSize[1] = 5 + m_bc->getNDims();
-      break;
+      switch(typeVersion) {
+      case(1):
+        // signal, errorSquared, runIndex, detectorId
+        m_BlockSize[1] = 4 + m_bc->getNDims();
+        break;
+      case(2):
+        // signal, errorSquared, runIndex, goniometerIndex, detectorId
+        m_BlockSize[1] = 5 + m_bc->getNDims();
+        break;
+      default:
+        throw std::invalid_argument("Unsupported MDEvent version");
+      }
     default:
       throw std::invalid_argument(" Unsupported event kind Identified  ");
     }
@@ -273,24 +279,23 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
 
   // check if the number of dimensions in the file corresponds to the number of
   // dimensions to read.
-  size_t nFileDim;
+  std::vector<size_t> nFileDim;
   auto ndim2 = static_cast<size_t>(info.dims[1]);
   switch (m_EventType) {
   case (LeanEvent):
-    nFileDim = ndim2 - 2;
+    nFileDim.push_back(ndim2 - 2); // signal,errorSquared
     break;
   case (FatEvent):
-    /** Traits of the serialized event are, in this order: signal,
-     * errorSquared, runIndex, detectorId, goniometerIndex, and nd-Dimensional
-     * coordinates */
-    nFileDim = ndim2 - 5;
+    // signal,errorSquared, runIndex, detectorId
+    nFileDim.push_back(ndim2 - 4);
+    // signal,errorSquared, runIndex, goniometerIndex, detectorId
+    nFileDim.push_back(ndim2 - 5);
     break;
   default:
     throw Kernel::Exception::FileError(
         "Unexpected type of events in the data file", m_fileName);
   }
-
-  if (nFileDim != m_bc->getNDims())
+  if (std::find(nFileDim.begin(), nFileDim.end(), m_bc->getNDims()) == nFileDim.end())
     throw Kernel::Exception::FileError(
         "Trying to open event data with different number of dimensions ",
         m_fileName);

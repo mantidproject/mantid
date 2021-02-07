@@ -55,6 +55,7 @@ LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
+      m_eventTypeVersion(2),
       m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
 
 /**
@@ -206,8 +207,18 @@ void LoadMD::exec() {
   if (entryName == "MDEventWorkspace") {
     // The type of event
     std::string eventType;
-    m_file->getAttr("event_type", eventType);
-
+    m_file->getAttr("event_type", eventType); // MDLeanEvent, MDEvent
+    try {
+      // version discriminates between files containing goniometerInfo data
+      std::string eventTypeVersionString;
+      m_file->getAttr("event_type_version", eventTypeVersionString);
+      std::istringstream eventTypeVersionStream(eventTypeVersionString);
+      eventTypeVersionStream >> m_eventTypeVersion;
+    }
+    catch (std::runtime_error &e) {
+      // attribute "event_type_version" is missing in files of version 1
+      m_eventTypeVersion = 1;  // no goniometerIndex info in event data block
+    }
     if (levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) !=
         levelEntries.end()) {
       this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO,
@@ -554,7 +565,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackEnd) { // TODO:: call to the file format factory
     auto loader = std::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
-    loader->setDataType(sizeof(coord_t), MDE::getTypeName());
+    loader->setDataType(sizeof(coord_t), MDE::getTypeName(), m_eventTypeVersion);
     bc->setFileBacked(loader, m_filename);
     // boxes have been already made file-backed when restoring the boxTree;
     // How much memory for the cache?

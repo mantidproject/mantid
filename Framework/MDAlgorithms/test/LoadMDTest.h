@@ -1087,4 +1087,22 @@ public:
       AnalysisDataService::Instance().remove(outWSName);
     }
   }
+
+  void test_old() {
+    // Arrange
+    std::string filename("WISH_md_small.nxs");
+    std::string outWSName("LoadMD_old");
+
+    // Act
+    LoadMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+  }
 };

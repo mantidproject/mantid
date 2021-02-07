@@ -61,13 +61,15 @@ public:
   ///  the method which returns the size of data block used in IO operations
   virtual size_t getDataChunk() const = 0;
 
-  /** As save/load operations use void data type, these function allow set
-   * up/get  the type name provided for the IO operations
-   *  and the size of the data type in bytes (e.g. the  class dependant physical
-   * meaning of the blockSize and blockPosition used
-   *  by save/load operations     */
+  /** As save/load operations use void data type, these function allow
+   * set up/get  the type name provided for the IO operations and the
+   * size of the data type in bytes (e.g. the  class dependant physical
+   * meaning of the blockSize and blockPosition used by save/load operations
+   * @param blockSize :
+   */
   virtual void setDataType(const size_t blockSize,
-                           const std::string &typeName) = 0;
+                           const std::string &typeName,
+                           const uint8_t typeVersion=2) = 0;
   virtual void getDataType(size_t &blockSize, std::string &typeName) const = 0;
 };
 } // namespace API

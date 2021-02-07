@@ -113,6 +113,9 @@ private:
   /// load only the box structure with empty boxes but do not load boxes events
   bool m_BoxStructureAndMethadata;
 
+  /// version of the MDEvent (e.g. event data missing goniometerIndex info)
+  uint8_t m_eventTypeVersion;
+
   /// Version of SaveMD used to save the file
   int m_saveMDVersion;
 
