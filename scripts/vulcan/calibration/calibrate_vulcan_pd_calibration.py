@@ -54,7 +54,7 @@ def main_calibration(load_full=False, bin_step=-.001):
     # 3 group mode
     group_ws_name = 'VULCAN_3Banks_Group'
     group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
-                                       GroupDetectorsBy='Group'
+                                       GroupDetectorsBy='Group',
                                        OutputWorkspace=group_ws_name)
     assert group_ws
 

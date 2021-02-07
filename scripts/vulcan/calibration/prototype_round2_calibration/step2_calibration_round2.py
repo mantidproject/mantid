@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def main():
     """Test data
     West:
@@ -18,7 +19,7 @@ def main():
     [0.89198,  0.8916369838561887,   -0.00034301614381127  ,   1711014.2874182279,  0.004183869530891603 ],
     [1.07577,  1.0752923197526465,   -0.0004776802473533958,    5144107.263454953,  0.005301084450801467 ],
     [1.26146,  1.2608123836195135,   -0.0006476163804864932,    6105345.550936011,  0.0064128286662222915]
-    
+
     East:
     [0.63073,  0.6302079728683675,   -0.0005220271316325187,    506135.12426777213,  -0.0005387387205723602],
     [0.68665,  0.6861197496412712,   -0.0005302503587287788,   1200154.2134833944 ,   0.0029087908163280165],
@@ -27,8 +28,8 @@ def main():
     [0.89198,  0.8913692482022341,   -0.0006107517977659294,   1491387.395178894  ,   0.004117032811035757 ],
     [1.07577,  1.0750533996758378,   -0.0007166003241620977,   4594537.432480814  ,   0.0051959641453001556],
     [1.26146,  1.2607046147470984,   -0.0007553852529016414,   5363235.786713449  ,   0.0063126764960063616],
-    
-    # High angle 
+
+    # High angle
     [0.54411,  0.5437223211405720,   -0.00038767885942803115, 2133004.7822663253,  0.0010026679918045452,  5.7558893608886600e-07],
     [0.56414,  0.5637762108934349,   -0.00036378910656509333,   4898888.50066852,  0.0010447548950161113,  3.619113727588304e-07 ],
     [0.63073,  0.6303822394091168,   -0.0003477605908832615 ,  4198374.582353895,  0.0011776888621865616,  4.7636487552369486e-07],
@@ -73,7 +74,7 @@ def main():
             [0.89198,  0.8915720486296965,   -0.00040795137030347206,  5964867.915248313, -0.0001302392985283653,  6.627982521449077e-07 ],
             [1.07577,  1.0752509282311888,   -0.0005190717688110524 ,  15183443.85147539,  0.001978951533954768 ,  4.7056051878319607e-07]])
 
-    # Load calibration file 
+    # Load calibration file
     calib_tuple = LoadDiffCal(Filename=source_cal_h5, InstrumentName='vulcan', WorkspaceName='DiffCal_Vulcan')
     print(f'type of returns from LoadDiffCal: {type(calib_tuple)}')
     print(f'dir for LoadDiffCal: {dir(calib_tuple)}')
@@ -138,13 +139,12 @@ def update_calibration_table(cal_table, residual, start_index, end_index):
     round 2: d = a + b * d' + c * d'^2
              d'^2 + b / c * d' - (a  - d)/c = 0
              d' = 1/2 * [(- b / c) + sqrt( b^2/c^2 - 4 * (a - d))]
-                = 1 / 2 * [- b / c + 
+                = 1 / 2 * [- b / c +
     """
 
 
 def calibrate_peak_positions(bank_dataset, plot=False):
 
-        
     y = bank_dataset[:, 0]
     x = bank_dataset[:, 1]
 
@@ -164,7 +164,7 @@ def calibrate_peak_positions(bank_dataset, plot=False):
         # print(dir(mymodel))
 
         # 'c', 'coef', 'coefficients', 'coeffs', 'deriv', 'integ', 'o', 'order', 'r', 'roots', 'variable
-        # print(type(mymodel.coefficients))  
+        # print(type(mymodel.coefficients))
         # print(mymodel.coefficients) numpy.ndarray
 
         print(f'slope:        b = {mymodel.coefficients[0]}')
@@ -222,5 +222,4 @@ Note:
         0.81854: -0.139   -4.762
         0.89198: -0.026   -4.574
         1.07577:  0.028   -4.825
-        
 """

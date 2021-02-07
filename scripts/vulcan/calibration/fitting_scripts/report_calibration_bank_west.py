@@ -54,12 +54,12 @@ out_png = 'delta_peak_pos.png'
 # title = 'Ratio from observed peak position to expected peak position: West bank (1)'
 # label_y = 'observed peak position / expected peak position'
 # out_png = 'delta_d_over_d.png'
-# 
+#
 # (3)
 # title = 'Ratio from observed peak height to uncalibrated peak height: West bank (1)'
 # label_y = 'observed peak height / uncalibrated peak height'
 # out_png = 'peak_height.png'
-# 
+#
 # (4)
 # title = 'Ratio from observed peak width to uncalibrated peak width: West bank (1)'
 # label_y = 'observed peak width / uncalibrated peak width'

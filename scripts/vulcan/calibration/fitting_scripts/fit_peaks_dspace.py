@@ -64,7 +64,7 @@ else:
 def fit_single_peak_proto():
 
     input_ws_name = 'VULCAN_164960_Final_3Banks'
-    
+
     # peakparnames = 'I, A, B, X0, S'
     peakparnames = 'A, B, X0, S'
 
@@ -95,7 +95,7 @@ def fit_single_peak_proto():
              OutputPeakParametersWorkspace=param_ws_name,
              OutputParameterFitErrorsWorkspace=error_ws_name,
              FittedPeaksWorkspace=model_ws_name)
-    
+
     # Process peak fitting result
     peak_pos_ws = mtd[out_ws_name]
     fitted_pos = peak_pos_ws.extractY()[0]
