@@ -46,7 +46,8 @@ itself defines the size and the format of the event
                     The events described in the class header are supported only
 */
 void BoxControllerDummyIO::setDataType(const size_t blockSize,
-                                       const std::string &typeName) {
+                                       const std::string &typeName,
+                                       const uint8_t typeVersion) {
   if (blockSize == 4 || blockSize == 8) {
     m_CoordSize = static_cast<unsigned int>(blockSize);
   } else
@@ -54,7 +55,18 @@ void BoxControllerDummyIO::setDataType(const size_t blockSize,
                                 "8(double) event coordinates only");
   m_TypeName = typeName;
   if (m_TypeName == "MDEvent") {
-    m_EventSize = static_cast<unsigned int>(m_bc->getNDims() + 4);
+    switch (typeVersion) {
+    case (1):
+      // signal, errorSquared, runIndex, detectorId
+      m_EventSize = static_cast<unsigned int>(m_bc->getNDims() + 4);
+      break;
+    case (2):
+      // signal, errorSquared, runIndex, goniometerIndex, detectorId
+      m_EventSize = static_cast<unsigned int>(m_bc->getNDims() + 5);
+      break;
+    default:
+      throw std::invalid_argument("Unsupported MDEvent version");
+    }
   } else if (m_TypeName == "MDLeanEvent") {
     m_EventSize = static_cast<unsigned int>(m_bc->getNDims() + 2);
   } else {
