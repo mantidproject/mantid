@@ -84,8 +84,10 @@ class HB3AFindPeaksTest(unittest.TestCase):
                               Centering="F",
                               PeakDistanceThreshold=0.25,
                               Wavelength=1.008)
-        self.assertTrue(HasUB(peaks))
-        self.assertGreater(peaks.getNumberPeaks(), 0)
+        # Verify UB and peaks were found for each workspace
+        for ws in peaks:
+            self.assertTrue(HasUB(ws))
+            self.assertGreater(ws.getNumberPeaks(), 0)
 
 
 if __name__ == '__main__':
