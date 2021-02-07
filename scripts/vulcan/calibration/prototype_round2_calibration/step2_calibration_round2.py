@@ -100,8 +100,13 @@ def main():
 def update_calibration_table(cal_table, residual, start_index, end_index):
 
     # theory
-    # DIFC^(2)(i) = DIFC(i) / b
-    # T0^(2)(i) = - DIFC(i) * a
+    # TOF = DIFC^(1) * d': first round calibration
+    # d = a + b * d': 2nd round calibration
+    # TOF = DIFC * (d / b - a / b)
+    #     = -DIFC * a / b + DIFC / b * d
+
+    # DIFC^(2)(i) = DIFC / b
+    # T0^(2)(i) = - DIFC * a  / b
 
     # west bank
     # print('before: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
@@ -121,12 +126,20 @@ def update_calibration_table(cal_table, residual, start_index, end_index):
             raise RuntimeError(f'Calibration table row {i_r}, Found non-zero TZERO {tzero}')
         # apply 2nd round correction
         new_difc = difc / b
-        tzero = - difc * a
+        tzero = - difc * a / b
         # set
         cal_table.setCell(i_r, 1, new_difc)
         cal_table.setCell(i_r, 3, tzero)
 
     # print('after: ', cal_table.cell(0, 1), cal_table.cell(0, 3))
+
+    """
+    round 1: TOF = DIFC^(1) * d'
+    round 2: d = a + b * d' + c * d'^2
+             d'^2 + b / c * d' - (a  - d)/c = 0
+             d' = 1/2 * [(- b / c) + sqrt( b^2/c^2 - 4 * (a - d))]
+                = 1 / 2 * [- b / c + 
+    """
 
 
 def calibrate_peak_positions(bank_dataset, plot=False):
