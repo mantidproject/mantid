@@ -43,7 +43,8 @@ protected:
   uint16_t runIndex;
 
   /** 0-based index defining the goniometer settings when the event took place*/
-  // attribute right after uint16_t runIndex to avoid padding arising from missaligment
+  // attribute right after uint16_t runIndex to avoid padding arising from
+  // missaligment
   uint16_t goniometerIndex;
 
   /** Detector ID of the pixel that measured this event. */
@@ -366,8 +367,7 @@ public:
                           static_cast<signal_t>(data[ii + 1]),
                           static_cast<uint16_t>(data[ii + 2]),
                           static_cast<uint16_t>(data[ii + 4]),
-                          static_cast<int32_t>(data[ii + 3]),
-                          centers);
+                          static_cast<int32_t>(data[ii + 3]), centers);
     }
   }
 

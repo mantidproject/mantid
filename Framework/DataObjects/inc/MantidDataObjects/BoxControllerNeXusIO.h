@@ -58,9 +58,8 @@ public:
    * @param typeVersion : determines number of attributes to expect for a
    * LeanEvent or FatEvent
    * */
-  void setDataType(const size_t blockSize,
-                   const std::string &typeName,
-                   const uint8_t typeVersion=2) override;
+  void setDataType(const size_t blockSize, const std::string &typeName,
+                   const uint8_t typeVersion = 2) override;
   void getDataType(size_t &CoordSize, std::string &typeName) const override;
   //------------------------------------------------------------------------------------------------------------------------
   // Auxiliary functions (non-virtual, used for testing)

@@ -20,8 +20,10 @@ namespace Mantid {
 namespace DataObjects {
 // Default headers(attributes) describing the contents of the data, written by
 // this class
-const char *EventHeaders[] = {"signal, errorSquared, center (each dim.)",
-                              "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each dim.)"};
+const char *EventHeaders[] = {
+    "signal, errorSquared, center (each dim.)",
+    "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each "
+    "dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
@@ -83,12 +85,12 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
       m_BlockSize[1] = 2 + m_bc->getNDims();
       break;
     case (FatEvent):
-      switch(typeVersion) {
-      case(1):
+      switch (typeVersion) {
+      case (1):
         // signal, errorSquared, runIndex, detectorId
         m_BlockSize[1] = 4 + m_bc->getNDims();
         break;
-      case(2):
+      case (2):
         // signal, errorSquared, runIndex, goniometerIndex, detectorId
         m_BlockSize[1] = 5 + m_bc->getNDims();
         break;
@@ -295,7 +297,8 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
     throw Kernel::Exception::FileError(
         "Unexpected type of events in the data file", m_fileName);
   }
-  if (std::find(nFileDim.begin(), nFileDim.end(), m_bc->getNDims()) == nFileDim.end())
+  if (std::find(nFileDim.begin(), nFileDim.end(), m_bc->getNDims()) ==
+      nFileDim.end())
     throw Kernel::Exception::FileError(
         "Trying to open event data with different number of dimensions ",
         m_fileName);

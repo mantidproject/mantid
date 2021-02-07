@@ -67,9 +67,8 @@ public:
    * meaning of the blockSize and blockPosition used by save/load operations
    * @param blockSize :
    */
-  virtual void setDataType(const size_t blockSize,
-                           const std::string &typeName,
-                           const uint8_t typeVersion=2) = 0;
+  virtual void setDataType(const size_t blockSize, const std::string &typeName,
+                           const uint8_t typeVersion = 2) = 0;
   virtual void getDataType(size_t &blockSize, std::string &typeName) const = 0;
 };
 } // namespace API
