@@ -1,6 +1,7 @@
-from mantid.simpleapi import (LoadEventAndCompress, LoadEventNexus, CropWorkspace,
+from mantid.simpleapi import (LoadEventAndCompress, CropWorkspace,
                               PDCalibration, SaveDiffCal, mtd,
                               AlignDetectors, Rebin, SaveNexusProcessed, CreateGroupingWorkspace)
+from mantid.simpleapi import LoadEventNexus
 
 instrument = "VULCAN"
 
@@ -16,7 +17,7 @@ def main_calibration(load_full=False, bin_step=-.001):
     bad_pulse_threshold = 10
     if load_full:
         # Load full size data
-        LoadEventNeXus(Filename=dia_wksp, OutputWorkspace=dia_wksp,
+        LoadEventNexus(Filename=dia_wksp, OutputWorkspace=dia_wksp,
                        MaxChunkSize=16, FilterBadPulses=bad_pulse_threshold)
     else:
         # Compress and crop
@@ -52,9 +53,9 @@ def main_calibration(load_full=False, bin_step=-.001):
 
     # 3 group mode
     group_ws_name = 'VULCAN_3Banks_Group'
-    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan', 
-                                       GroupDetectorsBy='Group', 
-                                       OutputWorkspace=group_ws_name) 
+    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
+                                       GroupDetectorsBy='Group'
+                                       OutputWorkspace=group_ws_name)
     assert group_ws
 
     SaveDiffCal(CalibrationWorkspace=instrument,

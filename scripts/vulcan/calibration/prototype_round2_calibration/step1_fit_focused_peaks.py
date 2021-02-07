@@ -30,7 +30,7 @@ def cal_fwhm(param_ws):
     a = param_ws.cell(1, 1)
     b = param_ws.cell(2, 1)
     s = param_ws.cell(4, 1)
-    x0 = param_ws.cell(3, 1)
+    # x0 = param_ws.cell(3, 1)
 
     # M_LN2 = 0.693147180559945309417
     # print(M_LN2)
@@ -195,7 +195,7 @@ def fit_90degree_banks(diamond_ws_name, title: str, ws_index: int):
         if fit_status.lower().count('success') == 0 and fit_status.lower().count('too small') == 0:
             continue
 
-        cov_matrix_table_ws = out.OutputNormalisedCovarianceMatrix
+        # cov_matrix_table_ws = out.OutputNormalisedCovarianceMatrix
         fit_param_table_ws = out.OutputParameters
         fitted_data_ws = out.OutputWorkspace
         fitted_data_ws = ConvertToPointData(InputWorkspace=fitted_data_ws, OutputWorkspace=str(fitted_data_ws))
@@ -350,9 +350,10 @@ def fit_high_angle_bank(diamond_ws_name, title):
     cal_vec_diff_list = []
 
     for pi in peak_info_list:
-
+        fit_func = f'name=BackToBackExponential,I={pi.intensity},A=3423.58,B=1336.86,' \
+                   f'X0={pi.obs_pos},S=0.000393873;name=LinearBackground,A0={pi.a0_obs},A1=0.'
         out = Fit(
-            Function=f'name=BackToBackExponential,I={pi.intensity},A=3423.58,B=1336.86,X0={pi.obs_pos},S=0.000393873;name=LinearBackground,A0={pi.a0_obs},A1=0.',
+            Function=fit_func,
             InputWorkspace=diamond_ws_name,
             Output=f'VULCAN_164960_pd0003_3banks_{pi.tag}',
             OutputCompositeMembers=True,
@@ -369,7 +370,7 @@ def fit_high_angle_bank(diamond_ws_name, title):
         if fit_status.lower().count('success') == 0 and fit_status.lower().count('too small') == 0:
             continue
 
-        cov_matrix_table_ws = out.OutputNormalisedCovarianceMatrix
+        # cov_matrix_table_ws = out.OutputNormalisedCovarianceMatrix
         fit_param_table_ws = out.OutputParameters
         fitted_data_ws = out.OutputWorkspace
         fitted_data_ws = ConvertToPointData(InputWorkspace=fitted_data_ws, OutputWorkspace=str(fitted_data_ws))

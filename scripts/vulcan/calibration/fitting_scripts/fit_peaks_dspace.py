@@ -1,14 +1,16 @@
 # Peak 1.07
-# All peaks   0.54411, 0.56414, 0.5947, 0.63073, 0.68665, 0.7283 , 0.81854, 0.89198, 1.07577, 
+# All peaks   0.54411, 0.56414, 0.5947, 0.63073, 0.68665, 0.7283 , 0.81854, 0.89198, 1.07577,
 # import mantid algorithms
 from mantid.simpleapi import *
 
 
 # FIXME - FitPeaks is unable to 'Fit from right' by using the fitted parameter from the previously (right) fitted result
 # TODO  - Fix FitPeaks
-# TODO  - Temporary solution: (1) Fit 3 peaks a time; (2) Using the leftmost fitted peak as the starting value of the next 3 peaks to fit
-
-LoadNexusProcessed(Filename='/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/LatestTestPD2Round/final_tests/VULCAN_164960_diamond_3banks.nxs', OutputWorkspace='VULCAN_164960_Final_3Banks')
+# TODO  - Temporary solution:
+#         (1) Fit 3 peaks a time;
+#         (2) Using the leftmost fitted peak as the starting value of the next 3 peaks to fit
+nxs = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/LatestTestPD2Round/final_tests/VULCAN_164960_diamond_3banks.nxs'
+LoadNexusProcessed(Filename=nxs, OutputWorkspace='VULCAN_164960_Final_3Banks')
 
 input_ws_name = 'VULCAN_164960_Final_3Banks'
 
@@ -30,7 +32,6 @@ model_ws_name = f'{out_ws_name}_Model'
 
 # peakparvalues = f'102176394 , 2500 , 1275 , {exp_center} , 0.000566765'
 peakparvalues = f'2500 , 1275 , 0.000566765'
-
 
 FitPeaks(InputWorkspace=input_ws_name,
          StartWorkspaceIndex=ws_index,
@@ -54,24 +55,11 @@ fitted_pos = peak_pos_ws.extractY()[0]
 param_ws = mtd[param_ws_name]
 error_ws = mtd[error_ws_name]
 
-print(fitted_pos)
 if fitted_pos <= 0:
     print(f'[Fitting   Error] Error code = {fitted_pos}')
 else:
     print(f'[Fitting Success] Peak   pos = {param_ws.cell(0, 5)} +/- some error {error_ws.cell(0, 5)}')
 
-
-
-
-# Fit(Function='name=BackToBackExponential,I=1.05074e+08,A=2517.65,B=1275.73,X0=1.07525,S=0.000566765;name=LinearBackground,A0=1.66376e+09,A1=-1.33005e+09',
-#     InputWorkspace='VULCAN_164960_pd0003_3banks',
-#     Output='VULCAN_164960_pd0003_3banks',
-#     OutputCompositeMembers=True,
-#     WorkspaceIndex=2,
-#     StartX=1.0430260736318451,
-#     EndX=1.1029278964344489,
-#     Normalise=True)
-# 
 
 def fit_single_peak_proto():
 
@@ -79,10 +67,9 @@ def fit_single_peak_proto():
     
     # peakparnames = 'I, A, B, X0, S'
     peakparnames = 'A, B, X0, S'
-    
+
     ws_index = 2
-    
-    
+
     exp_center = 1.07
     min_x = 1.05
     max_x = 1.15
@@ -90,11 +77,10 @@ def fit_single_peak_proto():
     param_ws_name = f'{out_ws_name}_Params'
     error_ws_name = f'{out_ws_name}_FitErrors'
     model_ws_name = f'{out_ws_name}_Model'
-    
+
     # peakparvalues = f'102176394 , 2500 , 1275 , {exp_center} , 0.000566765'
     peakparvalues = f'2500 , 1275 , {exp_center} , 0.000566765'
-    
-    
+
     FitPeaks(InputWorkspace=input_ws_name,
              StartWorkspaceIndex=ws_index,
              StopWorkspaceIndex=ws_index,
@@ -113,14 +99,11 @@ def fit_single_peak_proto():
     # Process peak fitting result
     peak_pos_ws = mtd[out_ws_name]
     fitted_pos = peak_pos_ws.extractY()[0]
-    
+
     param_ws = mtd[param_ws_name]
     error_ws = mtd[error_ws_name]
-    
+
     if fitted_pos <= 0:
         print(f'[Fitting   Error] Error code = {fitted_pos}')
     else:
         print(f'[Fitting Success] Peak   pos = {param_ws.cell(0, 5)} +/- some error {error_ws.cell(0, 5)}')
-    
-
-
