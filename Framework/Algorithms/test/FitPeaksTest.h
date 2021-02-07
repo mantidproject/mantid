@@ -799,9 +799,6 @@ public:
     AnalysisDataService::Instance().remove("FittedPeaksWS2");
     AnalysisDataService::Instance().remove("PeakParametersWS2");
 
-    // Stop
-    TS_ASSERT(false);
-
     return;
   }
 
