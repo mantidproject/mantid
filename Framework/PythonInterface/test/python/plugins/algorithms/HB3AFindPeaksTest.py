@@ -77,17 +77,16 @@ class HB3AFindPeaksTest(unittest.TestCase):
 
     def test_find_ub_van_norm(self):
         # Test with vanadium normalization to make sure UB matrix and peaks can still be found
-        scans = ','.join(f for f in self._files)
-        norm = HB3AAdjustSampleNorm(Filename=scans, VanadiumFile="HB3A_exp0722_scan0220.nxs")
+        norm = HB3AAdjustSampleNorm(Filename=self._files[0],
+                                    VanadiumFile="HB3A_exp0722_scan0220.nxs")
         peaks = HB3AFindPeaks(InputWorkspace=norm,
                               CellType="Orthorhombic",
                               Centering="F",
                               PeakDistanceThreshold=0.25,
                               Wavelength=1.008)
-        # Verify UB and peaks were found for each workspace
-        for ws in peaks:
-            self.assertTrue(HasUB(ws))
-            self.assertGreater(ws.getNumberPeaks(), 0)
+        # Verify UB and peaks were found
+        self.assertTrue(HasUB(peaks))
+        self.assertGreater(peaks.getNumberPeaks(), 0)
 
 
 if __name__ == '__main__':
