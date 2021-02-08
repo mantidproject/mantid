@@ -7,14 +7,10 @@
 from mantid.api import MultiDomainFunction, AnalysisDataService
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 
-from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
-from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
-
-import functools
 
 
 class GeneralFittingPresenter(BasicFittingPresenter):
@@ -38,8 +34,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
 
-        self.instrument_changed_observer = GenericObserver(self.instrument_changed) # Do we need?
-
         self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
         self.initialise_model_options()
@@ -60,10 +54,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
                 "EvaluationType": self.view.evaluation_type}
 
     def handle_new_data_loaded(self):
-        self.enable_view()
-        self.view.plot_guess(False)
+        self.view.plot_guess = False
         self.update_selected_workspace_list_for_fit()
         self.model.create_ws_fit_function_map()
+        self.enable_view()
 
     def handle_selected_group_pair_changed(self):
         self.update_selected_workspace_list_for_fit()
@@ -78,15 +72,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.start_time = self.start_x[current_index]
         self.view.end_time = self.end_x[current_index]
         self.view.set_current_dataset_index(current_index)
+
         self._update_stored_fit_functions()
         self.update_fit_status_information_in_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_use_rebin_changed(self):
-        if not self.view.fit_to_raw and not self.context._do_rebin():
-            self.view.fit_to_raw = True
-            self.view.warning_popup("No rebin options specified")
+        if not self._validate_rebin_options():
             return
 
         self.update_selected_workspace_list_for_fit()
@@ -122,14 +115,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         workspaces = self.get_fit_input_workspaces()
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
-    def handle_finished(self):
-        self.enable_editing_notifier.notify_subscribers()
-        if not self.thread_success:
-            return
-
-        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
-        if any([not fit_function, not fit_status, not fit_chi_squared]):
-            return
+    def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
         if self.view.is_simul_fit:
             self._fit_function[0] = fit_function
             self._fit_status = [fit_status] * len(self.start_x)
@@ -141,19 +127,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self._fit_chi_squared[current_index] = fit_chi_squared
 
         self.update_fit_status_information_in_view()
-        self.view.undo_fit_button.setEnabled(True)
-        self.view.plot_guess_checkbox.setChecked(False)
+
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+
         # Update parameter values in sequential tab.
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
         self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
-
-    def handle_error(self, error):
-        self.enable_editing_notifier.notify_subscribers()
-        self.thread_success = False
-        self.view.warning_popup(error)
 
     def handle_start_x_updated(self):
         value = self.view.start_time
@@ -194,13 +175,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_function_structure_changed(self):
         if not self._fit_function[0]:
             self.handle_display_workspace_changed()
-        self.view.plot_guess_checkbox.setChecked(False)
-        # if self._tf_asymmetry_mode:
-        #     self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
-        #     self.view.function_browser.blockSignals(True)
-        #     self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
-        #     self.view.function_browser.blockSignals(False)
-        #     return
+        self.view.plot_guess = False
         if not self.view.fit_object:
             if self.view.is_simul_fit:
                 self._fit_function = [None]
@@ -239,8 +214,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
                 return tf_asymmetry_parameters['InputFunction']
             return tf_function
 
-        self.view.undo_fit_button.setEnabled(False)
-        self.view.plot_guess_checkbox.setChecked(False)
+        self.view.enable_undo_fit(False)
+        self.view.plot_guess = False
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
         # if (
@@ -320,7 +295,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._fit_function = self._fit_function_cache
         self.clear_fit_information()
         self.update_fit_status_information_in_view()
-        self.view.undo_fit_button.setEnabled(False)
+        self.view.enable_undo_fit(False)
         self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
@@ -344,26 +319,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
-    # Perform fit
-    def perform_fit(self):
-        if not self.view.fit_object:
-            return
-        self._fit_function_cache = [func.clone() for func in self._fit_function]
-        try:
-            workspaces = self.get_fit_input_workspaces()
-            self._number_of_fits_cached += 1
-            calculation_function = functools.partial(
-                self.model.evaluate_single_fit, workspaces)
-            self.calculation_thread = self.create_thread(
-                calculation_function)
-            self.calculation_thread.threadWrapperSetUp(self.handle_started,
-                                                       self.handle_finished,
-                                                       self.handle_error)
-            self.calculation_thread.start()
-
-        except ValueError as error:
-            self.view.warning_popup(error)
-
     # Query view and update model.
     def clear_and_reset_gui_state(self):
         self.view.set_datasets_in_function_browser(self.selected_data)
@@ -375,9 +330,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         else:
             self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
 
-        self.view.undo_fit_button.setEnabled(False)
+        self.view.enable_undo_fit(False)
 
-        self.reset_start_time_to_first_good_data_value()
+        self._reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
         fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0]}
         self.update_model_from_view(**fitting_options)
@@ -389,7 +344,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._fit_chi_squared = [0.0] * len(
             self.selected_data) if self.selected_data else [0.0]
         self.update_fit_status_information_in_view()
-        self.view.undo_fit_button.setEnabled(False)
+        self.view.enable_undo_fit(False)
 
     def update_selected_workspace_list_for_fit(self):
         if self.view.is_simul_fit:
@@ -487,10 +442,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def update_end_x(self, index, value):
         self._end_x[index] = value
 
-    def create_thread(self, callback):
-        self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
-        return thread_model.ThreadModel(self.fitting_calculation_model)
-
     def update_fit_status_information_in_view(self):
         current_index = self._fit_function_index()
         self.view.update_with_fit_outputs(self._fit_function[current_index],
@@ -542,10 +493,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
                 return [FitPlotInformation(input_workspaces=self.selected_data, fit=fit)]
         else:
             return []
-
-    def instrument_changed(self):
-        #self.view.tf_asymmetry_mode = False
-        pass
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

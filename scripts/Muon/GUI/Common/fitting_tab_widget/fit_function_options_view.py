@@ -30,8 +30,8 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         super(FitFunctionOptionsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.time_start = None
-        self.time_end = None
+        self.start_x = None
+        self.end_x = None
         self.minimizer_combo = None
         self.fit_to_raw_data_checkbox = None
         self.evaluation_combo = None
@@ -48,6 +48,30 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Start X")
             table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
             self.end_time = DEFAULT_FREQUENCY_FIT_END_X
+
+    def set_slot_for_function_structure_changed(self, slot):
+        """Connect the slot for the function structure changing."""
+        self.function_browser.functionStructureChanged.connect(slot)
+
+    def set_slot_for_start_x_updated(self, slot):
+        """Connect the slot for the start x option."""
+        self.start_x.editingFinished.connect(slot)
+
+    def set_slot_for_end_x_updated(self, slot):
+        """Connect the slot for the end x option."""
+        self.end_x.editingFinished.connect(slot)
+
+    def set_slot_for_minimiser_changed(self, slot):
+        """Connect the slot for changing the Minimizer."""
+        self.minimizer_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_evaluation_type_changed(self, slot):
+        """Connect the slot for changing the Evaluation type."""
+        self.evaluation_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_use_raw_changed(self, slot):
+        """Connect the slot for the Use raw option."""
+        self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         """Sets the datasets stored in the FunctionBrowser."""
@@ -71,21 +95,6 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
 
-    # def set_slot_for_use_raw_changed(self, slot):
-    #     self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
-    #
-    # def set_slot_for_start_x_updated(self, slot):
-    #     self.time_start.editingFinished.connect(slot)
-    #
-    # def set_slot_for_end_x_updated(self, slot):
-    #     self.time_end.editingFinished.connect(slot)
-    #
-    # def set_slot_for_minimiser_changed(self, slot):
-    #     self.minimizer_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_evaluation_type_changed(self, slot):
-    #     self.evaluation_combo.currentIndexChanged.connect(slot)
-
     @property
     def fit_object(self):
         """Returns the global fitting function."""
@@ -99,22 +108,22 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
     @property
     def start_time(self):
         """Returns the selected start X."""
-        return float(self.time_start.text())
+        return float(self.start_x.text())
 
     @start_time.setter
     def start_time(self, value):
         """Sets the selected start X."""
-        self.time_start.setText(str(value))
+        self.start_x.setText(str(value))
 
     @property
     def end_time(self):
         """Returns the selected end X."""
-        return float(self.time_end.text())
+        return float(self.end_x.text())
 
     @end_time.setter
     def end_time(self, value):
         """Sets the selected end X."""
-        self.time_end.setText(str(value))
+        self.end_x.setText(str(value))
 
     @property
     def evaluation_type(self):
@@ -166,10 +175,10 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
         table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
-        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
+        self.start_x = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "Time End")
-        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
+        self.end_x = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])

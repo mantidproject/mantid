@@ -85,7 +85,7 @@ class GeneralFittingView(BasicFittingView):
     @display_workspace.setter
     def display_workspace(self, value):
         """Sets the name of the currently displayed workspace parameter."""
-        self.general_fitting_options.display_workspace(value)
+        self.general_fitting_options.display_workspace = value
 
     @property
     def simultaneous_fit_by(self):
@@ -95,7 +95,7 @@ class GeneralFittingView(BasicFittingView):
     @simultaneous_fit_by.setter
     def simultaneous_fit_by(self, fit_by_text):
         """Sets what you are simultaneously fitting by (Run or Group/Pair)."""
-        self.general_fitting_options.simultaneous_fit_by(fit_by_text)
+        self.general_fitting_options.simultaneous_fit_by = fit_by_text
 
     @property
     def simultaneous_fit_by_specifier(self):
