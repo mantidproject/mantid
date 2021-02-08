@@ -3,7 +3,7 @@
 Home Tab
 --------
 
-.. image::  ../images/muon_interface_tab_home.png
+.. image::  ../../images/muon_interface_tab_home.png
    :align: right
    :height: 400px
 

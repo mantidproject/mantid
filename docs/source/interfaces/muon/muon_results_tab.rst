@@ -3,7 +3,7 @@
 Results Table Tab
 -----------------
 
-.. image::  ../images/muon_interface_tab_results.png
+.. image::  ../../images/muon_interface_tab_results.png
    :align: right
    :height: 400px
 

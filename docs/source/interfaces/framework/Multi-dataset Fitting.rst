@@ -16,7 +16,7 @@ Multi-dataset Fitting*. The interface consists of three major parts: The fit
 property window, the spectrum & fit viewer, and the list of spectra to operate
 on. 
 
-.. figure::  ../images/multidataset-fitting/multidataset-fitting-labelled.png
+.. figure::  ../../images/multidataset-fitting/multidataset-fitting-labelled.png
    :align: center
    :width: 1000px
 
@@ -34,7 +34,7 @@ fitting. Spectra can be removed by highlighting a corresponding row (or rows)
 and clicking "Remove". To remove all spectra click the "workspace" column name
 and then click the "Remove" button.
 
-.. figure::  ../images/multidataset-fitting/multidataset-add-workspace.png
+.. figure::  ../../images/multidataset-fitting/multidataset-add-workspace.png
    :align: center
    :width: 800px
 
@@ -48,7 +48,7 @@ the start and end `x` values are for this particular spectrum for each fit. The
 start and end values are editable and can be changed by the user by double
 clicking on an entry.
 
-.. figure::  ../images/multidataset-fitting/multidataset-spectra.png
+.. figure::  ../../images/multidataset-fitting/multidataset-spectra.png
    :align: center
    :width: 800px
 
@@ -84,7 +84,7 @@ matrices and workspace with parameters for each spectrum. It will also output
 one workspace for each spectrum containing the data, fitted model, and
 difference between model and data.
 
-.. figure::  ../images/multidataset-fitting/multidataset-fit-prop.png
+.. figure::  ../../images/multidataset-fitting/multidataset-fit-prop.png
    :align: center
    :width: 300px
 
@@ -97,7 +97,7 @@ A model can be created by right clicking and choosing "Add function" in the top
 panel of the fit property window. This will produce a dialog box containing a
 large number of different fit functions which can be added to the model.
 
-.. figure::  ../images/multidataset-fitting/multidataset-fit-prop-dialog.png
+.. figure::  ../../images/multidataset-fitting/multidataset-fit-prop-dialog.png
    :align: center
    :width: 400px
 
@@ -112,7 +112,7 @@ model in the spectrum viewer using the starting parameter. To fit the model
 click the "Fit" button.
 
 
-.. figure::  ../images/multidataset-fitting/multidataset-fit-prop-with-model.png
+.. figure::  ../../images/multidataset-fitting/multidataset-fit-prop-with-model.png
    :align: center
    :width: 300px
 
@@ -126,7 +126,7 @@ the same parameter will be shared across all spectra. To set a parameter as
 global click the checkbox in the "Global" column of the fit property browser
 next to the name and value of the model parameter.
 
-.. figure::  ../images/multidataset-fitting/multidataset-global-param.png
+.. figure::  ../../images/multidataset-fitting/multidataset-global-param.png
    :align: center
    :width: 300px
 
@@ -138,14 +138,14 @@ A fixed parameter's value will not change during a fit. A tied parameter can be
 used to either bound a parameter to a range or to tie the values of two
 parameters together.
 
-.. figure::  ../images/multidataset-fitting/multidataset-fit-prop-right-click.png
+.. figure::  ../../images/multidataset-fitting/multidataset-fit-prop-right-click.png
    :align: center
    :width: 300px
 
    Right clicking on a parameter shows the context menu with the fix, tie, and
    constraint options
 
-.. figure::  ../images/multidataset-fitting/multidataset-set-tie.png
+.. figure::  ../../images/multidataset-fitting/multidataset-set-tie.png
    :align: center
    :width: 300px
 
@@ -153,7 +153,7 @@ parameters together.
    are allowed. See the documentation in the :ref:`Fit <algm-Fit-v1>`
    algorithm.
 
-.. figure::  ../images/multidataset-fitting/multidataset-tie-added.png
+.. figure::  ../../images/multidataset-fitting/multidataset-tie-added.png
    :align: center
    :width: 300px
 
@@ -168,13 +168,13 @@ modify, then clicking on the "..." button next to the value. This will open a
 dialog of values for every spectrum. Here individual values can be set, fixed,
 and tied as with the global parameters.
 
-.. figure::  ../images/multidataset-fitting/multidataset-edit-local-params.png
+.. figure::  ../../images/multidataset-fitting/multidataset-edit-local-params.png
    :align: center
    :width: 400px
      
    Button to open the window to edit local parameter values. 
 
-.. figure::  ../images/multidataset-fitting/multidataset-local-params.png
+.. figure::  ../../images/multidataset-fitting/multidataset-local-params.png
    :align: center
    :width: 800px
      
@@ -194,7 +194,7 @@ or for all spectra by selecting the "Apply to all spectra option. To select
 `x` bounds click and drag the blue dashed vertical lines to move define the
 fitting window.
 
-.. figure::  ../images/multidataset-fitting/multidataset-spectrum-view.png
+.. figure::  ../../images/multidataset-fitting/multidataset-spectrum-view.png
    :align: center
    :width: 800px
 

@@ -3,7 +3,7 @@
 Fitting Tab
 -----------
 
-.. image::  ../images/muon_interface_tab_fitting.png
+.. image::  ../../images/muon_interface_tab_fitting.png
    :align: right
    :height: 400px
 
@@ -19,7 +19,7 @@ The simultaneous fit can be performed over a selected run, or selected group/pai
 Fit function browser
 ^^^^^^^^^^^^^^^^^^^^
 
-.. image::  ../images/muon_interface_tab_fitting_browser.png
+.. image::  ../../images/muon_interface_tab_fitting_browser.png
    :height: 125px
 
 Right clicking in the central box will bring up a context menu for adding or removing functions.
