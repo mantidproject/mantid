@@ -31,20 +31,6 @@ BoxControllerDummyIO::BoxControllerDummyIO(const Mantid::API::BoxController *bc)
   m_EventSize = static_cast<unsigned int>(bc->getNDims() + 4);
 }
 
-/**The optional method to set up the event type and the size of the event
-coordinate
-* As save/load operations use void data type, these function allow set up/get
-the type name provided for the IO operations
-*  and the size of the data type in bytes (e.g. the  class dependant physical
-meaning of the blockSize and blockPosition used
-*  by save/load operations
-*@param blockSize -- size (in bytes) of the blockPosition and blockSize used in
-save/load operations. 4 and 8 are supported only
-                     (float and double)
-*@param typeName  -- the name of the event used in the operations. The name
-itself defines the size and the format of the event
-                    The events described in the class header are supported only
-*/
 void BoxControllerDummyIO::setDataType(const size_t blockSize,
                                        const std::string &typeName,
                                        const uint16_t typeVersion) {

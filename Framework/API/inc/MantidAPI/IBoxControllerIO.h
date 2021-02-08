@@ -61,11 +61,13 @@ public:
   ///  the method which returns the size of data block used in IO operations
   virtual size_t getDataChunk() const = 0;
 
-  /** As save/load operations use void data type, these function allow
-   * set up/get  the type name provided for the IO operations and the
-   * size of the data type in bytes (e.g. the  class dependant physical
-   * meaning of the blockSize and blockPosition used by save/load operations
-   * @param blockSize :
+  /**
+   * @brief determine the size (in bytes) storing the state of an event
+   *
+   * @param blockSize : bytes of the elemental datum (4-float, 8-double)
+   * @param typeName : string representation of the event class
+   * @param typeVersion : the MDEvent class template has been endowed with
+   * additional attributes over time, thus the need for version control
    */
   virtual void setDataType(const size_t blockSize, const std::string &typeName,
                            const uint16_t typeVersion = 2) = 0;

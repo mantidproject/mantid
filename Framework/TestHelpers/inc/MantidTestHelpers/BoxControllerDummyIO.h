@@ -62,8 +62,14 @@ public:
   void closeFile() override { m_isOpened = false; }
 
   ~BoxControllerDummyIO() override;
-  // Auxiliary functions. Used to change default state of this object which is
-  // not fully supported. Should be replaced by some IBoxControllerIO factory
+  /**
+   * @brief determine the size (in bytes) storing the state of an event
+   *
+   * @param blockSize : bytes of the elemental datum (4-float, 8-double)
+   * @param typeName : string representation of the event class
+   * @param typeVersion : the MDEvent class template has been endowed with
+   * additional attributes over time, thus the need for version control
+   */
   void setDataType(const size_t blockSize, const std::string &typeName,
                    const uint16_t typeVersion = 2) override;
   void getDataType(size_t &CoordSize, std::string &typeName) const override;
