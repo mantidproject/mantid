@@ -82,6 +82,8 @@ private:
   @param signal : intensity
   @param errorSQ : squared value of the error
   @param runindex : run index
+  @param goniometerIndex : 0-based index defining the goniometer settings
+  when the event took place
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
