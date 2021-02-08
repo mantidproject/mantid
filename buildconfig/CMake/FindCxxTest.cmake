@@ -168,10 +168,10 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # The TESTHELPER_SRCS variable can be set outside the macro and used to pass in test helper classes
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS} )
 
-    set (_misc_bin ${CMAKE_SOURCE_DIR}/external/src/ThirdParty/bin)
-    set (_qt5_bin ${CMAKE_SOURCE_DIR}/external/src/ThirdParty/lib/qt5/bin ${CMAKE_SOURCE_DIR}/external/src/ThirdParty/lib/qt5/lib)
-    set (_qt_qpa_platform_plugin ${CMAKE_SOURCE_DIR}/external/src/ThirdParty/lib/qt5/plugins)
-    set (_python_home ${CMAKE_SOURCE_DIR}/external/src/ThirdParty/lib/python3.8)
+    set (_misc_bin ${THIRD_PARTY_DIR}/bin)
+    set (_qt5_bin ${THIRD_PARTY_DIR}/lib/qt5/bin ${THIRD_PARTY_DIR}/lib/qt5/lib)
+    set (_qt_qpa_platform_plugin ${THIRD_PARTY_DIR}/lib/qt5/plugins)
+    set (_python_home ${THIRD_PARTY_DIR}/lib/python3.8)
     # Note: %PATH% isn't understood by cmake but it is by Visual Studio\Windows where it gets used
     set_target_properties(${_cxxtest_testname} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${_misc_bin};${_qt5_bin};${_python_home};${_python_home}/Scripts;%PATH%\n\
 QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}\n\
