@@ -74,7 +74,7 @@ BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
   only  */
 void BoxControllerNeXusIO::setDataType(const size_t blockSize,
                                        const std::string &typeName,
-                                       const uint8_t typeVersion) {
+                                       const uint16_t typeVersion) {
   if (blockSize == 4 || blockSize == 8) {
 
     m_CoordSize = static_cast<unsigned int>(blockSize);
@@ -97,6 +97,7 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
       default:
         throw std::invalid_argument("Unsupported MDEvent version");
       }
+      break;
     default:
       throw std::invalid_argument(" Unsupported event kind Identified  ");
     }

@@ -114,7 +114,7 @@ private:
   bool m_BoxStructureAndMethadata;
 
   /// version of the MDEvent (e.g. event data missing goniometerIndex info)
-  uint8_t m_eventTypeVersion;
+  uint16_t m_eventTypeVersion;
 
   /// Version of SaveMD used to save the file
   int m_saveMDVersion;

@@ -47,7 +47,7 @@ itself defines the size and the format of the event
 */
 void BoxControllerDummyIO::setDataType(const size_t blockSize,
                                        const std::string &typeName,
-                                       const uint8_t typeVersion) {
+                                       const uint16_t typeVersion) {
   if (blockSize == 4 || blockSize == 8) {
     m_CoordSize = static_cast<unsigned int>(blockSize);
   } else
