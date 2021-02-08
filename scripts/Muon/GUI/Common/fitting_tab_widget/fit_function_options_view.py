@@ -55,6 +55,10 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         self.function_browser.removeDatasets(index_list)
         self.function_browser.addDatasets(data_set_name_list)
 
+    def set_current_dataset_index(self, dataset_index):
+        """Sets the index of the current dataset."""
+        self.function_browser.setCurrentDataset(dataset_index)
+
     def update_function_browser_parameters(self, is_simultaneous_fit, fit_function):
         """Updates the parameters in the function browser."""
         if is_simultaneous_fit:

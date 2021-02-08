@@ -132,3 +132,7 @@ class GeneralFittingView(BasicFittingView):
     def setup_fit_by_specifier(self, choices):
         """Setup the fit by specifier combo box."""
         self.general_fitting_options.setup_fit_by_specifier(choices)
+
+    def set_workspace_combo_box_label(self, text):
+        """Sets the text in the workspace combo box label."""
+        self.general_fitting_options.set_workspace_combo_box_label(text)
