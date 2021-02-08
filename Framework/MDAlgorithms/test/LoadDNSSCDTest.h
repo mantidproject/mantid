@@ -34,7 +34,7 @@ using namespace Mantid::MDAlgorithms;
 bool cmp_Events(const std::vector<coord_t> &ev1,
                 const std::vector<coord_t> &ev2) {
   const size_t traits_count = 9;     // data items per event
-  const size_t detectorID_index = 3; // trait index for detectorID
+  const size_t detectorID_index = 4; // trait index for detectorID
   // event1 < event2 if it has smaller det_id and dE
   assert(ev1.size() == traits_count);
   assert(ev2.size() == traits_count);
