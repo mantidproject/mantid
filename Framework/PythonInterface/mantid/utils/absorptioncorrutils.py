@@ -308,7 +308,7 @@ def calculate_absorption_correction(
     #       mixing caching into the regular routine from start.
     # NOTE: Cache will always use sha in both workspace name and cache filename
     #       Examples
-                #
+    #
     #       PG3_11111.nxs with cache_dir=/tmp and abs_method="SampleOnly"
     #       -------------------------------------------------------------
     #       absName = PG3_sha1_abs_correction
@@ -329,7 +329,7 @@ def calculate_absorption_correction(
     return calc_absorption_corr_using_wksp(donorWS,
                                            abs_method,
                                            element_size,
-                                           absName,
+                                           prefix_name=absName,
                                            cache_dir=cache_dir)
 
 
