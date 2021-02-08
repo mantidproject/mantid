@@ -31,6 +31,10 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Sets the datasets stored in the FunctionBrowser."""
         self.fit_function_options.set_datasets_in_function_browser(data_set_name_list)
 
+    def set_current_dataset_index(self, dataset_index):
+        """Sets the index of the current dataset."""
+        self.fit_function_options.set_current_dataset_index(dataset_index)
+
     def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
         """Updates the view to show the status and results from a fit."""
         if not fit_function:
@@ -131,6 +135,10 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     def plot_guess(self, value):
         """Sets whether or not plot guess is ticked."""
         self.fit_controls.plot_guess(value)
+
+    def enable_undo_fit(self, enable):
+        """Sets whether or not undo fit is enabled."""
+        self.fit_controls.enable_undo_fit(enable)
 
     @property
     def function_name(self):

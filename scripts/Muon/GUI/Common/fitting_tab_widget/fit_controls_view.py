@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
 
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets
 
 ui_fit_controls, _ = load_ui(__file__, "fit_controls.ui")
 
@@ -17,7 +17,7 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
         super(FitControlsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.undo_fit_button.setEnabled(False)
+        self.enable_undo_fit(False)
 
         # Comment out this line to show the 'Fit Generator' button
         self.fit_generator_button.hide()
@@ -68,6 +68,10 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
         return self.plot_guess_checkbox.isChecked()
 
     @plot_guess.setter
-    def plot_guess(self, value):
+    def plot_guess(self, check):
         """Sets whether or not plot guess is ticked."""
-        self.plot_guess_checkbox.setCheckState(QtCore.Qt.Checked if value else QtCore.Qt.Unchecked)
+        self.plot_guess_checkbox.setChecked(check)
+
+    def enable_undo_fit(self, enable):
+        """Sets whether or not undo fit is enabled."""
+        self.undo_fit_button.setEnabled(enable)

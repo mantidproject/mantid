@@ -158,3 +158,7 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         self.simul_fit_by_specifier.addItems(choices)
         self.simul_fit_by_specifier.blockSignals(False)
         self.simul_fit_by_specifier.currentIndexChanged.emit(0)
+
+    def set_workspace_combo_box_label(self, text):
+        """Sets the text in the workspace combo box label."""
+        self.workspace_combo_box_label.setText(text)
