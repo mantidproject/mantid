@@ -734,6 +734,10 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
       hFile->makeGroup("MDEventWorkspace", "NXentry", true);
       hFile->putAttr("event_type", WSEventType);
 
+      // eventTypeVersion will be used on future loading of the file if
+      // attribute goniometerIndex was saved. "2" indicates "yes"
+      hFile->putAttr("event_type_version", "2");
+
       auto nDim = int32_t(nDims);
       // Write out  # of dimensions
       hFile->writeData("dimensions", nDim);
