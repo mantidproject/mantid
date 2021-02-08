@@ -24,6 +24,7 @@ Data Objects
 ------------
 
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
+- :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times in some cases.
 
 Python
 ------
