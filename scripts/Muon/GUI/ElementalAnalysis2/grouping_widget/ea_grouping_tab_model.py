@@ -83,3 +83,9 @@ class EAGroupingTabModel(object):
 
     def is_data_loaded(self):
         return self._data.is_data_loaded()
+
+    def handle_rebin(self, **kwargs):
+        self._context.handle_rebin(**kwargs)
+
+    def show_all_groups(self):
+        self._context.show_all_groups()

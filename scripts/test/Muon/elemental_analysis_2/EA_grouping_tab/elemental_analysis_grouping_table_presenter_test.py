@@ -9,7 +9,8 @@ from unittest import mock
 from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy.QtWidgets import QWidget
+from qtpy.QtWidgets import QWidget,QTableWidgetItem
+
 
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import EAGroupingTablePresenter
@@ -149,6 +150,121 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.presenter.remove_last_row_in_view_and_model()
         self.assertFalse(group_name3 in self.model.group_names)
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.get_table_item")
+    @mock.patch("qtpy.QtWidgets.QTableWidgetItem.text")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.update_model_from_view")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.notify_data_changed")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.update_view_from_model")
+    def test_rebin_with_steps_is_called(self,mock_update_view,mock_notify_data,mock_update_model,mock_handle_rebin,
+                                        mock_text,mock_get_table_item):
+        mock_text.return_value = "Steps:3"
+        mock_get_table_item.return_value = QTableWidgetItem()
+        self.presenter.handle_data_change(1,5)
+
+        #Tests
+        mock_get_table_item.assert_has_calls([mock.call(1,5) , mock.call(1,0)])
+        self.assertEqual(mock_update_model.call_count,1)
+        self.assertEqual(mock_notify_data.call_count,1)
+        self.assertEqual(mock_update_view.call_count, 1)
+        self.assertEqual(mock_text.call_count,2)
+        mock_handle_rebin.assert_has_calls([mock.call(name ="Steps:3", rebinType="Fixed", rebinParam =3)])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.get_table_item")
+    @mock.patch("qtpy.QtWidgets.QTableWidgetItem.text")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model.EAGroupingTabModel.handle_rebin")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.update_model_from_view")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.notify_data_changed")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.update_view_from_model")
+    def test_rebin_with_variable_is_called(self,mock_update_view,mock_notify_data,mock_update_model, mock_handle_rebin,
+                                           mock_text, mock_get_table_item):
+        mock_text.return_value = "Bin Boundaries:3,2,10"
+        mock_get_table_item.return_value = QTableWidgetItem()
+        self.presenter.handle_data_change(4, 5)
+
+        # Tests
+        mock_get_table_item.assert_has_calls([mock.call(4, 5), mock.call(4, 0)])
+        self.assertEqual(mock_update_model.call_count, 1)
+        self.assertEqual(mock_notify_data.call_count, 1)
+        self.assertEqual(mock_update_view.call_count, 1)
+        self.assertEqual(mock_text.call_count, 2)
+        mock_handle_rebin.assert_has_calls([mock.call(name="Bin Boundaries:3,2,10", rebinType="Variable",
+                                                      rebinParam="3,2,10")])
+
+    def test_validate_group_name(self):
+        self.test_setup()
+        self.assertTrue(self.presenter.validate_group_name("mock_group_name"))
+        self.assertFalse(self.presenter.validate_group_name('9999; Detector 1'))
+        self.assertFalse(self.presenter.validate_group_name('invalid_name$%'))
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.num_rows")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.get_table_contents")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.remove_last_row")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model."
+                "EAGroupingTabModel.remove_group_from_analysis")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model."
+                "EAGroupingTabModel.remove_groups_by_name")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.get_selected_group_names")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.notify_data_changed")
+    def test_handle_remove_group_button_clicked_with_nothing_selected(self,
+                                                                      mock_notify_data_changed,
+                                                                      mock_get_selected_group_names,
+                                                                      mock_remove_groups_by_name,
+                                                                      mock_remove_group_from_analysis,
+                                                                      mock_remove_last_row,mock_get_table_contents,
+                                                                      mock_num_rows):
+
+        mock_get_selected_group_names.return_value = []
+        mock_num_rows.return_value = 1
+        mock_get_table_contents.return_value = [["mock_name"]]
+
+        self.presenter.handle_remove_group_button_clicked()
+
+        #Assert Statements
+        mock_remove_groups_by_name.assert_has_calls([mock.call(["mock_name"])])
+        self.assertEqual(mock_remove_last_row.call_count,1)
+        self.assertEqual(mock_notify_data_changed.call_count, 1)
+        mock_remove_group_from_analysis.assert_has_calls([mock.call("mock_name")])
+
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.remove_selected_groups")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model."
+                "EAGroupingTabModel.remove_group_from_analysis")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model."
+                "EAGroupingTabModel.remove_groups_by_name")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view."
+                "EAGroupingTableView.get_selected_group_names")
+    @mock.patch("Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter."
+                "EAGroupingTablePresenter.notify_data_changed")
+    def test_handle_remove_group_button_clicked_with_a_group_selected(self,mock_notify_data_changed,
+                                                                      mock_get_selected_group_names,
+                                                                      mock_remove_groups_by_name,
+                                                                      mock_remove_group_from_analysis,
+                                                                      mock_remove_selected_groups):
+
+        mock_get_selected_group_names.return_value = ["mock_name"]
+
+        self.presenter.handle_remove_group_button_clicked()
+
+        #Assert Statements
+        mock_remove_groups_by_name.assert_has_calls([mock.call(["mock_name"])])
+        self.assertEqual(mock_remove_selected_groups.call_count,1)
+        self.assertEqual(mock_notify_data_changed.call_count, 1)
+        mock_remove_group_from_analysis.assert_has_calls([mock.call("mock_name")])
 
 
 if __name__ == '__main__':

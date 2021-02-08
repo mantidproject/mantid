@@ -32,13 +32,15 @@ class EAGroupingTablePresenter(object):
 
         self._dataChangedNotifier = lambda: 0
 
+        self.rebin_notifier = GenericObservable()
+
     def notify_data_changed(self):
         self._dataChangedNotifier()
 
     def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.grouping_table.currentColumn() == 0
         is_name_not_unique = False
-        if new_name in self._model.group_and_pair_names:
+        if new_name in self._model.group_names:
             is_name_not_unique = True
         return is_name_column_being_edited and is_name_not_unique
 
@@ -99,7 +101,15 @@ class EAGroupingTablePresenter(object):
                 self._view.rebin_fixed_chosen(row)
             elif changed_item.text() == REBIN_VARIABLE_OPTION:
                 self._view.rebin_variable_chosen(row)
-
+        if col == inverse_group_table_columns['rebin_options']:
+            params = changed_item.text().split(":")
+            if len(params) == 2:
+                if params[0] == "Steps":
+                    if len(params[1]) >= 1:
+                        self._model.handle_rebin(name =workspace_name, rebinType="Fixed", rebinParam = float(params[1]) )
+                if params[0] == "Bin Boundaries":
+                    if len(params[1]) >= 1:
+                        self._model.handle_rebin(name =workspace_name,rebinType="Variable", rebinParam = params[1] )
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
             self.update_view_from_model()

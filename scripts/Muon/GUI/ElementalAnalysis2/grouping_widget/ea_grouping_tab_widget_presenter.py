@@ -117,3 +117,6 @@ class EAGroupingTabPresenter(object):
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
         return thread_model.ThreadModel(self._update_model)
+
+    def calculate_all_data(self):
+        self._model.show_all_groups()

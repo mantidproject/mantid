@@ -8,6 +8,7 @@ from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QTableWidgetItem
 from Muon.GUI.Common import message_box
+from mantidqt.utils.observer_pattern import GenericObserver
 
 group_table_columns = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
 inverse_group_table_columns = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3,  'rebin': 4,
@@ -44,6 +45,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self._disabled = False
 
         self.change_once = False
+
+        self.disable_table_observer = GenericObserver(self.disable_editing)
+        self.enable_table_observer = GenericObserver(self.enable_editing)
 
     def setup_interface_layout(self):
         self.setObjectName("GroupingTableView")
@@ -265,8 +269,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self.grouping_table.setItem(row, 4, QTableWidgetItem(str(index)))
 
     def rebin_fixed_chosen(self, row):
-        steps, ok = QtWidgets.QInputDialog.getInt(self, 'Steps',
-                                                  'Enter a value to scale current bin width by:')
+        steps, ok = QtWidgets.QInputDialog.getText(self, 'Steps',
+                                                   'Enter the new bin width:')
+
         steps_text = "Steps: " + str(steps)
         self.grouping_table.setItem(row, 5, QTableWidgetItem(steps_text))
 

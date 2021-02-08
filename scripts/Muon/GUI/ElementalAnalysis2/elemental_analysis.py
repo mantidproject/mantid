@@ -16,6 +16,7 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -36,8 +37,16 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.data_context = DataContext(self.loaded_data)
         self.group_context = EAGroupContext(self.data_context.check_group_contains_valid_detectors)
         self.gui_context = MuonGuiContext()
-        self.context = ElementalAnalysisContext(self.group_context,self.group_context, self.gui_context)
+        self.context = ElementalAnalysisContext(self.data_context,self.group_context, self.gui_context)
         self.current_tab = ''
+
+        #disable and enable notifiers
+        self.disable_notifier = GenericObservable()
+        self.enable_notifier = GenericObservable()
+
+        # disable and enable observers
+        self.disable_observer = GenericObserver(self.disable_notifier.notify_subscribers)
+        self.enable_observer = GenericObserver(self.enable_notifier.notify_subscribers)
 
         self.setup_dummy()
 
@@ -54,7 +63,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         self.setWindowTitle(self.context.name)
 
+        # setup connections between notifiers and observers
+        self.setup_enable_notifier()
+        self.setup_disable_notifier()
         self.setup_load_observers()
+        self.setup_gui_variable_observers()
+        self.setup_group_calculation_enable_notifier()
+        self.setup_group_calculation_disable_notifier()
 
     def setup_dummy(self):
         self.load_widget = LoadWidget(self.loaded_data, self.context, parent=self)
@@ -83,11 +98,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
 
+        self.disable_notifier.add_subscriber(self.grouping_tab_widget.grouping_table_view.disable_table_observer)
+
     def setup_enable_notifier(self):
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
+
+        self.enable_notifier.add_subscriber(self.grouping_tab_widget.grouping_table_view.enable_table_observer)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -117,7 +136,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
               self.enable_observer)
 
-    def setup_group_calculation_disabler_notifier(self):
+        self.context.calculation_finished_notifier.add_subscriber(self.enable_observer)
+
+    def setup_group_calculation_disable_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
                self.disable_observer)
+
+        self.context.calculation_started_notifier.add_subscriber(self.disable_observer)

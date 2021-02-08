@@ -4,21 +4,26 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
-from mantidqt.utils.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import GenericObservable
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common import thread_model
+from mantid.simpleapi import Rebin
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws,remove_ws_if_present
 
 
 class ElementalAnalysisContext(object):
 
-    def __init__(self ,ea_group_context=None, muon_gui_context=None, workspace_suffix=' EA'):
+    def __init__(self ,data_context,ea_group_context=None, muon_gui_context=None, workspace_suffix=' EA'):
         self._window_title = "Elemental Analysis 2"
-        self.data_context = DataContext()
+        self.data_context = data_context
         self._gui_context = muon_gui_context
         self._group_context = ea_group_context
         self.workspace_suffix = workspace_suffix
 
-        self.update_view_from_model_notifier = Observable()
-        self.update_plots_notifier = Observable()
+        self.update_view_from_model_notifier = GenericObservable()
+        self.update_plots_notifier = GenericObservable()
+        self.calculation_started_notifier = GenericObservable()
+        self.calculation_finished_notifier = GenericObservable()
 
     @property
     def name(self):
@@ -61,3 +66,37 @@ class ElementalAnalysisContext(object):
 
     def workspace_replaced(self, workspace):
         self.update_plots_notifier.notify_subscribers(workspace)
+
+    def handle_calculation_started(self):
+        self.calculation_started_notifier.notify_subscribers()
+
+    def calculation_success(self):
+        self.calculation_finished_notifier.notify_subscribers()
+
+    def handle_calculation_error(self,error):
+        self.calculation_finished_notifier.notify_subscribers()
+
+    def _run_rebin(self,name,type,params):
+
+        if type == "Fixed":
+            rebined_run_name = str(name) + "_EA_Rebinned_Fixed"
+        if type == "Variable":
+            rebined_run_name = str(name) + "_EA_Rebinned_Variable"
+
+        remove_ws_if_present(rebined_run_name)
+
+        workspace = Rebin(InputWorkspace=name, OutputWorkspace=rebined_run_name, Params=params)
+        group = retrieve_ws(name.split(";")[0])
+        group.addWorkspace(workspace)
+        self.group_context[name].update_workspaces(name,workspace,rebin =True)
+
+    def handle_rebin(self,name,rebinType,rebinParam):
+        self.rebin_model = ThreadModelWrapper(lambda: self._run_rebin(name,rebinType,rebinParam))
+        self.rebin_thread = thread_model.ThreadModel(self.rebin_model)
+        self.rebin_thread.threadWrapperSetUp(self.handle_calculation_started,
+                                             self.calculation_success,
+                                             self.handle_calculation_error)
+        self.rebin_thread.start()
+
+    def show_all_groups(self):
+        pass

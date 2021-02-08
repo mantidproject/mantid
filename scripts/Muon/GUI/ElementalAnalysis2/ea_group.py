@@ -21,6 +21,7 @@ class EAGroup(object):
 
     def __init__(self, group_name, detector, run_number):
         self._group_name = group_name
+
         self.detector = detector
         self.run_number = run_number
         self.rebin_index = 0
@@ -83,3 +84,24 @@ class EAGroup(object):
     def show_raw(self, run: List[int], name: str):
         run_object = MuonRun(run)
         run_object not in self._counts_workspace or self._counts_workspace[run_object].show(name)
+
+    def update_workspaces(self, run, counts_workspace, rebin):
+        run_object = MuonRun(run)
+        if rebin:
+            self._counts_workspace_rebin.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+        else:
+            self._counts_workspace.update({run_object: MuonWorkspaceWrapper(counts_workspace)})
+
+    def update_counts_workspace(self, counts_workspace, run):
+        self._counts_workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
+
+    def get_rebined_or_unbinned_version_of_workspace_if_it_exists(self, name):
+        for key, value in self._counts_workspace.items():
+            if value.workspace_name == name and key in self._counts_workspace_rebin:
+                return self._counts_workspace_rebin[key].workspace_name
+
+        for key, value in self._counts_workspace_rebin.items():
+            if value.workspace_name == name and key in self._counts_workspace:
+                return self._counts_workspace[key].workspace_name
+
+        return None

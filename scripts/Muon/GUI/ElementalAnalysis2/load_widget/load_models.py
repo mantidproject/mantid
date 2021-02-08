@@ -93,7 +93,6 @@ class LoadRunWidgetModel(object):
                 except RuntimeError as error:
                     failed_files += [(run, error)]
                     continue
-                self._loaded_data_store.add_data(run=[run], workspace=groupws)
                 self._data_context._loaded_data.add_data(run=[run], workspace=groupws)
 
         if failed_files:
