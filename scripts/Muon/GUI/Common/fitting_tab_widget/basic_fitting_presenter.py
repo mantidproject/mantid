@@ -8,6 +8,10 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
+from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+
+import functools
 import re
 
 
@@ -48,65 +52,164 @@ class BasicFittingPresenter:
         self.fsg_view = None
         self.fsg_presenter = None
 
+        self.view.set_slot_for_fit_generator_clicked(self.handle_fit_generator_clicked)
+        self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
+        self.view.set_slot_for_undo_fit_clicked(self.handle_undo_fit_clicked)
+        self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
+        self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
+        self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
+        self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
+        #self.view.set_slot_for_minimiser_changed(self.handle_minimiser_changed)
+        #self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
+        self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
+
     def disable_view(self):
+        """Disable the widgets in the view if data is not loaded."""
         if not self.selected_data:
             self.view.setEnabled(False)
 
     def enable_view(self):
+        """Enable the widgets in the view if data is loaded."""
         if self.selected_data:
             self.view.setEnabled(True)
 
     @property
     def selected_data(self):
+        """Return the names of the currently selected workspaces."""
         return self._selected_data
 
     @selected_data.setter
     def selected_data(self, selected_data):
+        """Set the currently selected data. Clear and reset the GUI."""
         if self._selected_data == selected_data:
             return
 
         self._selected_data = selected_data
         self.clear_and_reset_gui_state()
 
-    def clear_and_reset_gui_state(self):
-        raise NotImplementedError("This method must be overridden by a child class.")
-
     @property
     def start_x(self):
+        """Return the stored start X's."""
         return self._start_x
 
     @property
     def end_x(self):
+        """Return the stored end X's."""
         return self._end_x
 
     def handle_fit_generator_clicked(self):
+        """Handle when the Fit Generator button has been clicked."""
         self._open_fit_script_generator_interface(self.get_loaded_workspaces(), self.get_fit_browser_options())
 
     def handle_gui_changes_made(self, changed_values):
+        """Handle when changes to the context have been made."""
         for key in changed_values.keys():
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
                 self._reset_start_time_to_first_good_data_value()
 
     def handle_fit_clicked(self):
+        """Handle when the fit button is clicked."""
         if len(self.selected_data) < 1:
-            self.view.warning_popup('No data selected to fit')
+            self.view.warning_popup("No data selected to fit")
             return
-        self.perform_fit()
+        if not self.view.fit_object:
+            return
+
+        self._update_fit_function_cache()
+        self._perform_fit()
 
     def handle_started(self):
+        """Handle when fitting has started."""
         self.disable_editing_notifier.notify_subscribers()
         self.thread_success = True
 
-    def perform_fit(self):
+    def handle_finished(self):
+        """Handle when fitting has finished."""
+        self.enable_editing_notifier.notify_subscribers()
+        if not self.thread_success:
+            return
+
+        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
+        if any([not fit_function, not fit_status, not fit_chi_squared]):
+            return
+
+        self.handle_fitting_finished(fit_function, fit_status, fit_chi_squared)
+        self.view.enable_undo_fit(True)
+        self.view.plot_guess = False
+
+    def handle_error(self, error):
+        """Handle when an error occurs while fitting."""
+        self.enable_editing_notifier.notify_subscribers()
+        self.thread_success = False
+        self.view.warning_popup(error)
+
+    def clear_and_reset_gui_state(self):
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_fitting_finished(self):
+        """Handle when fitting is finished."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_undo_fit_clicked(self):
+        """handle when undo fit is clicked."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_plot_guess_changed(self):
+        """Handle when plot guess is ticked or unticked."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_function_structure_changed(self):
+        """Handle when the function structure is changed."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_start_x_updated(self):
+        """Handle when the start X is changed."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_end_x_updated(self):
+        """Handle when the end X is changed."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_use_rebin_changed(self):
+        """Handle the Use Rebin state change."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def get_loaded_workspaces(self):
+        """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def get_fit_browser_options(self):
+        """Retrieve the fit options."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
+    def get_fit_input_workspaces(self):
+        """Retrieve the names of the workspaces to be fitted."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def _perform_fit(self):
+        """Perform the fit in a thread."""
+        self._number_of_fits_cached += 1
+        try:
+            calculation_function = functools.partial(self.model.evaluate_single_fit, self.get_fit_input_workspaces())
+            self.calculation_thread = self._create_thread(calculation_function)
+            self.calculation_thread.threadWrapperSetUp(self.handle_started,
+                                                       self.handle_finished,
+                                                       self.handle_error)
+            self.calculation_thread.start()
+        except ValueError as error:
+            self.view.warning_popup(error)
+
+    def _update_fit_function_cache(self):
+        """Update the fit function cache with the next fit function to be fitted."""
+        self._fit_function_cache = [func.clone() for func in self._fit_function]
+
+    def _create_thread(self, callback):
+        """Create a thread for fitting."""
+        self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
+        return thread_model.ThreadModel(self.fitting_calculation_model)
+
     def _open_fit_script_generator_interface(self, loaded_workspaces, fit_options):
+        """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
         self.fsg_view = FitScriptGeneratorView(None, fit_options)
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, loaded_workspaces,
@@ -115,17 +218,27 @@ class BasicFittingPresenter:
         self.fsg_presenter.openFitScriptGenerator()
 
     def _reset_start_time_to_first_good_data_value(self):
-        self._start_x = [self._retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if \
-            self.selected_data else [0.0]
+        """Reset the start and end X to the first good data value."""
+        self._start_x = [self._retrieve_first_good_data_from_run_name(run_name)
+                         for run_name in self.selected_data] if self.selected_data else [0.0]
         self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
 
         self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
         self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
 
     def _retrieve_first_good_data_from_run_name(self, workspace_name):
+        """Return the name of the first good data in a workspace."""
         try:
-            run = [float(re.search('[0-9]+', workspace_name).group())]
+            run = [float(re.search("[0-9]+", workspace_name).group())]
         except AttributeError:
             return 0.0
 
         return self.context.first_good_data(run)
+
+    def _check_rebin_options(self):
+        """Check that a rebin was indeed requested in the fitting tab or in the context."""
+        if not self.view.fit_to_raw and not self.context._do_rebin():
+            self.view.fit_to_raw = True
+            self.view.warning_popup("No rebin options specified.")
+            return False
+        return True

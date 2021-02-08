@@ -27,6 +27,46 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         self.fit_controls_layout.addWidget(self.fit_controls)
         self.fit_function_options_layout.addWidget(self.fit_function_options)
 
+    def set_slot_for_fit_generator_clicked(self, slot):
+        """Connect the slot for the Fit Generator button."""
+        self.fit_controls.set_slot_for_fit_generator_clicked(slot)
+
+    def set_slot_for_fit_button_clicked(self, slot):
+        """Connect the slot for the Fit button."""
+        self.fit_controls.set_slot_for_fit_button_clicked(slot)
+
+    def set_slot_for_undo_fit_clicked(self, slot):
+        """Connect the slot for the Undo Fit button."""
+        self.fit_controls.set_slot_for_undo_fit_clicked(slot)
+
+    def set_slot_for_plot_guess_changed(self, slot):
+        """Connect the slot for the Plot Guess checkbox."""
+        self.fit_controls.set_slot_for_plot_guess_changed(slot)
+
+    def set_slot_for_function_structure_changed(self, slot):
+        """Connect the slot for the function structure changing."""
+        self.fit_function_options.set_slot_for_function_structure_changed(slot)
+
+    def set_slot_for_start_x_updated(self, slot):
+        """Connect the slot for the start x option."""
+        self.fit_function_options.set_slot_for_start_x_updated(slot)
+
+    def set_slot_for_end_x_updated(self, slot):
+        """Connect the slot for the end x option."""
+        self.fit_function_options.set_slot_for_end_x_updated(slot)
+
+    def set_slot_for_minimiser_changed(self, slot):
+        """Connect the slot for changing the Minimizer."""
+        self.fit_function_options.set_slot_for_minimiser_changed(slot)
+
+    def set_slot_for_evaluation_type_changed(self, slot):
+        """Connect the slot for changing the Evaluation type."""
+        self.fit_function_options.set_slot_for_evaluation_type_changed(slot)
+
+    def set_slot_for_use_raw_changed(self, slot):
+        """Connect the slot for the Use raw option."""
+        self.fit_function_options.set_slot_for_use_raw_changed(slot)
+
     def set_datasets_in_function_browser(self, data_set_name_list):
         """Sets the datasets stored in the FunctionBrowser."""
         self.fit_function_options.set_datasets_in_function_browser(data_set_name_list)
@@ -48,39 +88,6 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Updates the global fit status label."""
         self.fit_controls.update_global_fit_status_label([output == "success" for output in output_list if output])
 
-    # def set_slot_for_fit_generator_clicked(self, slot):
-    #     self.fit_generator_button.clicked.connect(slot)
-    #
-    # def set_slot_for_display_workspace_changed(self, slot):
-    #     self.parameter_display_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_use_raw_changed(self, slot):
-    #     self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
-    #
-    # def set_slot_for_fit_type_changed(self, slot):
-    #     self.simul_fit_checkbox.toggled.connect(slot)
-    #
-    # def set_slot_for_fit_button_clicked(self, slot):
-    #     self.fit_button.clicked.connect(slot)
-    #
-    # def set_slot_for_start_x_updated(self, slot):
-    #     self.time_start.editingFinished.connect(slot)
-    #
-    # def set_slot_for_end_x_updated(self, slot):
-    #     self.time_end.editingFinished.connect(slot)
-    #
-    # def set_slot_for_simul_fit_by_changed(self, slot):
-    #     self.simul_fit_by_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_simul_fit_specifier_changed(self, slot):
-    #     self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_minimiser_changed(self, slot):
-    #     self.minimizer_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_evaluation_type_changed(self, slot):
-    #     self.evaluation_combo.currentIndexChanged.connect(slot)
-
     @property
     def fit_object(self):
         """Returns the global fitting function."""
@@ -99,7 +106,7 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     @start_time.setter
     def start_time(self, value):
         """Sets the selected start X."""
-        self.fit_function_options.start_time(value)
+        self.fit_function_options.start_time = value
 
     @property
     def end_time(self):
@@ -109,7 +116,7 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     @end_time.setter
     def end_time(self, value):
         """Sets the selected end X."""
-        self.fit_function_options.end_time(value)
+        self.fit_function_options.end_time = value
 
     @property
     def evaluation_type(self):
@@ -124,7 +131,7 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     @fit_to_raw.setter
     def fit_to_raw(self, value):
         """Sets whether or not you are fitting to raw data."""
-        self.fit_function_options.fit_to_raw(value)
+        self.fit_function_options.fit_to_raw = value
 
     @property
     def plot_guess(self):
@@ -134,7 +141,7 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     @plot_guess.setter
     def plot_guess(self, value):
         """Sets whether or not plot guess is ticked."""
-        self.fit_controls.plot_guess(value)
+        self.fit_controls.plot_guess = value
 
     def enable_undo_fit(self, enable):
         """Sets whether or not undo fit is enabled."""
@@ -148,7 +155,7 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     @function_name.setter
     def function_name(self, function_name):
         """Sets the function name being used."""
-        self.fit_function_options.function_name(function_name)
+        self.fit_function_options.function_name = function_name
 
     def warning_popup(self, message):
         """Displays a warning message."""

@@ -22,6 +22,22 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
         # Comment out this line to show the 'Fit Generator' button
         self.fit_generator_button.hide()
 
+    def set_slot_for_fit_generator_clicked(self, slot):
+        """Connect the slot for the Fit Generator button."""
+        self.fit_generator_button.clicked.connect(slot)
+
+    def set_slot_for_fit_button_clicked(self, slot):
+        """Connect the slot for the Fit button."""
+        self.fit_button.clicked.connect(slot)
+
+    def set_slot_for_undo_fit_clicked(self, slot):
+        """Connect the slot for the Undo Fit button."""
+        self.undo_fit_button.clicked.connect(slot)
+
+    def set_slot_for_plot_guess_changed(self, slot):
+        """Connect the slot for the Plot Guess checkbox."""
+        self.plot_guess_checkbox.stateChanged.connect(slot)
+
     def update_fit_status_labels(self, output_status, output_chi_squared):
         """Updates the fit status labels."""
         if output_status == "success":
@@ -55,12 +71,6 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
             self.global_fit_status_label.setText(
                 f"{len(success_list) - sum(success_list)} of {len(success_list)} fits failed")
             self.global_fit_status_label.setStyleSheet("color: red")
-
-    # def set_slot_for_fit_generator_clicked(self, slot):
-    #     self.fit_generator_button.clicked.connect(slot)
-
-    # def set_slot_for_fit_button_clicked(self, slot):
-    #     self.fit_button.clicked.connect(slot)
 
     @property
     def plot_guess(self):

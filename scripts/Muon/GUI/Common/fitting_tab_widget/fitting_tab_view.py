@@ -4,10 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QStackedWidget, QWidget
+from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
 
+from qtpy.QtWidgets import QStackedWidget, QWidget
+
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab2.ui")
+
+NORMAL_FITTING_COMBO_INDEX = 0
+TF_ASYMMETRY_FITTING_COMBO_INDEX = 1
 
 
 class FittingTabView(QWidget, ui_fitting_tab):
@@ -19,3 +24,8 @@ class FittingTabView(QWidget, ui_fitting_tab):
         self.fit_type_stacked_widget.addWidget(general_fitting_view)
 
         self.layout().addWidget(self.fit_type_stacked_widget)
+
+        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+
+    def handle_instrument_changed(self):
+        self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
