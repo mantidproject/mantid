@@ -26,7 +26,8 @@ Description of MDWorkspace
 
    -  The MDLeanEvent type contains only coordinates, signal and error.
    -  The MDEvent type also contains a run index (for multiple runs
-      summed into one workspace) and a detector ID, allowing for more
+      summed into one workspace), a goniometer index (defining the goniometer
+      settings when the event took place) and a detector ID, allowing for more
       information to be extracted.
 
 -  The class is named MDEventWorkspace.
