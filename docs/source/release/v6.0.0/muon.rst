@@ -8,6 +8,11 @@ MuSR Changes
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
 
+New Features
+############
+- Differences of groups/pairs can be created on the grouping tab.
+
+
 Improvements
 ############
 - Both interfaces are now able to analyse Phasequads.
