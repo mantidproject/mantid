@@ -96,6 +96,9 @@ std::string ErrorReporter::generateErrorMessage() const {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
+  // legacy interface requires paraview version DON'T REMOVE
+  message["ParaView"] = 0;
+
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();
   message["mantidSha1"] = MantidVersion::revisionFull();
