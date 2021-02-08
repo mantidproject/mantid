@@ -418,6 +418,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._elementSize,  # Size of one side of the integration element cube in mm
             metaws,  # Optional workspace containing metadata
             self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
+            "SHA", # Use cache files named with sha rather than a filename prefix
         )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
