@@ -129,6 +129,51 @@ class RundexSettings(object):
             POWDER_PSCAN: "PowderILLParameterScan",
             }
 
+    # export algos for each acquisition mode. Each algo has a boolean to set
+    # it as activated or not
+    EXPORT_ALGORITHMS = {
+            SANS_ACQ: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
+                },
+            REFL_POL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            REFL_NPOL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            POWDER_DSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                },
+            POWDER_PSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                }
+            }
+
+    EXPORT_ALGO_CRITERIA = {
+            "SaveCanSAS1D": "%OutputType% == 'I(Q)'",
+            "SaveNISTDAT": "%OutputType% == 'I(Qx,Qy)'",
+            }
+
+    EXPORT_ALGO_EXTENSION = {
+            "SaveNexusProcessed": ".nxs",
+            "SaveAscii": ".txt",
+            "SaveCanSAS1D": ".xml",
+            "SaveNISTDAT": ".dat",
+            "SaveReflectometryAscii": ".mft",
+            "SaveFocussedXYE": ".dat"
+            }
+
     # ideal number of threads for each acquisition mode (optional)
     # if not provided, Qt will decide, which will likely be the number of cores
     # for the moment, limit those to 1 until the algorithms are made truly thread safe
@@ -164,7 +209,8 @@ class RundexSettings(object):
                 "MaxQxy",
                 "DeltaQ",
                 "IQxQyLogBinning",
-                "OutputPanels"
+                "OutputPanels",
+                "WavelengthRange"
                 ],
             REFL_POL : [
                 "PolarizationEfficiencyFile",
@@ -282,3 +328,4 @@ class RundexSettings(object):
     SAMPLES_JSON_KEY = "Samples"
     CUSTOM_OPT_JSON_KEY = "CustomOptions"
     VISUAL_SETTINGS_JSON_KEY = "VisualSettings"
+    EXPORT_JSON_KEY = "ExportAlgorithms"

@@ -94,7 +94,8 @@ class SliceViewerTest(unittest.TestCase):
             "supports_peaks_overlays": True
         }
 
-    def test_sliceviewer_MDH(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_sliceviewer_MDH(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -122,7 +123,8 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
         self.assertEqual(self.view.data_view.update_plot_data.call_count, 1)
 
-    def test_sliceviewer_MDE(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_sliceviewer_MDE(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -153,7 +155,8 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
         self.assertEqual(self.view.data_view.update_plot_data.call_count, 1)
 
-    def test_sliceviewer_matrix(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_sliceviewer_matrix(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -173,7 +176,8 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 0)
         self.assertEqual(self.view.data_view.plot_matrix.call_count, 1)
 
-    def test_normalization_change_set_correct_normalization(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_normalization_change_set_correct_normalization(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
         self.view.data_view.plot_matrix = mock.Mock()
 
@@ -197,7 +201,8 @@ class SliceViewerTest(unittest.TestCase):
 
         self.view.data_view.disable_tool_button.assert_not_called()
 
-    def test_non_orthogonal_axes_toggled_on(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_non_orthogonal_axes_toggled_on(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
         data_view_mock = self.view.data_view
@@ -216,8 +221,9 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(data_view_mock.plot_MDH.call_count, 2)
         data_view_mock.disable_tool_button.assert_has_calls([mock.call(ToolItemText.LINEPLOTS)])
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
-    def test_non_orthogonal_axes_toggled_off(self, mock_sliceinfo_cls):
+    def test_non_orthogonal_axes_toggled_off(self, mock_sliceinfo_cls, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
@@ -240,7 +246,8 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.enable_tool_button.assert_has_calls(
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
-    def test_request_to_show_all_data_sets_correct_limits_on_view(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_request_to_show_all_data_sets_correct_limits_on_view(self, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         self.model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
 
@@ -251,7 +258,8 @@ class SliceViewerTest(unittest.TestCase):
                                                           data_view.dimensions.transpose)
         data_view.set_axes_limits.assert_called_once_with((-1, 1), (-2, 2))
 
-    def test_data_limits_changed_creates_new_plot_if_dynamic_rebinning_supported(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_data_limits_changed_creates_new_plot_if_dynamic_rebinning_supported(self, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         self.model.can_support_dynamic_rebinning.return_value = True
         new_plot_mock = mock.MagicMock()
@@ -261,7 +269,8 @@ class SliceViewerTest(unittest.TestCase):
 
         new_plot_mock.assert_called_once()
 
-    def test_data_limits_changed_does_not_create_new_plot_if_dynamic_rebinning_not_supported(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_data_limits_changed_does_not_create_new_plot_if_dynamic_rebinning_not_supported(self, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         self.model.can_support_dynamic_rebinning.return_value = False
         new_plot_mock = mock.MagicMock()
@@ -271,9 +280,10 @@ class SliceViewerTest(unittest.TestCase):
 
         new_plot_mock.assert_not_called()
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(
-            self, mock_sliceinfo_cls):
+            self, mock_sliceinfo_cls, is_view_delete):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -286,9 +296,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(
-            self, mock_sliceinfo_cls):
+            self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -301,9 +312,10 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.disable_tool_button.assert_not_called()
         data_view_mock.create_axes_orthogonal.assert_not_called()
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_ortho_mode_disables_nonortho_btn_if_not_supported(
-            self, mock_sliceinfo_cls):
+            self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -314,9 +326,10 @@ class SliceViewerTest(unittest.TestCase):
 
         data_view_mock.disable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_ortho_mode_enables_nonortho_btn_if_supported(
-            self, mock_sliceinfo_cls):
+            self, mock_sliceinfo_cls, _):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -327,10 +340,11 @@ class SliceViewerTest(unittest.TestCase):
 
         data_view_mock.enable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
 
+    @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
                 spec=PeaksViewerCollectionPresenter)
-    def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _):
+    def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, *_):
         for nonortho_axes in (False, True):
             presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(), nonortho_axes,
                                              nonortho_axes)
@@ -343,12 +357,14 @@ class SliceViewerTest(unittest.TestCase):
             mock_peaks_presenter.reset_mock()
             presenter.view.query_peaks_to_overlay.reset_mock()
 
-    def test_gui_starts_with_zoom_selected(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_gui_starts_with_zoom_selected(self, _):
         SliceViewer(None, model=self.model, view=self.view)
 
         self.view.data_view.activate_tool.assert_called_once_with(ToolItemText.ZOOM)
 
-    def test_replace_workspace_returns_when_the_workspace_is_not_the_model_workspace(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_replace_workspace_returns_when_the_workspace_is_not_the_model_workspace(self, _):
         self.model.workspace_equals.return_value = False
         presenter, _ = _create_presenter(self.model,
                                          self.view,
@@ -364,7 +380,8 @@ class SliceViewerTest(unittest.TestCase):
         presenter._decide_plot_update_methods.assert_not_called()
         presenter.update_view.assert_not_called()
 
-    def test_replace_workspace_closes_view_when_model_properties_change(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_replace_workspace_closes_view_when_model_properties_change(self, _):
         self.model.workspace_equals.return_value = True
         presenter, _ = _create_presenter(self.model,
                                          self.view,
@@ -392,7 +409,8 @@ class SliceViewerTest(unittest.TestCase):
             presenter._decide_plot_update_methods.assert_not_called()
             presenter.refresh_view.assert_not_called()
 
-    def test_replace_workspace_updates_view(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_replace_workspace_updates_view(self, _):
         presenter, _ = _create_presenter(self.model,
                                          self.view,
                                          mock.MagicMock(),
@@ -412,7 +430,8 @@ class SliceViewerTest(unittest.TestCase):
             presenter._decide_plot_update_methods.assert_called_once()
             self.view.delayed_refresh.assert_called_once()
 
-    def test_refresh_view(self):
+    @patch("sip.isdeleted", return_value=False)
+    def test_refresh_view(self, _):
         presenter, _ = _create_presenter(self.model,
                                          self.view,
                                          mock.MagicMock(),
@@ -425,6 +444,45 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.image_info_widget.setWorkspace.assert_called()
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
+
+    @patch("sip.isdeleted", return_value=True)
+    def test_refresh_view_does_nothing_when_view_deleted(self, _):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter.new_plot = mock.Mock()
+
+        presenter.refresh_view()
+
+        self.view.data_view.image_info_widget.setWorkspace.assert_not_called()
+        presenter.new_plot.assert_not_called()
+
+    @patch("sip.isdeleted", return_value=False)
+    def test_clear_observer_peaks_presenter_not_none(self, _):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._peaks_presenter = mock.MagicMock()
+
+        presenter.clear_observer()
+
+        presenter._peaks_presenter.clear_observer.assert_called_once()
+
+    @patch("sip.isdeleted", return_value=False)
+    def test_clear_observer_peaks_presenter_is_none(self, _):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._peaks_presenter = None
+
+        # Will raise exception if misbehaving.
+        presenter.clear_observer()
 
 
 if __name__ == '__main__':

@@ -17,10 +17,10 @@ Roles
 The roles are defined in terms of person responsible.
 This does not mean that the person needs to do the jobs himself/herself, but that they are responsible for ensuring that the work gets done.
 
-* Technical Release Manager - Person responsible for technical tasks such as renaming branchs, creating tags, configuring build servers.
+* Technical Release Manager - Person responsible for technical tasks such as renaming branches, creating tags, configuring build servers.
 * Release Editor - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
 * Release Manager - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be collection point for information between all of the Local Project Managers.
-* Local Project Manager(s) - People in charge of communicating with local development teams, facility managment, and other people at their sponsoring facility.
+* Local Project Manager(s) - People in charge of communicating with local development teams, facility management, and other people at their sponsoring facility.
 * Quality Assurance Manager - Person responsible for making sure that manual testing has been performed. They will ensure Mantid meets quality requirements before delivery in consultation with the *Release Manager*.
 
 Timeline
@@ -80,7 +80,7 @@ Clearing the project board
     Don't leave anything in the release milestone that is not definitely for that release.
 
 
-Unscripted and Final Testing
+Manual and Final Testing
 ----------------------------
 
 *  Ensure the
@@ -88,7 +88,7 @@ Unscripted and Final Testing
    test <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
    jobs have passed for all build environments for this release.
 *  Complete any PR testing remaining from Friday
-*  Perform unscripted testing following the instructions described
+*  Perform Manual testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
 Maintenance
@@ -108,7 +108,7 @@ Create the Release Branch (once most PR's are merged)
    `open-release-testing <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs
 *  Check state of all open pull requests for this milestone and decide which should be kept for the release,
-   liase with PM on this. Move any pull requests not targeted for release out of the milestone
+   liaise with PM on this. Move any pull requests not targeted for release out of the milestone
    and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
    to update the base branches of those pull requests.
 *  Inform other developers that release-next has been created by adapting/posting the following announcement:
@@ -163,7 +163,7 @@ Beta Test Closes
 Manual re-testing
 -----------------
 
-*  Is is likely that many changes have been made over the beta test period, therefore redo the unscripted testing
+*  Is is likely that many changes have been made over the beta test period, therefore redo the manual testing
    following the instructions described `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
 Wednesday, Release-2 days
@@ -193,7 +193,7 @@ release development.
 Release (technical tasks)
 -------------------------
 
-Once the unscripted testing has passed:
+Once the manual testing has passed:
 
 * Check the release notes and remove the "Under Construction" paragraph
   on the main index page.

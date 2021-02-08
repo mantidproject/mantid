@@ -120,10 +120,14 @@ set(INC_FILES
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
 )
 
+# Add a precompiled header where they are supported
+list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
+
 # Create the target for this directory
 
 add_library(
-  PythonAPIModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES}
+  PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
                   ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
 set_python_properties(PythonAPIModule _api)

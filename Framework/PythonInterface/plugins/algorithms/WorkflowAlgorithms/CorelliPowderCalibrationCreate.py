@@ -94,8 +94,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return ['PDCalibration', 'AlignDetectors', 'AlignComponents',
-                'CORELLIPowderCalibrationDatabase', 'CORELLIPowderCalibrationLoad', 'CORELLIPowderCalibrationApply']
+        return ['PDCalibration', 'AlignDetectors', 'AlignComponents']
 
     def summary(self):
         return "Adjust bank positions and orientations to optimize peak determination in d-spacing"

@@ -99,7 +99,21 @@ FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi,
 /**
  * Destructor
  */
-FunctionTreeView::~FunctionTreeView() {}
+FunctionTreeView::~FunctionTreeView() {
+  m_browser->unsetFactoryForManager(m_parameterManager);
+  m_browser->unsetFactoryForManager(m_attributeStringManager);
+  m_browser->unsetFactoryForManager(m_attributeDoubleManager);
+  m_browser->unsetFactoryForManager(m_attributeIntManager);
+  m_browser->unsetFactoryForManager(m_attributeBoolManager);
+  m_browser->unsetFactoryForManager(m_indexManager);
+  m_browser->unsetFactoryForManager(m_tieManager);
+  m_browser->unsetFactoryForManager(m_constraintManager);
+  m_browser->unsetFactoryForManager(m_filenameManager);
+  m_browser->unsetFactoryForManager(m_formulaManager);
+  m_browser->unsetFactoryForManager(m_workspaceManager);
+  m_browser->unsetFactoryForManager(m_attributeSizeManager);
+  m_browser->unsetFactoryForManager(m_attributeVectorDoubleManager);
+}
 
 /**
  * Create the Qt property browser and set up property managers.

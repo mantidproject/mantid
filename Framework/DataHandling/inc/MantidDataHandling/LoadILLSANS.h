@@ -59,18 +59,18 @@ private:
                                           const std::string &);
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD22B(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
-  size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
-                                           size_t firstIndex = 0);
-  size_t loadDataIntoWorkspaceFromVerticalTubes(NeXus::NXInt &,
-                                                const std::vector<double> &,
-                                                size_t);
+  size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry,
+                              size_t firstIndex = 0);
+  size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t);
   void runLoadInstrument();
   void moveDetectorsD33(const DetectorPosition &);
-  void moveDetectorDistance(double, const std::string &);
+  void moveDetectorDistance(double distance, const std::string &componentName);
   void moveDetectorHorizontal(double, const std::string &);
   void moveDetectorVertical(double, const std::string &);
   Kernel::V3D getComponentPosition(const std::string &componentName);
