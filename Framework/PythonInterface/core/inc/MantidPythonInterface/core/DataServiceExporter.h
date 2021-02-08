@@ -75,15 +75,18 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  "Return the list of names currently known to the ADS")
             .def("getObjectNamesStartWith",
                  &DataServiceExporter::getObjectNamesStartWithAsList,
-                 (arg("self"), arg("txt")), "Return the list of names known to "
+                 (arg("self"), arg("txt")),
+                 "Return the list of names known to "
                  "the ADS that start with a specific string")
             .def("getObjectNamesEndWith",
                  &DataServiceExporter::getObjectNamesEndWithAsList,
-                 (arg("self"), arg("txt")), "Return the list of names known to "
+                 (arg("self"), arg("txt")),
+                 "Return the list of names known to "
                  "the ADS that end with a specific string")
-             .def("getObjectNamesContain",
+            .def("getObjectNamesContain",
                  &DataServiceExporter::getObjectNamesContainAsList,
-                 (arg("self"), arg("txt")), "Return the list of names known to "
+                 (arg("self"), arg("txt")),
+                 "Return the list of names known to "
                  "the ADS that contain a specific string")
 
             // Make it act like a dictionary
@@ -190,8 +193,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param txt The search string
    * @return A python list of object names
    */
-  static boost::python::list getObjectNamesStartWithAsList(SvcType &self,
-          const std::string &txt) {
+  static boost::python::list
+  getObjectNamesStartWithAsList(SvcType &self, const std::string &txt) {
     boost::python::list names;
     const auto keys = self.getObjectNamesStartWith(txt);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
@@ -208,8 +211,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param txt The search string
    * @return A python list of object names
    */
-  static boost::python::list getObjectNamesEndWithAsList(SvcType &self,
-          const std::string &txt) {
+  static boost::python::list
+  getObjectNamesEndWithAsList(SvcType &self, const std::string &txt) {
     boost::python::list names;
     const auto keys = self.getObjectNamesEndWith(txt);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
@@ -226,8 +229,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param txt The search string
    * @return A python list of object names
    */
-  static boost::python::list getObjectNamesContainAsList(SvcType &self,
-          const std::string &txt) {
+  static boost::python::list
+  getObjectNamesContainAsList(SvcType &self, const std::string &txt) {
     boost::python::list names;
     const auto keys = self.getObjectNamesContain(txt);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
