@@ -352,7 +352,7 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        self.interface_list = self._discover_python_interfaces(interface_dir, self.PYTHON_GUI_BLACKLIST)
+        self.interface_list = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
 
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
@@ -387,7 +387,7 @@ class MainWindow(QMainWindow):
 
         warnings.showwarning = to_mantid_warning
 
-    def _discover_python_interfaces(self, interface_dir, gui_blacklist):
+    def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
 
@@ -399,7 +399,7 @@ class MainWindow(QMainWindow):
                 logger.warning('Failed to find script "{}" in "{}"'.format(
                     scriptname, interface_dir))
                 continue
-            if scriptname in gui_blacklist:
+            if scriptname in self.PYTHON_GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)

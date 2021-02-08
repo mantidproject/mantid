@@ -182,7 +182,7 @@ class MainWindowTest(unittest.TestCase):
             self.main_window.populate_interfaces_menu()
 
         self.main_window._discover_python_interfaces.assert_called_with(
-            interface_dir, self.main_window.PYTHON_GUI_BLACKLIST
+            interface_dir
         )
         self.main_window._discover_cpp_interfaces.assert_called_with(
             self.main_window._discover_python_interfaces.return_value
@@ -281,9 +281,10 @@ class MainWindowTest(unittest.TestCase):
         interfaces = ['Muon/Frequency_Domain_Analysis.py', 'ILL/Drill.py']
         interfaces_str = " ".join(interfaces)  # config service returns them as a whole string.
         mock_os_path_exists.return_value = lambda path: path in interfaces
+        self.main_window.PYTHON_GUI_BLACKLIST = []
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interfaces_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('', [])
+            returned_interfaces = self.main_window._discover_python_interfaces('')
 
         expected_interfaces = {'Muon': ['Frequency_Domain_Analysis.py'], 'ILL': ['Drill.py']}
         self.assertDictEqual(expected_interfaces, returned_interfaces)
@@ -293,9 +294,10 @@ class MainWindowTest(unittest.TestCase):
     def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
         interface_str = 'fake/interface.py'
         mock_os_path_exists.return_value = False
+        self.main_window.PYTHON_GUI_BLACKLIST = []
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('', [])
+            returned_interfaces = self.main_window._discover_python_interfaces('')
 
         self.assertDictEqual({}, returned_interfaces)
         mock_logger.warning.assert_called()
@@ -304,10 +306,11 @@ class MainWindowTest(unittest.TestCase):
     @patch('os.path.exists')
     def test_that_blacklisted_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
         interface_str = 'blacklisted/interface.py'
+        self.main_window.PYTHON_GUI_BLACKLIST = 'interface.py'
         mock_os_path_exists.return_value = True
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('', 'interface.py')
+            returned_interfaces = self.main_window._discover_python_interfaces('')
 
         self.assertDictEqual({}, returned_interfaces)
         mock_logger.information.assert_called()
