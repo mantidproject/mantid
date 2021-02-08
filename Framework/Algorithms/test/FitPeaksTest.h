@@ -365,71 +365,68 @@ public:
   /** Test fitting Back-to-back exponential with single peak on multiple spectra
    */
   void test_singlePeakMultiSpectraBackToBackExp() {
-      // Generate input workspace
-      std::string input_ws_name = generateTestDataBackToBackExponential();
-      // Specify output workspaces names
-      std::string peak_pos_ws_name("PeakPositionsB2BsPmS");
-      std::string param_ws_name("PeakParametersB2BsPmS");
-      std::string model_ws_name("ModelB2BsPmS");
+    // Generate input workspace
+    std::string input_ws_name = generateTestDataBackToBackExponential();
+    // Specify output workspaces names
+    std::string peak_pos_ws_name("PeakPositionsB2BsPmS");
+    std::string param_ws_name("PeakParametersB2BsPmS");
+    std::string model_ws_name("ModelB2BsPmS");
 
-      // Generate peak and background parameters
-      std::vector<string> peakparnames;
-      std::vector<double> peakparvalues;
-      createBackToBackExponentialParameters(peakparnames, peakparvalues, false);
+    // Generate peak and background parameters
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createBackToBackExponentialParameters(peakparnames, peakparvalues, false);
 
-      // Input data workspace contains 16 spectra
-      auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
-                  AnalysisDataService::Instance().retrieve(input_ws_name));
-      TS_ASSERT(inputWS);
-      TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), 16);
+    // Input data workspace contains 16 spectra
+    auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(input_ws_name));
+    TS_ASSERT(inputWS);
+    TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), 16);
 
-      // TODO FIXME - remove after test is passed
-      std::cout << input_ws_name << "\n";
-      for (size_t i = 0; i < peakparnames.size(); ++i)
-        std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
-      // END-TODO ------------------------------------------------------------------------
+    // TODO FIXME - remove after test is passed
+    std::cout << input_ws_name << "\n";
+    for (size_t i = 0; i < peakparnames.size(); ++i)
+      std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
+    // END-TODO
+    // ------------------------------------------------------------------------
 
     // Test includes
-      // 1. fit 10 spectra out of as StopWorkspaceIndex is included
-      // 2. fit 1 peak at 1.0758
+    // 1. fit 10 spectra out of as StopWorkspaceIndex is included
+    // 2. fit 1 peak at 1.0758
 
-      // Initialize FitPeak
-      FitPeaks fitpeaks;
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
 
-      fitpeaks.initialize();
-      TS_ASSERT(fitpeaks.isInitialized());
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
 
-      TS_ASSERT_THROWS_NOTHING(
-          fitpeaks.setProperty("InputWorkspace", input_ws_name));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 1));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 10));
-      TS_ASSERT_THROWS_NOTHING(
-          fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-          "PeakCenters", "1.0758"));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-          "FitWindowBoundaryList",
-          "1.05, 1.15"));
-      TS_ASSERT_THROWS_NOTHING(
-          fitpeaks.setProperty("PeakParameterNames", peakparnames));
-      TS_ASSERT_THROWS_NOTHING(
-          fitpeaks.setProperty("PeakParameterValues", peakparvalues));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
-      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", input_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 10));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList", "1.05, 1.15"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterNames", peakparnames));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
 
-      fitpeaks.setProperty("OutputWorkspace", peak_pos_ws_name);
-      fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
-      fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
+    fitpeaks.setProperty("OutputWorkspace", peak_pos_ws_name);
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
+    fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
 
-      fitpeaks.execute();
-      TS_ASSERT(fitpeaks.isExecuted());
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
 
     // check output workspaces
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist(peak_pos_ws_name));
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist(param_ws_name));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist(peak_pos_ws_name));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist(param_ws_name));
     TS_ASSERT(API::AnalysisDataService::Instance().doesExist(model_ws_name));
 
     // About the parameters
@@ -443,24 +440,29 @@ public:
     TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).x().size(), 1);
     // Check values
     for (auto i = 0; i < 10; ++i) {
-        TS_ASSERT_DELTA(peak_pos_ws->histogram(i).x()[0], 1.0758, 1E-7);
+      TS_ASSERT_DELTA(peak_pos_ws->histogram(i).x()[0], 1.0758, 1E-7);
     }
 
     // Get the table workspace
-    auto param_table = std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve(param_ws_name));
+    auto param_table = std::dynamic_pointer_cast<API::ITableWorkspace>(
+        AnalysisDataService::Instance().retrieve(param_ws_name));
     TS_ASSERT(param_table);
 
-    // Columns: 0. wsindex, 1. peakindex, 2. I, 3. A, 4. B, 5. X0, 6. S, 7. A0, 8. A1, 9. chi2
+    // Columns: 0. wsindex, 1. peakindex, 2. I, 3. A, 4. B, 5. X0, 6. S, 7.
+    // A0, 8. A1, 9. chi2
     std::vector<std::string> colnames = param_table->getColumnNames();
     TS_ASSERT_EQUALS(colnames.size(), 10);
 
     // Verify intensity
     for (auto i = 0; i < 10; ++i) {
-        TS_ASSERT(param_table->cell<double>(i, 2) > 90. && param_table->cell<double>(i, 2) < 1500);
+      TS_ASSERT(param_table->cell<double>(i, 2) > 90. &&
+                param_table->cell<double>(i, 2) < 1500);
     }
     // spec 1 is the largest and spec 10 is smallest
-    TS_ASSERT(param_table->cell<double>(0, 2) > param_table->cell<double>(3, 2));
-    TS_ASSERT(param_table->cell<double>(3, 2) > param_table->cell<double>(9, 2));
+    TS_ASSERT(param_table->cell<double>(0, 2) >
+              param_table->cell<double>(3, 2));
+    TS_ASSERT(param_table->cell<double>(3, 2) >
+              param_table->cell<double>(9, 2));
 
     return;
   }
@@ -1131,8 +1133,10 @@ public:
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
    * PeakPositionTolerance=0.02)
    */
-  void createBackToBackExponentialParameters(vector<string> &parnames, vector<double> &parvalues,
-                                             bool include_pos_intensity = true) {
+  void
+  createBackToBackExponentialParameters(vector<string> &parnames,
+                                        vector<double> &parvalues,
+                                        bool include_pos_intensity = true) {
     parnames.clear();
     parvalues.clear();
 
