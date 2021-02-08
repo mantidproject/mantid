@@ -39,7 +39,7 @@ class PeakMatchingTest(unittest.TestCase):
         self.input_table.addColumn("double", "sigma")
         for row in self.input_peaks:
             self.input_table.addRow(row)
-        self.algo = _PeakMatching()
+        self.alg = _PeakMatching()
 
     def tearDown(self):
         self.delete_if_present("input")
@@ -47,9 +47,9 @@ class PeakMatchingTest(unittest.TestCase):
         self.delete_if_present("secondary_matches")
         self.delete_if_present("all_matches")
         self.delete_if_present("all_matches_sorted_by_energy")
-        self.delete_if_present("element_likelyhood")
+        self.delete_if_present("element_likelihood")
         self.delete_if_present("Test")
-        self.algo = None
+        self.alg = None
 
     def assertPeaksMatch(self,table,peaks):
         assert(len(peaks) == table.columnCount())
@@ -58,7 +58,9 @@ class PeakMatchingTest(unittest.TestCase):
             assert(len(peaks[column]) == len(column_data))
             for i in range(len(peaks[column])):
                 if type(peaks[column][i]) == float:
-                    self.assertAlmostEqual(peaks[column][i],column_data[i])
+                    self.assertAlmostEqual(peaks[column][i],column_data[i], delta = 0.01)
+                else:
+                    self.assertEqual(peaks[column][i],column_data[i])
 
     @staticmethod
     def delete_if_present(workspace):
@@ -66,7 +68,7 @@ class PeakMatchingTest(unittest.TestCase):
             DeleteWorkspace(workspace)
 
     def test_get_input_peaks(self):
-        table_data = self.algo.get_input_peaks(self.input_table.name(),"centre","sigma")
+        table_data = self.alg.get_input_peaks(self.input_table.name(),"centre","sigma")
         self.assertEqual(table_data,self.input_peaks)
         self.delete_if_present("Test")
 
@@ -95,12 +97,12 @@ class PeakMatchingTest(unittest.TestCase):
                 }
             }
         })
-        data = self.algo.process_peak_data('')
+        data = self.alg.process_peak_data('')
 
         self.assertEqual(self.peak_data, data)
 
     def test_get_matches(self):
-        all_data = self.algo.get_matches(self.peak_data, self.input_peaks)
+        all_data = self.alg.get_matches(self.peak_data, self.input_peaks)
 
         primary_matches = [{'energy': 900.7, 'peak_centre': 900, 'error': 0.8,
                             'element': 'Ag', 'diff': 0.7, 'transition': 'L(4->2)','Rating' : 3},
@@ -121,23 +123,23 @@ class PeakMatchingTest(unittest.TestCase):
                               'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)','Rating' : 4}]
 
         all_matches = [primary_matches, secondary_matches, all_matches]
-        for j in range(len(all_data)):
-            data = all_data[j]
-            matches = all_matches[j]
+        print([len(x) for x in all_data])
+        for i, data in enumerate(all_data):
+            matches = all_matches[i]
             if len(data) != len(matches):
                 raise AssertionError
 
-            for i in range(len(data)):
+            for j, row in enumerate(data):
 
-                for column in data[i]:
+                for column,value in row.items():
 
-                    if type(data[i][column]) == int or type(data[i][column]) == float:
+                    if type(value) == int or type(value) == float:
 
-                        self.assertAlmostEqual(matches[i][column],
-                                                   data[i][column])
+                        self.assertAlmostEqual(matches[j][column],
+                                                   value)
                     else:
 
-                        self.assertEqual(matches[i][column], data[i][column])
+                        self.assertEqual(matches[j][column], value)
 
     @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.make_peak_table')
     @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.make_count_table')
@@ -145,7 +147,7 @@ class PeakMatchingTest(unittest.TestCase):
     @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.setPropertyValue')
     def test_output_data(self,mock_set_value,mock_set_property, mock_make_count_table
                         ,mock_make_peak_table):
-        self.algo.output_data(1, 2, 3,['prim','secon','all','sort','count']*5)
+        self.alg.output_data(1, 2, 3,['prim','secon','all','sort','count']*5)
         call = [mock.call('prim', 1), mock.call('secon', 2),
                 mock.call('all', 3),
                 mock.call('sort', 3,True,"energy"),
@@ -188,7 +190,7 @@ class PeakMatchingTest(unittest.TestCase):
         secon = mtd['secondary_matches']
         all = mtd['all_matches']
         sort = mtd['all_matches_sorted_by_energy']
-        count = mtd['element_likelyhood']
+        count = mtd['element_likelihood']
 
         correct_prim = {'Peak centre': [900.0, 306.0], 'Database Energy': [900.7, 304.7], 'Element': ['Ag', 'Ag'],
                       'Transition': ['L(4->2)', 'M(4->3)'], 'Error': [0.8, 1.6],
@@ -205,7 +207,7 @@ class PeakMatchingTest(unittest.TestCase):
                           'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                           'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Likelyhood(au)': [13]}
+        correct_count = {'Element': ['Ag'], 'Likelihood(au)': [13]}
 
         self.assertPeaksMatch(prim,correct_prim)
         self.assertPeaksMatch(secon, correct_secon)
@@ -217,7 +219,7 @@ class PeakMatchingTest(unittest.TestCase):
         self.delete_if_present('secondary_matches')
         self.delete_if_present('all_matches')
         self.delete_if_present('all_matches_sorted_by_energy')
-        self.delete_if_present('element_likelyhood')
+        self.delete_if_present('element_likelihood')
 
     def test_algorithm_with_invalid_arguments(self):
         testWorkspace = CreateWorkspace(DataX = [1] , DataY = [1], OutputWorkspace = "Test")
@@ -265,8 +267,9 @@ class PeakMatchingTest(unittest.TestCase):
                      PrimaryPeaks= "rename_prim",
                      SecondaryPeaks="rename_secon",
                      SortedByEnergy="rename_sort",
-                     ElementLikelyhood="rename_count")
+                     ElementLikelihood="rename_count")
         prim = mtd['rename_prim']
+        print(prim.toDict())
         secon = mtd['rename_secon']
         all = mtd['rename_all']
         sort = mtd['rename_sort']
@@ -287,7 +290,7 @@ class PeakMatchingTest(unittest.TestCase):
                         'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                         'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Likelyhood(au)': [13]}
+        correct_count = {'Element': ['Ag'], 'Likelihood(au)': [13]}
 
         self.assertPeaksMatch(prim, correct_prim)
         self.assertPeaksMatch(secon, correct_secon)

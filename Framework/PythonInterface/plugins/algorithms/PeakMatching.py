@@ -6,12 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 import os
-from mantid.api import (AlgorithmFactory,WorkspaceProperty,PythonAlgorithm,ITableWorkspaceProperty,
-                        FileProperty,FileAction,ITableWorkspace)
+from mantid.api import AlgorithmFactory,PythonAlgorithm,ITableWorkspaceProperty,FileProperty,FileAction
 from mantid.simpleapi import CreateEmptyTableWorkspace
-from mantid.kernel import Direction,StringMandatoryValidator
+from mantid.kernel import Direction
 from mantid import mtd
 from Muon.GUI import ElementalAnalysis
+
+LABELS = {'Primary' : "Primary energy" , "Secondary" : "Secondary energy"}
+
 
 class PeakMatching(PythonAlgorithm):
 
@@ -29,8 +31,8 @@ class PeakMatching(PythonAlgorithm):
     def PyInit(self):
 
         self.declareProperty(ITableWorkspaceProperty(name="PeakTable",
-                                               defaultValue="",
-                                               direction=Direction.Input),
+                                                     defaultValue="",
+                                                     direction=Direction.Input),
                              doc="Table containing peaks to match to database")
 
         self.declareProperty(FileProperty(name="PeakDatabase", defaultValue="",
@@ -67,20 +69,20 @@ class PeakMatching(PythonAlgorithm):
 
         self.declareProperty(
             ITableWorkspaceProperty(name='SortedByEnergy',
-                                defaultValue='all_matches_sorted_by_energy',
-                                direction=Direction.Output),
-        doc='Name of the table containing all of the peak matches sorted by energy')
+                                    defaultValue='all_matches_sorted_by_energy',
+                                    direction=Direction.Output),
+            doc='Name of the table containing all of the peak matches sorted by energy')
 
         self.declareProperty(
-            ITableWorkspaceProperty(name='ElementLikelyhood',
-                                    defaultValue='element_likelyhood',
+            ITableWorkspaceProperty(name='ElementLikelihood',
+                                    defaultValue='element_likelihood',
                                     direction=Direction.Output),
-            doc='Name of the table containing the count of elements in all matches')
+            doc='Name of the table containing the weighted count of elements in all matches')
 
     def get_default_peak_data(self):
         path = os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")
-        with open(path, 'r') as f:
-            peak_data = json.load(f)
+        with open(path, 'r') as file_to_read:
+            peak_data = json.load(file_to_read)
         return peak_data
 
     def PyExec(self):
@@ -92,12 +94,12 @@ class PeakMatching(PythonAlgorithm):
         peak_column = self.getProperty("PeakCentreColumn").value
         input_peaks = self.get_input_peaks(table,peak_column,sigma_column)
 
-        primary_data, secondary_data, all_data = self.get_matches(peak_data, input_peaks)
+        all_data , primary_data, secondary_data = self.get_matches(peak_data, input_peaks)
         names = [self.getPropertyValue("PrimaryPeaks"),
                  self.getPropertyValue("SecondaryPeaks"),
                  self.getPropertyValue("AllPeaks"),
                  self.getPropertyValue("SortedByEnergy"),
-                 self.getPropertyValue("ElementLikelyhood")]
+                 self.getPropertyValue("ElementLikelihood")]
         self.output_data(primary_data, secondary_data, all_data,names)
 
     def process_peak_data(self,path):
@@ -127,40 +129,31 @@ class PeakMatching(PythonAlgorithm):
                 '''
         peak_data = None
         if path:
-            with open(path, 'r') as f:
-                peak_data = json.load(f)
+            with open(path, 'r') as file_to_read:
+                peak_data = json.load(file_to_read)
         else:
             peak_data = self.get_default_peak_data()
 
-        primary_energies = {}
-
-        secondary_energies = {}
-
-        all_energies = {}
+        processed_data = {}
+        processed_data["All energies"] = {}
+        for label in LABELS:
+            processed_data[LABELS[label]] = {}
 
         for element in peak_data:
-            primary_energy = [float(x[1]) for x in list(peak_data[element]['Primary'].items())]
-            secondary_energy = [float(x[1]) for x in list(peak_data[element]['Secondary'].items())]
-            primary_trans = [x[0] for x in list(peak_data[element]['Primary'].items())]
-            secondary_trans = [x[0] for x in list(peak_data[element]['Secondary'].items())]
+            processed_data["All energies"][element] = {}
+            for label in LABELS:
+                energy_list = [float(energy) for transition,energy in list(peak_data[element][label].items())]
+                transition_list = [transition for transition,energy in list(peak_data[element][label].items())]
+                processed_data[LABELS[label]][element] = dict(zip(transition_list, energy_list))
+                processed_data["All energies"][element].update(dict(zip(transition_list, energy_list)) )
 
-            primary_energies[element] = dict(zip(primary_trans, primary_energy))
-            secondary_energies[element] = dict(zip(secondary_trans, secondary_energy))
-            all_energies[element] = dict(zip(primary_trans + secondary_trans,
-                                             primary_energy + secondary_energy))
-
-        peak_data = {}
-        peak_data['Primary energy'] = primary_energies
-        peak_data['Secondary energy'] = secondary_energies
-        peak_data['All energies'] = all_energies
-
-        return peak_data
+        return processed_data
 
     def make_count_table(self,name,data):
         table = CreateEmptyTableWorkspace(OutputWorkspace=name)
 
         table.addColumn("str", "Element")
-        table.addColumn("int", "Likelyhood(au)")
+        table.addColumn("int", "Likelihood(au)")
 
         counts = {}
 
@@ -169,11 +162,11 @@ class PeakMatching(PythonAlgorithm):
                 counts[entry['element']] = entry['Rating']
             counts[entry['element']] += entry['Rating']
 
-        sorted_data_by_count = sorted(counts.items(),key=lambda x: x[1], reverse=True)
+        #will be sorted by second element in row
+        sorted_data_by_count = sorted(counts.items(),key=lambda row: row[1], reverse=True)
 
-        for match in sorted_data_by_count:
-            row = [str(match[0]),match[1]]
-            table.addRow(row)
+        for row in sorted_data_by_count:
+            table.addRow([ str(row[0]) , row[1] ])
         return table
 
     def get_input_peaks(self,table,centre_column_name,sigma_column_name):
@@ -205,8 +198,8 @@ class PeakMatching(PythonAlgorithm):
 
     def get_matches(self,peak_data, input_peaks):
         all_matches = []
-        for x in peak_data:
-            raw_data = peak_data[x]
+        for label in peak_data:
+            raw_data = peak_data[label]
             matches = []
             for peak, sigma in input_peaks:
                 for element in raw_data:
@@ -254,7 +247,8 @@ class PeakMatching(PythonAlgorithm):
                             data['diff'] = abs(peak - energy)
                             data['Rating'] = 1
                             matches.append(data)
-            matches = sorted(matches, key=lambda x: x['diff'])
+
+            matches = sorted(matches, key=lambda data: data['diff'])
             all_matches.append(matches)
         return all_matches
 
@@ -276,9 +270,8 @@ class PeakMatching(PythonAlgorithm):
         self.setProperty('SortedByEnergy', sorted_table)
 
         count_table = self.make_count_table(names[4],all_data)
-        self.setPropertyValue('ElementLikelyhood', names[4])
-        self.setProperty('ElementLikelyhood', count_table)
-
+        self.setPropertyValue('ElementLikelihood', names[4])
+        self.setProperty('ElementLikelihood', count_table)
 
     def make_peak_table(self,name, data,sortBy = False,valueToSortBy = "energy"):
         table = CreateEmptyTableWorkspace(OutputWorkspace=name)
@@ -296,12 +289,13 @@ class PeakMatching(PythonAlgorithm):
         table.addColumn("double", "Difference")
 
         if sortBy:
-            data = sorted(data , key = lambda x: x[valueToSortBy])
+            data = sorted(data , key = lambda row: row[valueToSortBy])
 
         for match in data:
             row = [match['peak_centre'], match['energy'], match['element'],
                    match['transition'], match['error'], match['diff']]
             table.addRow(row)
         return table
+
 
 AlgorithmFactory.subscribe(PeakMatching)

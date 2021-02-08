@@ -15,25 +15,34 @@ to find probable energy transitions for peaks.
 Input Table and datafile requirement
 ####################################
 
-- input table must have atleast 2 tables in which one column is the peak centre and the other is the standard deviation,
-the names of the columns must be given if they differ from the default values: centre and sigma respectively.
-
+- input table must have atleast 2 tables in which one column is the peak centre and the other is the standard deviation,the names of the columns must be given if they differ from the default values: centre and sigma respectively.
 - json file can be loaded to override the default but must follow structure below:
-	Format of file:
-            {
-            'Element': {
-                'Z': z,
-                'A': a,
-                'Primary' : {
-                    'Transition':energy,
-                    ..., ...
-                    },
-                'Secondary': {
-                    'Transition': energy,
-                    ..., ...
-                    }
-				}
-			}
+
+.. code-block:: json
+
+    {
+      "Ag": {
+        "Z": 47,
+        "A": 107.87,
+        "Primary": {
+          "K(4->1)": 3177.7,
+          "L(4->2)": 900.7,
+          "M(4->3)": 304.7,
+          "6->5": 141
+        },
+        "Secondary": {
+          "K(2->1)": 3140.6,
+          "L(8->2)": 1347.8,
+          "M(10->3)": 567,
+          "8->6": 122.2
+        },
+        "Gammas": {
+          "72Ge(n,n')72Ge": 691,
+          "73Ge(n,g)74Ge": null,
+          "74Ge(n,n')74Ge": 595.7
+        }
+      }
+    }
 
 Usage
 -----
@@ -61,7 +70,7 @@ Usage
 	secondary_matches = mtd['secondary_matches'] 
 	all_matches = mtd['all_matches'] 
 	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_likelyhood = mtd[ 'element_likelyhood'] 
+	element_likelihood = mtd[ 'element_likelihood'] 
 
 	print("--"*25)
 	print(primary_matches.row(0))
@@ -72,7 +81,7 @@ Usage
 	print("--"*25)
 	print(sorted_by_energy.row(0))
 	print("--"*25)
-	print(element_likelyhood.row(0))
+	print(element_likelihood.row(0))
 		
 Output:
 
@@ -87,7 +96,7 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 3.0, 'Database Energy': 3.4, 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': 0.8, 'Difference': 0.3999999999999999}
 	--------------------------------------------------
-	{'Element': 'Ag', 'Likelyhood(au)': 13}
+	{'Element': 'Ag', 'Likelihood(au)': 13}
 	
 *Example: Renaming tables**
 
@@ -106,13 +115,13 @@ Output:
 	for row in rows:
 		table.addRow(row)
     
-	PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelyhood="count")
+	PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelihood="count")
 
 	primary_matches = mtd['primary'] 
 	secondary_matches = mtd['secondary'] 
-	all_matches = mtd['all_matches'] 
+	all_matches = mtd['all'] 
 	sorted_by_energy = mtd['sort'] 
-	element_likelyhood = mtd[ 'count'] 
+	element_likelihood = mtd[ 'count'] 
 
 	print("--"*25)
 	print(primary_matches.row(1))
@@ -123,7 +132,7 @@ Output:
 	print("--"*25)
 	print(sorted_by_energy.row(1))
 	print("--"*25)
-	print(element_likelyhood.row(1))
+	print(element_likelihood.row(1))
 		
 Output:
 
@@ -138,10 +147,10 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
 	--------------------------------------------------
-	{'Element': 'I', 'Likelyhood(au)': 6}
+	{'Element': 'I', 'Likelihood(au)': 6}
 
 
-	*Example: Using non default column names**
+*Example: Using non default column names**
 
 .. testcode:: non-defaultcolumns
 
@@ -164,7 +173,7 @@ Output:
 	secondary_matches = mtd['secondary_matches'] 
 	all_matches = mtd['all_matches'] 
 	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_likelyhood = mtd[ 'element_likelyhood'] 
+	element_likelihood = mtd[ 'element_likelihood'] 
 
 	print("--"*25)
 	print(primary_matches.row(2))
@@ -175,7 +184,7 @@ Output:
 	print("--"*25)
 	print(sorted_by_energy.row(2))
 	print("--"*25)
-	print(element_likelyhood.row(2))
+	print(element_likelihood.row(2))
 		
 Output:
 
@@ -190,7 +199,7 @@ Output:
 	--------------------------------------------------
 	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
 	--------------------------------------------------
-	{'Element': 'Li', 'Likelyhood(au)': 6}
+	{'Element': 'Li', 'Likelihood(au)': 6}
 
 
 .. categories::
