@@ -45,12 +45,14 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+
 - New IDF for upgraded VULCAN instrument
 
 Improvements
 ############
 
 - BackToBackExponential fitting parameters read from .xml file and output to .prm file for GSAS-II.
+- The Engineering Diffraction interface can now be saved as part of a project file, and can save/restore in the event of a crash as part of the general project save system.
 
 Single Crystal Diffraction
 --------------------------

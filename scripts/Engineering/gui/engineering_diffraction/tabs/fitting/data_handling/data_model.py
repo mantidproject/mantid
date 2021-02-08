@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path
 
-from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Plus, Minus, AverageLogData, \
+from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, ConvertUnits, Minus, AverageLogData, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
