@@ -271,7 +271,7 @@ class GroupingTabPresenter(object):
 
     def plot_default_groups_or_pairs(self):
         # if we have no pairs or groups selected, generate a default plot
-        if len(self._model.selected_pairs + self._model.selected_groups) == 0:
+        if len(self._model.selected_groups_and_pairs) == 0:
             if len(self._model.pairs) > 0:  # if we have pairs - then plot all pairs
                 self.pairing_table_widget.plot_default_case()
             else:  # else plot groups

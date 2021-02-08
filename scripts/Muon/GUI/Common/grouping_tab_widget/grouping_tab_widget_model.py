@@ -94,6 +94,10 @@ class GroupingTabModel(object):
     def selected_diffs(self):
         return self._groups_and_pairs.selected_diffs
 
+    @property
+    def selected_groups_and_pairs(self):
+        return self.selected_groups+self.selected_pairs+self.selected_diffs
+
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
         self._context.show_all_pairs()
