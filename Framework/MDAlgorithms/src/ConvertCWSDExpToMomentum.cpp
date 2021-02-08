@@ -440,8 +440,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     const uint16_t goniometerIndex(0);
     inserter.insertMDEvent(static_cast<float>(signal),
                            static_cast<float>(error * error),
-                           static_cast<uint16_t>(runnumber),
-                           goniometerIndex, detid, q_sample.data());
+                           static_cast<uint16_t>(runnumber), goniometerIndex,
+                           detid, q_sample.data());
     updateQRange(q_sample);
 
     g_log.debug() << "Q-lab = " << qlab.toString() << "\n";

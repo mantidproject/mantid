@@ -106,10 +106,10 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
 
     // Insert
     const uint16_t goniometerIndex(0);
-    inserter.insertMDEvent(
-        static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), goniometerIndex, detid,
-        millerindex.data());
+    inserter.insertMDEvent(static_cast<float>(signal),
+                           static_cast<float>(error * error),
+                           static_cast<uint16_t>(runnumber), goniometerIndex,
+                           detid, millerindex.data());
   }
 
   // Set up run information

@@ -620,8 +620,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
       const uint16_t goniometerIndex(0);
-      inserter.insertMDEvent(signal, error * error, runnumber,
-                             goniometerIndex, detid, data);
+      inserter.insertMDEvent(signal, error * error, runnumber, goniometerIndex,
+                             detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 

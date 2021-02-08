@@ -617,14 +617,14 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
             PARALLEL_CRITICAL(addValues) {
               inserter.insertMDEvent(
                   static_cast<float>(signal), static_cast<float>(error * error),
-                  static_cast<uint16_t>(runindex),
-                  goniometerIndex, detid, millerindex.data());
+                  static_cast<uint16_t>(runindex), goniometerIndex, detid,
+                  millerindex.data());
 
               norm_inserter.insertMDEvent(
                   static_cast<float>(norm_signal),
                   static_cast<float>(norm_error * norm_error),
-                  static_cast<uint16_t>(runindex),
-                  goniometerIndex, detid, millerindex.data());
+                  static_cast<uint16_t>(runindex), goniometerIndex, detid,
+                  millerindex.data());
             }
           }
           PARALLEL_END_INTERUPT_REGION
@@ -775,16 +775,16 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           datapoint[1] = static_cast<float>(omega);
           datapoint[2] = static_cast<float>(tof1 + tof2);
           PARALLEL_CRITICAL(addValues) {
-            inserter.insertMDEvent(
-                static_cast<float>(signal), static_cast<float>(error * error),
-                static_cast<uint16_t>(runindex),
-                goniometerIndex, detid, datapoint.data());
+            inserter.insertMDEvent(static_cast<float>(signal),
+                                   static_cast<float>(error * error),
+                                   static_cast<uint16_t>(runindex),
+                                   goniometerIndex, detid, datapoint.data());
 
             norm_inserter.insertMDEvent(
                 static_cast<float>(norm_signal),
                 static_cast<float>(norm_error * norm_error),
-                static_cast<uint16_t>(runindex),
-                goniometerIndex, detid, datapoint.data());
+                static_cast<uint16_t>(runindex), goniometerIndex, detid,
+                datapoint.data());
           }
           PARALLEL_END_INTERUPT_REGION
         }

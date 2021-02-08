@@ -278,7 +278,7 @@ void ConvertHFIRSCDtoMDE::exec() {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
         const uint16_t goniometerIndex(0);
         inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0,
-                                   q_sample.data());
+                               q_sample.data());
       }
     }
   }
