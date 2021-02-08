@@ -260,10 +260,11 @@ void FitPeaks::init() {
   // properties about fitting range and criteria
   declareProperty(PropertyNames::START_WKSP_INDEX, EMPTY_INT(),
                   "Starting workspace index for fit");
-  declareProperty(PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
-                  "Last workspace index to fit (which is included). "
-                  "If a value larger than the workspace index of last spectrum, "
-                  "then the workspace index of last spectrum is used.");
+  declareProperty(
+      PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
+      "Last workspace index to fit (which is included). "
+      "If a value larger than the workspace index of last spectrum, "
+      "then the workspace index of last spectrum is used.");
 
   // properties about peak positions to fit
   declareProperty(
