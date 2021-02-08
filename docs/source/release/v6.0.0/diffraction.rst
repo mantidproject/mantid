@@ -14,8 +14,8 @@ New Algorithms
 - :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the d-Spacing of the Lead (111) peak and the sample temperature
 - :ref:`PEARLTransfit <algm-PEARLTransfit>` for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 - :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalman Pings terms
-- :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save CORELLI geometry calibration to database
-- :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
+- :ref:`CorelliCalibrationDatabase <algm-CorelliCalibrationDatabase>` to save CORELLI geometry calibration to database
+- :ref:`CorelliCalibrationApply <algm-CorelliCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
 - :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of CORELLI banks in order to optimize the comparison of observed peaks to reference data
 - :ref:`ClipPeaks <algm-ClipPeaks>` to clip peaks, providing a background estimation.
 - :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument
