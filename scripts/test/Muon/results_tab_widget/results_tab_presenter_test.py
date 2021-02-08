@@ -166,5 +166,6 @@ class ResultsTabPresenterTest(unittest.TestCase):
         enable_notifier._notify_subscribers_impl(arg=None)
         self.mock_view.setEnabled.assert_called_once_with(True)
 
+
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

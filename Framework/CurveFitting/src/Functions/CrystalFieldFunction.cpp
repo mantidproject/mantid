@@ -319,6 +319,20 @@ double CrystalFieldFunction::getError(size_t i) const {
   }
 }
 
+/// Get the fitting error for a parameter
+double CrystalFieldFunction::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  checkSourceFunction();
+  checkTargetFunction();
+  if (index < m_nControlParams) {
+    return m_control.getError(index);
+  } else if (index < m_nControlSourceParams) {
+    return m_source->getError(index - m_nControlParams);
+  } else {
+    return m_target->getError(index - m_nControlSourceParams);
+  }
+}
+
 /// Set the fitting error for a parameter
 void CrystalFieldFunction::setError(size_t i, double err) {
   checkSourceFunction();
@@ -329,6 +343,20 @@ void CrystalFieldFunction::setError(size_t i, double err) {
     m_source->setError(i - m_nControlParams, err);
   } else {
     m_target->setError(i - m_nControlSourceParams, err);
+  }
+}
+
+/// Set the fitting error for a parameter
+void CrystalFieldFunction::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  checkSourceFunction();
+  checkTargetFunction();
+  if (index < m_nControlParams) {
+    m_control.setError(index, err);
+  } else if (index < m_nControlSourceParams) {
+    m_source->setError(index - m_nControlParams, err);
+  } else {
+    m_target->setError(index - m_nControlSourceParams, err);
   }
 }
 
@@ -401,8 +429,12 @@ void CrystalFieldFunction::buildAttributeNames() const {
   if (!m_attributeNames.empty()) {
     return;
   }
-  m_attributeNames = IFunction::getAttributeNames();
+  auto numAttributes = IFunction::nAttributes();
+  for (size_t i = 0; i < numAttributes; ++i) {
+    m_attributeNames.emplace_back(IFunction::attributeName(i));
+  }
   auto controlAttributeNames = m_control.getAttributeNames();
+
   // Lambda function that moves a attribute name from controlAttributeNames
   // to attNames.
   auto moveAttributeName = [&](const std::string &name) {
@@ -417,7 +449,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
   auto prependPrefix = [&](const std::string &prefix,
                            const std::vector<std::string> &names) {
     for (auto name : names) {
-      if (name == "NumDeriv")
+      if (name.find("NumDeriv") != std::string::npos)
         continue;
       name.insert(name.begin(), prefix.begin(), prefix.end());
       m_attributeNames.emplace_back(name);
@@ -428,9 +460,13 @@ void CrystalFieldFunction::buildAttributeNames() const {
   moveAttributeName("Symmetries");
   moveAttributeName("Temperatures");
   moveAttributeName("Background");
-  // Copy the rest of the names
-  m_attributeNames.insert(m_attributeNames.end(), controlAttributeNames.begin(),
-                          controlAttributeNames.end());
+
+  // Only copy the unprefixed attributes - as the loop below will include
+  // And modify the prefixed attributes accordingly
+  std::copy_if(controlAttributeNames.begin(), controlAttributeNames.end(),
+               std::back_inserter(m_attributeNames), [](const auto &name) {
+                 return name.find(".") == std::string::npos;
+               });
   // Get
   for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
     std::string prefix(SPECTRUM_PREFIX);

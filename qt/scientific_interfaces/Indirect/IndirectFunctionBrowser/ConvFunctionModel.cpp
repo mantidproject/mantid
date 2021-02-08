@@ -485,12 +485,17 @@ void ConvFunctionModel::removeConstraint(const QString &paramName) {
   m_model.removeConstraint(paramName);
 }
 
-void ConvFunctionModel::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void ConvFunctionModel::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
+  m_model.setDatasets(datasets);
 }
 
 QStringList ConvFunctionModel::getDatasetNames() const {
   return m_model.getDatasetNames();
+}
+
+QStringList ConvFunctionModel::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
 }
 
 double ConvFunctionModel::getLocalParameterValue(const QString &parName,
@@ -537,6 +542,11 @@ void ConvFunctionModel::setLocalParameterConstraint(const QString &parName,
 void ConvFunctionModel::setLocalParameterFixed(const QString &parName, int i,
                                                bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
+}
+
+void ConvFunctionModel::setGlobalParameterValue(const QString &paramName,
+                                                double value) {
+  m_model.setGlobalParameterValue(paramName, value);
 }
 
 void ConvFunctionModel::setParameter(ParamID name, double value) {

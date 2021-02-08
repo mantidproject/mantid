@@ -333,9 +333,9 @@ public:
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
-        "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
-        "abc,WorkspaceIndex=1,X=(),Y=());(composite=Convolution,FixResolution="
-        "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
+        "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,Workspace="
+        "abc,WorkspaceIndex=1,X=(),Y=());(composite=Convolution,NumDeriv="
+        "true,FixResolution=true,$domains=i;name=Resolution,Workspace=abc,"
         "WorkspaceIndex=2,X=(),Y=())");
   }
 
@@ -361,11 +361,11 @@ public:
     TS_ASSERT_EQUALS(
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
-        "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
+        "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,Workspace="
         "abc,WorkspaceIndex=1,X=(),Y=();name=DeltaFunction,Height=1,Centre=0,"
         "constraints=(0<Height));("
-        "composite=Convolution,FixResolution="
-        "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
+        "composite=Convolution,NumDeriv="
+        "true,FixResolution=true,$domains=i;name=Resolution,Workspace=abc,"
         "WorkspaceIndex=2,X=(),Y=();name=DeltaFunction,Height=1,Centre=0,"
         "constraints=(0<Height))");
   }
@@ -393,14 +393,15 @@ public:
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
-        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
         "TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex=2147483647,"
         "Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name=DeltaFunction,Height=1,"
         "Centre=0,constraints=(0<Height))));(composite=CompositeFunction,"
         "NumDeriv=false,$domains=i;"
-        "name=FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
-        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        "name=FlatBackground,A0=0;(composite=Convolution,NumDeriv=true,"
+        "FixResolution=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=()"
+        ",Y=()"
         ";(name=TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex="
         "2147483647,Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name="
         "DeltaFunction,Height=1,Centre=0,constraints=(0<Height))))");
@@ -430,14 +431,15 @@ public:
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
-        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name=Lorentzian,"
         "Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,"
         "PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0,constraints=("
         "0<Height))));("
         "composite=CompositeFunction,NumDeriv=false,$domains=i;name="
-        "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
-        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        "FlatBackground,A0=0;(composite=Convolution,NumDeriv=true,"
+        "FixResolution=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=()"
+        ",Y=()"
         ";(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,"
         "Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0,"
         "constraints=(0<Height)))"
@@ -468,7 +470,7 @@ public:
         fitFunctionAsString,
         "composite=MultiDomainFunction,NumDeriv=true;(composite="
         "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
-        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
         "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
         "DeltaFunction,Height=1,Centre=0,constraints=(0<Height);(composite="
         "ProductFunction,NumDeriv="
@@ -476,8 +478,9 @@ public:
         "name=Lorentzian,Amplitude=1,"
         "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
         "));(composite=CompositeFunction,NumDeriv=false,$domains=i;name="
-        "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
-        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        "FlatBackground,A0=0;(composite=Convolution,NumDeriv=true,"
+        "FixResolution=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=()"
+        ",Y=()"
         ";(name=DeltaFunction,Height=1,Centre=0,constraints=(0<Height);("
         "composite=ProductFunction,"
         "NumDeriv=false;name=ConvTempCorrection,Temperature=100,ties=("

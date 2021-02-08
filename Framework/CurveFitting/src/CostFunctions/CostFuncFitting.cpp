@@ -201,7 +201,8 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
     }
   }
   m_function->setCovarianceMatrix(covarMatrix);
-  m_function->setChiSquared(chi2);
+  m_function->setReducedChiSquared(
+      chi2 / static_cast<double>((m_values->size() - np)));
 }
 
 /**

@@ -9,20 +9,29 @@
 # std imports
 import unittest
 from unittest.mock import MagicMock, patch
+import numpy as np
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid \
-    import EllipsoidalIntergratedPeakRepresentation
+    import EllipsoidalIntergratedPeakRepresentation, slice_ellipsoid
 
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpers \
     import FuzzyMatch, create_ellipsoid_info, draw_representation
 
 
-def create_test_ellipsoid():
+def create_test_ellipsoid(bg_shell=True):
+    radii = [1.5, 1.3, 1.4]
+    if bg_shell:
+        frac_thick = 0.1  # fractional thickness of major axis
+        bg_outer = [2 * r for r in radii]
+        bg_inner = [(1 - frac_thick) * r for r in bg_outer]
+    else:
+        bg_outer = 3 * [0]
+        bg_inner = radii
     return create_ellipsoid_info(
-        radii=(1.5, 1.3, 1.4),
+        radii=radii,
         axes=("1 0 0", "0 1 0", "0 0 1"),
-        bkgd_radii=(((2.5, 2.3, 2.4)), ((2.6, 2.4, 2.5))))
+        bkgd_radii=((bg_inner), (bg_outer)))
 
 
 @patch("mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid.compute_alpha")
@@ -41,7 +50,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         painter.ellipse.assert_not_called()
         painter.elliptical_shell.assert_not_called()
 
-    def test_draw_creates_ellipse_with_expected_properties_with_nonzero_alpha(
+    def test_draw_creates_ellipse_with_expected_properties_with_nonzero_alpha_and_background(
             self, compute_alpha_mock):
         peak_center = (1, 2, 3)
         ellipsoid = create_test_ellipsoid()
@@ -57,16 +66,38 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         self._assert_painter_calls(
             painter,
             peak_center[:2],
-            cross_width=0.26,
-            signal_width=2.6,
-            signal_height=3.0,
-            angle=90,
+            cross_width=0.3,
+            signal_width=3.0,
+            signal_height=2.6,
+            angle=0,
             alpha=fake_alpha,
             fg_color=fg_color,
-            bkgd_width=4.8,
+            bkgd_width=6.0,
             bkgd_height=5.2,
             thickness=0.1,
             bg_color=bg_color)
+
+    def test_draw_creates_ellipse_with_expected_properties_with_nonzero_alpha_no_background(self, compute_alpha_mock):
+        peak_center = (1, 2, 3)
+        ellipsoid = create_test_ellipsoid(bg_shell=False)
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'g'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, peak_center,
+                                      ellipsoid, painter, fg_color, bg_color)
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter,
+            peak_center[:2],
+            cross_width=0.3,
+            signal_width=3.0,
+            signal_height=2.6,
+            angle=0,
+            alpha=fake_alpha,
+            fg_color=fg_color)
 
     def test_draw_respects_transform(self, compute_alpha_mock):
         def slice_transform(x):
@@ -86,14 +117,14 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         self.assertTrue(painted is not None)
         self._assert_painter_calls(
             painter, (peak_center[2], peak_center[0]),
-            cross_width=0.182,
-            signal_width=1.82,
-            signal_height=2.1,
+            cross_width=0.192,
+            signal_width=1.92,
+            signal_height=1.79,
             angle=90,
             alpha=fake_alpha,
             fg_color=fg_color,
-            bkgd_width=4.4,
-            bkgd_height=4.77,
+            bkgd_width=5.54,
+            bkgd_height=5.17,
             thickness=0.1,
             bg_color=bg_color)
 
@@ -141,6 +172,81 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
                 edgecolor="none",
                 facecolor=bg_color,
                 linestyle='--')
+
+
+class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCase):
+    def test_slice_ellipsoid_zp(self):
+        origin = (0, 0, 0)
+        axis_a = np.array([1, 0, 0])
+        axis_b = np.array([0, 1, 0])
+        axis_c = np.array([0, 0, 1])
+        a = 1
+        b = 2
+        c = 1
+        zp = 0
+
+        def slice_transform(x):
+            return (x[1], x[0], x[2])
+
+        expected_slice_origin = (0, 0, 0)
+        expected_major_radius = 2
+        expected_minor_radius = 1
+        expected_angle = 0
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minor_radius,
+                                               expected_angle))
+
+        zp = np.sin(np.pi / 3)
+        expected_slice_origin = (0, 0, zp)
+        expected_major_radius = 1.0  # 2*cos(pi/3)
+        expected_minor_radius = 0.5  # cos(pi/3)
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minor_radius,
+                                               expected_angle))
+
+        # This causes negative eignevalues there np.sqrt(eignevalues) gives NaN radius
+        zp = 2
+        expected_slice_origin = (0, 0, zp)
+        expected_major_radius = np.nan
+        expected_minor_radius = np.nan
+        expected_angle = 90  # flips to 90 as x-axis (Y on view) has negative eigenvalue and is first in sorted list
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minor_radius,
+                                               expected_angle))
+
+        # This causes `eigvalues, eigvectors = linalg.eig(MM)` to throw np.linalg.LinAlgError
+        zp = 1
+        expected_slice_origin = (0, 0, 0)
+        expected_major_radius = np.nan
+        expected_minor_radius = np.nan
+        expected_angle = 0  # returns 0 is could not diag ellipMatrix
+
+        self._run_slice_ellipsoid_and_compare((origin, axis_a, axis_b, axis_c, a, b, c, zp, slice_transform),
+                                              (*expected_slice_origin,
+                                               expected_major_radius,
+                                               expected_minor_radius,
+                                               expected_angle))
+
+    def _run_slice_ellipsoid_and_compare(self, input_values, expectecd):
+        slice_origin, major_radius, minor_radius, angle = slice_ellipsoid(*input_values)
+        print(slice_origin, major_radius, minor_radius, angle)
+
+        self.assertAlmostEqual(slice_origin[0], expectecd[0])
+        self.assertAlmostEqual(slice_origin[1], expectecd[1])
+        self.assertAlmostEqual(slice_origin[2], expectecd[2])
+        # numpy correctly handles NaN
+        np.testing.assert_almost_equal(major_radius, expectecd[3])
+        np.testing.assert_almost_equal(minor_radius, expectecd[4])
+        self.assertAlmostEqual(angle, expectecd[5])
 
 
 if __name__ == "__main__":

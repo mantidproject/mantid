@@ -9,12 +9,8 @@
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
-except:
+except ModuleNotFoundError:
     web_var = None
-try:
-    import mantidplot as mpl
-except:
-    mpl = None
 
 
 class ReduceMERLIN(ReductionWrapper):
@@ -155,8 +151,6 @@ class ReduceMERLIN(ReductionWrapper):
         corrections,time_to_correct_abs = self.evaluate_abs_corrections(test_ws,check_spectra)
         # When accuracy and speed of the corrections is satisfactory, copy chosen abs_corr_info
         # properties from above to the advanced_porperties area to run in reduction.
-        if mpl:
-            mpl.plotSpectrum(corrections,range(0,len(check_spectra)))
         #
         return corrections
 

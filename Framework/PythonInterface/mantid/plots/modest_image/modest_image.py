@@ -11,18 +11,19 @@ set_extent.
 """
 import matplotlib
 rcParams = matplotlib.rcParams
-
 import matplotlib.image as mi
 import matplotlib.colors as mcolors
 import matplotlib.cbook as cbook
 from matplotlib.transforms import IdentityTransform, Affine2D
+
+from mantid.plots.mantidimage import MantidImage
 
 import numpy as np
 
 IDENTITY_TRANSFORM = IdentityTransform()
 
 
-class ModestImage(mi.AxesImage):
+class ModestImage(MantidImage):
 
     """
     Computationally modest image class.

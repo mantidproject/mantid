@@ -145,10 +145,12 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def read_fitprop_from_browser(self):
         return self.fit_browser.read_current_fitprop()
 
-    def update_browser_setup(self, func_str, setup_name):
-        # update browser with output function and save setup
-        self.fit_browser.loadFunction(func_str)
-        self.fit_browser.save_current_setup(setup_name)
+    def update_browser(self, status, func_str, setup_name):
+        self.fit_browser.fitResultsChanged.emit(status)
+        # update browser with output function and save setup if successful
+        if "success" in status:
+            self.fit_browser.loadFunction(func_str)
+            self.fit_browser.save_current_setup(setup_name)
 
     # =================
     # Component Getters

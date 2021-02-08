@@ -90,8 +90,13 @@ class LoadUtilsTest(unittest.TestCase):
         X_data = np.linspace(0, 400, num_bins)
         # create data in each workspace based on y = mx + specNumber
         m = 0.1
-        Yfunc = lambda x, specNo: m * x + specNo
-        Efunc = lambda x, specNo: 2 * m * x + specNo
+
+        def Yfunc(x, specNo):
+            return m * x + specNo
+
+        def Efunc(x, specNo):
+            return 2 * m * x + specNo
+
         for i in range(0, num_workspaces):
             name = "test_" + str(i)
             workspace_names.append(name)
@@ -122,8 +127,13 @@ class LoadUtilsTest(unittest.TestCase):
         X_data = np.linspace(0, 400, num_bins)
         names = ["Total", "Prompt"]
         # create data in each workspace based on y = mx + specNumber
-        Yfunc = lambda x, specNo: 0.1 * x + specNo
-        Efunc = lambda x, specNo: 2 * 0.1 * x + specNo
+
+        def Yfunc(x, specNo):
+            return 0.1 * x + specNo
+
+        def Efunc(x, specNo):
+            return 2 * 0.1 * x + specNo
+
         for i in range(0, 2):
             name = names[i]
             ws = mantid.WorkspaceFactory.create("Workspace2D", NVectors=1,
@@ -147,13 +157,12 @@ class LoadUtilsTest(unittest.TestCase):
             self.assertTrue(np.array_equal(merged_ws.readY(input_index), Yfunc(X_data, i)))
             self.assertTrue(np.array_equal(merged_ws.readE(input_index), Efunc(X_data, i)))
         # check that the y data for delayed response is all zeros
-        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"]-1)))
-
+        self.assertTrue(not np.any(merged_ws.readY(lutils.spectrum_index["Delayed"] - 1)))
 
     def test_flatten_run_data(self):
         test_1 = ["1_det_1", "1_det_2"]
         test_2 = ["2_det_1", "2_det_2"]
-        self.assertEquals(lutils.flatten_run_data(test_1,test_2), [test_1,test_2])
+        self.assertEquals(lutils.flatten_run_data(test_1, test_2), [test_1, test_2])
 
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}

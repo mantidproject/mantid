@@ -51,7 +51,7 @@ template <
 std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
-  for (const auto index : indices)
+  for (const auto &index : indices)
     converted.emplace_back(
         static_cast<Out>(static_cast<typename In::underlying_type>(index)));
   return converted;

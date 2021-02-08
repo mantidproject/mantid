@@ -69,6 +69,11 @@ AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
   setLayout(dialog_layout);
 
   this->initLayout();
+
+  // Wide widgets inside the QScrollArea do not cause the dialog to grow
+  // and so can be cut off. Force a minimum width
+  setObjectName("AlgorithmPropertiesWidget");
+  setStyleSheet("#AlgorithmPropertiesWidget {min-width: 25em;}");
 }
 
 //----------------------------------------------------------------------------------------------

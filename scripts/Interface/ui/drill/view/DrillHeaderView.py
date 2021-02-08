@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QHeaderView, QStyle, QStyleOptionToolButton
+from qtpy.QtWidgets import QHeaderView, QStyle, QStyleOptionToolButton, QAbstractItemView
 from qtpy.QtCore import *
 
 
@@ -36,6 +36,11 @@ class DrillHeaderView(QHeaderView):
                                                 None, self)
         minHeaderSize = self.BUTTON_SIZE + 2 * headerMargin + 1
         self.setMinimumSectionSize(max(minCellSize, minHeaderSize))
+
+        # drag and drop activation
+        self.setSectionsMovable(True)
+        self.setDragEnabled(True)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
 
     def sizeHint(self):
         """

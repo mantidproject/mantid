@@ -545,14 +545,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
 
 # This section deals with creating the GithubApiHelper implementation
-
-if(WIN32)
-  set(GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
-elseif(APPLE)
-  set(GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
-else()
-  set(GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
-endif()
+set (GITHUB_AUTHORIZATION_TOKEN ""
+     CACHE STRING "token used for authenticated read access to github")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h)
 
@@ -656,10 +650,8 @@ endif()
 set(CONSOLECHANNELCLASS "StdoutChannel")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${BIN_DIR}
-        RENAME Mantid.properties)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${WORKBENCH_BIN_DIR}
-        RENAME Mantid.properties)
+mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+                  INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
+                  RENAME Mantid.properties)
+

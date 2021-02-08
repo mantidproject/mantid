@@ -61,9 +61,12 @@ set(INC_FILES
     inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
     inc/MantidPythonInterface/core/Policies/MatrixToNumpy.h
     inc/MantidPythonInterface/core/Policies/RemoveConst.h
-    inc/MantidPythonInterface/core/Policies/ToWeakPtr.h
     inc/MantidPythonInterface/core/Policies/VectorToNumpy.h
 )
+
+# Add a precompiled header where they are supported
+enable_precompiled_headers(inc/MantidPythonInterface/core/PrecompiledHeader.h SRC_FILES)
+
 
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
@@ -77,11 +80,15 @@ set_target_properties(
                              COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
 )
 
+set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
+if(USE_PYTHON_DYNAMIC_LIB)
+	list(APPEND PUBLIC_TARGETS Python::Python) 
+endif()
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC Python::Python Python::NumPy ${BoostPython_LIBRARIES}
-  PRIVATE Types Kernel ${Boost_LIBRARIES} ${POCO_LIBRARIES}
+  PUBLIC ${PUBLIC_TARGETS} 
+  PRIVATE Types Kernel ${Boost_LIBRARIES}  ${POCO_LIBRARIES}
 )
 
 # Add to the 'Framework/Python' group in MSVS

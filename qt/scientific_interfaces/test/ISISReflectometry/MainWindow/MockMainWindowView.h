@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 class MockMainWindowView : public IMainWindowView {
 public:
-  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));

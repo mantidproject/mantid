@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import json
 import os
 import tempfile
 import unittest
-
 from unittest import mock
+
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.state.Serializer import Serializer
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState,
@@ -28,18 +27,18 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         view = create_mock_settings_diagnostic_tab()
         presenter = SettingsDiagnosticPresenter(parent_presenter)
         presenter.set_view(view)
-        self.assertEqual(view.set_tree.call_count,  1)
+        self.assertEqual(view.set_tree.call_count, 1)
         presenter.on_row_changed()
-        self.assertEqual(view.set_tree.call_count,  2)
+        self.assertEqual(view.set_tree.call_count, 2)
 
     def test_that_updates_rows_when_triggered(self):
         parent_presenter = create_run_tab_presenter_mock()
         view = create_mock_settings_diagnostic_tab()
         presenter = SettingsDiagnosticPresenter(parent_presenter)
         presenter.set_view(view)
-        self.assertEqual(view.update_rows.call_count,  1)
+        self.assertEqual(view.update_rows.call_count, 1)
         presenter.on_update_rows()
-        self.assertEqual(view.update_rows.call_count,  2)
+        self.assertEqual(view.update_rows.call_count, 2)
 
     def test_that_can_save_out_state(self):
         # Arrange
@@ -75,6 +74,7 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         presenter.on_row_changed()
 
         parent_presenter.display_warning_box.assert_called_once_with('Warning', 'Unable to find files.', 'Test Error')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -22,6 +22,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.setupUi(self)
         self.fit_table = SequentialTableWidget(parent)
         self.tableLayout.addWidget(self.fit_table.widget)
+        self.setEnabled(False)
 
     def warning_popup(self, message):
         warning(message, parent=self)

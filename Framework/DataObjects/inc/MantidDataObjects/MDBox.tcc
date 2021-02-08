@@ -622,7 +622,7 @@ TMDE(void MDBox)::integrateSphere(
       if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
         const auto signal = static_cast<signal_t>(it.getSignal());
         const auto errSquared = static_cast<signal_t>(it.getErrorSquared());
-        vals.emplace_back(std::make_pair(signal, errSquared));
+        vals.emplace_back(signal, errSquared);
       }
     }
     // Sort based on signal values

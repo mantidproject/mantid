@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 import unittest
-import sys
 
 from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -54,37 +53,12 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = GeneralSettings(None)
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
-        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
         self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
         mock_ConfigService.getInstrument.assert_called_once_with()
-        self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
-        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"),
-                                                      mock_ConfigService.mock_facility,
-                                                      mock_ConfigService.mock_facility]
-        presenter = GeneralSettings(None)
-
-        self.assertEqual(mock_ConfigService.mock_facility.name(),
-                         presenter.view.facility.currentText())
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.instrument.currentText())
-        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
-        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_instrument_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getInstrument.side_effect = [RuntimeError("Invalid instrument name"),
-                                                        mock_ConfigService.mock_instrument]
-        presenter = GeneralSettings(None)
-
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.instrument.currentText())
-        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
+        self.assertEqual(1, mock_ConfigService.mock_instrument.name.call_count)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
@@ -125,12 +99,12 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter = GeneralSettings(None)
         mock_ConfigService.setFacility.reset_mock()
 
-        new_facility = "WWW"
+        new_facility = "TEST_LIVE"
         presenter.action_facility_changed(new_facility)
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(2, presenter.view.instrument.count())
+        self.assertEqual(43, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
@@ -169,23 +143,33 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_prompt_deleting_workspace(self, mock_CONF):
+        presenter = GeneralSettings(None)
+        presenter.settings_presenter = MagicMock()
+
+        presenter.action_prompt_deleting_workspace(True)
+
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, True)
+        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
+        mock_CONF.set.reset_mock()
+        presenter.settings_presenter.reset_mock()
+
+        presenter.action_prompt_deleting_workspace(False)
+
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, False)
+        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_load_current_setting_values(self, mock_ConfigService, mock_CONF):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
 
         # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
-        # In python 3 it __bool__ is called otherwise __nonzero__ is used
-        if sys.version_info < (3,):
-            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                            call().__nonzero__(),
-                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                            call().__nonzero__()])
-        else:
-            mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                            call().__bool__(),
-                                            call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                            call().__bool__()])
+        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
+                                        call().__bool__(),
+                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
+                                        call().__bool__()])
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
                                                        call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
@@ -226,7 +210,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, num_checkpoints)
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value,
+                                                             num_checkpoints)
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_instrument_changed(self, mock_ConfigService):
@@ -245,7 +230,8 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography")
+        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value,
+                                                             "Crystallography")
 
         mock_ConfigService.setString.reset_mock()
 
@@ -315,7 +301,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.fill_layout_display()
 
-        calls = [call('a'), call('b'),  call('c')]
+        calls = [call('a'), call('b'), call('c')]
         presenter.view.layout_display.addItem.assert_has_calls(calls)
 
     @patch(WORKBENCH_CONF_CLASSPATH)

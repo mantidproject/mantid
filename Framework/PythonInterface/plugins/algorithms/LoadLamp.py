@@ -38,7 +38,7 @@ class LoadLamp(PythonAlgorithm):
             errors = numpy.array(hf.get('entry1/data1/errors'), dtype='float')
             x = numpy.array(hf.get('entry1/data1/X'), dtype='float')
             if "entry1/data1/PARAMETERS" in hf:
-                logs = str(hf.get('entry1/data1/PARAMETERS')[0])
+                logs = str(hf.get('entry1/data1/PARAMETERS')[0].decode('UTF-8'))
             y = numpy.array([0])
             nspec = 1
             if data.ndim == 2:

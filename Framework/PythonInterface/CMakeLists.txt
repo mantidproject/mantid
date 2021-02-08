@@ -149,16 +149,8 @@ add_subdirectory(test)
 # Installation settings
 
 # Python algorithms
-install(
+mtd_install_dirs(
   DIRECTORY plugins/
-  DESTINATION ${PLUGINS_DIR}/python
-  PATTERN "*.pyc" EXCLUDE
-  PATTERN ".svn" EXCLUDE
-)
-
-install(
-  DIRECTORY plugins/
-  DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
-  PATTERN "*.pyc" EXCLUDE
-  PATTERN ".svn" EXCLUDE
+  INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
+  EXCLUDE "*.pyc"
 )

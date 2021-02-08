@@ -276,7 +276,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # The provided cache directory does not exist
         cache_dir = self.getProperty('CacheDir').value  # absolute or relative path, as a string
-        if bool(cache_dir) and Path(cache_dir).exist() is False:
+        if bool(cache_dir) and Path(cache_dir).exists() is False:
             issues['CacheDir'] = f'Directory {cache_dir} does not exist'
 
         # We cannot clear the cache if property "CacheDir" has not been set
@@ -418,6 +418,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._elementSize,  # Size of one side of the integration element cube in mm
             metaws,  # Optional workspace containing metadata
             self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
+            "SHA", # Use cache files named with sha rather than a filename prefix
         )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:

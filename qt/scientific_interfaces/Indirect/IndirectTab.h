@@ -86,15 +86,7 @@ public:
   /// Used to run python code
   void runPythonCode(std::string const &pythonCode) override;
 
-public slots:
-  void runTab();
-  void setupTab();
-  bool validateTab();
-  void exportPythonScript();
-
-protected slots:
-  /// Slot to handle when an algorithm finishes running
-  virtual void algorithmFinished(bool error);
+  void displayWarning(std::string const &message);
 
 protected:
   /// Run the load algorithms
@@ -168,13 +160,20 @@ protected:
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm);
 
-  QString runPythonCode(const QString &vode, bool no_output = false);
+  QString runPythonCode(const QString &code, bool no_output = false);
 
   /// Checks the ADS for a workspace named `workspaceName`,
   /// opens a warning box for plotting/saving if none found
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName,
                                     const bool plotting,
                                     const bool warn = true);
+
+  /// Overidden by child class.
+  virtual void setup() = 0;
+  /// Overidden by child class.
+  virtual void run() = 0;
+  /// Overidden by child class.
+  virtual bool validate() = 0;
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;
@@ -209,35 +208,37 @@ protected:
   /// Validator for positive double inputs
   QDoubleValidator *m_valPosDbl;
 
-signals:
-  /// Send signal to parent window to show a message box to user
-  void showMessageBox(const QString &message);
-  /// Run a python script
-  void runAsPythonScript(const QString &code, bool noOutput = false);
-
-protected:
-  /// Overidden by child class.
-  virtual void setup() = 0;
-  /// Overidden by child class.
-  virtual void run() = 0;
-  /// Overidden by child class.
-  virtual bool validate() = 0;
-
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 
   std::unique_ptr<IndirectPlotter> m_plotter;
 
+private:
+  std::string getInterfaceProperty(std::string const &interfaceName,
+                                   std::string const &propertyName,
+                                   std::string const &attribute) const;
+
+public slots:
+  void runTab();
+  void setupTab();
+  bool validateTab();
+  void exportPythonScript();
+
+protected slots:
+  /// Slot to handle when an algorithm finishes running
+  virtual void algorithmFinished(bool error);
+
 private slots:
   virtual void handleDataReady(QString const &dataName) {
     UNUSED_ARG(dataName);
   };
 
-private:
-  std::string getInterfaceProperty(std::string const &interfaceName,
-                                   std::string const &propertyName,
-                                   std::string const &attribute) const;
+signals:
+  /// Send signal to parent window to show a message box to user
+  void showMessageBox(const QString &message);
+  /// Run a python script
+  void runAsPythonScript(const QString &code, bool noOutput = false);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

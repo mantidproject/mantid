@@ -62,9 +62,8 @@ public:
                         const std::string &title) override;
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
-  bool askUserYesNo(const std::string &prompt,
-                    const std::string &title) override;
-  bool askUserDiscardChanges() override;
+  bool askUserOkCancel(const std::string &prompt,
+                       const std::string &title) override;
   std::string askUserForLoadFileName(std::string const &filter) override;
   std::string askUserForSaveFileName(std::string const &filter) override;
 

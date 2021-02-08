@@ -7,7 +7,8 @@
 import unittest
 from unittest import mock
 
-from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, FitModeForMerge, \
+from sans.common.enums import SANSInstrument, SANSFacility, DetectorType, ReductionMode, RangeStepType, \
+    FitModeForMerge, \
     DataType, FitType, RebinType
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
@@ -167,8 +168,8 @@ class TomlV1ParserTest(unittest.TestCase):
                                                        "flat": {},
                                                        "tube": {},
                                                        "position": {}},
-                                       "radius_limit" : {"min" : None,
-                                                         "max" : None}}}
+                                       "radius_limit": {"min": None,
+                                                        "max": None}}}
 
         calibration_dict = top_level_dict["detector"]["calibration"]
 
@@ -236,12 +237,18 @@ class TomlV1ParserTest(unittest.TestCase):
         q_resolution_dict["moderator_file"] = mock.NonCallableMock()
         q_resolution_dict["source_aperture"] = 1
         q_resolution_dict["delta_r"] = 2
+        q_resolution_dict["h1"], q_resolution_dict["h2"] = 3, 4
+        q_resolution_dict["w1"], q_resolution_dict["w2"] = 5, 6
 
         q_resolution = self._setup_parser(top_level_dict).get_state_convert_to_q()
 
         self.assertEqual(True, q_resolution.use_q_resolution)
         self.assertEqual(1, q_resolution.q_resolution_a1)
         self.assertEqual(2, q_resolution.q_resolution_delta_r)
+        self.assertEqual(3, q_resolution.q_resolution_h1)
+        self.assertEqual(4, q_resolution.q_resolution_h2)
+        self.assertEqual(5, q_resolution.q_resolution_w1)
+        self.assertEqual(6, q_resolution.q_resolution_w2)
         self.assertEqual(q_resolution_dict["moderator_file"], q_resolution.moderator_file)
 
     def test_gravity(self):
@@ -392,11 +399,11 @@ class TomlV1ParserTest(unittest.TestCase):
 
     def test_parse_mask(self):
         top_level_dict = {"mask": {"beamstop_shadow": {},
-                                   "prompt_peak" : {},
+                                   "prompt_peak": {},
                                    "mask_pixels": [],
                                    "mask_files": [],
                                    "time": {"tof": []}},
-                                   "phi": {}}
+                          "phi": {}}
 
         top_level_dict["mask"]["beamstop_shadow"] = {"width": 10, "angle": 180}
         top_level_dict["mask"]["prompt_peak"] = {"start": 101, "stop": 102}

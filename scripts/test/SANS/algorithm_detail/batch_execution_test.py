@@ -17,6 +17,7 @@ class ADSMock(object):
     """
     An object to mock out the ADS
     """
+
     class GroupWS(object):
         def contains(self, _):
             return True
@@ -57,16 +58,18 @@ class GetAllNamesToSaveTest(unittest.TestCase):
                                                 XMin=1, XMax=14, BinWidth=2)
         reduced_hab_can = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
                                                 XMin=1, XMax=14, BinWidth=2)
-        reduced_lab_sample = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                                XMin=1, XMax=14, BinWidth=2)
-        reduced_hab_sample = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
-                                                XMin=1, XMax=14, BinWidth=2)
+        reduced_lab_sample = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,
+                                                   NumEvents=1,
+                                                   XMin=1, XMax=14, BinWidth=2)
+        reduced_hab_sample = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,
+                                                   NumEvents=1,
+                                                   XMin=1, XMax=14, BinWidth=2)
         transmission = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,
-                                                   NumEvents=1,
-                                                   XMin=1, XMax=14, BinWidth=2)
+                                             NumEvents=1,
+                                             XMin=1, XMax=14, BinWidth=2)
         transmission_can = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,
-                                                   NumEvents=1,
-                                                   XMin=1, XMax=14, BinWidth=2)
+                                                 NumEvents=1,
+                                                 XMin=1, XMax=14, BinWidth=2)
 
         self.reduction_package_merged.reduced_merged = merged_workspace
         self.reduction_package_merged.reduced_lab = lab_workspace
@@ -113,7 +116,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         names_to_save = get_all_names_to_save(reduction_packages, True)
         names = {'merged_workspace', 'lab_workspace', 'hab_workspace',
                  'reduced_lab_can', 'reduced_hab_can',
-                'reduced_lab_sample', 'reduced_hab_sample'}
+                 'reduced_lab_sample', 'reduced_hab_sample'}
         names_expected = set([(name, '', '') for name in names])
         self.assertEqual(names_to_save, names_expected)
 
@@ -266,7 +269,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
-        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
+        file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH,
+                      SaveType.CSV]
 
         save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
 

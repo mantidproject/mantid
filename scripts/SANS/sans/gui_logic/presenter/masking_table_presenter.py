@@ -86,9 +86,8 @@ def perform_load(serialized_state):
 
 
 def perform_move(state, workspace):
-    move_info = state.move
-    move_component(move_info=move_info, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
-    move_component(component_name=None, move_info=move_info, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
+    move_component(state=state, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+    move_component(component_name=None, state=state, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):

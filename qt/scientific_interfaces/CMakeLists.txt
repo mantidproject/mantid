@@ -19,12 +19,6 @@ add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
 set(TEST_FILES
-    test/ALCBaselineModellingModelTest.h
-    test/ALCBaselineModellingPresenterTest.h
-    test/ALCDataLoadingPresenterTest.h
-    test/ALCLatestFileFinderTest.h
-    test/ALCPeakFittingModelTest.h
-    test/ALCPeakFittingPresenterTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
@@ -64,8 +58,6 @@ set(TEST_FILES
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/ClipboardTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
-    test/ISISReflectometry/Common/DecoderTest.h
-    test/ISISReflectometry/Common/EncoderTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE

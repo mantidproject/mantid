@@ -12,12 +12,13 @@ our custom window.
 """
 
 # std imports
+import matplotlib
 import numpy as np
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
-                                       create_subplots, raise_if_not_sequence, plot_md_histo_ws
+from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot, \
+    create_subplots, raise_if_not_sequence, plot_md_histo_ws
 
 from mantid.kernel import Logger, ConfigService
 from mantid.plots.datafunctions import add_colorbar_label
@@ -25,7 +26,6 @@ from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantid.api import IMDHistoWorkspace
-
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -39,6 +39,7 @@ LOGGER = Logger("workspace.plotting.functions")
 DEFAULT_CONTOUR_LEVELS = 2
 DEFAULT_CONTOUR_COLOUR = 'k'
 DEFAULT_CONTOUR_WIDTH = 0.5
+
 
 # -----------------------------------------------------------------------------
 # 'Public' Functions
@@ -55,15 +56,13 @@ def can_overplot():
     compatible.
     """
     compatible = False
-    msg = "Unable to overplot on currently active plot type.\n" \
-          "Please select another plot."
     fig = current_figure_or_none()
     if fig is not None:
         figtype = figure_type(fig)
         if figtype in [FigureType.Line, FigureType.Errorbar, FigureType.Waterfall]:
-            compatible, msg = True, None
+            compatible = True
 
-    return compatible, msg
+    return compatible
 
 
 def current_figure_or_none():
@@ -208,12 +207,14 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
-def pcolormesh(workspaces, fig=None):
+def pcolormesh(workspaces, fig=None, normalize_by_bin_width=None):
     """
     Create a figure containing pcolor subplots
 
     :param workspaces: A list of workspace handles
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
+    :param normalize_by_bin_width: Optional and only to be used in the event that the function is being called as part
+    of a plot restore
     :returns: The figure containing the plots
     """
     # check inputs
@@ -231,7 +232,7 @@ def pcolormesh(workspaces, fig=None):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
-            pcm = pcolormesh_on_axis(ax, ws)
+            pcm = pcolormesh_on_axis(ax, ws, normalize_by_bin_width)
             plots.append(pcm)
             if col_idx < ncols - 1:
                 col_idx += 1
@@ -261,7 +262,7 @@ def pcolormesh(workspaces, fig=None):
     add_colorbar_label(colorbar, axes)
 
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    #assert a minimum size, otherwise we can lose axis labels
+    # assert a minimum size, otherwise we can lose axis labels
     size = fig.get_size_inches()
     if (size[0] <= COLORPLOT_MIN_WIDTH) or (size[1] <= COLORPLOT_MIN_HEIGHT):
         fig.set_size_inches(COLORPLOT_MIN_WIDTH, COLORPLOT_MIN_HEIGHT, forward=True)
@@ -270,19 +271,25 @@ def pcolormesh(workspaces, fig=None):
     return fig
 
 
-def pcolormesh_on_axis(ax, ws):
+def pcolormesh_on_axis(ax, ws, normalize_by_bin_width=None):
     """
     Plot a pcolormesh plot of the given workspace on the given axis
     :param ax: A matplotlib axes instance
     :param ws: A mantid workspace instance
+    :param normalize_by_bin_width: Optional keyword argument to pass to imshow in the event of a plot restoration
     :return:
     """
     ax.clear()
     ax.set_title(ws.name())
+    scale = _get_colorbar_scale()
     if use_imshow(ws):
-        pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower')
+        pcm = ax.imshow(ws, cmap=ConfigService.getString("plots.images.Colormap"), aspect='auto', origin='lower',
+                        norm=scale(), normalize_by_bin_width=normalize_by_bin_width)
+        # remove normalize_by_bin_width from cargs if present so that this can be toggled in future
+        for cargs in pcm.axes.creation_args:
+            cargs.pop('normalize_by_bin_width')
     else:
-        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"))
+        pcm = ax.pcolormesh(ws, cmap=ConfigService.getString("plots.images.Colormap"), norm=scale())
 
     return pcm
 
@@ -290,6 +297,15 @@ def pcolormesh_on_axis(ax, ws):
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
     raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
+
+
+def _get_colorbar_scale():
+    """Get the scale type (Linear, Log) for the colorbar in image type plots"""
+    scale = ConfigService.getString("plots.images.ColorBarScale")
+    if scale == "Log":
+        return matplotlib.colors.LogNorm
+    else:
+        return matplotlib.colors.Normalize
 
 
 @manage_workspace_names

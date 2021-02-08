@@ -19,6 +19,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -36,6 +37,7 @@ public:
   LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
   }
 
   void setUp() override {
@@ -82,6 +84,7 @@ public:
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Degrees")
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_no_scan() {
@@ -169,6 +172,7 @@ public:
     TS_ASSERT_EQUALS(
         outputWS->run().getProperty("Detector.calibration_file")->value(),
         "none")
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_no_scan_requesting_calibrated_throws() {
@@ -255,6 +259,7 @@ public:
         "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
 
     TS_ASSERT_EQUALS(omega->value(), omegaTimeSeriesValue)
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_detector_scan_offset() {
@@ -278,6 +283,7 @@ public:
     position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 5.825, 0.001);
     TS_ASSERT_LESS_THAN(position.X(), 0.);
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_multifile() {
@@ -301,6 +307,7 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
+    checkTimeFormat(outputWS);
   }
 
   void test_D2B_alignment() {
@@ -349,6 +356,7 @@ public:
     TS_ASSERT_DELTA(tube128CentreTime2.Y(), 0., 0.001)
     tube128CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
+    checkTimeFormat(outputWS);
   }
 
   void do_test_D2B_single_file(const std::string &dataType) {
@@ -439,6 +447,7 @@ public:
                      ANGULAR_DETECTOR_SPACING * double(i)),
             1e-2)
       }
+      checkTimeFormat(outputWS);
     }
 
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
@@ -478,6 +487,41 @@ public:
     TS_ASSERT(run.hasProperty("ScanType"));
     const auto type = run.getLogData("ScanType");
     TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+    checkTimeFormat(outputWS);
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("start_time")->value()));
+  }
+
+  void test_D1B() {
+    const int NUMBER_OF_TUBES = 1280;
+    const int NUMBER_OF_MONITORS = 1;
+
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "473432.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TwoThetaOffset", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto run = outputWS->run();
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
+                     NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
+
+    TS_ASSERT(!detInfo.isMonitor({1, 0}))
+    auto firstTube = detInfo.position({1, 0});
+    TS_ASSERT_DELTA(firstTube.angle(V3D(0, 0, 1)) * RAD_2_DEG, 0.85, 1e-6)
+
+    TS_ASSERT_EQUALS(outputWS->y(13)[0], 1394)
+    checkTimeFormat(outputWS);
   }
 
 private:

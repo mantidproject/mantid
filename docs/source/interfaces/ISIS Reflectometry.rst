@@ -487,46 +487,53 @@ Search Interface
 
   *The search interface*
 
+Searching by Investigation ID
+=============================
+
 To search for runs, select the instrument the runs are from, enter the
-experiment ID and cycle name of the investigation the runs are part of, and
-click on **Search**. Note that the cycle name is optional but it is recommended
-to use it to avoid requiring an ICat login. At the time of writing, the ICat
-search is also less reliable.
+experiment ID, and optionally the cycle name, of the investigation the runs are
+part of, and click on **Search**. Providing the cycle name is currently
+recommended if you are on the ISIS network because this avoids the need to log
+in to ICat. At the time of writing, the ICat search is less reliable. However,
+if you are not on the ISIS network or do not know the cycle name, you will need
+to use the ICat search.
 
-In the table below, valid runs and their descriptions will be listed. You can
-then transfer runs to the processing table by selecting the runs you wish to
-transfer, and click the **Transfer** |transfer| button. You can also
-right-click on one of the selected runs and select *Transfer* in the context
-menu that appears.
+If any runs are found for the experiment, their run number and description will
+be listed in the search results table below. Note that if you enter an invalid
+search or if there are no runs in the experiment yet, the table will remain
+empty. If an experiment is currently running, you can re-run the search to
+check for new runs and they will be added to the results table.
 
-Search Transfer
-===============
+Note that some runs will be highlighted in blue. This indicates that they are
+not valid for reduction, e.g. transmission runs, or runs without a valid
+angle. Hover over the row to see a tooltip with the reason the run is invalid.
 
-Search transfer uses the descriptions associated with raw files from the experiment.
+Transferring runs to the processing table
+=========================================
 
-If a run's description contains the text ``th=0.7`` at the end of the
-description then the interface will deduce that the run's angle (also known as
-theta), was ``0.7``, and enter this value into the angle column for you.  This
-holds true for any numeric value.
+In order to process runs they must be transferred to the main table for
+processing. To transfer runs, select them in the search results table and click
+the **Transfer** |transfer| button. You can select multiple items by holding
+Ctrl or Shift while clicking with the mouse or using the up/down arrow keys.
 
-When multiple runs are selected and transferred simultaneously, the interface
-will attempt to organise them appropriately in the processing table. The exact
-behaviour of this is as follows:
+The run number and angle will be populated in the main table. If a run's
+description contains the text ``th=0.7`` at the end of the description then the
+interface will deduce that the run's angle (also known as theta), was ``0.7``,
+and enter this value into the angle column for you.  This holds true for any
+numeric value. If the angle is not set in the description, the run will not be
+valid for transfer.
 
-- Any runs with the same description, excluding their theta value, will be
-  placed into the same group.
-- Any runs with the same description, including their theta value, will be
-  merged into a single row, with all the runs listed in the **Run(s)** column
-  in the format, ``123+124+125``.
+Runs that need to be summed or stitched together are automatically identified
+and grouped as follows:
+
+- Any runs with the same description *and the same theta value* will be merged
+  into a single row. The run numbers will be listed in the format
+  ``123+124+125``. This indicates that they will be summed before being
+  reduced.
+- Any runs with the same description *but a different theta value* will be
+  placed in separate rows but in the same group. This indicates that they will
+  be stitched together after the reduction.
 - Rows within a group will be sorted by angle.
-
-Failed Transfers
-================
-
-When transferring a run from the Search table to the Processing table there may
-exist invalid runs. For example, where theta could not be found or is zero. In
-the image below we have selected four runs from the Search table that we have
-transfered to the processing table.
 
 .. figure:: /images/ISISReflectometryInterface/transfer.png
   :class: screenshot
@@ -534,51 +541,105 @@ transfered to the processing table.
   :align: center
   :alt: Selecting runs from search table to transfer to processing table
 
-  *Selecting runs from search table to transfer to processing table*
+  *Transferring search results to the processing table*
 
-Attempting to transfer an invalid run will result in that run not being
-transferred to the processing table. If the transfer was not successful then
-that specific run will be highlighted in blue in the Search table. Hovering
-over the highlighted run with your cursor will allow you to see why the run was
-invalid.
+Invalid runs
+============
+
+Some runs will be highlighted in blue in the search results table. This means
+they are not valid for reduction, e.g. if theta was not found or is zero. This
+is expected for some runs, e.g. transmission runs. Hovering over a highlighted
+row will display the reason it is invalid.
+
+These runs cannot be transferred to the processing table - if you attempt to
+transfer them they will be ignored - this means you can safely select e.g. all
+of the rows and be sure that only valid rows will be transferred. They will
+also be excluded from auto processing (see below).
+
+Excluding and annotating runs
+=============================
+
+You may with to exclude certain runs from reduction. This is especially useful
+for auto processing (see below). You can mark a run for exclusion by entering a
+reason into the `Exclude` column in the search results table. Double-click the
+cell to edit it and then press Enter or click off the cell when finished. The
+row will be highlighted blue to indicate that it will be excluded, similar to
+invalid rows. Again, a tooltip will display the reason that it is excluded.
+
+You can also add a comment to a run without excluding it by entering text in
+the `Comments` column. This will not affect the reduction and is simply for
+user convenience.
+
+To save your annotations in the `Exclude` and `Comments` columns, save the
+whole batch via the `Batch->Save` menu.
+
+Note that your annotations will be preserved if you re-run the same search or
+run auto-processing. However, if you change the search settings, then the
+existing search results, including your annotations, will be discarded. If you
+have warnings enabled in the `Options` dialog, then you will be warned before
+any unsaved changes are discarded.
 
 Autoprocessing
 ^^^^^^^^^^^^^^
 
+Starting autoprocessing
+=======================
+
 The interface provides **Autoprocessing**, which allows fully automatic
-processing of runs for a particular investigation. Enter the instrument and
-investigation ID and then click `Autoprocess` to start. This then:
+processing of runs for a particular investigation. This works similarly to
+searching for runs by investigation but takes out the manual steps for you. For
+more details on how searching works, see the `Search Interface` section.
 
-- Searches for runs that are part of the investigation the id was supplied for.
-- Transfers any initial runs found for that investigation from the Search table
-  into the Processing table and processes them.y
-- Polls for new runs and transfers and processes any as they are found.
+To start autoprocessing, specify the instrument and investigation ID, and
+optionally the cycle name. Then click `Autoprocess` to start autoproessing for
+this investigation. This will:
 
-If the investigation has not started yet, polling will begin straight away and
-the Processing table will remain empty until runs are created.
-  
-Like the `Process` button in the Processing table, the `Autoprocess` button
-will be disabled while autoprocessing is in progress. If autoprocessing has
-been paused, the button will be enabled again. Clicking `Autoprocess` again
-will resume processing from where it left off.
+- Populate the search results list with runs that are part of the investigation.
+- Transfer valid runs into the processing table, and begin processing them.
+- Periodically check for new runs.
+- If any new runs are found, merge them in to the main table and process them.
 
-Rows that do not contain a valid theta value will not be included in
-autoprocessing - they will be highlighted as failed rows in the Search
-table. The error message will be displayed as a tooltip if you hover over the
-row. These rows can be transferred manually by first pausing autoprocessing and
-then selecting the rows and clicking `Transfer`.
+If the investigation has not started yet, the results list will initially be
+empty. However, polling will begin and runs will be found and processed as soon
+as they become available. Note that there may be a slight delay in the run
+finishing and its file becoming availble on the archive.
 
-Successfully reduced rows are highlighted in green. If a group has been
-post-processed successfully then it is also highlighted in green. If the group
-only contains a single row then post-processing is not applicable, and the
-group will be highlighted in a paler shade of green to indicate that all of its
-rows have been reduced successfully but that post-processing was not performed.
+Invalid/excluded runs
+=====================
 
-If row or group processing fails, the row will be highlighted in blue. The
-error message will be displayed as a tooltip if you hover over the row. Failed
-rows will not be reprocessed automatically, but you can manually re-process
-them by pausing autoprocessing, selecting the required rows, and clicking
-`Process`.
+Runs that are not valid for reduction will not be included in autoprocessing -
+they will be highlighted in blue in the search results table to indicate they
+will be excluded. The reason will be displayed as a tooltip if you hover over
+the row.
+
+You can manually exclude runs from autoprocessing by specifying an `Exclude`
+reason in the search results list. You will need to pause autoprocessing in
+order to edit the table. Alternatively you can do a manual search first to view
+and edit the results before you start autoprocessing.
+
+During autoprocessing
+=====================
+
+Similarly to manual processing, the `Autoprocess` button will be disabled while
+autoprocessing is in progress. If autoprocessing has been paused, the button
+will be enabled again. Clicking `Autoprocess` again will resume processing from
+where it left off.
+
+Successfully reduced rows are highlighted in green in the processing table. If
+a group has been post-processed successfully then it is also highlighted in
+green. If the group only contains a single row then post-processing is not
+applicable, and the group will be highlighted in a paler shade of green to
+indicate that all of its rows have been reduced successfully but that
+post-processing was not performed.
+
+If row or group processing fails, the row will be highlighted in blue in the
+processing table. The error message will be displayed as a tooltip if you hover
+over the row. Failed rows will not be reprocessed automatically, but you can
+manually re-process them by pausing autoprocessing, selecting the required
+rows, and clicking `Process`.
+
+Editing the processing table
+============================
 
 The Processing table is not editable while autoprocessing is running but can be
 edited while paused. Any changes to a row that will affect the result of the
@@ -586,10 +647,10 @@ reduction will cause the row's state to be reset to unprocessed, and the row
 will be re-processed when autoprocessing is resumed. You can also manually
 process selected rows while autoprocessing is paused using the `Process` button.
 
-Rows can be deleted and new rows can be added to the table while autoprocessing
-is paused. Use the buttons at the top of the Processing table, or manually
-transfer them from the Search table. They will then be included when you resume
-autoprocessing.
+Additional rows can be added to the table and will be processed if you restart
+autoprocessing. Note that if you delete rows and then start autoprocessing
+again, they will be re-added to the table. If you want to exclude them, you
+must specify an `Exclude` reason in the search results table.
 
 If workspaces are deleted while autoprocessing is running, or before resuming
 autoprocessing, then affected rows/groups will be reprocessed if their
@@ -597,13 +658,15 @@ mandatory output workspaces no longer exist. If you do not want a row/group to
 be reprocessed, then you must first remove it from the table. Deleting interim
 workspaces such as IvsLam will not cause rows to be reprocessed.
 
-Changing the instrument, investigation id or transfer method while paused and
-then clicking `Autoprocess` will start a new autoprocessing operation, and the
-current contents of the Processing table will be cleared. You will be warned if
+Changing the instrument or search criteria while paused and then clicking
+`Autoprocess` will start a completely new autoprocessing operation. The search
+results and processing table will be cleared and populated with the new
+results. If you have warnings enabled in the `Options`, you will be warned if
 this will cause unsaved changes to be lost.
 
 Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
+
 .. figure:: /images/ISISReflectometryInterface/live_data_section.png
   :class: screenshot
   :width: 400px

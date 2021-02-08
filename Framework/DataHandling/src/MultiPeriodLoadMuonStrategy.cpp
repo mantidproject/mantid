@@ -120,6 +120,19 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
 }
 
 /**
+ * Gets time zero table from loaded time zeros
+ * Assumes all peridos have same time zero
+ * @returns :: Time zero table
+ */
+Workspace_sptr MultiPeriodLoadMuonStrategy::getTimeZeroTable() {
+  auto workspace =
+      std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(0));
+  const auto numSpec = workspace->getNumberHistograms();
+  auto timeZeros = m_nexusLoader.loadTimeZeroListFromNexusFile(numSpec);
+  return createTimeZeroTable(numSpec, timeZeros);
+}
+
+/**
  * Finds the detectors which are loaded in the stored workspace group
  */
 std::vector<detid_t> MultiPeriodLoadMuonStrategy::getLoadedDetectors() {

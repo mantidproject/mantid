@@ -227,11 +227,13 @@ class PropertiesDirective(AlgorithmBaseDirective):
         Returns:
           str: The string to add to the property table description section.
         """
+        from mantid.api import IWorkspaceProperty
+
         desc = str(prop.documentation.replace("\n", " "))
 
         allowedValueString = str(prop.allowedValues)
         # 4 allows for ['']
-        if len(allowedValueString) > 4:
+        if len(allowedValueString) > 4 and not isinstance(prop, IWorkspaceProperty):
             ##make sure the last sentence ended with a full stop (or equivalent)
             if (not desc.rstrip().endswith("."))      \
                 and (not desc.rstrip().endswith("!")) \

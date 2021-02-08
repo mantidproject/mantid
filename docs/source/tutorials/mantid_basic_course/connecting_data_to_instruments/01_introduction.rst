@@ -26,4 +26,4 @@ to their functions
 
 The display window shows the instrument detector coloured according to
 the (integrated) counts in a workspace. The integration range is adjusted
-using the data slider at the bottom.
+using the data slider at the bottom. It can be moved, widened and shrunk using the arrow keys.

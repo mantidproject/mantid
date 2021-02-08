@@ -631,6 +631,52 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
+  void testZeroLengthVectorExecutesWithNaNOutput() {
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2663, 5, 7.5);
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+    Instrument_sptr testInst(new Instrument);
+    // Make it look like MARI (though not bin boundaries are different to the
+    // real MARI file used before)
+    // Define a source and sample position
+    // Define a source component
+    ObjComponent *source =
+        new ObjComponent("moderator", IObject_sptr(), testInst.get());
+    source->setPos(V3D(0, 0.0, -11.739));
+    testInst->add(source);
+    testInst->markAsSource(source);
+    // Define a sample position
+    Component *sample = new Component("samplePos", testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+    Detector *dummyPixel = new Detector("pixel", 1, testInst.get());
+    dummyPixel->setPos(0.0, 0.0, 0.0);
+    testInst->add(dummyPixel);
+    testInst->markAsDetector(dummyPixel);
+    ws->setInstrument(testInst);
+    ws->getSpectrum(0).addDetectorID(dummyPixel->getID());
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setProperty("InputWorkspace", ws);
+    std::string outputSpace = "outWorkspace";
+    conv.setPropertyValue("OutputWorkspace", outputSpace);
+    conv.setPropertyValue("Target", "MomentumTransfer");
+    conv.setPropertyValue("Emode", "Direct");
+    conv.setPropertyValue("Efixed", "12.95");
+    conv.execute();
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
+    TS_ASSERT(std::isnan(output->x(0)[0]));
+  }
+
   void setup_Event() {
     this->inputSpace = "eventWS";
     EventWorkspace_sptr ws =

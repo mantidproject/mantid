@@ -22,7 +22,7 @@ class LoadPresenterTest(unittest.TestCase):
         self._load_model = mock.create_autospec(LoadModel)
         self._co_model = mock.create_autospec(CoLoadModel)
         self.presenter = LoadPresenter(
-        self._view, self._load_model, self._co_model)
+            self._view, self._load_model, self._co_model)
         self.view = self.presenter.view
 
     def test_equalise_last_loaded_run_empty(self):
@@ -35,10 +35,10 @@ class LoadPresenterTest(unittest.TestCase):
     def test_equalise_last_loaded_run_data(self):
         # need to add each in tern for Python 2
         runs = OrderedDict()
-        runs[1]=[]
-        runs[2] =[]
-        runs[5] =[]
-        runs[3]=[]
+        runs[1] = []
+        runs[2] = []
+        runs[5] = []
+        runs[3] = []
         self.presenter.co_model.loaded_runs = runs
         self.presenter.load_model.loaded_runs = runs
         self.presenter.equalise_last_loaded_run(runs)
@@ -66,7 +66,7 @@ class LoadPresenterTest(unittest.TestCase):
         self.presenter.co_model.loaded_runs = runs
         self.presenter.load_model.loaded_runs = OrderedDict()
         self.presenter.set_coadd_loaded_run()
-        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())      
+        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())
 
     def test_set_loaded_run(self):
         self.presenter.equalise_last_loaded_run = mock.Mock()
@@ -74,7 +74,7 @@ class LoadPresenterTest(unittest.TestCase):
         self.presenter.co_model.loaded_runs = OrderedDict()
         self.presenter.load_model.loaded_runs = runs
         self.presenter.set_loaded_run()
-        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())      
+        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())
 
     def test_end_load_thread(self):
         self.presenter.set_loaded_run = mock.Mock()
@@ -101,6 +101,7 @@ class LoadPresenterTest(unittest.TestCase):
     def test_last_loaded_run(self):
         self.presenter._current_run = 5
         self.assertEquals(self.presenter.last_loaded_run(), 5)
+
 
 if __name__ == "__main__":
     unittest.main()

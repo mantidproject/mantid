@@ -44,6 +44,8 @@ public:
     m_view = new NiceMock<MockPlotFitAnalysisPaneView>();
     m_model = new MockPlotFitAnalysisPaneModel();
     m_presenter = new PlotFitAnalysisPanePresenter(m_view, m_model);
+    m_workspaceName = "test";
+    m_range = std::make_pair(0.0, 1.0);
   }
 
   void tearDown() override {
@@ -54,10 +56,9 @@ public:
   }
 
   void test_doFit() {
-    std::string name = "test";
     // set name via addSpectrum
-    EXPECT_CALL(*m_view, addSpectrum(name)).Times(1);
-    m_presenter->addSpectrum(name);
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
     // set up rest of test
 
     IFunction_sptr function =
@@ -65,32 +66,79 @@ public:
             "name = FlatBackground");
 
     EXPECT_CALL(*m_view, getFunction()).Times(1).WillOnce(Return(function));
-    std::pair<double, double> range = std::make_pair(0.0, 1.0);
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(range));
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
 
     EXPECT_CALL(*m_view, updateFunction(function));
 
     m_presenter->doFit();
-    TS_ASSERT_EQUALS(m_model->getCount(), 1);
+    TS_ASSERT_EQUALS(m_model->getFitCount(), 1);
   }
 
   void test_addFunction() {
-
-    IFunction_sptr function =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name = FlatBackground");
+    auto function = Mantid::API::FunctionFactory::Instance().createInitialized(
+        "name = FlatBackground");
     EXPECT_CALL(*m_view, addFunction(function)).Times(1);
     m_presenter->addFunction(function);
   }
 
   void test_addSpectrum() {
-    std::string name = "test";
-    EXPECT_CALL(*m_view, addSpectrum(name)).Times(1);
-    m_presenter->addSpectrum(name);
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+  }
+
+  void
+  test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
+    EXPECT_CALL(*m_view,
+                displayWarning(
+                    "Could not update estimate: data has not been extracted."))
+        .Times(1);
+
+    m_presenter->updateEstimate();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 0);
+    TS_ASSERT(!m_model->hasEstimate());
+  }
+
+  void test_that_calculateEstimate_is_called_as_expected() {
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+
+    m_presenter->updateEstimate();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
+    TS_ASSERT(m_model->hasEstimate());
+  }
+
+  void
+  test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+
+    m_presenter->updateEstimateAfterExtraction();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
+    TS_ASSERT(m_model->hasEstimate());
+  }
+
+  void
+  test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+
+    m_presenter->updateEstimate();
+    m_presenter->updateEstimateAfterExtraction();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
+    TS_ASSERT(m_model->hasEstimate());
   }
 
 private:
   NiceMock<MockPlotFitAnalysisPaneView> *m_view;
   MockPlotFitAnalysisPaneModel *m_model;
   PlotFitAnalysisPanePresenter *m_presenter;
+
+  std::string m_workspaceName;
+  std::pair<double, double> m_range;
 };

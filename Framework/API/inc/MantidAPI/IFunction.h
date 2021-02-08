@@ -44,6 +44,19 @@ class Workspace;
 class MatrixWorkspace;
 class FunctionHandler;
 
+/**
+ * Attribute visitor structure supporting lambda expressions
+ * Example usage: AttributeLambdaVisitor{[](const int val) {...}, [] (const
+ * double val) {}} would create a visitor capable of "visiting" an integer and
+ * double attribute*
+ * It functions by inheriting the () operator defined in each lambda
+ */
+template <class... Ts> struct AttributeLambdaVisitor : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+AttributeLambdaVisitor(Ts...)->AttributeLambdaVisitor<Ts...>;
+
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -250,6 +263,10 @@ public:
     template <typename T> T apply(ConstAttributeVisitor<T> &v) const {
       return boost::apply_visitor(v, m_data);
     }
+    /// Apply a lambda visitor
+    template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) {
+      boost::apply_visitor(v, m_data);
+    }
 
     /// Returns type of the attribute
     std::string type() const;
@@ -401,13 +418,17 @@ public:
   virtual bool isExplicitlySet(size_t i) const = 0;
   /// Get the fitting error for a parameter
   virtual double getError(size_t i) const = 0;
+  /// Get the fitting error for a parameter by name
+  virtual double getError(const std::string &name) const = 0;
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
+  /// Set the fitting error for a parameter by name
+  virtual void setError(const std::string &name, double err) = 0;
 
   /// Check if a parameter i is fixed
-  bool isFixed(size_t i) const;
+  [[nodiscard]] bool isFixed(size_t i) const;
   /// Check if a parameter i is fixed by default (not by user).
-  bool isFixedByDefault(size_t i) const;
+  [[nodiscard]] bool isFixedByDefault(size_t i) const;
   /// Removes a parameter i from the list of active
   void fix(size_t i, bool isDefault = false);
   /// Restores a declared parameter i to the active status
@@ -429,23 +450,23 @@ public:
   /// and ties in composite functions
   virtual size_t getParameterIndex(const ParameterReference &ref) const = 0;
   /// Return a vector with all parameter names
-  std::vector<std::string> getParameterNames() const;
+  [[nodiscard]] std::vector<std::string> getParameterNames() const;
   //@}
 
   /** @name Active parameters */
   //@{
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
-  virtual double activeParameter(size_t i) const;
+  [[nodiscard]] virtual double activeParameter(size_t i) const;
   /// Set new value of i-th active parameter. Override this method to make
   /// fitted parameters different from the declared
   virtual void setActiveParameter(size_t i, double value);
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(size_t i) const;
+  [[nodiscard]] virtual std::string nameOfActive(size_t i) const;
   /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(size_t i) const;
+  [[nodiscard]] virtual std::string descriptionOfActive(size_t i) const;
   /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const;
+  [[nodiscard]] bool isActive(size_t i) const;
   //@}
 
   /** @name Ties */
@@ -468,7 +489,7 @@ public:
   /// Put all ties in order in which they will be applied correctly.
   void sortTies();
   /// Write a parameter tie to a string
-  std::string writeTies() const;
+  [[nodiscard]] std::string writeTies() const;
   //@}
 
   /** @name Constraints */
@@ -478,13 +499,13 @@ public:
   /// Add a constraint to function
   virtual void addConstraint(std::unique_ptr<IConstraint> ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const;
+  [[nodiscard]] virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
   virtual void setConstraintPenaltyFactor(const std::string &parName,
                                           const double &c);
   /// Write a parameter constraint to a string
-  std::string writeConstraints() const;
+  [[nodiscard]] std::string writeConstraints() const;
   /// Remove all constraints.
   virtual void clearConstraints();
   //@}
@@ -492,15 +513,17 @@ public:
   /** @name Attributes */
   //@{
   /// Returns the number of attributes associated with the function
-  virtual size_t nAttributes() const;
+  [[nodiscard]] virtual size_t nAttributes() const;
   /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames() const;
+  [[nodiscard]] virtual std::vector<std::string> getAttributeNames() const;
+  /// Get name of ith attribute
+  [[nodiscard]] virtual std::string attributeName(size_t index) const;
   /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string &name) const;
+  [[nodiscard]] virtual Attribute getAttribute(const std::string &name) const;
   /// Set a value to attribute attName
   virtual void setAttribute(const std::string &name, const Attribute &);
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string &name) const;
+  [[nodiscard]] virtual bool hasAttribute(const std::string &name) const;
   /// Set an attribute value
   template <typename T>
   void setAttributeValue(const std::string &attName, const T &value) {
@@ -515,17 +538,18 @@ public:
   //@}
 
   /// Returns the pointer to i-th child function
-  virtual std::shared_ptr<IFunction> getFunction(size_t i) const;
+  [[nodiscard]] virtual std::shared_ptr<IFunction> getFunction(size_t i) const;
   /// Number of child functions
-  virtual std::size_t nFunctions() const { return 0; }
+  [[nodiscard]] virtual std::size_t nFunctions() const { return 0; }
   /// Set up the function for a fit.
   virtual void setUpForFit();
   /// Get number of values for a given domain.
-  virtual size_t getValuesSize(const FunctionDomain &domain) const;
+  [[nodiscard]] virtual size_t
+  getValuesSize(const FunctionDomain &domain) const;
   /// Get number of domains required by this function
-  virtual size_t getNumberDomains() const;
+  [[nodiscard]] virtual size_t getNumberDomains() const;
   /// Split this function (if needed) into a list of independent functions.
-  virtual std::vector<std::shared_ptr<IFunction>>
+  [[nodiscard]] virtual std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
@@ -536,20 +560,22 @@ public:
   std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
   }
-  /// Set the chi^2
-  void setChiSquared(double chi2) { m_chiSquared = chi2; }
-  /// Get the chi^2
-  double getChiSquared() const { return m_chiSquared; }
+  /// Set the reduced chi^2
+  void setReducedChiSquared(double chi2) { m_chiSquared = chi2; }
+  /// Get the reduced chi^2
+  [[nodiscard]] double getReducedChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
-  void setParallel(bool on) { m_isParallel = on; }
+  void setParallel(bool on) {
+    m_isParallel = on;
+  }
   /// Get the parallel hint
-  bool isParallel() const { return m_isParallel; }
+  [[nodiscard]] bool isParallel() const { return m_isParallel; }
 
   /// Set a function handler
   void setHandler(std::unique_ptr<FunctionHandler> handler);
   /// Return the handler
-  FunctionHandler *getHandler() const { return m_handler.get(); }
+  [[nodiscard]] FunctionHandler *getHandler() const { return m_handler.get(); }
 
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.
@@ -557,11 +583,16 @@ public:
   /// FixedByDefault:  Fixed by default, don't show in ties of
   ///         the output string.
   /// Tied:   Value depends on values of other parameters.
-  enum ParameterStatus { Active, Fixed, FixedByDefault, Tied };
+  enum ParameterStatus {
+    Active,
+    Fixed,
+    FixedByDefault,
+    Tied
+  };
   /// Change status of parameter
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
-  virtual ParameterStatus getParameterStatus(size_t i) const = 0;
+  [[nodiscard]] virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -571,9 +602,10 @@ protected:
                                 const std::string &description = "") = 0;
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
-  double convertValue(double value, Kernel::Unit_sptr &outUnit,
-                      const std::shared_ptr<const MatrixWorkspace> &ws,
-                      size_t wsIndex) const;
+  [[nodiscard]] double
+  convertValue(double value, Kernel::Unit_sptr &outUnit,
+               const std::shared_ptr<const MatrixWorkspace> &ws,
+               size_t wsIndex) const;
 
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
                     const std::shared_ptr<const MatrixWorkspace> &ws,
@@ -595,10 +627,10 @@ protected:
                               const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
-  bool hasOrderedTies() const;
+  [[nodiscard]] bool hasOrderedTies() const;
   void applyOrderedTies();
   /// Writes itself into a string
-  virtual std::string
+  [[nodiscard]] virtual std::string
   writeToString(const std::string &parentLocalAttributesStr = "") const;
 
   friend class ParameterTie;

@@ -61,6 +61,7 @@ set(EXPORT_FILES
     src/Exports/StringContainsValidator.cpp
     src/Exports/PropertyFactory.cpp
     src/Exports/RebinParamsValidator.cpp
+    src/Exports/PhysicalConstants.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
@@ -124,9 +125,13 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
 )
 
+# Add a precompiled header where they are supported
+list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+enable_precompiled_headers(inc/MantidPythonInterface/kernel/Registry/PrecompiledHeader.h ALL_FILES)
+
 # Create the target for this directory
 add_library(
-  PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES}
+  PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION}
                      ${INC_FILES} ${PYTHON_INSTALL_FILES}
 )
 set_python_properties(PythonKernelModule _kernel)

@@ -116,6 +116,7 @@ if(ENABLE_WORKBENCH)
                           Gui
                           Widgets
                           OpenGL
+                          Test
                REQUIRED)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")

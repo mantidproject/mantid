@@ -70,12 +70,9 @@ string(REPLACE ";"
                "${_pth_list_install}")
 file(WRITE ${_scripts_pth_install} "${_pth_list_install}\n")
 
-install(FILES ${_scripts_pth_install}
-        DESTINATION ${BIN_DIR}
-        RENAME mantid-scripts.pth)
-install(FILES ${_scripts_pth_install}
-        DESTINATION ${WORKBENCH_BIN_DIR}
-        RENAME mantid-scripts.pth)
+mtd_install_files(FILES ${_scripts_pth_install}
+                  INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
+                  RENAME mantid-scripts.pth)
 
 # Testing
 add_subdirectory(test)

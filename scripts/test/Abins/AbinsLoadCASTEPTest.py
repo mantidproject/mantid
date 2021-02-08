@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import mantid
-import abins.test_helpers
 import abins.input
+import abins.test_helpers
 from abins.input import CASTEPLoader
+
 
 class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     # simple tests

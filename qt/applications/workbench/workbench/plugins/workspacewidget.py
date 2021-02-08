@@ -7,7 +7,7 @@
 #
 #
 from functools import partial
-from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
+from qtpy.QtWidgets import QApplication, QVBoxLayout
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
@@ -76,6 +76,8 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_3D, plot_type='wireframe'))
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
+        self.workspacewidget.contextMenuAboutToShow.connect(
+            self._on_context_menu)
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
@@ -95,6 +97,13 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
+    def _on_context_menu(self):
+        """
+        Triggered when the context menu is about to be displayed.
+        """
+        ableToOverplot = can_overplot()
+        self.workspacewidget.setOverplotDisabled(not ableToOverplot)
+
     def _do_plot_spectrum(self, names, errors, overplot, advanced=False):
         """
         Plot spectra from the selected workspaces
@@ -106,11 +115,6 @@ class WorkspaceWidget(PluginWidget):
         :param advanced: If true then the advanced options will be shown in
                          the spectra selector dialog.
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         try:
             plot_from_names(names, errors, overplot, advanced=advanced)
         except RuntimeError as re:
@@ -126,11 +130,6 @@ class WorkspaceWidget(PluginWidget):
                                    and it is a compatible figure
         :return:
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         try:
             plot_md_ws_from_names(names, errors, overplot)
         except RuntimeError as re:
@@ -145,11 +144,6 @@ class WorkspaceWidget(PluginWidget):
         :param overplot: If true then the add to the current figure if one
                          exists and it is a compatible figure
         """
-        if overplot:
-            compatible, error_msg = can_overplot()
-            if not compatible:
-                QMessageBox.warning(self, "", error_msg)
-                return
         plot_kwargs = {"axis": MantidAxType.BIN}
         plot(self._ads.retrieveWorkspaces(names, unrollGroups=True),
              errors=errors,
@@ -289,7 +283,7 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
+            if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
                 #If this is ws is just a single value show the data, else plot the bin
                 if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])

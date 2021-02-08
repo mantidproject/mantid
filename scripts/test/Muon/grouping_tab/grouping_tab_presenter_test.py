@@ -248,6 +248,10 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_default_grouping_button_clicked()
         self.assertEqual(self.view.display_warning_box.call_count, 1)
 
+    def test_update_description_to_empty_on_clear_all(self):
+        self.presenter.on_clear_requested()
+        self.assertEqual('', self.view.get_description_text())
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

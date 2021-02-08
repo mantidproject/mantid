@@ -9,6 +9,7 @@ set(TEST_PY_FILES
     create_sans_wavelength_pixel_adjustment_test.py
     convert_to_q_test.py
     crop_helper_test.py
+    mask_workspace_test.py
     mask_sans_workspace_test.py
     merge_reductions_test.py
     move_sans_instrument_component_test.py

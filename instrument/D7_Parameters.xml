@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D7" valid-from="1900-01-01T00:00:00">
+
+  <component-link name="D7">
+    <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
+	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
+	 operators -->
+    <parameter name="formula_eff" type="string">
+      <value val="1.0 - exp(-13.153/sqrt(e))" />
+    </parameter>
+
+    <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
+    <parameter name="sample_distance_chopper" type="number">
+      <value val="0.48" />
+    </parameter>
+    <parameter name="sample_distance_odd" type="number">
+      <value val="1.5177" />
+    </parameter>
+    <parameter name="sample_distance_even" type="number">
+      <value val="1.50518" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>
+

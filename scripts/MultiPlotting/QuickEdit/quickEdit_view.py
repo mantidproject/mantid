@@ -35,6 +35,7 @@ class QuickEditView(QtWidgets.QWidget):
             self.autoscale.setStyleSheet("background-color:lightgrey")
         else:
             self.autoscale = QtWidgets.QCheckBox("Autoscale y")
+            self.autoscale.setChecked(True)
             self.autoscale.setToolTip("While pan or zoom are enabled autoscale is disabled")
 
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))

@@ -34,6 +34,7 @@ set(TEST_PY_FILES
     MDHistoWorkspaceTest.py
     MultipleExperimentInfos.py
     MultipleFilePropertyTest.py
+    PreviewManagerTest.py
     ProgressTest.py
     ProjectionTest.py
     PythonAlgorithmPropertiesTest.py

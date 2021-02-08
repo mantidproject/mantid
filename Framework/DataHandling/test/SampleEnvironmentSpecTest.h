@@ -47,6 +47,20 @@ public:
     TS_ASSERT_EQUALS(testContainer, retrieved);
   }
 
+  void test_Find_Single_Container_Without_ID() {
+    using Mantid::Geometry::Container;
+    SampleEnvironmentSpec spec("CRYO-001");
+    auto testContainer = std::make_shared<Container>("");
+    testContainer->setID("8mm");
+
+    TS_ASSERT_EQUALS(0, spec.ncans());
+    TS_ASSERT_THROWS_NOTHING(spec.addContainer(testContainer));
+    TS_ASSERT_EQUALS(1, spec.ncans());
+    auto retrieved = spec.findContainer("");
+    TS_ASSERT(retrieved);
+    TS_ASSERT_EQUALS(testContainer, retrieved);
+  }
+
   void test_AddObject_Stores_Reference_To_Object() {
     SampleEnvironmentSpec spec("CRYO-001");
 

@@ -9,6 +9,7 @@ import abins.test_helpers
 import abins.input
 from abins.input import CRYSTALLoader
 
+
 class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
 
     def tearDown(self):

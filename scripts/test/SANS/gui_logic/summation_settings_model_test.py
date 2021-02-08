@@ -57,7 +57,7 @@ class SummationSettingsBinSettingsTest(SummationSettingsTestCase):
         self.assertDoesNotHaveBinSettings()
 
 
-class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
+class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase,
                                                 SummationSettingsOverlayEventWorkspaceTestCase):
     def assertHasAdditionalTimeShifts(self):
         self.assertTrue(self.summation_settings.has_additional_time_shifts())
@@ -101,7 +101,7 @@ class SummationSettingsAdditionalTimeShiftsTest(SummationSettingsTestCase, \
         self.assertEqual(additional_time_shifts, self.summation_settings.additional_time_shifts)
 
 
-class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
+class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase,
                                              SummationSettingsOverlayEventWorkspaceTestCase):
     def test_custom_binning_does_not_have_overlay_event_workspaces(self):
         self.setUpWithInitialType(BinningType.CUSTOM)
@@ -132,4 +132,5 @@ class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
         self.assertOverlayEventWorkspacesDisabled()
 
 
-if __name__ == '__main__': unittest.main()
+if __name__ == '__main__':
+    unittest.main()

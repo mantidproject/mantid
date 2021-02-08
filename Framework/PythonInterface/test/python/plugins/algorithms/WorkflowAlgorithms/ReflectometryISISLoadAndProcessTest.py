@@ -313,7 +313,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # Note that the child sliced workspaces don't include the full history - this
         # might be something we want to change in the underlying algorithms at some point
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_1200'), history, False)
 
     def test_slicing_uses_run_in_ADS_with_no_prefix(self):
@@ -330,7 +330,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
              '38415_sliced_2400_3600', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_1'), history, False)
 
     def test_slicing_loads_input_run_if_not_in_ADS(self):
@@ -340,7 +340,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_210'), history, False)
 
     def test_slicing_reloads_input_run_if_workspace_is_incorrect_type(self):
@@ -351,7 +351,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_210'), history, False)
 
     def test_slicing_loads_input_run_if_monitor_ws_not_in_ADS(self):
@@ -362,7 +362,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_210'), history, False)
 
     def test_slicing_with_no_interval_returns_single_slice(self):
@@ -375,7 +375,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'IvsLam_38415_sliced_0_4200', 'TOF_38415', 'TOF_38415_monitors',
                    'TOF_38415_sliced', 'TOF_38415_sliced_0_4200', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_4200'), history, False)
 
     def test_slicing_by_number_of_slices(self):
@@ -387,7 +387,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = self._expected_dummy_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415_sliced_0_1200'), history, False)
 
     def test_slicing_by_log_value(self):
@@ -408,7 +408,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'TOF_38415'+slice2, 'TOF_38415'+slice3]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+                   'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'+slice1), history, False)
 
     def test_slicing_by_log_value_with_no_interval_returns_single_slice(self):
@@ -423,7 +423,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced',
                    'TOF_38415'+sliceName]
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces', 'GroupWorkspaces']
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'+sliceName), history, False)
 
     def test_with_input_workspace_group(self):
@@ -436,7 +436,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
                    'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
-                   'GroupWorkspaces', 'GroupWorkspaces']
+                   'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_12345_1'), history, False)
 
     def test_TOF_input_workspace_groups_collapsed(self):

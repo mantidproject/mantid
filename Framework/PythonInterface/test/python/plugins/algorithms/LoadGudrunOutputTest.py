@@ -31,31 +31,31 @@ class LoadGudrunOutputTest(unittest.TestCase):
     def test_load_dcs(self):
         actual = LoadGudrunOutput(self.file_name.format('.dcs'))
         self.assertIsInstance(actual, Workspace)
-        self.assertEqual(actual.getNumberBins(), 100)
+        self.assertEqual(actual.blocksize(), 100)
         self.assertEqual(actual.getNumberHistograms(), 5)
 
     def test_load_mdsc(self):
         actual = LoadGudrunOutput(self.file_name.format('.mdcs'))
         self.assertIsInstance(actual, Workspace)
-        self.assertEqual(actual.getNumberBins(), 100)
+        self.assertEqual(actual.blocksize(), 100)
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_load_mint(self):
         actual = LoadGudrunOutput(self.file_name.format('.mint'))
         self.assertIsInstance(actual, Workspace)
-        self.assertEqual(actual.getNumberBins(), 100)
+        self.assertEqual(actual.blocksize(), 100)
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_load_mdor(self):
         actual = LoadGudrunOutput(self.file_name.format('.mdor'))
         self.assertIsInstance(actual, Workspace)
-        self.assertEqual(actual.getNumberBins(), 100)
+        self.assertEqual(actual.blocksize(), 100)
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_load_mgor(self):
         actual = LoadGudrunOutput(self.file_name.format('.mgor'))
         self.assertIsInstance(actual, Workspace)
-        self.assertEqual(actual.getNumberBins(), 100)
+        self.assertEqual(actual.blocksize(), 100)
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_one_column_data_file(self):

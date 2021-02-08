@@ -23,6 +23,7 @@ using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
+using namespace MantidQt::MantidWidgets;
 
 // Mock function browser widget
 class MockFunctionBrowser : public IFunctionBrowser {
@@ -42,7 +43,8 @@ public:
   MOCK_METHOD0(clearErrors, void());
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
-  MOCK_METHOD1(setDatasetNames, void(const QStringList &));
+  MOCK_METHOD1(setDatasets, void(const QStringList &));
+  MOCK_METHOD1(setDatasets, void(const QList<FunctionModelDataset> &));
   MOCK_METHOD1(updateMultiDatasetParameters,
                void(const Mantid::API::IFunction &));
   MOCK_METHOD1(updateMultiDatasetParameters,
@@ -53,6 +55,7 @@ public:
   MOCK_CONST_METHOD0(getNumberOfDatasets, int());
   MOCK_CONST_METHOD0(getCurrentDataset, int());
   MOCK_CONST_METHOD0(getDatasetNames, QStringList());
+  MOCK_CONST_METHOD0(getDatasetDomainNames, QStringList());
   MOCK_METHOD3(setLocalParameterValue, void(const QString &, int, double));
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));

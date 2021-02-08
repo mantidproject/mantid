@@ -79,7 +79,7 @@ class PlotsSaverTest(unittest.TestCase):
                                                      u'position': u'Bottom',
                                                      u'visible': True},
                                 u'xAxisScale': u'linear',
-                                u'xLim': (0.0, 1.0),
+                                u'xLim': (0.0, 1.0),u"xAutoScale":False,
                                 u'yAxisProperties': {u'fontSize': 10.0,
                                                      u'gridStyle': {u'gridOn': False},
                                                      u'majorTickFormat': None,
@@ -93,7 +93,7 @@ class PlotsSaverTest(unittest.TestCase):
                                                      u'position': u'Left',
                                                      u'visible': True},
                                 u'yAxisScale': u'linear',
-                                u'yLim': (0.0, 1.0),
+                                u'yLim': (0.0, 1.0),u"yAutoScale":False,
                                 u'showMinorGrid': False},
                 u'textFromArtists': {},
                 u'texts': [{u'position': (0, 0),
@@ -135,7 +135,8 @@ class PlotsSaverTest(unittest.TestCase):
         self.fig.axes[0].creation_args = [{u"specNum": 2, "function": "plot"}]
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
-        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
+        self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot", u"normalize_by_bin_width":
+                                                                                            True}]]
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
@@ -144,6 +145,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.plot_saver.figure_creation_args = [{"function": "plot"}]
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
+        self.loader_plot_dict["axes"][0]['_is_norm'] = True
         expected_value = self.loader_plot_dict["axes"][0]
 
         self.maxDiff = None

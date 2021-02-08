@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import DeleteWorkspace, Load
+from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -639,27 +639,29 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
-def get_group_from_string(grouping_string):
-    if '-' in grouping_string:
-        return list(create_range_from(grouping_string, '-'))
-    elif ':' in grouping_string:
-        return list(create_range_from(grouping_string, ':'))
-    elif '+' in grouping_string:
-        return [int(i) for i in grouping_string.split('+')]
-    else:
-        return [int(grouping_string)]
-
-
-def create_group_from_string(group_detectors, grouping_string):
-    group_detectors.setProperty("SpectraList", get_group_from_string(grouping_string))
+def create_group_from_spectra_list(group_detectors, spectra_list):
+    group_detectors.setProperty("SpectraList", spectra_list)
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
 
 
-def conjoin_workspaces(*workspaces):
-    from mantid.simpleapi import AppendSpectra
+def create_individual_spectra_groups(group_detectors, grouping_string):
+    return [create_group_from_spectra_list(group_detectors, [i]) for i in create_range_from(grouping_string, ':')]
 
+
+def add_group_from_string(groups, group_detectors, grouping_string):
+    if ':' in grouping_string:
+        groups.extend(create_individual_spectra_groups(group_detectors, grouping_string))
+    elif '-' in grouping_string:
+        groups.append(create_group_from_spectra_list(group_detectors, list(create_range_from(grouping_string, '-'))))
+    elif '+' in grouping_string:
+        groups.append(create_group_from_spectra_list(group_detectors, [int(i) for i in grouping_string.split('+')]))
+    else:
+        groups.append(create_group_from_spectra_list(group_detectors, [int(grouping_string)]))
+
+
+def conjoin_workspaces(*workspaces):
     conjoined = workspaces[0]
     for workspace in workspaces[1:]:
         conjoined = AppendSpectra(conjoined, workspace, StoreInADS=False)
@@ -668,7 +670,9 @@ def conjoin_workspaces(*workspaces):
 
 def group_on_string(group_detectors, grouping_string):
     grouping_string.replace(' ', '')
-    groups = [create_group_from_string(group_detectors, group) for group in grouping_string.split(',')]
+    groups = []
+    for sub_string in grouping_string.split(','):
+        add_group_from_string(groups, group_detectors, sub_string)
     return conjoin_workspaces(*groups)
 
 
@@ -738,6 +742,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Get the filename for the grouping file
         if group_file is not None:
             grouping_file = group_file
+            group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
             try:
                 grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]

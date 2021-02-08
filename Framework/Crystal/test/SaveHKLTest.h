@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SaveHKL.h"
@@ -37,6 +38,15 @@ using namespace Mantid::PhysicalConstants;
 
 class SaveHKLTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SaveHKLTest *createSuite() { return new SaveHKLTest(); }
+  static void destroySuite(SaveHKLTest *suite) { delete suite; }
+
+  // create FrameworkManager so that MantidAlgorithms.dll is loaded and
+  // AddAbsorptionWeightedPathLengths algorithm is registered
+  SaveHKLTest() { FrameworkManager::Instance(); }
+
   void test_Init() {
     SaveHKL alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

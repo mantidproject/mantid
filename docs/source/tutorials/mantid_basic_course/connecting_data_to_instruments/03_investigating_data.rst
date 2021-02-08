@@ -123,6 +123,8 @@ To select multiple shapes draw a rubber band around them.
    :alt: SelectMuplipleShapes.png
    :width: 300px
 
+#. Copy selected shapes using Ctrl+C. Then paste them as much as you like using Ctrl+V.
+
 The selected shapes are indicated by drawing a bounding box around each
 of them.
 
@@ -131,6 +133,7 @@ of them.
    :width: 300px
 
 Only translation is possible for a multiple selection.
+
 
 
 Sum selected detectors

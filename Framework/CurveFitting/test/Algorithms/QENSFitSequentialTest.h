@@ -62,7 +62,31 @@ public:
     auto resolution =
         createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
 
-    auto outputBaseName = runConvolutionFit(inputWorkspace, resolution);
+    std::vector<double> startX;
+    std::vector<double> endX;
+    for (int i = 0; i < 6; i++) {
+      // startX and endX for each spectra being fit.
+      startX.push_back(0.0);
+      endX.push_back(3.0);
+    }
+    auto outputBaseName =
+        runConvolutionFit(inputWorkspace, resolution, startX, endX);
+    testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_convolution_fit_single_startX() {
+    const int totalBins = 6;
+    const int totalHist = 5;
+    auto inputWorkspace = createReducedWorkspace(totalBins, totalHist);
+    auto resolution =
+        createResolutionWorkspace(totalBins, totalHist, "__QENS_Resolution");
+    std::vector<double> startX;
+    startX.push_back(0.0);
+    std::vector<double> endX;
+    endX.push_back(3.0);
+    auto outputBaseName =
+        runConvolutionFit(inputWorkspace, resolution, startX, endX);
     testFitOutput(outputBaseName, inputWorkspace->getNumberHistograms());
     AnalysisDataService::Instance().clear();
   }
@@ -72,22 +96,48 @@ public:
     const int totalHist = 10;
 
     std::vector<std::string> names = {"first_red", "second_red"};
-    auto outputBaseName = runMultipleFit(
-        createReducedWorkspaces(names, totalBins, totalHist), peakFunction());
+    std::vector<double> startX;
+    std::vector<double> endX;
+    for (int i = 0; i < 6; i++) {
+      // startX and endX for each spectra being fit.
+      startX.push_back(0.0);
+      endX.push_back(10.0);
+    }
+    auto outputBaseName =
+        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
+                       peakFunction(), startX, endX);
+    testFitOutput(outputBaseName, names.size() * 3);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_multiple_fit_single_startX() {
+    const int totalBins = 15;
+    const int totalHist = 10;
+
+    std::vector<std::string> names = {"first_red", "second_red"};
+    std::vector<double> startX;
+    startX.push_back(0.0);
+    std::vector<double> endX;
+    endX.push_back(10.0);
+    auto outputBaseName =
+        runMultipleFit(createReducedWorkspaces(names, totalBins, totalHist),
+                       peakFunction(), startX, endX);
     testFitOutput(outputBaseName, names.size() * 3);
     AnalysisDataService::Instance().clear();
   }
 
 private:
   std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace,
-                                const MatrixWorkspace_sptr &resolution) {
+                                const MatrixWorkspace_sptr &resolution,
+                                const std::vector<double> &startX,
+                                const std::vector<double> &endX) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("Function", convolutionFunction(resolution->getName()));
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 3.0);
+    alg.setProperty("StartX", startX);
+    alg.setProperty("EndX", endX);
     alg.setProperty("SpecMin", 0);
     alg.setProperty(
         "SpecMax", static_cast<int>(inputWorkspace->getNumberHistograms() - 1));
@@ -104,14 +154,15 @@ private:
 
   std::string runMultipleFit(
       const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-      const std::string &function) {
+      const std::string &function, const std::vector<double> startX,
+      const std::vector<double> endX) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     alg.setProperty("Input", createMultipleFitInput(workspaces));
     alg.setProperty("Function", function);
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 10.0);
+    alg.setProperty("StartX", startX);
+    alg.setProperty("EndX", endX);
     alg.setProperty("ConvolveMembers", true);
     alg.setProperty("Minimizer", "Levenberg-Marquardt");
     alg.setProperty("MaxIterations", 500);
@@ -136,7 +187,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             outputBaseName + "_Result"));
-
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);
   }
 

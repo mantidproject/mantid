@@ -13,6 +13,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -126,6 +127,14 @@ void LoadPSIMuonBin::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                       "TimeZeroList", Kernel::Direction::Output),
                   "A vector of time zero values");
+
+  declareProperty(
+      std::make_unique<
+          Mantid::API::WorkspaceProperty<Mantid::API::ITableWorkspace>>(
+          "TimeZeroTable", "", Mantid::Kernel::Direction::Output,
+          Mantid::API::PropertyMode::Optional),
+      "TableWorkspace of time zeros for each spectra");
+
   declareProperty(
       "CorrectTime", true,
       "Boolean flag controlling whether time should be corrected by timezero.",
@@ -224,6 +233,13 @@ void LoadPSIMuonBin::exec() {
 
   setProperty("TimeZero", absTimeZero);
   setProperty("TimeZeroList", correctedTimeZeroList);
+
+  // create time zero table
+  if (!getPropertyValue("TimeZeroTable").empty()) {
+    auto table =
+        createTimeZeroTable(m_histograms.size(), correctedTimeZeroList);
+    setProperty("TimeZeroTable", table);
+  }
 
   auto firstGoodDataSpecIndex = static_cast<int>(
       *std::max_element(m_header.firstGood, m_header.firstGood + 16));

@@ -46,7 +46,10 @@ public:
 
   // Search methods
   void resizeSearchResultsColumnsToContents() override;
-  ISearchModel const &searchResults() override;
+  int getSearchResultsTableWidth() const override;
+  int getSearchResultsColumnWidth(int column) const override;
+  void setSearchResultsColumnWidth(int column, int width) override;
+  ISearchModel const &searchResults() const override;
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods
@@ -58,6 +61,7 @@ public:
   void setInstrumentComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
+  void setSearchResultsEnabled(bool enabled) override;
   void setStartMonitorButtonEnabled(bool enabled) override;
   void setStopMonitorButtonEnabled(bool enabled) override;
   void setUpdateIntervalSpinBoxEnabled(bool enabled) override;
@@ -122,6 +126,7 @@ private slots:
   void on_buttonMonitor_clicked();
   void on_buttonStopMonitor_clicked();
   void onStartMonitorComplete();
+  void onSearchResultsChanged(const QModelIndex &, const QModelIndex &);
   void onSearchComplete();
   void onInstrumentChanged(int index);
   void onShowSearchContextMenuRequested(const QPoint &pos);

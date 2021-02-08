@@ -11,7 +11,7 @@ Description
 -----------
 
 Algorithm to mask detectors in particular banks, tube, or pixels.
-To use the ``Bank`` argument, the instrument must be one of: ARCS, BIOSANS, CG2 CNCS, CORELLI, EQ-SANS HYSPEC, MANDI, NOMAD, POWGEN, SEQUOIA, SNAP, SXD, TOPAZ, WAND, WISH.
+To use the ``Bank`` argument, the instrument must be one of: ARCS, BIOSANS, CG2, CNCS, CORELLI, D33, EQ-SANS, HYSPEC, MANDI, NOMAD, POWGEN, SEQUOIA, SNAP, SXD, TOPAZ, WAND, WISH.
 For instruments with rectangular position sensitive detectors (POWGEN, SNAP, TOPAZ), the tube is corresponding to the x coordinate, and pixel to the y coordinate.
 For example, on SNAP ``Bank="1"``, ``Tube="3"`` corresponds to ``SNAP/East/Column1/bank1/bank1(x=3)``, and ``Bank="1"``, ``Tube="3"``, ``Pixel="5"`` is ``SNAP/East/Column1/bank1/bank1(x=3)/bank1(3,5)``.
 

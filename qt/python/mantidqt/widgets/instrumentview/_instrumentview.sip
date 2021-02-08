@@ -5,11 +5,13 @@ using namespace MantidQt::MantidWidgets;
 %End
 
 %Include ../../../common_sip/exceptions.sip
+%Include ../../../common_sip/string.sip
 
 %InitialisationCode
 qRegisterMetaType<std::string>("StdString");
 qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 %End
+
 
 //----------------------------------------------------------------------------
 // Classes
@@ -160,6 +162,17 @@ public:
     Args:
         min_value The minimum value over which the data is integrated
         max_value The maximum value over which the data is integrated
+%End
+
+  void replaceWorkspace(const std::string &wsName, const std::string &newInstrumentWindowName);
+%Docstring
+  void replaceWorkspace(const std::string &wsName, const std::string &newInstrumentWindowName)
+  --------------------------------------------------------------------------------------------
+  Replace the workspace being shown by the instrument viewer.
+
+  Args:
+      wsName The name of the workspace to show
+      newInstrumentWindowName The new title of the window
 %End
 
 };

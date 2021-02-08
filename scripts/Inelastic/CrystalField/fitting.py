@@ -226,6 +226,9 @@ class CrystalField(object):
 
         self._setPeaks()
 
+        # Required to build the target function for the first time (which includes applying all ties)
+        self.crystalFieldFunction.initialize()
+
         # Eigensystem
         self._dirty_eigensystem = True
         self._eigenvalues = None
@@ -390,6 +393,8 @@ class CrystalField(object):
         self.crystalFieldFunction.setAttributeValue('Symmetry', value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
+
+        self.crystalFieldFunction.initialize()
 
     @property
     def ToleranceEnergy(self):
@@ -614,16 +619,24 @@ class CrystalField(object):
 
     def _makeBackgroundObject(self, value, prefix=''):
         from .function import Background, Function
-        if value.peak is not None and value.background is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.f0.')
-            background = Function(self.function, prefix=prefix + 'f0.f1.')
-        elif value.peak is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.')
-            background = None
-        elif value.background is not None:
-            peak = None
-            background = Function(self.function, prefix=prefix + 'f0.')
-        return Background(peak=peak, background=background)
+
+        if len(value.functions) > 1:
+            prefix += 'f0.'
+
+        n_functions = 0
+        peak, background = None, None
+        if value.peak is not None:
+            peak = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            n_functions += 1
+        if value.background is not None:
+            background = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            n_functions += 1
+
+        other_functions = []
+        for function_index in range(n_functions, len(value.functions)):
+            other_functions.append(Function(self.function, prefix=prefix + f'f{function_index}.'))
+
+        return Background(peak=peak, background=background, functions=other_functions)
 
     @property
     def PhysicalProperty(self):
@@ -956,18 +969,19 @@ class CrystalField(object):
             createWS.execute()
             plotSpectrum(ws_name, 0)
 
-    def update(self, func):
+    def update(self, func, index=0):
         """
         Update values of the fitting parameters.
         @param func: A IFunction object containing new parameter values.
+        @param index: The index of the function to update in the Background object.
         """
         self.function = func
         if self._background is not None:
             if isinstance(self._background, list):
                 for background in self._background:
-                    background.update(func)
+                    background.update(func, index)
             else:
-                self._background.update(func)
+                self._background.update(func, index)
         self._setPeaks()
 
     def calc_xmin_xmax(self, i):

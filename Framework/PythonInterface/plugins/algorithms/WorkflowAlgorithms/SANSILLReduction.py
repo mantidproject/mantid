@@ -43,13 +43,6 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     @staticmethod
-    def _get_solid_angle_method(instrument):
-        if instrument in ['D11', 'D11lr', 'D16']:
-            return 'Rectangle'
-        else:
-            return 'GenericShape'
-
-    @staticmethod
     def _make_solid_angle_name(ws):
         return mtd[ws].getInstrument().getName()+'_'+str(round(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
@@ -67,6 +60,22 @@ class SANSILLReduction(PythonAlgorithm):
         r2 = ws2.getRunNumber()
         if fabs(l2_1 - l2_2) > tolerance:
             logger.warning('Different distances detected! {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
+
+    @staticmethod
+    def _check_wavelengths_match(ws1, ws2):
+        """
+            Checks if the wavelength difference between the data is close enough
+            @param ws1 : workspace 1
+            @param ws2 : workspace 2
+        """
+        tolerance = 0.01 # A
+        wavelength_1 = ws1.getRun().getLogData('wavelength').value
+        wavelength_2 = ws2.getRun().getLogData('wavelength').value
+        r1 = ws1.getRunNumber()
+        r2 = ws2.getRunNumber()
+        if fabs(wavelength_1 - wavelength_2) > tolerance:
+            logger.warning('Different wavelengths detected! {0}: {1}, {2}: {3}'.format(r1, wavelength_1,
+                                                                                       r2, wavelength_2))
 
     @staticmethod
     def _check_processed_flag(ws, value):
@@ -132,7 +141,10 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('BeamFinderMethod', beam)
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.), doc='Sample thickness [cm]')
+        self.declareProperty('SampleThickness', 0.1,
+                             validator=FloatBoundedValidator(lower=-1),
+                             doc='Sample thickness [cm] (if -1, the value is '
+                             'taken from the nexus file).')
 
         self.setPropertySettings('SampleThickness', sample)
 
@@ -317,6 +329,8 @@ class SANSILLReduction(PythonAlgorithm):
             @param beam_ws: empty beam workspace
         """
         self._check_distances_match(mtd[ws], beam_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], beam_ws)
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
         radius = self.getProperty('BeamRadius').value
         shapeXML = self._cylinder(radius)
@@ -412,6 +426,8 @@ class SANSILLReduction(PythonAlgorithm):
             @ref_ws : reference workspace (water)
         """
         self._check_distances_match(mtd[ws], ref_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], ref_ws)
         sample_l2 = mtd[ws].getRun().getLogData('L2').value
         ref_l2 = ref_ws.getRun().getLogData('L2').value
         flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
@@ -443,6 +459,8 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
         self._check_distances_match(mtd[ws], beam_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], beam_ws)
 
     def _apply_transmission(self, ws, transmission_ws):
         """
@@ -461,7 +479,7 @@ class SANSILLReduction(PythonAlgorithm):
                                         TransmissionError=transmission_err, ThetaDependent=theta_dependent,
                                         OutputWorkspace=ws)
         else:
-            # wavelenght dependent transmission, need to rebin
+            # wavelength dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
             RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
                              OutputWorkspace=transmission_rebinned)
@@ -478,6 +496,8 @@ class SANSILLReduction(PythonAlgorithm):
         if not self._check_processed_flag(container_ws, 'Container'):
             self.log().warning('Container input workspace is not processed as container.')
         self._check_distances_match(mtd[ws], container_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], container_ws)
         Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
 
     def _apply_parallax(self, ws):
@@ -486,9 +506,8 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws : the input workspace
         """
         self.log().information('Performing parallax correction')
-        if self._instrument == 'D33':
-            components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
-                          'front_detector_left', 'front_detector_right']
+        if self._instrument in ['D33', 'D11B', 'D22B']:
+            components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
         else:
             components = ['detector']
         ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
@@ -502,8 +521,8 @@ class SANSILLReduction(PythonAlgorithm):
         instrument = mtd[ws].getInstrument()
         if instrument.hasParameter('tau'):
             tau = instrument.getNumberParameter('tau')[0]
-            if self._instrument == 'D33':
-                grouping_filename = 'D33_Grouping.xml'
+            if self._instrument == 'D33' or self._instrument == 'D11B':
+                grouping_filename = self._instrument + '_Grouping.xml'
                 grouping_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
                 DeadTimeCorrection(InputWorkspace=ws, Tau=tau, MapFile=grouping_file, OutputWorkspace=ws)
             elif instrument.hasParameter('grouping'):
@@ -517,13 +536,9 @@ class SANSILLReduction(PythonAlgorithm):
 
     def _finalize(self, ws, process):
         if process != 'Transmission':
-            if self._instrument == 'D33':
-                CalculateDynamicRange(Workspace=ws,
-                                      ComponentNames=['back_detector',
-                                                      'front_detector_right',
-                                                      'front_detector_left',
-                                                      'front_detector_top',
-                                                      'front_detector_bottom'])
+            if self._instrument in ['D33', 'D11B', 'D22B']:
+                components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0]
+                CalculateDynamicRange(Workspace=ws, ComponentNames=components.split(','))
             elif self._instrument == 'D16' and mtd[ws].getAxis(0).getUnit().caption() != "Wavelength":
                 # D16 omega scan case : we have an histogram indexed by omega, not wavelength
                 pass
@@ -544,6 +559,50 @@ class SANSILLReduction(PythonAlgorithm):
         mask_ws = self.getProperty('MaskedInputWorkspace').value
         if mask_ws:
             self._mask(ws, mask_ws)
+
+    def _apply_thickness(self, ws):
+        """
+            Perform the normalization by sample thickness. In case the provided
+            thickness is -1, this method will try to get it from the sample
+            logs.
+            @param ws : input workspace on wich the normalization is applied.
+        """
+        thickness = self.getProperty('SampleThickness').value
+        if thickness == -1:
+            try:
+                run = mtd[ws].getRun()
+                thickness = run.getLogData('sample.thickness').value
+                self.log().information("Sample thickness read from the sample "
+                                       "logs: {0} cm.".format(thickness))
+            except:
+                thickness = self.getProperty("SampleThickness").getDefault
+                thickness = float(thickness)
+                self.log().warning("Sample thickness not found in the sample "
+                                   "logs. Using the default value: {:.2f}"
+                                   .format(thickness))
+            finally:
+                self.setProperty('SampleThickness', thickness)
+        NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws,
+                             SampleThickness=thickness)
+
+    def _set_sample_title(self, ws):
+        """
+            Set the workspace title using Nexus file fields.
+            @param ws : input workspace
+        """
+        run = mtd[ws].getRun()
+        title = ''
+        if run.hasProperty('sample_description'):
+            title = run.getLogData('sample_description').value
+            if title:
+                mtd[ws].setTitle(title)
+                return
+
+        if run.hasProperty('sample.sampleId'):
+            title = run.getLogData('sample.sampleId').value
+            if title:
+                title = "Sample ID = " + title
+                mtd[ws].setTitle(title)
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
@@ -602,7 +661,7 @@ class SANSILLReduction(PythonAlgorithm):
                         else:
                             input_solid = ws
                         SolidAngle(InputWorkspace=input_solid, OutputWorkspace=solid_angle,
-                                   Method=self._get_solid_angle_method(self._instrument))
+                                   Method="Rectangle")
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:
                         DeleteWorkspace(solid_angle)
@@ -612,16 +671,16 @@ class SANSILLReduction(PythonAlgorithm):
                         if container_ws:
                             self._apply_container(ws, container_ws)
                         self._apply_masks(ws)
-                        thickness = self.getProperty('SampleThickness').value
-                        NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
+                        self._apply_thickness(ws)
                         # parallax (gondola) effect
-                        if self._instrument in ['D22', 'D22lr', 'D33']:
+                        if self._instrument in ['D22', 'D22lr', 'D33', 'D11B', 'D22B']:
                             self._apply_parallax(ws)
                         progress.report()
                         sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
                         if sensitivity_out:
                             self._process_sensitivity(ws, sensitivity_out)
                         self._process_sample(ws)
+                        self._set_sample_title(ws)
                         progress.report()
         self._finalize(ws, process)
 

@@ -138,3 +138,10 @@ class D2B_Merge_ReductionTest(_DiffReductionTest):
         PowderILLDetectorScan(Run='508093-508095', OutputWorkspace='sum')
         match = CompareWorkspaces(Workspace1='out_1D', Workspace2='sum_1D')
         self.assertTrue(match[0])
+
+
+class D20_TwoScansMerged_Test(_DiffReductionTest):
+
+    def runTest(self):
+        PowderILLDetectorScan(Run='167339:167340', OutputWorkspace='out', CropNegativeScatteringAngles=False)
+        return ['out_1D', 'D20_DetectorScan_1D.nxs']

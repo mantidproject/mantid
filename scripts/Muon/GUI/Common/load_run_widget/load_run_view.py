@@ -108,6 +108,9 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.increment_run_button.setEnabled(True)
         self.decrement_run_button.setEnabled(True)
 
+    def hide_current_run_button(self):
+        self.load_current_run_button.hide()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Instrument / run-edit
     # ------------------------------------------------------------------------------------------------------------------
@@ -149,6 +152,9 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def clear(self):
         self.set_run_edit_text("")
+
+    def hide_instrument_label(self):
+        self.instrument_label.hide()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Signal/slot connections called by presenter

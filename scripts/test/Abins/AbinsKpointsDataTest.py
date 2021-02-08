@@ -5,10 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import numpy as np
 
+import numpy as np
 from abins.kpointsdata import KpointsData, KpointData
-from abins.constants import ACOUSTIC_PHONON_THRESHOLD
 
 
 class KpointsDataTest(unittest.TestCase):

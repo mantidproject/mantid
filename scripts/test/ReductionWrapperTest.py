@@ -50,6 +50,7 @@ class test_helper(ReductionWrapper):
         return lambda: custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         #return None
+
     @iliad
     def reduce(self, input_file=None, output_directory=None):
 
@@ -287,6 +288,64 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertTrue('SR_MAR000400#1_reduced' in mtd)
         self.assertTrue('SR_MAR000400#2_reduced' in mtd)
 
+    def test_check_archive_logs(self):
+        th = test_helper()
+
+        propman = th.reducer.prop_man
+        # define unique log file to use instead of real log file
+        # for testing all branches of log validation routine
+        test_dir = config.getString('defaultsave.directory')
+        test_log = os.path.normpath(test_dir+'lastrun.txt')
+        # clear up rubbish from previous runs if any
+        if os.path.isfile(test_log):
+            os.remove(test_log)
+        propman.archive_upload_log_file = test_log
+
+        # no log file at all
+        ok,run_num,info = th._check_progress_log_run_completed(10)
+        self.assertTrue(ok)
+        self.assertEqual(run_num,0)
+        self.assertEqual(info,'log test disabled as no log file available')
+
+        # Upload log have appeared:
+        with open(test_log,'w') as fh:
+            fh.write('MAR 1000 0 \n')
+        # need to set up the test log value again, as log test had been disabled automatically if no log file was found
+        propman.archive_upload_log_file = test_log
+
+        # log file states data available
+        ok,run_num,info = th._check_progress_log_run_completed(10)
+        self.assertTrue(ok)
+        self.assertEqual(run_num,1000)
+        self.assertEqual(len(info),0)
+
+        # no changes for the second attempt to look at file
+        ok,run_num,info = th._check_progress_log_run_completed(1000)
+        self.assertTrue(ok)
+        self.assertEqual(run_num,1000)
+        self.assertEqual(info,'no new data have been added to archive')
+
+        ok,run_num,info = th._check_progress_log_run_completed(1001)
+        self.assertFalse(ok)
+        self.assertEqual(run_num,1000)
+        self.assertEqual(info,'no new data have been added to archive')
+
+        with open(test_log,'w') as fh:
+            fh.write('MAR 1001 0 \n')
+        m_time = os.path.getmtime(test_log)
+        # Update modification time manually as some OS and some tests do not update it properly
+        m_time  = m_time +1
+        os.utime(test_log,(m_time,m_time))
+        # next attempt is successfull
+        ok,run_num,info = th._check_progress_log_run_completed(1001)
+        self.assertEqual(info,'')
+        self.assertEqual(run_num,1001)
+        self.assertTrue(ok)
+
+        os.remove(test_log)
+
 
 if __name__ == "__main__":
+    #tester=ReductionWrapperTest('test_check_archive_logs')
+    #tester.run()
     unittest.main()

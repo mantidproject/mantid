@@ -115,8 +115,8 @@ public:
         calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec),
         const std::runtime_error &);
 
-    Mock::VerifyAndClearExpectations(entropy);
-    Mock::VerifyAndClearExpectations(transform);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(entropy));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(transform));
   }
 
   void test_size_complex_data_real_image() {
@@ -156,8 +156,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec));
 
-    Mock::VerifyAndClearExpectations(entropy);
-    Mock::VerifyAndClearExpectations(transform);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(entropy));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(transform));
   }
 
   void test_size_resolution_factor() {
@@ -214,8 +214,8 @@ public:
         calculator.iterate(vec2, vec2, vec1, bkg, emptyVec, emptyVec),
         const std::runtime_error &);
 
-    Mock::VerifyAndClearExpectations(entropy);
-    Mock::VerifyAndClearExpectations(transform);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(entropy));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(transform));
   }
 
   void test_data_not_loaded() {
@@ -273,8 +273,8 @@ public:
     TS_ASSERT_DELTA(calculator.getChisq(), 1, 1e-8);
     TS_ASSERT_DELTA(calculator.getAngle(), 0.7071, 1e-4);
 
-    Mock::VerifyAndClearExpectations(entropy);
-    Mock::VerifyAndClearExpectations(transform);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(entropy));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(transform));
   }
 
   void test_dirs_coefficients() {
@@ -335,7 +335,7 @@ public:
     TS_ASSERT_DELTA(coeff.c2[0][1], 0, 1E-6);
     TS_ASSERT_DELTA(coeff.c2[1][1], 0, 1E-6);
 
-    Mock::VerifyAndClearExpectations(entropy);
-    Mock::VerifyAndClearExpectations(transform);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(entropy));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(transform));
   }
 };

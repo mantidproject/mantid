@@ -16,6 +16,7 @@ The Simplest Plot
 #. Right click the workspace in the workspace list.
 #. Select "Plot > Spectrum ...".
 #. In the dialog that appears enter "1-3" in the spectra number box.
+#. Click "OK".
 
 You should get a plot like this with three spectra corresponding to
 spectra 1-3 (which in this case these are the monitors on MARI):
@@ -42,11 +43,12 @@ Another way to plot
       want.
    -  Click while holding Ctrl to select / deselect individual rows.
 
-4. Please highlight rows 0-2 and bring up the right-click
-   menu:
+4. Please highlight rows 0-2 and bring up the following right-click
+   menu. Select ``Plot spectrum (values only)``.
 
 .. figure:: /images/300px-MatrixDisplayRightClickOptions.png
    :align: center
+   :alt: Select "Plot spectrum (values only)"
 
 
 5. You will be presented with options for plotting the selected spectra,

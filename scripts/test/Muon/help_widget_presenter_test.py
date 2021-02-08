@@ -5,13 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
-from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets import manageuserdirectories
 
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication

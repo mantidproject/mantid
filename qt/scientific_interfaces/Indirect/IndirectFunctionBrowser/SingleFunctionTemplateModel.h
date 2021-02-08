@@ -8,10 +8,10 @@
 
 #include "DllConfig.h"
 #include "IFQFitObserver.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
 #include <QMap>

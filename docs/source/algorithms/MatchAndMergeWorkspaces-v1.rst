@@ -65,3 +65,7 @@ Workflow
 ########
 
 .. diagram:: MatchAndMergeWorkspaces-v1_wkflw.dot
+
+.. categories::
+
+.. sourcelink::

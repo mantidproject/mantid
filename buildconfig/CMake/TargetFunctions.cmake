@@ -16,9 +16,7 @@ function (mtd_install_targets)
         return()
     endif()
 
-    list(REMOVE_DUPLICATES PARSED_INSTALL_DIRS)
-    set ( _install_dirs ${PARSED_INSTALL_DIRS} )
-
+    _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
     foreach( _dir ${_install_dirs})
         install ( TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_dir} )
     endforeach ()
@@ -27,10 +25,10 @@ endfunction()
 # Install files into multiple directories
 # This respects ENABLE_WORKBENCH flags for macOS
 function (mtd_install_files)
-  set (options)
-  set (oneValueArgs RENAME)
-  set (multiValueArgs FILES INSTALL_DIRS)
-  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+    set (options)
+    set (oneValueArgs RENAME)
+    set (multiValueArgs FILES INSTALL_DIRS)
+    cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
 
     if (NOT PARSED_INSTALL_DIRS)
@@ -41,9 +39,9 @@ function (mtd_install_files)
         message(FATAL_ERROR "Empty argument FILES")
         return()
     endif()
-     list(REMOVE_DUPLICATES PARSED_INSTALL_DIRS)
 
-     foreach( _dir ${PARSED_INSTALL_DIRS})
+     _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
+     foreach( _dir ${_install_dirs})
          # install (FILES ) only overwrites file if timestamp is different. Touch files here to always overwrite
          # Wrap call to execute_process in install (CODE ) so it runs at package time and not build time
          install ( CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E touch \"${PARSED_FILES}\")")

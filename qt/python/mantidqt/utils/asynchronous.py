@@ -14,10 +14,10 @@ import threading
 import time
 from traceback import extract_tb
 from mantid.api import IAlgorithm
-from enum import Enum
+from enum import IntEnum
 
 
-class TaskExitCode(Enum):
+class TaskExitCode(IntEnum):
     OK = 0
     ERROR = 1
     SYNTAX_ERROR = 2

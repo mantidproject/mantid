@@ -320,7 +320,16 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
   getDetectorsInBank(dets, *comp);
 }
 
-//------------------------------------------------------------------------------------------
+/** Checks to see if the Instrument has a source.
+ *   @returns True if the instrument has a source cache.
+ */
+bool Instrument::hasSource() const { return m_sourceCache; }
+
+/** Checks to see if the Instrument has a sample.
+ *   @returns True if the instrument has a sample cache.
+ */
+bool Instrument::hasSample() const { return m_sampleCache; }
+
 /** Gets a pointer to the source
  *   @returns a pointer to the source
  */

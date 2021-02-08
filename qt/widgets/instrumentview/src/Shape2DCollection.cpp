@@ -28,7 +28,8 @@ namespace MantidWidgets {
 
 Shape2DCollection::Shape2DCollection()
     : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr),
-      m_currentCP(0), m_overridingCursor(false) {}
+      m_currentCP(0), m_copiedShapes(QList<Shape2D *>()),
+      m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
   foreach (Shape2D *shape, m_shapes) { delete shape; }
@@ -529,6 +530,43 @@ void Shape2DCollection::removeSelectedShapes() {
   if (!shapeList.isEmpty()) {
     removeShapes(shapeList);
     emit shapesDeselected();
+  }
+}
+
+/**
+ * @brief Shape2DCollection::copySelectedShapes
+ * Add the selected shapes to a copy buffer. Remove those previously stored.
+ */
+void Shape2DCollection::copySelectedShapes() {
+  m_copiedShapes.clear();
+  foreach (auto shape, m_selectedShapes) {
+    Shape2D *newShape = shape->clone();
+    newShape->setFillColor(shape->getFillColor());
+    // the fill color is not transmitted by the clone operator
+    m_copiedShapes.push_back(newShape);
+  }
+}
+
+/**
+ * @brief Shape2DCollection::pasteCopiedShapes
+ * Add a copy of the shapes stored in the copy buffer to the collection.
+ */
+void Shape2DCollection::pasteCopiedShapes() {
+  foreach (auto shape, m_copiedShapes) {
+    Shape2D *newShape;
+    if (shape->type() == "sector") {
+      double angleOffset =
+          shape->getDouble("endAngle") - shape->getDouble("startAngle");
+      shape->setDouble("startAngle",
+                       shape->getDouble("startAngle") + angleOffset);
+
+      shape->setDouble("endAngle", shape->getDouble("endAngle") + angleOffset);
+    } else {
+      shape->moveBy(QPointF(0.1, -0.1));
+    }
+    newShape = shape->clone();
+    newShape->setFillColor(shape->getFillColor());
+    addShape(newShape, false);
   }
 }
 

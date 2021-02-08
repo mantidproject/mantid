@@ -148,7 +148,8 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
                    params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection,
-                    params.attenuationProfileFileName);
+                    params.attenuationProfileFileName,
+                    params.xRayAttenuationProfileFileName);
 }
 
 /**
@@ -194,16 +195,17 @@ void ReadMaterial::setNumberDensity(
   }
 }
 
-void ReadMaterial::setScatteringInfo(double coherentXSection,
-                                     double incoherentXSection,
-                                     double attenuationXSection,
-                                     double scatteringXSection,
-                                     std::string attenuationProfileFileName) {
+void ReadMaterial::setScatteringInfo(
+    double coherentXSection, double incoherentXSection,
+    double attenuationXSection, double scatteringXSection,
+    std::string attenuationProfileFileName,
+    std::string xRayAttenuationProfileFileName) {
   builder.setCoherentXSection(coherentXSection);       // in barns
   builder.setIncoherentXSection(incoherentXSection);   // in barns
   builder.setAbsorptionXSection(attenuationXSection);  // in barns
   builder.setTotalScatterXSection(scatteringXSection); // in barns
   builder.setAttenuationProfileFilename(attenuationProfileFileName);
+  builder.setXRayAttenuationProfileFilename(xRayAttenuationProfileFileName);
 }
 
 bool ReadMaterial::isEmpty(const double toCheck) {

@@ -30,9 +30,9 @@ class MaxEntModelTest(unittest.TestCase):
         inputs["maxent"] = empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()
-        assert(self.model.setRun.call_count == 1)
-        assert(self.model.MaxEntAlg.call_count == 1)
-        assert(self.model.makePhaseTable.call_count == 0)
+        assert (self.model.setRun.call_count == 1)
+        assert (self.model.MaxEntAlg.call_count == 1)
+        assert (self.model.makePhaseTable.call_count == 0)
 
     def testAll_execute(self):
         empty = {}
@@ -42,9 +42,10 @@ class MaxEntModelTest(unittest.TestCase):
         inputs["phaseTable"] = empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()
-        assert(self.model.setRun.call_count == 1)
-        assert(self.model.MaxEntAlg.call_count == 1)
-        assert(self.model.makePhaseTable.call_count == 1)
+        assert (self.model.setRun.call_count == 1)
+        assert (self.model.MaxEntAlg.call_count == 1)
+        assert (self.model.makePhaseTable.call_count == 1)
+
 
 if __name__ == '__main__':
     unittest.main()

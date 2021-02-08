@@ -191,7 +191,7 @@ The following options are available for grouping output data:
 
 Custom
   Follows the same grouping patterns used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
-  An example of the syntax is 1,2+3,4-6,7-10
+  An example of the syntax is 1,2+3,4-6,7:10
 
   This would produce spectra for: spectra 1, the sum of spectra 2 and 3, the sum of spectra 4-6 (4+5+6)
   and individual spectra from 7 to 10 (7,8,9,10)

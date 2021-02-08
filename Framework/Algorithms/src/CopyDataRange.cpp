@@ -42,10 +42,8 @@ void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace,
                    int const &specMin, int const &specMax, double const &xMin,
                    double const &xMax, int yInsertionIndex,
                    int const &xInsertionIndex) {
-  auto const xMinIndex =
-      static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0, 0.000001));
-  auto const xMaxIndex =
-      static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0, 0.000001));
+  auto const xMinIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0));
+  auto const xMaxIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0));
 
   copyDataRange(inputWorkspace, std::move(destWorkspace), specMin, specMax,
                 xMinIndex, xMaxIndex, yInsertionIndex, xInsertionIndex);
@@ -96,11 +94,15 @@ void CopyDataRange::init() {
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), positiveInt,
                   "The index denoting the end of the spectra range.");
 
-  declareProperty("XMin", EMPTY_DBL(), anyDouble,
-                  "An X value that is within the first (lowest X value) bin");
+  declareProperty(
+      "XMin", EMPTY_DBL(), anyDouble,
+      "An X value that is equal to the lowest point to copy (point data), or "
+      "an X value that is within the first bin to copy (histogram data).");
 
-  declareProperty("XMax", EMPTY_DBL(), anyDouble,
-                  "An X value that is in the highest X value bin");
+  declareProperty(
+      "XMax", EMPTY_DBL(), anyDouble,
+      "An X value that is equal to the highest point to copy (point data), or "
+      "an X value that is within the last bin to copy (histogram data).");
 
   declareProperty("InsertionYIndex", 0, positiveInt,
                   "The index denoting the histogram position for the start of "

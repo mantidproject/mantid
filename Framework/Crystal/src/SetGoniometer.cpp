@@ -56,6 +56,9 @@ void SetGoniometer::init() {
                         propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
   }
+  declareProperty("Average", true,
+                  "Use the average value of the log, if false a separate "
+                  "goniometer will be created for each value in the logs");
 }
 
 /** Execute the algorithm.
@@ -158,7 +161,10 @@ void SetGoniometer::exec() {
   // All went well, copy the goniometer into it. It will throw if the log values
   // cannot be found
   try {
-    ei->mutableRun().setGoniometer(gon, true);
+    if (getProperty("Average"))
+      ei->mutableRun().setGoniometer(gon, true);
+    else
+      ei->mutableRun().setGoniometers(gon);
   } catch (std::runtime_error &) {
     g_log.error("No log values for goniometers");
   }

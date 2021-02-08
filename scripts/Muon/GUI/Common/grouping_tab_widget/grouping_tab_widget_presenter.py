@@ -33,7 +33,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
 
-        self._view.set_description_text(self.text_for_description())
+        self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
@@ -78,14 +78,19 @@ class GroupingTabPresenter(object):
         instrument = self._model.instrument
         n_detectors = self._model.num_detectors
         main_field = self._model.main_field_direction
-        text = "{} , {} detectors, main field : {} to muon polarization".format(
-            instrument, n_detectors, main_field)
+        text = "{}, {} detectors".format(
+            instrument, n_detectors)
+        if main_field:
+            text += ", main field : {} to muon polarization".format(main_field)
         return text
 
     def update_description_text(self, description_text=''):
         if not description_text:
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
+
+    def update_description_text_to_empty(self):
+        self._view.set_description_text('')
 
     def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
 
@@ -223,7 +228,7 @@ class GroupingTabPresenter(object):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
-        self.update_description_text()
+        self.update_description_text_to_empty()
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
