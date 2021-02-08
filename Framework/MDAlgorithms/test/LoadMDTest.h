@@ -1089,7 +1089,7 @@ public:
   }
 
   void test_old() {
-    // Arrange
+    // Load a file in read mode lacking goniometer info
     std::string filename("WISH_md_small.nxs");
     std::string outWSName("LoadMD_old");
 

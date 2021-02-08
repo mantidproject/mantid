@@ -604,7 +604,6 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   for (const auto &thisWorkspace : vec_ws2d) {
     uint16_t runnumber = static_cast<uint16_t>(
         std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
-
     detid_t detindex = 0;
 
     size_t nHist = thisWorkspace->getNumberHistograms();
@@ -620,7 +619,9 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
+      const uint16_t goniometerIndex(0);
+      inserter.insertMDEvent(signal, error * error, runnumber,
+                             goniometerIndex, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
@@ -697,7 +698,9 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
+      const uint16_t goniometerIndex(0);
+      inserter.insertMDEvent(signal, error * error, runnumber, goniometerIndex,
+                             detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
