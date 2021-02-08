@@ -470,8 +470,8 @@ public:
    * @param txt The search string
    * @return A vector of strings containing object names in the ADS
    */
-  std::vector<std::string> getObjectNamesStartWith(
-      const std::string &txt) const {
+  std::vector<std::string>
+  getObjectNamesStartWith(const std::string &txt) const {
     std::vector<std::string> foundNames;
     bool showHidden;
 
@@ -495,8 +495,7 @@ public:
    * @param txt The search string
    * @return A vector of strings containing object names in the ADS
    */
-  std::vector<std::string> getObjectNamesEndWith(
-      const std::string &txt) const {
+  std::vector<std::string> getObjectNamesEndWith(const std::string &txt) const {
     std::vector<std::string> foundNames;
     bool showHidden;
 
@@ -511,7 +510,7 @@ public:
         continue;
       }
       if (item.first.compare(item.first.length() - txt.length(), txt.length(),
-            txt) == 0) {
+                             txt) == 0) {
         foundNames.push_back(item.first);
       }
     }
@@ -524,8 +523,7 @@ public:
    * @param txt The search string
    * @return A vector of strings containing object names in the ADS
    */
-  std::vector<std::string> getObjectNamesContain(
-      const std::string &txt) const {
+  std::vector<std::string> getObjectNamesContain(const std::string &txt) const {
     std::vector<std::string> foundNames;
     bool showHidden;
 
