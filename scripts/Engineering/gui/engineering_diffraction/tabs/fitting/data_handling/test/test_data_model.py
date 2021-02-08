@@ -154,8 +154,7 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".DeleteWorkspace")
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
-    @patch(data_model_path + ".Plus")
-    def test_do_background_subtraction_first_time(self, mock_plus, mock_minus, mock_estimate_bg, mock_delete_ws):
+    def test_do_background_subtraction_first_time(self, mock_minus, mock_estimate_bg, mock_delete_ws):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
         self.model._bg_sub_workspaces = {"name1": None}
         self.model._bg_params = dict()
@@ -167,14 +166,12 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(self.model._bg_params["name1"], bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
-        mock_plus.assert_not_called()
         mock_delete_ws.assert_called_once()
 
     @patch(data_model_path + ".DeleteWorkspace")
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
-    @patch(data_model_path + ".Plus")
-    def test_do_background_subtraction_bgparams_changed(self, mock_plus, mock_minus, mock_estimate_bg, mock_delete_ws):
+    def test_do_background_subtraction_bgparams_changed(self, mock_minus, mock_estimate_bg, mock_delete_ws):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
         self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         self.model._bg_params = {"name1": [True, 80, 1000, False]}
@@ -190,8 +187,7 @@ class TestFittingDataModel(unittest.TestCase):
 
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
-    @patch(data_model_path + ".Plus")
-    def test_do_background_subtraction_no_change(self, mock_plus, mock_minus, mock_estimate_bg):
+    def test_do_background_subtraction_no_change(self, mock_minus, mock_estimate_bg):
         self.model._loaded_workspaces = {"name1": self.mock_ws}
         self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         bg_params = [True, 80, 1000, False]
@@ -203,7 +199,6 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertEqual(self.model._bg_params["name1"], bg_params)
         mock_minus.assert_not_called()
         mock_estimate_bg.assert_not_called()
-        mock_plus.assert_not_called()
 
     @patch(data_model_path + '.RenameWorkspace')
     @patch(data_model_path + ".ADS")
