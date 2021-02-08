@@ -22,6 +22,8 @@ Algorithms
 Data Objects
 ------------
 
+- a goniometer index is introduced as new attribute of class MDEvent.
+
 Python
 ------
 
