@@ -246,6 +246,7 @@ void ConvertHFIRSCDtoMDE::exec() {
   }
 
   for (size_t n = 0; n < inputWS->getDimension(2)->getNBins(); n++) {
+    uint16_t goniometerIndex(static_cast<uint16_t>(n));
     Eigen::Matrix3f goniometer;
     if (instrument == "HB3A") {
       float omega_radian =
@@ -276,7 +277,6 @@ void ConvertHFIRSCDtoMDE::exec() {
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0.f) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        uint16_t goniometerIndex(static_cast<uint16_t>(n));
         inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0,
                                q_sample.data());
       }
