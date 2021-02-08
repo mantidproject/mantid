@@ -202,7 +202,7 @@ After the processing, the export of reduced data is automatically triggered. The
 configuration of this mechanism is done via the export dialog that can be opened
 from the tool bar.
 
-.. image:: ../images/drill-export.png
+.. image:: ../../images/drill-export.png
    :align: center
 
 For each acquisition mode, a list of adapated algorithms will be displayed in
