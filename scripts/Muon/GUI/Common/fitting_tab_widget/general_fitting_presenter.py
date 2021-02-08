@@ -38,14 +38,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
 
-        # self.instrument_changed_observer = GenericObserver(self.instrument_changed)
+        self.instrument_changed_observer = GenericObserver(self.instrument_changed) # Do we need?
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
         self.initialise_model_options()
 
-        #self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_double_pulse_set)
-        #self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_double_pulse_set)  # Investigate
+        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)  # Investigate
 
     def disable_view(self):
         self.update_selected_workspace_list_for_fit()
@@ -195,12 +195,12 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         if not self._fit_function[0]:
             self.handle_display_workspace_changed()
         self.view.plot_guess_checkbox.setChecked(False)
-        if self._tf_asymmetry_mode:
-            self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
-            self.view.function_browser.blockSignals(True)
-            self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
-            self.view.function_browser.blockSignals(False)
-            return
+        # if self._tf_asymmetry_mode:
+        #     self.view.warning_popup('Cannot change function structure during tf asymmetry mode')
+        #     self.view.function_browser.blockSignals(True)
+        #     self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
+        #     self.view.function_browser.blockSignals(False)
+        #     return
         if not self.view.fit_object:
             if self.view.is_simul_fit:
                 self._fit_function = [None]
@@ -224,9 +224,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.fit_function_changed_notifier.notify_subscribers()
 
-    #def handle_double_pulse_set(self, updated_variables):
+    def handle_double_pulse_set(self, updated_variables):
     #    if 'DoublePulseEnabled' in updated_variables:
     #        self.view.tf_asymmetry_mode = False
+        pass
 
     def handle_tf_asymmetry_mode_changed(self):
         def calculate_tf_fit_function(original_fit_function):
@@ -242,28 +243,28 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.plot_guess_checkbox.setChecked(False)
 
         groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
-        if (
-                not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
-            self.view.tf_asymmetry_mode = False
+        # if (
+        #         not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
+        #     self.view.tf_asymmetry_mode = False
+        #
+        #     self.view.warning_popup('Can only fit groups in tf asymmetry mode and need a function defined')
+        #     return
 
-            self.view.warning_popup('Can only fit groups in tf asymmetry mode and need a function defined')
-            return
-
-        if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
-            return
-
-        self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
+        # if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
+        #     return
+        #
+        # self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
-        if self._tf_asymmetry_mode:
-            new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
-            if self.automatically_update_fit_name:
-                self.view.function_name += ',TFAsymmetry'
-                self.model.function_name = self.view.function_name
-        else:
-            new_global_parameters = [item[9:] for item in global_parameters]
-            if self.automatically_update_fit_name:
-                self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
-                self.model.function_name = self.view.function_name
+        # if self._tf_asymmetry_mode:
+        #     new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
+        #     if self.automatically_update_fit_name:
+        #         self.view.function_name += ',TFAsymmetry'
+        #         self.model.function_name = self.view.function_name
+        # else:
+        new_global_parameters = [item[9:] for item in global_parameters]
+        if self.automatically_update_fit_name:
+            self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
+            self.model.function_name = self.view.function_name
 
         if not self.view.is_simul_fit:
             for index, fit_function in enumerate(self._fit_function):
@@ -287,11 +288,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
-        self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=self.view.tf_asymmetry_mode)
+        #self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=self.view.tf_asymmetry_mode)
+        self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=False)
         self.fit_function_changed_notifier.notify_subscribers()
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
-        mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
+        mode = "Extract"
+        #mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
         workspace_list = self.selected_data if self.view.is_simul_fit else [self.view.display_workspace]
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
@@ -323,10 +326,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_by_changed(self):
-        if self.view.tf_asymmetry_mode:
-            self.view.warning_popup("Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
-            self.view.simultaneous_fit_by = "Run" if self.view.simultaneous_fit_by == "Group/Pair" else "Group/Pair"
-            return
+        # if self.view.tf_asymmetry_mode:
+        #     self.view.warning_popup("Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
+        #     self.view.simultaneous_fit_by = "Run" if self.view.simultaneous_fit_by == "Group/Pair" else "Group/Pair"
+        #     return
 
         self.update_selected_workspace_list_for_fit()
         self.view.simul_fit_by_specifier.setEnabled(True)
@@ -511,7 +514,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
                            "fit_to_raw": self.view.fit_to_raw, "fit_type": self._get_fit_type(),
                            "fit_by": self.view.simultaneous_fit_by,
                            "global_parameters": self.view.get_global_parameters(),
-                           "tf_asymmetry_mode": self.view.tf_asymmetry_mode}
+                           "tf_asymmetry_mode": False}  # self.view.tf_asymmetry_mode
         self.model.update_model_fit_options(**fitting_options)
 
     def _get_fit_type(self):
@@ -541,7 +544,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             return []
 
     def instrument_changed(self):
-        self.view.tf_asymmetry_mode = False
+        #self.view.tf_asymmetry_mode = False
+        pass
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs

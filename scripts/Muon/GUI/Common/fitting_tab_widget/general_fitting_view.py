@@ -12,7 +12,6 @@ class GeneralFittingView(BasicFittingView):
 
     def __init__(self, parent=None, is_frequency_domain=False, simultaneous_item_list=[]):
         super(GeneralFittingView, self).__init__(parent)
-        self.setupUi(self)
 
         self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain, simultaneous_item_list)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
