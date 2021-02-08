@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -66,12 +66,12 @@ public:
   void test_singlePeaksPartialSpectra() {
     // Generate input workspace
     const std::string data_ws_name("Test1Data");
-    createTestData(data_ws_name);
+    generateTestDataGaussian(data_ws_name);
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
@@ -151,7 +151,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -262,7 +262,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -362,58 +362,105 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on single peak on partial spectra
+  /** Test fitting Back-to-back exponential with single peak on multiple spectra
    */
-  void Failed_test_singlePeakMultiSpectra() {
-    // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
+  void test_singlePeakMultiSpectraBackToBackExp() {
+      // Generate input workspace
+      std::string input_ws_name = generateTestDataBackToBackExponential();
+      // Specify output workspaces names
+      std::string peak_pos_ws_name("PeakPositionsB2BsPmS");
+      std::string param_ws_name("PeakParametersB2BsPmS");
+      std::string model_ws_name("ModelB2BsPmS");
 
-    // Generate peak and background parameters
-    std::vector<string> peakparnames;
-    std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+      // Generate peak and background parameters
+      std::vector<string> peakparnames;
+      std::vector<double> peakparvalues;
+      createBackToBackExponentialParameters(peakparnames, peakparvalues, false);
 
-    // Initialize FitPeak
-    FitPeaks fitpeaks;
+      // Input data workspace contains 16 spectra
+      auto inputWS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+                  AnalysisDataService::Instance().retrieve(input_ws_name));
+      TS_ASSERT(inputWS);
+      TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), 16);
 
-    fitpeaks.initialize();
-    TS_ASSERT(fitpeaks.isInitialized());
+      // TODO FIXME - remove after test is passed
+      std::cout << input_ws_name << "\n";
+      for (size_t i = 0; i < peakparnames.size(); ++i)
+        std::cout << peakparnames[i] << ", " << peakparvalues[i] << "\n";
+      // END-TODO ------------------------------------------------------------------------
 
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    // Test includes
+      // 1. fit 10 spectra out of as StopWorkspaceIndex is included
+      // 2. fit 1 peak at 1.0758
 
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+      // Initialize FitPeak
+      FitPeaks fitpeaks;
 
-    fitpeaks.execute();
-    TS_ASSERT(fitpeaks.isExecuted());
+      fitpeaks.initialize();
+      TS_ASSERT(fitpeaks.isInitialized());
+
+      TS_ASSERT_THROWS_NOTHING(
+          fitpeaks.setProperty("InputWorkspace", input_ws_name));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 1));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 10));
+      TS_ASSERT_THROWS_NOTHING(
+          fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+          "PeakCenters", "1.0758"));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+          "FitWindowBoundaryList",
+          "1.05, 1.15"));
+      TS_ASSERT_THROWS_NOTHING(
+          fitpeaks.setProperty("PeakParameterNames", peakparnames));
+      TS_ASSERT_THROWS_NOTHING(
+          fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitFromRight", true));
+      TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+
+      fitpeaks.setProperty("OutputWorkspace", peak_pos_ws_name);
+      fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
+      fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
+
+      fitpeaks.execute();
+      TS_ASSERT(fitpeaks.isExecuted());
 
     // check output workspaces
     TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+        API::AnalysisDataService::Instance().doesExist(peak_pos_ws_name));
     TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+        API::AnalysisDataService::Instance().doesExist(param_ws_name));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist(model_ws_name));
 
-    // about the parameters
-    API::MatrixWorkspace_sptr peak_params_ws =
+    // About the parameters
+    API::MatrixWorkspace_sptr peak_pos_ws =
         std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
-    TS_ASSERT(peak_params_ws);
-    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
+            AnalysisDataService::Instance().retrieve(peak_pos_ws_name));
+    // Check peak values
+    // Only the number of selected spectra will be recorded
+    TS_ASSERT(peak_pos_ws);
+    TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).x().size(), 1);
+    // Check values
+    for (auto i = 0; i < 10; ++i) {
+        TS_ASSERT_DELTA(peak_pos_ws->histogram(i).x()[0], 1.0758, 1E-7);
+    }
+
+    // Get the table workspace
+    auto param_table = std::dynamic_pointer_cast<API::ITableWorkspace>(AnalysisDataService::Instance().retrieve(param_ws_name));
+    TS_ASSERT(param_table);
+
+    // Columns: 0. wsindex, 1. peakindex, 2. I, 3. A, 4. B, 5. X0, 6. S, 7. A0, 8. A1, 9. chi2
+    std::vector<std::string> colnames = param_table->getColumnNames();
+    TS_ASSERT_EQUALS(colnames.size(), 10);
+
+    // Verify intensity
+    for (auto i = 0; i < 10; ++i) {
+        TS_ASSERT(param_table->cell<double>(i, 2) > 90. && param_table->cell<double>(i, 2) < 1500);
+    }
+    // spec 1 is the largest and spec 10 is smallest
+    TS_ASSERT(param_table->cell<double>(0, 2) > param_table->cell<double>(3, 2));
+    TS_ASSERT(param_table->cell<double>(3, 2) > param_table->cell<double>(9, 2));
 
     return;
   }
@@ -473,16 +520,16 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test on init and setup
+  /** Test Back-to-back exponential on 3 peaks in the same spectrum
    */
-  void Ntest_SingleSpectrum3Peaks() {
+  void Progress_test_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -492,8 +539,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakCenters", "1.0758, 0.89198"));
     TS_ASSERT_THROWS_NOTHING(
@@ -706,9 +753,9 @@ public:
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
    */
-  void test_multiple_peak_profiles() {
+  void InProgress_test_multiple_peak_profiles() {
     // Generate input workspace
-    std::string input_ws_name = genBk2BkTestData();
+    std::string input_ws_name = generateTestDataBackToBackExponential();
     API::MatrixWorkspace_sptr input_ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(input_ws_name));
@@ -716,7 +763,7 @@ public:
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     std::cout << input_ws_name << "\n";
     for (size_t i = 0; i < peakparnames.size(); ++i)
@@ -814,7 +861,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -892,42 +939,6 @@ public:
     AnalysisDataService::Instance().remove("FittedPeaksWS");
     AnalysisDataService::Instance().remove("PeakParametersWS");
     AnalysisDataService::Instance().remove("FitErrorsWS");
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Generate peak parameters for Back-to-back exponential convoluted by
-   * Gaussian
-   * FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
-   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
-   * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
-   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
-   * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
-   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
-   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
-   * PeakRange='1.06,1.09',
-   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
-   * PeakPositionTolerance=0.02)
-   */
-  void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
-    parnames.clear();
-    parvalues.clear();
-
-    parnames.emplace_back("I");
-    parvalues.emplace_back(2.5e+06);
-
-    parnames.emplace_back("A");
-    parvalues.emplace_back(5400);
-
-    parnames.emplace_back("B");
-    parvalues.emplace_back(1700);
-
-    parnames.emplace_back("X0");
-    parvalues.emplace_back(1.07);
-
-    parnames.emplace_back("S");
-    parvalues.emplace_back(0.000355);
-
-    return;
   }
 
   //--------------------------------------------------------------------------------------------------------------
@@ -1009,7 +1020,7 @@ public:
    * @brief createTestData
    * @param workspacename
    */
-  void createTestData(const std::string &workspacename) {
+  void generateTestDataGaussian(const std::string &workspacename) {
     // ---- Create the simple workspace -------
     size_t num_spec = 3;
 
@@ -1062,6 +1073,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   void createGuassParameters(vector<string> &parnames,
                              vector<double> &parvalues) {
     parnames.clear();
@@ -1081,12 +1093,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains peaks with profile as back to back
-   * exponenential convoluted
-   * by Gaussian
+   * exponenential convoluted by Gaussian from a processed NeXus file
+   * vulcan_diamond.nxs
    */
-  std::string genBk2BkTestData() {
+  std::string generateTestDataBackToBackExponential() {
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();
+
+    std::string datawsname("diamond_3peaks");
 
     loader.setProperty("Filename", "vulcan_diamond.nxs");
     loader.setProperty("OutputWorkspace", "diamond_3peaks");
@@ -1100,7 +1114,48 @@ public:
             AnalysisDataService::Instance().retrieve("diamond_3peaks"));
     TS_ASSERT(ws);
 
-    return "diamond_3peaks";
+    return datawsname;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate peak parameters for Back-to-back exponential convoluted by
+   * Gaussian
+   * FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
+   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
+   * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
+   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
+   * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
+   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
+   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
+   * PeakRange='1.06,1.09',
+   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
+   * PeakPositionTolerance=0.02)
+   */
+  void createBackToBackExponentialParameters(vector<string> &parnames, vector<double> &parvalues,
+                                             bool include_pos_intensity = true) {
+    parnames.clear();
+    parvalues.clear();
+
+    if (include_pos_intensity) {
+      parnames.emplace_back("I");
+      parvalues.emplace_back(2.5e+06);
+    }
+
+    parnames.emplace_back("A");
+    parvalues.emplace_back(5400);
+
+    parnames.emplace_back("B");
+    parvalues.emplace_back(1700);
+
+    if (include_pos_intensity) {
+      parnames.emplace_back("X0");
+      parvalues.emplace_back(1.07);
+    }
+
+    parnames.emplace_back("S");
+    parvalues.emplace_back(0.000355);
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
