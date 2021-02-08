@@ -243,6 +243,13 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace containing already loaded raw data, used for parameter scans.')
 
+        self.declareProperty(MatrixWorkspaceProperty('SolventInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='The name of the solvent workspace.')
+
+        self.setPropertySettings('SolventInputWorkspace', sample)
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -667,8 +674,11 @@ class SANSILLReduction(PythonAlgorithm):
                         DeleteWorkspace(solid_angle)
                     progress.report()
                     if process == 'Sample':
+                        solvent_ws = self.getProperty('SolventInputWorkspace').value
                         container_ws = self.getProperty('ContainerInputWorkspace').value
-                        if container_ws:
+                        if solvent_ws:
+                            self._apply_container(ws, solvent_ws)
+                        elif container_ws:
                             self._apply_container(ws, container_ws)
                         self._apply_masks(ws)
                         self._apply_thickness(ws)
