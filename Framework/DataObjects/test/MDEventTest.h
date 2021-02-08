@@ -240,9 +240,9 @@ public:
       TS_ASSERT_DELTA(events[i].getErrorSquared(), data[ncols * i + 1], 1.e-6);
       TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
       TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
-                       uint16_t(data[ncols * i + 4]));
+                       uint16_t(data[ncols * i + 3]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
-                       uint32_t(data[ncols * i + 3]));
+                       uint32_t(data[ncols * i + 4]));
 
       TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + trait_count],
                       1.e-6);

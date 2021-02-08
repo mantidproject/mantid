@@ -366,8 +366,8 @@ public:
       events.emplace_back(static_cast<signal_t>(data[ii]),
                           static_cast<signal_t>(data[ii + 1]),
                           static_cast<uint16_t>(data[ii + 2]),
-                          static_cast<uint16_t>(data[ii + 4]),
-                          static_cast<int32_t>(data[ii + 3]), centers);
+                          static_cast<uint16_t>(data[ii + 3]),
+                          static_cast<int32_t>(data[ii + 4]), centers);
     }
   }
 
