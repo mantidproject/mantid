@@ -654,7 +654,7 @@ class FittingTabPresenter(object):
         self.view.tf_asymmetry_mode = False
 
     def _get_selected_groups_and_pairs(self):
-        return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+        return self.context.group_pair_context.selected_groups_and_pairs
 
     def _get_selected_runs_and_groups_for_fitting(self):
         runs = 'All'
