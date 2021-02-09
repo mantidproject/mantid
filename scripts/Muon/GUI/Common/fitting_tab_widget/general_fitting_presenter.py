@@ -135,7 +135,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.enable_simultaneous_fit_by_specifier(True)
         self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
 
-        self.fit_type_changed_notifier.notify_subscribers()
+        self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
