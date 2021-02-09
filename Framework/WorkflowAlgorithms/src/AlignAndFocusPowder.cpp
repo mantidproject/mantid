@@ -261,6 +261,14 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
     }
   }
 
+  if ((!isDefault(PropertyNames::RAGGED_DELTA)) &&
+      (!isDefault(PropertyNames::RESAMPLEX))) {
+    result[PropertyNames::RAGGED_DELTA] =
+        "Cannot specify with " + PropertyNames::RESAMPLEX;
+    result[PropertyNames::RESAMPLEX] =
+        "Cannot specify with " + PropertyNames::RAGGED_DELTA;
+  }
+
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
   m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
@@ -749,18 +757,15 @@ void AlignAndFocusPowder::exec() {
 
   // this next call should probably be in for rebin as well
   // but it changes the system tests
-  if (dspace && m_resampleX != 0.) {
-    if (m_delta_ragged.empty()) {
+  if (dspace) {
+    if (m_resampleX != 0.) {
       m_outputW = rebin(m_outputW);
-    } else {
-      m_outputW = rebinRagged(m_outputW, true);
-    }
-    if (m_processLowResTOF) {
-      if (m_delta_ragged.empty()) {
+      if (m_processLowResTOF)
         m_lowResW = rebin(m_lowResW);
-      } else {
+    } else if (!m_delta_ragged.empty()) {
+      m_outputW = rebinRagged(m_outputW, true);
+      if (m_processLowResTOF)
         m_lowResW = rebinRagged(m_lowResW, true);
-      }
     }
   }
   m_progress->report();
