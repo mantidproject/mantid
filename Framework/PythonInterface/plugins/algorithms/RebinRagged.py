@@ -26,11 +26,11 @@ class RebinRagged(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
             "input workspace",
         )
         self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             "output workspace",
         )
         self.declareProperty(FloatArrayProperty("XMin"),
