@@ -82,7 +82,8 @@ class AdvancedSetupScript(BaseScriptElement):
     @property
     def cache_dir(self):
         """Passing all three candidates back as one list"""
-        return [self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2]
+        # A comma ',' is used here since it is the default delimiter in mantid
+        return ",".join(self.cache_dir_scan_save, self.cache_dir_scan_1, self.cache_dir_scan_2)
 
     def __init__(self, inst_name):
         """ Initialization
