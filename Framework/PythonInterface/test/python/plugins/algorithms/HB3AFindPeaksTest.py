@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import ClearUB,  HasUB, FindPeaksMD, HB3AAdjustSampleNorm, HB3AFindPeaks, mtd
+from mantid.simpleapi import ClearUB, HasUB, FindPeaksMD, HB3AAdjustSampleNorm, HB3AFindPeaks, mtd
 
 
 class HB3AFindPeaksTest(unittest.TestCase):
@@ -42,9 +42,7 @@ class HB3AFindPeaksTest(unittest.TestCase):
                                    FlipX=True,
                                    InnerGoniometer=True)
 
-            peaks = HB3AFindPeaks(InputWorkspace=mtd[scan],
-                                  CellType="Orthorhombic",
-                                  Centering="F")
+            peaks = HB3AFindPeaks(InputWorkspace=mtd[scan], CellType="Orthorhombic", Centering="F")
 
             # Verify that the algorithm found a UB matrix
             self.assertTrue(HasUB(peaks))
@@ -76,6 +74,19 @@ class HB3AFindPeaksTest(unittest.TestCase):
 
             # Check that peaks were actually found
             self.assertTrue(peaks.getNumberPeaks() > 0)
+
+    def test_find_ub_van_norm(self):
+        # Test with vanadium normalization to make sure UB matrix and peaks can still be found
+        norm = HB3AAdjustSampleNorm(Filename=self._files[0],
+                                    VanadiumFile="HB3A_exp0722_scan0220.nxs")
+        peaks = HB3AFindPeaks(InputWorkspace=norm,
+                              CellType="Orthorhombic",
+                              Centering="F",
+                              PeakDistanceThreshold=0.25,
+                              Wavelength=1.008)
+        # Verify UB and peaks were found
+        self.assertTrue(HasUB(peaks))
+        self.assertGreater(peaks.getNumberPeaks(), 0)
 
 
 if __name__ == '__main__':
