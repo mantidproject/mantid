@@ -78,6 +78,7 @@ class RundexSettings(object):
                 "TransmissionBeamRuns",
                 "MaskFiles",
                 "ReferenceFiles",
+                "SolventFiles",
                 "OutputWorkspace",
                 "SampleThickness",
                 "CustomOptions"
