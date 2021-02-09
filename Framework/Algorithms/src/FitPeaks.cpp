@@ -296,8 +296,7 @@ void FitPeaks::init() {
   // properties about peak range including fitting window and peak width
   // (percentage)
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::FIT_WINDOW_LIST),
-      "List of left boundaries of the peak fitting window corresponding to "
+      std::make_unique<ArrayProperty<double>>(PropertyNames::FIT_WINDOW_LIST),      "List of left boundaries of the peak fitting window corresponding to "
       "PeakCenters.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -518,12 +517,13 @@ void FitPeaks::exec() {
   // process inputs
   processInputs();
 
-  // create output workspaces
+  // create output workspace: fitted peak positions
   generateOutputPeakPositionWS();
 
-  // generateFittedParametersValueWorkspace();
+  // create output workspace: fitted peaks' parameters values
   generateFittedParametersValueWorkspaces();
 
+  // create output workspace: calculated from fitted peak and background
   generateCalculatedPeaksWS();
 
   // fit peaks
@@ -1094,18 +1094,18 @@ void FitPeaks::fitSpectrumPeaks(
                              lastGoodPeakParameters[fit_index].end(),
                              [&](auto const &val) { return val <= 1e-10; })));
 
-    g_log.warning() << "WS-index = " << wi << " Peak " << fit_index
-                    << ", Found-any-peak = " << foundAnyPeak
-                    << "; Local monitor = " << somePeakFit << "\n";
+    std::cout << "WS-index = " << wi << " Peak " << fit_index
+              << ", Found-any-peak = " << foundAnyPeak
+              << "; Local monitor = " << somePeakFit << "\n";
 
     if (somePeakFit) {
       // Get from local best result
-      g_log.warning() << "Set peak parameters: number = "
-                      << localPrevGoodResults.size() << "\n";
+      std::cout << "Set peak parameters: number = "
+                << localPrevGoodResults.size() << "\n";
       for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
         peakfunction->setParameter(i, localPrevGoodResults[i]);
-        g_log.warning() << "Set parameter " << i << " with value "
-                        << localPrevGoodResults[i] << "\n";
+        g_log.notice() << "Set parameter " << i << " with value "
+                       << localPrevGoodResults[i] << "\n";
       }
     } else if (foundAnyPeak) {
       // set the peak parameters from last good fit to that peak
