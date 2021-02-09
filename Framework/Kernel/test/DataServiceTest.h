@@ -336,57 +336,6 @@ public:
     TS_ASSERT_EQUALS(objects.at(std::distance(names.cbegin(), cit)), three);
   }
 
-  void test_getObjectNamesStartWith() {
-    svc.add("A1", std::make_shared<int>(1));
-    svc.add("B1", std::make_shared<int>(2));
-    svc.add("B2", std::make_shared<int>(3));
-
-    std::vector<std::string> names;
-
-    names = svc.getObjectNamesStartWith("A");
-    TS_ASSERT_EQUALS(names.size(), 1);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "A1"), names.end())
-
-    names = svc.getObjectNamesStartWith("B");
-    TS_ASSERT_EQUALS(names.size(), 2);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "B1"), names.end())
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "B2"), names.end())
-
-    names = svc.getObjectNamesStartWith("C");
-    TS_ASSERT_EQUALS(names.size(), 0);
-
-    names = svc.getObjectNamesStartWith("B2");
-    TS_ASSERT_EQUALS(names.size(), 1);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "B2"), names.end())
-
-    names = svc.getObjectNamesStartWith("ABCDEF");
-    TS_ASSERT_EQUALS(names.size(), 0);
-  }
-
-  void test_getObjectNamesEndWith() {
-    svc.add("A1", std::make_shared<int>(1));
-    svc.add("A2", std::make_shared<int>(1));
-    svc.add("B11", std::make_shared<int>(2));
-    svc.add("C2", std::make_shared<int>(3));
-
-    std::vector<std::string> names;
-
-    names = svc.getObjectNamesEndWith("1");
-    TS_ASSERT_EQUALS(names.size(), 2);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "A1"), names.end())
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "B11"), names.end())
-
-    names = svc.getObjectNamesEndWith("11");
-    TS_ASSERT_EQUALS(names.size(), 1);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "B11"), names.end())
-
-    names = svc.getObjectNamesEndWith("C");
-    TS_ASSERT_EQUALS(names.size(), 0);
-
-    names = svc.getObjectNamesEndWith("ABCDEF");
-    TS_ASSERT_EQUALS(names.size(), 0);
-  }
-
   void test_getObjectNamesContain() {
     svc.add("A1B1", std::make_shared<int>(1));
     svc.add("C2B2", std::make_shared<int>(1));
