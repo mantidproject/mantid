@@ -118,7 +118,11 @@ void IntegratePeaksMD2::init() {
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
 
   declareProperty("Ellipsoid", false, "Default is sphere.");
-  declareProperty("FixQAxis", false, "Default is sphere.");
+  declareProperty("FixQAxis", false,
+                  "Fix one axis of ellipsoid to be along direction of Q.");
+  declareProperty("UseCentroid", false,
+                  "Perform integration on estimated centroid not peak position "
+                  "(ignored if all three peak radii are specified).");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -289,6 +293,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Ellipsoid
   bool isEllipse = getProperty("Ellipsoid");
   bool qAxisIsFixed = getProperty("FixQAxis");
+  bool useCentroid = getProperty("UseCentroid");
   /// Cylinder Length to use around peaks for cylinder
   double cylinderLength = getProperty("CylinderLength");
   Workspace2D_sptr wsProfile2D, wsFit2D, wsDiff2D;
@@ -500,11 +505,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             bgSignal / (4 * M_PI * pow(PeakRadiusVector[i], 3) / 3);
         std::vector<V3D> eigenvects;
         std::vector<double> eigenvals;
+        V3D translation(0.0, 0.0, 0.0); // translation from peak pos to centroid
         if (PeakRadius.size() == 1) {
           findEllipsoid<MDE, nd>(
               ws, getRadiusSq, pos,
               static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
-              bgDensity, eigenvects, eigenvals);
+              bgDensity, eigenvects, eigenvals, translation);
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
@@ -515,7 +521,15 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           eigenvects.push_back(V3D(0.0, 1.0, 0.0));
           eigenvects.push_back(V3D(0.0, 0.0, 1.0));
         }
-
+        if (useCentroid) {
+          // apply translation to center
+          for (size_t d = 0; d < nd; ++d) {
+            center[d] += static_cast<coord_t>(translation[d]);
+          }
+        } else {
+          // reset translation to (0,0,0)
+          translation = V3D(0.0, 0.0, 0.0);
+        }
         // transform ellispoid onto sphere of radius = R
         getRadiusSq =
             CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
@@ -556,7 +570,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
                 eigenvects, peakRadii, backgroundInnerRadii,
                 backgroundOuterRadii, CoordinatesToUse, this->name(),
-                this->version());
+                this->version(), translation);
             shapeablePeak->setPeakShape(ellipsoidShape);
           }
         } else {
@@ -914,6 +928,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *  @param bgDensity      background counts per unit volume
  *  @param eigenvects     eigenvectors of covariance matrix of spherical region
  *  @param eigenvals      eigenvectors of covariance matrix of spherical region
+ *  @param translation    container to hold translation of peak pos to centroid
  */
 template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(
@@ -921,7 +936,7 @@ void IntegratePeaksMD2::findEllipsoid(
     const CoordTransform &getRadiusSq, const V3D &pos,
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const double &bgDensity, std::vector<V3D> &eigenvects,
-    std::vector<double> &eigenvals) {
+    std::vector<double> &eigenvals, V3D &translation) {
   double w_sum = 0.0;  // sum of weights
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
@@ -1036,6 +1051,10 @@ void IntegratePeaksMD2::findEllipsoid(
             Evec[ibasis][ivect];
       }
     }
+  }
+  // calculate translation from pos to centroid (mean)
+  for (size_t d = 0; d < mean.size(); ++d) {
+    translation[d] += mean[d] - pos[d];
   }
 }
 

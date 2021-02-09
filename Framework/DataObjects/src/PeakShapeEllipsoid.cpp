@@ -23,7 +23,8 @@ PeakShapeEllipsoid::PeakShapeEllipsoid(
     : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
       m_directions(directions), m_abc_radii(abcRadii),
       m_abc_radiiBackgroundInner(abcRadiiBackgroundInner),
-      m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter) {
+      m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter),
+      m_translation(translation) {
 
   if (directions.size() != 3) {
     throw std::invalid_argument("directions must be of size 3");
