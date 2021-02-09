@@ -555,7 +555,6 @@ class SANSILLReduction(PythonAlgorithm):
         solvent_ws.setDistribution(False)
         Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
-
     def _finalize(self, ws, process):
         if process != 'Transmission':
             if self._instrument in ['D33', 'D11B', 'D22B']:
