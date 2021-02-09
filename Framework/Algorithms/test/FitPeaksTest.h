@@ -66,7 +66,7 @@ public:
   void test_singlePeaksPartialSpectra() {
     // Generate input workspace
     const std::string data_ws_name("Test1Data");
-    createTestData(data_ws_name);
+    genearteTestDataGaussian(data_ws_name);
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -151,7 +151,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    genearteTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -262,7 +262,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    genearteTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -359,172 +359,6 @@ public:
     AnalysisDataService::Instance().remove("PeakParametersWS");
 
     FrameworkManager::Instance().setNumOMPThreadsToConfigValue();
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Test on single peak on partial spectra
-   */
-  void Ntest_singlePeakMultiSpectra() {
-    // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
-
-    // Generate peak and background parameters
-    std::vector<string> peakparnames;
-    std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
-
-    // Initialize FitPeak
-    FitPeaks fitpeaks;
-
-    fitpeaks.initialize();
-    TS_ASSERT(fitpeaks.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
-
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
-
-    fitpeaks.execute();
-    TS_ASSERT(fitpeaks.isExecuted());
-
-    // check output workspaces
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
-
-    // about the parameters
-    API::MatrixWorkspace_sptr peak_params_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
-    TS_ASSERT(peak_params_ws);
-    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
-
-    return;
-  }
-
-  void Ntest_singlePeakMultiSpectraPseudoVoigt() {
-    // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
-
-    // Generate peak and background parameters
-    std::vector<double> peakparvalues{0.5};
-
-    // Initialize FitPeak
-    FitPeaks fitpeaks;
-
-    fitpeaks.initialize();
-    TS_ASSERT(fitpeaks.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakFunction", "PseudoVoigt"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
-
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
-
-    fitpeaks.execute();
-    TS_ASSERT(fitpeaks.isExecuted());
-
-    // check output workspaces
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
-
-    // about the parameters
-    API::MatrixWorkspace_sptr peak_params_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
-    TS_ASSERT(peak_params_ws);
-    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Test on init and setup
-   */
-  void Ntest_SingleSpectrum3Peaks() {
-    // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
-
-    // Generate peak and background parameters
-    std::vector<string> peakparnames;
-    std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
-
-    // Initialize FitPeak
-    FitPeaks fitpeaks;
-
-    fitpeaks.initialize();
-    TS_ASSERT(fitpeaks.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakCenters", "1.0758, 0.89198"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05, 0.87"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("FitWindowRightBoundary", "1.15, 0.92"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02, 0.015"));
-    TS_ASSERT_THROWS_NOTHING(
-        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
-
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS2");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS2");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS2");
-
-    fitpeaks.execute();
-    TS_ASSERT(fitpeaks.isExecuted());
-
-    TS_ASSERT(
-        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS2"));
-
-    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS2"));
-    API::MatrixWorkspace_sptr fitted_data_ws =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(
-            API::AnalysisDataService::Instance().retrieve("FittedPeaksWS2"));
-    TS_ASSERT(fitted_data_ws);
-
-    // API::MatrixWorkspace_const_sptr fitted_data_ws =
-    // fitpeaks.getProperty("FittedPeaksWS2");
-    TS_ASSERT_EQUALS(fitted_data_ws->getNumberHistograms(), 24900);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -703,6 +537,172 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test on single peak on partial spectra
+   */
+  void Ntest_singlePeakMultiSpectra() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    gen_PeakParameters(peakparnames, peakparvalues);
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // check output workspaces
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+    // about the parameters
+    API::MatrixWorkspace_sptr peak_params_ws =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
+    TS_ASSERT(peak_params_ws);
+    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
+
+    return;
+  }
+
+  void Ntest_singlePeakMultiSpectraPseudoVoigt() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<double> peakparvalues{0.5};
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakFunction", "PseudoVoigt"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // check output workspaces
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+    // about the parameters
+    API::MatrixWorkspace_sptr peak_params_ws =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
+    TS_ASSERT(peak_params_ws);
+    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test on init and setup
+   */
+  void Ntest_SingleSpectrum3Peaks() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    gen_PeakParameters(peakparnames, peakparvalues);
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 6468));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 24900));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakCenters", "1.0758, 0.89198"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05, 0.87"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15, 0.92"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02, 0.015"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS2");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS2");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS2");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS2"));
+
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS2"));
+    API::MatrixWorkspace_sptr fitted_data_ws =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("FittedPeaksWS2"));
+    TS_ASSERT(fitted_data_ws);
+
+    // API::MatrixWorkspace_const_sptr fitted_data_ws =
+    // fitpeaks.getProperty("FittedPeaksWS2");
+    TS_ASSERT_EQUALS(fitted_data_ws->getNumberHistograms(), 24900);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
    */
@@ -810,7 +810,7 @@ public:
     createGuassParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    createTestData(m_inputWorkspaceName);
+    genearteTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -928,7 +928,7 @@ public:
 
   //--------------------------------------------------------------------------------------------------------------
   /** generate a peak center workspace compatible to the workspace created by
-   * createTestData(), which will 3 spectra and at most 2 elements for each
+   * genearteTestDataGaussian(), which will 3 spectra and at most 2 elements for each
    * sepctrum
    * @brief genPeakCenterWorkspace
    * @param peak_index_vec :: a vector of integer as 0 or 1.  0 for peak center
@@ -968,7 +968,7 @@ public:
 
   //--------------------------------------------------------------------------------------------------------------
   /** create a fit window workspace compatibel to the workspace created by
-   * createTestData()
+   * genearteTestDataGaussian()
    * @brief genFitWindowWorkspace :: generate a matrix work for peak fitting
    * window
    * @param peak_index_vec :: vector for peak indexes
@@ -1002,10 +1002,10 @@ public:
    * ws-index = 0: peak 0 @ 5.00; peak 1  @ 10.00
    * ws-index = 1: peak 0 @ 5.01; peak 1  @  9.98
    * ws-index = 2: peak 0 @ 5.03; peak 1  @ 10.02
-   * @brief createTestData
+   * @brief genearteTestDataGaussian
    * @param workspacename
    */
-  void createTestData(const std::string &workspacename) {
+  void genearteTestDataGaussian(const std::string &workspacename) {
     // ---- Create the simple workspace -------
     size_t num_spec = 3;
 
