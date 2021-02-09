@@ -572,8 +572,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(start_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(stop_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "StartWorkspaceIndex", static_cast<int>(start_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "StopWorkspaceIndex", static_cast<int>(stop_ws_index)));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
@@ -630,7 +632,8 @@ public:
       TS_ASSERT(param_table->cell<double>(i, 2) > 90. &&
                 param_table->cell<double>(i, 2) < 150);
     }
-    // workspace index 10, 11 and 12 are smallest with output index at 4, 5 and 6
+    // workspace index 10, 11 and 12 are smallest with output index at 4, 5 and
+    // 6
     TS_ASSERT(param_table->cell<double>(0, 2) >
               param_table->cell<double>(4, 2));
     TS_ASSERT(param_table->cell<double>(8, 2) >
@@ -640,8 +643,8 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test to fit multiple peaks on multiple spectra with back-to-back exponential convoluted
-   * with Gaussian
+  /** Test to fit multiple peaks on multiple spectra with back-to-back
+   * exponential convoluted with Gaussian
    */
   void test_multiPeaksMultiSpectraBackToBackExp() {
     // Generate input workspace
@@ -671,16 +674,18 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("InputWorkspace", input_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", static_cast<int>(min_ws_index)));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", static_cast<int>(max_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "StartWorkspaceIndex", static_cast<int>(min_ws_index)));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
+        "StopWorkspaceIndex", static_cast<int>(max_ws_index)));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakFunction", "BackToBackExponential"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("BackgroundType", "Linear"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
         "PeakCenters", "0.728299, 0.817, 0.89198, 1.0758"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty(
-        "FitWindowBoundaryList",
-        "0.71, 0.76, 0.80, 0.84, 0.88, 0.91, 1.05, 1.11"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowBoundaryList",
+                             "0.71, 0.76, 0.80, 0.84, 0.88, 0.91, 1.05, 1.11"));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("PeakParameterNames", peakparnames));
     TS_ASSERT_THROWS_NOTHING(
@@ -701,38 +706,38 @@ public:
         CheckAndRetrieveMatrixWorkspace(peak_pos_ws_name, &peak_pos_ws_exist);
     API::MatrixWorkspace_sptr model_ws =
         CheckAndRetrieveMatrixWorkspace(model_ws_name, &fitted_ws_exist);
-    API::ITableWorkspace_sptr peak_param_ws = CheckAndRetrieveTableWorkspace(
-        param_ws_name, &peak_param_ws_exist);
+    API::ITableWorkspace_sptr peak_param_ws =
+        CheckAndRetrieveTableWorkspace(param_ws_name, &peak_param_ws_exist);
 
     size_t num_histograms = max_ws_index - min_ws_index + 1;
 
     // Verify peaks' positions
     if (peak_pos_ws_exist) {
-      // workspace for peak positions from fitted value: must be a 16 x 4 workspace2D
+      // workspace for peak positions from fitted value: must be a 16 x 4
+      // workspace2D
       TS_ASSERT_EQUALS(peak_pos_ws->getNumberHistograms(), num_histograms);
       TS_ASSERT_EQUALS(peak_pos_ws->histogram(0).y().size(), 4);
 
       // Expected value: with one peak that cannot be fit
       std::vector<double> exp_positions{-4, 0.81854, 0.89198, 1.0758};
 
-      for (size_t ih = 0;  ih < num_histograms; ++ih) {
-          // Get histogram
-          HistogramData::HistogramY peak_pos_i = peak_pos_ws->histogram(ih).y();
-          HistogramData::HistogramE pos_error_i = peak_pos_ws->histogram(ih).e();
-          // Check value
-          for (auto ip = 0; ip < 4; ++ip) {
-              cout << "ws-index = " << ih << ", peak-index = " << ip << ": peak found @ " << peak_pos_i[ip] << "\n";
-              TS_ASSERT_DELTA(peak_pos_i[ip], exp_positions[ip],
-                              0.0012);
-              if (peak_pos_i[ip] > 0) {
-                  // a good fit: require error less than 100
-                  TS_ASSERT(pos_error_i[ip] < 150.);
-              } else {
-                  // failed fit
-                  TS_ASSERT(pos_error_i[ip] > 1E20);
-
-              }
+      for (size_t ih = 0; ih < num_histograms; ++ih) {
+        // Get histogram
+        HistogramData::HistogramY peak_pos_i = peak_pos_ws->histogram(ih).y();
+        HistogramData::HistogramE pos_error_i = peak_pos_ws->histogram(ih).e();
+        // Check value
+        for (auto ip = 0; ip < 4; ++ip) {
+          cout << "ws-index = " << ih << ", peak-index = " << ip
+               << ": peak found @ " << peak_pos_i[ip] << "\n";
+          TS_ASSERT_DELTA(peak_pos_i[ip], exp_positions[ip], 0.0012);
+          if (peak_pos_i[ip] > 0) {
+            // a good fit: require error less than 100
+            TS_ASSERT(pos_error_i[ip] < 150.);
+          } else {
+            // failed fit
+            TS_ASSERT(pos_error_i[ip] > 1E20);
           }
+        }
       }
     }
 
@@ -1012,10 +1017,10 @@ public:
   /** Generate a workspace contains peaks with profile as back to back
    * exponenential convoluted by Gaussian from a processed NeXus file
    * vulcan_diamond.nxs
-   * File vulcan_diamond.nxs was fabricated from a real VULCAN diamond run containing 16 spectra
-   * from west, east and high angle banks.
-   * The corresponding spectrum IDs are
-   * 47-48 (west lower), 4856 - 4859 (east upper), 8186 - 8188, 15087 - 15089, 21491 - 21493
+   * File vulcan_diamond.nxs was fabricated from a real VULCAN diamond run
+   * containing 16 spectra from west, east and high angle banks. The
+   * corresponding spectrum IDs are 47-48 (west lower), 4856 - 4859 (east
+   * upper), 8186 - 8188, 15087 - 15089, 21491 - 21493
    */
   std::string generateTestDataBackToBackExponential() {
     DataHandling::LoadNexusProcessed loader;

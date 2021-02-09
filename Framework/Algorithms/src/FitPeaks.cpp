@@ -296,7 +296,8 @@ void FitPeaks::init() {
   // properties about peak range including fitting window and peak width
   // (percentage)
   declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::FIT_WINDOW_LIST),      "List of left boundaries of the peak fitting window corresponding to "
+      std::make_unique<ArrayProperty<double>>(PropertyNames::FIT_WINDOW_LIST),
+      "List of left boundaries of the peak fitting window corresponding to "
       "PeakCenters.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
