@@ -193,7 +193,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.disable_notifier.add_subscriber(self.load_widget.load_widget.disable_observer)
 
-        self.disable_notifier.add_subscriber(self.fitting_tab.general_fitting_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
@@ -209,7 +209,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
 
-        self.enable_notifier.add_subscriber(self.fitting_tab.general_fitting_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_view.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
@@ -230,7 +230,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.phase_tab.phase_table_presenter.run_change_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.fitting_tab.general_fitting_presenter.disable_tab_observer)
+            self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
@@ -359,7 +359,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.enable_observer)
 
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-            self.fitting_tab.general_fitting_presenter.enable_tab_observer)
+            self.fitting_tab.fitting_tab_view.enable_tab_observer)
 
     def setup_on_load_disabler(self):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
@@ -369,7 +369,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.disable_observer)
 
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-            self.fitting_tab.general_fitting_presenter.disable_tab_observer)
+            self.fitting_tab.fitting_tab_view.disable_tab_observer)
 
     def setup_on_recalulation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(

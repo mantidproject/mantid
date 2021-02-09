@@ -49,8 +49,6 @@ class BasicFittingPresenter:
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
-        self.view.setEnabled(False)
-
         self.fsg_model = None
         self.fsg_view = None
         self.fsg_presenter = None
@@ -80,16 +78,6 @@ class BasicFittingPresenter:
                            "minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
                            "fit_to_raw": self.view.fit_to_raw}
         return fitting_options
-
-    def disable_view(self):
-        """Disable the widgets in the view if data is not loaded."""
-        if not self.selected_data:
-            self.view.setEnabled(False)
-
-    def enable_view(self):
-        """Enable the widgets in the view if data is loaded."""
-        if self.selected_data:
-            self.view.setEnabled(True)
 
     def update_model_from_view(self, **kwargs):
         """Update the fit options stored in the model."""
@@ -180,7 +168,6 @@ class BasicFittingPresenter:
         """Handle when new data has been loaded into the interface."""
         self.view.plot_guess = False
         self.model.create_ws_fit_function_map()
-        self.enable_view()
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
