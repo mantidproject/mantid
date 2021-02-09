@@ -4,11 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import AnalysisDataService
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable
 from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
 from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
 import functools
@@ -45,12 +47,15 @@ class BasicFittingPresenter:
         self.fit_function_changed_notifier = GenericObservable()
 
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
 
         self.view.setEnabled(False)
 
         self.fsg_model = None
         self.fsg_view = None
         self.fsg_presenter = None
+
+        self.initialise_model_options()
 
         self.view.set_slot_for_fit_generator_clicked(self.handle_fit_generator_clicked)
         self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
@@ -65,6 +70,17 @@ class BasicFittingPresenter:
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
+    def initialise_model_options(self):
+        """Initialise the model with the default fitting options."""
+        self.model.update_model_fit_options(**self.get_model_fitting_options())
+
+    def get_model_fitting_options(self):
+        """Returns the fitting options to be used when initializing the model. Override in child classes."""
+        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0],
+                           "minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
+                           "fit_to_raw": self.view.fit_to_raw}
+        return fitting_options
+
     def disable_view(self):
         """Disable the widgets in the view if data is not loaded."""
         if not self.selected_data:
@@ -78,6 +94,13 @@ class BasicFittingPresenter:
     def update_model_from_view(self, **kwargs):
         """Update the fit options stored in the model."""
         self.model.update_model_fit_options(**kwargs)
+
+    def update_view_from_model(self, workspace_removed=None):
+        """Update the view using the data stored in the model."""
+        if workspace_removed:
+            self.selected_data = [item for item in self.selected_data if item != workspace_removed]
+        else:
+            self.selected_data = []
 
     @property
     def selected_data(self):
@@ -102,6 +125,14 @@ class BasicFittingPresenter:
     def end_x(self):
         """Return the stored end X's."""
         return self._end_x
+
+    def update_start_x(self, index, value):
+        """Updates a start X at a specific index."""
+        self._start_x[index] = value
+
+    def update_end_x(self, index, value):
+        """Updates a end X at a specific index."""
+        self._end_x[index] = value
 
     def handle_gui_changes_made(self, changed_values):
         """Handle when changes to the context have been made."""
@@ -145,16 +176,27 @@ class BasicFittingPresenter:
         self.thread_success = False
         self.view.warning_popup(error)
 
+    def handle_new_data_loaded(self):
+        """Handle when new data has been loaded into the interface."""
+        self.view.plot_guess = False
+        self.model.create_ws_fit_function_map()
+        self.enable_view()
+
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
         self._fit_function = self._fit_function_cache
-        self._clear_fit_information()
+        self._reset_fit_status_information()
         self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
 
     def handle_fit_generator_clicked(self):
         """Handle when the Fit Generator button has been clicked."""
         self._open_fit_script_generator_interface(self.get_loaded_workspaces(), self._get_fit_browser_options())
+
+    def handle_fit_name_changed_by_user(self):
+        """Handle when the fit name is changed by the user."""
+        self.automatically_update_fit_name = False
+        self.model.function_name = self.view.function_name
 
     def handle_minimiser_changed(self):
         """Handle when a minimiser is changed."""
@@ -163,15 +205,6 @@ class BasicFittingPresenter:
     def handle_evaluation_type_changed(self):
         """Handle when the evaluation type is changed."""
         self.update_model_from_view(evaluation_type=self.view.evaluation_type)
-
-    def handle_fit_name_changed_by_user(self):
-        """Handle when the fit name is changed by the user."""
-        self.automatically_update_fit_name = False
-        self.model.function_name = self.view.function_name
-
-    def clear_and_reset_gui_state(self):
-        """Clears the data displayed in the fitting view."""
-        raise NotImplementedError("This method must be overridden by a child class.")
 
     def handle_fitting_finished(self):
         """Handle when fitting is finished."""
@@ -208,6 +241,20 @@ class BasicFittingPresenter:
     def get_fit_input_workspaces(self):
         """Retrieve the names of the workspaces to be fitted."""
         raise NotImplementedError("This method must be overridden by a child class.")
+
+    def get_x_data_type(self):
+        """Returns the type of data in the x domain. Returns string None if it cannot be determined."""
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
+            return self.context._frequency_context.plot_type
+        return "None"
+
+    def clear_and_reset_gui_state(self):
+        """Clears all data in the view and updates the model."""
+        self.view.set_datasets_in_function_browser(self.selected_data)
+
+        self._reset_fit_status_information()
+        self._reset_start_time_to_first_good_data_value()
+        self._reset_fit_function()
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
@@ -253,15 +300,8 @@ class BasicFittingPresenter:
         self.view.update_global_fit_state(self._fit_status, current_index)
 
     def _fit_function_index(self):
-        """Return the index of the currently displayed fit function. (Assume it is zero for BasicFitting for now.)"""
+        """Return the index of the currently displayed fit function (assume it is zero for BasicFitting for now)."""
         return 0
-
-    def _clear_fit_information(self):
-        """Clear the fit status and chi squared information currently displayed."""
-        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
-        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
-        self._update_fit_status_information_in_view()
-        self.view.enable_undo_fit(False)
 
     def _create_thread(self, callback):
         """Create a thread for fitting."""
@@ -277,6 +317,22 @@ class BasicFittingPresenter:
 
         self.fsg_presenter.openFitScriptGenerator()
 
+    def _reset_fit_function(self):
+        """Reset the fit function information."""
+        if self.view.fit_object:
+            self._fit_function = [func.clone() for func in self._get_fit_function()]
+        else:
+            self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+
+        self.update_model_from_view(fit_function=self._fit_function[0])
+
+    def _reset_fit_status_information(self):
+        """Reset the fit status and chi squared information currently displayed."""
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self._update_fit_status_information_in_view()
+        self.view.enable_undo_fit(False)
+
     def _reset_start_time_to_first_good_data_value(self):
         """Reset the start and end X to the first good data value."""
         self._start_x = [self._retrieve_first_good_data_from_run_name(run_name)
@@ -285,6 +341,8 @@ class BasicFittingPresenter:
 
         self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
         self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
+
+        self.update_model_from_view(startX=self.start_x[0], endX=self.end_x[0])
 
     def _retrieve_first_good_data_from_run_name(self, workspace_name):
         """Return the name of the first good data in a workspace."""
@@ -302,3 +360,8 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
+
+    @staticmethod
+    def _check_data_exists(workspace_names):
+        """Returns only the workspace names that exist in the ADS."""
+        return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
