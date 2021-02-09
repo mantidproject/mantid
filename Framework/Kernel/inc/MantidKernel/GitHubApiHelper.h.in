@@ -11,6 +11,10 @@
 namespace Mantid {
 namespace Kernel {
 
+namespace  {
+ const static std::string DEFAULT_GITHUB_TOKEN("@GITHUB_AUTHORIZATION_TOKEN@");
+}
+
 /** GitHubApiHelper : A helper class for supporting access to the github api
 through HTTP and HTTPS, inherits from the InternetHelper.
 This class automatically adds the authorization to a read only account.
@@ -37,13 +41,12 @@ protected:
   virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
     Poco::URI &uri, std::ostream &responseStream) override;
 private:
-  int processAnonymousRequest(const Poco::Net::HTTPResponse &response,
-    Poco::URI &uri,
-    std::ostream &responseStream);
-  void addAuthenticationToken() {
-    addHeader("Authorization",
-              "token @GITHUB_AUTHORIZATION_TOKEN@");
-  }
+  int processAnonymousRequest(Poco::URI &uri, std::ostream &responseStream);
+  void addAuthenticationToken();
+  /**
+   * API token for github access. This is only created during construction.
+   */
+  std::string m_api_token;
 };
 
 } // namespace Kernel

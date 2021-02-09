@@ -30,7 +30,7 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         peak = ConvertHFIRSCDtoMDETest_peaks.getPeak(13)
-        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.001306865, 1.918834], rtol=1e-05)
+        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.003572579, 1.918834], rtol=1e-05)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
 

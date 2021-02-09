@@ -52,6 +52,8 @@ private:
   /// Run the algorithm
   void exec() override;
 
+  std::map<std::string, std::string> validateInputs() override;
+
   template <typename MDE, size_t nd>
   void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 

@@ -35,6 +35,7 @@ const std::string ADDABLE[ADDABLES] = {
     "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
+const char *GONIOMETERS_LOG_NAME = "goniometers";
 /// Name of the stored histogram bins log when saved to NeXus
 const char *HISTO_BINS_LOG_NAME = "processed_histogram_bins";
 const char *PEAK_RADIUS_GROUP = "peak_radius";
@@ -45,26 +46,33 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 Kernel::Logger g_log("Run");
 } // namespace
 
-Run::Run() : m_goniometer(std::make_unique<Geometry::Goniometer>()) {}
+Run::Run() {
+  m_goniometers.clear();
+  m_goniometers.push_back(std::make_unique<Geometry::Goniometer>());
+}
 
-Run::Run(const Run &other)
-    : LogManager(other),
-      m_goniometer(std::make_unique<Geometry::Goniometer>(*other.m_goniometer)),
-      m_histoBins(other.m_histoBins) {}
+Run::Run(const Run &other) : LogManager(other), m_histoBins(other.m_histoBins) {
+  this->copyGoniometers(other);
+}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 Run::~Run() = default;
 
 Run &Run::operator=(const Run &other) {
   LogManager::operator=(other);
-  m_goniometer = std::make_unique<Geometry::Goniometer>(*other.m_goniometer);
+  copyGoniometers(other);
   m_histoBins = other.m_histoBins;
   return *this;
 }
 
 bool Run::operator==(const Run &other) {
-  return *m_goniometer == *other.m_goniometer &&
-         LogManager::operator==(other) &&
+  if (m_goniometers.size() != other.m_goniometers.size())
+    return false;
+  for (size_t i = 0; i < m_goniometers.size(); i++) {
+    if (*m_goniometers[i] != *other.m_goniometers[i])
+      return false;
+  }
+  return LogManager::operator==(other) &&
          this->m_histoBins == other.m_histoBins;
 }
 
@@ -75,8 +83,7 @@ std::shared_ptr<Run> Run::clone() {
   for (auto property : this->m_manager->getProperties()) {
     clone->addProperty(property->clone());
   }
-  clone->m_goniometer =
-      std::make_unique<Geometry::Goniometer>(*this->m_goniometer);
+  clone->copyGoniometers(const_cast<Run &>(*this));
   clone->m_histoBins = this->m_histoBins;
   return clone;
 }
@@ -315,27 +322,51 @@ std::vector<double> Run::getBinBoundaries() const {
  */
 size_t Run::getMemorySize() const {
   size_t total = LogManager::getMemorySize();
-  total += sizeof(*m_goniometer);
+  total += sizeof(Geometry::Goniometer) * m_goniometers.size();
   total += m_histoBins.size() * sizeof(double);
   return total;
 }
 
+/** @return A reference to the const Goniometer object for this run */
+const Geometry::Goniometer &Run::getGoniometer() const {
+  return *m_goniometers[0];
+}
+
+/** @return A reference to the non-const Goniometer object for this run */
+Geometry::Goniometer &Run::mutableGoniometer() { return *m_goniometers[0]; }
+
 //-----------------------------------------------------------------------------------------------
 /**
- * Set the gonoimeter & optionally read the values from the logs
- * @param goniometer :: A refernce to a goniometer
+ * Set the gonoimeter & optionally read the average values from the logs
+ * @param goniometer :: A reference to a goniometer
  * @param useLogValues :: If true, recalculate the goniometer using the log
  * values
  */
 void Run::setGoniometer(const Geometry::Goniometer &goniometer,
                         const bool useLogValues) {
-  auto old = std::move(m_goniometer);
+  auto old = std::move(m_goniometers);
   try {
-    m_goniometer = std::make_unique<Geometry::Goniometer>(goniometer);
+    m_goniometers.emplace_back(
+        std::make_unique<Geometry::Goniometer>(goniometer));
     if (useLogValues)
-      calculateGoniometerMatrix();
+      calculateAverageGoniometerMatrix();
   } catch (std::runtime_error &) {
-    m_goniometer = std::move(old);
+    m_goniometers = std::move(old);
+    throw;
+  }
+}
+
+//-----------------------------------------------------------------------------------------------
+/**
+ * Set the gonoimeter & read the individual values from the logs
+ * @param goniometer :: A reference to a goniometer
+ */
+void Run::setGoniometers(const Geometry::Goniometer &goniometer) {
+  auto old = std::move(m_goniometers);
+  try {
+    calculateGoniometerMatrices(goniometer);
+  } catch (std::runtime_error &) {
+    m_goniometers = std::move(old);
     throw;
   }
 }
@@ -344,12 +375,84 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
  * previously set Goniometer object as well as the angles
  * loaded in the run (if any).
  *
- * As of now, it uses the MEAN angle.
- *
  * @return 3x3 double rotation matrix
  */
 const Mantid::Kernel::DblMatrix &Run::getGoniometerMatrix() const {
-  return m_goniometer->getR();
+  return getGoniometerMatrix(0);
+}
+
+//-----------------------------------------------------------------------------------------------
+/// @return the number of goniometers's in this Run
+size_t Run::getNumGoniometers() const { return m_goniometers.size(); }
+
+//-----------------------------------------------------------------------------------------------
+/** Add a new Goniometer to this Run
+ *
+ * @param goniometer :: goniometer to add
+ * @return the index at which it was added
+ */
+size_t Run::addGoniometer(const Geometry::Goniometer &goniometer) {
+  m_goniometers.emplace_back(
+      std::make_unique<Geometry::Goniometer>(goniometer));
+  return m_goniometers.size() - 1;
+}
+
+//-----------------------------------------------------------------------------------------------
+/// Remove all goniometers on the Run
+void Run::clearGoniometers() { m_goniometers.clear(); }
+
+//-----------------------------------------------------------------------------------------------
+/** Get the Goniometer for the given run index
+ *
+ * @param index :: index of the run to get.
+ * @return goniometer
+ */
+const Geometry::Goniometer &Run::getGoniometer(const size_t index) const {
+  if (index >= m_goniometers.size())
+    throw std::out_of_range(
+        "Run::getGoniometer() const: index is out of range.");
+  return *m_goniometers[index];
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Get the non-const Goniometer for the given run index
+ *
+ * @param index :: index of the run to get.
+ * @return goniometer
+ */
+Geometry::Goniometer &Run::mutableGoniometer(const size_t index) {
+  if (index >= m_goniometers.size())
+    throw std::out_of_range(
+        "Run::getGoniometer() const: index is out of range.");
+  return *m_goniometers[index];
+}
+
+/** Get the gonoimeter rotation matrix, calculated using the
+ * previously set Goniometer object as well as the angles
+ * loaded in the run (if any).
+ *
+ * @param index :: index of the run to get.
+ * @return 3x3 double rotation matrix
+ */
+const Mantid::Kernel::DblMatrix &
+Run::getGoniometerMatrix(const size_t index) const {
+  if (index >= m_goniometers.size())
+    throw std::out_of_range(
+        "Run::getGoniometer() const: index is out of range.");
+  return m_goniometers[index]->getR();
+}
+
+/** Get a vector of all the gonoimeter rotation matries
+ *
+ * @return vector of 3x3 double rotation matrix
+ */
+const std::vector<Kernel::Matrix<double>> Run::getGoniometerMatrices() const {
+  std::vector<Kernel::Matrix<double>> goniometers;
+  goniometers.reserve(m_goniometers.size());
+  for (auto it = m_goniometers.begin(); it != m_goniometers.end(); ++it) {
+    goniometers.emplace_back((*it)->getR());
+  }
+  return goniometers;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -363,7 +466,16 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   LogManager::saveNexus(file, group, true);
 
   // write the goniometer
-  m_goniometer->saveNexus(file, GONIOMETER_LOG_NAME);
+  if (m_goniometers.size() == 1)
+    m_goniometers[0]->saveNexus(file, GONIOMETER_LOG_NAME);
+  else if (m_goniometers.size() > 1) {
+    file->makeGroup(GONIOMETERS_LOG_NAME, "NXcollection", true);
+    file->writeData("num_goniometer", int(m_goniometers.size()));
+    for (size_t i = 0; i < m_goniometers.size(); i++) {
+      m_goniometers[i]->saveNexus(file, "goniometer" + std::to_string(i));
+    }
+    file->closeGroup();
+  }
 
   // write the histogram bins, if there are any
   if (!m_histoBins.empty()) {
@@ -417,9 +529,20 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
   file->getEntries(entries);
   LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
-    if (name_class.second == "NXpositioner") {
+    if (name_class.first == GONIOMETER_LOG_NAME) {
       // Goniometer class
-      m_goniometer->loadNexus(file, name_class.first);
+      m_goniometers[0]->loadNexus(file, name_class.first);
+    } else if (name_class.first == GONIOMETERS_LOG_NAME) {
+      file->openGroup(name_class.first, "NXcollection");
+      int num_goniometer;
+      file->readData("num_goniometer", num_goniometer);
+      m_goniometers.clear();
+      m_goniometers.reserve(num_goniometer);
+      for (int i = 0; i < num_goniometer; i++) {
+        m_goniometers.emplace_back(std::make_unique<Geometry::Goniometer>());
+        m_goniometers[i]->loadNexus(file, "goniometer" + std::to_string(i));
+      }
+      file->closeGroup();
     } else if (name_class.first == HISTO_BINS_LOG_NAME) {
       file->openGroup(name_class.first, "NXdata");
       file->readData("value", m_histoBins);
@@ -470,11 +593,11 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group,
 //-----------------------------------------------------------------------------------------------------------------------
 
 /**
- * Calculate the goniometer matrix
+ * Calculate the average goniometer matrix
  */
-void Run::calculateGoniometerMatrix() {
-  for (size_t i = 0; i < m_goniometer->getNumberAxes(); ++i) {
-    const std::string axisName = m_goniometer->getAxis(i).name;
+void Run::calculateAverageGoniometerMatrix() {
+  for (size_t i = 0; i < m_goniometers[0]->getNumberAxes(); ++i) {
+    const std::string axisName = m_goniometers[0]->getAxis(i).name;
     const double minAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Minimum);
     const double maxAngle =
@@ -511,7 +634,40 @@ void Run::calculateGoniometerMatrix() {
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
       }
     }
-    m_goniometer->setRotationAngle(i, angle);
+    m_goniometers[0]->setRotationAngle(i, angle);
+  }
+}
+
+/**
+ * Calculate the goniometer matrixes from logs
+ * @param goniometer goniometer with axes names to use
+ */
+void Run::calculateGoniometerMatrices(Geometry::Goniometer goniometer) {
+  if (goniometer.getNumberAxes() == 0)
+    throw std::runtime_error(
+        "Run::calculateGoniometerMatrices must include axes for goniometer");
+
+  const size_t num_log_values =
+      getTimeSeriesProperty<double>(goniometer.getAxis(0).name)->size();
+
+  m_goniometers.clear();
+  m_goniometers.reserve(num_log_values);
+
+  for (size_t i = 0; i < num_log_values; ++i)
+    m_goniometers.emplace_back(
+        std::make_unique<Geometry::Goniometer>(goniometer));
+
+  for (size_t i = 0; i < goniometer.getNumberAxes(); ++i) {
+    const auto angles =
+        getTimeSeriesProperty<double>(goniometer.getAxis(i).name)
+            ->valuesAsVector();
+    if (angles.size() != num_log_values)
+      throw std::runtime_error("Run::calculateGoniometerMatrices different "
+                               "number of log entries between axes");
+
+    for (size_t j = 0; j < num_log_values; ++j) {
+      m_goniometers[j]->setRotationAngle(i, angles[j]);
+    }
   }
 }
 
@@ -540,5 +696,16 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   }
 }
 
+//-----------------------------------------------------------------------------------------------
+/** Copy the goniometers from another
+ * @param other :: other workspace to copy    */
+void Run::copyGoniometers(const Run &other) {
+  m_goniometers.clear();
+  m_goniometers.reserve(other.m_goniometers.size());
+  for (const auto &goniometer : other.m_goniometers) {
+    auto new_goniometer = std::make_unique<Geometry::Goniometer>(*goniometer);
+    m_goniometers.emplace_back(std::move(new_goniometer));
+  }
+}
 } // namespace API
 } // namespace Mantid

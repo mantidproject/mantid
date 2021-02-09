@@ -218,6 +218,27 @@ public:
                      (150 * 150) + 2) // Two monitors
   }
 
+  void test_load_event_nexus_v20_ess_log_filtered() {
+    const std::string file = "V20_ESS_example.nxs";
+    std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
+
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("AllowList", allowed);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (150 * 150) + 2) // Two monitors
+  }
+
   void test_load_event_nexus_v20_ess_integration_2018() {
     // Only perform this test if the version of hdf5 supports vlen strings
     if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {

@@ -14,11 +14,16 @@ Concepts
 
 Algorithms
 ----------
+:ref:`LoadNexusLogs <algm-LoadNexusLogs>` has additional parameters to allow or block specific logs from being loaded.
+:ref:`LoadEventNexus <algm-LoadEventNexus>` now utilizes the log filter provided by `LoadNexusLogs <algm-LoadNexusLogs>`.
 
 - :ref:`CompareWorkspaces <algm-CompareWorkspaces>` compares the positions of both source and sample (if extant) when property `checkInstrument` is set.
+- :ref:`SetGoniometer <algm-SetGoniometer>` can now set multiple goniometers from log values instead of just the time-avereged value.
 
 Data Objects
 ------------
+
+- :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 
 Python
 ------
