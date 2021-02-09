@@ -38,6 +38,7 @@ class RebinRagged(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("XMax"),
                              "maximum x values with NaN meaning no maximum")
         self.declareProperty(FloatArrayProperty("Delta"), "step parameter for rebin")
+        self.declareProperty("PreserveEvents", True, "False converts event workspaces to histograms")
 
     def validateInputs(self):
         inputWS = self.getProperty("InputWorkspace").value
@@ -110,12 +111,13 @@ class RebinRagged(PythonAlgorithm):
         xmins = self.getProperty("XMin").value
         xmaxs = self.getProperty("XMax").value
         deltas = self.getProperty("Delta").value
+        preserveEvents = self.getProperty("PreserveEvents").value
 
         if self.__use_simple_rebin(xmins, xmaxs, deltas):
             # plain old rebin should have been used
             name = "__{}_rebinned_".format(outputWS)
             params = (xmins[0], deltas[0], xmaxs[0])
-            Rebin(InputWorkspace=inputWS, OutputWorkspace=name, Params=params)
+            Rebin(InputWorkspace=inputWS, OutputWorkspace=name, Params=params, PreserveEvents=preserveEvents)
             self.setProperty("OutputWorkspace", mtd[name])
             DeleteWorkspace(name)
         else:
@@ -164,6 +166,7 @@ class RebinRagged(PythonAlgorithm):
                     Rebin(InputWorkspace=name,
                           OutputWorkspace=name,
                           Params=(xmin, delta, xmax),
+                          PreserveEvents = preserveEvents,
                           startProgress=progStart,
                           endProgress=(progStart + progStep),
                           EnableLogging=False)
