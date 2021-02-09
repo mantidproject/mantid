@@ -321,6 +321,7 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
         dmin = np.array((0.306,0.306,0.22))
         dmax = np.array((4.280, 4.280, 3.133))
         delta = np.array((-0.001,-0.001,-0.0003))
+        tofmin, tofmax = 5000, 70000
 
         # wksp_exp is doing the reduction in event mode then calling RebinRagged
         AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
@@ -328,6 +329,7 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=True,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
                                      DMin=dmin.min(), DMax=dmax.max())
         ConvertUnits(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp, Target='dSpacing')
         RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
@@ -343,6 +345,7 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=True,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
                                      DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
         ConvertUnits(InputWorkspace=self.wksp_obs, OutputWorkspace=self.wksp_obs, Target='dSpacing')
 
@@ -382,6 +385,7 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
         dmin = np.array((0.306,0.306,0.22))
         dmax = np.array((4.280, 4.280, 3.133))
         delta = np.array((-0.001,-0.001,-0.0003))
+        tofmin, tofmax = 5000, 70000
 
         # wksp_exp is doing the reduction in event mode then calling RebinRagged
         AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
@@ -389,12 +393,13 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=False,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
                                      DMin=dmin.min(), DMax=dmax.max())
         RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
-                    XMin=dmin, XMax=dmax, Delta=delta)
+                    XMin=tofmin, XMax=tofmax, Delta=delta)
 
         wksp_exp = mtd[self.wksp_exp]  # may be unnecessary to have this check
-        for i, exp_length in enumerate([2639, 2639, 8855]):
+        for i, exp_length in enumerate([2641, 2641, 8798]):
             msg = 'index={} {} != {}'.format(i, len(wksp_exp.readY(i)), exp_length)
             assert len(wksp_exp.readY(i)) == exp_length, msg
 
@@ -404,6 +409,7 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=False,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
                                      DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
 
     def validateMethod(self):
