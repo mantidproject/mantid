@@ -928,8 +928,8 @@ public:
 
   //--------------------------------------------------------------------------------------------------------------
   /** generate a peak center workspace compatible to the workspace created by
-   * genearteTestDataGaussian(), which will 3 spectra and at most 2 elements for each
-   * sepctrum
+   * genearteTestDataGaussian(), which will 3 spectra and at most 2 elements for
+   * each sepctrum
    * @brief genPeakCenterWorkspace
    * @param peak_index_vec :: a vector of integer as 0 or 1.  0 for peak center
    * @param workspace_name
