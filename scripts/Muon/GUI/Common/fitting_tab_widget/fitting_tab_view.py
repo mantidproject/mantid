@@ -27,10 +27,14 @@ class FittingTabView(QWidget, ui_fitting_tab):
 
         self.layout().addWidget(self.fit_type_stacked_widget)
 
+        self.disable_tab_observer = GenericObserver(self.disable_view)
+        self.enable_tab_observer = GenericObserver(self.enable_view)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+
+        self.disable_view()
 
     def handle_instrument_changed(self):
         self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
@@ -38,3 +42,11 @@ class FittingTabView(QWidget, ui_fitting_tab):
     def handle_pulse_type_changed(self, updated_variables):
         if "DoublePulseEnabled" in updated_variables:
             self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
+
+    def disable_view(self):
+        """Disable all widgets in the fitting tab."""
+        self.setEnabled(False)
+
+    def enable_view(self):
+        """Enable all widgets in the fitting tab."""
+        self.setEnabled(True)

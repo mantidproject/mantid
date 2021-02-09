@@ -27,9 +27,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
         self.selected_plot_type_observer = GenericObserverWithArgPassing(self.handle_selected_plot_type_changed)
 
-        self.disable_tab_observer = GenericObserver(self.disable_view)
-        self.enable_tab_observer = GenericObserver(self.enable_view)
-
         self.view.set_slot_for_display_workspace_changed(self.handle_display_workspace_changed)
         self.view.set_slot_for_display_workspace_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
@@ -44,11 +41,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         fitting_options["global_parameters"] = self.view.get_global_parameters()
         fitting_options["tf_asymmetry_mode"] = False  # TEMPORARY
         return fitting_options
-
-    def disable_view(self):
-        """Disable the widgets in the view if data is not loaded."""
-        self.update_selected_workspace_list_for_fit()
-        super().disable_view()
 
     def get_loaded_workspaces(self):
         """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
