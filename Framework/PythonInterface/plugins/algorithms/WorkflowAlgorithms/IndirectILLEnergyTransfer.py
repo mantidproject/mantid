@@ -509,6 +509,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         elastic_tof = elastic_tof_equator
         elastic_channel = elastic_channel_equator
+
+        x_new = elastic_tof + (x[0] - elastic_channel) * channel_width
+        ws.setX(0, x_new)
+
         for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
             if self._fit_option == "FitAllPixelGroups":
                 group = (pixel - 1) // self._group_by
@@ -645,7 +649,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._do_group_detectors(ws)
         if self._normalise_to == 'Monitor':
             mtd[ws].setDistribution(True)
-        GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
+        GroupWorkspaces(InputWorkspaces=[ws], OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
     @staticmethod
@@ -726,7 +730,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         pattern = ''
 
-        for tube in range(1,N_TUBES+1):
+        for tube in range(1, N_TUBES+1):
             pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[0])
             pattern += '-'
             pattern += str((tube - 1) * N_PIXELS_PER_TUBE + self._psd_int_range[1])
