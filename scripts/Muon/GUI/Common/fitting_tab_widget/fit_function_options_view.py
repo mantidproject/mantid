@@ -49,9 +49,17 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
             self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
+    def set_slot_for_fit_name_changed(self, slot):
+        """Connect the slot for the fit name being changed by the user."""
+        self.function_name_line_edit.textChanged.connect(slot)
+
     def set_slot_for_function_structure_changed(self, slot):
         """Connect the slot for the function structure changing."""
         self.function_browser.functionStructureChanged.connect(slot)
+
+    def set_slot_for_function_parameter_changed(self, slot):
+        """Connect the slot for a function parameter changing."""
+        self.function_browser.parameterChanged.connect(slot)
 
     def set_slot_for_start_x_updated(self, slot):
         """Connect the slot for the start x option."""

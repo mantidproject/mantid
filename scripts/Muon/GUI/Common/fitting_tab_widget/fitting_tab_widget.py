@@ -31,7 +31,7 @@ class FittingTabWidget(object):
         self.general_fitting_presenter = GeneralFittingPresenter(self.general_fitting_view, self.general_fitting_model,
                                                                  context)
 
-        self.fitting_tab_view = FittingTabView(parent, self.general_fitting_view)
+        self.fitting_tab_view = FittingTabView(parent, context, self.general_fitting_view)
 
         # self.fitting_tab_view.set_slot_for_fit_generator_clicked(self.fitting_tab_presenter.handle_fit_generator_clicked)
         # self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_display_workspace_changed)

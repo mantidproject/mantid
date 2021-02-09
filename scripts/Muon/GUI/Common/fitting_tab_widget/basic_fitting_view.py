@@ -43,9 +43,17 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Connect the slot for the Plot Guess checkbox."""
         self.fit_controls.set_slot_for_plot_guess_changed(slot)
 
+    def set_slot_for_fit_name_changed(self, slot):
+        """Connect the slot for the fit name being changed by the user."""
+        self.fit_function_options.set_slot_for_fit_name_changed(slot)
+
     def set_slot_for_function_structure_changed(self, slot):
         """Connect the slot for the function structure changing."""
         self.fit_function_options.set_slot_for_function_structure_changed(slot)
+
+    def set_slot_for_function_parameter_changed(self, slot):
+        """Connect the slot for a function parameter changing."""
+        self.fit_function_options.set_slot_for_function_parameter_changed(slot)
 
     def set_slot_for_start_x_updated(self, slot):
         """Connect the slot for the start x option."""

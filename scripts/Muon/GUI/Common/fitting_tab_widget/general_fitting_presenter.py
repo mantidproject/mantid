@@ -24,7 +24,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_selected_workspace_list_for_fit()
 
         self.fit_parameter_changed_notifier = GenericObservable()
-        self.fit_type_changed_notifier = GenericObservable()
+        self.fitting_mode_changed_notifier = GenericObservable()
         self.selected_single_fit_notifier = GenericObservable()
 
         self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
@@ -38,8 +38,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.initialise_model_options()
 
-        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_double_pulse_set)  # Investigate
-        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)  # Investigate
+        self.view.set_slot_for_display_workspace_changed(self.handle_display_workspace_changed)
+        self.view.set_slot_for_display_workspace_changed(self.handle_plot_guess_changed)
+        self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
+        self.view.set_slot_for_simultaneous_fit_by_changed(self.handle_simultaneous_fit_by_changed)
+        self.view.set_slot_for_simultaneous_fit_by_specifier_changed(self.handle_simultaneous_fit_by_specifier_changed)
 
     def disable_view(self):
         self.update_selected_workspace_list_for_fit()
@@ -48,10 +51,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def get_loaded_workspaces(self):
         return self.view.loaded_workspaces
 
-    def get_fit_browser_options(self):
-        return {"FittingType": "Simultaneous" if self.view.is_simul_fit else "Sequential",
-                "Minimizer": self.view.minimizer,
-                "EvaluationType": self.view.evaluation_type}
+    def _is_simultaneous_fitting(self):
+        return self.view.is_simultaneous_fit_ticked
 
     def handle_new_data_loaded(self):
         self.view.plot_guess = False
@@ -74,7 +75,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.set_current_dataset_index(current_index)
 
         self._update_stored_fit_functions()
-        self.update_fit_status_information_in_view()
+        self._update_fit_status_information_in_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
@@ -87,11 +88,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.context.fitting_context.fit_raw = self.view.fit_to_raw
         self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
 
-    def handle_fit_type_changed(self):
+    def handle_fitting_mode_changed(self):
         self.view.enable_undo_fit(False)
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             self.view.set_workspace_combo_box_label("Display parameters for")
-            self.view.enable_simul_fit_options()
+            self.view.enable_simultaneous_fit_options()
             self.view.switch_to_simultaneous()
             self._update_stored_fit_functions()
             self.update_fit_specifier_list()
@@ -100,11 +101,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self.view.set_workspace_combo_box_label("Select Workspace")
             self.view.switch_to_single()
             self._update_stored_fit_functions()
-            self.view.disable_simul_fit_options()
+            self.view.disable_simultaneous_fit_options()
 
         self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
                                     fit_by=self.view.simultaneous_fit_by)
-        self.fit_type_changed_notifier.notify_subscribers()
+        self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
@@ -115,8 +116,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         workspaces = self.get_fit_input_workspaces()
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
+    def handle_undo_fit_clicked(self):
+        super().handle_undo_fit_clicked()
+        # Send the workspaces to be plotted
+        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             self._fit_function[0] = fit_function
             self._fit_status = [fit_status] * len(self.start_x)
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
@@ -126,7 +132,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self._fit_status[current_index] = fit_status
             self._fit_chi_squared[current_index] = fit_chi_squared
 
-        self.update_fit_status_information_in_view()
+        self._update_fit_status_information_in_view()
 
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
@@ -162,122 +168,31 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_end_x(index, value)
         self.update_model_from_view(endX=value)
 
-    def handle_minimiser_changed(self):
-        self.update_model_from_view(minimiser=self.view.minimizer)
-
-    def handle_evaluation_type_changed(self):
-        self.update_model_from_view(evaluation_type=self.view.evaluation_type)
-
-    def handle_fit_name_changed_by_user(self):
-        self.automatically_update_fit_name = False
-        self.model.function_name = self.view.function_name
-
     def handle_function_structure_changed(self):
         if not self._fit_function[0]:
             self.handle_display_workspace_changed()
         self.view.plot_guess = False
         if not self.view.fit_object:
-            if self.view.is_simul_fit:
+            if self.view.is_simultaneous_fit_ticked:
                 self._fit_function = [None]
             else:
-                self._fit_function = [None] * len(self.selected_data)\
-                    if self.selected_data else [None]
+                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.model.clear_fit_information()
             self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
         else:
             self._fit_function = [func.clone() for func in self._get_fit_function()]
 
-        self.clear_fit_information()
+        self._clear_fit_information()
 
-        if self.automatically_update_fit_name:
-            name = self._get_fit_function()[0]
-            self.view.function_name = self.model.get_function_name(name)
-            self.model.function_name = self.view.function_name
+        self._update_function_name()
 
         self.update_model_from_view(fit_function=self._fit_function[0],
                                     global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
 
-    def handle_double_pulse_set(self, updated_variables):
-    #    if 'DoublePulseEnabled' in updated_variables:
-    #        self.view.tf_asymmetry_mode = False
-        pass
-
-    def handle_tf_asymmetry_mode_changed(self):
-        def calculate_tf_fit_function(original_fit_function):
-            tf_asymmetry_parameters = self.get_parameters_for_tf_function_calculation(original_fit_function)
-            try:
-                tf_function = self.model.convert_to_tf_function(tf_asymmetry_parameters)
-            except RuntimeError:
-                self.view.warning_popup('The input function was not of the form N*(1+f)+A*exp(-lambda*t)')
-                return tf_asymmetry_parameters['InputFunction']
-            return tf_function
-
-        self.view.enable_undo_fit(False)
-        self.view.plot_guess = False
-
-        groups_only = self.check_workspaces_are_tf_asymmetry_compliant(self.selected_data)
-        # if (
-        #         not groups_only and self.view.tf_asymmetry_mode) or not self.view.fit_object and self.view.tf_asymmetry_mode:
-        #     self.view.tf_asymmetry_mode = False
-        #
-        #     self.view.warning_popup('Can only fit groups in tf asymmetry mode and need a function defined')
-        #     return
-
-        # if self._tf_asymmetry_mode == self.view.tf_asymmetry_mode:
-        #     return
-        #
-        # self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
-        global_parameters = self.view.get_global_parameters()
-        # if self._tf_asymmetry_mode:
-        #     new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
-        #     if self.automatically_update_fit_name:
-        #         self.view.function_name += ',TFAsymmetry'
-        #         self.model.function_name = self.view.function_name
-        # else:
-        new_global_parameters = [item[9:] for item in global_parameters]
-        if self.automatically_update_fit_name:
-            self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
-            self.model.function_name = self.view.function_name
-
-        if not self.view.is_simul_fit:
-            for index, fit_function in enumerate(self._fit_function):
-                fit_function = fit_function if fit_function else self.view.fit_object.clone()
-                new_function = calculate_tf_fit_function(fit_function)
-                self._fit_function[index] = new_function.clone()
-
-            self.view.function_browser.blockSignals(True)
-            self.view.function_browser.clear()
-            self.view.function_browser.setFunction(str(self._fit_function[self.view.get_index_for_start_end_times()]))
-            self.view.function_browser.setGlobalParameters(new_global_parameters)
-            self.view.function_browser.blockSignals(False)
-        else:
-            new_function = calculate_tf_fit_function(self.view.fit_object)
-            self._fit_function = [new_function.clone()]
-            self.view.function_browser.blockSignals(True)
-            self.view.function_browser.clear()
-            self.view.function_browser.setFunction(str(self._fit_function[0]))
-            self.view.function_browser.setGlobalParameters(new_global_parameters)
-            self.view.function_browser.blockSignals(False)
-
-        self.update_fit_status_information_in_view()
-        self.handle_display_workspace_changed()
-        #self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=self.view.tf_asymmetry_mode)
-        self.update_model_from_view(fit_function=self._fit_function[0], tf_asymmetry_mode=False)
-        self.fit_function_changed_notifier.notify_subscribers()
-
-    def get_parameters_for_tf_function_calculation(self, fit_function):
-        mode = "Extract"
-        #mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
-        workspace_list = self.selected_data if self.view.is_simul_fit else [self.view.display_workspace]
-        return {'InputFunction': fit_function,
-                'WorkspaceList': workspace_list,
-                'Mode': mode,
-                'CopyTies': False}
-
     def handle_function_parameter_changed(self):
-        if not self.view.is_simul_fit:
+        if not self.view.is_simultaneous_fit_ticked:
             index = self.view.get_index_for_start_end_times()
             fit_function = self._get_fit_function()[index]
             self._fit_function[index] = self._get_fit_function()[index]
@@ -290,31 +205,20 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.fit_parameter_changed_notifier.notify_subscribers()
         self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
 
-    def handle_undo_fit_clicked(self):
-        self._fit_function = self._fit_function_cache
-        self._fit_function = self._fit_function_cache
-        self.clear_fit_information()
-        self.update_fit_status_information_in_view()
-        self.view.enable_undo_fit(False)
-        self.context.fitting_context.remove_latest_fit()
-        self._number_of_fits_cached = 0
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
-
-    def handle_fit_by_changed(self):
-        # if self.view.tf_asymmetry_mode:
-        #     self.view.warning_popup("Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
-        #     self.view.simultaneous_fit_by = "Run" if self.view.simultaneous_fit_by == "Group/Pair" else "Group/Pair"
-        #     return
-
+    def handle_simultaneous_fit_by_changed(self):
         self.update_selected_workspace_list_for_fit()
-        self.view.simul_fit_by_specifier.setEnabled(True)
+        self.view.enable_simultaneous_fit_by_specifier(True)
         self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
-    def handle_fit_specifier_changed(self):
+    #######################
+    ## HERE
+    ####################### connect slots for the following
+
+    def handle_simultaneous_fit_by_specifier_changed(self):
         self.selected_data = self.get_workspace_selected_list()
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
@@ -336,18 +240,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.update_displayed_data_combo_box(self.selected_data)
         fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0]}
         self.update_model_from_view(**fitting_options)
-        self.update_fit_status_information_in_view()
-
-    def clear_fit_information(self):
-        self._fit_status = [None] * len(
-            self.selected_data) if self.selected_data else [None]
-        self._fit_chi_squared = [0.0] * len(
-            self.selected_data) if self.selected_data else [0.0]
-        self.update_fit_status_information_in_view()
-        self.view.enable_undo_fit(False)
+        self._update_fit_status_information_in_view()
 
     def update_selected_workspace_list_for_fit(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             self.update_fit_specifier_list()
 
         self.selected_data = self.get_workspace_selected_list()
@@ -397,7 +293,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.setup_fit_by_specifier(simul_choices)
 
     def _update_stored_fit_functions(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             if self.view.fit_object:
                 self._fit_function = [self.view.fit_object.clone()]
             else:
@@ -414,7 +310,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
                 self._fit_function = [None] * len(self._start_x)
 
     def _get_fit_function(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             return [self.view.fit_object]  # return the fit function stored in the browser
         else:  # we need to convert stored function into equiv
             if self.view.fit_object:  # make sure thers a fit function in the browser
@@ -431,7 +327,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         return self._fit_function[self._fit_function_index()]
 
     def _fit_function_index(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             return 0  # if we are doing a single simultaneous fit return 0
         else:  # else fitting on one of the display workspaces
             return self.view.get_index_for_start_end_times()
@@ -442,22 +338,12 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def update_end_x(self, index, value):
         self._end_x[index] = value
 
-    def update_fit_status_information_in_view(self):
-        current_index = self._fit_function_index()
-        self.view.update_with_fit_outputs(self._fit_function[current_index],
-                                          self._fit_status[current_index],
-                                          self._fit_chi_squared[current_index])
-        self.view.update_global_fit_state(self._fit_status, current_index)
-
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
             self.selected_data = [
                 item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []
-
-    def update_model_from_view(self, **kwargs):
-        self.model.update_model_fit_options(**kwargs)
 
     def initialise_model_options(self):
         fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0],
@@ -469,14 +355,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.update_model_fit_options(**fitting_options)
 
     def _get_fit_type(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             fit_type = "Simul"
         else:
             fit_type = "Single"
         return fit_type
 
     def get_fit_input_workspaces(self):
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             return self.selected_data
         else:
             return [self.view.display_workspace]
@@ -500,7 +386,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def _get_selected_runs_and_groups_for_fitting(self):
         runs = 'All'
         groups_and_pairs = self._get_selected_groups_and_pairs()
-        if self.view.is_simul_fit:
+        if self.view.is_simultaneous_fit_ticked:
             if self.view.simultaneous_fit_by == "Run":
                 runs = self.view.simultaneous_fit_by_specifier
             elif self.view.simultaneous_fit_by == "Group/Pair":

@@ -22,10 +22,26 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
-        self.disable_simul_fit_options()
+        self.disable_simultaneous_fit_options()
 
         if is_frequency_domain:
             self.hide_simultaneous_fit_options()
+
+    def set_slot_for_display_workspace_changed(self, slot):
+        """Connect the slot for the display workspace combo box being changed."""
+        self.parameter_display_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_fitting_mode_changed(self, slot):
+        """Connect the slot for the simultaneous fit check box."""
+        self.simul_fit_checkbox.toggled.connect(slot)
+
+    def set_slot_for_simultaneous_fit_by_changed(self, slot):
+        """Connect the slot for the fit by combo box being changed."""
+        self.simul_fit_by_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_simultaneous_fit_by_specifier_changed(self, slot):
+        """Connect the slot for the fit specifier combo box being changed."""
+        self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
     def update_displayed_data_combo_box(self, data_list):
         """Update the data in the parameter display combo box."""
@@ -67,18 +83,6 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         """Populate the simultaneous fit by combo box."""
         for item in item_list:
             self.simul_fit_by_combo.addItem(item)
-
-    # def set_slot_for_display_workspace_changed(self, slot):
-    #     self.parameter_display_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_fit_type_changed(self, slot):
-    #     self.simul_fit_checkbox.toggled.connect(slot)
-    #
-    # def set_slot_for_simul_fit_by_changed(self, slot):
-    #     self.simul_fit_by_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_simul_fit_specifier_changed(self, slot):
-    #     self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
     @property
     def display_workspace(self):
@@ -123,29 +127,33 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         current_index = self.parameter_display_combo.currentIndex()
         return current_index if current_index != -1 else 0
 
-    def disable_simul_fit_options(self):
-        """Disables the simultaneous fit options."""
-        self.simul_fit_by_combo.setEnabled(False)
-        self.simul_fit_by_specifier.setEnabled(False)
-
     def hide_simultaneous_fit_options(self):
         """Hides the simultaneous fit options."""
         self.simul_fit_checkbox.hide()
         self.simul_fit_by_combo.hide()
         self.simul_fit_by_specifier.hide()
 
-    def enable_simul_fit_options(self):
+    def disable_simultaneous_fit_options(self):
+        """Disables the simultaneous fit options."""
+        self.simul_fit_by_combo.setEnabled(False)
+        self.simul_fit_by_specifier.setEnabled(False)
+
+    def enable_simultaneous_fit_options(self):
         """Enables the simultaneous fit options."""
         self.simul_fit_by_combo.setEnabled(True)
         self.simul_fit_by_specifier.setEnabled(True)
 
+    def enable_simultaneous_fit_by_specifier(self, enable):
+        """Enables or disables the simultaneous fit by combo box."""
+        self.simul_fit_by_specifier.setEnabled(enable)
+
     @property
-    def is_simul_fit(self):
+    def is_simultaneous_fit_ticked(self):
         """Returns true if in simultaneous mode."""
         return self.simul_fit_checkbox.isChecked()
 
-    @is_simul_fit.setter
-    def is_simul_fit(self, simultaneous):
+    @is_simultaneous_fit_ticked.setter
+    def is_simultaneous_fit_ticked(self, simultaneous):
         """Sets whether or not you are in simultaneous mode."""
         self.simul_fit_checkbox.blockSignals(True)
         self.simul_fit_checkbox.setChecked(simultaneous)
