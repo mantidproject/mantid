@@ -343,7 +343,7 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=True,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
-                                     DMin=dmin, DMax=dmax, Delta=delta)  # bonus bit for RebinRagged
+                                     DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
         ConvertUnits(InputWorkspace=self.wksp_obs, OutputWorkspace=self.wksp_obs, Target='dSpacing')
 
     def validateMethod(self):
@@ -404,7 +404,7 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
                                      PreserveEvents=True, Dspacing=False,
                                      Params=delta.max(),
                                      CompressTolerance=0.01,
-                                     DMin=dmin, DMax=dmax, Delta=delta)  # bonus bit for RebinRagged
+                                     DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
 
     def validateMethod(self):
         self.tolerance = 1.0e-2
