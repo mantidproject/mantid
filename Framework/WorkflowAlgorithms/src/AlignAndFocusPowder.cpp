@@ -807,10 +807,6 @@ void AlignAndFocusPowder::exec() {
   m_outputW = convertUnits(m_outputW, "TOF");
   m_progress->report();
 
-  if (!dspace && !m_delta_ragged.empty()) {
-    m_outputW = rebinRagged(m_outputW, false);
-  }
-
   // compress again if appropriate
   m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if ((m_outputEW) && (compressEventsTolerance > 0.)) {
@@ -834,6 +830,10 @@ void AlignAndFocusPowder::exec() {
     m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
   m_progress->report();
+
+  if (!dspace && !m_delta_ragged.empty()) {
+    m_outputW = rebinRagged(m_outputW, false);
+  }
 
   // return the output workspace
   setProperty("OutputWorkspace", m_outputW);
