@@ -18,6 +18,7 @@ from mantid.simpleapi import *
 
 N_TUBES = 16
 N_PIXELS_PER_TUBE = 128
+N_MONITOR = 1
 
 
 def _ws_or_none(s):
@@ -502,26 +503,40 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
         output_epp = self.getPropertyValue('OutputElasticChannelWorkspace')
         rows = epp_ws.rowCount()
-        if rows == 1:
-            elastic_channel_equator = epp_ws.cell('PeakCentre', 0)
-            formula = '{0} + (x - {1})*{2}'.format(elastic_tof_equator, elastic_channel_equator, channel_width)
-            ConvertAxisByFormula(InputWorkspace=ws, Axis='X', AxisUnits='TOF', Formula=formula, OutputWorkspace=ws)
-        else:
-            elastic_channel_equator = epp_ws.cell('PeakCentre', rows-1)
-            x = ws.extractX()
-            for pixel in range(ws.getNumberHistograms()):
-                if 0 < pixel < N_PIXELS_PER_TUBE * N_TUBES + 1:
-                    group = int((pixel - 1) / self._group_by)
-                    if epp_ws.cell('FitStatus', group) == 'success':
-                        l2 = detector_info.l2(pixel)
-                        elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
-                        elastic_channel = epp_ws.cell('PeakCentre', group)
+
+        elastic_channel_equator = epp_ws.cell('PeakCentre', rows-1)
+        x = ws.extractX()
+
+        elastic_tof = elastic_tof_equator
+        elastic_channel = elastic_channel_equator
+        for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
+            if self._fit_option == "FitAllPixelGroups":
+                group = (pixel - 1) // self._group_by
+                if epp_ws.cell('FitStatus', group) == 'success':
+                    l2 = detector_info.l2(pixel)
+                    elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
+                    elastic_channel = epp_ws.cell('PeakCentre', group)
                 else:
-                    elastic_tof = elastic_tof_equator
-                    elastic_channel = elastic_channel_equator
-                x_new = elastic_tof + (x[pixel] - elastic_channel) * channel_width
-                ws.setX(pixel, x_new)
-            ws.getAxis(0).setUnit('TOF')
+                    pass
+                    # TODO find out what to take as default in case of failure
+            else:
+                elastic_tof = elastic_tof_equator
+                elastic_channel = elastic_channel_equator
+            x_new = elastic_tof + (x[pixel] - elastic_channel) * channel_width
+            ws.setX(pixel, x_new)
+
+        for single_detector in range(N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR + 1, ws.getNumberHistograms()):
+            group = rows - 1 - (ws.getNumberHistograms() - single_detector)
+            if epp_ws.cell('FitStatus', group) == 'success':
+                l2 = detector_info.l2(single_detector)
+                elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
+                elastic_channel = epp_ws.cell('PeakCentre', group)
+            else:
+                pass
+                # TODO find out what to take as default in case of failure
+            x_new = elastic_tof + (x[single_detector] - elastic_channel) * channel_width
+            ws.setX(single_detector, x_new)
+        ws.getAxis(0).setUnit('TOF')
 
         if output_epp:
             RenameWorkspace(InputWorkspace=epp_ws, OutputWorkspace=output_epp)
@@ -590,16 +605,25 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
             FindEPP(InputWorkspace=equator_ws, OutputWorkspace=equator_epp_ws)
             DeleteWorkspace(equator_ws)
+            single_detectors = mtd[self._ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - N_MONITOR
 
             if self._fit_option == 'FitAllPixelGroups':
-                GroupDetectors(InputWorkspace=ws, OutputWorkspace=grouped_ws, GroupingPattern=self._group_pixels(self._group_by))
+                GroupDetectors(InputWorkspace=ws,
+                               OutputWorkspace=grouped_ws,
+                               GroupingPattern=self._group_pixels(self._group_by, single_detectors))
                 CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, XMin=to_crop, XMax=3 * to_crop)
                 FindEPP(InputWorkspace=grouped_ws, OutputWorkspace=epp_ws)
                 self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws])
                 DeleteWorkspaces([equator_epp_ws, grouped_ws])
             else:
-                self._create_elastic_channel_ws(mtd[equator_epp_ws], mtd[ws].getRun())
-                RenameWorkspace(InputWorkspace=equator_epp_ws, OutputWorkspace=epp_ws)
+                single_det_ws = _make_name(ws, "sds")
+                ExtractSpectra(InputWorkspace=ws,
+                               OutputWorkspace=single_det_ws,
+                               StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + 1,
+                               EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors)
+                FindEPP(InputWorkspace=single_det_ws, OutputWorkspace=epp_ws)
+                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws])
+                DeleteWorkspaces([equator_epp_ws, single_det_ws])
             self._convert_to_energy_bats(mtd[ws], mtd[epp_ws])
         else:
             center_chopper_speed = input_epp.cell('ChopperSpeed', 0)
@@ -625,7 +649,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         DeleteWorkspaces([rebin_ws])
 
     @staticmethod
-    def _group_pixels(by=4):
+    def _group_pixels(by=4, single_detectors=0):
         """
         Groups pixels in the tubes by the factor, which should be a power of 2.
         @param by : the group pixels by
@@ -636,6 +660,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 start = i * N_PIXELS_PER_TUBE + j * by + 1
                 end = start + by - 1
                 pattern += str(start)+'-'+str(end)+','
+
+        for single_det in range(single_detectors):
+            sd_index = N_TUBES * N_PIXELS_PER_TUBE + single_det + 1
+            pattern += str(sd_index)
+            pattern += ','
+
         return pattern[:-1]
 
     def _do_group_detectors(self, ws):
