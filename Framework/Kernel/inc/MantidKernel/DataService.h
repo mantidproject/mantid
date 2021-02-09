@@ -419,6 +419,7 @@ public:
    * to unsorted
    * @param hiddenState Whether to include hidden objects, Defaults to
    * Auto which checks the current configuration to determine behavior.
+   * @param contain Include only object names that contain this string.
    * @return A vector of strings containing object names in the ADS
    */
   std::vector<std::string>

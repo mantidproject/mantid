@@ -160,6 +160,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * Return a Python list of object names from the ADS as this is
    * far easier to work with than a set
    * @param self :: A reference to the ADS object that called this method
+   * @param contain :: If provided, the function will return only names that
+   * contain this string
    * @returns A python list created from the set of strings
    */
   static boost::python::list getObjectNamesAsList(SvcType &self,
