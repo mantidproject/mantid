@@ -71,7 +71,7 @@ public:
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
@@ -541,12 +541,12 @@ public:
    */
   void Ntest_singlePeakMultiSpectra() {
     // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
+    // std::string input_ws_name = generateTestDataBackToBackExponential();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -595,7 +595,7 @@ public:
 
   void Ntest_singlePeakMultiSpectraPseudoVoigt() {
     // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
+    // std::string input_ws_name = generateTestDataBackToBackExponential();
 
     // Generate peak and background parameters
     std::vector<double> peakparvalues{0.5};
@@ -652,12 +652,12 @@ public:
    */
   void Ntest_SingleSpectrum3Peaks() {
     // Generate input workspace
-    // std::string input_ws_name = loadVulcanHighAngleData();
+    // std::string input_ws_name = generateTestDataBackToBackExponential();
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -708,7 +708,7 @@ public:
    */
   void test_multiple_peak_profiles() {
     // Generate input workspace
-    std::string input_ws_name = loadVulcanHighAngleData();
+    std::string input_ws_name = generateTestDataBackToBackExponential();
     API::MatrixWorkspace_sptr input_ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(input_ws_name));
@@ -716,7 +716,7 @@ public:
     // Generate peak and background parameters
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    gen_PeakParameters(peakparnames, peakparvalues);
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -890,42 +890,6 @@ public:
     AnalysisDataService::Instance().remove("FitErrorsWS");
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Generate peak parameters for Back-to-back exponential convoluted by
-   * Gaussian
-   * FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
-   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
-   * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
-   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
-   * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
-   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
-   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
-   * PeakRange='1.06,1.09',
-   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
-   * PeakPositionTolerance=0.02)
-   */
-  void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
-    parnames.clear();
-    parvalues.clear();
-
-    parnames.emplace_back("I");
-    parvalues.emplace_back(2.5e+06);
-
-    parnames.emplace_back("A");
-    parvalues.emplace_back(5400);
-
-    parnames.emplace_back("B");
-    parvalues.emplace_back(1700);
-
-    parnames.emplace_back("X0");
-    parvalues.emplace_back(1.07);
-
-    parnames.emplace_back("S");
-    parvalues.emplace_back(0.000355);
-
-    return;
-  }
-
   //--------------------------------------------------------------------------------------------------------------
   /** generate a peak center workspace compatible to the workspace created by
    * genearteTestDataGaussian(), which will 3 spectra and at most 2 elements for
@@ -1080,7 +1044,7 @@ public:
    * exponenential convoluted
    * by Gaussian
    */
-  std::string loadVulcanHighAngleData() {
+  std::string generateTestDataBackToBackExponential() {
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();
 
@@ -1098,6 +1062,49 @@ public:
 
     return "diamond_3peaks";
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate peak parameters for Back-to-back exponential convoluted by
+   * Gaussian
+   * FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
+   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
+   * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
+   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
+   * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
+   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
+   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
+   * PeakRange='1.06,1.09',
+   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
+   * PeakPositionTolerance=0.02)
+   */
+  void createBackToBackExponentialParameters(vector<string> &parnames,
+		                             vector<double> &parvalues,
+					     bool include_pos_intensity = true) {
+    parnames.clear();
+    parvalues.clear();
+
+    if (include_pos_intensity) {
+      parnames.emplace_back("I");
+      parvalues.emplace_back(2.5e+06);
+    }
+
+    parnames.emplace_back("A");
+    parvalues.emplace_back(5400);
+
+    parnames.emplace_back("B");
+    parvalues.emplace_back(1700);
+
+    if (include_pos_intensity) {
+      parnames.emplace_back("X0");
+      parvalues.emplace_back(1.07);
+    }
+
+    parnames.emplace_back("S");
+    parvalues.emplace_back(0.000355);
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Check whether a workspace exists or not
