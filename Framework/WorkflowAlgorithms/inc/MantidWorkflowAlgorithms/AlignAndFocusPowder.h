@@ -113,7 +113,7 @@ private:
   int m_resampleX{0};
   std::vector<double> m_dmins;
   std::vector<double> m_dmaxs;
-  std::vector<double> m_delta;
+  std::vector<double> m_delta_ragged;
   bool dspace{false};
   double xmin{0.0};
   double xmax{0.0};

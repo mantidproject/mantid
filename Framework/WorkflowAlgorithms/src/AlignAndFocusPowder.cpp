@@ -56,7 +56,7 @@ const std::string RESAMPLEX("ResampleX");
 const std::string BIN_IN_D("Dspacing");
 const std::string D_MINS("DMin");
 const std::string D_MAXS("DMax");
-const std::string DELTA("Delta");
+const std::string RAGGED_DELTA("DeltaRagged");
 const std::string TOF_MIN("TMin");
 const std::string TOF_MAX("TMax");
 const std::string WL_MIN("CropWavelengthMin");
@@ -160,9 +160,10 @@ void AlignAndFocusPowder::init() {
       std::make_unique<ArrayProperty<double>>(PropertyNames::D_MAXS),
       "Maximum for Dspace axis. (Default 0.) ");
   mapPropertyName(PropertyNames::D_MAXS, "d_max");
-  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::DELTA),
-                  "Step parameter for rebin");
-  mapPropertyName(PropertyNames::DELTA, "delta");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::RAGGED_DELTA),
+      "Step parameter for rebin");
+  mapPropertyName(PropertyNames::RAGGED_DELTA, "delta");
   declareProperty(PropertyNames::TOF_MIN, EMPTY_DBL(),
                   "Minimum for TOF axis. Defaults to 0. ");
   mapPropertyName(PropertyNames::TOF_MIN, "tof_min");
@@ -358,7 +359,7 @@ void AlignAndFocusPowder::exec() {
   dspace = getProperty(PropertyNames::BIN_IN_D);
   auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
-  this->getVecPropertyFromPmOrSelf(PropertyNames::DELTA, m_delta);
+  this->getVecPropertyFromPmOrSelf(PropertyNames::RAGGED_DELTA, m_delta_ragged);
   LRef = getProperty(PropertyNames::UNWRAP_REF);
   DIFCref = getProperty(PropertyNames::LOWRES_REF);
   const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
@@ -749,13 +750,13 @@ void AlignAndFocusPowder::exec() {
   // this next call should probably be in for rebin as well
   // but it changes the system tests
   if (dspace && m_resampleX != 0) {
-    if (m_delta.empty()) {
+    if (m_delta_ragged.empty()) {
       m_outputW = rebin(m_outputW);
     } else {
       m_outputW = rebinRagged(m_outputW);
     }
     if (m_processLowResTOF) {
-      if (m_delta.empty()) {
+      if (m_delta_ragged.empty()) {
         m_lowResW = rebin(m_lowResW);
       } else {
         m_lowResW = rebinRagged(m_lowResW);
@@ -801,7 +802,7 @@ void AlignAndFocusPowder::exec() {
   m_outputW = convertUnits(m_outputW, "TOF");
   m_progress->report();
 
-  if (!dspace && !m_delta.empty()) {
+  if (!dspace && !m_delta_ragged.empty()) {
     m_outputW = rebinRagged(m_outputW);
   }
 
@@ -919,7 +920,7 @@ AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
  */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
-  if (!m_delta.empty()) {
+  if (!m_delta_ragged.empty()) {
     return matrixws;
   } else if (m_resampleX != 0) {
     // ResampleX
@@ -992,7 +993,7 @@ AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws) {
   }
   alg->setProperty("InputWorkspace", matrixws);
   alg->setProperty("OutputWorkspace", matrixws);
-  alg->setProperty("Delta", m_delta);
+  alg->setProperty("Delta", m_delta_ragged);
   alg->executeAsChildAlg();
   matrixws = alg->getProperty("OutputWorkspace");
   return matrixws;
