@@ -391,9 +391,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             else:
                 self.log().information('Skipping empty token run.')
 
-        for output in outputSamples:
-            ConvertToPointData(InputWorkspace=output,
-                               OutputWorkspace=output)
+        for i in range(len(outputSamples)):
+            ConvertToPointData(InputWorkspace=outputSamples[i],
+                               OutputWorkspace=outputSamples[i])
+            suffix = self.createCustomSuffix(outputSamples[i])
+            RenameWorkspace(InputWorkspace=outputSamples[i],
+                            OutputWorkspace=outputSamples[i] + suffix)
+            outputSamples[i] += suffix
+
         if (len(outputSamples) > 1
            and self.getPropertyValue('OutputType') == 'I(Q)'):
             try:
@@ -421,6 +426,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
                 CropWorkspace(InputWorkspace=ws, XMin=x[nonzero][0] - 1,
                               XMax=x[nonzero][-1], OutputWorkspace=ws)
+
+                # add the suffix
+                suffix = self.createCustomSuffix(outputWedges[i][j])
+                RenameWorkspace(InputWorkspace=outputWedges[i][j],
+                                OutputWorkspace=outputWedges[i][j] + suffix)
+                outputWedges[i][j] += suffix
 
         # stitch if possible and group
         for i in range(len(outputWedges[0])):
@@ -612,7 +623,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         return container_name
 
-    def createCustomSuffix(self, ws, i):
+    def createCustomSuffix(self, ws):
         logs = mtd[ws].run().getProperties()
         logs = {log.name:log.value for log in logs}
 
@@ -657,7 +668,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if wavelength:
             suffix += "_w{:.1f}A".format(wavelength)
 
-        suffix += "_{}".format(i + 1)
         return suffix
 
     def processSample(self, i, flux_name, sample_transmission_names, beam_name,
@@ -745,11 +755,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value,
                 )
 
-        suffix = self.createCustomSuffix(sample_name, i)
-        output_sample = self.output + suffix
+        output_sample = self.output + '_' + str(i + 1)
 
         if self.getProperty('OutputPanels').value:
-            panel_ws_group = self.output_panels + suffix
+            panel_ws_group = self.output_panels + '_' + str(i + 1)
         else:
             panel_ws_group = ""
 
@@ -791,7 +800,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if output_wedges:
             wedges_old_names = [output_wedges + "_" + str(w + 1)
                                 for w in range(self.n_wedges)]
-            wedges_new_names = [self.output + "_wedge_" + str(w + 1) + suffix
+            wedges_new_names = [self.output + "_wedge_" + str(w + 1)
+                                + "_" + str(i + 1)
                                 for w in range(self.n_wedges)]
             UnGroupWorkspace(InputWorkspace=output_wedges)
             RenameWorkspaces(InputWorkspaces=wedges_old_names,
