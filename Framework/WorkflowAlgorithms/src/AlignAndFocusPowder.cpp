@@ -977,7 +977,8 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
 /** RebinRagged this should only be done on the final focussed workspace
  */
 API::MatrixWorkspace_sptr
-AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace) {
+AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws,
+                                 const bool inDspace) {
   // local variables to control whether or not to log individual values
   bool print_xmin = false;
   bool print_xmax = false;
@@ -985,25 +986,25 @@ AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool 
   // configure RebinRagged
   API::IAlgorithm_sptr alg = createChildAlgorithm("RebinRagged");
   if (inDspace) {
-      if (!m_dmins.empty()) {
-          print_xmin = true;
-          alg->setProperty("XMin", m_dmins);
-      }
-      if (!m_dmaxs.empty()) {
-          print_xmax = true;
-        alg->setProperty("XMax", m_dmaxs);
-      }
+    if (!m_dmins.empty()) {
+      print_xmin = true;
+      alg->setProperty("XMin", m_dmins);
+    }
+    if (!m_dmaxs.empty()) {
+      print_xmax = true;
+      alg->setProperty("XMax", m_dmaxs);
+    }
   } else { // assume time-of-flight
-      if (tmin > 0.) {
-          print_xmin = true;
-          // wacky syntax to set a single value to an ArrayProperty
-          alg->setProperty("XMin", std::vector<double>(1, tmin));
-      }
-      if (tmax > 0. && tmax > tmin) {
-          print_xmax = true;
-          // wacky syntax to set a single value to an ArrayProperty
-          alg->setProperty("XMax", std::vector<double>(1, tmax));
-      }
+    if (tmin > 0.) {
+      print_xmin = true;
+      // wacky syntax to set a single value to an ArrayProperty
+      alg->setProperty("XMin", std::vector<double>(1, tmin));
+    }
+    if (tmax > 0. && tmax > tmin) {
+      print_xmax = true;
+      // wacky syntax to set a single value to an ArrayProperty
+      alg->setProperty("XMax", std::vector<double>(1, tmax));
+    }
   }
   alg->setProperty("Delta", m_delta_ragged);
   alg->setProperty("InputWorkspace", matrixws);
@@ -1012,9 +1013,9 @@ AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool 
   // log the parameters used
   g_log.information() << "running RebinRagged(";
   if (print_xmin)
-      g_log.information() << " XMin=" << alg->getPropertyValue("XMin");
+    g_log.information() << " XMin=" << alg->getPropertyValue("XMin");
   if (print_xmax)
-      g_log.information() << " XMax=" << alg->getPropertyValue("XMax");
+    g_log.information() << " XMax=" << alg->getPropertyValue("XMax");
   g_log.information() << " Delta=" << alg->getPropertyValue("Delta");
   g_log.information() << " ) started at "
                       << Types::Core::DateAndTime::getCurrentTime() << "\n";
