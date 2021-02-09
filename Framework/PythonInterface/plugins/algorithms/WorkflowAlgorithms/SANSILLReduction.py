@@ -541,6 +541,21 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
 
+    def _apply_solvent(self, ws, solvent_ws):
+        """
+            Applies solvent subtraction
+            @param ws: input workspace
+            @param solvent_ws: empty container workspace
+        """
+        if not self._check_processed_flag(solvent_ws, 'Sample'):
+            self.log().warning('Solvent input workspace is not processed as sample.')
+        self._check_distances_match(mtd[ws], solvent_ws)
+        if self._mode != 'TOF':
+            self._check_wavelengths_match(mtd[ws], solvent_ws)
+        solvent_ws.setDistribution(False)
+        Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
+
+
     def _finalize(self, ws, process):
         if process != 'Transmission':
             if self._instrument in ['D33', 'D11B', 'D22B']:
@@ -677,7 +692,7 @@ class SANSILLReduction(PythonAlgorithm):
                         solvent_ws = self.getProperty('SolventInputWorkspace').value
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if solvent_ws:
-                            self._apply_container(ws, solvent_ws)
+                            self._apply_solvent(ws, solvent_ws)
                         elif container_ws:
                             self._apply_container(ws, container_ws)
                         self._apply_masks(ws)
