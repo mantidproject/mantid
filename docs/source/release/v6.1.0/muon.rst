@@ -30,6 +30,7 @@ New Features
 
 Improvements
 ############
+- Exported workspaces now have history.
 
 Bug fixes
 ##########
