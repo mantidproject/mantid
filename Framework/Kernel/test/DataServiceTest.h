@@ -334,33 +334,15 @@ public:
     auto cit = std::find(names.cbegin(), names.cend(), "__Three");
     TS_ASSERT_DIFFERS(cit, names.cend());
     TS_ASSERT_EQUALS(objects.at(std::distance(names.cbegin(), cit)), three);
-  }
 
-  void test_getObjectNamesContain() {
-    svc.add("A1B1", std::make_shared<int>(1));
-    svc.add("C2B2", std::make_shared<int>(1));
-    svc.add("A1C2", std::make_shared<int>(2));
-    svc.add("ABC", std::make_shared<int>(3));
-
-    std::vector<std::string> names;
-
-    names = svc.getObjectNamesContain("A1");
-    TS_ASSERT_EQUALS(names.size(), 2);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "A1B1"),
-                      names.end())
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "A1C2"),
-                      names.end())
-
-    names = svc.getObjectNamesContain("B");
-    TS_ASSERT_EQUALS(names.size(), 3);
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "A1B1"),
-                      names.end())
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "C2B2"),
-                      names.end())
-    TS_ASSERT_DIFFERS(std::find(names.begin(), names.end(), "ABC"), names.end())
-
-    names = svc.getObjectNamesContain("ABCDEF");
-    TS_ASSERT_EQUALS(names.size(), 0);
+    names = svc.getObjectNames(DataServiceSort::Unsorted,
+                               DataServiceHidden::Auto, "T");
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "One"),
+                     names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"),
+                      names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "TwoAgain"),
+                      names.end());
   }
 
   void test_getObjectsReturnsConfigOption() {

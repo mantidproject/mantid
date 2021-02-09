@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidPythonInterface/core/WeakPtr.h"
 
@@ -71,13 +72,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
             .def("size", &SvcType::size, arg("self"),
                  "Returns the number of objects within the service")
             .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList,
-                 arg("self"),
+                 (arg("self"), arg("contain") = ""),
                  "Return the list of names currently known to the ADS")
-            .def("getObjectNamesContain",
-                 &DataServiceExporter::getObjectNamesContainAsList,
-                 (arg("self"), arg("txt")),
-                 "Return the list of names known to "
-                 "the ADS that contain a specific string")
 
             // Make it act like a dictionary
             .def("__len__", &SvcType::size, arg("self"))
@@ -166,27 +162,12 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param self :: A reference to the ADS object that called this method
    * @returns A python list created from the set of strings
    */
-  static boost::python::list getObjectNamesAsList(SvcType &self) {
+  static boost::python::list getObjectNamesAsList(SvcType &self,
+                                                  const std::string &contain) {
     boost::python::list names;
-    const auto keys = self.getObjectNames();
-    for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
-      names.append(*itr);
-    }
-    assert(names.attr("__len__")() == keys.size());
-    return names;
-  }
-
-  /**
-   * Return a Python list of object names that contain a specific string from
-   * the ADS.
-   * @param self A reference to the ADS
-   * @param txt The search string
-   * @return A python list of object names
-   */
-  static boost::python::list
-  getObjectNamesContainAsList(SvcType &self, const std::string &txt) {
-    boost::python::list names;
-    const auto keys = self.getObjectNamesContain(txt);
+    const auto keys =
+        self.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                            Mantid::Kernel::DataServiceHidden::Auto, contain);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }

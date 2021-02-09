@@ -421,9 +421,10 @@ public:
    * Auto which checks the current configuration to determine behavior.
    * @return A vector of strings containing object names in the ADS
    */
-  std::vector<std::string> getObjectNames(
-      DataServiceSort sortState = DataServiceSort::Unsorted,
-      DataServiceHidden hiddenState = DataServiceHidden::Auto) const {
+  std::vector<std::string>
+  getObjectNames(DataServiceSort sortState = DataServiceSort::Unsorted,
+                 DataServiceHidden hiddenState = DataServiceHidden::Auto,
+                 const std::string &contain = "") const {
 
     std::vector<std::string> foundNames;
 
@@ -442,7 +443,11 @@ public:
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
       foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
-        foundNames.emplace_back(item.first);
+        if (contain.empty()) {
+          foundNames.emplace_back(item.first);
+        } else if (item.first.find(contain) != std::string::npos) {
+          foundNames.emplace_back(item.first);
+        }
       }
       // Lock released at end of scope here
     } else {
@@ -451,7 +456,11 @@ public:
       for (const auto &item : datamap) {
         if (!isHiddenDataServiceObject(item.first)) {
           // This item is not hidden add it
-          foundNames.emplace_back(item.first);
+          if (contain.empty()) {
+            foundNames.emplace_back(item.first);
+          } else if (item.first.find(contain) != std::string::npos) {
+            foundNames.emplace_back(item.first);
+          }
         }
       }
       // Lock released at end of scope here
@@ -460,30 +469,6 @@ public:
     // Now sort if told to
     if (sortState == DataServiceSort::Sorted) {
       std::sort(foundNames.begin(), foundNames.end());
-    }
-
-    return foundNames;
-  }
-
-  /**
-   * Returns the object names of the ADS that contain a specific string.
-   * @param txt The search string
-   * @return A vector of strings containing object names in the ADS
-   */
-  std::vector<std::string> getObjectNamesContain(const std::string &txt) const {
-    std::vector<std::string> foundNames;
-    bool showHidden;
-
-    showHidden = showingHiddenObjects();
-
-    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-    for (const auto &item : datamap) {
-      if ((!showHidden) && (isHiddenDataServiceObject(item.first))) {
-        continue;
-      }
-      if (item.first.find(txt) != std::string::npos) {
-        foundNames.push_back(item.first);
-      }
     }
 
     return foundNames;
