@@ -181,7 +181,7 @@ class RebinRagged(PythonAlgorithm):
                                       endProgress=(progStart + 3 * progStep),
                                       EnableLogging=False)
             self.setProperty("OutputWorkspace", mtd[accumulationWS])
-            DeleteWorkspace(accumulationWS)
+            DeleteWorkspace(accumulationWS, EnableLogging=False)
 
 
 AlgorithmFactory.subscribe(RebinRagged)
