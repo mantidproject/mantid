@@ -141,9 +141,9 @@ class RebinRagged(PythonAlgorithm):
             for i, (name, xmin, xmax, delta) in enumerate(zip(names, xmins, xmaxs, deltas)):
                 # don't  go beyond the range of the data
                 x = inputWS.readX(i)
-                if xmin < x[0] or xmin == Property.EMPTY_DBL:
+                if xmin == Property.EMPTY_DBL:
                     xmin = x[0]
-                if xmax > x[-1] or xmax == Property.EMPTY_DBL:
+                if xmax == Property.EMPTY_DBL:
                     xmax = x[-1]
 
                 progStart = 3 * i * progStep
@@ -168,7 +168,7 @@ class RebinRagged(PythonAlgorithm):
                           endProgress=(progStart + progStep),
                           EnableLogging=False)
                 except Exception as e:
-                    raise RuntimeError('for index={}'.format(i)) from e
+                    raise RuntimeError('for index={}: {}'.format(i, e)) from e
 
                 # accumulate
                 if accumulationWS is None:
