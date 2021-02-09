@@ -240,6 +240,100 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
         )
 
 
+class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
+    """
+    Tests auto process for D11 with 1 sample at 3 different distances,
+    and with multiple transmissions per process.
+    """
+
+    def __init__(self):
+        super(D11_AutoProcess_Solvent_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D11/')
+
+        # prepare mask for instrument edges first:
+        MaskBTP(Instrument='D11', Tube='0-4,252-256')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_vertical')
+        MaskBTP(Instrument='D11', Pixel='0-4,252-256')
+        Plus(LHSWorkspace='mask_vertical', RHSWorkspace='D11MaskBTP', OutputWorkspace='edge_masks')
+        # the edges mask can be used as a default mask for all distances and wavelengths
+
+        MaskBTP(Instrument='D11', Tube='114-142,', Pixel='114-142')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A')
+        MaskBTP(Instrument='D11', Tube='103-147', Pixel='103-147')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A_center')
+        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256') # there's a line with high count in the top-left corner
+        Plus(LHSWorkspace='D11MaskBTP', RHSWorkspace='mask_1m_4_6A_center', OutputWorkspace='mask_1m_4_6A')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['iq_mult_solvent', 'D11_AutoProcess_Solvent_Reference.nxs']
+
+    def runTest(self):
+        beams = '947,1088'
+        containers = '973,1003'
+        container_tr = '988'
+        beam_tr = '1119'
+        samples = '975,1005'
+        sample_tr = '990'
+        solvents = '1106,1091'
+        solvent_tr = '1121'
+        thick = 0.1
+
+        # this also tests that already loaded workspace can be passed instead of a file
+        LoadNexusProcessed(Filename='sens-lamp.nxs', OutputWorkspace='sens-lamp')
+        # first, process the solvent
+        SANSILLAutoProcess(
+            SampleRuns=solvents,
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            DefaultMaskFile='edge_masks',
+            MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=solvent_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='solvents',
+            BeamRadius='0.05',
+            TransmissionBeamRadius=0.05,
+            ClearCorrected2DWorkspace=False
+        )
+
+        tmp_dir = gettempdir()
+        solvent_dir = [os.path.join(tmp_dir, 'solvent_' + str(i) + '.nxs') for i in range(2)]
+        SaveNexusProcessed('001106_Sample', solvent_dir[0])
+        SaveNexusProcessed('001091_Sample', solvent_dir[1])
+
+        # reduce samples
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            BeamRuns=beams,
+            DefaultMaskFile='edge_masks',
+            MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
+            SensitivityMaps='sens-lamp',
+            SampleTransmissionRuns=sample_tr,
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SolventFiles=",".join(solvent_dir),
+            SampleThickness=thick,
+            CalculateResolution='MildnerCarpenter',
+            OutputWorkspace='iq_mult_solvent',
+            BeamRadius='0.05',
+            TransmissionBeamRadius=0.05
+        )
+
+
 class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
     Tests auto process with D33 monochromatic data
