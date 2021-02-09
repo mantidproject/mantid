@@ -647,7 +647,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             LoadNexusProcessed(Filename=mask, OutputWorkspace=mask_name)
         # sensitivity
         sens_input = ''
-        ref_input = ''
         if self.sensitivity:
             sens = (self.sensitivity[i]
                     if len(self.sensitivity) == self.dimensionality
@@ -661,6 +660,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                    OutputWorkspace=sensitivity_name)
 
         # reference
+        ref_input = ''
         if self.reference:
             reference = (self.reference[i]
                          if len(self.reference) == self.dimensionality
