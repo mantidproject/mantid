@@ -1077,9 +1077,10 @@ public:
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
    * PeakPositionTolerance=0.02)
    */
-  void createBackToBackExponentialParameters(vector<string> &parnames,
-		                             vector<double> &parvalues,
-					     bool include_pos_intensity = true) {
+  void
+  createBackToBackExponentialParameters(vector<string> &parnames,
+                                        vector<double> &parvalues,
+                                        bool include_pos_intensity = true) {
     parnames.clear();
     parvalues.clear();
 
@@ -1104,7 +1105,6 @@ public:
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Check whether a workspace exists or not
