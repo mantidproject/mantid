@@ -377,12 +377,12 @@ void AlignAndFocusPowder::exec() {
       getProperty(PropertyNames::COMPRESS_WALL_TOL);
   // determine some bits about d-space and binning
   if (m_resampleX != 0) {
-    m_params.clear(); // ignore the normal rebin parameters
-  } else if (m_params.size() == 1) {
-    if (dmax > 0.)
-      dspace = true;
-    else
-      dspace = false;
+    // ignore the normal rebin parameters
+    m_params.clear();
+  } else if (m_params.size() == 1 && m_delta_ragged.empty()) {
+    // if there is 1 binning parameter and not in ragged rebinning mode
+    // ignore what people asked for
+    dspace = bool(dmax > 0.);
   }
   if (dspace) {
     if (m_params.size() == 1 && (!isEmpty(dmin)) && (!isEmpty(dmax))) {
@@ -749,17 +749,17 @@ void AlignAndFocusPowder::exec() {
 
   // this next call should probably be in for rebin as well
   // but it changes the system tests
-  if (dspace && m_resampleX != 0) {
+  if (dspace && m_resampleX != 0.) {
     if (m_delta_ragged.empty()) {
       m_outputW = rebin(m_outputW);
     } else {
-      m_outputW = rebinRagged(m_outputW);
+      m_outputW = rebinRagged(m_outputW, true);
     }
     if (m_processLowResTOF) {
       if (m_delta_ragged.empty()) {
         m_lowResW = rebin(m_lowResW);
       } else {
-        m_lowResW = rebinRagged(m_lowResW);
+        m_lowResW = rebinRagged(m_lowResW, true);
       }
     }
   }
@@ -803,7 +803,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   if (!dspace && !m_delta_ragged.empty()) {
-    m_outputW = rebinRagged(m_outputW);
+    m_outputW = rebinRagged(m_outputW, false);
   }
 
   // compress again if appropriate
@@ -969,31 +969,52 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Rebin
+/** RebinRagged this should only be done on the final focussed workspace
  */
 API::MatrixWorkspace_sptr
-AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws) {
-  API::IAlgorithm_sptr alg = createChildAlgorithm("Rebin");
-  g_log.information() << "running RebinRagged( ";
-  size_t numHist = m_outputW->getNumberHistograms();
-  if ((numHist == m_dmins.size()) && (numHist == m_dmaxs.size())) {
-    alg->setProperty("XMin", m_dmins);
-    alg->setProperty("XMax", m_dmaxs);
-  } else {
-    g_log.information()
-        << "Number of dmin and dmax values don't match the "
-        << "number of workspace indices. Ignoring the parameters.\n";
+AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace) {
+  // local variables to control whether or not to log individual values
+  bool print_xmin = false;
+  bool print_xmax = false;
+
+  // configure RebinRagged
+  API::IAlgorithm_sptr alg = createChildAlgorithm("RebinRagged");
+  if (inDspace) {
+      if (!m_dmins.empty()) {
+          print_xmin = true;
+          alg->setProperty("XMin", m_dmins);
+      }
+      if (!m_dmaxs.empty()) {
+          print_xmax = true;
+        alg->setProperty("XMax", m_dmaxs);
+      }
+  } else { // assume time-of-flight
+      if (tmin > 0.) {
+          print_xmin = true;
+          // wacky syntax to set a single value to an ArrayProperty
+          alg->setProperty("XMin", std::vector<double>(1, tmin));
+      }
+      if (tmax > 0. && tmax > tmin) {
+          print_xmax = true;
+          // wacky syntax to set a single value to an ArrayProperty
+          alg->setProperty("XMax", std::vector<double>(1, tmax));
+      }
   }
-  g_log.information() << ") started at "
-                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
-  for (double param : m_params) {
-    if (isEmpty(param)) {
-      g_log.warning("encountered empty binning parameter");
-    }
-  }
+  alg->setProperty("Delta", m_delta_ragged);
   alg->setProperty("InputWorkspace", matrixws);
   alg->setProperty("OutputWorkspace", matrixws);
-  alg->setProperty("Delta", m_delta_ragged);
+
+  // log the parameters used
+  g_log.information() << "running RebinRagged(";
+  if (print_xmin)
+      g_log.information() << " XMin=" << alg->getPropertyValue("XMin");
+  if (print_xmax)
+      g_log.information() << " XMax=" << alg->getPropertyValue("XMax");
+  g_log.information() << " Delta=" << alg->getPropertyValue("Delta");
+  g_log.information() << " ) started at "
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
+
+  // run the algorithm and get the result back
   alg->executeAsChildAlg();
   matrixws = alg->getProperty("OutputWorkspace");
   return matrixws;

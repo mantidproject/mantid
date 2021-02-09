@@ -74,7 +74,7 @@ private:
   void loadCalFile(const std::string &calFilename,
                    const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
-  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws);
+  API::MatrixWorkspace_sptr rebinRagged(API::MatrixWorkspace_sptr matrixws, const bool inDspace);
 
   API::MatrixWorkspace_sptr
   conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
