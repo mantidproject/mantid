@@ -16,6 +16,22 @@ class GeneralFittingView(BasicFittingView):
         self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain, simultaneous_item_list)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
 
+    def set_slot_for_display_workspace_changed(self, slot):
+        """Connect the slot for the display workspace combo box being changed."""
+        self.general_fitting_options.set_slot_for_display_workspace_changed(slot)
+
+    def set_slot_for_fitting_mode_changed(self, slot):
+        """Connect the slot for the simultaneous fit check box."""
+        self.general_fitting_options.set_slot_for_fitting_mode_changed(slot)
+
+    def set_slot_for_simultaneous_fit_by_changed(self, slot):
+        """Connect the slot for the fit by combo box being changed."""
+        self.general_fitting_options.set_slot_for_simultaneous_fit_by_changed(slot)
+
+    def set_slot_for_simultaneous_fit_by_specifier_changed(self, slot):
+        """Connect the slot for the fit specifier combo box being changed."""
+        self.general_fitting_options.set_slot_for_simultaneous_fit_by_specifier_changed(slot)
+
     def update_displayed_data_combo_box(self, data_list):
         """Update the data in the parameter display combo box."""
         self.general_fitting_options.update_displayed_data_combo_box(data_list)
@@ -26,51 +42,18 @@ class GeneralFittingView(BasicFittingView):
             self.fit_controls.clear_fit_status(output_chi_squared)
             return
 
-        self.fit_function_options.update_function_browser_parameters(self.is_simul_fit, fit_function)
+        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function)
         self.fit_controls.update_fit_status_labels(output_status, output_chi_squared)
 
     def update_global_fit_state(self, output_list, index):
         """Updates the global fit status label."""
-        if self.is_simul_fit:
+        if self.is_simultaneous_fit_ticked:
             indexed_fit = output_list[index]
             boolean_list = [indexed_fit == "success"] if indexed_fit else []
         else:
             boolean_list = [output == "success" for output in output_list if output]
 
         self.fit_controls.update_global_fit_status_label(boolean_list)
-
-    # def set_slot_for_fit_generator_clicked(self, slot):
-    #     self.fit_generator_button.clicked.connect(slot)
-    #
-    # def set_slot_for_display_workspace_changed(self, slot):
-    #     self.parameter_display_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_use_raw_changed(self, slot):
-    #     self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
-    #
-    # def set_slot_for_fit_type_changed(self, slot):
-    #     self.simul_fit_checkbox.toggled.connect(slot)
-    #
-    # def set_slot_for_fit_button_clicked(self, slot):
-    #     self.fit_button.clicked.connect(slot)
-    #
-    # def set_slot_for_start_x_updated(self, slot):
-    #     self.time_start.editingFinished.connect(slot)
-    #
-    # def set_slot_for_end_x_updated(self, slot):
-    #     self.time_end.editingFinished.connect(slot)
-    #
-    # def set_slot_for_simul_fit_by_changed(self, slot):
-    #     self.simul_fit_by_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_simul_fit_specifier_changed(self, slot):
-    #     self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_minimiser_changed(self, slot):
-    #     self.minimizer_combo.currentIndexChanged.connect(slot)
-    #
-    # def set_slot_for_evaluation_type_changed(self, slot):
-    #     self.evaluation_combo.currentIndexChanged.connect(slot)
 
     @property
     def display_workspace(self):
@@ -106,27 +89,31 @@ class GeneralFittingView(BasicFittingView):
         """Returns the index of the currently displayed workspace."""
         return self.general_fitting_options.get_index_for_start_end_times()
 
-    def disable_simul_fit_options(self):
-        """Disables the simultaneous fit options."""
-        self.general_fitting_options.disable_simul_fit_options()
-
     def hide_simultaneous_fit_options(self):
         """Hides the simultaneous fit options."""
         self.general_fitting_options.hide_simultaneous_fit_options()
 
-    def enable_simul_fit_options(self):
+    def disable_simultaneous_fit_options(self):
+        """Disables the simultaneous fit options."""
+        self.general_fitting_options.disable_simultaneous_fit_options()
+
+    def enable_simultaneous_fit_options(self):
         """Enables the simultaneous fit options."""
-        self.general_fitting_options.enable_simul_fit_options()
+        self.general_fitting_options.enable_simultaneous_fit_options()
+
+    def enable_simultaneous_fit_by_specifier(self, enable):
+        """Enables or disables the simultaneous fit by combo box."""
+        self.general_fitting_options.enable_simultaneous_fit_by_specifier(enable)
 
     @property
-    def is_simul_fit(self):
+    def is_simultaneous_fit_ticked(self):
         """Returns true if in simultaneous mode."""
-        return self.general_fitting_options.is_simul_fit
+        return self.general_fitting_options.is_simultaneous_fit_ticked
 
-    @is_simul_fit.setter
-    def is_simul_fit(self, simultaneous):
+    @is_simultaneous_fit_ticked.setter
+    def is_simultaneous_fit_ticked(self, simultaneous):
         """Sets whether or not you are in simultaneous mode."""
-        self.general_fitting_options.is_simul_fit(simultaneous)
+        self.general_fitting_options.is_simultaneous_fit_ticked(simultaneous)
 
     def setup_fit_by_specifier(self, choices):
         """Setup the fit by specifier combo box."""

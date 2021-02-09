@@ -56,11 +56,13 @@ class BasicFittingPresenter:
         self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
         self.view.set_slot_for_undo_fit_clicked(self.handle_undo_fit_clicked)
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
+        self.view.set_slot_for_fit_name_changed(self.handle_fit_name_changed_by_user)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
+        self.view.set_slot_for_function_parameter_changed(self.handle_function_parameter_changed)
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
-        #self.view.set_slot_for_minimiser_changed(self.handle_minimiser_changed)
-        #self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
+        self.view.set_slot_for_minimiser_changed(self.handle_minimiser_changed)
+        self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
     def disable_view(self):
@@ -72,6 +74,10 @@ class BasicFittingPresenter:
         """Enable the widgets in the view if data is loaded."""
         if self.selected_data:
             self.view.setEnabled(True)
+
+    def update_model_from_view(self, **kwargs):
+        """Update the fit options stored in the model."""
+        self.model.update_model_fit_options(**kwargs)
 
     @property
     def selected_data(self):
@@ -96,10 +102,6 @@ class BasicFittingPresenter:
     def end_x(self):
         """Return the stored end X's."""
         return self._end_x
-
-    def handle_fit_generator_clicked(self):
-        """Handle when the Fit Generator button has been clicked."""
-        self._open_fit_script_generator_interface(self.get_loaded_workspaces(), self.get_fit_browser_options())
 
     def handle_gui_changes_made(self, changed_values):
         """Handle when changes to the context have been made."""
@@ -143,15 +145,36 @@ class BasicFittingPresenter:
         self.thread_success = False
         self.view.warning_popup(error)
 
+    def handle_undo_fit_clicked(self):
+        """Handle when undo fit is clicked."""
+        self._fit_function = self._fit_function_cache
+        self._clear_fit_information()
+        self.context.fitting_context.remove_latest_fit()
+        self._number_of_fits_cached = 0
+
+    def handle_fit_generator_clicked(self):
+        """Handle when the Fit Generator button has been clicked."""
+        self._open_fit_script_generator_interface(self.get_loaded_workspaces(), self._get_fit_browser_options())
+
+    def handle_minimiser_changed(self):
+        """Handle when a minimiser is changed."""
+        self.update_model_from_view(minimiser=self.view.minimizer)
+
+    def handle_evaluation_type_changed(self):
+        """Handle when the evaluation type is changed."""
+        self.update_model_from_view(evaluation_type=self.view.evaluation_type)
+
+    def handle_fit_name_changed_by_user(self):
+        """Handle when the fit name is changed by the user."""
+        self.automatically_update_fit_name = False
+        self.model.function_name = self.view.function_name
+
     def clear_and_reset_gui_state(self):
+        """Clears the data displayed in the fitting view."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def handle_fitting_finished(self):
         """Handle when fitting is finished."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
-    def handle_undo_fit_clicked(self):
-        """handle when undo fit is clicked."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def handle_plot_guess_changed(self):
@@ -160,6 +183,10 @@ class BasicFittingPresenter:
 
     def handle_function_structure_changed(self):
         """Handle when the function structure is changed."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def handle_function_parameter_changed(self):
+        """Handle when a function parameter is changed."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def handle_start_x_updated(self):
@@ -178,13 +205,20 @@ class BasicFittingPresenter:
         """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
-    def get_fit_browser_options(self):
-        """Retrieve the fit options."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
     def get_fit_input_workspaces(self):
         """Retrieve the names of the workspaces to be fitted."""
         raise NotImplementedError("This method must be overridden by a child class.")
+
+    def _get_fit_browser_options(self):
+        """Returns the fitting options to use in the Fit Script Generator interface."""
+        return {"FittingType": "Simultaneous" if self._is_simultaneous_fitting() else "Sequential",
+                "Minimizer": self.view.minimizer,
+                "EvaluationType": self.view.evaluation_type}
+
+    @staticmethod
+    def _is_simultaneous_fitting():
+        """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
+        return False
 
     def _perform_fit(self):
         """Perform the fit in a thread."""
@@ -202,6 +236,32 @@ class BasicFittingPresenter:
     def _update_fit_function_cache(self):
         """Update the fit function cache with the next fit function to be fitted."""
         self._fit_function_cache = [func.clone() for func in self._fit_function]
+
+    def _update_function_name(self):
+        """Updates the function name used within the outputted fit workspaces."""
+        if self.automatically_update_fit_name:
+            name = self._get_fit_function()[0]
+            self.view.function_name = self.model.get_function_name(name)
+            self.model.function_name = self.view.function_name
+
+    def _update_fit_status_information_in_view(self):
+        """Updates the fit status and chi squared information in the view."""
+        current_index = self._fit_function_index()
+        self.view.update_with_fit_outputs(self._fit_function[current_index],
+                                          self._fit_status[current_index],
+                                          self._fit_chi_squared[current_index])
+        self.view.update_global_fit_state(self._fit_status, current_index)
+
+    def _fit_function_index(self):
+        """Return the index of the currently displayed fit function. (Assume it is zero for BasicFitting for now.)"""
+        return 0
+
+    def _clear_fit_information(self):
+        """Clear the fit status and chi squared information currently displayed."""
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self._update_fit_status_information_in_view()
+        self.view.enable_undo_fit(False)
 
     def _create_thread(self, callback):
         """Create a thread for fitting."""
