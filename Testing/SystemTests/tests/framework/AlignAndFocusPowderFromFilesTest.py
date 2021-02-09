@@ -302,6 +302,20 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         return (self.wksp_mem, self.wksp_file)
 
 
+def checkRaggedWorkspaces(obs_name, exp_name):
+    # CompareWorkspace does not support ragged workspaces
+    wksp_obs = mtd[obs_name]
+    wksp_exp = mtd[exp_name]
+
+    # first check that the data arrays are the same length
+    assert wksp_obs.getNumberHistograms() == wksp_exp.getNumberHistograms(), "number of histograms doesn't match"
+    for i in range(wksp_exp.getNumberHistograms()):
+        np.testing.assert_allclose(wksp_obs.readX(i), wksp_exp.readX(i),
+                                   err_msg='x-values index={i}')
+        np.testing.assert_allclose(wksp_obs.readY(i), wksp_exp.readY(i),
+                                   err_msg='y-values index={i}')
+
+
 class VulcanRaggedInD(systemtesting.MantidSystemTest):
     '''This is identically to VulcanInD except the binning is done in d-space'''
     cal_file  = "VULCAN_calibrate_2019_06_27.h5"
@@ -334,10 +348,6 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
         ConvertUnits(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp, Target='dSpacing')
         RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
                     XMin=dmin, XMax=dmax, Delta=delta)
-        wksp_exp = mtd[self.wksp_exp]  # may be unnecessary to have this check
-        for i, exp_length in enumerate([2639, 2639, 8855]):
-            msg = 'index={} {} != {}'.format(i, len(wksp_exp.readY(i)), exp_length)
-            assert len(wksp_exp.readY(i)) == exp_length, msg
 
         # wksp_obs is doing the reduction with RebinRagged internal
         AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
@@ -349,21 +359,9 @@ class VulcanRaggedInD(systemtesting.MantidSystemTest):
                                      DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
         ConvertUnits(InputWorkspace=self.wksp_obs, OutputWorkspace=self.wksp_obs, Target='dSpacing')
 
-    def validateMethod(self):
-        self.tolerance = 1.0e-2
-        return "ValidateWorkspaceToWorkspace"
-
     def validate(self):
-        # first check that the data arrays are the same length
-        wksp_obs = mtd[self.wksp_obs]
-        wksp_exp = mtd[self.wksp_exp]
-
-        for i in range(3):
-            msg = 'index={} {}(obs) != {}(exp)'.format(i, len(wksp_obs.readY(i)), len(wksp_exp.readY(i)))
-            assert len(wksp_obs.readY(i)) == len(wksp_exp.readY(i)), msg
-
-        # return the workspaces so normal comparison can happen
-        return (self.wksp_obs, self.wksp_exp)
+        # CompareWorkspace does not support ragged workspaces
+        checkRaggedWorkspaces(self.wksp_obs, self.wksp_exp)
 
 
 class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
@@ -398,11 +396,6 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
         RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
                     XMin=tofmin, XMax=tofmax, Delta=delta)
 
-        wksp_exp = mtd[self.wksp_exp]  # may be unnecessary to have this check
-        for i, exp_length in enumerate([2641, 2641, 8798]):
-            msg = 'index={} {} != {}'.format(i, len(wksp_exp.readY(i)), exp_length)
-            assert len(wksp_exp.readY(i)) == exp_length, msg
-
         # wksp_obs is doing the reduction with RebinRagged internal
         AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
                                      CalFileName=self.cal_file,
@@ -412,18 +405,6 @@ class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
                                      TMin=tofmin, TMax=tofmax,
                                      DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
 
-    def validateMethod(self):
-        self.tolerance = 1.0e-2
-        return "ValidateWorkspaceToWorkspace"
-
     def validate(self):
-        # first check that the data arrays are the same length
-        wksp_obs = mtd[self.wksp_obs]
-        wksp_exp = mtd[self.wksp_exp]
-
-        for i in range(3):
-            msg = 'index={} {}(obs) != {}(exp)'.format(i, len(wksp_obs.readY(i)), len(wksp_exp.readY(i)))
-            assert len(wksp_obs.readY(i)) == len(wksp_exp.readY(i)), msg
-
-        # return the workspaces so normal comparison can happen
-        return (self.wksp_obs, self.wksp_exp)
+        # CompareWorkspace does not support ragged workspaces
+        checkRaggedWorkspaces(self.wksp_obs, self.wksp_exp)
