@@ -10,14 +10,15 @@ from qtpy import QtWidgets
 
 ui_general_fitting_options, _ = load_ui(__file__, "general_fitting_options.ui")
 
+FDA_FITTING_OPTIONS = []
+MA_FITTING_OPTIONS = ["Run", "Group/Pair"]
+
 
 class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
 
-    def __init__(self, parent=None, is_frequency_domain=False, simultaneous_item_list=[]):
+    def __init__(self, parent=None, is_frequency_domain=False):
         super(GeneralFittingOptionsView, self).__init__(parent)
         self.setupUi(self)
-
-        self._setup_simultaneous_fit_by_combo_box(simultaneous_item_list)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -25,7 +26,10 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         self.disable_simultaneous_fit_options()
 
         if is_frequency_domain:
+            self._setup_simultaneous_fit_by_combo_box(FDA_FITTING_OPTIONS)
             self.hide_simultaneous_fit_options()
+        else:
+            self._setup_simultaneous_fit_by_combo_box(MA_FITTING_OPTIONS)
 
     def set_slot_for_display_workspace_changed(self, slot):
         """Connect the slot for the display workspace combo box being changed."""

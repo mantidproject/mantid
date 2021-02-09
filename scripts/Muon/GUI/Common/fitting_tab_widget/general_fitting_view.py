@@ -10,10 +10,10 @@ from Muon.GUI.Common.fitting_tab_widget.general_fitting_options_view import Gene
 
 class GeneralFittingView(BasicFittingView):
 
-    def __init__(self, parent=None, is_frequency_domain=False, simultaneous_item_list=[]):
+    def __init__(self, parent=None, is_frequency_domain=False):
         super(GeneralFittingView, self).__init__(parent)
 
-        self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain, simultaneous_item_list)
+        self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
 
     def set_slot_for_display_workspace_changed(self, slot):
