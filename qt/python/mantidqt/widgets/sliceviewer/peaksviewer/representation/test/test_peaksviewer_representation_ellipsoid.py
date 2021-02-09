@@ -19,7 +19,8 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.shapetesthelpe
     import FuzzyMatch, create_ellipsoid_info, draw_representation
 
 
-def create_test_ellipsoid(bg_shell=True):
+def create_test_ellipsoid(bg_shell=True, do_translate=False):
+    translation = [0.1, 0, 0] if do_translate else [0, 0, 0]  # shift to peak centre
     radii = [1.5, 1.3, 1.4]
     if bg_shell:
         frac_thick = 0.1  # fractional thickness of major axis
@@ -31,7 +32,8 @@ def create_test_ellipsoid(bg_shell=True):
     return create_ellipsoid_info(
         radii=radii,
         axes=("1 0 0", "0 1 0", "0 0 1"),
-        bkgd_radii=((bg_inner), (bg_outer)))
+        bkgd_radii=((bg_inner), (bg_outer)),
+        translation=translation)
 
 
 @patch("mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid.compute_alpha")
@@ -42,7 +44,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         fake_alpha = -0.1
         compute_alpha_mock.return_value = fake_alpha
 
-        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, (1, 2, 3),
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, [1, 2, 3],
                                       ellipsoid, painter, 'r', 'g')
 
         self.assertTrue(painted is None)
@@ -52,7 +54,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
 
     def test_draw_creates_ellipse_with_expected_properties_with_nonzero_alpha_and_background(
             self, compute_alpha_mock):
-        peak_center = (1, 2, 3)
+        peak_center = [1, 2, 3]
         ellipsoid = create_test_ellipsoid()
         painter = MagicMock()
         fg_color, bg_color = 'r', 'g'
@@ -78,7 +80,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             bg_color=bg_color)
 
     def test_draw_creates_ellipse_with_expected_properties_with_nonzero_alpha_no_background(self, compute_alpha_mock):
-        peak_center = (1, 2, 3)
+        peak_center = [1, 2, 3]
         ellipsoid = create_test_ellipsoid(bg_shell=False)
         painter = MagicMock()
         fg_color, bg_color = 'r', 'g'
@@ -104,7 +106,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             # set slice(x)=data(z)
             return (x[2], x[0], x[1])
 
-        peak_center = (1, 2, 3)
+        peak_center = [1, 2, 3]
         ellipsoid = create_test_ellipsoid()
         painter = MagicMock()
         fg_color, bg_color = 'r', 'g'
@@ -117,6 +119,36 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         self.assertTrue(painted is not None)
         self._assert_painter_calls(
             painter, (peak_center[2], peak_center[0]),
+            cross_width=0.192,
+            signal_width=1.92,
+            signal_height=1.79,
+            angle=90,
+            alpha=fake_alpha,
+            fg_color=fg_color,
+            bkgd_width=5.54,
+            bkgd_height=5.17,
+            thickness=0.1,
+            bg_color=bg_color)
+
+    def test_draw_with_nonzero_translation(self, compute_alpha_mock):
+        def slice_transform(x):
+            # set slice(x)=data(z)
+            return (x[2], x[0], x[1])
+
+        peak_center = (1, 2, 3)
+        ellipsoid = create_test_ellipsoid(do_translate=True)
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'g'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        # pass peak centre as list as modified in place
+        painted = draw_representation(EllipsoidalIntergratedPeakRepresentation, list(peak_center),
+                                      ellipsoid, painter, fg_color, bg_color, slice_transform)
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter, (peak_center[2], peak_center[0] + 0.1),
             cross_width=0.192,
             signal_width=1.92,
             signal_height=1.79,
@@ -176,7 +208,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
 
 class EllipsoidalIntergratedPeakRepresentationSliceEllipsoidTest(unittest.TestCase):
     def test_slice_ellipsoid_zp(self):
-        origin = (0, 0, 0)
+        origin = [0, 0, 0]
         axis_a = np.array([1, 0, 0])
         axis_b = np.array([0, 1, 0])
         axis_c = np.array([0, 0, 1])
