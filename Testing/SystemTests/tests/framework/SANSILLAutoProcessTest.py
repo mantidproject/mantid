@@ -257,21 +257,25 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D11/')
 
         # prepare mask for instrument edges first:
-        MaskBTP(Instrument='D11', Tube='0-4,252-256')
+        MaskBTP(Instrument='D11', Tube='0-6,250-256')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_vertical')
-        MaskBTP(Instrument='D11', Pixel='0-4,252-256')
+        MaskBTP(Instrument='D11', Pixel='0-6,250-256')
         Plus(LHSWorkspace='mask_vertical', RHSWorkspace='D11MaskBTP', OutputWorkspace='edge_masks')
         # the edges mask can be used as a default mask for all distances and wavelengths
 
         MaskBTP(Instrument='D11', Tube='114-142,', Pixel='114-142')
-        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A')
+        RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_8m_4_6A_center')
+        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256')
+        Plus(LHSWorkspace='D11MaskBTP', RHSWorkspace='mask_8m_4_6A_center', OutputWorkspace='mask_8m_4_6A')
         MaskBTP(Instrument='D11', Tube='103-147', Pixel='103-147')
         RenameWorkspace(InputWorkspace='D11MaskBTP', OutputWorkspace='mask_1m_4_6A_center')
-        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256') # there's a line with high count in the top-left corner
+        MaskBTP(Instrument='D11', Tube='3-14', Pixel='240-256')
         Plus(LHSWorkspace='D11MaskBTP', RHSWorkspace='mask_1m_4_6A_center', OutputWorkspace='mask_1m_4_6A')
 
     def cleanup(self):
         mtd.clear()
+        for i in range(2):
+            os.remove(os.path.join(gettempdir(), 'solvent_' + str(i) + '.nxs'))
 
     def validate(self):
         self.tolerance = 1e-3
@@ -295,7 +299,6 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
         SANSILLAutoProcess(
             SampleRuns=solvents,
             BeamRuns=beams,
-            ContainerRuns=containers,
             DefaultMaskFile='edge_masks',
             MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
             SensitivityMaps='sens-lamp',
@@ -319,6 +322,7 @@ class D11_AutoProcess_Solvent_Test(systemtesting.MantidSystemTest):
         SANSILLAutoProcess(
             SampleRuns=samples,
             BeamRuns=beams,
+            ContainerRuns=containers,
             DefaultMaskFile='edge_masks',
             MaskFiles='mask_8m_4_6A,mask_1m_4_6A',
             SensitivityMaps='sens-lamp',
