@@ -22,6 +22,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidHistogramData/EstimatePolynomial.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
@@ -31,9 +33,6 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/Detector.h"
-
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -815,8 +814,8 @@ void FitPeaks::processInputPeakCenters() {
     // number of peaks to fit!
     m_numPeaksToFit = m_peakCenterWorkspace->x(0).size();
     g_log.debug() << "Input peak center workspace: "
-                    << m_peakCenterWorkspace->x(0).size() << ", "
-                    << m_peakCenterWorkspace->y(0).size() << "\n";
+                  << m_peakCenterWorkspace->x(0).size() << ", "
+                  << m_peakCenterWorkspace->y(0).size() << "\n";
 
     // check matrix worksapce for peak positions
     const size_t peak_center_ws_spectra_number =
@@ -1096,44 +1095,50 @@ void FitPeaks::fitSpectrumPeaks(
 
     // Determine how to set the starting value parameters
 
-
     // Determine whether to set starting parameter from fitted value
     // of same peak but different spectrum
-    bool samePeakCrossSpectrum = (lastGoodPeakParameters[fit_index].size() >
-                         static_cast<size_t>(std::count_if(
-                             lastGoodPeakParameters[fit_index].begin(),
-                             lastGoodPeakParameters[fit_index].end(),
-                             [&](auto const &val) { return val <= 1e-10; })));
-    // Check whether current spectrum's pixel (detector ID) is close to its previous spectrum's pixel (detector ID).
+    bool samePeakCrossSpectrum =
+        (lastGoodPeakParameters[fit_index].size() >
+         static_cast<size_t>(
+             std::count_if(lastGoodPeakParameters[fit_index].begin(),
+                           lastGoodPeakParameters[fit_index].end(),
+                           [&](auto const &val) { return val <= 1e-10; })));
+    // Check whether current spectrum's pixel (detector ID) is close to its
+    // previous spectrum's pixel (detector ID).
     try {
-        if (wi > 0 && samePeakCrossSpectrum) {
-            // First spectrum or discontinuous detector ID: do not start from same peak of last spectrum
-            std::shared_ptr<const Geometry::Detector> pdetector =
-                std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi - 1));
-            std::shared_ptr<const Geometry::Detector> cdetector =
-                std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
+      if (wi > 0 && samePeakCrossSpectrum) {
+        // First spectrum or discontinuous detector ID: do not start from same
+        // peak of last spectrum
+        std::shared_ptr<const Geometry::Detector> pdetector =
+            std::dynamic_pointer_cast<const Geometry::Detector>(
+                m_inputMatrixWS->getDetector(wi - 1));
+        std::shared_ptr<const Geometry::Detector> cdetector =
+            std::dynamic_pointer_cast<const Geometry::Detector>(
+                m_inputMatrixWS->getDetector(wi));
 
-            // If they do have detector ID
-            if (pdetector && cdetector) {
-                auto prev_id = pdetector->getID();
-                auto curr_id = cdetector->getID();
-                if (prev_id + 1 != curr_id)
-                    samePeakCrossSpectrum = false;
-            } else {
-                samePeakCrossSpectrum = false;
-            }
-
-        } else {
-            // first spectrum in the workspace: no peak's fitting result to copy from
+        // If they do have detector ID
+        if (pdetector && cdetector) {
+          auto prev_id = pdetector->getID();
+          auto curr_id = cdetector->getID();
+          if (prev_id + 1 != curr_id)
             samePeakCrossSpectrum = false;
+        } else {
+          samePeakCrossSpectrum = false;
         }
-    } catch (const std::runtime_error &) {
-        // workspace does not have detector ID set: there is no guarantee that the adjacent spectra can have similar peak profiles
+
+      } else {
+        // first spectrum in the workspace: no peak's fitting result to copy
+        // from
         samePeakCrossSpectrum = false;
+      }
+    } catch (const std::runtime_error &) {
+      // workspace does not have detector ID set: there is no guarantee that the
+      // adjacent spectra can have similar peak profiles
+      samePeakCrossSpectrum = false;
     }
 
     // Set starting values of the peak function
-    if (samePeakCrossSpectrum) {  // somePeakFit
+    if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
       for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
@@ -1168,8 +1173,8 @@ void FitPeaks::fitSpectrumPeaks(
           getPeakFitWindow(wi, peak_index);
 
       // Decide whether to estimate peak width by observation
-      bool observe_peak_width = decideToEstimatePeakParams(
-          !samePeakCrossSpectrum, peakfunction);
+      bool observe_peak_width =
+          decideToEstimatePeakParams(!samePeakCrossSpectrum, peakfunction);
       //
       if (peakfunction->name() == "BackToBackExponential") {
         if (neighborPeakSameSpectrum) {
@@ -1522,7 +1527,8 @@ int FitPeaks::estimatePeakParameters(
 
   // use values from background to locate FWHM
   peakfunction->setHeight(peak_height);
-  // FIXME - there are multiple occasions in FitPeaks that setCentre is called.  Is there any way to centralize this?
+  // FIXME - there are multiple occasions in FitPeaks that setCentre is called.
+  // Is there any way to centralize this?
   peakfunction->setCentre(peak_center);
 
   // Estimate FHWM (peak width)

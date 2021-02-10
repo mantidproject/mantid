@@ -734,7 +734,10 @@ public:
         // Check value
         for (auto ip = 0; ip < 4; ++ip) {
 
-          // FIXME - the exact reason why only this peak gets failed with fitting has not been discovered yet.  It is related to the starting values and fit window. Hopefully the future improved fitting algorithm will solve this issue.
+          // FIXME - the exact reason why only this peak gets failed with
+          // fitting has not been discovered yet.  It is related to the starting
+          // values and fit window. Hopefully the future improved fitting
+          // algorithm will solve this issue.
           if (ih == 5 && ip == 2) {
             continue;
           }
@@ -781,7 +784,6 @@ public:
 
     return;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Test the optional output for fit error of each peak parameters
