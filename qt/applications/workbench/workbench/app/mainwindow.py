@@ -43,6 +43,7 @@ from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
+from workbench.config import get_window_config
 
 # -----------------------------------------------------------------------------
 # Splash screen
@@ -341,9 +342,12 @@ class MainWindow(QMainWindow):
             interface = self.interface_manager.createSubWindow(interface_name)
             interface.setObjectName(object_name)
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
-            # make indirect interfaces children of workbench
+            parent, flags = get_window_config()
             if submenu == "Indirect":
+                # always make indirect interfaces children of workbench
                 interface.setParent(self, interface.windowFlags())
+            else:
+                interface.setParent(parent, flags)
             interface.show()
         else:
             if window.windowState() == Qt.WindowMinimized:
