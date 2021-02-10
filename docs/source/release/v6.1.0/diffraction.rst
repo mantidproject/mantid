@@ -29,6 +29,7 @@ Bugfixes
 - Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 - New options, including three "cache directory" and one "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
 - New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
+- Correct unit to TOF for ``_tof_xye`` files output for PEARL, when the focusing mode is set to *all*.
 
 Engineering Diffraction
 -----------------------
