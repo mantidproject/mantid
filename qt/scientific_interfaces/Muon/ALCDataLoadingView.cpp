@@ -221,7 +221,12 @@ bool ALCDataLoadingView::setCurrentLog(const QString &log) {
  * Set list of available periods in both boxes
  * @param periods :: [input] List of periods
  */
-void ALCDataLoadingView::setAvailablePeriods(const std::vector<std::string> &periods) {
+void ALCDataLoadingView::setAvailablePeriods(
+    const std::vector<std::string> &periods) {
+  if (periods.size() == m_numPeriods)
+    return;
+  m_numPeriods = periods.size();
+
   setAvailableItems(m_ui.redPeriod, periods);
   setAvailableItems(m_ui.greenPeriod, periods);
 
