@@ -19,6 +19,7 @@ set(
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
+  IndirectFitPropertyBrowserTest.h
   IndirectFittingModelTest.h
   IndirectPlotOptionsModelTest.h
   IndirectPlotOptionsPresenterTest.h

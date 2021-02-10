@@ -334,7 +334,7 @@ void IndirectFitPropertyBrowser::setBackgroundA0(double value) {
 }
 
 void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
-  if (m_functionBrowser->getNumberOfDatasets() == 0)
+  if (getNumberOfDatasets() == 0)
     return;
   updateFitStatus(i);
   if (isFullFunctionBrowserActive()) {
@@ -345,7 +345,13 @@ void IndirectFitPropertyBrowser::setCurrentDataset(FitDomainIndex i) {
 }
 
 FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
-  return FitDomainIndex{static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  if (isFullFunctionBrowserActive()) {
+    return FitDomainIndex{
+        static_cast<size_t>(m_functionBrowser->getCurrentDataset())};
+  } else {
+    return FitDomainIndex{
+        static_cast<size_t>(m_templateBrowser->getCurrentDataset())};
+  }
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
