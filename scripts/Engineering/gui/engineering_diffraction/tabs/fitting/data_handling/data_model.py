@@ -371,9 +371,9 @@ class FittingDataModel(object):
             fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
             tmp = Minus(LHSWorkspace=ws_name, RHSWorkspace=ws_bgsub, StoreInADS=False)
-            ax[0].plot(ws_bgsub, 'x')
-            ax[0].plot(tmp, '-r')
-            ax[1].plot(ws, 'x')
+            ax[0].plot(ws, 'x')
+            ax[1].plot(ws_bgsub, 'x')
+            ax[1].plot(tmp, '-r')
             fig.show()
 
     def get_last_added(self):
