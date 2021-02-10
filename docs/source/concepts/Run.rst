@@ -156,7 +156,7 @@ Multiple goniometers can be accessed from the run object by
   print("Number of goniometers =", wg.getRun().getNumGoniometers())
 
   for i in range(wg.getRun().getNumGoniometers()):
-      print("Goniometer angles:  {}".format(wg.getRun().getGoniometerByIndex(i).getEulerAngles('YZY')))
+      print("Goniometer angles:  {}".format(wg.getRun().getGoniometer(i).getEulerAngles('YZY')))
 
 .. testoutput:: GetGoniometertest2
   :hide:
