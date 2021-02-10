@@ -262,10 +262,19 @@ void ALCDataLoadingView::setAvailablePeriods(
   setAvailableItems(m_ui.redPeriod, periods);
   setAvailableItems(m_ui.greenPeriod, periods);
 
+  // Reset this so not checked incorrectly
+  m_ui.subtractCheckbox->setChecked(false);
+
   // If single period, disable "Subtract" checkbox and green period box
   const bool multiPeriod = periods.size() > 1;
   m_ui.subtractCheckbox->setEnabled(multiPeriod);
   m_ui.greenPeriod->setEnabled(multiPeriod);
+
+  // If two periods, default to 1 minus 2
+  if (periods.size() == 2) {
+    m_ui.subtractCheckbox->setChecked(true);
+    m_ui.greenPeriod->setCurrentIndex(1);
+  }
 }
 
 /**
