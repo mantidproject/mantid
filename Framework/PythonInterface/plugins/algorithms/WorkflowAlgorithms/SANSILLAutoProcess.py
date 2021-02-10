@@ -634,8 +634,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def createCustomSuffix(self, ws):
         DISTANCE_LOG = "L2"
-        if "front_detector" in ws:
-            DISTANCE_LOG = "detector.det1_calc"
         COLLIMATION_LOG = "collimation.actual_position"
         WAVELENGTH_LOG1 = "wavelength"
         WAVELENGTH_LOG2 = "selector.wavelength"
@@ -645,7 +643,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         distance = None
         try:
-            distance = float(logs[DISTANCE_LOG])
+            instrument = mtd[ws].getInstrument()
+            components = instrument.getStringParameter('detector_panels')
+            if components:
+                components = components[0].split(',')
+                for c in components:
+                    if c in ws:
+                        distance = instrument.getComponentByName(c).getPos()[2]
+                        break
+            if not distance:
+                distance = float(logs[DISTANCE_LOG])
             if distance < 0.0:
                 distance = None
                 raise ValueError
