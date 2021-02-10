@@ -393,6 +393,9 @@ class SANSILLReduction(PythonAlgorithm):
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
             self._mask(ws, reference_ws)
             self._rescale_flux(ws, reference_ws)
+        solvent_ws = self.getProperty('SolventInputWorkspace').value
+        if solvent_ws:
+            self._apply_solvent(ws, solvent_ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
@@ -547,13 +550,17 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param solvent_ws: empty container workspace
         """
+        solvent_ws.setDistribution(False)
         if not self._check_processed_flag(solvent_ws, 'Sample'):
             self.log().warning('Solvent input workspace is not processed as sample.')
         self._check_distances_match(mtd[ws], solvent_ws)
+        solvent_ws_name = solvent_ws.getName()
         if self._mode != 'TOF':
             self._check_wavelengths_match(mtd[ws], solvent_ws)
-        solvent_ws.setDistribution(False)
-        Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
+        else:
+            solvent_ws_name += '_tmp'
+            RebinToWorkspace(WorkspaceToRebin=solvent_ws, WorkspaceToMatch=ws, OutputWorkspace=solvent_ws_name)
+        Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws_name, OutputWorkspace=ws)
 
     def _finalize(self, ws, process):
         if process != 'Transmission':
@@ -688,11 +695,8 @@ class SANSILLReduction(PythonAlgorithm):
                         DeleteWorkspace(solid_angle)
                     progress.report()
                     if process == 'Sample':
-                        solvent_ws = self.getProperty('SolventInputWorkspace').value
                         container_ws = self.getProperty('ContainerInputWorkspace').value
-                        if solvent_ws:
-                            self._apply_solvent(ws, solvent_ws)
-                        elif container_ws:
+                        if container_ws:
                             self._apply_container(ws, container_ws)
                         self._apply_masks(ws)
                         self._apply_thickness(ws)
