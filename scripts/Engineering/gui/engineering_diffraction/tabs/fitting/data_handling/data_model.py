@@ -287,6 +287,9 @@ class FittingDataModel(object):
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
             for iws, wsname in enumerate(self._loaded_workspaces.keys()):
+                wsname_bgsub = wsname + "_bgsub"
+                if wsname_bgsub in self._fit_results:
+                    wsname = wsname_bgsub
                 if wsname in self._fit_results and param in self._fit_results[wsname]['results']:
                     fitvals = array(self._fit_results[wsname]['results'][param])
                     # pad to max length (with nans)
