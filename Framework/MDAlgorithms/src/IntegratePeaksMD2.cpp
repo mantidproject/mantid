@@ -36,9 +36,12 @@
 #include "MantidMDAlgorithms/GSLFunctions.h"
 #include "MantidMDAlgorithms/MDBoxMaskFunction.h"
 
+#include "boost/math/distributions.hpp"
+
 #include <cmath>
 #include <fstream>
 #include <gsl/gsl_integration.h>
+
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -120,6 +123,11 @@ void IntegratePeaksMD2::init() {
   declareProperty("Ellipsoid", false, "Default is sphere.");
   declareProperty("FixQAxis", false,
                   "Fix one axis of ellipsoid to be along direction of Q.");
+  declareProperty("FixMajorAxisLength", true,
+                  "Set major axis to be equal to PeakRadius and scale the "
+                  "length of the orthogonal axes by proportional to the sqrt "
+                  "of the eigenvalues of the covariance matrix (this ignored "
+                  "if all three peak radii are specified)");
   declareProperty("UseCentroid", false,
                   "Perform integration on estimated centroid not peak position "
                   "(ignored if all three peak radii are specified).");
@@ -293,6 +301,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Ellipsoid
   bool isEllipse = getProperty("Ellipsoid");
   bool qAxisIsFixed = getProperty("FixQAxis");
+  bool majorAxisLengthFixed = getProperty("FixMajorAxisLength");
   bool useCentroid = getProperty("UseCentroid");
   /// Cylinder Length to use around peaks for cylinder
   double cylinderLength = getProperty("CylinderLength");
@@ -511,6 +520,18 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
               ws, getRadiusSq, pos,
               static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
               bgDensity, eigenvects, eigenvals, translation);
+          if (majorAxisLengthFixed) {
+            // replace radius for this peak with 3*stdev along major axis
+            auto max_stdev =
+                sqrt(*std::max_element(eigenvals.begin(), eigenvals.end()));
+            BackgroundOuterRadiusVector[i] =
+                3 * max_stdev *
+                (BackgroundOuterRadiusVector[i] / PeakRadiusVector[i]);
+            BackgroundInnerRadiusVector[i] =
+                3 * max_stdev *
+                (BackgroundInnerRadiusVector[i] / PeakRadiusVector[i]);
+            PeakRadiusVector[i] = 3 * max_stdev;
+          }
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
@@ -553,13 +574,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           }
           // set peak shape
           if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-            // get radii in same proprtion as eigenvalues
-            auto max_stdev =
-                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
             std::vector<double> peakRadii(3, 0.0);
             std::vector<double> backgroundInnerRadii(3, 0.0);
             std::vector<double> backgroundOuterRadii(3, 0.0);
             for (size_t irad = 0; irad < peakRadii.size(); irad++) {
+              auto max_stdev = sqrt(*std::max_element(eigenvals.begin(), eigenvals.end()));
               auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
               peakRadii[irad] = PeakRadiusVector[i] * scale;
               backgroundInnerRadii[irad] =
@@ -664,7 +683,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
       // spherical integration of signal
       ws->getBox()->integrateSphere(
-          getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
+          getRadiusSq,
+          static_cast<coord_t>(PeakRadiusVector[i] * PeakRadiusVector[i]),
           signal, errorSquared, 0.0 /* innerRadiusSquared */,
           useOnePercentBackgroundCorrection);
     } else {
@@ -959,6 +979,8 @@ void IntegratePeaksMD2::findEllipsoid(
   std::vector<double> mean(3, 0.0);
   double var_Qhat = 0.0; //  variance parallel to Q (used if fix Q axis)
 
+  boost::math::chi_squared chisq(nd);
+
   // loop over all boxes inside radius
   do {
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(MDiter.getBox());
@@ -977,7 +999,7 @@ void IntegratePeaksMD2::findEllipsoid(
 
         if (evnt.getSignal() > bg && out[0] < radiusSquared) {
           auto signal = (evnt.getSignal() - bg);
-          w_sum += signal;
+          
 
           if (qAxisIsFixed) {
             // transform coords to Q, uhat, vhat basis
@@ -989,6 +1011,26 @@ void IntegratePeaksMD2::findEllipsoid(
               center[d] = static_cast<coord_t>(tmp[d]);
             }
           }
+
+          // evaluate the mahobanalis distance
+          std::vector<double> cen = {static_cast<double>(center[0]),
+                                     static_cast<double>(center[1]),
+                                     static_cast<double>(center[2])};
+          Matrix<double> invCov(cov_mat);
+          invCov.Invert();
+          auto tmp = invCov * cen;
+          double mdsq = 0.0;
+          for (size_t n = 0; n < nd; n++) {
+            mdsq += cen[n] * tmp[n];
+          }
+          if (isfinite(mdsq)) {
+            auto p = static_cast<float>(boost::math::cdf(chisq, sqrt(mdsq)));
+            if (p > 0.95) {
+              continue;
+            }
+          }
+
+          w_sum += signal;
 
           // update mean
           for (size_t d = 0; d < mean.size(); ++d) {
@@ -1036,8 +1078,9 @@ void IntegratePeaksMD2::findEllipsoid(
   }
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
-  std::replace_if(eigenvals.begin(), eigenvals.end(),
-                  [&](auto x) { return x < 1e-6; }, 1e-6);
+  std::replace_if(
+      eigenvals.begin(), eigenvals.end(), [&](auto x) { return x < 1e-6; },
+      1e-6);
   // populate rest of eigenvect/vals
   for (size_t ivect = 0; ivect < cov_mat.numRows(); ++ivect) {
     if (!qAxisIsFixed) {
