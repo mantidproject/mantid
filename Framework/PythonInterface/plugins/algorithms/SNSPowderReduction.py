@@ -489,7 +489,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
                 if not hstry.empty():
-                    last_absMethod = hstry.getHistory().getAlgorithm(0).getPropertyValue("TypeOfCorrection")
+                    last_absMethod = hstry.getAlgorithm(0).getPropertyValue("TypeOfCorrection")
                     if last_absMethod != self._absMethod:
                         self.log().information(
                             f"Remove {can_run_ws_name} as it is generated with a different method")
