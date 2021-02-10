@@ -634,6 +634,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def createCustomSuffix(self, ws):
         DISTANCE_LOG = "L2"
+        if "front_detector" in ws:
+            DISTANCE_LOG = "detector.det1_calc"
         COLLIMATION_LOG = "collimation.actual_position"
         WAVELENGTH_LOG1 = "wavelength"
         WAVELENGTH_LOG2 = "selector.wavelength"
