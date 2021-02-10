@@ -301,7 +301,7 @@ def calculate_absorption_correction(
                                       environment=environment,
                                       metaws=metaws)
 
-    # NOTE: Ideally we want to separate cache related task from calcualtion,
+    # NOTE: Ideally we want to separate cache related task from calculation,
     #       but the fact that we are trying to determine the name based on
     #       caching types requires us to use part of the caching here.
     #       Not a clean design, but it is unavoidable given that we are
