@@ -493,8 +493,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     last_absMethod = hstry.getHistory().getAlgorithm(0).getPropertyValue("TypeOfCorrection")
                     if last_absMethod != self._absMethod:
                         self.log().information(
-                            f"Remove existing container workspace {can_run_ws_name} generated with a different method"
-                        )
+                            f"Remove {can_run_ws_name} as it is generated with a different method")
                         mtd.remove(can_run_ws_name)
 
             can_run_ws_name = self._process_container_runs(can_run_numbers,
