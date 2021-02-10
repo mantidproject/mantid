@@ -31,6 +31,7 @@ New Features
 Improvements
 ############
 - Exported workspaces now have history.
+- The interface saves previous settings if possible instead of resetting.
 
 Bug fixes
 ##########
