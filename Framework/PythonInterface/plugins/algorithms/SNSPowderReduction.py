@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-lines
 import os
-
+from pathlib import Path
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
-from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
-    IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
+from mantid.kernel import (
+    ConfigService, Direction, EnabledWhenProperty, FloatArrayProperty, FloatBoundedValidator, IntArrayBoundedValidator,
+    IntArrayProperty, Property, PropertyCriterion, PropertyManagerDataService, StringListValidator)
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -215,8 +216,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
                              "'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
-        self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",action=FileAction.Directory))
+
+        # Caching options
         self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
+        self.declareProperty('CleanCache', False, 'Remove all cache files within CacheDir')
+        self.setPropertySettings('CleanCache', EnabledWhenProperty('CacheDir', PropertyCriterion.IsNotDefault))
+        property_names = ('CacheDir', 'CleanCache')
+        [self.setPropertyGroup(name, 'Caching') for name in property_names]
+
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         # absorption correction
@@ -266,6 +274,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if self.getProperty("SampleFormula").value == '':
                 issues['SampleFormula'] = "A sample formula must be provided."
 
+        # The provided cache directory does not exist
+        cache_dir = self.getProperty('CacheDir').value  # absolute or relative path, as a string
+        if bool(cache_dir) and Path(cache_dir).exists() is False:
+            issues['CacheDir'] = f'Directory {cache_dir} does not exist'
+
+        # We cannot clear the cache if property "CacheDir" has not been set
+        if self.getProperty('CleanCache').value and not bool(self.getProperty('CacheDir').value):
+            issues['CleanCache'] = f'Property "CacheDir" must be set in order to clean the cache'
+
         return issues
 
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -299,6 +316,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._scaleFactor = self.getProperty("ScaleData").value
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
+        # Caching options
+        self._cache_dir = self.getProperty("CacheDir").value
+        self._clean_cache = self.getProperty("CleanCache").value
+
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
         self._absMethod = self.getProperty("TypeOfCorrection").value
@@ -344,6 +365,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         if self.COMPRESS_TOL_TOF < -0.:
             self.COMPRESS_TOL_TOF = 0.01
 
+        # Clean the cache directory if so requested
+        if self._clean_cache:
+            api.CleanFileCache(CacheDir=self._cache_dir, AgeInDays=0)
+
         # Process data
         # List stores the workspacename of all data workspaces that will be converted to d-spacing in the end.
         workspacelist = []
@@ -379,14 +404,22 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.Load(Filename=samRuns[0], OutputWorkspace=absName, MetaDataOnly=True)
             self._info = self._getinfo(absName)
             metaws = absName
-        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(samRuns[0], self._absMethod,
-                                                                                    self._info, self._sampleFormula,
-                                                                                    self._massDensity,
-                                                                                    self._numberDensity,
-                                                                                    self._containerShape,
-                                                                                    self._num_wl_bins,
-                                                                                    self._elementSize,
-                                                                                    metaws)
+        # NOTE: inconsistent naming among different methods
+        #       -> adding more comments to help clarify
+        a_sample, a_container = absorptioncorrutils.calculate_absorption_correction(
+            samRuns[0],  # filename: File to be used for absorption correction
+            self._absMethod,  # [None, SampleOnly, SampleAndContainer, FullPaalmanPings]
+            self._info,  # PropertyManager of run characterizations
+            self._sampleFormula,  # Material for absorption correction
+            self._massDensity,  # Mass density of the sample
+            self._numberDensity,  # Optional number density of sample to be added
+            self._containerShape,  # Shape definition of container
+            self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1
+            self._elementSize,  # Size of one side of the integration element cube in mm
+            metaws,  # Optional workspace containing metadata
+            self.getProperty("CacheDir").value,  # Cache dir for absoption correction workspace
+            "SHA", # Use cache files named with sha rather than a filename prefix
+        )
 
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
@@ -762,7 +795,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          MaxChunkSize=self._chunks,
                                          FilterBadPulses=self._filterBadPulses,
                                          Characterizations=characterizations,
-                                         CacheDir=self.getProperty("CacheDir").value,
+                                         CacheDir=self._cache_dir,
                                          Params=self._binning,
                                          ResampleX=self._resampleX,
                                          Dspacing=self._bin_in_dspace,

@@ -197,8 +197,9 @@ void ConvertHFIRSCDtoMDE::exec() {
       }
     }
   } else { // HB2C
-    s1 = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
-        expInfo.getLog("s1"))))();
+    auto s1Log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        expInfo.run().getLogData("s1"));
+    s1 = s1Log->valuesAsVector();
     azimuthal =
         (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
             expInfo.getLog("azimuthal"))))();
@@ -274,7 +275,7 @@ void ConvertHFIRSCDtoMDE::exec() {
     for (size_t m = 0; m < azimuthal.size(); m++) {
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
-      if (signal > 0.f) {
+      if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
         inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
       }

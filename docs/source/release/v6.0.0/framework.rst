@@ -16,6 +16,7 @@ Concepts
 - Added packing fraction to :ref:`Material <Materials>` to separate number density and effective number density.
 - Added a feature allowing time-dependent values for individual instrument parameters.
 - Added a ``PythonStdOutChannel`` and the ability to change the :ref:`logging channel <Properties File>` without restarting mantid framework
+- Bugfix :ref:`DownloadInstrument <algm-DownloadInstrument>` to try unauthenticated connections if authenticated failes. Also added the ability to allow for setting the github api token in the :ref:`properties file <Properties File>`
 
 Algorithms
 ----------
