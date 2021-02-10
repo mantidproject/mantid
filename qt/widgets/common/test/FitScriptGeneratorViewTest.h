@@ -212,8 +212,8 @@ public:
   test_that_parameterValue_will_return_the_correct_value_of_the_specified_parameter() {
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
-    m_view->setFunction(m_function);
     m_function->addFunction(createIFunction("name=LinearBackground"));
+    m_view->setFunction(m_function);
 
     TS_ASSERT_EQUALS(m_view->parameterValue("f0.A0"), 0.0);
     TS_ASSERT_EQUALS(m_view->parameterValue("f1.Height"), 1.0);
