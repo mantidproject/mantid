@@ -633,12 +633,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         return container_name
 
     def createCustomSuffix(self, ws):
+        DISTANCE_LOG = "L2"
+        COLLIMATION_LOG = "collimation.actual_position"
+        WAVELENGTH_LOG1 = "wavelength"
+        WAVELENGTH_LOG2 = "selector.wavelength"
+
         logs = mtd[ws].run().getProperties()
         logs = {log.name:log.value for log in logs}
 
         distance = None
         try:
-            distance = float(logs["L2"])
+            distance = float(logs[DISTANCE_LOG])
             if distance < 0.0:
                 distance = None
                 raise ValueError
@@ -647,7 +652,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                           "the sample logs.")
         collimation = None
         try:
-            collimation = float(logs["collimation.actual_position"])
+            collimation = float(logs[COLLIMATION_LOG])
             if collimation < 0.0:
                 collimation = None
                 raise ValueError
@@ -656,13 +661,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                           "the sample logs.")
         wavelength = None
         try:
-            wavelength = float(logs["wavelength"])
+            wavelength = float(logs[WAVELENGTH_LOG1])
             if wavelength < 0.0:
                 wavelength = None
                 raise ValueError
         except:
             try:
-                wavelength = float(logs["selector.wavelength"])
+                wavelength = float(logs[WAVELENGTH_LOG2])
                 if wavelength < 0.0:
                     wavelength = None
                     raise ValueError
