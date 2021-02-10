@@ -1361,13 +1361,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             missing_value_dict = {
                 "SampleFormula": 'V',
                 "SampleDensity": str(absorptioncorrutils.VAN_SAMPLE_DENSITY),
-                "BL11A:CS:ITEMS:HeightInContainerUnits": "mm",  # or cm? not sure which one
+                "BL11A:CS:ITEMS:HeightInContainerUnits": "mm",
                 "BL11A:CS:ITEMS:HeightInContainer": "7.0",
                 "SampleContainer": "None",
             }
             for key, value in missing_value_dict.items():
-                mtd[absWksp].mutableRun()[key] = StringTimeSeriesProperty(key)
-                mtd[absWksp].mutableRun()[key].addValue(0, value)
+                if not mtd[absWksp].mutableRun().hasProperty(key):
+                    mtd[absWksp].mutableRun()[key] = StringTimeSeriesProperty(key)
+                    mtd[absWksp].mutableRun()[key].addValue(0, value)
 
             abs_v_wsn, _ = absorptioncorrutils.calc_absorption_corr_using_wksp(
                 absWksp,
