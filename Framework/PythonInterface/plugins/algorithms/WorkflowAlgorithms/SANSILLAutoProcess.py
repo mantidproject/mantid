@@ -458,7 +458,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # group panels
         if panel_output_groups:
-            GroupWorkspaces(InputWorkspaces=panel_output_groups,
+            panelWs = []
+            for groupName in panel_output_groups:
+                wsNames = mtd[groupName].getNames()
+                UnGroupWorkspace(InputWorkspace=groupName)
+                for ws in wsNames:
+                    suffix = self.createCustomSuffix(ws)
+                    RenameWorkspace(InputWorkspace=ws,
+                                    OutputWorkspace=ws + suffix)
+                    panelWs.append(ws + suffix)
+            GroupWorkspaces(InputWorkspaces=panelWs,
                             OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
