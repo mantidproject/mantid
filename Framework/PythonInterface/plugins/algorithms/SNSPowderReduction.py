@@ -1287,7 +1287,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
     def _generate_container_run_name(self, can_run_numbers, samRunIndex):
         """generate container workspace name based on given info
-        
+
         :param can_run_numbers:
         :param samRunIndex:
 
