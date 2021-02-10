@@ -729,8 +729,9 @@ void FunctionTreeView::addAttributeAndParameterProperties(
         addGlobalParameterTie(ap.prop, name.toStdString(), parentComposite,
                               parentIndex);
 
-      if (auto c = fun->getConstraint(i)) {
-        addConstraintProperties(ap.prop, QString::fromStdString(c->asString()));
+      if (const auto constraint = fun->getConstraint(i)) {
+        addConstraintProperties(ap.prop,
+                                QString::fromStdString(constraint->asString()));
       }
     }
   }

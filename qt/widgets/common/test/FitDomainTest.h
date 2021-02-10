@@ -58,8 +58,8 @@ public:
     m_expDecay = createIFunction("name=ExpDecay");
 
     auto composite = createEmptyComposite();
-    composite->addFunction(createIFunction("name=FlatBackground"));
-    composite->addFunction(createIFunction("name=ExpDecay"));
+    composite->addFunction(m_flatBackground->clone());
+    composite->addFunction(m_expDecay->clone());
     m_composite = composite;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace(m_wsName,

@@ -213,9 +213,12 @@ public:
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain(m_wsName, m_wsIndex, 0.0, 2.0);
     m_view->setFunction(m_function);
+    m_function->addFunction(createIFunction("name=LinearBackground"));
 
     TS_ASSERT_EQUALS(m_view->parameterValue("f0.A0"), 0.0);
     TS_ASSERT_EQUALS(m_view->parameterValue("f1.Height"), 1.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f2.A0"), 0.0);
+    TS_ASSERT_EQUALS(m_view->parameterValue("f2.A1"), 0.0);
   }
 
   void

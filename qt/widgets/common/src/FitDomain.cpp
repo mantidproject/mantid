@@ -35,18 +35,6 @@ CompositeFunction_sptr createEmptyComposite() {
   return toComposite(createIFunction("name=CompositeFunction"));
 }
 
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
-  std::vector<std::string> subStrings;
-  boost::split(subStrings, str, boost::is_any_of(delimiter));
-  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
-                                  [](std::string const &subString) {
-                                    return subString.empty();
-                                  }),
-                   subStrings.cend());
-  return subStrings;
-}
-
 std::vector<std::string>
 getFunctionNamesInString(std::string const &functionString) {
   std::vector<std::string> functionNames;
@@ -116,9 +104,10 @@ void FitDomain::removeFunctionFromIFunction(std::string const &function,
 
 void FitDomain::removeFunctionFromComposite(std::string const &function,
                                             CompositeFunction_sptr &composite) {
-  for (auto const &functionName : getFunctionNamesInString(function))
+  for (auto const &functionName : getFunctionNamesInString(function)) {
     if (composite->hasFunction(functionName))
       composite->removeFunction(composite->functionIndex(functionName));
+  }
 
   if (composite->nFunctions() == 0)
     m_function = nullptr;
@@ -285,9 +274,10 @@ void FitDomain::appendParametersTiedTo(
     std::vector<std::string> &tiedParameters, std::string const &parameter,
     std::size_t const &parameterIndex) const {
   if (auto const tie = m_function->getTie(parameterIndex)) {
-    for (auto rhsParameter : tie->getRHSParameters())
+    for (auto rhsParameter : tie->getRHSParameters()) {
       if (parameter == rhsParameter.parameterName())
         tiedParameters.emplace_back(m_function->parameterName(parameterIndex));
+    }
   }
 }
 

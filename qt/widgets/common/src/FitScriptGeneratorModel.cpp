@@ -256,7 +256,8 @@ void FitScriptGeneratorModel::updateParameterValuesWithLocalTieTo(
 
 void FitScriptGeneratorModel::updateParameterValuesWithGlobalTieTo(
     std::string const &fullParameter, double newValue) {
-  // Deep copy so that global ties can be removed whilst in this for loop
+  // Deep copy so that global ties can be removed whilst in this for loop. This
+  // will happen if a global tie has been invalidated.
   auto const globalTies = m_globalTies;
   for (auto const &globalTie : globalTies)
     if (fullParameter == globalTie.m_tie)

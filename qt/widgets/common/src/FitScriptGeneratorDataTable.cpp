@@ -155,6 +155,9 @@ void FitScriptGeneratorDataTable::handleItemSelectionChanged() {
   if (!selectionModel->hasSelection()) {
     this->blockSignals(true);
 
+    // Makes sure that multi-selection rows are stored within the selectionModel
+    // as should be expected. This prevents a bug where not all selected rows
+    // were being stored in the selection model.
     auto itemSelection = selectionModel->selection();
     for (auto const &selectedRow : m_selectedRows) {
       this->selectRow(static_cast<int>(selectedRow.value));

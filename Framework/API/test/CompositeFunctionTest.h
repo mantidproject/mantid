@@ -1459,6 +1459,9 @@ public:
   void
   test_hasFunction_returns_false_if_the_composite_does_not_contain_a_function_with_the_given_name() {
     auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
     TS_ASSERT(!composite->hasFunction("Gauss"));
   }
 
@@ -1478,6 +1481,9 @@ public:
   void
   test_functionIndex_throws_if_the_function_name_provided_does_not_exist_in_the_composite() {
     auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
     TS_ASSERT_THROWS(composite->functionIndex("Gauss"),
                      const std::invalid_argument &);
   }
