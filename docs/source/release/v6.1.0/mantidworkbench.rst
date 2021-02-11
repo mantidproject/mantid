@@ -7,6 +7,7 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
+Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
