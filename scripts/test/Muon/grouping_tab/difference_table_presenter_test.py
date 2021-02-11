@@ -177,6 +177,47 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.assertEqual(0, self.presenter.group_view.warning_popup.call_count)
 
     # ------------------------------------------------------------------------------------------------------------------
+    # TESTS : Context menu has "add diff" and "remove diff" functionality
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def test_context_menu_adds_diff_with_no_rows_selected(self):
+        self.add_two_groups() # Required for a group diff
+        self.presenter.group_view.contextMenuEvent(0)
+        self.presenter.group_view.add_diff_action.triggered.emit(True)
+
+        self.assertEqual(1, self.presenter.group_view.num_rows())
+        self.assertEqual("diff_0", self.presenter.group_view.get_table_item_text(0, 0))
+
+    def test_context_menu_does_not_allow_add_diff_if_rows_selected(self):
+        self.presenter.group_view._get_selected_row_indices = mock.Mock(return_value=[0])
+        self.presenter.group_view.contextMenuEvent(0)
+
+        self.assertFalse(self.presenter.group_view.add_diff_action.isEnabled())
+
+    def test_context_menu_remove_diff_with_no_selected_rows(self):
+        self.add_two_group_diffs()
+        self.presenter.group_view.contextMenuEvent(0)
+        self.presenter.group_view.remove_diff_action.triggered.emit(True)
+
+        self.assertEqual(1, len(self.model.diffs))
+        self.assertEqual(1, self.presenter.group_view.num_rows())
+        self.assertEqual('group_diff_0', self.presenter.group_view.get_table_item_text(0, 0))
+
+    def test_context_menu_removes_selected_diffs(self):
+        self.add_two_group_diffs()
+        self.presenter.group_view._get_selected_row_indices = mock.Mock(return_value=[0])
+        self.presenter.group_view.contextMenuEvent(0)
+        self.presenter.group_view.remove_diff_action.triggered.emit(True)
+
+        self.assertEqual(1, len(self.model.diffs))
+        self.assertEqual(1, self.presenter.group_view.num_rows())
+        self.assertEqual('group_diff_1', self.presenter.group_view.get_table_item_text(0, 0))
+
+    def test_context_menu_cannot_remove_diff_if_no_diffs_in_table(self):
+        self.presenter.group_view.contextMenuEvent(0)
+        self.assertFalse(self.presenter.group_view.remove_diff_action.isEnabled())
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Diff name validation
     # ------------------------------------------------------------------------------------------------------------------
 
