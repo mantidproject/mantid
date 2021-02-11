@@ -516,8 +516,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ws.setX(0, x_new)
 
         for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
+
             group = (pixel - 1) // self._group_by
-            if self._fit_option == "FitAllPixelGroups" and epp_ws.cell('FitStatus', group) in ['success', "narrowPeak"]:
+            if self._fit_option == "FitAllPixelGroups" and epp_ws.cell('FitStatus', group) == 'success':
                 l2 = detector_info.l2(pixel)
                 elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
                 elastic_channel = epp_ws.cell('PeakCentre', group)
