@@ -30,23 +30,24 @@ from math import inf  # noqa: E402
 
 @start_qapplication
 class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
-    def setUp(self):
-        self.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(100),
-                                               ErrorInput=range(100),
-                                               NumberOfBins='5,5,4',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_2d')
-        self.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                        Extents='-10,10,-10,10,-10,10',
-                                        Names='A,B,C',
-                                        Units='r.l.u.,r.l.u.,r.l.u.',
-                                        Frames='HKL,HKL,HKL',
-                                        OutputWorkspace='hkl_ws')
+    @classmethod
+    def setUpClass(cls):
+        cls.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
+                                              Extents='-3,3,-10,10,-1,1',
+                                              SignalInput=range(100),
+                                              ErrorInput=range(100),
+                                              NumberOfBins='5,5,4',
+                                              Names='Dim1,Dim2,Dim3',
+                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                              OutputWorkspace='ws_MD_2d')
+        cls.hkl_ws = CreateMDWorkspace(Dimensions=3,
+                                       Extents='-10,10,-9,9,-8,8',
+                                       Names='A,B,C',
+                                       Units='r.l.u.,r.l.u.,r.l.u.',
+                                       Frames='HKL,HKL,HKL',
+                                       OutputWorkspace='hkl_ws')
         expt_info = CreateSampleWorkspace()
-        self.hkl_ws.addExperimentInfo(expt_info)
+        cls.hkl_ws.addExperimentInfo(expt_info)
         SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
 
     def tearDown(self):
@@ -128,6 +129,25 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
+
+        pres.view.close()
+
+    def test_update_plot_data_updates_axes_limits_when_orthog_data_tranposed(self):
+        pres = SliceViewer(self.hkl_ws)
+
+        # not transpose
+        pres.view.data_view.dimensions.transpose = False
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertListEqual(extent, [-10.0, 10.0, -9.0, 9.0])
+
+        # transpose
+        pres.view.data_view.dimensions.transpose = True
+        pres.update_plot_data()
+        extent = pres.view.data_view.image.get_extent()
+        self.assertTupleEqual(extent, (-9.0, 9.0, -10.0, 10.0))
+        self.assertTupleEqual(extent[0:2], pres.view.data_view.ax.get_xlim())
+        self.assertTupleEqual(extent[2:], pres.view.data_view.ax.get_ylim())
 
         pres.view.close()
 

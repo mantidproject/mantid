@@ -320,6 +320,8 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.5,Sigma=0.5,Frequency=1,Phi=0')
         self.view.is_simul_fit = mock.MagicMock(return_value=False)
+        function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter._get_fit_function = mock.Mock(return_value=[function]*3)
         self.presenter.fitting_calculation_model = mock.MagicMock()
         self.presenter.model.evaluate_single_fit.return_value = (fit_function, 'Fit Succeeded', 0.5)
 

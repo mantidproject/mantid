@@ -16,6 +16,7 @@ from mantid.kernel import config  # noqa
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 
+from .DrillExportDialog import DrillExportDialog
 from ..presenter.DrillPresenter import DrillPresenter
 from .DrillTableWidget import DrillTableWidget
 from .DrillContextMenu import DrillContextMenu
@@ -193,6 +194,9 @@ class DrillView(QMainWindow):
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(self.showSettings.emit)
+
+        self.export.setIcon(icons.get_icon("mdi.application-export"))
+        self.export.clicked.connect(self.showExportDialog)
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
         self.paste.clicked.connect(self.pasteCells)
@@ -539,6 +543,14 @@ class DrillView(QMainWindow):
         menu = DrillContextMenu(self.table.viewport().mapToGlobal(pos), self)
         self._presenter.onShowContextMenu(menu)
 
+    def showExportDialog(self):
+        """
+        Open the export dialog.
+        """
+        dialog = DrillExportDialog(self)
+        self._presenter.onShowExportDialog(dialog)
+        dialog.show()
+
     ###########################################################################
     # for model calls                                                         #
     ###########################################################################
@@ -696,6 +708,7 @@ class DrillView(QMainWindow):
         self.datadirs.setDisabled(state)
         self.load.setDisabled(state)
         self.settings.setDisabled(state)
+        self.export.setDisabled(state)
         self.paste.setDisabled(state)
         self.copy.setDisabled(state)
         self.cut.setDisabled(state)

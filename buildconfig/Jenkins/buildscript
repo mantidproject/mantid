@@ -185,8 +185,6 @@ fi
 #                            the links helps keep it fresh
 #   - build/Testing/**: old ctest xml files will change over time and removing
 #                       the links helps keep it fresh
-#   - build/qt/**/ui_*.h: Header files produced from .ui files can remain stale
-#                         if a .ui file is removed from a CMakeLists.txt file
 ###############################################################################
 if [ -z "$BUILD_DIR" ]; then
     echo "Build directory not set. Cannot continue"
@@ -201,7 +199,7 @@ mkdir -p $BUILD_DIR
 
 # Tidy build dir
 rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
-find ${BUILD_DIR:?} \( -name 'ui_*.h' -o -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+find ${BUILD_DIR:?} \( -name 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -298,6 +296,10 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
                 RELEASE_NUMBER="1"
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+        fi
+
+        if [[ -n "${GITHUB_AUTHORIZATION_TOKEN}" ]]; then
+            PACKAGINGVARS="${PACKAGINGVARS} -DGITHUB_AUTHORIZATION_TOKEN=${GITHUB_AUTHORIZATION_TOKEN}"
         fi
     fi
 fi

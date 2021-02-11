@@ -44,12 +44,16 @@ the provided radii. Errors are also summed in quadrature.
    IntegratePeaksMD\_graph1.png
 
 -  All the Radii are specified in :math:`\AA^{-1}`
--  A sphere of radius **PeakRadius** is integrated around the center of
+-  A sphere or ellipsoid of radius **PeakRadius** is integrated around the center of
    each peak.
 
    -  This gives the summed intensity :math:`I_{peak}` and the summed
       squared error :math:`\sigma I_{peak}^2`.
    -  The volume of integration is :math:`V_{peak}`.
+   -  An ellipsoidal shape is integrated when the **Ellipsoid** option is enabled (the following also applies to BackgroundInnerRadius and BackgroundOuterRadius):
+
+      -  When only one value for PeakRadius is given, then the ellipsoidal shape is calculated automatically with axes proportional to the sqrt of the eigenvalues of the covariance matrix.
+      -  Three values for PeakRadius can be given, which correspond to the semi-axis lengths (a,b,c) of the ellipsoid.
 
 -  If **BackgroundOuterRadius** is specified, then a shell, with radius
    r where **BackgroundInnerRadius** < r < **BackgroundOuterRadius**, is

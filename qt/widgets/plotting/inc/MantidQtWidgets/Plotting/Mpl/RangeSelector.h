@@ -38,6 +38,7 @@ public:
   double getMaximum() const;
 
   void setVisible(bool visible);
+  void setBounds(const double min, const double max);
 
   void detach();
 
@@ -54,7 +55,6 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
-  void resetBounds();
   void redrawMarker();
 
 private:

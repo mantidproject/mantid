@@ -42,5 +42,8 @@ Bugfixes
 - ISIS SANS will print the name of any missing mask files instead of an empty name.
 - A bug has been fixed in the ISIS SANS GUI sum runs tab, where clicking browse and then cancelling the file picker
   dialog caused a crash.
+- Fixes a bug in :ref:`SaveNXcanSAS <algm-SaveNXcanSAS>` where a bin-edge transmission array would be saved instead points
+  if the input workspace was a histogram. :ref:`LoadNXcanSAS <algm-LoadNXcanSAS>` has been modified to load existing files
+  that might contain bin-edge transmissoin data.
 
 :ref:`Release 6.0.0 <v6.0.0>`
