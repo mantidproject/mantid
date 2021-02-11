@@ -60,8 +60,10 @@ class MainWindow(QMainWindow):
         if outOption in self.needsFlightPathOutputList:
             self.flightPathEnable(True)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         QMainWindow.__init__(self, parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
         self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
         self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))

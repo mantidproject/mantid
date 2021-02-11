@@ -40,11 +40,14 @@ class MainWindow(QMainWindow):
 
     _errMsgWindow = None
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         """ Initialization and set up
         """
         # Base class
         QMainWindow.__init__(self, parent)
+
+        if window_flags:
+            self.setWindowFlags(window_flags)
 
         # Mantid configuration
         config = ConfigService.Instance()

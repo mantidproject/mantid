@@ -136,8 +136,10 @@ class DrillView(QMainWindow):
     ERROR_COLOR = "#3fff0000"
     PROCESSING_COLOR = "#3fffff00"
 
-    def __init__(self):
-        super(DrillView, self).__init__(None, Qt.Window)
+    def __init__(self, parent=None, window_flags=None):
+        super(DrillView, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.here = os.path.dirname(os.path.realpath(__file__))
 
         # setup ui

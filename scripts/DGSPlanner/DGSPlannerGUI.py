@@ -39,9 +39,11 @@ class CustomNavigationToolbar(NavigationToolbar2QT):
 
 
 class DGSPlannerGUI(QtWidgets.QWidget):
-    def __init__(self, ol=None, parent=None):
+    def __init__(self, parent=None, window_flags=None, ol=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(DGSPlannerGUI, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         # OrientedLattice
         if ValidateOL(ol):
             self.ol = ol
