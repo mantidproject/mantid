@@ -1093,7 +1093,23 @@ void FitPeaks::fitSpectrumPeaks(
 
     double expected_peak_pos = expected_peak_centers[peak_index];
 
-    // Determine how to set the starting value parameters
+    // set center and calc any parameters from xml (e.g. A  and B for B2Bexp)
+    peakfunction->setCentre(expected_peak_pos);
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
+
+    std::map<size_t, double> tied_values;
+    if (!peakfunction->writeTies().empty()) {
+      // save value of these parameters which have just been calculated
+      for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
+        auto tie = peakfunction->getTie(ipar);
+        if (tie) {
+          tied_values[ipar] = peakfunction->getParameter(ipar);
+        }
+      }
+      // let them be free to fit as these are typically refined from a focussed
+      // bank
+      peakfunction->clearTies();
+    }
 
     // Determine whether to set starting parameter from fitted value
     // of same peak but different spectrum
@@ -1103,6 +1119,7 @@ void FitPeaks::fitSpectrumPeaks(
              std::count_if(lastGoodPeakParameters[peak_index].begin(),
                            lastGoodPeakParameters[peak_index].end(),
                            [&](auto const &val) { return val <= 1e-10; })));
+
     // Check whether current spectrum's pixel (detector ID) is close to its
     // previous spectrum's pixel (detector ID).
     try {
@@ -1155,12 +1172,11 @@ void FitPeaks::fitSpectrumPeaks(
 
       // reset center though - don't know before hand which element this is
       peakfunction->setCentre(expected_peak_pos);
-    } else {
-      // set matrix workspace so reads necessary params from .xml file after
-      // need to set center first
-      peakfunction->setCentre(expected_peak_pos);
-      peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
-      peakfunction->clearTies(); // let S,A,B of B2B exp be refined
+    }
+
+    // reset value of ties parameters
+    for (const auto &[ipar, value] : tied_values) {
+      peakfunction->setParameter(ipar, value);
     }
 
     double cost(DBL_MAX);
