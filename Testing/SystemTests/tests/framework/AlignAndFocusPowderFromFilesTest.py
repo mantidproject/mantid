@@ -300,3 +300,111 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         assert mtd[self.wksp_file].sample().getMaterial().name() == 'V'
         # use standard method
         return (self.wksp_mem, self.wksp_file)
+
+
+def checkRaggedWorkspaces(obs_name, exp_name):
+    # CompareWorkspace does not support ragged workspaces
+    wksp_obs = mtd[obs_name]
+    wksp_exp = mtd[exp_name]
+
+    # first check that the data arrays are the same length
+    assert wksp_obs.getNumberHistograms() == wksp_exp.getNumberHistograms(), "number of histograms doesn't match"
+    for i in range(wksp_exp.getNumberHistograms()):
+        np.testing.assert_allclose(wksp_obs.readX(i), wksp_exp.readX(i),
+                                   err_msg='x-values index={i}')
+        np.testing.assert_allclose(wksp_obs.readY(i), wksp_exp.readY(i),
+                                   err_msg='y-values index={i}')
+
+
+class VulcanRaggedInD(systemtesting.MantidSystemTest):
+    '''This is identically to VulcanInD except the binning is done in d-space'''
+    cal_file  = "VULCAN_calibrate_2019_06_27.h5"
+    data_file = 'VULCAN_189186.nxs.h5'
+
+    def requiredMemoryMB(self):
+        return 3*1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.data_file]
+
+    def runTest(self):
+        # put together then names
+        basename = os.path.basename(self.data_file).split('.')[0]
+        self.wksp_obs, self.wksp_exp = basename + '_allinone', basename + '_separate'
+
+        dmin = np.array((0.306,0.306,0.22))
+        dmax = np.array((4.280, 4.280, 3.133))
+        delta = np.array((-0.001,-0.001,-0.0003))
+        tofmin, tofmax = 5000, 70000
+
+        # wksp_exp is doing the reduction in event mode then calling RebinRagged
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=True,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
+                                     DMin=dmin.min(), DMax=dmax.max())
+        ConvertUnits(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp, Target='dSpacing')
+        RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
+                    XMin=dmin, XMax=dmax, Delta=delta)
+
+        # wksp_obs is doing the reduction with RebinRagged internal
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=True,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
+                                     DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
+        ConvertUnits(InputWorkspace=self.wksp_obs, OutputWorkspace=self.wksp_obs, Target='dSpacing')
+
+    def validate(self):
+        # CompareWorkspace does not support ragged workspaces
+        checkRaggedWorkspaces(self.wksp_obs, self.wksp_exp)
+
+
+class VulcanRaggedInTOF(systemtesting.MantidSystemTest):
+    '''This is identically to VulcanInD except the binning is done in time-of-flight'''
+    cal_file  = "VULCAN_calibrate_2019_06_27.h5"
+    data_file = 'VULCAN_189186.nxs.h5'
+
+    def requiredMemoryMB(self):
+        return 3*1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.data_file]
+
+    def runTest(self):
+        # put together then names
+        basename = os.path.basename(self.data_file).split('.')[0]
+        self.wksp_obs, self.wksp_exp = basename + '_allinone', basename + '_separate'
+
+        dmin = np.array((0.306,0.306,0.22))
+        dmax = np.array((4.280, 4.280, 3.133))
+        delta = np.array((-0.001,-0.001,-0.0003))
+        tofmin, tofmax = 5000, 70000
+
+        # wksp_exp is doing the reduction in event mode then calling RebinRagged
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_exp,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=False,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
+                                     DMin=dmin.min(), DMax=dmax.max())
+        RebinRagged(InputWorkspace=self.wksp_exp, OutputWorkspace=self.wksp_exp,
+                    XMin=tofmin, XMax=tofmax, Delta=delta)
+
+        # wksp_obs is doing the reduction with RebinRagged internal
+        AlignAndFocusPowderFromFiles(Filename=self.data_file, OutputWorkspace=self.wksp_obs,
+                                     CalFileName=self.cal_file,
+                                     PreserveEvents=True, Dspacing=False,
+                                     Params=delta.max(),
+                                     CompressTolerance=0.01,
+                                     TMin=tofmin, TMax=tofmax,
+                                     DMin=dmin, DMax=dmax, DeltaRagged=delta)  # bonus bit for RebinRagged
+
+    def validate(self):
+        # CompareWorkspace does not support ragged workspaces
+        checkRaggedWorkspaces(self.wksp_obs, self.wksp_exp)
