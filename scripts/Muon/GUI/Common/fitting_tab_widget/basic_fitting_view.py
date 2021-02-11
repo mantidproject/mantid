@@ -75,9 +75,9 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Connect the slot for the Use raw option."""
         self.fit_function_options.set_slot_for_use_raw_changed(slot)
 
-    def set_datasets_in_function_browser(self, data_set_name_list):
+    def set_datasets_in_function_browser(self, dataset_names):
         """Sets the datasets stored in the FunctionBrowser."""
-        self.fit_function_options.set_datasets_in_function_browser(data_set_name_list)
+        self.fit_function_options.set_datasets_in_function_browser(dataset_names)
 
     def set_current_dataset_index(self, dataset_index):
         """Sets the index of the current dataset."""

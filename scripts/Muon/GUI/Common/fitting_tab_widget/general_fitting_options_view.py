@@ -55,13 +55,12 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)
+        self.parameter_display_combo.blockSignals(False)
 
         if index != -1:
             self.parameter_display_combo.setCurrentIndex(index)
         else:
             self.parameter_display_combo.setCurrentIndex(0)
-
-        self.parameter_display_combo.blockSignals(False)
 
     def increment_display_combo_box(self):
         """Increment the parameter display combo box."""
@@ -106,6 +105,9 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
             self.parameter_display_combo.blockSignals(True)
             self.parameter_display_combo.setCurrentIndex(index)
             self.parameter_display_combo.blockSignals(False)
+
+    def number_of_domains(self):
+        return self.parameter_display_combo.count()
 
     @property
     def simultaneous_fit_by(self):
