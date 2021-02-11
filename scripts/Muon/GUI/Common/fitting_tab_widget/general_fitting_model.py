@@ -32,6 +32,12 @@ class GeneralFittingModel(BasicFittingModel):
         self._simultaneous_fit_function = None
         self._simultaneous_fitting_mode = False
 
+        self._simultaneous_fit_by = ""
+        self._simultaneous_fit_by_specifier = ""
+
+        self._global_parameters = []
+        self._tf_asymmetry_mode = False
+
     @property
     def simultaneous_fit_function(self):
         return self._simultaneous_fit_function
@@ -48,17 +54,46 @@ class GeneralFittingModel(BasicFittingModel):
     def simultaneous_fitting_mode(self, enable_simultaneous):
         self._simultaneous_fitting_mode = enable_simultaneous
 
-    # @property
-    # def fit_function(self):
-    #     return self.fitting_options["fit_function"]
-    #
-    # @fit_function.setter
-    # def fit_function(self, function):
-    #     self.fitting_options["fit_function"] = function
+    @property
+    def simultaneous_fit_by(self):
+        return self._simultaneous_fit_by
+
+    @simultaneous_fit_by.setter
+    def simultaneous_fit_by(self, simultaneous_fit_by):
+        self._simultaneous_fit_by = simultaneous_fit_by
+
+    @property
+    def simultaneous_fit_by_specifier(self):
+        return self._simultaneous_fit_by_specifier
+
+    @simultaneous_fit_by_specifier.setter
+    def simultaneous_fit_by_specifier(self, simultaneous_fit_by_specifier):
+        self._simultaneous_fit_by_specifier = simultaneous_fit_by_specifier
+
+    @property
+    def global_parameters(self):
+        return self._global_parameters
+
+    @global_parameters.setter
+    def global_parameters(self, global_parameters):
+        self._global_parameters = global_parameters
+
+    @property
+    def tf_asymmetry_mode(self):
+        return self._tf_asymmetry_mode
+
+    @tf_asymmetry_mode.setter
+    def tf_asymmetry_mode(self, tf_asymmetry_mode):
+        self._tf_asymmetry_mode = tf_asymmetry_mode
+
+    ##############################
+    ##  Old
+    ##############################
 
     @property
     def stored_fit_functions(self):
-        return list(self.ws_fit_function_map.values())
+        pass
+        ##return list(self.ws_fit_function_map.values())
 
     # plot guess
     def change_plot_guess(self, plot_guess, workspace_names, index):
@@ -106,7 +141,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _get_guess_parameters(self, workspace_names, index):
         # Currently not supporting plot guess and tf asymmetry mode
-        if self.fitting_options["tf_asymmetry_mode"]:
+        if self.tf_asymmetry_mode:
             return None, None
         params = self._get_fit_parameters(workspace_names)
         data_ws_name = params['InputWorkspace']
@@ -120,21 +155,21 @@ class GeneralFittingModel(BasicFittingModel):
     # single fitting
     def evaluate_single_fit(self, workspace):
         if not self.simultaneous_fitting_mode:
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_single_tf_fit(workspace[0])
                 function_object, output_status, output_chi_squared = self.do_single_tf_fit(params)
             else:
                 params = self.get_parameters_for_single_fit(workspace[0])
                 function_object, output_status, output_chi_squared = self.do_single_fit(params)
         else:  # single simultaneous fit
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_simultaneous_tf_fit(workspace)
                 function_object, output_status, output_chi_squared = \
-                    self.do_simultaneous_tf_fit(params, self.fitting_options["global_parameters"])
+                    self.do_simultaneous_tf_fit(params, self.global_parameters)
             else:
                 params = self.get_parameters_for_simultaneous_fit(workspace)
                 function_object, output_status, output_chi_squared = \
-                    self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
+                    self.do_simultaneous_fit(params, self.global_parameters)
         return function_object, output_status, output_chi_squared
 
     def do_single_fit(self, parameter_dict):
@@ -275,7 +310,7 @@ class GeneralFittingModel(BasicFittingModel):
         if not self.simultaneous_fitting_mode:
             # flatten the workspace list
             workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 function_object, output_status, output_chi_squared = self.do_sequential_tf_fit(workspace_list,
                                                                                                use_initial_values)
             else:
@@ -283,7 +318,7 @@ class GeneralFittingModel(BasicFittingModel):
                                                                                             use_initial_values)
         else:
             # in a simultaneous-sequential fit, each fit corresponds to a list of workspaces
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 function_object, output_status, output_chi_squared = \
                     self.do_sequential_simultaneous_tf_fit(workspaces, use_initial_values)
             else:
@@ -327,7 +362,7 @@ class GeneralFittingModel(BasicFittingModel):
                 self.set_fit_function_parameter_values(params['Function'], previous_values)
 
             function_object, output_status, output_chi_squared = \
-                self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
+                self.do_simultaneous_fit(params, self.global_parameters)
             function_object_list.append(function_object)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
@@ -369,7 +404,7 @@ class GeneralFittingModel(BasicFittingModel):
                                                        previous_values)
 
             function_object, output_status, output_chi_squared = \
-                self.do_simultaneous_tf_fit(params, self.fitting_options["global_parameters"])
+                self.do_simultaneous_tf_fit(params, self.global_parameters)
 
             function_object_list.append(function_object)
             output_status_list.append(output_status)
@@ -406,30 +441,18 @@ class GeneralFittingModel(BasicFittingModel):
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
 
-    def update_model_fit_options(self, **kwargs):
-        for option, value in kwargs.items():
-            self.fitting_options[option] = value
-        self.create_ws_fit_function_map()
-
-    def create_ws_fit_function_map(self):
-        fit_function = self.get_function_for_fitting()
-        if fit_function is None:
-            return
-
-        self.ws_fit_function_map.clear()
-        workspace_keys = self.create_hashable_keys_for_workspace_names()
-
-        for workspace_key in workspace_keys:
-            self.ws_fit_function_map[workspace_key] = fit_function.clone()
-
-        if self.fitting_options["tf_asymmetry_mode"]:
-            self.update_fit_function_map_with_tf_asym_data()
-
-    def get_function_for_fitting(self):
+    def get_fit_function(self, dataset_name):
         if self.simultaneous_fitting_mode:
             return self.simultaneous_fit_function
         else:
-            return self.single_fit_functions[self.current_dataset_index]
+            dataset_index = self.dataset_names.index(dataset_name)
+            return self.single_fit_functions[dataset_index]
+
+    def get_function_for_fitting(self, dataset_index):
+        if self.simultaneous_fitting_mode:
+            return self.simultaneous_fit_function
+        else:
+            return self.single_fit_functions[dataset_index]
 
     # This function creates a list of keys from a list of input workspace names
     def create_hashable_keys_for_workspace_names(self):
@@ -450,18 +473,12 @@ class GeneralFittingModel(BasicFittingModel):
 
         return workspace_key_list
 
-    def update_ws_fit_function_parameters(self, workspace, params):
-        workspace_key = self.create_workspace_key(workspace)
-        try:
-            fit_function = self.ws_fit_function_map[workspace_key]
-        except KeyError:
-            return
+    def update_ws_fit_function_parameters(self, workspace_names, params):
+        if self.simultaneous_fitting_mode:
+            fit_function = self.simultaneous_fit_function
+        else:
+            fit_function = self.current_single_fit_function
         self.set_fit_function_parameter_values(fit_function, params)
-
-    def update_fit_function_map_with_tf_asym_data(self):
-        for workspace_key, fit_function in self.ws_fit_function_map.items():
-            workspace_list = list(workspace_key)
-            self.update_tf_fit_function(workspace_list, fit_function)
 
     def update_tf_fit_function(self, workspaces, fit_function):
         if not self.simultaneous_fitting_mode:
@@ -480,7 +497,7 @@ class GeneralFittingModel(BasicFittingModel):
             'OutputFitWorkspace': "fit",
             'StartX': self.current_start_x,
             'EndX': self.current_end_x,
-            'Minimizer': self.fitting_options["minimiser"]}
+            'Minimizer': self.minimizer}
 
     def get_params_for_multi_tf_function_calculation(self, workspace_list, fit_function):
         return {
@@ -491,7 +508,7 @@ class GeneralFittingModel(BasicFittingModel):
             'OutputFitWorkspace': "fit",
             'StartX': self.current_start_x,
             'EndX': self.current_end_x,
-            'Minimizer': self.fitting_options["minimiser"]
+            'Minimizer': self.minimizer
         }
 
     def clear_fit_information(self):
@@ -499,7 +516,6 @@ class GeneralFittingModel(BasicFittingModel):
         self.simultaneous_fit_function = None
         self.current_dataset_index = 0
         self.function_name = ""
-        self.ws_fit_function_map = {}
 
     def freq_type(self):
         if isinstance(self.context, FrequencyDomainAnalysisContext):
@@ -508,21 +524,14 @@ class GeneralFittingModel(BasicFittingModel):
             freq = 'None'
         return freq
 
-    def get_ws_fit_function(self, workspaces):
-        workspace_key = self.create_workspace_key(workspaces)
-        try:
-            return self.ws_fit_function_map[workspace_key]
-        except KeyError:
-            pass
-
     def _get_fit_parameters(self, workspaces):
         if not self.simultaneous_fitting_mode:
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_single_tf_fit(workspaces[0])
             else:
                 params = self.get_parameters_for_single_fit(workspaces[0])
         else:  # single simultaneous fit
-            if self.fitting_options["tf_asymmetry_mode"]:
+            if self.tf_asymmetry_mode:
                 params = self.get_parameters_for_simultaneous_tf_fit(workspaces)
             else:
                 params = self.get_parameters_for_simultaneous_fit(workspaces)
@@ -531,7 +540,7 @@ class GeneralFittingModel(BasicFittingModel):
     def get_parameters_for_single_fit(self, workspace):
         params = self._get_shared_parameters()
         params['InputWorkspace'] = workspace
-        params['Function'] = self.get_ws_fit_function([workspace])
+        params['Function'] = self.current_single_fit_function
         params['StartX'] = self.current_start_x
         params['EndX'] = self.current_end_x
 
@@ -540,7 +549,7 @@ class GeneralFittingModel(BasicFittingModel):
     def get_parameters_for_simultaneous_fit(self, workspaces):
         params = self._get_shared_parameters()
         params['InputWorkspace'] = workspaces
-        params['Function'] = self.get_ws_fit_function(workspaces)
+        params['Function'] = self.simultaneous_fit_function
         params['StartX'] = [self.current_start_x] * len(workspaces)
         params['EndX'] = [self.current_end_x] * len(workspaces)
 
@@ -554,22 +563,22 @@ class GeneralFittingModel(BasicFittingModel):
         :return: The set of attributes common to all fit types
         """
         return {
-            'Minimizer': self.fitting_options["minimiser"],
-            'EvaluationType': self.fitting_options["evaluation_type"],
+            'Minimizer': self.minimizer,
+            'EvaluationType': self.evaluation_type,
         }
 
     def get_parameters_for_single_tf_fit(self, workspace):
         # workspace is the name of the input workspace
         fit_workspace_name, _ = create_fitted_workspace_name(workspace, self.function_name)
         parameters = {
-            'InputFunction': self.get_ws_fit_function([workspace]),
+            'InputFunction': self.current_single_fit_function,
             'ReNormalizedWorkspaceList': workspace,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 [workspace])[0],
             'OutputFitWorkspace': fit_workspace_name,
             'StartX': self.current_start_x,
             'EndX': self.current_end_x,
-            'Minimizer': self.fitting_options["minimiser"],
+            'Minimizer': self.minimizer,
         }
 
         if self.double_pulse_enabled():
@@ -588,13 +597,13 @@ class GeneralFittingModel(BasicFittingModel):
         fit_workspaces, _ = create_multi_domain_fitted_workspace_name(workspaces[0], self.function_name)
 
         parameters = {
-            'InputFunction': self.get_ws_fit_function(workspaces),
+            'InputFunction': self.simultaneous_fit_function,
             'ReNormalizedWorkspaceList': workspaces,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(workspaces),
             'OutputFitWorkspace': fit_workspaces,
             'StartX': self.current_start_x,
             'EndX': self.current_end_x,
-            'Minimizer': self.fitting_options["minimiser"],
+            'Minimizer': self.minimizer,
         }
         if self.double_pulse_enabled():
             offset = self.context.gui_context['DoublePulseTime']
@@ -617,7 +626,7 @@ class GeneralFittingModel(BasicFittingModel):
             selected_workspaces += self.context.get_names_of_workspaces_to_fit(
                 runs='All',
                 group_and_pair=grp_and_pair,
-                rebin=not self.fitting_options["fit_to_raw"],
+                rebin=not self.fit_to_raw,
                 freq=self.freq_type())
 
         selected_workspaces = list(
@@ -638,7 +647,7 @@ class GeneralFittingModel(BasicFittingModel):
             runs = [run for run, _ in run_groups_and_pairs]
         else:
             fit_workspaces = {}
-            if self.fitting_options["fit_by"] == "Run":
+            if self.simultaneous_fit_by == "Run":
                 for workspace in selected_workspaces:
                     run = get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)
                     if run not in fit_workspaces:
@@ -648,7 +657,7 @@ class GeneralFittingModel(BasicFittingModel):
                 runs = list(fit_workspaces.keys())
                 runs.sort()
                 groups_and_pairs = list(fit_workspaces.values())
-            elif self.fitting_options["fit_by"] == "Group/Pair":
+            elif self.simultaneous_fit_by == "Group/Pair":
                 for workspace in selected_workspaces:
                     group_or_pair = get_group_or_pair_from_name(workspace)
                     run = get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)
@@ -670,15 +679,15 @@ class GeneralFittingModel(BasicFittingModel):
                 if check_phasequad_name(
                         group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_phasequad_name(self.context, group_or_pair, run,
-                                                                not self.fitting_options["fit_to_raw"])]
+                                                                not self.fit_to_raw)]
                 elif group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
-                                                                not self.fitting_options["fit_to_raw"])]
+                                                                not self.fit_to_raw)]
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
                     period_string = run_list_to_string(
                         self.context.group_pair_context[group_or_pair].periods)
                     workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
-                                                                 not self.fitting_options["fit_to_raw"])]
+                                                                 not self.fit_to_raw)]
 
         return workspace_names
 

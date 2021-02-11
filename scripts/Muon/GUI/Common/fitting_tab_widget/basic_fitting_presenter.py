@@ -43,7 +43,7 @@ class BasicFittingPresenter:
         self.fsg_view = None
         self.fsg_presenter = None
 
-        self.initialise_model_options()
+        self.initialize_model_options()
 
         self.view.set_slot_for_fit_generator_clicked(self.handle_fit_generator_clicked)
         self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
@@ -54,25 +54,17 @@ class BasicFittingPresenter:
         self.view.set_slot_for_function_parameter_changed(self.handle_function_parameter_changed)
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
-        self.view.set_slot_for_minimiser_changed(self.handle_minimiser_changed)
+        self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
-    def initialise_model_options(self):
+    def initialize_model_options(self):
         """Initialise the model with the default fitting options."""
         self.model.start_xs = [self.view.start_time]
         self.model.end_xs = [self.view.end_time]
-        self.model.update_model_fit_options(**self.get_model_fitting_options())
-
-    def get_model_fitting_options(self):
-        """Returns the fitting options to be used when initializing the model. Override in child classes."""
-        fitting_options = {"minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
-                           "fit_to_raw": self.view.fit_to_raw}
-        return fitting_options
-
-    def update_model_from_view(self, **kwargs):
-        """Update the fit options stored in the model."""
-        self.model.update_model_fit_options(**kwargs)
+        self.model.minimizer = self.view.minimizer
+        self.model.evaluation_type = self.view.evaluation_type
+        self.model.fit_to_raw = self.view.fit_to_raw
 
     def update_view_from_model(self, workspace_removed=None):
         """Update the view using the data stored in the model."""
@@ -127,7 +119,6 @@ class BasicFittingPresenter:
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
         self.view.plot_guess = False
-        self.model.create_ws_fit_function_map()
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
@@ -145,13 +136,13 @@ class BasicFittingPresenter:
         self.model.function_name_auto_update = False
         self.model.function_name = self.view.function_name
 
-    def handle_minimiser_changed(self):
-        """Handle when a minimiser is changed."""
-        self.update_model_from_view(minimiser=self.view.minimizer)
+    def handle_minimizer_changed(self):
+        """Handle when a minimizer is changed."""
+        self.model.minimizer = self.view.minimizer
 
     def handle_evaluation_type_changed(self):
         """Handle when the evaluation type is changed."""
-        self.update_model_from_view(evaluation_type=self.view.evaluation_type)
+        self.model.evaluation_type = self.view.evaluation_type
 
     def handle_fitting_finished(self):
         """Handle when fitting is finished."""
@@ -209,9 +200,9 @@ class BasicFittingPresenter:
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
-        return {"FittingType": "Simultaneous" if self._is_simultaneous_fitting() else "Sequential",
-                "Minimizer": self.view.minimizer,
-                "EvaluationType": self.view.evaluation_type}
+        return {"FittingType": "Simultaneous" if self.model.simultaneous_fitting_mode else "Sequential",
+                "Minimizer": self.model.minimizer,
+                "EvaluationType": self.model.evaluation_type}
 
     @staticmethod
     def _is_simultaneous_fitting():

@@ -69,7 +69,7 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         """Connect the slot for the end x option."""
         self.end_x.editingFinished.connect(slot)
 
-    def set_slot_for_minimiser_changed(self, slot):
+    def set_slot_for_minimizer_changed(self, slot):
         """Connect the slot for changing the Minimizer."""
         self.minimizer_combo.currentIndexChanged.connect(slot)
 

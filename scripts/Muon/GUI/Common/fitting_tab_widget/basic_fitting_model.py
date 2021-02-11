@@ -49,9 +49,9 @@ class BasicFittingModel:
         self._function_name = ""
         self._function_name_auto_update = True
 
-        #self._grppair_index = {}
-        self.fitting_options = {}
-        self.ws_fit_function_map = {}
+        self._minimizer = ""
+        self._evaluation_type = ""
+        self._fit_to_raw = False
 
     @property
     def current_dataset_index(self):
@@ -196,6 +196,30 @@ class BasicFittingModel:
     def automatically_update_function_name(self):
         if self.function_name_auto_update:
             self.function_name = self._get_function_name(self.single_fit_functions[0])
+
+    @property
+    def minimizer(self):
+        return self._minimizer
+
+    @minimizer.setter
+    def minimizer(self, minimizer):
+        self._minimizer = minimizer
+
+    @property
+    def evaluation_type(self):
+        return self._evaluation_type
+
+    @evaluation_type.setter
+    def evaluation_type(self, evaluation_type):
+        self._evaluation_type = evaluation_type
+
+    @property
+    def fit_to_raw(self):
+        return self._fit_to_raw
+
+    @fit_to_raw.setter
+    def fit_to_raw(self, fit_to_raw):
+        self._fit_to_raw = fit_to_raw
 
     @staticmethod
     def _clone_function(function):

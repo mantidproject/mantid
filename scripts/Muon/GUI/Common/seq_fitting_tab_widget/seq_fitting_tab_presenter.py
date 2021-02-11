@@ -60,17 +60,19 @@ class SeqFittingTabPresenter(object):
         # self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
 
     def handle_fit_function_parameter_changed(self):
-        self.view.fit_table.reset_fit_quality()
-        fit_functions = self.model.stored_fit_functions
-        for row in range(self.view.fit_table.get_number_of_fits()):
-            parameter_values = self.model.get_fit_function_parameter_values(fit_functions[row])
-            self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
+        pass
+        # self.view.fit_table.reset_fit_quality()
+        # fit_functions = self.model.stored_fit_functions
+        # for row in range(self.view.fit_table.get_number_of_fits()):
+        #     parameter_values = self.model.get_fit_function_parameter_values(fit_functions[row])
+        #     self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
-        self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
-        self.model.create_ws_fit_function_map()
-        self.handle_fit_function_updated()
+        pass
+        # runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        # self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
+        # self.model.create_ws_fit_function_map()
+        # self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):
         self.selected_rows = self.view.fit_table.get_selected_rows()

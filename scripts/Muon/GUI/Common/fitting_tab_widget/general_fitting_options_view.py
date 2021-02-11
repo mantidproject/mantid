@@ -149,10 +149,6 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         self.simul_fit_by_combo.setEnabled(True)
         self.simul_fit_by_specifier.setEnabled(True)
 
-    def enable_simultaneous_fit_by_specifier(self, enable):
-        """Enables or disables the simultaneous fit by combo box."""
-        self.simul_fit_by_specifier.setEnabled(enable)
-
     @property
     def is_simultaneous_fit_ticked(self):
         """Returns true if in simultaneous mode."""

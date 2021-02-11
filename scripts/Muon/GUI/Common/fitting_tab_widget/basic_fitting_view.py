@@ -63,9 +63,9 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Connect the slot for the end x option."""
         self.fit_function_options.set_slot_for_end_x_updated(slot)
 
-    def set_slot_for_minimiser_changed(self, slot):
+    def set_slot_for_minimizer_changed(self, slot):
         """Connect the slot for changing the Minimizer."""
-        self.fit_function_options.set_slot_for_minimiser_changed(slot)
+        self.fit_function_options.set_slot_for_minimizer_changed(slot)
 
     def set_slot_for_evaluation_type_changed(self, slot):
         """Connect the slot for changing the Evaluation type."""

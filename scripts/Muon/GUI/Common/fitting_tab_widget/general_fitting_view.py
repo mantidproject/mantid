@@ -104,10 +104,6 @@ class GeneralFittingView(BasicFittingView):
         """Enables the simultaneous fit options."""
         self.general_fitting_options.enable_simultaneous_fit_options()
 
-    def enable_simultaneous_fit_by_specifier(self, enable):
-        """Enables or disables the simultaneous fit by combo box."""
-        self.general_fitting_options.enable_simultaneous_fit_by_specifier(enable)
-
     @property
     def is_simultaneous_fit_ticked(self):
         """Returns true if in simultaneous mode."""
