@@ -206,7 +206,7 @@ class AbinsAlgorithm:
 
         return issues
 
-    def _validate_instrument_settings(self, name='Setting', parameter='setting') -> Dict[str, str]:
+    def _validate_instrument_settings(self, name='Setting', parameter='settings') -> Dict[str, str]:
         """Check that multiple-choice parameter is compatible with selected Instrument"""
         instrument_name = self.getProperty("Instrument").value
         setting = self.getProperty(name).value
@@ -228,16 +228,16 @@ class AbinsAlgorithm:
                 return {"Setting":
                         f'Instrument "{instrument_name}" does not have a default '
                         + 'setting, and no setting was specified. Accepted settings: '
-                        + ', '.join(parameters['settings'].keys())}
+                        + ', '.join(parameters[parameter].keys())}
 
-        downcased_settings = {s.lower(): s for s in parameters['settings']}
+        downcased_settings = {s.lower(): s for s in parameters[parameter]}
         if setting.lower() in downcased_settings:
             return {}
 
-        return {"Setting":
-                f'Setting "{setting}" is unknown for instrument '
-                + f'{instrument_name}. Supported settings: '
-                + ', '.join(sorted(parameters['settings'].keys()))}
+        return {name:
+                f'{name}: "{setting}" is unknown for instrument '
+                + f'{instrument_name}. Supported values: '
+                + ', '.join(sorted(parameters[parameter].keys()))}
 
     @staticmethod
     def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
