@@ -18,6 +18,9 @@ New and Improved
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
 
+- Added an algorithm ProfileChiSquared1D to profile chi squared after a fit. This can be used
+  to find better estimates of parameter errors.
+
 Bugfixes
 --------
 
