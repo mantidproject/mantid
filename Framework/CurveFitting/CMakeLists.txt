@@ -353,6 +353,7 @@ set(TEST_FILES
     Algorithms/PawleyFitTest.h
     Algorithms/PlotPeakByLogValueTest.h
     Algorithms/PlotPeakByLogValueHelperTest.h
+    Algorithms/ProfileChiSquared1DTest.h
     Algorithms/QENSFitSequentialTest.h
     Algorithms/QENSFitSimultaneousTest.h
     Algorithms/RefinePowderInstrumentParameters3Test.h

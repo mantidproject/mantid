@@ -47,7 +47,8 @@ and obtain a :math:`68.3\%` confidence interval for the single parameter :math:`
 
 This algorithm obtains the 1-sigma confidence level by varying a single parameter at a time and recording the extremums
 of the values that increase :math:`\chi^2` by :math:`1`. The results are outputted in the table '<Output>_errors',
-which reports the left and right 1-sigma errors. In this table, an additional value is reported, termed the quadratic error.
+which reports the left and right 1-sigma errors. This procedure is repeated for 2-sigma and 3-sigma,
+with the results displayed in the columns (2-sigma) and (3-sigma). An additional value is also reported, termed the quadratic error.
 This is the 1-sigma error obtained from a Taylor expansion of the chi squared function about its minimum:
 
 .. math::
