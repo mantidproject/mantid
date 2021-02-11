@@ -70,6 +70,9 @@ class GeneralFittingView(BasicFittingView):
         """Sets the name of the currently displayed workspace parameter."""
         self.general_fitting_options.display_workspace = value
 
+    def number_of_domains(self):
+        return self.general_fitting_options.number_of_domains()
+
     @property
     def simultaneous_fit_by(self):
         """Returns what you are simultaneously fitting by (Run or Group/Pair)."""

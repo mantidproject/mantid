@@ -81,11 +81,11 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         """Connect the slot for the Use raw option."""
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
-    def set_datasets_in_function_browser(self, data_set_name_list):
+    def set_datasets_in_function_browser(self, dataset_names):
         """Sets the datasets stored in the FunctionBrowser."""
         index_list = range(self.function_browser.getNumberOfDatasets())
         self.function_browser.removeDatasets(index_list)
-        self.function_browser.addDatasets(data_set_name_list)
+        self.function_browser.addDatasets(dataset_names)
 
     def set_current_dataset_index(self, dataset_index):
         """Sets the index of the current dataset."""

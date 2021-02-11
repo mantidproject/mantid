@@ -27,50 +27,37 @@ class GeneralFittingModel(BasicFittingModel):
         super(GeneralFittingModel, self).__init__(context)
         self._grppair_index = {}
 
-    @property
-    def fit_function(self):
-        return self.fitting_options["fit_function"]
-
-    @fit_function.setter
-    def fit_function(self, function):
-        self.fitting_options["fit_function"] = function
+        # This is a MultiDomainFunction if there are multiple domains in the function browser.
+        self._simultaneous_fit_function = None
+        self._simultaneous_fitting_mode = False
 
     @property
-    def function_name(self):
-        return self._function_name
+    def simultaneous_fit_function(self):
+        return self._simultaneous_fit_function
 
-    @function_name.setter
-    def function_name(self, value):
-        if value:
-            self._function_name = ' ' + value
-        else:
-            self._function_name = ''
+    @simultaneous_fit_function.setter
+    def simultaneous_fit_function(self, fit_function):
+        self._simultaneous_fit_function = fit_function
+
+    @property
+    def simultaneous_fitting_mode(self):
+        return self._simultaneous_fitting_mode
+
+    @simultaneous_fitting_mode.setter
+    def simultaneous_fitting_mode(self, enable_simultaneous):
+        self._simultaneous_fitting_mode = enable_simultaneous
+
+    # @property
+    # def fit_function(self):
+    #     return self.fitting_options["fit_function"]
+    #
+    # @fit_function.setter
+    # def fit_function(self, function):
+    #     self.fitting_options["fit_function"] = function
 
     @property
     def stored_fit_functions(self):
         return list(self.ws_fit_function_map.values())
-
-    @staticmethod
-    def get_function_name(function):
-        if function is None:
-            return ''
-
-        if function.getNumberDomains() > 1:
-            function_temp = function.getFunction(0)
-        else:
-            function_temp = function
-
-        try:
-            function_string_list = []
-            for i in range(function_temp.nFunctions()):
-                function_string_list.append(function_temp.getFunction(i).name())
-            if len(function_string_list) > 3:
-                function_string_list = function_string_list[:3]
-                function_string_list.append('...')
-            function_string = ','.join(function_string_list)
-            return function_string
-        except AttributeError:
-            return function_temp.name()
 
     # plot guess
     def change_plot_guess(self, plot_guess, workspace_names, index):
@@ -424,16 +411,24 @@ class GeneralFittingModel(BasicFittingModel):
         self.create_ws_fit_function_map()
 
     def create_ws_fit_function_map(self):
-        if self.fit_function is None:
+        fit_function = self.get_function_for_fitting()
+        if fit_function is None:
             return
 
         self.ws_fit_function_map.clear()
         workspace_keys = self.create_hashable_keys_for_workspace_names()
-        for workspace_key in workspace_keys:
-            self.ws_fit_function_map[workspace_key] = self.fit_function.clone()
+
+        for index, workspace_key in enumerate(workspace_keys):
+            self.ws_fit_function_map[workspace_key] = fit_function.clone()
 
         if self.fitting_options["tf_asymmetry_mode"]:
             self.update_fit_function_map_with_tf_asym_data()
+
+    def get_function_for_fitting(self):
+        if self.simultaneous_fitting_mode:
+            return self.simultaneous_fit_function
+        else:
+            return self.single_fit_functions[self.current_domain_index]
 
     # This function creates a list of keys from a list of input workspace names
     def create_hashable_keys_for_workspace_names(self):
@@ -499,8 +494,10 @@ class GeneralFittingModel(BasicFittingModel):
         }
 
     def clear_fit_information(self):
-        self.fit_function = None
-        self.function_name = ''
+        self.single_fit_functions = [None]
+        self.simultaneous_fit_function = None
+        self.current_domain_index = 0
+        self.function_name = ""
         self.ws_fit_function_map = {}
 
     def freq_type(self):

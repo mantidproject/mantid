@@ -12,6 +12,9 @@ from Muon.GUI.Common.fitting_tab_widget.basic_fitting_presenter import BasicFitt
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 
 
+from mantid import logger
+
+
 class GeneralFittingPresenter(BasicFittingPresenter):
 
     def __init__(self, view, model, context):
@@ -67,16 +70,20 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
         """Handle when fitting is finished."""
         if self.view.is_simultaneous_fit_ticked:
-            self._fit_function[0] = fit_function
+            self.model.simultaneous_fit_function = fit_function
+            #self._fit_function[0] = fit_function
             self._fit_status = [fit_status] * len(self.start_x)
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
         else:
             current_index = self.view.get_index_for_start_end_times()
-            self._fit_function[current_index] = fit_function
+            self.model.update_single_fit_function(current_index, fit_function)
+            logger.warning(f"{fit_function}")
+            logger.warning(f"{self.model.single_fit_functions[current_index]}")
+            #self._fit_function[current_index] = fit_function
             self._fit_status[current_index] = fit_status
             self._fit_chi_squared[current_index] = fit_chi_squared
 
-        self._update_fit_status_information_in_view()
+        self.update_fit_status_in_the_view()
 
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
@@ -100,6 +107,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_fitting_mode_changed(self):
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
         self.view.enable_undo_fit(False)
+        self.model.simultaneous_fitting_mode = self.view.is_simultaneous_fit_ticked
+
         if self.view.is_simultaneous_fit_ticked:
             self.view.set_workspace_combo_box_label("Display parameters for")
             self.view.enable_simultaneous_fit_options()
@@ -113,8 +122,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self._update_stored_fit_functions()
             self.view.disable_simultaneous_fit_options()
 
-        self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
-                                    fit_by=self.view.simultaneous_fit_by)
+        #self.model.current_domain_index = 0
+        self.update_model_from_view(fit_type=self._get_fit_type(), fit_by=self.view.simultaneous_fit_by)
+        #self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
+        #                            fit_by=self.view.simultaneous_fit_by)
         self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workspaces to be plotted
@@ -125,7 +136,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the simultaneous fit by combo box is changed."""
         self.update_selected_workspace_list_for_fit()
         self.view.enable_simultaneous_fit_by_specifier(True)
-        self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
+        #self.model.current_domain_index = 0
+        self.update_model_from_view(fit_by=self.view.simultaneous_fit_by)
+        #self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
 
         self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
@@ -144,31 +157,29 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.set_current_dataset_index(current_index)
 
         self._update_stored_fit_functions()
-        self._update_fit_status_information_in_view()
+        self.set_current_domain_index(current_index)
+
+        self.update_fit_status_in_the_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_function_structure_changed(self):
         """Handle when the function structure is changed."""
-        if not self._fit_function[0]:
-            self.handle_display_workspace_changed()
+        #if not self._fit_function[0]:
+        #    self.handle_display_workspace_changed()
         self.view.plot_guess = False
+        self._update_stored_fit_functions()
         if not self.view.fit_object:
-            if self.view.is_simultaneous_fit_ticked:
-                self._fit_function = [None]
-            else:
-                self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
             self.model.clear_fit_information()
             self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
-        else:
-            self._fit_function = [func.clone() for func in self._get_fit_function()]
 
         self._reset_fit_status_information()
 
-        self._update_function_name()
+        self.automatically_update_function_name()
 
-        self.update_model_from_view(fit_function=self._fit_function[0],
-                                    global_parameters=self.view.get_global_parameters())
+        self.update_model_from_view(global_parameters=self.view.get_global_parameters())
+        #self.update_model_from_view(fit_function=self._fit_function[0],
+        #                            global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
 
@@ -176,11 +187,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the value of a parameter in a function is changed."""
         if not self.view.is_simultaneous_fit_ticked:
             index = self.view.get_index_for_start_end_times()
-            fit_function = self._get_fit_function()[index]
-            self._fit_function[index] = fit_function
+            fit_function = self._get_fit_functions_for_each_domain()[index]
+            self.model.update_single_fit_function(index, fit_function)
+            #self._fit_function[index] = fit_function
         else:
-            fit_function = self._get_fit_function()[0]
-            self._fit_function = self._get_fit_function()
+            fit_function = self.view.fit_object
+            self.model.simultaneous_fit_function = fit_function
+            #self._fit_function = self._get_fit_function()
 
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
         self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
@@ -281,38 +294,37 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.view.setup_fit_by_specifier(simul_choices)
 
+    def update_fit_status_in_the_view(self):
+        """Updates the fit status and chi squared information in the view."""
+        current_index = self.view.get_index_for_start_end_times()
+        if self.view.is_simultaneous_fit_ticked:
+            self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function,
+                                                            current_index)
+        else:
+            self.update_fit_status_and_function_in_the_view(self.model.single_fit_functions[current_index],
+                                                            current_index)
+
     def _update_stored_fit_functions(self):
         """Updates the stored fit functions."""
         if self.view.is_simultaneous_fit_ticked:
-            if self.view.fit_object:
-                self._fit_function = [self.view.fit_object.clone()]
-            else:
-                self._fit_function = [None]
-        else:  # we need to convert stored function into equivalent function
-            if self.view.fit_object:  # make sure there is a fit function in the browser
-                if isinstance(self.view.fit_object, MultiDomainFunction):
-                    equiv_fit_function = self.view.fit_object.createEquivalentFunctions()
-                    single_domain_fit_functions = [func.clone() for func in equiv_fit_function]
-                else:
-                    single_domain_fit_functions = [self.view.fit_object.clone()]
-                self._fit_function = single_domain_fit_functions
-            else:
-                self._fit_function = [None] * len(self._start_x)
+            self.model.simultaneous_fit_function = self.view.fit_object
+        else:
+            self.model.single_fit_functions = self._get_fit_functions_for_each_domain()
 
     def _get_fit_function(self):
         """Get all of the fit functions stored within the fitting interface."""
         if self.view.is_simultaneous_fit_ticked:
-            return [self.view.fit_object]  # return the fit function stored in the browser
-        else:  # we need to convert stored function into equiv
-            if self.view.fit_object:  # make sure thers a fit function in the browser
-                if isinstance(self.view.fit_object, MultiDomainFunction):
-                    equiv_fit_funtion = self.view.fit_object.createEquivalentFunctions()
-                    single_domain_fit_function = equiv_fit_funtion
-                else:
-                    single_domain_fit_function = [self.view.fit_object]
-                return single_domain_fit_function
-            else:
-                return [None] * len(self._start_x)
+            return self.view.fit_object
+        else:
+            return self._get_fit_functions_for_each_domain()
+
+    def _get_fit_functions_for_each_domain(self):
+        if self.view.fit_object:  # make sure there is a fit function in the browser
+            if isinstance(self.view.fit_object, MultiDomainFunction):
+                return [function.clone() for function in self.view.fit_object.createEquivalentFunctions()]
+            return [self.view.fit_object]
+        number_of_domains = self.view.number_of_domains()
+        return [None] * number_of_domains if number_of_domains > 0 else [None]
 
     def _fit_function_index(self):
         """Returns the index of the currently displayed fit function."""

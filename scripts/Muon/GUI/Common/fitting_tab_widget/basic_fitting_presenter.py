@@ -16,6 +16,8 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 import functools
 import re
 
+from mantid import logger
+
 
 class BasicFittingPresenter:
 
@@ -31,13 +33,8 @@ class BasicFittingPresenter:
 
         self._fit_status = [None]
         self._fit_chi_squared = [0.0]
-        self._fit_function = [None]
-        self._fit_function_cache = [None]
-        self._multi_domain_function = None
 
         self._number_of_fits_cached = 0
-
-        self.automatically_update_fit_name = True
 
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
@@ -74,9 +71,8 @@ class BasicFittingPresenter:
 
     def get_model_fitting_options(self):
         """Returns the fitting options to be used when initializing the model. Override in child classes."""
-        fitting_options = {"fit_function": self._fit_function[0], "startX": self.start_x[0], "endX": self.end_x[0],
-                           "minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
-                           "fit_to_raw": self.view.fit_to_raw}
+        fitting_options = {"startX": self.start_x[0], "endX": self.end_x[0], "minimiser": self.view.minimizer,
+                           "evaluation_type": self.view.evaluation_type, "fit_to_raw": self.view.fit_to_raw}
         return fitting_options
 
     def update_model_from_view(self, **kwargs):
@@ -131,12 +127,12 @@ class BasicFittingPresenter:
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
         if len(self.selected_data) < 1:
-            self.view.warning_popup("No data selected to fit")
+            self.view.warning_popup("No data selected for fitting.")
             return
         if not self.view.fit_object:
             return
 
-        self._update_fit_function_cache()
+        self.model.cache_the_current_fit_functions()
         self._perform_fit()
 
     def handle_started(self):
@@ -171,7 +167,7 @@ class BasicFittingPresenter:
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
-        self._fit_function = self._fit_function_cache
+        self.model.single_fit_functions = self.model.single_fit_functions_cache
         self._reset_fit_status_information()
         self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
@@ -182,7 +178,7 @@ class BasicFittingPresenter:
 
     def handle_fit_name_changed_by_user(self):
         """Handle when the fit name is changed by the user."""
-        self.automatically_update_fit_name = False
+        self.model.function_name_auto_update = False
         self.model.function_name = self.view.function_name
 
     def handle_minimiser_changed(self):
@@ -241,7 +237,11 @@ class BasicFittingPresenter:
 
         self._reset_fit_status_information()
         self._reset_start_time_to_first_good_data_value()
-        self._reset_fit_function()
+        #self._reset_fit_function()
+
+    def set_current_domain_index(self, domain_index):
+        self.model.current_domain_index = domain_index
+        self.view.set_current_dataset_index(domain_index)
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
@@ -267,24 +267,21 @@ class BasicFittingPresenter:
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def _update_fit_function_cache(self):
-        """Update the fit function cache with the next fit function to be fitted."""
-        self._fit_function_cache = [func.clone() for func in self._fit_function]
-
-    def _update_function_name(self):
+    def automatically_update_function_name(self):
         """Updates the function name used within the outputted fit workspaces."""
-        if self.automatically_update_fit_name:
-            name = self._get_fit_function()[0]
-            self.view.function_name = self.model.get_function_name(name)
-            self.model.function_name = self.view.function_name
+        self.model.automatically_update_function_name()
+        self.view.function_name = self.model.function_name
 
-    def _update_fit_status_information_in_view(self):
-        """Updates the fit status and chi squared information in the view."""
-        current_index = self._fit_function_index()
-        self.view.update_with_fit_outputs(self._fit_function[current_index],
-                                          self._fit_status[current_index],
-                                          self._fit_chi_squared[current_index])
-        self.view.update_global_fit_state(self._fit_status, current_index)
+    def update_fit_status_in_the_view(self):
+        """Updates the fit status, chi squared and function information in the view."""
+        pass
+
+    def update_fit_status_and_function_in_the_view(self, fit_function, domain_index):
+        """Updates the fit status, chi squared and function information in the view."""
+        self.view.update_with_fit_outputs(fit_function,
+                                          self._fit_status[domain_index],
+                                          self._fit_chi_squared[domain_index])
+        self.view.update_global_fit_state(self._fit_status, domain_index)
 
     def _fit_function_index(self):
         """Return the index of the currently displayed fit function (assume it is zero for BasicFitting for now)."""
@@ -304,20 +301,15 @@ class BasicFittingPresenter:
 
         self.fsg_presenter.openFitScriptGenerator()
 
-    def _reset_fit_function(self):
-        """Reset the fit function information."""
-        if self.view.fit_object:
-            self._fit_function = [func.clone() for func in self._get_fit_function()]
-        else:
-            self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
-
-        self.update_model_from_view(fit_function=self._fit_function[0])
+    # def _reset_fit_function(self):
+    #     """Reset the fit function information."""
+    #     self.model.single_fit_functions = self._get_fit_function()
 
     def _reset_fit_status_information(self):
         """Reset the fit status and chi squared information currently displayed."""
         self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
         self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
-        self._update_fit_status_information_in_view()
+        self.update_fit_status_in_the_view()
         self.view.enable_undo_fit(False)
 
     def _reset_start_time_to_first_good_data_value(self):
