@@ -285,8 +285,12 @@ void FitPeaks::init() {
   // properties about peak profile
   const std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
-  declareProperty(PropertyNames::PEAK_FUNC, "Gaussian",
-                  std::make_shared<StringListValidator>(peakNames));
+  declareProperty(
+      PropertyNames::PEAK_FUNC, "Gaussian",
+      std::make_shared<StringListValidator>(peakNames),
+      "Use of a BackToBackExponential profile is only reccomended if the "
+      "coeficients to calculate A and B are defined in the instrument "
+      "Parameters.xml file.");
   const vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(PropertyNames::BACK_FUNC, "Linear",
                   std::make_shared<StringListValidator>(bkgdtypes),
@@ -1191,12 +1195,6 @@ void FitPeaks::fitSpectrumPeaks(
       // Decide whether to estimate peak width by observation
       bool observe_peak_width =
           decideToEstimatePeakParams(!samePeakCrossSpectrum, peakfunction);
-      //
-      if (peakfunction->name() == "BackToBackExponential") {
-        if (neighborPeakSameSpectrum) {
-          observe_peak_width = false;
-        }
-      }
 
       if (observe_peak_width &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
@@ -1219,7 +1217,8 @@ void FitPeaks::fitSpectrumPeaks(
     processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
                                fit_function, fit_result); // sets the record
 
-    if (fit_result->getCost(peak_index) < 1e10) { // assume it worked and save out the result
+    if (fit_result->getCost(peak_index) <
+        1e10) { // assume it worked and save out the result
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
       // copy values
