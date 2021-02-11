@@ -119,9 +119,11 @@ public:
 
   void test_that_removeWorkspaceDomain_will_remove_the_specified_domain() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
     m_model->removeWorkspaceDomain(m_wsName, m_wsIndex);
 
     TS_ASSERT(!m_model->hasWorkspaceDomain(m_wsName, m_wsIndex));
+    TS_ASSERT(m_model->hasWorkspaceDomain("Name2", m_wsIndex));
   }
 
   void
@@ -236,12 +238,14 @@ public:
 
   void test_that_setFunction_will_set_the_function_in_the_correct_domain() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
+    m_model->addWorkspaceDomain("Name2", m_wsIndex, m_startX, m_endX);
     m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
 
     m_model->setFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
 
     TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex)->asString(),
                      m_flatBackground->asString());
+    TS_ASSERT_EQUALS(m_model->getFunction("Name2", m_wsIndex), nullptr);
   }
 
   void test_that_setFunction_will_clear_the_global_ties_that_have_expired() {
@@ -263,10 +267,12 @@ public:
   test_that_removeFunction_will_remove_the_function_in_the_correct_domain() {
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
+    m_model->addFunction(m_wsName, m_wsIndex, m_expDecay->asString());
 
     m_model->removeFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
 
-    TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex), nullptr);
+    TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex)->asString(),
+                     m_expDecay->asString());
   }
 
   void test_that_removeFunction_will_clear_the_global_ties_that_have_expired() {
