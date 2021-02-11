@@ -1209,15 +1209,6 @@ void FitPeaks::fitSpectrumPeaks(
       cost =
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_width, peakfunction, bkgdfunction);
-      if (cost < 1e7) { // assume it worked and save out the result
-        // reset the flag such that there is at a peak fit in this spectrum
-        neighborPeakSameSpectrum = true;
-        // copy values
-        for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
-          lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
-          localPrevGoodResults[i] = peakfunction->getParameter(i);
-        }
-      }
     }
 
     // process fitting result
@@ -1227,6 +1218,16 @@ void FitPeaks::fitSpectrumPeaks(
 
     processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
                                fit_function, fit_result); // sets the record
+
+    if (fit_result->getCost(peak_index) < 1e10) { // assume it worked and save out the result
+      // reset the flag such that there is at a peak fit in this spectrum
+      neighborPeakSameSpectrum = true;
+      // copy values
+      for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+        lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
+        localPrevGoodResults[i] = peakfunction->getParameter(i);
+      }
+    }
   }
 
   return;
