@@ -19,11 +19,13 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 MAX_NUMBER_OF_DIFFS = 20
 
+
 def enter_diff_name_side_effect():
     name = []
     for i in range(MAX_NUMBER_OF_DIFFS + 1):
         name.append("diff_" + str(i))
     return name
+
 
 @start_qapplication
 class DifferenceTablePresenterTest(unittest.TestCase):
@@ -128,7 +130,9 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.group_view.num_rows())
         self.assertEqual(1, len(self.model.diffs))
         self.assertEqual('group', self.model.diffs[0].group_or_pair)
-        self.assertEqual("diff_0", self.presenter.group_view.get_table_item_text(self.presenter.group_view.num_rows() - 1, 0)) # Check added to end of table
+        self.assertEqual("diff_0",
+                         self.presenter.group_view.get_table_item_text(self.presenter.group_view.num_rows() - 1,
+                                                                       0))  # Check added to end of table
         self.assertEqual(0, self.presenter.pair_view.num_rows()) # Check no pair diffs
 
     def test_add_two_pair_diffs_function(self):
@@ -155,7 +159,8 @@ class DifferenceTablePresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.pair_view.num_rows())
         self.assertEqual(1, len(self.model.diffs))
         self.assertEqual('pair', self.model.diffs[0].group_or_pair)
-        self.assertEqual("diff_0", self.presenter.pair_view.get_table_item_text(self.presenter.pair_view.num_rows() - 1, 0)) # Check added to end of table
+        self.assertEqual("diff_0", self.presenter.pair_view.get_table_item_text(self.presenter.pair_view.num_rows() - 1,
+                                                                                0))  # Check added to end of table
         self.assertEqual(0, self.presenter.group_view.num_rows())  # Check no group diffs
 
     def test_remove_diff_button(self):
@@ -238,3 +243,7 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.presenter.group_view.warning_popup.call_count) # Group name duplicated
         self.assertEqual(2, self.presenter.pair_view.warning_popup.call_count)  # Pair and Diff name duplicated
+
+
+if __name__ == '__main__':
+    unittest.main(buffer=False, verbosity=2)
