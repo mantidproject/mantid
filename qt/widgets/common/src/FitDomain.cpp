@@ -77,7 +77,7 @@ void FitDomain::setFunction(Mantid::API::IFunction_sptr const &function) {
   m_function = function;
 }
 
-Mantid::API::IFunction_sptr FitDomain::getFunction() const {
+Mantid::API::IFunction_sptr FitDomain::getFunctionCopy() const {
   if (m_function)
     return m_function->clone();
   return nullptr;

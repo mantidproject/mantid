@@ -77,7 +77,7 @@ public:
     TS_ASSERT_EQUALS(m_fitDomain->workspaceIndex(), m_wsIndex);
     TS_ASSERT_EQUALS(m_fitDomain->startX(), m_startX);
     TS_ASSERT_EQUALS(m_fitDomain->endX(), m_endX);
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction(), nullptr);
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy(), nullptr);
   }
 
   void
@@ -123,17 +123,17 @@ public:
 
   void test_that_setFunction_will_set_the_function_as_expected() {
     m_fitDomain->setFunction(m_flatBackground);
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
                      m_flatBackground->asString());
   }
 
   void test_that_getFunction_returns_a_clone_of_the_function() {
     m_fitDomain->setFunction(m_flatBackground);
 
-    auto modifiedFunction = m_fitDomain->getFunction();
+    auto modifiedFunction = m_fitDomain->getFunctionCopy();
     modifiedFunction->setParameter("A0", 5.0);
 
-    TS_ASSERT_DIFFERS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_DIFFERS(m_fitDomain->getFunctionCopy()->asString(),
                       modifiedFunction->asString());
   }
 
@@ -143,7 +143,7 @@ public:
 
     m_fitDomain->removeFunction(m_flatBackground->asString());
 
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction(), nullptr);
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy(), nullptr);
   }
 
   void
@@ -152,7 +152,7 @@ public:
 
     m_fitDomain->removeFunction(m_flatBackground->asString());
 
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
                      m_expDecay->asString());
   }
 
@@ -168,14 +168,14 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         m_fitDomain->removeFunction(m_expDecay->asString()));
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
                      m_flatBackground->asString());
   }
 
   void
   test_that_addFunction_will_add_a_function_correctly_for_a_single_ifunction() {
     m_fitDomain->addFunction(m_flatBackground);
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
                      m_flatBackground->asString());
   }
 
@@ -184,7 +184,7 @@ public:
     m_fitDomain->addFunction(m_flatBackground);
     m_fitDomain->addFunction(m_expDecay);
 
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->asString(),
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->asString(),
                      m_composite->asString());
   }
 
@@ -485,7 +485,7 @@ public:
     // The value of Height is automatically 1.0
     m_fitDomain->updateParameterConstraint("", "Height", "1.1<Height<1.5");
 
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->getConstraint(0), nullptr);
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->getConstraint(0), nullptr);
   }
 
   void
@@ -495,7 +495,7 @@ public:
     // The value of Height is automatically 1.0
     m_fitDomain->updateParameterConstraint("", "Height", "0.5<Height<0.9");
 
-    TS_ASSERT_EQUALS(m_fitDomain->getFunction()->getConstraint(0), nullptr);
+    TS_ASSERT_EQUALS(m_fitDomain->getFunctionCopy()->getConstraint(0), nullptr);
   }
 
   void

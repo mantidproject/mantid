@@ -61,9 +61,9 @@ bool isFunctionIndex(std::string const &str) {
 }
 
 bool isSameDomain(std::size_t const &domainIndex,
-                  std::string const &parameter) {
-  if (!parameter.empty() && !isNumber(parameter))
-    return domainIndex == getFunctionIndexAt(parameter, 0);
+                  std::string const &fullParameter) {
+  if (!fullParameter.empty() && !isNumber(fullParameter))
+    return domainIndex == getFunctionIndexAt(fullParameter, 0);
   return true;
 }
 
@@ -183,7 +183,7 @@ IFunction_sptr
 FitScriptGeneratorModel::getFunction(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) const {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
-  return m_fitDomains[domainIndex.value]->getFunction();
+  return m_fitDomains[domainIndex.value]->getFunctionCopy();
 }
 
 std::string FitScriptGeneratorModel::getEquivalentFunctionIndexForDomain(

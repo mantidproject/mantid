@@ -42,7 +42,7 @@ public:
   inline double endX() const noexcept { return m_endX; }
 
   void setFunction(Mantid::API::IFunction_sptr const &function);
-  [[nodiscard]] Mantid::API::IFunction_sptr getFunction() const;
+  [[nodiscard]] Mantid::API::IFunction_sptr getFunctionCopy() const;
   void removeFunction(std::string const &function);
   void addFunction(Mantid::API::IFunction_sptr const &function);
 
