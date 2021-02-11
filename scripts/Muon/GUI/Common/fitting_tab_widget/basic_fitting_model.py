@@ -8,6 +8,8 @@ from Muon.GUI.Common.contexts.fitting_context import FitInformation
 
 from typing import List, NamedTuple
 
+DEFAULT_START_X = 0.0
+DEFAULT_END_X = 15.0
 FDA_GUESS_WORKSPACE = "__frequency_domain_analysis_fitting_guess"
 MA_GUESS_WORKSPACE = "__muon_analysis_fitting_guess"
 FDA_SUFFIX = " FD"
@@ -40,8 +42,8 @@ class BasicFittingModel:
         self._fit_statuses = [None]
         self._fit_chi_squares = [0.0]
 
-        self._start_xs = [self.view.start_time]
-        self._end_xs = [self.view.end_time]
+        self._start_xs = [DEFAULT_START_X]
+        self._end_xs = [DEFAULT_END_X]
 
         self._function_name = ""
         self._function_name_auto_update = True
@@ -100,6 +102,10 @@ class BasicFittingModel:
     def current_fit_status(self):
         return self.fit_statuses[self.current_domain_index]
 
+    @current_fit_status.setter
+    def current_fit_status(self, fit_status):
+        self.fit_statuses[self.current_domain_index] = fit_status
+
     @property
     def fit_chi_squares(self):
         return self._fit_chi_squares
@@ -111,6 +117,10 @@ class BasicFittingModel:
     @property
     def current_fit_chi_squared(self):
         return self.fit_chi_squares[self.current_domain_index]
+
+    @current_fit_chi_squared.setter
+    def current_fit_chi_squared(self, fit_chi_squared):
+        self.fit_chi_squares[self.current_domain_index] = fit_chi_squared
 
     @property
     def start_xs(self):

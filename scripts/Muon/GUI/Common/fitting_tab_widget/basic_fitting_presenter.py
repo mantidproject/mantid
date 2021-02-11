@@ -11,6 +11,7 @@ from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScr
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
+from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import DEFAULT_START_X, DEFAULT_END_X
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
 import functools
@@ -27,9 +28,6 @@ class BasicFittingPresenter:
         self.context = context
 
         self._selected_data = []
-
-        self._fit_status = [None]
-        self._fit_chi_squared = [0.0]
 
         self._number_of_fits_cached = 0
 
@@ -257,12 +255,12 @@ class BasicFittingPresenter:
         """Updates the fit status, chi squared and function information in the view."""
         pass
 
-    def update_fit_status_and_function_in_the_view(self, fit_function, domain_index):
+    def update_fit_status_and_function_in_the_view(self, fit_function):
         """Updates the fit status, chi squared and function information in the view."""
         self.view.update_with_fit_outputs(fit_function,
-                                          self._fit_status[domain_index],
-                                          self._fit_chi_squared[domain_index])
-        self.view.update_global_fit_state(self._fit_status, domain_index)
+                                          self.model.current_fit_status,
+                                          self.model.current_fit_chi_squared)
+        self.view.update_global_fit_state(self.model.fit_statuses, self.model.current_domain_index)
 
     def _fit_function_index(self):
         """Return the index of the currently displayed fit function (assume it is zero for BasicFitting for now)."""
@@ -288,16 +286,16 @@ class BasicFittingPresenter:
 
     def _reset_fit_status_information(self):
         """Reset the fit status and chi squared information currently displayed."""
-        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
-        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self.model.fit_statuses = [None] * len(self.selected_data) if self.selected_data else [None]
+        self.model.fit_chi_squares = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
         self.update_fit_status_in_the_view()
         self.view.enable_undo_fit(False)
 
     def _reset_start_time_to_first_good_data_value(self):
         """Reset the start and end X to the first good data value."""
         self.model.start_xs = [self._retrieve_first_good_data_from_run_name(run_name)
-                               for run_name in self.selected_data] if self.selected_data else [0.0]
-        self.model.end_xs = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
+                               for run_name in self.selected_data] if self.selected_data else [DEFAULT_START_X]
+        self.model.end_xs = [self.view.end_time] * len(self.selected_data) if self.selected_data else [DEFAULT_END_X]
 
         self.view.start_time = self.model.start_xs[0]
         self.view.end_time = self.model.end_xs[0]
