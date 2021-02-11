@@ -159,7 +159,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
-        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents'])
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents', 'DMin', 'DMax', 'DeltaRagged'])
 
         self.declareProperty("Sum", False,
                              "Sum the runs. Does nothing for characterization runs")
@@ -477,7 +477,30 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_container)
+            # Check if existing container
+            #  - has history and is using SNSPowderReduction
+            #    - was created using the same method
+            #       -> carry on as usual
+            #    - was created with a different method
+            #       -> delete the current one, then carry on
+            #  - no history (processing list of runs)
+            #    -> carry on as a single call wiht list of runs ensures that same method is used.
+            can_run_ws_name, _ = self._generate_container_run_name(can_run_numbers, samRunIndex)
+            if can_run_ws_name in mtd:
+                hstry = mtd[can_run_ws_name].getHistory()
+                if not hstry.empty():
+                    alg = hstry.getAlgorithm(0)
+                    if alg.name() == "SNSPowderReduction":
+                        if alg.getPropertyValue("TypeOfCorrection") != self._absMethod:
+                            self.log().information(
+                                f"Remove {can_run_ws_name} as it is generated with a different method"
+                            )
+                            mtd.remove(can_run_ws_name)
+
+            can_run_ws_name = self._process_container_runs(can_run_numbers,
+                                                           samRunIndex,
+                                                           preserveEvents,
+                                                           absorptionWksp=a_container)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -1263,19 +1286,23 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=None):
-        """ Process container runs
+    def _generate_container_run_name(self, can_run_numbers, samRunIndex):
+        """generate container workspace name based on given info
+
         :param can_run_numbers:
-        :return:
+        :param samRunIndex:
+
+        :return can_run_ws_name:
+        :return can_run_number:
         """
         assert isinstance(samRunIndex, int)
 
         if noRunSpecified(can_run_numbers):
             # no container run is specified
             can_run_ws_name = None
+            can_run_number = None
         else:
             # reduce container run such that it can be removed from sample run
-
             if len(can_run_numbers) == 1:
                 # only 1 container run
                 can_run_number = can_run_numbers[0]
@@ -1285,6 +1312,21 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
             # get reference to container run
             can_run_ws_name = getBasename(can_run_number)
+        return can_run_ws_name, can_run_number
+
+    def _process_container_runs(self,
+                                can_run_numbers,
+                                samRunIndex,
+                                preserveEvents,
+                                absorptionWksp=None):
+        """ Process container runs
+        :param can_run_numbers:
+        :return:
+        """
+        can_run_ws_name, can_run_number = self._generate_container_run_name(
+            can_run_numbers, samRunIndex)
+
+        if can_run_ws_name is not None:
             self.log().notice('Processing empty container {}'.format(can_run_ws_name))
             if self.does_workspace_exist(can_run_ws_name):
                 # container run exists to get reference from mantid
@@ -1295,7 +1337,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 fileArg = [can_run_number]
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
-                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name, absorptionWksp=absorptionWksp)
+                self._focusAndSum(fileArg,
+                                  preserveEvents,
+                                  final_name=can_run_ws_name,
+                                  absorptionWksp=absorptionWksp)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
