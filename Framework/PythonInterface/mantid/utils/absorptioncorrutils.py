@@ -159,7 +159,14 @@ def __load_cached_data(cache_file_name, sha1, abs_method="", prefix_name=""):
 #    func(wksp_name: str, abs_method:str, cache_dir="")
 def abs_cache(func):
     """decorator to make the caching process easier
-    
+
+    NOTE: this decorator should only be used on function calls where
+          - the first positional arguments is the workspace name
+          - the second positional arguments is the absorption calculation method
+
+    WARNING: currently this decorator should only be used on
+                calc_absorption_corr_using_wksp
+
     example:
     without caching:
         SNSPowderReduction successful, Duration 5 minutes 53.54 seconds
