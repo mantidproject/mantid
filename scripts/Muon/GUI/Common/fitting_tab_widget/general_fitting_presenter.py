@@ -71,17 +71,12 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when fitting is finished."""
         if self.view.is_simultaneous_fit_ticked:
             self.model.simultaneous_fit_function = fit_function
-            #self._fit_function[0] = fit_function
-            self._fit_status = [fit_status] * len(self.model.start_xs)
-            self._fit_chi_squared = [fit_chi_squared] * len(self.model.start_xs)
+            self.model.fit_statuses = [fit_status] * len(self.model.start_xs)
+            self.model.fit_chi_squares = [fit_chi_squared] * len(self.model.start_xs)
         else:
-            current_index = self.view.get_index_for_start_end_times()
-            self.model.update_single_fit_function(current_index, fit_function)
-            logger.warning(f"{fit_function}")
-            logger.warning(f"{self.model.single_fit_functions[current_index]}")
-            #self._fit_function[current_index] = fit_function
-            self._fit_status[current_index] = fit_status
-            self._fit_chi_squared[current_index] = fit_chi_squared
+            self.model.current_single_fit_function = fit_function
+            self.model.current_fit_status = fit_status
+            self.model.current_fit_chi_squared = fit_chi_squared
 
         self.update_fit_status_in_the_view()
 
@@ -285,13 +280,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_fit_status_in_the_view(self):
         """Updates the fit status and chi squared information in the view."""
-        current_index = self.view.get_index_for_start_end_times()
         if self.view.is_simultaneous_fit_ticked:
-            self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function,
-                                                            current_index)
+            self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function)
         else:
-            self.update_fit_status_and_function_in_the_view(self.model.single_fit_functions[current_index],
-                                                            current_index)
+            self.update_fit_status_and_function_in_the_view(self.model.current_single_fit_function)
 
     def _update_stored_fit_functions(self):
         """Updates the stored fit functions."""
