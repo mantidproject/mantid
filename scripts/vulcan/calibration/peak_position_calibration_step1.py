@@ -199,19 +199,37 @@ def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_ve
     # calculate the optimized positions
     predicted_pos_vec = poly_model(raw_pos_vec)
 
-    percent_relative_diff = (predicted_pos_vec - exp_pos_vec) / exp_pos_vec * 10000.
-    prev_percent_relative_diff = (raw_pos_vec - exp_pos_vec) / exp_pos_vec * 10000.
+    percent_relative_diff = (predicted_pos_vec - exp_pos_vec) / exp_pos_vec
+    prev_percent_relative_diff = (raw_pos_vec - exp_pos_vec) / exp_pos_vec
     for i in range(len(predicted_pos_vec)):
         print(f'{exp_pos_vec[i]:.5f}: {percent_relative_diff[i]:.3f}   {prev_percent_relative_diff[i]:.3f}')
 
     # plot
     time.sleep(1)
     plt.cla()
-    plt.plot(exp_pos_vec, (raw_pos_vec - exp_pos_vec) / exp_pos_vec * 10000, linestyle='None', marker='o', color='black', label='raw peak positions')
-    plt.plot(exp_pos_vec, (predicted_pos_vec - exp_pos_vec) / exp_pos_vec * 10000, linestyle='None', marker='D', color='red', label='expected peak positions')
+    plt.plot(exp_pos_vec, prev_percent_relative_diff,
+             linestyle='None',
+             marker='o',
+             color='black',
+             label='Observed peak positions')
+    plt.plot(exp_pos_vec, percent_relative_diff,
+             linestyle='None',
+             marker='D',
+             color='red',
+             label='Expected calibrated peak positions')
     plt.xlabel('d (A): expected peak position')
-    plt.ylabel('Relative error on peak position (d_obs - d_exp) / d_exp x 10000')
-    plt.title(f'2nd round peak position calibration: d = {residual.intercept} + {residual.slope} x d\'')
+    plt.ylabel('Relative difference on peak position (d_obs - d_exp) / d_exp')
+    plt.title(f'Regression: d = {residual.intercept:.3E} + {residual.slope} x d\'')
+
+    # set VULCAN criteria
+    plt.plot([exp_pos_vec[0] - 0.1, exp_pos_vec[-1] + 0.1], [-0.0001, -0.0001], linestyle=':', color='green')
+    plt.plot([exp_pos_vec[0] - 0.1, exp_pos_vec[-1] + 0.1], [0.0001, 0.0001], linestyle=':', color='green')
+
+    # set canvas size
+    plt.xlim(exp_pos_vec[0] - 0.1, exp_pos_vec[-1] + 0.1)
+    y_limit = np.max(np.abs(prev_percent_relative_diff)) * 1.2
+    plt.ylim(-max(y_limit, 0.00012), max(y_limit, 0.00012))
+
     plt.legend()
     plt.savefig(os.path.join('/tmp', f'predicted_position_bank{ws_index}'))
     plt.show()
@@ -358,8 +376,15 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
 
     if np.allclose(data_vec_x, model_vec_x):
         diff_y_vec = model_vec_y - data_vec_y
+
+        # only plot the difference for the calculated peaks
+        true_false_vec = model_vec_y > 0
+        true_false_vec = true_false_vec.astype('int')
+        diff_y_vec *= true_false_vec
+
         plt.plot(model_vec_x[:-1], diff_y_vec, color='green', label='diff')
     plt.legend()
+    plt.xlim(0.3, 1.5)
 
     plt.savefig(os.path.join('/tmp', f'bank_{ws_index}.png'))
     plt.show()
@@ -378,7 +403,6 @@ def demo_calibration():
     src_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/backup/calibration-real/' \
                  'LatestTestPD2Round/VULCAN_pdcalibration.h5'
     target_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/VULCAN_pdcalibration_peakcalibration.h5'
-    print(diamond_nxs)
 
     main(diamond_nxs, title, tag, src_cal_h5, target_cal_h5)
 
@@ -395,7 +419,7 @@ def demo_report():
 
 
 if __name__ in ['__main__', 'mantidqt.widgets.codeeditor.execution']:
-    if False:
+    if True:
         demo_calibration()
     else:
         demo_report()
