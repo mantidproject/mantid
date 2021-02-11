@@ -110,7 +110,7 @@ class GeneralFittingModel(BasicFittingModel):
         params = self._get_fit_parameters(workspace_names)
         data_ws_name = params['InputWorkspace']
         fit_function = params['Function']
-        if self.fitting_options["fit_type"] != "Single" and fit_function is not None:
+        if self.simultaneous_fitting_mode and fit_function is not None:
             equiv_functions = fit_function.createEquivalentFunctions()
             fit_function = equiv_functions[index]
             data_ws_name = workspace_names[index]
@@ -118,7 +118,7 @@ class GeneralFittingModel(BasicFittingModel):
 
     # single fitting
     def evaluate_single_fit(self, workspace):
-        if self.fitting_options["fit_type"] == "Single":
+        if not self.simultaneous_fitting_mode:
             if self.fitting_options["tf_asymmetry_mode"]:
                 params = self.get_parameters_for_single_tf_fit(workspace[0])
                 function_object, output_status, output_chi_squared = self.do_single_tf_fit(params)
@@ -271,7 +271,7 @@ class GeneralFittingModel(BasicFittingModel):
     # sequential fitting
     def evaluate_sequential_fit(self, workspaces, use_initial_values):
         # workspaces are stored as list of list [[Fit1 workspaces], [Fit2 workspaces], [Fit3 workspaces]]
-        if self.fitting_options["fit_type"] == "Single":
+        if not self.simultaneous_fitting_mode:
             # flatten the workspace list
             workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
             if self.fitting_options["tf_asymmetry_mode"]:
@@ -463,7 +463,7 @@ class GeneralFittingModel(BasicFittingModel):
             self.update_tf_fit_function(workspace_list, fit_function)
 
     def update_tf_fit_function(self, workspaces, fit_function):
-        if self.fitting_options["fit_type"] == "Single":
+        if not self.simultaneous_fitting_mode:
             tf_asymmetry_parameters = self.get_params_for_single_tf_function_calculation(workspaces[0], fit_function)
         else:
             tf_asymmetry_parameters = self.get_params_for_multi_tf_function_calculation(workspaces, fit_function)
@@ -515,7 +515,7 @@ class GeneralFittingModel(BasicFittingModel):
             pass
 
     def _get_fit_parameters(self, workspaces):
-        if self.fitting_options["fit_type"] == "Single":
+        if not self.simultaneous_fitting_mode:
             if self.fitting_options["tf_asymmetry_mode"]:
                 params = self.get_parameters_for_single_tf_fit(workspaces[0])
             else:
@@ -625,7 +625,7 @@ class GeneralFittingModel(BasicFittingModel):
         selected_workspaces = self.get_selected_workspace_list()
         runs = []
         groups_and_pairs = []
-        if self.fitting_options["fit_type"] == "Single":
+        if not self.simultaneous_fitting_mode:
             for workspace in selected_workspaces:
                 runs += [get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)]
                 groups_and_pairs += [get_group_or_pair_from_name(workspace)]

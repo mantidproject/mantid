@@ -39,7 +39,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def get_model_fitting_options(self):
         """Returns the fitting options to be used when initializing the model."""
         fitting_options = super().get_model_fitting_options()
-        fitting_options["fit_type"] = self._get_fit_type()
         fitting_options["fit_by"] = self.view.simultaneous_fit_by
         fitting_options["global_parameters"] = self.view.get_global_parameters()
         fitting_options["tf_asymmetry_mode"] = False  # TEMPORARY
@@ -117,8 +116,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self._update_stored_fit_functions()
             self.view.disable_simultaneous_fit_options()
 
-        #self.model.current_domain_index = 0
-        self.update_model_from_view(fit_type=self._get_fit_type(), fit_by=self.view.simultaneous_fit_by)
+        self.update_model_from_view(fit_by=self.view.simultaneous_fit_by)
         #self.update_model_from_view(fit_function=self._fit_function[0], fit_type=self._get_fit_type(),
         #                            fit_by=self.view.simultaneous_fit_by)
         self.fitting_mode_changed_notifier.notify_subscribers()
@@ -313,14 +311,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             return self.view.get_index_for_start_end_times()
         return 0
 
-    def _get_fit_type(self):
-        """Returns the currently selected fitting mode."""
-        if self.view.is_simultaneous_fit_ticked:
-            fit_type = "Simul"
-        else:
-            fit_type = "Single"
-        return fit_type
-
     def get_fit_input_workspaces(self):
         """Returns the workspaces that are to be fitted."""
         if self.view.is_simultaneous_fit_ticked:
@@ -330,7 +320,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def get_selected_fit_workspaces(self):
         """Returns the fitted workspaces."""
         if self.selected_data:
-            if self._get_fit_type() == "Single":
+            if not self.model.simultaneous_fitting_mode:
                 fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
                     [self.view.display_workspace], self.model.function_name)
                 return [FitPlotInformation(input_workspaces=[self.view.display_workspace], fit=fit)]
