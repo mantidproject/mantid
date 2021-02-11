@@ -237,6 +237,7 @@ class BasicFittingPresenter:
         """Perform the fit in a thread."""
         self._number_of_fits_cached += 1
         try:
+            logger.warning(str(self.get_fit_input_workspaces()))
             calculation_function = functools.partial(self.model.evaluate_single_fit, self.get_fit_input_workspaces())
             self.calculation_thread = self._create_thread(calculation_function)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
