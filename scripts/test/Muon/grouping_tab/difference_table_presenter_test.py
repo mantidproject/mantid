@@ -175,3 +175,25 @@ class DifferenceTablePresenterTest(unittest.TestCase):
     def test_remove_diff_button_when_table_is_empty_does_not_throw(self):
         self.presenter.group_widget.handle_remove_diff_button_clicked()
         self.assertEqual(0, self.presenter.group_view.warning_popup.call_count)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Diff name validation
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def test_warning_using_duplicated_name(self):
+        self.add_two_pair_diffs()
+
+        self.presenter.group_view.enter_diff_name = mock.Mock(return_value="group_0") # Diff name same as group
+        self.presenter.group_widget.handle_add_diff_button_clicked()
+
+        self.presenter.pair_view.enter_diff_name = mock.Mock(return_value="pair_0")  # Diff name same as pair
+        self.presenter.pair_widget.handle_add_diff_button_clicked()
+
+        self.presenter.pair_view.enter_diff_name = mock.Mock(return_value="pair_diff_0")  # Diff name same as diff
+        self.presenter.pair_widget.handle_add_diff_button_clicked()
+
+        self.presenter.pair_view.enter_diff_name = mock.Mock(return_value="new_diff")  # New diff name
+        self.presenter.pair_widget.handle_add_diff_button_clicked()
+
+        self.assertEqual(1, self.presenter.group_view.warning_popup.call_count) # Group name duplicated
+        self.assertEqual(2, self.presenter.pair_view.warning_popup.call_count)  # Pair and Diff name duplicated
