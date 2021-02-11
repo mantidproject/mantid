@@ -19,6 +19,7 @@ set(SRC_FILES
     src/Algorithms/PawleyFit.cpp
     src/Algorithms/PlotPeakByLogValue.cpp
     src/Algorithms/PlotPeakByLogValueHelper.cpp
+    src/Algorithms/ProfileChiSquared1D.cpp
     src/Algorithms/QENSFitSequential.cpp
     src/Algorithms/QENSFitSimultaneous.cpp
     src/Algorithms/QENSFitUtilities.cpp
@@ -187,6 +188,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/PawleyFit.h
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h
+    inc/MantidCurveFitting/Algorithms/ProfileChiSquared1D.h
     inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
     inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
     inc/MantidCurveFitting/Algorithms/QENSFitUtilities.h

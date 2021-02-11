@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/IFunction_fwd.h"
+#include "MantidCurveFitting/Functions/ChebfunBase.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 #include "MantidKernel/System.h"
 
@@ -15,24 +16,30 @@ namespace CurveFitting {
 namespace Algorithms {
 
 /**
-  Calculate chi squared for a function and a data set in a workspace.
+Profiles chi2 about its minimum to find parameter errors
 */
-class MANTID_CURVEFITTING_DLL CalculateChiSquared : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL ProfileChiSquared1D : public IFittingAlgorithm {
 public:
+  ProfileChiSquared1D(); 
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CalculateCostFunction", "Fit"};
+    return {"CalculateChiSquared", "Fit"};
   }
   const std::string summary() const override;
-  static void calcChiSquared(const API::IFunction &fun, size_t nParams,
-                             const API::FunctionDomain &domain,
-                             API::FunctionValues &values, double &chiSquared,
-                             double &chiSquaredWeighted, double &dof);
 
 private:
   void initConcrete() override;
   void execConcrete() override;
+  void unfixParameters();
+  void refixParameters();
+  GSLMatrix getCovarianceMatrix();
+  std::tuple<double, double>
+  getChiSquaredRoots(const Functions::ChebfunBase_sptr &approximation,
+                     std::vector<double> &coeffs, double qvalue, double rBound,
+                     double lBound);
+  /// Cache indices of fixed parameters
+  std::vector<size_t> m_fixedParameters;
 };
 
 } // namespace Algorithms
