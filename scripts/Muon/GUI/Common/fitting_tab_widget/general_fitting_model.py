@@ -95,8 +95,8 @@ class GeneralFittingModel(BasicFittingModel):
                 try:
                     EvaluateFunction(InputWorkspace=data_ws_name,
                                      Function=fit_function,
-                                     StartX=self.fitting_options["startX"],
-                                     EndX=self.fitting_options["endX"],
+                                     StartX=self.current_start_x,
+                                     EndX=self.current_end_x,
                                      OutputWorkspace=guess_ws_name)
                 except RuntimeError:
                     mantid.logger.error('Could not evaluate the function.')
@@ -477,8 +477,8 @@ class GeneralFittingModel(BasicFittingModel):
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 [workspace])[0],
             'OutputFitWorkspace': "fit",
-            'StartX': self.fitting_options["startX"],
-            'EndX': self.fitting_options["endX"],
+            'StartX': self.current_start_x,
+            'EndX': self.current_end_x,
             'Minimizer': self.fitting_options["minimiser"]}
 
     def get_params_for_multi_tf_function_calculation(self, workspace_list, fit_function):
@@ -488,8 +488,8 @@ class GeneralFittingModel(BasicFittingModel):
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 workspace_list),
             'OutputFitWorkspace': "fit",
-            'StartX': self.fitting_options["startX"],
-            'EndX': self.fitting_options["endX"],
+            'StartX': self.current_start_x,
+            'EndX': self.current_end_x,
             'Minimizer': self.fitting_options["minimiser"]
         }
 
@@ -531,8 +531,8 @@ class GeneralFittingModel(BasicFittingModel):
         params = self._get_shared_parameters()
         params['InputWorkspace'] = workspace
         params['Function'] = self.get_ws_fit_function([workspace])
-        params['StartX'] = self.fitting_options["startX"]
-        params['EndX'] = self.fitting_options["endX"]
+        params['StartX'] = self.current_start_x
+        params['EndX'] = self.current_end_x
 
         return params
 
@@ -540,8 +540,8 @@ class GeneralFittingModel(BasicFittingModel):
         params = self._get_shared_parameters()
         params['InputWorkspace'] = workspaces
         params['Function'] = self.get_ws_fit_function(workspaces)
-        params['StartX'] = [self.fitting_options["startX"]] * len(workspaces)
-        params['EndX'] = [self.fitting_options["endX"]] * len(workspaces)
+        params['StartX'] = [self.current_start_x] * len(workspaces)
+        params['EndX'] = [self.current_end_x] * len(workspaces)
 
         return params
 
@@ -563,8 +563,8 @@ class GeneralFittingModel(BasicFittingModel):
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
                 [workspace])[0],
             'OutputFitWorkspace': fit_workspace_name,
-            'StartX': self.fitting_options["startX"],
-            'EndX': self.fitting_options["endX"],
+            'StartX': self.current_start_x,
+            'EndX': self.current_end_x,
             'Minimizer': self.fitting_options["minimiser"],
         }
 
@@ -588,8 +588,8 @@ class GeneralFittingModel(BasicFittingModel):
             'ReNormalizedWorkspaceList': workspaces,
             'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(workspaces),
             'OutputFitWorkspace': fit_workspaces,
-            'StartX': self.fitting_options["startX"],
-            'EndX': self.fitting_options["endX"],
+            'StartX': self.current_start_x,
+            'EndX': self.current_end_x,
             'Minimizer': self.fitting_options["minimiser"],
         }
         if self.double_pulse_enabled():

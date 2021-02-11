@@ -37,12 +37,26 @@ class BasicFittingModel:
         self._single_fit_functions = [None]
         self._single_fit_functions_cache = [None]
 
+        self._fit_statuses = [None]
+        self._fit_chi_squares = [0.0]
+
+        self._start_xs = [self.view.start_time]
+        self._end_xs = [self.view.end_time]
+
         self._function_name = ""
         self._function_name_auto_update = True
 
         #self._grppair_index = {}
         self.fitting_options = {}
         self.ws_fit_function_map = {}
+
+    @property
+    def current_domain_index(self):
+        return self._current_domain_index
+
+    @current_domain_index.setter
+    def current_domain_index(self, index):
+        self._current_domain_index = index
 
     @property
     def single_fit_functions(self):
@@ -55,19 +69,13 @@ class BasicFittingModel:
 
         self._single_fit_functions = [self._clone_function(function) for function in fit_functions]
 
-    def update_single_fit_function(self, index, function):
-        if index >= len(self._single_fit_functions):
-            raise ValueError("The provided domain index does not exist.")
-
-        self._single_fit_functions[index] = self._clone_function(function)
-
     @property
-    def current_domain_index(self):
-        return self._current_domain_index
+    def current_single_fit_function(self):
+        return self.single_fit_functions[self.current_domain_index]
 
-    @current_domain_index.setter
-    def current_domain_index(self, index):
-        self._current_domain_index = index
+    @current_single_fit_function.setter
+    def current_single_fit_function(self, fit_function):
+        self.single_fit_functions[self.current_domain_index] = fit_function
 
     @property
     def single_fit_functions_cache(self):
@@ -79,6 +87,62 @@ class BasicFittingModel:
 
     def cache_the_current_fit_functions(self):
         self.single_fit_functions_cache = [self._clone_function(function) for function in self.single_fit_functions]
+
+    @property
+    def fit_statuses(self):
+        return self._fit_statuses
+
+    @fit_statuses.setter
+    def fit_statuses(self, fit_statuses):
+        self._fit_statuses = fit_statuses
+
+    @property
+    def current_fit_status(self):
+        return self.fit_statuses[self.current_domain_index]
+
+    @property
+    def fit_chi_squares(self):
+        return self._fit_chi_squares
+
+    @fit_chi_squares.setter
+    def fit_chi_squares(self, fit_chi_squares):
+        self._fit_chi_squares = fit_chi_squares
+
+    @property
+    def current_fit_chi_squared(self):
+        return self.fit_chi_squares[self.current_domain_index]
+
+    @property
+    def start_xs(self):
+        return self._start_xs
+
+    @start_xs.setter
+    def start_xs(self, start_xs):
+        self._start_xs = start_xs
+
+    @property
+    def current_start_x(self):
+        return self.start_xs[self.current_domain_index]
+
+    @current_start_x.setter
+    def current_start_x(self, value):
+        self.start_xs[self.current_domain_index] = value
+
+    @property
+    def end_xs(self):
+        return self._end_xs
+
+    @end_xs.setter
+    def end_xs(self, end_xs):
+        self._end_xs = end_xs
+
+    @property
+    def current_end_x(self):
+        return self.end_xs[self.current_domain_index]
+
+    @current_end_x.setter
+    def current_end_x(self, value):
+        self.end_xs[self.current_domain_index] = value
 
     @property
     def function_name(self):

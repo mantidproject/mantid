@@ -72,8 +72,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         if self.view.is_simultaneous_fit_ticked:
             self.model.simultaneous_fit_function = fit_function
             #self._fit_function[0] = fit_function
-            self._fit_status = [fit_status] * len(self.start_x)
-            self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
+            self._fit_status = [fit_status] * len(self.model.start_xs)
+            self._fit_chi_squared = [fit_chi_squared] * len(self.model.start_xs)
         else:
             current_index = self.view.get_index_for_start_end_times()
             self.model.update_single_fit_function(current_index, fit_function)
@@ -152,12 +152,12 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_display_workspace_changed(self):
         """Handle when the display workspace combo box is changed."""
         current_index = self.view.get_index_for_start_end_times()
-        self.view.start_time = self.start_x[current_index]
-        self.view.end_time = self.end_x[current_index]
-        self.view.set_current_dataset_index(current_index)
 
         self._update_stored_fit_functions()
         self.set_current_domain_index(current_index)
+
+        self.view.start_time = self.model.current_start_x
+        self.view.end_time = self.model.current_end_x
 
         self.update_fit_status_in_the_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
@@ -178,22 +178,17 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.automatically_update_function_name()
 
         self.update_model_from_view(global_parameters=self.view.get_global_parameters())
-        #self.update_model_from_view(fit_function=self._fit_function[0],
-        #                            global_parameters=self.view.get_global_parameters())
 
         self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_function_parameter_changed(self):
         """Handle when the value of a parameter in a function is changed."""
         if not self.view.is_simultaneous_fit_ticked:
-            index = self.view.get_index_for_start_end_times()
-            fit_function = self._get_fit_functions_for_each_domain()[index]
-            self.model.update_single_fit_function(index, fit_function)
-            #self._fit_function[index] = fit_function
+            fit_function = self._get_fit_functions_for_each_domain()[self.model.current_domain_index]
+            self.model.current_single_fit_function = fit_function
         else:
             fit_function = self.view.fit_object
             self.model.simultaneous_fit_function = fit_function
-            #self._fit_function = self._get_fit_function()
 
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
         self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
@@ -203,30 +198,24 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_start_x_updated(self):
         """Handle when the start X is changed."""
         value = self.view.start_time
-        index = self.view.get_index_for_start_end_times()
         # Check start is greater than end, swap if need be
-        if value > self.end_x[index]:
-            self.view.start_time, self.view.end_time = self.end_x[index], value
-            self.update_end_x(index, value)
-            self.update_model_from_view(endX=value)
+        if value > self.model.current_end_x:
+            self.view.start_time, self.view.end_time = self.model.current_end_x, value
+            self.model.current_end_x = value
             value = self.view.start_time
 
-        self.update_start_x(index, value)
-        self.update_model_from_view(startX=value)
+        self.model.current_start_x = value
 
     def handle_end_x_updated(self):
         """Handle when the end X is changed."""
         value = self.view.end_time
-        index = self.view.get_index_for_start_end_times()
         # Check end is less than start, swap if need be
-        if value < self.start_x[index]:
-            self.view.start_time, self.view.end_time = value, self.start_x[index]
-            self.update_start_x(index, value)
-            self.update_model_from_view(startX=value)
+        if value < self.model.current_start_x:
+            self.view.start_time, self.view.end_time = value, self.model.current_start_x
+            self.model.current_start_x = value
             value = self.view.end_time
 
-        self.update_end_x(index, value)
-        self.update_model_from_view(endX=value)
+        self.model.current_end_x = value
 
     def handle_use_rebin_changed(self):
         """Handle the Use Rebin state change."""
