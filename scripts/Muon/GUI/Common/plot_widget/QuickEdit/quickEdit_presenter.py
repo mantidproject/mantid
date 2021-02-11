@@ -28,7 +28,9 @@ class QuickEditPresenter(object):
     def clear_subplots(self):
         self._view.clear_subplots()
 
-
+    @property
+    def get_all_subplots(self):
+        return self.all()
 
 
 

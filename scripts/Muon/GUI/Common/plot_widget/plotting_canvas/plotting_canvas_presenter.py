@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
-from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
+from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_interface import \
     PlottingCanvasPresenterInterface
@@ -17,7 +17,7 @@ from mantidqt.utils.observer_pattern import GenericObserver
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel,
-                 options_presenter: QuickEditPresenter, context):
+                 options_presenter: QuickEditWidget, context):
         self._view = view
         self._model = model
         self._options_view = None
@@ -138,14 +138,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._set_axes_limits_and_titles(autoscale)
 
     def _set_axes_limits_and_titles(self, autoscale):
-        xlims, ylims = self._get_axes_limits_from_quick_edit_widget()
-        if xlims is None or ylims is None:
-            self._view.set_axes_limits(self._context.default_xlims, self._context.default_ylims)
-            self._view.autoscale_y_axes()
-        else:
-            self._view.set_axes_limits(xlims, ylims)
-            # override y values
-            if autoscale:
+        xlims = self._context.default_xlims
+        ylims = self._context.default_ylims
+
+        selected_subplots, _ = self._get_selected_subplots_from_quick_edit_widget()
+        if len(selected_subplots) == 1:
+            xlim = self._context.get_xlim(selected_subplots[0])
+            ylim = self._context.get_ylim(selected_subplots[0])
+        self._view.set_axes_limits(xlims, ylims)
+            # override y values 
+        if autoscale:
                 self._view.autoscale_y_axes()
         titles = self._model.create_axes_titles()
         for axis_number, title in enumerate(titles):
@@ -266,15 +268,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_plot_x_range(range)
         self._handle_xlim_changed_in_quick_edit_options(range)
 
-    # Implementation of QuickEdit widget
     def _update_quickedit_widget(self):
         self._update_quick_widget_subplots_menu()
         self._handle_subplot_changed_in_quick_edit_widget()
 
     def _update_quick_widget_subplots_menu(self):
+        subplots = self._options_presenter.get_all_subplots
         for i, title in  enumerate(self._model.create_axes_titles()):
-            self._options_presenter.add_subplot(title)
-            self._context.update_axis(title, i)
+            if title not in subplots:
+                self._options_presenter.add_subplot(title)
+                self._context.update_axis(title, i)
 
     def update_range(self):
         # get the updated values first
@@ -297,20 +300,20 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_plot_x_range(x_values)
         self._options_presenter.set_plot_y_range(y_values)
 
-    #autoscale
+    """ autoscale """
 
     def _setup_autoscale_observer(self):
-        self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
+        self.uncheck_autoscale_observer = GenericObserver(self.uncheck_autoscale)
         self._view.add_uncheck_autoscale_subscriber(self.uncheck_autoscale_observer)
 
-        self.enable_autoscale_observer = GenericObserver(self._options_presenter.enable_autoscale)
+        self.enable_autoscale_observer = GenericObserver(self.enable_autoscale)
         self._view.add_enable_autoscale_subscriber(self.enable_autoscale_observer)
 
-        self.disable_autoscale_observer = GenericObserver(self._options_presenter.disable_autoscale)
+        self.disable_autoscale_observer = GenericObserver(self.disable_autoscale)
         self._view.add_disable_autoscale_subscriber(self.disable_autoscale_observer)
 
     def uncheck_autoscale(self):
-        self._options_presenter.uncheck_autoscale()
+        self._options_presenter.set_autoscale(False)
 
     def enable_autoscale(self):
         self._options_presenter.enable_autoscale()
@@ -355,10 +358,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_plot_y_range([ymin,ymax])
         self._options_presenter.disable_yaxis_changer()
         self._view.redraw_figure()
+
+    def autoscale_y_axes(self):
+        """Autoscales all y-axes in the figure using the existing x axis"""
+        self._view.autoscale_y_axes()
+        self._view.redraw_figure()     
         
     """ error checkbox"""
     def set_errors(self, state:bool):
         print("moo", state)
+        self._options_presenter.set_errors(state)
         self._options_presenter.set_errors(state)
 
     def handle_error_selection_changed(self):
@@ -377,6 +386,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             for workspace_name in plotted_workspaces:
                 index = self._model._get_workspace_plot_axis(workspace_name)
                 if axis == index:
+                    print(workspace_name, "WE")
                     self.replot_workspace_with_error_state(workspace_name, state)
 
 

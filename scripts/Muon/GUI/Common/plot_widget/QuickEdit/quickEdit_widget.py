@@ -34,37 +34,15 @@ class QuickEditWidget(object):
     def enable_autoscale(self):
         self._presenter.enable_autoscale()
 
-    def uncheck_autoscale(self):
-        self._presenter.uncheck_autoscale()
-
-    """ connect statements"""
-
-    def connect_autoscale_changed(self, slot):
-        self._presenter.connect_autoscale_changed(slot)
-
-    def connect_errors_changed(self, slot):
-        self._presenter.connect_errors_changed(slot)
-
-    def connect_x_range_changed(self, slot):
-        self._presenter.connect_x_range_changed(slot)
-
-    def connect_y_range_changed(self, slot):
-        self._presenter.connect_y_range_changed(slot)
-
-    def connect_plot_selection(self, slot):
-        self._presenter.connect_plot_selection(slot)
-
     def add_subplot(self, name):
         self._presenter.add_subplot(name)
 
-    def rm_subplot(self, name):
-        self._presenter.rm_subplot(name)
+    @property
+    def get_all_subplots(self):
+        return self._presenter.get_all_subplots
 
     def clear_subplots(self):
         self._presenter.clear_subplots()
-
-    def get_subplots(self):
-        return self._presenter.all()
 
     def get_selection(self):
         return self._presenter.get_selection()
@@ -96,5 +74,19 @@ class QuickEditWidget(object):
     def get_errors(self):
         return self._presenter.get_errors()
 
-    def set_mock(self, mock_presenter):
-        self._presenter = mock_presenter
+    """ connect statements"""
+
+    def connect_autoscale_changed(self, slot):
+        self._presenter.connect_autoscale_changed(slot)
+
+    def connect_errors_changed(self, slot):
+        self._presenter.connect_errors_changed(slot)
+
+    def connect_x_range_changed(self, slot):
+        self._presenter.connect_x_range_changed(slot)
+
+    def connect_y_range_changed(self, slot):
+        self._presenter.connect_y_range_changed(slot)
+
+    def connect_plot_selection(self, slot):
+        self._presenter.connect_plot_selection(slot)

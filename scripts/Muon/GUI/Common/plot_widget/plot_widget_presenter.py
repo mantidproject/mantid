@@ -121,16 +121,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
             self._view.enable_plot_type_combo()
             self._view.hide_plot_diff()
             self.update_plot()
-            self.fitting_plot_range = self._figure_presenter.get_plot_x_range()
-            self._figure_presenter.set_plot_range(self.data_plot_range)
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.show_plot_diff()
             self.update_plot()
-            self.data_plot_range = self._figure_presenter.get_plot_x_range()
-            self._figure_presenter.set_plot_range(self.fitting_plot_range)
-
-        self._figure_presenter.autoscale_y_axes()
 
     def handle_plot_mode_changed_for_frequency_domain_analysis(self, plot_mode : PlotMode):
         if plot_mode == self.context.gui_context['PlotMode']:
@@ -151,10 +145,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         elif plot_mode == PlotMode.Fitting:
             self._view.disable_plot_type_combo()
             self._view.show_plot_diff()
-            self._view.disable_tile_plotting_options()
-            self._view.disable_plot_raw_option()
+            #self._view.disable_tile_plotting_options()
+            #self._view.disable_plot_raw_option()
             self.data_plot_tiled_state = self._view.is_tiled_plot()
-            self._view.set_is_tiled_plot(False)
+            #self._view.set_is_tiled_plot(False)
             self.update_plot()
             self.data_plot_range = self._figure_presenter.get_plot_x_range()
             self._figure_presenter.set_plot_range(self.fitting_plot_range)

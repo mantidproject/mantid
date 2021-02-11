@@ -83,7 +83,7 @@ class MuonContext(object):
 
     @property
     def default_data_plot_range(self):
-        return MUON_ANALYSIS_DEFAULT_X_RANGE
+        return self._plotting_context.default_xlims
 
     def num_periods(self, run):
         return self._data_context.num_periods(run)

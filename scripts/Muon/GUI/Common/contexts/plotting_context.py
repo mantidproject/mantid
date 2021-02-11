@@ -45,37 +45,9 @@ class PlottingContext(object):
     def default_ylims(self):
         return self._default_ylim
 
-    def update_xlim_all(self, values:List[float]):
-        self._xlim_all = values
-
-    @property
-    def get_xlim_all(self):
-        return self._xlim_all
-
-    def update_ylim_all(self, values:List[float]):
-        self._ylim_all = values
-
-    @property
-    def get_ylim_all(self):
-        return self._ylim_all
-
-    @property
-    def get_autoscale_all(self)->bool:
-        return self._autoscale_all
-
-    def set_autoscale_all(self, state:bool):
-        self._autoscale_all = state
-
-    @property
-    def get_error_all(self):
-        print("out",self._errors_all)
-        return self._errors_all
-
-    def set_error_all(self, state:bool):
-        print("error",state)
-        self._errors_all = state
-
     def add_subplot(self, name:str, index:int):
+        if name in (self._subplots.keys()):
+            return
         self._subplots[name] = PlotEditContext()
         self._subplots[name].update_xlim(self._default_xlim)
         self._subplots[name].update_ylim(self._default_ylim)
@@ -85,6 +57,38 @@ class PlottingContext(object):
         for name in list(self._subplots.keys()):
             del self._subplots[name]
 
+    """ methods for the All option """
+
+    def update_xlim_all(self, values:List[float]):
+        self._xlim_all = values
+
+    @property
+    def get_xlim_all(self)->List[float]:
+        return self._xlim_all
+
+    def update_ylim_all(self, values:List[float]):
+        self._ylim_all = values
+
+    @property
+    def get_ylim_all(self)->List[float]:
+        return self._ylim_all
+
+    def set_autoscale_all(self, state:bool):
+        self._autoscale_all = state
+    
+    @property
+    def get_autoscale_all(self)->bool:
+        return self._autoscale_all
+
+    def set_error_all(self, state:bool):
+        print("error",state)
+        self._errors_all = state
+
+    @property
+    def get_error_all(self)->bool:
+        return self._errors_all
+
+    """ get/eidt values for a specific subplot"""
     def update_xlim(self, name:str, values:List[float]):
         if name == "All":
             for subplot in list(self._subplots.keys()):
