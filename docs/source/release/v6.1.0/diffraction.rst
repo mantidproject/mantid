@@ -42,5 +42,6 @@ Single Crystal Diffraction
 Improvements
 ############
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now check if previous container is created using the same method before reusing it.
 
 :ref:`Release 6.1.0 <v6.1.0>`
