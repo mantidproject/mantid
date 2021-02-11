@@ -28,9 +28,6 @@ class BasicFittingPresenter:
 
         self._selected_data = []
 
-        self._start_x = [self.view.start_time]
-        self._end_x = [self.view.end_time]
-
         self._fit_status = [None]
         self._fit_chi_squared = [0.0]
 
@@ -67,12 +64,14 @@ class BasicFittingPresenter:
 
     def initialise_model_options(self):
         """Initialise the model with the default fitting options."""
+        self.model.start_xs = [self.view.start_time]
+        self.model.end_xs = [self.view.end_time]
         self.model.update_model_fit_options(**self.get_model_fitting_options())
 
     def get_model_fitting_options(self):
         """Returns the fitting options to be used when initializing the model. Override in child classes."""
-        fitting_options = {"startX": self.start_x[0], "endX": self.end_x[0], "minimiser": self.view.minimizer,
-                           "evaluation_type": self.view.evaluation_type, "fit_to_raw": self.view.fit_to_raw}
+        fitting_options = {"minimiser": self.view.minimizer, "evaluation_type": self.view.evaluation_type,
+                           "fit_to_raw": self.view.fit_to_raw}
         return fitting_options
 
     def update_model_from_view(self, **kwargs):
@@ -99,24 +98,6 @@ class BasicFittingPresenter:
 
         self._selected_data = selected_data
         self.clear_and_reset_gui_state()
-
-    @property
-    def start_x(self):
-        """Return the stored start X's."""
-        return self._start_x
-
-    @property
-    def end_x(self):
-        """Return the stored end X's."""
-        return self._end_x
-
-    def update_start_x(self, index, value):
-        """Updates a start X at a specific index."""
-        self._start_x[index] = value
-
-    def update_end_x(self, index, value):
-        """Updates a end X at a specific index."""
-        self._end_x[index] = value
 
     def handle_gui_changes_made(self, changed_values):
         """Handle when changes to the context have been made."""
@@ -314,14 +295,12 @@ class BasicFittingPresenter:
 
     def _reset_start_time_to_first_good_data_value(self):
         """Reset the start and end X to the first good data value."""
-        self._start_x = [self._retrieve_first_good_data_from_run_name(run_name)
-                         for run_name in self.selected_data] if self.selected_data else [0.0]
-        self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
+        self.model.start_xs = [self._retrieve_first_good_data_from_run_name(run_name)
+                               for run_name in self.selected_data] if self.selected_data else [0.0]
+        self.model.end_xs = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
 
-        self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
-        self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
-
-        self.update_model_from_view(startX=self.start_x[0], endX=self.end_x[0])
+        self.view.start_time = self.model.start_xs[0]
+        self.view.end_time = self.model.end_xs[0]
 
     def _retrieve_first_good_data_from_run_name(self, workspace_name):
         """Return the name of the first good data in a workspace."""
