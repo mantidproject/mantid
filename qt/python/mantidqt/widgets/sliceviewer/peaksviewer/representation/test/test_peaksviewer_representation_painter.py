@@ -64,7 +64,7 @@ class MplPainterTest(unittest.TestCase):
     def test_ellipticalshell(self):
         view = MagicMock()
         painter = MplPainter(view)
-        x, y, outer_width, outer_height, thick = 1, 2, 0.8, 1.0, 0.2
+        x, y, outer_width, outer_height, thick = 1, 2, 0.8, 1.0, (0.2, 0.2)
         alpha = 1.0
 
         painter.elliptical_shell(x, y, outer_width, outer_height, thick, alpha=alpha)

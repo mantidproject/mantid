@@ -22,6 +22,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidHistogramData/EstimatePolynomial.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
@@ -42,6 +44,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using Mantid::HistogramData::Histogram;
 using namespace std;
 
@@ -260,8 +263,11 @@ void FitPeaks::init() {
   // properties about fitting range and criteria
   declareProperty(PropertyNames::START_WKSP_INDEX, EMPTY_INT(),
                   "Starting workspace index for fit");
-  declareProperty(PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
-                  "Last workspace index to fit (which is included)");
+  declareProperty(
+      PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
+      "Last workspace index to fit (which is included). "
+      "If a value larger than the workspace index of last spectrum, "
+      "then the workspace index of last spectrum is used.");
 
   // properties about peak positions to fit
   declareProperty(
@@ -515,12 +521,13 @@ void FitPeaks::exec() {
   // process inputs
   processInputs();
 
-  // create output workspaces
+  // create output workspace: fitted peak positions
   generateOutputPeakPositionWS();
 
-  // generateFittedParametersValueWorkspace();
+  // create output workspace: fitted peaks' parameters values
   generateFittedParametersValueWorkspaces();
 
+  // create output workspace: calculated from fitted peak and background
   generateCalculatedPeaksWS();
 
   // fit peaks
@@ -792,7 +799,7 @@ void FitPeaks::processInputPeakCenters() {
   API::MatrixWorkspace_const_sptr peakcenterws =
       getProperty(PropertyNames::PEAK_CENTERS_WKSP);
   if (!peakcenterws)
-    g_log.error("There is no peak center workspace");
+    g_log.notice("Peak centers are not specified by peak center workspace");
 
   std::string peakpswsname = getPropertyValue(PropertyNames::PEAK_CENTERS_WKSP);
   if ((!m_peakCenters.empty()) && peakcenterws == nullptr) {
@@ -806,9 +813,9 @@ void FitPeaks::processInputPeakCenters() {
     m_peakCenterWorkspace = getProperty(PropertyNames::PEAK_CENTERS_WKSP);
     // number of peaks to fit!
     m_numPeaksToFit = m_peakCenterWorkspace->x(0).size();
-    g_log.warning() << "Input peak center workspace: "
-                    << m_peakCenterWorkspace->x(0).size() << ", "
-                    << m_peakCenterWorkspace->y(0).size() << "\n";
+    g_log.debug() << "Input peak center workspace: "
+                  << m_peakCenterWorkspace->x(0).size() << ", "
+                  << m_peakCenterWorkspace->y(0).size() << "\n";
 
     // check matrix worksapce for peak positions
     const size_t peak_center_ws_spectra_number =
@@ -1037,11 +1044,13 @@ void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
     const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
     std::vector<std::vector<double>> &lastGoodPeakParameters) {
+  // Spectrum contains very weak signal: do not proceed and return
   if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
     for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
       fit_result->setBadRecord(i, -1.);
     return; // don't do anything
   }
+
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
   try {
@@ -1067,6 +1076,11 @@ void FitPeaks::fitSpectrumPeaks(
 
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
+
+  // Copy result from last fitting and set flag
+  std::vector<double> localPrevGoodResults(m_peakFunction->nParams(), 0.0);
+  bool neighborPeakSameSpectrum = false;
+
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
     // convert fit index to peak index (in ascending order)
     size_t peak_index(fit_index);
@@ -1079,16 +1093,66 @@ void FitPeaks::fitSpectrumPeaks(
 
     double expected_peak_pos = expected_peak_centers[peak_index];
 
-    bool foundAnyPeak = (lastGoodPeakParameters[fit_index].size() >
-                         static_cast<size_t>(std::count_if(
-                             lastGoodPeakParameters[fit_index].begin(),
-                             lastGoodPeakParameters[fit_index].end(),
-                             [&](auto const &val) { return val <= 1e-10; })));
-    if (foundAnyPeak) {
-      // set the peak parameters from last good fit to that peak
-      for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
-        peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
+    // Determine how to set the starting value parameters
+
+    // Determine whether to set starting parameter from fitted value
+    // of same peak but different spectrum
+    bool samePeakCrossSpectrum =
+        (lastGoodPeakParameters[peak_index].size() >
+         static_cast<size_t>(
+             std::count_if(lastGoodPeakParameters[peak_index].begin(),
+                           lastGoodPeakParameters[peak_index].end(),
+                           [&](auto const &val) { return val <= 1e-10; })));
+    // Check whether current spectrum's pixel (detector ID) is close to its
+    // previous spectrum's pixel (detector ID).
+    try {
+      if (wi > 0 && samePeakCrossSpectrum) {
+        // First spectrum or discontinuous detector ID: do not start from same
+        // peak of last spectrum
+        std::shared_ptr<const Geometry::Detector> pdetector =
+            std::dynamic_pointer_cast<const Geometry::Detector>(
+                m_inputMatrixWS->getDetector(wi - 1));
+        std::shared_ptr<const Geometry::Detector> cdetector =
+            std::dynamic_pointer_cast<const Geometry::Detector>(
+                m_inputMatrixWS->getDetector(wi));
+
+        // If they do have detector ID
+        if (pdetector && cdetector) {
+          auto prev_id = pdetector->getID();
+          auto curr_id = cdetector->getID();
+          if (prev_id + 1 != curr_id)
+            samePeakCrossSpectrum = false;
+        } else {
+          samePeakCrossSpectrum = false;
+        }
+
+      } else {
+        // first spectrum in the workspace: no peak's fitting result to copy
+        // from
+        samePeakCrossSpectrum = false;
       }
+    } catch (const std::runtime_error &) {
+      // workspace does not have detector ID set: there is no guarantee that the
+      // adjacent spectra can have similar peak profiles
+      samePeakCrossSpectrum = false;
+    }
+
+    // Set starting values of the peak function
+    if (samePeakCrossSpectrum) { // somePeakFit
+      // Get from local best result
+      for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+        peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
+      }
+
+      // reset center though - don't know before hand which element this is
+      peakfunction->setCentre(expected_peak_pos);
+
+    } else if (neighborPeakSameSpectrum) {
+      // set the peak parameters from last good fit to that peak
+      for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
+        peakfunction->setParameter(i, localPrevGoodResults[i]);
+      }
+
       // reset center though - don't know before hand which element this is
       peakfunction->setCentre(expected_peak_pos);
     } else {
@@ -1108,10 +1172,17 @@ void FitPeaks::fitSpectrumPeaks(
       std::pair<double, double> peak_window_i =
           getPeakFitWindow(wi, peak_index);
 
-      bool observe_peak_params =
-          decideToEstimatePeakParams(!foundAnyPeak, peakfunction);
+      // Decide whether to estimate peak width by observation
+      bool observe_peak_width =
+          decideToEstimatePeakParams(!samePeakCrossSpectrum, peakfunction);
+      //
+      if (peakfunction->name() == "BackToBackExponential") {
+        if (neighborPeakSameSpectrum) {
+          observe_peak_width = false;
+        }
+      }
 
-      if (observe_peak_params &&
+      if (observe_peak_width &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
         g_log.warning(
             "Peak width can be estimated as ZERO.  The result can be wrong");
@@ -1121,10 +1192,15 @@ void FitPeaks::fitSpectrumPeaks(
       // point)
       cost =
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
-                            observe_peak_params, peakfunction, bkgdfunction);
+                            observe_peak_width, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
-        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i)
-          lastGoodPeakParameters[fit_index][i] = peakfunction->getParameter(i);
+        // reset the flag such that there is at a peak fit in this spectrum
+        neighborPeakSameSpectrum = true;
+        // copy values
+        for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+          lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
+          localPrevGoodResults[i] = peakfunction->getParameter(i);
+        }
       }
     }
 
@@ -1189,8 +1265,9 @@ bool FitPeaks::decideToEstimatePeakParams(
  * @param fitfunction :: pointer to function to retrieve information from
  * @param fit_result :: (output) PeakFitResult instance to set the fitting
  * result to
+ * @return :: whether the peak fiting is good or not
  */
-void FitPeaks::processSinglePeakFitResult(
+bool FitPeaks::processSinglePeakFitResult(
     size_t wsindex, size_t peakindex, const double cost,
     const std::vector<double> &expected_peak_positions,
     const FitPeaksAlgorithm::FitFunction &fitfunction,
@@ -1289,7 +1366,7 @@ void FitPeaks::processSinglePeakFitResult(
   // chi2
   fit_result->setRecord(peakindex, adjust_cost, peak_pos, fitfunction);
 
-  return;
+  return good_fit;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1453,6 +1530,8 @@ int FitPeaks::estimatePeakParameters(
 
   // use values from background to locate FWHM
   peakfunction->setHeight(peak_height);
+  // FIXME - there are multiple occasions in FitPeaks that setCentre is called.
+  // Is there any way to centralize this?
   peakfunction->setCentre(peak_center);
 
   // Estimate FHWM (peak width)
@@ -1461,6 +1540,9 @@ int FitPeaks::estimatePeakParameters(
     double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
     if (peak_fwhm > 0.0) {
+      g_log.warning() << "Peak function " << peakfunction->name()
+                      << " still set estimated FWHM"
+                      << "\n";
       peakfunction->setFwhm(peak_fwhm);
     }
   }
@@ -1641,7 +1723,7 @@ double
 FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
                             const double expected_peak_center,
                             const std::pair<double, double> &fitwindow,
-                            const bool observe_peak_params,
+                            const bool estimate_peak_width,
                             const API::IPeakFunction_sptr &peakfunction,
                             const API::IBackgroundFunction_sptr &bkgdfunc) {
   double cost(DBL_MAX);
@@ -1655,12 +1737,12 @@ FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
     // fit peak with high background!
     cost =
         fitFunctionHighBackground(fitter, fitwindow, wi, expected_peak_center,
-                                  observe_peak_params, peakfunction, bkgdfunc);
+                                  estimate_peak_width, peakfunction, bkgdfunc);
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
                          fitwindow.first, fitwindow.second,
-                         expected_peak_center, observe_peak_params, true);
+                         expected_peak_center, estimate_peak_width, true);
   }
 
   return cost;
@@ -1676,7 +1758,7 @@ double FitPeaks::fitFunctionSD(
     const IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
     const API::IBackgroundFunction_sptr &bkgd_function,
     const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double xmin,
-    double xmax, const double &expected_peak_center, bool observe_peak_shape,
+    double xmax, const double &expected_peak_center, bool estimate_peak_width,
     bool estimate_background) {
   std::stringstream errorid;
   errorid << "(WorkspaceIndex=" << wsindex
@@ -1695,7 +1777,7 @@ double FitPeaks::fitFunctionSD(
   // Estimate peak profile parameter
   peak_function->setCentre(expected_peak_center); // set expected position first
   int result = estimatePeakParameters(histogram, peak_window, peak_function,
-                                      bkgd_function, observe_peak_shape);
+                                      bkgd_function, estimate_peak_width);
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
     if (result == NOSIGNAL || result == LOWPEAK) {
