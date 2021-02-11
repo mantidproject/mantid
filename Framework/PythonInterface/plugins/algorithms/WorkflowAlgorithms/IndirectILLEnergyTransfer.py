@@ -69,6 +69,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _fit_option = None
     _group_by = None
     _pulse_chopper = None
+    _group_detectors = None
+    _progress = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -279,7 +281,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1E+9))
             vformula = '-2/({0}-1)*{1}*(x-{0}/2)+{2}'.format(bsize, self._doppler_speed, vfixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=vformula)
-            nmass = nm * 1E+9 / c**2 # mev / (m/s)**2
+            nmass = nm * 1E+9 / c**2  # mev / (m/s)**2
             eformula = '{0}*x*x/2 - {1}'.format(nmass, efixed)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
@@ -494,7 +496,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         detector_info = ws.detectorInfo()
         l1 = detector_info.l1()
-        middle = int(N_PIXELS_PER_TUBE / 2)
+        middle = N_PIXELS_PER_TUBE // 2
         l2_equator = (detector_info.l2(middle) + detector_info.l2(middle+1)) / 2.
         v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
         elastic_tof_equator = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
@@ -514,30 +516,29 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ws.setX(0, x_new)
 
         for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
-            if self._fit_option == "FitAllPixelGroups":
-                group = (pixel - 1) // self._group_by
-                if epp_ws.cell('FitStatus', group) == 'success':
-                    l2 = detector_info.l2(pixel)
-                    elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
-                    elastic_channel = epp_ws.cell('PeakCentre', group)
-                else:
-                    pass
-                    # TODO find out what to take as default in case of failure
+            group = (pixel - 1) // self._group_by
+            if self._fit_option == "FitAllPixelGroups" and epp_ws.cell('FitStatus', group) in ['success', "narrowPeak"]:
+                l2 = detector_info.l2(pixel)
+                elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
+                elastic_channel = epp_ws.cell('PeakCentre', group)
             else:
                 elastic_tof = elastic_tof_equator
                 elastic_channel = elastic_channel_equator
             x_new = elastic_tof + (x[pixel] - elastic_channel) * channel_width
             ws.setX(pixel, x_new)
 
-        for single_detector in range(N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR + 1, ws.getNumberHistograms()):
+        for single_detector in range(N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR, ws.getNumberHistograms()):
             group = rows - 1 - (ws.getNumberHistograms() - single_detector)
-            if epp_ws.cell('FitStatus', group) == 'success':
+            if epp_ws.cell('FitStatus', group) in ['success', "narrowPeak"]:
                 l2 = detector_info.l2(single_detector)
                 elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
                 elastic_channel = epp_ws.cell('PeakCentre', group)
             else:
-                pass
-                # TODO find out what to take as default in case of failure
+                elastic_tof = elastic_tof_equator
+                elastic_channel = elastic_channel_equator
+                self.log.warning("Single detector number {0}'s peak was not found. Using equatorial peak instead."
+                                 " The result is likely erroneous.".format(single_detector + 1))
+
             x_new = elastic_tof + (x[single_detector] - elastic_channel) * channel_width
             ws.setX(single_detector, x_new)
         ws.getAxis(0).setUnit('TOF')
