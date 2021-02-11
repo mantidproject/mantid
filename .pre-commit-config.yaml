@@ -15,4 +15,10 @@ repos:
         args: ['--maxkb=4096']
       - id: check-xml
       - id: check-yaml
+        args: [--allow-multiple-documents]
 
+  - repo: https://github.com/mantidproject/pre-commit-hooks
+    rev: 05b2d4cfe17dcb36e29c249705364c19eeccced5
+    hooks:
+      - id: clang-format
+        exclude: Testing/Tools/cxxtest|tools

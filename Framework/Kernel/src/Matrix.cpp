@@ -1020,7 +1020,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     }
   }
   if (regular) {
-    // use analytic expression as described in G Y Hu and R F O’Connell (1996)
+    // use analytic expression as described in G Y Hu and R F O'Connell (1996)
     T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
     *this /= scalefactor;
     T D = m_rawData[0][0];
