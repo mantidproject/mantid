@@ -79,6 +79,7 @@ private:
                    const Kernel::PropertyManager &materialArgs);
   Kernel::PropertyManager materialSettingsEnsureLegacyCompatibility(
       const Kernel::PropertyManager &materialArgs);
+  bool isDictionaryPopulated(const Kernel::PropertyManager_const_sptr dict);
 };
 
 } // namespace DataHandling
