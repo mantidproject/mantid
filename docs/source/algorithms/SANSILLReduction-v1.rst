@@ -52,6 +52,7 @@ Different input properties can be specified depending on the value of **ProcessA
 |              | * MaskedInputWorkspace        |                        |
 |              | * ReferenceInputWorkspace     |                        |
 |              | * SensitivityInputWorkspace   |                        |
+|              | * SolventInputWOrkspace       |                        |
 +--------------+-------------------------------+------------------------+
 
 All the input workspace properties above are optional.
