@@ -64,8 +64,10 @@ class PyChopGui(QMainWindow):
     maxE = {}
     hyspecS2 = 35.
 
-    def __init__(self):
-        super(PyChopGui, self).__init__()
+    def __init__(self, parent=None, window_flags=None):
+        super(PyChopGui, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.folder = os.path.dirname(sys.modules[self.__module__].__file__)
         for fname in os.listdir(self.folder):
             if fname.endswith('.yaml'):
