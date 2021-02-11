@@ -117,7 +117,8 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def _create_table_batch(self, ws, parent, window_flags, view, model):
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
         table_model = TableModel(parent=parent, data_model=model)
-        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags, table_model=table_model)
+        view = view if view else TableWorkspaceDisplayView(presenter=self, parent=parent, window_flags=window_flags,
+                                                           table_model=table_model)
         self.presenter = TableWorkspaceDataPresenterBatch(model, view)
         return view, model
 

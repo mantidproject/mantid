@@ -19,6 +19,6 @@ else:
     parent, flags = None, None
 
 reducer = ReductionGUI(parent, flags, instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS",
-                                        "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
+                                                       "MARI", "MERLIN", "SEQUOIA", "TOFTOF"])
 if reducer.setup_layout(load_last=True):
     reducer.show()
