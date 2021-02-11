@@ -126,9 +126,6 @@ if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData %BUILD_DIR%\Testing
   pushd %BUILD_DIR%
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
-  pushd qt
-  for /f %%F in ('dir /b /a-d /S "ui_*.h"') do del /Q %%F >/nul
-  popd
   popd
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
@@ -156,6 +153,10 @@ if "%BUILDPKG%" == "yes" (
     set PACKAGE_SUFFIX=unstable
   )
   set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX! -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON
+  :: add the github token if provided
+  if not "%GITHUB_AUTHORIZATION_TOKEN%" == "" (
+    set PACKAGE_OPTS=!PACKAGE_OPTS! -DGITHUB_AUTHORIZATION_TOKEN=%GITHUB_AUTHORIZATION_TOKEN%
+  )
 )
 
 cd %BUILD_DIR%
