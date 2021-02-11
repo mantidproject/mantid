@@ -212,7 +212,7 @@ private:
                          size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
-  void processSinglePeakFitResult(
+  bool processSinglePeakFitResult(
       size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
       const FitPeaksAlgorithm::FitFunction &fitfunction,

@@ -1098,10 +1098,10 @@ void FitPeaks::fitSpectrumPeaks(
     // Determine whether to set starting parameter from fitted value
     // of same peak but different spectrum
     bool samePeakCrossSpectrum =
-        (lastGoodPeakParameters[fit_index].size() >
+        (lastGoodPeakParameters[peak_index].size() >
          static_cast<size_t>(
-             std::count_if(lastGoodPeakParameters[fit_index].begin(),
-                           lastGoodPeakParameters[fit_index].end(),
+             std::count_if(lastGoodPeakParameters[peak_index].begin(),
+                           lastGoodPeakParameters[peak_index].end(),
                            [&](auto const &val) { return val <= 1e-10; })));
     // Check whether current spectrum's pixel (detector ID) is close to its
     // previous spectrum's pixel (detector ID).
@@ -1140,8 +1140,8 @@ void FitPeaks::fitSpectrumPeaks(
     // Set starting values of the peak function
     if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
-      for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
-        peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
+      for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+        peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
       }
 
       // reset center though - don't know before hand which element this is
@@ -1194,10 +1194,12 @@ void FitPeaks::fitSpectrumPeaks(
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_width, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
-        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
-          lastGoodPeakParameters[fit_index][i] = peakfunction->getParameter(i);
+        // reset the flag such that there is at a peak fit in this spectrum
+        neighborPeakSameSpectrum = true;
+        // copy values
+        for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+          lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
           localPrevGoodResults[i] = peakfunction->getParameter(i);
-          neighborPeakSameSpectrum = true;
         }
       }
     }
@@ -1263,8 +1265,9 @@ bool FitPeaks::decideToEstimatePeakParams(
  * @param fitfunction :: pointer to function to retrieve information from
  * @param fit_result :: (output) PeakFitResult instance to set the fitting
  * result to
+ * @return :: whether the peak fiting is good or not
  */
-void FitPeaks::processSinglePeakFitResult(
+bool FitPeaks::processSinglePeakFitResult(
     size_t wsindex, size_t peakindex, const double cost,
     const std::vector<double> &expected_peak_positions,
     const FitPeaksAlgorithm::FitFunction &fitfunction,
@@ -1363,7 +1366,7 @@ void FitPeaks::processSinglePeakFitResult(
   // chi2
   fit_result->setRecord(peakindex, adjust_cost, peak_pos, fitfunction);
 
-  return;
+  return good_fit;
 }
 
 //----------------------------------------------------------------------------------------------
