@@ -34,7 +34,8 @@ class BasicFittingModel:
     def __init__(self, context):
         self.context = context
 
-        self._current_domain_index = 0
+        self._current_dataset_index = 0
+        self._dataset_names = []
 
         self._single_fit_functions = [None]
         self._single_fit_functions_cache = [None]
@@ -53,12 +54,32 @@ class BasicFittingModel:
         self.ws_fit_function_map = {}
 
     @property
-    def current_domain_index(self):
-        return self._current_domain_index
+    def current_dataset_index(self):
+        return self._current_dataset_index
 
-    @current_domain_index.setter
-    def current_domain_index(self, index):
-        self._current_domain_index = index
+    @current_dataset_index.setter
+    def current_dataset_index(self, index):
+        self._current_dataset_index = index
+
+    @property
+    def dataset_names(self):
+        return self._dataset_names
+
+    @dataset_names.setter
+    def dataset_names(self, names):
+        self._dataset_names = names
+
+    @property
+    def current_dataset_name(self):
+        return self.dataset_names[self.current_dataset_index]
+
+    @current_dataset_name.setter
+    def current_dataset_name(self, name):
+        self.dataset_names[self.current_dataset_index] = name
+
+    @property
+    def number_of_datasets(self):
+        return len(self.dataset_names)
 
     @property
     def single_fit_functions(self):
@@ -73,11 +94,11 @@ class BasicFittingModel:
 
     @property
     def current_single_fit_function(self):
-        return self.single_fit_functions[self.current_domain_index]
+        return self.single_fit_functions[self.current_dataset_index]
 
     @current_single_fit_function.setter
     def current_single_fit_function(self, fit_function):
-        self.single_fit_functions[self.current_domain_index] = fit_function
+        self.single_fit_functions[self.current_dataset_index] = fit_function
 
     @property
     def single_fit_functions_cache(self):
@@ -100,11 +121,11 @@ class BasicFittingModel:
 
     @property
     def current_fit_status(self):
-        return self.fit_statuses[self.current_domain_index]
+        return self.fit_statuses[self.current_dataset_index]
 
     @current_fit_status.setter
     def current_fit_status(self, fit_status):
-        self.fit_statuses[self.current_domain_index] = fit_status
+        self.fit_statuses[self.current_dataset_index] = fit_status
 
     @property
     def fit_chi_squares(self):
@@ -116,11 +137,11 @@ class BasicFittingModel:
 
     @property
     def current_fit_chi_squared(self):
-        return self.fit_chi_squares[self.current_domain_index]
+        return self.fit_chi_squares[self.current_dataset_index]
 
     @current_fit_chi_squared.setter
     def current_fit_chi_squared(self, fit_chi_squared):
-        self.fit_chi_squares[self.current_domain_index] = fit_chi_squared
+        self.fit_chi_squares[self.current_dataset_index] = fit_chi_squared
 
     @property
     def start_xs(self):
@@ -132,11 +153,11 @@ class BasicFittingModel:
 
     @property
     def current_start_x(self):
-        return self.start_xs[self.current_domain_index]
+        return self.start_xs[self.current_dataset_index]
 
     @current_start_x.setter
     def current_start_x(self, value):
-        self.start_xs[self.current_domain_index] = value
+        self.start_xs[self.current_dataset_index] = value
 
     @property
     def end_xs(self):
@@ -148,11 +169,11 @@ class BasicFittingModel:
 
     @property
     def current_end_x(self):
-        return self.end_xs[self.current_domain_index]
+        return self.end_xs[self.current_dataset_index]
 
     @current_end_x.setter
     def current_end_x(self, value):
-        self.end_xs[self.current_domain_index] = value
+        self.end_xs[self.current_dataset_index] = value
 
     @property
     def function_name(self):

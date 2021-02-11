@@ -20,6 +20,7 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 import math
 from typing import List
+from mantid import logger
 
 
 class GeneralFittingModel(BasicFittingModel):
@@ -418,7 +419,7 @@ class GeneralFittingModel(BasicFittingModel):
         self.ws_fit_function_map.clear()
         workspace_keys = self.create_hashable_keys_for_workspace_names()
 
-        for index, workspace_key in enumerate(workspace_keys):
+        for workspace_key in workspace_keys:
             self.ws_fit_function_map[workspace_key] = fit_function.clone()
 
         if self.fitting_options["tf_asymmetry_mode"]:
@@ -428,7 +429,7 @@ class GeneralFittingModel(BasicFittingModel):
         if self.simultaneous_fitting_mode:
             return self.simultaneous_fit_function
         else:
-            return self.single_fit_functions[self.current_domain_index]
+            return self.single_fit_functions[self.current_dataset_index]
 
     # This function creates a list of keys from a list of input workspace names
     def create_hashable_keys_for_workspace_names(self):
@@ -496,7 +497,7 @@ class GeneralFittingModel(BasicFittingModel):
     def clear_fit_information(self):
         self.single_fit_functions = [None]
         self.simultaneous_fit_function = None
-        self.current_domain_index = 0
+        self.current_dataset_index = 0
         self.function_name = ""
         self.ws_fit_function_map = {}
 
@@ -542,6 +543,9 @@ class GeneralFittingModel(BasicFittingModel):
         params['Function'] = self.get_ws_fit_function(workspaces)
         params['StartX'] = [self.current_start_x] * len(workspaces)
         params['EndX'] = [self.current_end_x] * len(workspaces)
+
+        logger.warning(f"Input Ws {str(params['InputWorkspace'])}")
+        logger.warning(f"Fit Function {str(params['Function'])}")
 
         return params
 

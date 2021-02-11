@@ -27,8 +27,6 @@ class BasicFittingPresenter:
         self.model = model
         self.context = context
 
-        self._selected_data = []
-
         self._number_of_fits_cached = 0
 
         self.thread_success = True
@@ -79,22 +77,9 @@ class BasicFittingPresenter:
     def update_view_from_model(self, workspace_removed=None):
         """Update the view using the data stored in the model."""
         if workspace_removed:
-            self.selected_data = [item for item in self.selected_data if item != workspace_removed]
+            self.model.dataset_names = [name for name in self.model.dataset_names if name != workspace_removed]
         else:
-            self.selected_data = []
-
-    @property
-    def selected_data(self):
-        """Return the names of the currently selected workspaces."""
-        return self._selected_data
-
-    @selected_data.setter
-    def selected_data(self, selected_data):
-        """Set the currently selected data. Clear and reset the GUI."""
-        if self._selected_data == selected_data:
-            return
-
-        self._selected_data = selected_data
+            self.model.dataset_names = []
         self.clear_and_reset_gui_state()
 
     def handle_gui_changes_made(self, changed_values):
@@ -105,7 +90,7 @@ class BasicFittingPresenter:
 
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
-        if len(self.selected_data) < 1:
+        if self.model.number_of_datasets < 1:
             self.view.warning_popup("No data selected for fitting.")
             return
         if not self.view.fit_object:
@@ -212,15 +197,15 @@ class BasicFittingPresenter:
 
     def clear_and_reset_gui_state(self):
         """Clears all data in the view and updates the model."""
-        self.view.set_datasets_in_function_browser(self.selected_data)
+        self.view.set_datasets_in_function_browser(self.model.dataset_names)
 
         self._reset_fit_status_information()
         self._reset_start_time_to_first_good_data_value()
         #self._reset_fit_function()
 
-    def set_current_domain_index(self, domain_index):
-        self.model.current_domain_index = domain_index
-        self.view.set_current_dataset_index(domain_index)
+    def set_current_dataset_index(self, dataset_index):
+        self.model.current_dataset_index = dataset_index
+        self.view.set_current_dataset_index(dataset_index)
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
@@ -261,7 +246,7 @@ class BasicFittingPresenter:
         self.view.update_with_fit_outputs(fit_function,
                                           self.model.current_fit_status,
                                           self.model.current_fit_chi_squared)
-        self.view.update_global_fit_state(self.model.fit_statuses, self.model.current_domain_index)
+        self.view.update_global_fit_state(self.model.fit_statuses, self.model.current_dataset_index)
 
     def _fit_function_index(self):
         """Return the index of the currently displayed fit function (assume it is zero for BasicFitting for now)."""
@@ -287,16 +272,20 @@ class BasicFittingPresenter:
 
     def _reset_fit_status_information(self):
         """Reset the fit status and chi squared information currently displayed."""
-        self.model.fit_statuses = [None] * len(self.selected_data) if self.selected_data else [None]
-        self.model.fit_chi_squares = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        number_of_datasets = self.model.number_of_datasets
+
+        self.model.fit_statuses = [None] * number_of_datasets if number_of_datasets > 0 else [None]
+        self.model.fit_chi_squares = [0.0] * number_of_datasets if number_of_datasets > 0 else [0.0]
         self.update_fit_status_in_the_view()
         self.view.enable_undo_fit(False)
 
     def _reset_start_time_to_first_good_data_value(self):
         """Reset the start and end X to the first good data value."""
+        number_of_datasets = self.model.number_of_datasets
+
         self.model.start_xs = [self._retrieve_first_good_data_from_run_name(run_name)
-                               for run_name in self.selected_data] if self.selected_data else [DEFAULT_START_X]
-        self.model.end_xs = [self.view.end_time] * len(self.selected_data) if self.selected_data else [DEFAULT_END_X]
+                               for run_name in self.model.dataset_names] if number_of_datasets > 0 else [DEFAULT_START_X]
+        self.model.end_xs = [self.view.end_time] * number_of_datasets if number_of_datasets > 0 else [DEFAULT_END_X]
 
         self.view.start_time = self.model.start_xs[0]
         self.view.end_time = self.model.end_xs[0]
