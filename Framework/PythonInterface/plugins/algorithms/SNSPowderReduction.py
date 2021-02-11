@@ -478,7 +478,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
             # Check if existing container
-            #  - has history
+            #  - has history and is using SNSPowderReduction
             #    - was created using the same method
             #       -> carry on as usual
             #    - was created with a different method
@@ -489,11 +489,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
                 if not hstry.empty():
-                    last_absMethod = hstry.getAlgorithm(0).getPropertyValue("TypeOfCorrection")
-                    if last_absMethod != self._absMethod:
-                        self.log().information(
-                            f"Remove {can_run_ws_name} as it is generated with a different method")
-                        mtd.remove(can_run_ws_name)
+                    alg = hstry.getAlgorithm(0)
+                    if alg.name() == "SNSPowderReduction":
+                        if alg.getPropertyValue("TypeOfCorrection") != self._absMethod:
+                            self.log().information(
+                                f"Remove {can_run_ws_name} as it is generated with a different method"
+                            )
+                            mtd.remove(can_run_ws_name)
 
             can_run_ws_name = self._process_container_runs(can_run_numbers,
                                                            samRunIndex,
