@@ -176,9 +176,9 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         return self.fit_function_options.get_global_parameters()
 
     def switch_to_simultaneous(self):
-        """Switches the view to simultaneous mode."""
+        """Switches the view to simultaneous fit mode."""
         self.fit_function_options.switch_to_simultaneous()
 
     def switch_to_single(self):
-        """Switches the view to single mode."""
+        """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
