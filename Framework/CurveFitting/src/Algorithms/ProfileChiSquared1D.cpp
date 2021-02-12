@@ -52,8 +52,10 @@ using namespace Mantid::API;
 class ChiSlice {
 public:
   /// Constructor.
-  /// @param f :: The fitting function
+  /// @param inputFunction :: The fitting function
   /// @param dir :: A normalised direction vector in the parameter space.
+  /// @param inputWS :: The input workspace (used for fit algorithm)
+  /// @param workspaceIndex :: Workspace index (used for fit algorithm)
   /// @param domain :: Function's domain.
   /// @param values :: Functin's values.
   /// @param chi0 :: Chi squared at the minimum.
@@ -108,11 +110,10 @@ public:
   /// @param A :: Output vector with approximation parameters.
   Functions::ChebfunBase_sptr makeApprox(double lBound, double rBound,
                                          std::vector<double> &P,
-                                         std::vector<double> &A, bool &ok) {
+                                         std::vector<double> &A) {
 
     auto base = Functions::ChebfunBase::bestFitAnyTolerance(
         lBound, rBound, *this, P, A, 1.0, 1e-4, 129);
-    ok = bool(base);
     if (!base) {
       base = std::make_shared<Functions::ChebfunBase>(10, lBound, rBound, 1e-4);
       P = base->fit(*this);
@@ -178,7 +179,7 @@ private:
 };
 
 /// Default constructor
-ProfileChiSquared1D::ProfileChiSquared1D() : IFittingAlgorithm(){}
+ProfileChiSquared1D::ProfileChiSquared1D() : IFittingAlgorithm() {}
 
 const std::string ProfileChiSquared1D::name() const {
   return "ProfileChiSquared1D";
@@ -208,7 +209,7 @@ void ProfileChiSquared1D::execConcrete() {
   boost::math::chi_squared chi2Dist(1);
   std::array<double, 3> sigmas = {1, 2, 3};
   std::array<double, 3> qvalues;
-  for (int i = 0; i < sigmas.size(); i++) {
+  for (size_t i = 0; i < sigmas.size(); i++) {
     double pvalue = std::erf(sigmas[i] / sqrt(2));
     // find chi2 quanitile for given p value
     qvalues[i] = boost::math::quantile(chi2Dist, pvalue);
@@ -266,9 +267,7 @@ void ProfileChiSquared1D::execConcrete() {
   CalculateChiSquared::calcChiSquared(*m_function, nParams, *domain, *values,
                                       chiSquared, chiSquaredWeighted, dof);
   // Value of chi squared for current parameters in m_function
-  double chi0 = chiSquared;
-  // Fit data variance
-  chi0 = chiSquaredWeighted;
+  double chi0 = chiSquaredWeighted;
 
   // Parameter bounds that define a volume in the parameter
   // space within which the chi squared is being examined.
@@ -324,8 +323,7 @@ void ProfileChiSquared1D::execConcrete() {
     // The polynomial is defined on interval [lBound, rBound]
     // The value of the polynomial at 0 == chi squared at par0
     std::vector<double> P, A;
-    bool ok = true;
-    auto base = slice.makeApprox(lBound, rBound, P, A, ok);
+    auto base = slice.makeApprox(lBound, rBound, P, A);
 
     // Write n slice points into the output table.
     double dp = (rBound - lBound) / static_cast<double>(n);
@@ -363,7 +361,7 @@ void ProfileChiSquared1D::execConcrete() {
     // interval on parameter ip
     valueColumn->fromDouble(ip, par0);
     minValueColumn->fromDouble(ip, par0 + parMin);
-    for (auto i = 0; i < qvalues.size(); i++) {
+    for (size_t i = 0; i < qvalues.size(); i++) {
       auto [rootsMin, rootsMax] =
           getChiSquaredRoots(base, A, qvalues[i], rBound, lBound);
       errorsTable->getColumn(3 + 2 * i)->fromDouble(ip, rootsMin - parMin);

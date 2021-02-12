@@ -20,7 +20,7 @@ Profiles chi2 about its minimum to find parameter errors
 */
 class MANTID_CURVEFITTING_DLL ProfileChiSquared1D : public IFittingAlgorithm {
 public:
-  ProfileChiSquared1D(); 
+  ProfileChiSquared1D();
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override {

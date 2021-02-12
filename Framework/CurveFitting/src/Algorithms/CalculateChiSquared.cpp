@@ -130,11 +130,13 @@ void CalculateChiSquared::execConcrete() {
 
 /// Caclculate the chi squared, weighted chi squared and the number of degrees
 /// of freedom.
-/// @param domain :: Function's domain.
+/// @param fun :: Function's domain.
 /// @param nParams :: Number of free fitting parameters.
-/// @param values :: Functin's values.
-/// @param chi0 :: Chi squared at the minimum.
-/// @param sigma2 :: Estimated variance of the fitted data.
+/// @param domain :: Function's domain
+/// @param values :: Function's values
+/// @param chiSquared :: unweighted chi squared
+/// @param chiSquaredWeighted :: weighted chi squared
+/// @param dof :: degrees of freedom
 void CalculateChiSquared::calcChiSquared(
     const API::IFunction &fun, size_t nParams,
     const API::FunctionDomain &domain, API::FunctionValues &values,

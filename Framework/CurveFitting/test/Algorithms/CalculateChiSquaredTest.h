@@ -188,7 +188,6 @@ private:
     double EndX;
     bool ignoreInvalidData;
     std::string outputName;
-    bool Weighted;
 
     void makeXValues() {
       size_t dlt = isHisto ? 1 : 0;
@@ -237,7 +236,7 @@ private:
     Tester(size_t np = 3, size_t nd = 10, bool histo = true)
         : nParams(np), nData(nd), isHisto(histo), xMin(-10), xMax(10),
           workspaceIndex(0), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
-          ignoreInvalidData(false), Weighted(false),
+          ignoreInvalidData(false),
           // output
           chiSquared(-1), chiSquaredDividedByDOF(-1), chiSquaredWeighted(-1),
           chiSquaredWeightedDividedByDOF(-1), isExecuted(false) {
