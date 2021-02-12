@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 
+import re
 from typing import List, NamedTuple
 
 DEFAULT_START_X = 0.0
@@ -220,6 +221,22 @@ class BasicFittingModel:
     @fit_to_raw.setter
     def fit_to_raw(self, fit_to_raw):
         self._fit_to_raw = fit_to_raw
+        self.context.fitting_context.fit_raw = fit_to_raw
+
+    @property
+    def do_rebin(self):
+        return self.context._do_rebin()
+
+    def remove_latest_fit_from_context(self):
+        """Removes the latest fit results from the context."""
+        self.context.fitting_context.remove_latest_fit()
+
+    def retrieve_first_good_data_from_run(self, workspace_name):
+        """Returns the first good data value from a run number within a workspace name."""
+        try:
+            return self.context.first_good_data([float(re.search("[0-9]+", workspace_name).group())])
+        except AttributeError:
+            return DEFAULT_START_X
 
     def get_active_workspace_names(self):
         """Returns the names of the workspaces that will be fitted. Single Fit mode only fits the selected workspace."""

@@ -89,6 +89,14 @@ class GeneralFittingModel(BasicFittingModel):
     def tf_asymmetry_mode(self, tf_asymmetry_mode):
         self._tf_asymmetry_mode = tf_asymmetry_mode
 
+    def get_simultaneous_fit_by_specifiers_to_display_from_context(self):
+        """Returns the simultaneous fit by specifiers to display in the view from the context."""
+        if self.simultaneous_fit_by == "Run":
+            return self._get_selected_runs()
+        elif self.simultaneous_fit_by == "Group/Pair":
+            return self._get_selected_groups_and_pairs()
+        return []
+
     def get_workspace_names_to_display_from_context(self):
         """Returns the workspace names to display in the view based on the selected run and group/pair options."""
         runs, groups_and_pairs = self._get_selected_runs_groups_and_pairs()
@@ -130,6 +138,27 @@ class GeneralFittingModel(BasicFittingModel):
     def _get_selected_groups_and_pairs(self):
         """Returns the groups and pairs currently selected in the context."""
         return self.context.group_pair_context.selected_groups_and_pairs
+
+    def _get_selected_runs(self):
+        """Returns an ordered list of run numbers currently selected in the context."""
+        if len(self.context.data_context.current_runs) > 1:
+            run_numbers = self._get_selected_runs_from_run_list()
+        else:
+            run_numbers = self._get_selected_runs_from_workspace()
+        run_numbers.sort()
+        return run_numbers
+
+    def _get_selected_runs_from_run_list(self):
+        """Extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]"""
+        current_runs = self.context.data_context.current_runs
+        return [str(run) for run_list in current_runs for run in run_list]
+
+    def _get_selected_runs_from_workspace(self):
+        """Extract runs from the output workspace of the data context."""
+        instrument = self.context.data_context.instrument
+        workspace_list = self.context.data_context.current_data["OutputWorkspace"]
+        return [get_run_numbers_as_string_from_workspace_name(workspace.workspace_name, instrument)
+                for workspace in workspace_list]
 
     def _get_x_data_type(self):
         """Returns the type of data in the x domain. Returns string "None" if it cannot be determined."""

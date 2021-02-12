@@ -17,8 +17,7 @@ class FittingTabWidget(object):
 
         self.general_fitting_view = GeneralFittingView(parent, is_frequency_domain)
         self.general_fitting_model = GeneralFittingModel(context)
-        self.general_fitting_presenter = GeneralFittingPresenter(self.general_fitting_view, self.general_fitting_model,
-                                                                 context)
+        self.general_fitting_presenter = GeneralFittingPresenter(self.general_fitting_view, self.general_fitting_model)
 
         self.fitting_tab_view = FittingTabView(parent, context, self.general_fitting_view)
 
