@@ -77,6 +77,23 @@ class BasicFittingPresenter:
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
                 self.reset_start_xs_and_end_xs()
 
+    def handle_new_data_loaded(self):
+        """Handle when new data has been loaded into the interface."""
+        self.view.plot_guess = False
+        self.view.enable_undo_fit(False)
+
+    def handle_plot_guess_changed(self):
+        """Handle when plot guess is ticked or un-ticked."""
+        self.model.update_plot_guess(self.view.plot_guess)
+
+    def handle_undo_fit_clicked(self):
+        """Handle when undo fit is clicked."""
+        self.model.single_fit_functions = self.model.single_fit_functions_cache
+        self.model.remove_latest_fit_from_context()
+
+        self.clear_fit_status_and_chi_squared_information()
+        self._number_of_fits_cached = 0
+
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
         if self.model.number_of_datasets < 1:
@@ -113,19 +130,6 @@ class BasicFittingPresenter:
         self.thread_success = False
         self.view.warning_popup(error)
 
-    def handle_new_data_loaded(self):
-        """Handle when new data has been loaded into the interface."""
-        self.view.plot_guess = False
-        self.view.enable_undo_fit(False)
-
-    def handle_undo_fit_clicked(self):
-        """Handle when undo fit is clicked."""
-        self.model.single_fit_functions = self.model.single_fit_functions_cache
-        self.model.remove_latest_fit_from_context()
-
-        self.clear_fit_status_and_chi_squared_information()
-        self._number_of_fits_cached = 0
-
     def handle_fit_generator_clicked(self):
         """Handle when the Fit Generator button has been clicked."""
         self._open_fit_script_generator_interface(self.model.dataset_names, self._get_fit_browser_options())
@@ -145,10 +149,6 @@ class BasicFittingPresenter:
 
     def handle_fitting_finished(self):
         """Handle when fitting is finished."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
-    def handle_plot_guess_changed(self):
-        """Handle when plot guess is ticked or unticked."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def handle_function_structure_changed(self):
@@ -208,14 +208,9 @@ class BasicFittingPresenter:
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
-        return {"FittingType": "Simultaneous" if self.simultaneous_fitting_mode() else "Sequential",
+        return {"FittingType": "Simultaneous" if self.model.simultaneous_fitting_mode else "Sequential",
                 "Minimizer": self.model.minimizer,
                 "EvaluationType": self.model.evaluation_type}
-
-    @staticmethod
-    def simultaneous_fitting_mode():
-        """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
-        return False
 
     def _perform_fit(self):
         """Perform the fit in a thread."""
