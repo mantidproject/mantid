@@ -39,10 +39,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.global_parameters = self.view.get_global_parameters()
         self.model.tf_asymmetry_mode = False  # TEMPORARY
 
-    def simultaneous_fitting_mode(self):
-        """Returns true if the fitting mode is simultaneous."""
-        return self.model.simultaneous_fitting_mode
-
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
         self.update_and_reset_all_data()
@@ -51,6 +47,12 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_selected_group_pair_changed(self):
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
         self.update_and_reset_all_data()
+
+    def handle_undo_fit_clicked(self):
+        """Handle when undo fit is clicked."""
+        super().handle_undo_fit_clicked()
+        self.model.simultaneous_fit_function = self.model.simultaneous_fit_function_cache
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
         """Handle when fitting is finished."""
@@ -68,22 +70,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
 
-    def handle_plot_guess_changed(self):
-        """Handle when plot guess is ticked or unticked."""
-        active_workspaces = self.model.get_active_workspace_names()
-        self.model.change_plot_guess(self.view.plot_guess, active_workspaces, self.model.current_dataset_index)
-
-    def handle_undo_fit_clicked(self):
-        """Handle when undo fit is clicked."""
-        super().handle_undo_fit_clicked()
-        self.model.simultaneous_fit_function = self.model.simultaneous_fit_function_cache
-        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
-
     def handle_fitting_mode_changed(self):
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
         self.model.simultaneous_fitting_mode = self.view.is_simultaneous_fit_ticked
 
-        if self.view.is_simultaneous_fit_ticked:
+        if self.model.simultaneous_fitting_mode:
             self.view.switch_to_simultaneous()
         else:
             self.view.switch_to_single()
@@ -142,7 +133,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the function structure is changed."""
         #if not self._fit_function[0]:
         #    self.handle_display_workspace_changed()
-        self.view.plot_guess = False
         self.update_fit_functions_in_model_from_view()
         if not self.view.fit_object:
             self.model.clear_fit_information()
@@ -155,20 +145,21 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.global_parameters = self.view.get_global_parameters()
 
         self.fit_function_changed_notifier.notify_subscribers()
+        self.model.update_plot_guess(self.view.plot_guess)
 
     def handle_function_parameter_changed(self):
         """Handle when the value of a parameter in a function is changed."""
-        if not self.view.is_simultaneous_fit_ticked:
-            fit_function = self.current_single_fit_function_in_view()
-            self.model.current_single_fit_function = fit_function
-        else:
+        if self.model.simultaneous_fitting_mode:
             fit_function = self.view.fit_object
             self.model.simultaneous_fit_function = fit_function
+        else:
+            fit_function = self.current_single_fit_function_in_view()
+            self.model.current_single_fit_function = fit_function
 
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
         self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
-        self.model.update_plot_guess(self.model.get_active_workspace_names(), self.view.get_index_for_start_end_times())
+        self.model.update_plot_guess(self.view.plot_guess)
 
     def clear_and_reset_gui_state(self):
         #"""Clears all data in the view and updates the model."""
@@ -192,7 +183,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_fit_statuses_and_chi_squared_in_model(self, fit_status, chi_squared):
         """Updates the fit status and chi squared stored in the model. This is used after a fit."""
-        if self.view.is_simultaneous_fit_ticked:
+        if self.model.simultaneous_fitting_mode:
             self.model.fit_statuses = [fit_status] * self.model.number_of_datasets
             self.model.fit_chi_squares = [chi_squared] * self.model.number_of_datasets
         else:
@@ -201,17 +192,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_fit_function_in_model(self, fit_function):
         """Updates the fit function stored in the model. This is used after a fit."""
-        if self.view.is_simultaneous_fit_ticked:
+        if self.model.simultaneous_fitting_mode:
             self.model.simultaneous_fit_function = fit_function
         else:
             self.model.current_single_fit_function = fit_function
 
     def update_fit_function_in_view_from_model(self):
         """Updates the parameters of a fit function shown in the view."""
-        if self.view.is_simultaneous_fit_ticked:
-            self.view.update_fit_function(self.model.simultaneous_fit_function)
-        else:
-            self.view.update_fit_function(self.model.current_single_fit_function)
+        self.view.update_fit_function(self.model.get_active_fit_function())
 
     def update_simultaneous_fit_by_specifiers_in_view(self):
         """Updates the entries in the simultaneous fit by specifier combo box."""
@@ -225,7 +213,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_fit_functions_in_model_from_view(self):
         """Updates the fit functions stored in the model using the view."""
-        if self.view.is_simultaneous_fit_ticked:
+        if self.model.simultaneous_fitting_mode:
             self.model.clear_single_fit_functions()
             self.update_simultaneous_fit_function_in_model()
         else:

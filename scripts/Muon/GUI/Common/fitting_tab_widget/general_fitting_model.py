@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry,
-                              CopyLogs, EvaluateFunction)
+from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry, CopyLogs
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
@@ -123,6 +122,13 @@ class GeneralFittingModel(BasicFittingModel):
 
         return self._sort_workspace_names(display_workspaces)
 
+    def get_active_fit_function(self):
+        """Returns the fit function that is active and will be used for a fit."""
+        if self.simultaneous_fitting_mode:
+            return self.simultaneous_fit_function
+        else:
+            return super().get_active_fit_function()
+
     def get_active_workspace_names(self):
         """Returns the names of the workspaces that will be fitted. For simultaneous fitting, it is all loaded data."""
         if self.simultaneous_fitting_mode:
@@ -207,63 +213,6 @@ class GeneralFittingModel(BasicFittingModel):
     def stored_fit_functions(self):
         pass
         ##return list(self.ws_fit_function_map.values())
-
-    # plot guess
-    def change_plot_guess(self, plot_guess, workspace_names, index):
-        guess_ws_name = self.evaluate_plot_guess(workspace_names, plot_guess, index)
-        if guess_ws_name and AnalysisDataService.doesExist(guess_ws_name):
-            self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
-
-    def update_plot_guess(self, workspace_names, index):
-        if not self.context.fitting_context.plot_guess:
-            return
-        self.evaluate_plot_guess(workspace_names, plot_guess=True, index=index)
-
-    def evaluate_plot_guess(self, workspace_names: str, plot_guess: bool, index: int):
-        fit_function, data_ws_name = self._get_guess_parameters(workspace_names, index)
-        if isinstance(data_ws_name, list):
-            data_ws_name = data_ws_name[0]
-        if not data_ws_name:
-            return
-        if isinstance(data_ws_name, List):
-            data_ws_name = data_ws_name[0]
-        if self.context.workspace_suffix == MA_SUFFIX:
-            guess_ws_name = MA_GUESS_WORKSPACE + data_ws_name
-        elif self.context.workspace_suffix == FDA_SUFFIX:
-            guess_ws_name = FDA_GUESS_WORKSPACE + data_ws_name
-        else:
-            guess_ws_name = '__unknown_interface_fitting_guess'
-        # Handle case of function removed
-        if fit_function is None and plot_guess:
-            self.context.fitting_context.notify_plot_guess_changed(plot_guess, None)
-        elif fit_function is None or not workspace_names:
-            return
-        else:
-            # evaluate the current function on the workspace
-            if plot_guess:
-                try:
-                    EvaluateFunction(InputWorkspace=data_ws_name,
-                                     Function=fit_function,
-                                     StartX=self.current_start_x,
-                                     EndX=self.current_end_x,
-                                     OutputWorkspace=guess_ws_name)
-                except RuntimeError:
-                    mantid.logger.error('Could not evaluate the function.')
-                    return
-            return guess_ws_name
-
-    def _get_guess_parameters(self, workspace_names, index):
-        # Currently not supporting plot guess and tf asymmetry mode
-        if self.tf_asymmetry_mode:
-            return None, None
-        params = self._get_fit_parameters(workspace_names)
-        data_ws_name = params['InputWorkspace']
-        fit_function = params['Function']
-        if self.simultaneous_fitting_mode and fit_function is not None:
-            equiv_functions = fit_function.createEquivalentFunctions()
-            fit_function = equiv_functions[index]
-            data_ws_name = workspace_names[index]
-        return fit_function, data_ws_name
 
     # single fitting
     def evaluate_single_fit(self, workspace):
@@ -636,19 +585,6 @@ class GeneralFittingModel(BasicFittingModel):
         else:
             freq = 'None'
         return freq
-
-    def _get_fit_parameters(self, workspaces):
-        if not self.simultaneous_fitting_mode:
-            if self.tf_asymmetry_mode:
-                params = self.get_parameters_for_single_tf_fit(workspaces[0])
-            else:
-                params = self.get_parameters_for_single_fit(workspaces[0])
-        else:  # single simultaneous fit
-            if self.tf_asymmetry_mode:
-                params = self.get_parameters_for_simultaneous_tf_fit(workspaces)
-            else:
-                params = self.get_parameters_for_simultaneous_fit(workspaces)
-        return params
 
     def get_parameters_for_single_fit(self, workspace):
         params = self._get_shared_parameters()

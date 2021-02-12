@@ -4,6 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid import logger
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import EvaluateFunction
+
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 
 import re
@@ -227,8 +231,18 @@ class BasicFittingModel:
         self.context.fitting_context.fit_raw = fit_to_raw
 
     @property
+    def simultaneous_fitting_mode(self):
+        """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
+        return False
+
+    @property
     def do_rebin(self):
         return self.context._do_rebin()
+
+    def update_plot_guess(self, plot_guess):
+        """Updates the guess plot using the current dataset and function."""
+        guess_workspace_name = self._evaluate_plot_guess(plot_guess)
+        self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_workspace_name)
 
     def remove_latest_fit_from_context(self):
         """Removes the latest fit results from the context."""
@@ -240,6 +254,10 @@ class BasicFittingModel:
             return self.context.first_good_data([float(re.search("[0-9]+", workspace_name).group())])
         except AttributeError:
             return DEFAULT_START_X
+
+    def get_active_fit_function(self):
+        """Returns the fit function that is active and will be used for a fit."""
+        return self.current_single_fit_function
 
     def get_active_workspace_names(self):
         """Returns the names of the workspaces that will be fitted. Single Fit mode only fits the selected workspace."""
@@ -277,3 +295,36 @@ class BasicFittingModel:
             return get_function_name_for_composite(function)
         except AttributeError:
             return function.name()
+
+    def _evaluate_plot_guess(self, plot_guess: bool):
+        if not plot_guess or self.current_dataset_name is None:
+            return None
+
+        if fit_function := self._get_plot_guess_fit_function():
+            return self._evaluate_function(fit_function, self._get_plot_guess_name())
+        return None
+
+    def _evaluate_function(self, fit_function, output_workspace):
+        try:
+            EvaluateFunction(InputWorkspace=self.current_dataset_name,
+                             Function=fit_function,
+                             StartX=self.current_start_x,
+                             EndX=self.current_end_x,
+                             OutputWorkspace=output_workspace)
+        except RuntimeError:
+            logger.error("Failed to plot guess.")
+            return None
+        return output_workspace
+
+    def _get_plot_guess_name(self):
+        if self.context.workspace_suffix == MA_SUFFIX:
+            return MA_GUESS_WORKSPACE + self.current_dataset_name
+        else:
+            return FDA_GUESS_WORKSPACE + self.current_dataset_name
+
+    def _get_plot_guess_fit_function(self):
+        fit_function = self.get_active_fit_function()
+        if fit_function is not None and self.simultaneous_fitting_mode:
+            return fit_function.createEquivalentFunctions()[self.current_dataset_index]
+        else:
+            return fit_function
