@@ -26,6 +26,9 @@ from mantid import logger
 class GeneralFittingModel(BasicFittingModel):
     def __init__(self, context):
         super(GeneralFittingModel, self).__init__(context)
+
+        self._x_data_type = self._get_x_data_type()
+
         self._grppair_index = {}
 
         # This is a MultiDomainFunction if there are multiple domains in the function browser.
@@ -86,12 +89,70 @@ class GeneralFittingModel(BasicFittingModel):
     def tf_asymmetry_mode(self, tf_asymmetry_mode):
         self._tf_asymmetry_mode = tf_asymmetry_mode
 
+    def get_workspace_names_to_display_from_context(self):
+        """Returns the workspace names to display in the view based on the selected run and group/pair options."""
+        runs, groups_and_pairs = self._get_selected_runs_groups_and_pairs()
+
+        display_workspaces = []
+        for group_and_pair in groups_and_pairs:
+            display_workspaces += self._get_workspace_names_to_display_from_context(runs, group_and_pair)
+
+        return self._sort_workspace_names(display_workspaces)
+
     def get_active_workspace_names(self):
-        """Returns the names of the workspaces that will be fitted."""
+        """Returns the names of the workspaces that will be fitted. For simultaneous fitting, it is all loaded data."""
         if self.simultaneous_fitting_mode:
             return self.dataset_names
         else:
             return super().get_active_workspace_names()
+
+    def _get_selected_runs_groups_and_pairs(self):
+        """Returns the runs, groups and pairs that are currently selected."""
+        if self.simultaneous_fitting_mode:
+            return self._get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode()
+        else:
+            return self._get_selected_runs_groups_and_pairs_for_single_fit_mode()
+
+    def _get_selected_runs_groups_and_pairs_for_simultaneous_fit_mode(self):
+        """Returns the runs, groups and pairs that are currently selected for simultaneous fit mode."""
+        runs, groups_and_pairs = self._get_selected_runs_groups_and_pairs_for_single_fit_mode()
+
+        if self.simultaneous_fit_by == "Run":
+            runs = self.simultaneous_fit_by_specifier
+        elif self.simultaneous_fit_by == "Group/Pair":
+            groups_and_pairs = [self.simultaneous_fit_by_specifier]
+        return runs, groups_and_pairs
+
+    def _get_selected_runs_groups_and_pairs_for_single_fit_mode(self):
+        """Returns the runs, groups and pairs to use for single fit mode."""
+        return "All", self._get_selected_groups_and_pairs()
+
+    def _get_selected_groups_and_pairs(self):
+        """Returns the groups and pairs currently selected in the context."""
+        return self.context.group_pair_context.selected_groups_and_pairs
+
+    def _get_x_data_type(self):
+        """Returns the type of data in the x domain. Returns string "None" if it cannot be determined."""
+        if isinstance(self.context, FrequencyDomainAnalysisContext):
+            return self.context._frequency_context.plot_type
+        return "None"
+
+    def _get_workspace_names_to_display_from_context(self, runs, group_and_pair):
+        """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
+        return self.context.get_names_of_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
+                                                           rebin=not self.fit_to_raw, freq=self._x_data_type)
+
+    def _sort_workspace_names(self, workspace_names):
+        """Sort the workspace names and check the workspaces exist in the ADS."""
+        workspace_names = list(set(self._check_data_exists(workspace_names)))
+        if len(workspace_names) > 1:
+            workspace_names.sort(key=self.workspace_list_sorter)
+        return workspace_names
+
+    @staticmethod
+    def _check_data_exists(workspace_names):
+        """Returns only the workspace names that exist in the ADS."""
+        return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
 
     ##############################
     ##  Old
@@ -719,9 +780,6 @@ class GeneralFittingModel(BasicFittingModel):
                     / (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
             return 0
-
-    def _get_selected_groups_and_pairs(self):
-        return self.context.group_pair_context.selected_groups_and_pairs
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):

@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_presenter import BasicFittingPresenter
-from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 
 
 from mantid import logger
@@ -56,14 +54,17 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
         self.update_selected_workspace_list_for_fit()
         self.update_fit_functions_in_model()
+        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
 
     def handle_selected_plot_type_changed(self, _):
         """Update the selected workspace list when the selected plot has changed."""
         self.update_selected_workspace_list_for_fit()
+        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
 
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
         self.update_selected_workspace_list_for_fit()
+        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
         super().handle_new_data_loaded()
 
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
@@ -103,7 +104,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.enable_undo_fit(False)
         self.model.simultaneous_fitting_mode = self.view.is_simultaneous_fit_ticked
 
-        self.model.dataset_names = self.get_workspace_selected_list()
+        self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         logger.warning(f"{str(self.model.dataset_names)}")
 
         if self.view.is_simultaneous_fit_ticked:
@@ -130,7 +131,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
         self.update_fit_by_specifier_list()
 
-        self.model.dataset_names = self.get_workspace_selected_list()
         self.view.update_displayed_data_combo_box(self.model.dataset_names)
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
 
@@ -143,7 +143,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_simultaneous_fit_by_specifier_changed(self):
         """Handle when the simultaneous fit by specifier combo box is changed."""
-        self.model.dataset_names = self.get_workspace_selected_list()
+        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
+
+        self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.clear_and_reset_gui_state()
         self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
@@ -234,31 +236,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Updates the simultaneous fit specifier and selected data."""
         self.update_fit_by_specifier_list()
 
-        self.model.dataset_names = self.get_workspace_selected_list()
+        self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.clear_and_reset_gui_state()
 
     def set_display_workspace(self, workspace_name):
         """Set the display workspace programmatically."""
         self.view.display_workspace = workspace_name
         self.handle_display_workspace_changed()
-
-    def get_workspace_selected_list(self):
-        """Get the names of workspaces stored in the context for fitting."""
-        freq = self.get_x_data_type()
-
-        selected_runs, selected_groups_and_pairs = self._get_selected_runs_and_groups_for_fitting()
-        selected_workspaces = []
-        for group_and_pair in selected_groups_and_pairs:
-            selected_workspaces += self.context.get_names_of_workspaces_to_fit(
-                runs=selected_runs,
-                group_and_pair=group_and_pair,
-                rebin=not self.model.fit_to_raw, freq=freq)
-
-        selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
-        if len(selected_workspaces) > 1:  # sort the list to preserve order
-            selected_workspaces.sort(key=self.model.workspace_list_sorter)
-
-        return selected_workspaces
 
     def update_fit_by_specifier_list(self):
         """Updates the simultaneous fit by specifier combo box."""
@@ -275,44 +259,25 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             run_numbers.sort()
             simul_choices = run_numbers
         elif self.view.simultaneous_fit_by == "Group/Pair":
-            simul_choices = self._get_selected_groups_and_pairs()
+            simul_choices = self.model._get_selected_groups_and_pairs()
         else:
             simul_choices = []
 
         self.view.setup_fit_by_specifier(simul_choices)
 
     def update_fit_status_in_the_view(self):
-        """Updates the fit status and chi squared information in the view."""
         if self.view.is_simultaneous_fit_ticked:
             self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function)
         else:
             self.update_fit_status_and_function_in_the_view(self.model.current_single_fit_function)
 
     def update_fit_functions_in_model(self):
-        """Updates the stored fit functions."""
+        """Updates the fit functions stored in the model using the view."""
         if self.view.is_simultaneous_fit_ticked:
             self.update_simultaneous_fit_function_in_model()
         else:
             self.update_single_fit_functions_in_model()
 
     def update_simultaneous_fit_function_in_model(self):
+        """Updates the simultaneous fit function in the model using the view."""
         self.model.simultaneous_fit_function = self.view.fit_object
-
-    def _get_selected_groups_and_pairs(self):
-        """Returns the selected groups and pairs."""
-        return self.context.group_pair_context.selected_groups_and_pairs
-
-    def _get_selected_runs_and_groups_for_fitting(self):
-        """Returns the selected runs and groups to be used for fitting."""
-        runs = "All"
-        groups_and_pairs = self._get_selected_groups_and_pairs()
-        if self.view.is_simultaneous_fit_ticked:
-            if self.view.simultaneous_fit_by == "Run":
-                runs = self.view.simultaneous_fit_by_specifier
-            elif self.view.simultaneous_fit_by == "Group/Pair":
-                groups_and_pairs = [self.view.simultaneous_fit_by_specifier]
-
-        logger.warning(str(runs))
-        logger.warning(str(groups_and_pairs))
-
-        return runs, groups_and_pairs
