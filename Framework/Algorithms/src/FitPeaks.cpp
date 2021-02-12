@@ -1081,8 +1081,8 @@ void FitPeaks::fitSpectrumPeaks(
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
 
-  // Copy result from last fitting and set flag
-  std::vector<double> localPrevGoodResults(m_peakFunction->nParams(), 0.0);
+  // index of previous peka inn same spectrum (initially innvalid)
+  size_t prev_peak_index = m_numPeaksToFit + 1;
   bool neighborPeakSameSpectrum = false;
 
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
@@ -1098,6 +1098,7 @@ void FitPeaks::fitSpectrumPeaks(
     double expected_peak_pos = expected_peak_centers[peak_index];
 
     // set center and calc any parameters from xml (e.g. A  and B for B2Bexp)
+    // need to set center beforehand for this to work
     peakfunction->setCentre(expected_peak_pos);
     peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
 
@@ -1161,23 +1162,19 @@ void FitPeaks::fitSpectrumPeaks(
     // Set starting values of the peak function
     if (samePeakCrossSpectrum) { // somePeakFit
       // Get from local best result
-      for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
+      for (size_t i = 0; i < peakfunction->nParams(); ++i) {
         peakfunction->setParameter(i, lastGoodPeakParameters[peak_index][i]);
       }
-
-      // reset center though - don't know before hand which element this is
-      peakfunction->setCentre(expected_peak_pos);
-
     } else if (neighborPeakSameSpectrum) {
       // set the peak parameters from last good fit to that peak
-      for (size_t i = 0; i < localPrevGoodResults.size(); ++i) {
-        peakfunction->setParameter(i, localPrevGoodResults[i]);
+      for (size_t i = 0; i < peakfunction->nParams(); ++i) {
+        peakfunction->setParameter(i,
+                                   lastGoodPeakParameters[prev_peak_index][i]);
       }
-
-      // reset center though - don't know before hand which element this is
-      peakfunction->setCentre(expected_peak_pos);
     }
 
+    // reset center though - don't know before hand which element this is
+    peakfunction->setCentre(expected_peak_pos);
     // reset value of ties parameters
     for (const auto &[ipar, value] : tied_values) {
       peakfunction->setParameter(ipar, value);
@@ -1217,14 +1214,13 @@ void FitPeaks::fitSpectrumPeaks(
     processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
                                fit_function, fit_result); // sets the record
 
-    if (fit_result->getCost(peak_index) <
-        1e10) { // assume it worked and save out the result
+    if (fit_result->getCost(peak_index) < 1e10) {
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
+      prev_peak_index = peak_index;
       // copy values
       for (size_t i = 0; i < lastGoodPeakParameters[peak_index].size(); ++i) {
         lastGoodPeakParameters[peak_index][i] = peakfunction->getParameter(i);
-        localPrevGoodResults[i] = peakfunction->getParameter(i);
       }
     }
   }
