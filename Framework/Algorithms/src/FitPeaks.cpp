@@ -1066,9 +1066,7 @@ void FitPeaks::fitSpectrumPeaks(
     throw std::runtime_error(errss.str());
   }
 
-  // Clone the function
-  IPeakFunction_sptr peakfunction =
-      std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
+  // Clone background function
   IBackgroundFunction_sptr bkgdfunction =
       std::dynamic_pointer_cast<API::IBackgroundFunction>(
           m_bkgdFunction->clone());
@@ -1081,8 +1079,8 @@ void FitPeaks::fitSpectrumPeaks(
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
 
-  // index of previous peak inn same spectrum (initially invalid)
-  size_t prev_peak_index = m_numPeaksToFit + 1;
+  // index of previous peak in same spectrum (initially invalid)
+  size_t prev_peak_index = m_numPeaksToFit;
   bool neighborPeakSameSpectrum = false;
 
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
@@ -1097,25 +1095,24 @@ void FitPeaks::fitSpectrumPeaks(
 
     double expected_peak_pos = expected_peak_centers[peak_index];
 
-    // set center and calc any parameters from xml (e.g. A  and B for B2Bexp)
-    // need to set center beforehand for this to work
+    // clone peak function for each peak (need to do this so can
+    // set center and calc any parameters from xml)
+    auto peakfunction =
+        std::dynamic_pointer_cast<API::IPeakFunction>(m_peakFunction->clone());
     peakfunction->setCentre(expected_peak_pos);
     peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
 
-    std::map<size_t, double> tied_values;
-    if (!peakfunction->writeTies().empty()) {
-      // save value of these parameters which have just been calculated
-      // if they were set to be tied (e.g. for the B2Bexp this would
-      // typically be A and B but not Sigma)
-      for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
-        auto tie = peakfunction->getTie(ipar);
-        if (tie) {
-          tied_values[ipar] = peakfunction->getParameter(ipar);
-        }
+    std::map<size_t, double> keep_values;
+    for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
+      if (peakfunction->isFixed(ipar)) {
+        // save value of these parameters which have just been calculated
+        // if they were set to be fixed (e.g. for the B2Bexp this would
+        // typically be A and B but not Sigma)
+        keep_values[ipar] = peakfunction->getParameter(ipar);
+        // let them be free to fit as these are typically refined from a
+        // focussed bank
+        peakfunction->unfix(ipar);
       }
-      // let them be free to fit as these are typically refined from a focussed
-      // bank
-      peakfunction->clearTies();
     }
 
     // Determine whether to set starting parameter from fitted value
@@ -1177,8 +1174,8 @@ void FitPeaks::fitSpectrumPeaks(
 
     // reset center though - don't know before hand which element this is
     peakfunction->setCentre(expected_peak_pos);
-    // reset value of ties parameters
-    for (const auto &[ipar, value] : tied_values) {
+    // reset value of parameters that were fixed (but are now free to vary)
+    for (const auto &[ipar, value] : keep_values) {
       peakfunction->setParameter(ipar, value);
     }
 
