@@ -14,17 +14,15 @@ from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import DEFAULT_START
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
 import functools
-import re
 
 from mantid import logger
 
 
 class BasicFittingPresenter:
 
-    def __init__(self, view, model, context):
+    def __init__(self, view, model):
         self.view = view
         self.model = model
-        self.context = context
 
         self._number_of_fits_cached = 0
 
@@ -122,8 +120,8 @@ class BasicFittingPresenter:
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
         self.model.single_fit_functions = self.model.single_fit_functions_cache
+        self.model.remove_latest_fit_from_context()
         self._reset_fit_status_information()
-        self.context.fitting_context.remove_latest_fit()
         self._number_of_fits_cached = 0
 
     def handle_fit_generator_clicked(self):
@@ -274,25 +272,16 @@ class BasicFittingPresenter:
         """Reset the start and end X to the first good data value."""
         number_of_datasets = self.model.number_of_datasets
 
-        self.model.start_xs = [self._retrieve_first_good_data_from_run_name(run_name)
-                               for run_name in self.model.dataset_names] if number_of_datasets > 0 else [DEFAULT_START_X]
+        self.model.start_xs = [self.model.retrieve_first_good_data_from_run(name)
+                               for name in self.model.dataset_names] if number_of_datasets > 0 else [DEFAULT_START_X]
         self.model.end_xs = [self.view.end_time] * number_of_datasets if number_of_datasets > 0 else [DEFAULT_END_X]
 
         self.view.start_time = self.model.start_xs[0]
         self.view.end_time = self.model.end_xs[0]
 
-    def _retrieve_first_good_data_from_run_name(self, workspace_name):
-        """Return the name of the first good data in a workspace."""
-        try:
-            run = [float(re.search("[0-9]+", workspace_name).group())]
-        except AttributeError:
-            return 0.0
-
-        return self.context.first_good_data(run)
-
     def _check_rebin_options(self):
         """Check that a rebin was indeed requested in the fitting tab or in the context."""
-        if not self.view.fit_to_raw and not self.context._do_rebin():
+        if not self.view.fit_to_raw and not self.model.do_rebin:
             self.view.fit_to_raw = True
             self.view.warning_popup("No rebin options specified.")
             return False

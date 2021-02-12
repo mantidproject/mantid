@@ -6,17 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_numbers_as_string_from_workspace_name
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_presenter import BasicFittingPresenter
-
 
 from mantid import logger
 
 
 class GeneralFittingPresenter(BasicFittingPresenter):
 
-    def __init__(self, view, model, context):
-        super(GeneralFittingPresenter, self).__init__(view, model, context)
+    def __init__(self, view, model):
+        super(GeneralFittingPresenter, self).__init__(view, model)
 
         self.update_selected_workspace_list_for_fit()
 
@@ -129,7 +127,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_simultaneous_fit_by_changed(self):
         """Handle when the simultaneous fit by combo box is changed."""
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
-        self.update_fit_by_specifier_list()
+        self.update_simultaneous_fit_by_specifiers_in_view()
 
         self.view.update_displayed_data_combo_box(self.model.dataset_names)
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
@@ -218,58 +216,39 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.current_end_x = value
 
     def handle_use_rebin_changed(self):
-        """Handle the Use Rebin state change."""
-        if not self._validate_rebin_options():
+        #"""Handle the Use Rebin state change."""
+        if not self._check_rebin_options():
             return
 
         self.update_selected_workspace_list_for_fit()
 
-        self.context.fitting_context.fit_raw = self.view.fit_to_raw
         self.model.fit_to_raw = self.view.fit_to_raw
 
     def clear_and_reset_gui_state(self):
-        """Clears all data in the view and updates the model."""
+        #"""Clears all data in the view and updates the model."""
         super().clear_and_reset_gui_state()
         self.view.update_displayed_data_combo_box(self.model.dataset_names)
 
     def update_selected_workspace_list_for_fit(self):
-        """Updates the simultaneous fit specifier and selected data."""
-        self.update_fit_by_specifier_list()
+        #"""Updates the simultaneous fit specifier and selected data."""
+        self.update_simultaneous_fit_by_specifiers_in_view()
 
         self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
         self.clear_and_reset_gui_state()
 
     def set_display_workspace(self, workspace_name):
-        """Set the display workspace programmatically."""
         self.view.display_workspace = workspace_name
         self.handle_display_workspace_changed()
-
-    def update_fit_by_specifier_list(self):
-        """Updates the simultaneous fit by specifier combo box."""
-        if self.view.simultaneous_fit_by == "Run":
-            # extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]
-            current_runs = self.context.data_context.current_runs
-            if len(current_runs) > 1:
-                run_numbers = [str(item) for sub_list in current_runs for item in sub_list]
-            else:
-                # extract runs from workspace
-                ws_list = self.context.data_context.current_data["OutputWorkspace"]
-                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
-                    ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
-            run_numbers.sort()
-            simul_choices = run_numbers
-        elif self.view.simultaneous_fit_by == "Group/Pair":
-            simul_choices = self.model._get_selected_groups_and_pairs()
-        else:
-            simul_choices = []
-
-        self.view.setup_fit_by_specifier(simul_choices)
 
     def update_fit_status_in_the_view(self):
         if self.view.is_simultaneous_fit_ticked:
             self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function)
         else:
             self.update_fit_status_and_function_in_the_view(self.model.current_single_fit_function)
+
+    def update_simultaneous_fit_by_specifiers_in_view(self):
+        """Updates the entries in the simultaneous fit by specifier combo box."""
+        self.view.setup_fit_by_specifier(self.model.get_simultaneous_fit_by_specifiers_to_display_from_context())
 
     def update_fit_functions_in_model(self):
         """Updates the fit functions stored in the model using the view."""
