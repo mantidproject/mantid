@@ -89,7 +89,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # create the Dockable plot widget
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.plot_widget = PlotWidget(self.context, self.fitting_tab.general_fitting_presenter.get_selected_fit_workspaces, parent=self)
+        self.plot_widget = PlotWidget(self.context, self.fitting_tab.general_fitting_model.get_active_fit_results,
+                                      parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)

@@ -86,6 +86,13 @@ class GeneralFittingModel(BasicFittingModel):
     def tf_asymmetry_mode(self, tf_asymmetry_mode):
         self._tf_asymmetry_mode = tf_asymmetry_mode
 
+    def get_active_workspace_names(self):
+        """Returns the names of the workspaces that will be fitted."""
+        if self.simultaneous_fitting_mode:
+            return self.dataset_names
+        else:
+            return super().get_active_workspace_names()
+
     ##############################
     ##  Old
     ##############################

@@ -55,7 +55,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_selected_group_pair_changed(self):
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
         self.update_selected_workspace_list_for_fit()
-        self._update_stored_fit_functions()
+        self.update_fit_functions_in_model()
 
     def handle_selected_plot_type_changed(self, _):
         """Update the selected workspace list when the selected plot has changed."""
@@ -80,23 +80,23 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_fit_status_in_the_view()
 
         # Send the workspaces to be plotted
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
         # Update parameter values in sequential tab.
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
-        self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
+        self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_plot_guess_changed(self):
         """Handle when plot guess is ticked or unticked."""
         index = self.view.get_index_for_start_end_times()
-        workspaces = self.get_fit_input_workspaces()
+        workspaces = self.model.get_active_workspace_names()
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
         super().handle_undo_fit_clicked()
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_fitting_mode_changed(self):
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
@@ -116,13 +116,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self.view.disable_simultaneous_fit_options()
             self.view.switch_to_single()
 
-        self._update_stored_fit_functions()
+        self.update_fit_functions_in_model()
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
 
         self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
         # Send the workspaces to be plotted
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
         self.handle_plot_guess_changed()
 
     def handle_simultaneous_fit_by_changed(self):
@@ -139,19 +139,19 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.fitting_mode_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_simultaneous_fit_by_specifier_changed(self):
         """Handle when the simultaneous fit by specifier combo box is changed."""
         self.model.dataset_names = self.get_workspace_selected_list()
         self.clear_and_reset_gui_state()
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_display_workspace_changed(self):
         """Handle when the display workspace combo box is changed."""
         current_index = self.view.get_index_for_start_end_times()
 
-        self._update_stored_fit_functions()
+        self.update_fit_functions_in_model()
         self.set_current_dataset_index(current_index)
 
         self.view.start_time = self.model.current_start_x
@@ -159,17 +159,17 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.update_fit_status_in_the_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
-        self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_function_structure_changed(self):
         """Handle when the function structure is changed."""
         #if not self._fit_function[0]:
         #    self.handle_display_workspace_changed()
         self.view.plot_guess = False
-        self._update_stored_fit_functions()
+        self.update_fit_functions_in_model()
         if not self.view.fit_object:
             self.model.clear_fit_information()
-            self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
+            self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
         self._reset_fit_status_information()
 
@@ -182,16 +182,16 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_function_parameter_changed(self):
         """Handle when the value of a parameter in a function is changed."""
         if not self.view.is_simultaneous_fit_ticked:
-            fit_function = self._get_fit_functions_for_each_domain()[self.model.current_dataset_index]
+            fit_function = self.current_single_fit_function_in_view()
             self.model.current_single_fit_function = fit_function
         else:
             fit_function = self.view.fit_object
             self.model.simultaneous_fit_function = fit_function
 
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
-        self.model.update_ws_fit_function_parameters(self.get_fit_input_workspaces(), parameter_values)
+        self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
-        self.model.update_plot_guess(self.get_fit_input_workspaces(), self.view.get_index_for_start_end_times())
+        self.model.update_plot_guess(self.model.get_active_workspace_names(), self.view.get_index_for_start_end_times())
 
     def handle_start_x_updated(self):
         """Handle when the start X is changed."""
@@ -288,53 +288,15 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         else:
             self.update_fit_status_and_function_in_the_view(self.model.current_single_fit_function)
 
-    def _update_stored_fit_functions(self):
+    def update_fit_functions_in_model(self):
         """Updates the stored fit functions."""
         if self.view.is_simultaneous_fit_ticked:
-            self.model.simultaneous_fit_function = self.view.fit_object
+            self.update_simultaneous_fit_function_in_model()
         else:
-            self.model.single_fit_functions = self._get_fit_functions_for_each_domain()
+            self.update_single_fit_functions_in_model()
 
-    def _get_fit_function(self):
-        """Get all of the fit functions stored within the fitting interface."""
-        if self.view.is_simultaneous_fit_ticked:
-            return self.view.fit_object
-        else:
-            return self._get_fit_functions_for_each_domain()
-
-    def _get_fit_functions_for_each_domain(self):
-        if self.view.fit_object:  # make sure there is a fit function in the browser
-            if isinstance(self.view.fit_object, MultiDomainFunction):
-                return [function.clone() for function in self.view.fit_object.createEquivalentFunctions()]
-            return [self.view.fit_object]
-        number_of_domains = self.view.number_of_domains()
-        return [None] * number_of_domains if number_of_domains > 0 else [None]
-
-    def _fit_function_index(self):
-        """Returns the index of the currently displayed fit function."""
-        if not self.view.is_simultaneous_fit_ticked:
-            return self.view.get_index_for_start_end_times()
-        return 0
-
-    def get_fit_input_workspaces(self):
-        """Returns the workspaces that are to be fitted."""
-        if self.view.is_simultaneous_fit_ticked:
-            return self.model.dataset_names
-        return [self.model.current_dataset_name]
-
-    def get_selected_fit_workspaces(self):
-        """Returns the fitted workspaces."""
-        if self.model.number_of_datasets > 0:
-            if not self.model.simultaneous_fitting_mode:
-                fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
-                    [self.view.display_workspace], self.model.function_name)
-                return [FitPlotInformation(input_workspaces=[self.view.display_workspace], fit=fit)]
-            else:
-                fit = self.context.fitting_context.find_fit_for_input_workspace_list_and_function(
-                    self.model.dataset_names, self.model.function_name)
-                return [FitPlotInformation(input_workspaces=self.model.dataset_names, fit=fit)]
-        else:
-            return []
+    def update_simultaneous_fit_function_in_model(self):
+        self.model.simultaneous_fit_function = self.view.fit_object
 
     def _get_selected_groups_and_pairs(self):
         """Returns the selected groups and pairs."""

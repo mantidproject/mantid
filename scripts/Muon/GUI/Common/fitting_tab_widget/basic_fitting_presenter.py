@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable
 from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
@@ -176,10 +176,6 @@ class BasicFittingPresenter:
         """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
-    def get_fit_input_workspaces(self):
-        """Retrieve the names of the workspaces to be fitted."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
     def get_x_data_type(self):
         """Returns the type of data in the x domain. Returns string None if it cannot be determined."""
         if isinstance(self.context, FrequencyDomainAnalysisContext):
@@ -198,6 +194,20 @@ class BasicFittingPresenter:
         self.model.current_dataset_index = dataset_index
         self.view.set_current_dataset_index(dataset_index)
 
+    def current_single_fit_function_in_view(self):
+        return self._get_single_fit_functions_from_view()[self.model.current_dataset_index]
+
+    def update_single_fit_functions_in_model(self):
+        self.model.single_fit_functions = self._get_single_fit_functions_from_view()
+
+    def _get_single_fit_functions_from_view(self):
+        """Returns the fit functions corresponding to each domain as a list."""
+        if self.view.fit_object:
+            if isinstance(self.view.fit_object, MultiDomainFunction):
+                return [function.clone() for function in self.view.fit_object.createEquivalentFunctions()]
+            return [self.view.fit_object]
+        return [None] * self.view.number_of_domains()
+
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
         return {"FittingType": "Simultaneous" if self.model.simultaneous_fitting_mode else "Sequential",
@@ -213,8 +223,9 @@ class BasicFittingPresenter:
         """Perform the fit in a thread."""
         self._number_of_fits_cached += 1
         try:
-            logger.warning(str(self.get_fit_input_workspaces()))
-            calculation_function = functools.partial(self.model.evaluate_single_fit, self.get_fit_input_workspaces())
+            logger.warning(str(self.model.get_active_workspace_names()))
+            calculation_function = functools.partial(self.model.evaluate_single_fit,
+                                                     self.model.get_active_workspace_names())
             self.calculation_thread = self._create_thread(calculation_function)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -238,10 +249,6 @@ class BasicFittingPresenter:
                                           self.model.current_fit_status,
                                           self.model.current_fit_chi_squared)
         self.view.update_global_fit_state(self.model.fit_statuses, self.model.current_dataset_index)
-
-    def _fit_function_index(self):
-        """Return the index of the currently displayed fit function (assume it is zero for BasicFitting for now)."""
-        return 0
 
     def _create_thread(self, callback):
         """Create a thread for fitting."""
