@@ -683,6 +683,9 @@ class GeneralFittingModel(BasicFittingModel):
                 elif group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fit_to_raw)]
+                elif group_or_pair in self.context.group_pair_context.selected_diffs:
+                    workspace_names += [get_diff_asymmetry_name(self.context, group_or_pair, run,
+                                                                not self.fit_to_raw)]
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
                     period_string = run_list_to_string(
                         self.context.group_pair_context[group_or_pair].periods)
@@ -711,7 +714,7 @@ class GeneralFittingModel(BasicFittingModel):
             return 0
 
     def _get_selected_groups_and_pairs(self):
-        return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
+        return self.context.group_pair_context.selected_groups_and_pairs
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function):
