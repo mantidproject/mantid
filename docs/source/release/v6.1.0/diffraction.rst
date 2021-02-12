@@ -16,6 +16,7 @@ Powder Diffraction
 - New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 - New options "cache directory" and "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
+- Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 
 Engineering Diffraction
 -----------------------
