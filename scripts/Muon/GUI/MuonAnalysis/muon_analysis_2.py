@@ -273,7 +273,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # differences
         self.grouping_tab_widget.diff_table.add_subscribers(
-            [self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer,
+            [self.fitting_tab.general_fitting_presenter.selected_group_pair_observer,
              self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer,
              self.plot_widget.presenter.added_group_or_pair_observer])
 
