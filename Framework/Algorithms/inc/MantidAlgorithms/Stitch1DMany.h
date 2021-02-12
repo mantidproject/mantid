@@ -43,7 +43,7 @@ public:
   void doStitch1DMany(const size_t period, const bool useManualScaleFactors,
                       std::string &outName,
                       std::vector<double> &outScaleFactors,
-                      const bool storeInADS = true);
+                      const int indexOfReference, const bool storeInADS = true);
 
 private:
   /// Overwrites Algorithm method.

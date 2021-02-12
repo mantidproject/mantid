@@ -139,7 +139,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       }
       if (!isDefault("IndexOfReference")) {
         m_indexOfReference = this->getProperty("IndexOfReference");
-        if (m_indexOfReference >= static_cast<int>(column.size())) {
+        if (m_indexOfReference >= static_cast<int>(column.size()) &&
+            m_indexOfReference >= static_cast<int>(m_inputWSMatrix.size())) {
           issues["IndexOfReference"] =
               "The index of reference workspace is larger than the number of "
               "provided workspaces.";
@@ -260,7 +261,8 @@ void Stitch1DMany::exec() {
 
         outName = groupName;
         std::vector<double> scaleFactors;
-        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors);
+        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors,
+                       m_indexOfReference);
 
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
@@ -276,7 +278,7 @@ void Stitch1DMany::exec() {
       constexpr bool storeInADS = false;
 
       doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName,
-                     periodScaleFactors, storeInADS);
+                     periodScaleFactors, m_indexOfReference, storeInADS);
 
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
@@ -385,6 +387,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
                                   const bool useManualScaleFactors,
                                   std::string &outName,
                                   std::vector<double> &outScaleFactors,
+                                  const int indexOfReference,
                                   const bool storeInADS) {
 
   // List of workspaces to stitch
@@ -409,6 +412,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
   alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
   if (useManualScaleFactors)
     alg->setProperty("ManualScaleFactors", m_manualScaleFactors);
+  alg->setProperty("IndexOfReference", indexOfReference);
   alg->execute();
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
