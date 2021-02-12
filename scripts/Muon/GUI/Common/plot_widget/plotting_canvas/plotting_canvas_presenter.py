@@ -29,10 +29,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.add_subplot("one")
         self._context.update_axis("one", 0)
 
-<<<<<<< HEAD
-=======
     # general plotting
->>>>>>> e082d8bbd4b... refs #29323 error checkbox works with quickedit in muon
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
         for workspace_name in workspace_names:
@@ -146,7 +143,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             xlim = self._context.get_xlim(selected_subplots[0])
             ylim = self._context.get_ylim(selected_subplots[0])
         self._view.set_axes_limits(xlims, ylims)
-            # override y values 
+        # override y values 
         if autoscale:
                 self._view.autoscale_y_axes()
         titles = self._model.create_axes_titles()
@@ -154,27 +151,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             self._view.set_title(axis_number, title)
         self._update_quickedit_widget()
         self._view.redraw_figure()
-
-<<<<<<< HEAD
-#    def _set_axes_limits_and_titles(self, autoscale):
-#        xlims, ylims = self._get_axes_limits_from_quick_edit_widget()
-#        if xlims is None or ylims is None:
-#            self._view.set_axes_limits(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
-#            self._view.autoscale_y_axes()
-#        else:
-#           self._view.set_axes_limits(xlims, ylims)
-#
-#        if autoscale:
-#            self._options_presenter.disable_yaxis_changer()
-#            self._view.autoscale_y_axes()
-#        else:
-#            self._options_presenter.enable_yaxis_changer()#
-#
-#        titles = self._model.create_axes_titles()
-#        for axis_number, title in enumerate(titles):
-#            self._view.set_title(axis_number, title)
-#        self._update_quickedit_widget()
-#        self._view.redraw_figure()
 
     """ Quick edit"""
     def _setup_quick_edit_widget(self):
@@ -245,6 +221,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for subplot, index in zip(selected_subplots,indicies):
             self._view.set_axis_xlimits(index, xlims)
             self._context.update_xlim(subplot, xlims)
+        if self._view.autoscale_state:
+            self._handle_autoscale_y_axes()
         self._view.redraw_figure()
 
 

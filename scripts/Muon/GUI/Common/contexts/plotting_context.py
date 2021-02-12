@@ -30,12 +30,23 @@ class PlottingContext(object):
         self._ylim_all = self._default_ylim
         self._autoscale_all = False
         self._errors_all = False
+        self._min_y_range = 2.0
+        self._y_axis_margin = 20.
 
     def set_defaults(self, default_xlim:List[float], default_ylim:List[float]):
         self._default_xlim = default_xlim
         self._default_ylim = default_ylim
         self._xlim_all = self._default_xlim
         self._ylim_all = self._default_ylim
+
+    @property
+    def min_y_range(self):
+        return self._min_y_range/2.
+
+    @property
+    def y_axis_margin(self):
+        # stored as a percentage, but return decimal
+        return self._y_axis_margin/100.
 
     @property
     def default_xlims(self):

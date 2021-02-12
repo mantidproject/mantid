@@ -26,13 +26,9 @@ if is_pyqt5():
 else:
     from matplotlib.backends.backend_qt4agg import FigureCanvas
 
-# The y limit to use when y_min == y_max when autoscaling y
-ARBITRARY_Y_LIMIT = 1.0
-DEFAULT_X_LIMITS = [0, 15]
+
 # Default color cycle using Matplotlib color codes C0, C1...ect
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
-# The y axis margin when autoscaling is 20%
-Y_AXIS_MARGIN = 0.2
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
@@ -52,9 +48,11 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
-    def __init__(self, parent=None):
+    def __init__(self, quick_edit, min_y_range, y_axis_margin, parent=None):
         super().__init__(parent)
-
+        # later we will allow these to be changed in the settings
+        self._min_y_range = min_y_range
+        self._y_axis_margin = y_axis_margin
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
@@ -69,9 +67,15 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolBar)
         layout.addWidget(self.fig.canvas)
+        self._quick_eidt = quick_edit
+        layout.addWidget(self._quick_eidt)
         self.setLayout(layout)
 
         self._plot_information_list = []  # type : List[PlotInformation}
+
+    @property
+    def autoscale_state(self):
+        return self._quick_eidt.autoscale_state
 
     @property
     def plotted_workspace_information(self):
@@ -94,9 +98,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     @property
     def number_of_axes(self):
         return self._number_of_axes
-
-    def add_widget(self, widget):
-        self.layout().addWidget(widget)
 
     def create_new_plot_canvas(self, num_axes):
         """Creates a new blank plotting canvas"""
@@ -287,22 +288,20 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         return plot_kwargs
 
-    @staticmethod
-    def _get_y_axis_autoscale_limits(axis):
+    def _get_y_axis_autoscale_limits(self, axis):
         x_min, x_max = sorted(axis.get_xlim())
         y_min, y_max = np.inf, -np.inf
         for line in axis.lines:
             y_min, y_max = get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max)
-
         if y_min == np.inf:
-            y_min = -ARBITRARY_Y_LIMIT
+            y_min = -self._min_y_range
         if y_max == -np.inf:
-            y_max = ARBITRARY_Y_LIMIT
+            y_max = self._min_y_range
         if y_min == y_max:
-            y_min -= ARBITRARY_Y_LIMIT
-            y_max += ARBITRARY_Y_LIMIT
+            y_min -= self._min_y_range
+            y_max += self._min_y_range
 
-        y_margin = abs(y_max - y_min) * Y_AXIS_MARGIN
+        y_margin = abs(y_max - y_min) * self._y_axis_margin
 
         return y_min - y_margin, y_max + y_margin
 

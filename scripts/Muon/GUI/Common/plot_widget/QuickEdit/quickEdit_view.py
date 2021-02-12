@@ -17,14 +17,14 @@ class QuickEditView(QtWidgets.QWidget):
        
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
+        self.plot_selector.setMinimumContentsLength(30)
         self.plot_selector.setEditable(True)
         self.plot_selector.completer().setCompletionMode(
             QtWidgets.QCompleter.PopupCompletion)
         self.plot_selector.view().setMinimumWidth(100)
 
-        if qtpy.PYQT5:
-            self.plot_selector.completer().setFilterMode(
-                QtCore.Qt.MatchContains)
+        self.plot_selector.completer().setFilterMode(
+            QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem("All")
         self.plot_selector.setEditable(False)
@@ -48,12 +48,15 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addStretch()
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
+        self.setFixedHeight(50)
+
 
     """ plot selection """
     def add_subplot(self, name):
         self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)
         self.plot_selector.blockSignals(False)
+        width = self.plot_selector.minimumSizeHint().width()
 
     def rm_subplot(self, index):
         self.plot_selector.removeItem(index)
@@ -77,9 +80,6 @@ class QuickEditView(QtWidgets.QWidget):
     def number_of_plots(self):
         return self.plot_selector.count()
 
-
-
-
     def clear_subplots(self):
         self.plot_selector.blockSignals(True)
         self.plot_selector.clear()
@@ -92,7 +92,6 @@ class QuickEditView(QtWidgets.QWidget):
     """ x axis selection """
 
     def connect_x_range_changed(self, slot):
-        print("moo")
         self.x_axis_changer.on_range_changed(slot)
 
     def set_plot_x_range(self, limits):
