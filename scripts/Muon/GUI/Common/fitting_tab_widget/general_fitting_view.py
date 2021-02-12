@@ -53,11 +53,6 @@ class GeneralFittingView(BasicFittingView):
         """Returns the name of the currently displayed workspace parameter."""
         return self.general_fitting_options.display_workspace
 
-    @property
-    def loaded_workspaces(self):
-        """Returns the names of all loaded workspaces."""
-        return self.general_fitting_options.loaded_workspaces
-
     @display_workspace.setter
     def display_workspace(self, value):
         """Sets the name of the currently displayed workspace parameter."""

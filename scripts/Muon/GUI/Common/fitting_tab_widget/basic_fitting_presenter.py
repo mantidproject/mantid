@@ -126,7 +126,7 @@ class BasicFittingPresenter:
 
     def handle_fit_generator_clicked(self):
         """Handle when the Fit Generator button has been clicked."""
-        self._open_fit_script_generator_interface(self.get_loaded_workspaces(), self._get_fit_browser_options())
+        self._open_fit_script_generator_interface(self.model.dataset_names, self._get_fit_browser_options())
 
     def handle_fit_name_changed_by_user(self):
         """Handle when the fit name is changed by the user."""
@@ -159,19 +159,24 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self):
         """Handle when the start X is changed."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        if self.view.start_time > self.view.end_time:
+            self.view.start_time, self.view.end_time = self.view.end_time, self.view.start_time
+            self.model.current_end_x = self.view.end_time
+
+        self.model.current_start_x = self.view.start_time
 
     def handle_end_x_updated(self):
         """Handle when the end X is changed."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        if self.view.end_time < self.view.start_time:
+            self.view.start_time, self.view.end_time = self.view.end_time, self.view.start_time
+            self.model.current_start_x = self.view.start_time
+
+        self.model.current_end_x = self.view.end_time
 
     def handle_use_rebin_changed(self):
-        """Handle the Use Rebin state change."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
-    def get_loaded_workspaces(self):
-        """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        """Handle the Fit to raw data checkbox state change."""
+        if self._check_rebin_options():
+            self.model.fit_to_raw = self.view.fit_to_raw
 
     def clear_and_reset_gui_state(self):
         """Clears all data in the view and updates the model."""
@@ -201,12 +206,12 @@ class BasicFittingPresenter:
 
     def _get_fit_browser_options(self):
         """Returns the fitting options to use in the Fit Script Generator interface."""
-        return {"FittingType": "Simultaneous" if self.model.simultaneous_fitting_mode else "Sequential",
+        return {"FittingType": "Simultaneous" if self.simultaneous_fitting_mode() else "Sequential",
                 "Minimizer": self.model.minimizer,
                 "EvaluationType": self.model.evaluation_type}
 
     @staticmethod
-    def _is_simultaneous_fitting():
+    def simultaneous_fitting_mode():
         """Returns true if the fitting mode is simultaneous. Override this method if you require simultaneous."""
         return False
 
@@ -241,11 +246,11 @@ class BasicFittingPresenter:
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return thread_model.ThreadModel(self.fitting_calculation_model)
 
-    def _open_fit_script_generator_interface(self, loaded_workspaces, fit_options):
+    def _open_fit_script_generator_interface(self, workspaces, fit_options):
         """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
         self.fsg_view = FitScriptGeneratorView(None, fit_options)
-        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, loaded_workspaces,
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
                                                          self.view.start_time, self.view.end_time)
 
         self.fsg_presenter.openFitScriptGenerator()
