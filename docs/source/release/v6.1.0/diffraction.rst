@@ -18,6 +18,7 @@ Powder Diffraction
 - New options "cache directory" and "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 
 Engineering Diffraction
 -----------------------
