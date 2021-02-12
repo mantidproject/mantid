@@ -36,24 +36,17 @@ class GeneralFittingView(BasicFittingView):
         """Update the data in the parameter display combo box."""
         self.general_fitting_options.update_displayed_data_combo_box(data_list)
 
-    def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
-        """Updates the view to show the status and results from a fit."""
-        if not fit_function:
-            self.fit_controls.clear_fit_status(output_chi_squared)
-            return
-
-        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function)
-        self.fit_controls.update_fit_status_labels(output_status, output_chi_squared)
-
-    def update_global_fit_state(self, output_list, index):
+    def update_global_fit_status(self, fit_statuses, index):
         """Updates the global fit status label."""
         if self.is_simultaneous_fit_ticked:
-            indexed_fit = output_list[index]
-            boolean_list = [indexed_fit == "success"] if indexed_fit else []
+            indexed_fit = fit_statuses[index]
+            self.fit_controls.update_global_fit_status_label([indexed_fit == "success"] if indexed_fit else [])
         else:
-            boolean_list = [output == "success" for output in output_list if output]
+            super().update_global_fit_status(fit_statuses, index)
 
-        self.fit_controls.update_global_fit_status_label(boolean_list)
+    def update_fit_function(self, fit_function):
+        """Updates the parameters of a fit function shown in the view."""
+        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function)
 
     @property
     def display_workspace(self):

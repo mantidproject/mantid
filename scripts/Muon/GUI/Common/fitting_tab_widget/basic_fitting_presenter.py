@@ -230,16 +230,11 @@ class BasicFittingPresenter:
         self.model.automatically_update_function_name()
         self.view.function_name = self.model.function_name
 
-    def update_fit_status_in_the_view(self):
-        """Updates the fit status, chi squared and function information in the view."""
-        pass
-
-    def update_fit_status_and_function_in_the_view(self, fit_function):
-        """Updates the fit status, chi squared and function information in the view."""
-        self.view.update_with_fit_outputs(fit_function,
-                                          self.model.current_fit_status,
-                                          self.model.current_fit_chi_squared)
-        self.view.update_global_fit_state(self.model.fit_statuses, self.model.current_dataset_index)
+    def update_fit_statuses_and_chi_squared_in_view(self):
+        """Updates the local and global fit status and chi squared in the view."""
+        self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
+                                                          self.model.current_fit_chi_squared)
+        self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
 
     def _create_thread(self, callback):
         """Create a thread for fitting."""
@@ -265,7 +260,7 @@ class BasicFittingPresenter:
 
         self.model.fit_statuses = [None] * number_of_datasets if number_of_datasets > 0 else [None]
         self.model.fit_chi_squares = [0.0] * number_of_datasets if number_of_datasets > 0 else [0.0]
-        self.update_fit_status_in_the_view()
+        self.update_fit_statuses_and_chi_squared_in_view()
         self.view.enable_undo_fit(False)
 
     def _reset_start_time_to_first_good_data_value(self):

@@ -76,7 +76,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
             self.model.current_fit_status = fit_status
             self.model.current_fit_chi_squared = fit_chi_squared
 
-        self.update_fit_status_in_the_view()
+        self.update_fit_statuses_and_chi_squared_in_view()
+        self.update_fit_function_in_view()
 
         # Send the workspaces to be plotted
         self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
@@ -157,7 +158,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.view.start_time = self.model.current_start_x
         self.view.end_time = self.model.current_end_x
 
-        self.update_fit_status_in_the_view()
+        self.update_fit_statuses_and_chi_squared_in_view()
+        self.update_fit_function_in_view()
         self.handle_plot_guess_changed()  # update the guess (use the selected workspace as data for the guess)
         self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
 
@@ -237,14 +239,16 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.clear_and_reset_gui_state()
 
     def set_display_workspace(self, workspace_name):
+        """Sets the workspace to be displayed in the view programmatically."""
         self.view.display_workspace = workspace_name
         self.handle_display_workspace_changed()
 
-    def update_fit_status_in_the_view(self):
+    def update_fit_function_in_view(self):
+        """Updates the parameters of a fit function shown in the view."""
         if self.view.is_simultaneous_fit_ticked:
-            self.update_fit_status_and_function_in_the_view(self.model.simultaneous_fit_function)
+            self.view.update_fit_function(self.model.simultaneous_fit_function)
         else:
-            self.update_fit_status_and_function_in_the_view(self.model.current_single_fit_function)
+            self.view.update_fit_function(self.model.current_single_fit_function)
 
     def update_simultaneous_fit_by_specifiers_in_view(self):
         """Updates the entries in the simultaneous fit by specifier combo box."""
