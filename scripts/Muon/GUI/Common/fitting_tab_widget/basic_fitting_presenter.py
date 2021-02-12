@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AnalysisDataService, MultiDomainFunction
+from mantid.api import MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable
 from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import DEFAULT_START_X, DEFAULT_END_X
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
@@ -176,12 +175,6 @@ class BasicFittingPresenter:
         """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
-    def get_x_data_type(self):
-        """Returns the type of data in the x domain. Returns string None if it cannot be determined."""
-        if isinstance(self.context, FrequencyDomainAnalysisContext):
-            return self.context._frequency_context.plot_type
-        return "None"
-
     def clear_and_reset_gui_state(self):
         """Clears all data in the view and updates the model."""
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
@@ -304,8 +297,3 @@ class BasicFittingPresenter:
             self.view.warning_popup("No rebin options specified.")
             return False
         return True
-
-    @staticmethod
-    def _check_data_exists(workspace_names):
-        """Returns only the workspace names that exist in the ADS."""
-        return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
