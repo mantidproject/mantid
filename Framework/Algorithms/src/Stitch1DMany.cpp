@@ -381,6 +381,7 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
  * factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
+ * @param indexOfReference :: Index of reference for scaling
  * @param storeInADS :: Whether to store in ADS or not
  */
 void Stitch1DMany::doStitch1DMany(const size_t period,
