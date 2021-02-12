@@ -7,6 +7,9 @@
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_view import BasicFittingView
 from Muon.GUI.Common.fitting_tab_widget.general_fitting_options_view import GeneralFittingOptionsView
 
+SINGLE_FIT_LABEL = "Select Workspace"
+SIMULTANEOUS_FIT_LABEL = "Display parameters for"
+
 
 class GeneralFittingView(BasicFittingView):
 
@@ -79,6 +82,18 @@ class GeneralFittingView(BasicFittingView):
     def get_index_for_start_end_times(self):
         """Returns the index of the currently displayed workspace."""
         return self.general_fitting_options.get_index_for_start_end_times()
+
+    def switch_to_simultaneous(self):
+        """Switches the view to simultaneous fit mode."""
+        super().switch_to_simultaneous()
+        self.set_workspace_combo_box_label(SIMULTANEOUS_FIT_LABEL)
+        self.enable_simultaneous_fit_options()
+
+    def switch_to_single(self):
+        """Switches the view to single fit mode."""
+        super().switch_to_single()
+        self.set_workspace_combo_box_label(SINGLE_FIT_LABEL)
+        self.disable_simultaneous_fit_options()
 
     def hide_simultaneous_fit_options(self):
         """Hides the simultaneous fit options."""

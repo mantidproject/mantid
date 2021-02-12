@@ -33,6 +33,7 @@ class GeneralFittingModel(BasicFittingModel):
 
         # This is a MultiDomainFunction if there are multiple domains in the function browser.
         self._simultaneous_fit_function = None
+        self._simultaneous_fit_function_cache = None
         self._simultaneous_fitting_mode = False
 
         self._simultaneous_fit_by = ""
@@ -41,6 +42,9 @@ class GeneralFittingModel(BasicFittingModel):
         self._global_parameters = []
         self._tf_asymmetry_mode = False
 
+    def clear_simultaneous_fit_function(self):
+        self.simultaneous_fit_function = None
+
     @property
     def simultaneous_fit_function(self):
         return self._simultaneous_fit_function
@@ -48,6 +52,18 @@ class GeneralFittingModel(BasicFittingModel):
     @simultaneous_fit_function.setter
     def simultaneous_fit_function(self, fit_function):
         self._simultaneous_fit_function = fit_function
+
+    @property
+    def simultaneous_fit_function_cache(self):
+        return self._simultaneous_fit_function_cache
+
+    @simultaneous_fit_function_cache.setter
+    def simultaneous_fit_function_cache(self, fit_function):
+        self._simultaneous_fit_function_cache = fit_function
+
+    def cache_the_current_fit_functions(self):
+        super().cache_the_current_fit_functions()
+        self.simultaneous_fit_function_cache = self._clone_function(self.simultaneous_fit_function)
 
     @property
     def simultaneous_fitting_mode(self):

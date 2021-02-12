@@ -82,6 +82,9 @@ class BasicFittingModel:
     def number_of_datasets(self):
         return len(self.dataset_names)
 
+    def clear_single_fit_functions(self):
+        self.single_fit_functions = [None] * self.number_of_datasets
+
     @property
     def single_fit_functions(self):
         return self._single_fit_functions

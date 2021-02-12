@@ -75,7 +75,7 @@ class BasicFittingPresenter:
         """Handle when changes to the context have been made."""
         for key in changed_values.keys():
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
-                self._reset_start_time_to_first_good_data_value()
+                self.reset_start_xs_and_end_xs()
 
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
@@ -116,12 +116,14 @@ class BasicFittingPresenter:
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
         self.view.plot_guess = False
+        self.view.enable_undo_fit(False)
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
         self.model.single_fit_functions = self.model.single_fit_functions_cache
         self.model.remove_latest_fit_from_context()
-        self._reset_fit_status_information()
+
+        self.clear_fit_status_and_chi_squared_information()
         self._number_of_fits_cached = 0
 
     def handle_fit_generator_clicked(self):
@@ -182,8 +184,8 @@ class BasicFittingPresenter:
         """Clears all data in the view and updates the model."""
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
 
-        self._reset_fit_status_information()
-        self._reset_start_time_to_first_good_data_value()
+        self.clear_fit_status_and_chi_squared_information()
+        self.reset_start_xs_and_end_xs()
         #self._reset_fit_function()
 
     def set_current_dataset_index(self, dataset_index):
@@ -235,7 +237,7 @@ class BasicFittingPresenter:
         self.model.automatically_update_function_name()
         self.view.function_name = self.model.function_name
 
-    def update_fit_statuses_and_chi_squared_in_view(self):
+    def update_fit_statuses_and_chi_squared_in_view_from_model(self):
         """Updates the local and global fit status and chi squared in the view."""
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
                                                           self.model.current_fit_chi_squared)
@@ -259,17 +261,17 @@ class BasicFittingPresenter:
     #     """Reset the fit function information."""
     #     self.model.single_fit_functions = self._get_fit_function()
 
-    def _reset_fit_status_information(self):
-        """Reset the fit status and chi squared information currently displayed."""
+    def clear_fit_status_and_chi_squared_information(self):
+        """Clear the fit status and chi squared information in the view and model."""
         number_of_datasets = self.model.number_of_datasets
 
         self.model.fit_statuses = [None] * number_of_datasets if number_of_datasets > 0 else [None]
         self.model.fit_chi_squares = [0.0] * number_of_datasets if number_of_datasets > 0 else [0.0]
-        self.update_fit_statuses_and_chi_squared_in_view()
-        self.view.enable_undo_fit(False)
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+        #self.view.enable_undo_fit(False)
 
-    def _reset_start_time_to_first_good_data_value(self):
-        """Reset the start and end X to the first good data value."""
+    def reset_start_xs_and_end_xs(self):
+        """Reset the start Xs and end Xs using the data stored in the context."""
         number_of_datasets = self.model.number_of_datasets
 
         self.model.start_xs = [self.model.retrieve_first_good_data_from_run(name)
