@@ -51,20 +51,18 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
             self.fit_status_success_failure.setStyleSheet("color: red")
         self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared:.4g}")
 
-    def clear_fit_status(self, output_chi_squared):
+    def clear_fit_status(self):
         """Clears the fit status label."""
         self.fit_status_success_failure.setText("No Fit")
         self.fit_status_success_failure.setStyleSheet("color: black")
-        self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared}")
+        self.fit_status_chi_squared.setText(f"Chi squared: 0.0")
 
     def update_global_fit_status_label(self, success_list):
         """Updates the global fit status label."""
         if not success_list:
             self.global_fit_status_label.setText("No Fit")
             self.global_fit_status_label.setStyleSheet("color: black")
-            return
-
-        if all(success_list):
+        elif all(success_list):
             self.global_fit_status_label.setText("Fit Successful")
             self.global_fit_status_label.setStyleSheet("color: green")
         else:

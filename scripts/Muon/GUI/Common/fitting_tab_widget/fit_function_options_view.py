@@ -93,7 +93,11 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
 
     def update_function_browser_parameters(self, is_simultaneous_fit, fit_function):
         """Updates the parameters in the function browser."""
-        if is_simultaneous_fit:
+        if fit_function is None:
+            self.function_browser.blockSignals(True)
+            self.function_browser.setFunction("")
+            self.function_browser.blockSignals(False)
+        elif is_simultaneous_fit:
             self.function_browser.blockSignals(True)
             self.function_browser.updateMultiDatasetParameters(fit_function)
             self.function_browser.blockSignals(False)

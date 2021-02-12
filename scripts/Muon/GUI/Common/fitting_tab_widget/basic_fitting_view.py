@@ -83,18 +83,20 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         """Sets the index of the current dataset."""
         self.fit_function_options.set_current_dataset_index(dataset_index)
 
-    def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
+    def update_local_fit_status_and_chi_squared(self, fit_status, chi_squared):
         """Updates the view to show the status and results from a fit."""
-        if not fit_function:
-            self.fit_controls.clear_fit_status(output_chi_squared)
-            return
+        if fit_status:
+            self.fit_controls.update_fit_status_labels(fit_status, chi_squared)
+        else:
+            self.fit_controls.clear_fit_status()
 
-        self.fit_function_options.update_function_browser_parameters(False, fit_function)
-        self.fit_controls.update_fit_status_labels(output_status, output_chi_squared)
-
-    def update_global_fit_state(self, output_list):
+    def update_global_fit_status(self, fit_statuses, _):
         """Updates the global fit status label."""
-        self.fit_controls.update_global_fit_status_label([output == "success" for output in output_list if output])
+        self.fit_controls.update_global_fit_status_label([status == "success" for status in fit_statuses if status])
+
+    def update_fit_function(self, fit_function):
+        """Updates the parameters of a fit function shown in the view."""
+        self.fit_function_options.update_function_browser_parameters(False, fit_function)
 
     @property
     def fit_object(self):
