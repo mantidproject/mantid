@@ -244,7 +244,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
 endif()
 
 if(ENABLE_MANTIDPLOT)
-  add_subdirectory(MantidPlot)
+  message( ERROR "MantidPlot has been removed from the source code")
 endif()
 
 add_subdirectory(scripts)
