@@ -97,7 +97,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
     def PyExec(self):
         import pydevd_pycharm
         pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
-        np.random.seed(1234)
+        random.seed(1234)
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
         self._setup()
@@ -145,6 +145,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 self._QSS = 0.0
                 QS_sum[ne] = 0.0
 # new neutrons start here
+                self._maxweight = 0
                 if ne <=1:              #if ms 
                     for neut in range(0,self._nrun1):    # no. of 1st scatterings
                         self._scatter(ne)
@@ -276,6 +277,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             AT2 = math.exp(-self._vmu*dl)                 #attenuation along path
             # DH this is for the final path section (l_out in the Mancinelli paper)
             weight = self._B9*AT2*SQ*self._sigs/four_pi     #weighting of scattering
+            if weight>self._maxweight:
+                self._maxweight=weight
             self._total[ne] += weight
             if ne == 1:
                 self._B1 = self._B1*AT2                #b1=atten to 1st scatt
@@ -306,6 +309,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._wave = self.getProperty('Wavelength').value
         self._number_angles = self.getProperty('NumberAngles').value
         self._q_values = mtd[self._sample_ws_name].readX(0)             # q array
+        # DH: the q bins in the Ni_Q workspace are not even so this underestimates _delta_q
         self._delta_q = self._q_values[1] - self._q_values[0]
         self._sofq = mtd[self._sample_ws_name].readY(0)             # S(q) values
         self._number_q = len(self._q_values)

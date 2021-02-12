@@ -94,8 +94,8 @@ private:
   void updateWeightAndPosition(Geometry::Track &track, double &weight,
                                const double vmfp, const double sigma_total,
                                Kernel::PseudoRandomNumberGenerator &rng);
-  void q_dir(Geometry::Track track, const API::MatrixWorkspace_sptr SOfQ,
-             const double kinc, double scatteringXSection,
+  void q_dir(Geometry::Track &track, const API::MatrixWorkspace_sptr SOfQ,
+             const double kinc, const double scatteringXSection,
              Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
              double &weight);
   int m_callsToInterceptSurface;

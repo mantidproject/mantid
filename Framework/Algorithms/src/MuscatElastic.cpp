@@ -122,14 +122,16 @@ void MuscatElastic::init() {
  */
 void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
+  MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // take log of S(Q) and store it this way
+  SQWS = SQWS->clone();
   auto &y = SQWS->mutableY(0);
   std::transform(y.begin(), y.end(), y.begin(),
                  static_cast<double (*)(double)>(std::log));
 
-  const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
+  MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS) {
+    sigmaSSWS = sigmaSSWS->clone();
     // take log of sigmaSSWS and store it this way
     auto &y = sigmaSSWS->mutableY(0);
     std::transform(y.begin(), y.end(), y.begin(),
@@ -395,9 +397,9 @@ std::tuple<bool, double> MuscatElastic::scatter(
 }
 
 // update track direction, QSS and weight
-void MuscatElastic::q_dir(Geometry::Track track,
+void MuscatElastic::q_dir(Geometry::Track &track,
                           const MatrixWorkspace_sptr SOfQ, const double kinc,
-                          double scatteringXSection,
+                          const double scatteringXSection,
                           Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
                           double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
