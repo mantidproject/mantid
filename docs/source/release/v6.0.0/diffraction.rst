@@ -26,7 +26,6 @@ New Algorithms
    :width: 400px
    :align: right
 
-
 Improvements
 ############
 
@@ -51,6 +50,7 @@ Improvements
 - The vanadium absorption correction in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` is now calculated using numerical integration rather than Carpenter method
 - In the creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` automatically gets information from sample logs
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
+- :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum)
 
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` copies the sample from the absorption workspace to the output workspace
 - Scripts for pixel calibration of CORELLI 16-packs produce a calibration table, a masking table, and a goodness of fit workspace
@@ -59,12 +59,16 @@ Improvements
 
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged
 - The :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` now can do the YIG Bragg peak fitting individually or simultaneously, or not at all and provide feedback on the initial guess quality
+- :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
+- PaalmanPingsMonteCarloAbsorption can now make use of predefined sample and container geometries
 
 Bugfixes
 ########
 
 - Dummy detectors in POLARIS workspaces no longer prevent unit conversion
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has created a Van splines WorkspaceGroup
+- Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
+- Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a WorkspaceGroup when specified by user
 
 
