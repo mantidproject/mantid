@@ -24,7 +24,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
-        self.selected_plot_type_observer = GenericObserverWithArgPassing(self.handle_selected_plot_type_changed)
 
         self.view.set_slot_for_display_workspace_changed(self.handle_display_workspace_changed)
         self.view.set_slot_for_display_workspace_changed(self.handle_plot_guess_changed)
@@ -35,28 +34,19 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def initialize_model_options(self):
         """Returns the fitting options to be used when initializing the model."""
         super().initialize_model_options()
-        self.model.simultaneous_fit_by = self.view.simultaneous_fit_by  # TEMPORARY POSSIBLY
-        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier  # TEMPORARY POSSIBLY
+        self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
+        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
         self.model.global_parameters = self.view.get_global_parameters()
         self.model.tf_asymmetry_mode = False  # TEMPORARY
 
-    def get_loaded_workspaces(self):
-        """Retrieve the names of the workspaces successfully loaded into the fitting interface."""
-        return self.view.loaded_workspaces
-
-    def _is_simultaneous_fitting(self):
+    def simultaneous_fitting_mode(self):
         """Returns true if the fitting mode is simultaneous."""
-        return self.view.is_simultaneous_fit_ticked
+        return self.model.simultaneous_fitting_mode
 
     def handle_selected_group_pair_changed(self):
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
         self.update_selected_workspace_list_for_fit()
         self.update_fit_functions_in_model()
-        self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
-
-    def handle_selected_plot_type_changed(self, _):
-        """Update the selected workspace list when the selected plot has changed."""
-        self.update_selected_workspace_list_for_fit()
         self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
 
     def handle_new_data_loaded(self):
@@ -194,37 +184,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
         self.model.update_plot_guess(self.model.get_active_workspace_names(), self.view.get_index_for_start_end_times())
-
-    def handle_start_x_updated(self):
-        """Handle when the start X is changed."""
-        value = self.view.start_time
-        # Check start is greater than end, swap if need be
-        if value > self.model.current_end_x:
-            self.view.start_time, self.view.end_time = self.model.current_end_x, value
-            self.model.current_end_x = value
-            value = self.view.start_time
-
-        self.model.current_start_x = value
-
-    def handle_end_x_updated(self):
-        """Handle when the end X is changed."""
-        value = self.view.end_time
-        # Check end is less than start, swap if need be
-        if value < self.model.current_start_x:
-            self.view.start_time, self.view.end_time = value, self.model.current_start_x
-            self.model.current_start_x = value
-            value = self.view.end_time
-
-        self.model.current_end_x = value
-
-    def handle_use_rebin_changed(self):
-        #"""Handle the Use Rebin state change."""
-        if not self._check_rebin_options():
-            return
-
-        self.update_selected_workspace_list_for_fit()
-
-        self.model.fit_to_raw = self.view.fit_to_raw
 
     def clear_and_reset_gui_state(self):
         #"""Clears all data in the view and updates the model."""

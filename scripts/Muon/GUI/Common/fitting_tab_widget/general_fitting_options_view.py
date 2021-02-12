@@ -92,11 +92,6 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         """Returns the name of the currently displayed workspace parameter."""
         return str(self.parameter_display_combo.currentText())
 
-    @property
-    def loaded_workspaces(self):
-        """Returns the names of all loaded workspaces."""
-        return [self.parameter_display_combo.itemText(i) for i in range(self.parameter_display_combo.count())]
-
     @display_workspace.setter
     def display_workspace(self, value):
         """Sets the name of the currently displayed workspace parameter."""
