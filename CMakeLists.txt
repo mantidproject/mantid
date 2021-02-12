@@ -32,6 +32,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" OFF)
 option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
+if(ENABLE_MANTIDPLOT)
+  message( FATAL_ERROR "MantidPlot has been removed from the source code")
+endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
@@ -79,10 +82,6 @@ include(Span)
 # VATES flag. Requires ParaView
 option(MAKE_VATES "Switch for compiling the Vates project" Off)
 
-if(ENABLE_MANTIDPLOT OR MAKE_VATES)
-  message( STATUS "ParaView is no longer used")
-endif()
-
 if( MSVC )
   include ( MSVCSetup )
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -109,36 +108,6 @@ option(COVERALLS "Generate coveralls data" OFF)
 if(COVERALLS)
   include(Coveralls)
   coveralls_turn_on_coverage()
-endif()
-
-# Qt/Qwt/PyQt/sip
-if(ENABLE_MANTIDPLOT)
-  set(QT_USE_IMPORTED_TARGETS ON)
-  find_package(Qt4
-               COMPONENTS QtCore
-                          QtDesigner
-                          QtGui
-                          QtOpenGL
-                          QtScript
-                          QtSvg
-                          QtXml
-               REQUIRED)
-  find_package(QScintillaQt4 REQUIRED)
-  find_package(Qwt5 REQUIRED)
-  if(QWT5_VERSION VERSION_LESS 5.0
-     OR QWT5_VERSION VERSION_EQUAL 6.0
-     OR QWT5_VERSION VERSION_GREATER 6.0)
-    message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
-  endif()
-
-  if(UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
-    set(USE_PRIVATE_SIPPYQT4 ON)
-    include(ExternalSipPyQt4)
-  else()
-    find_package(PyQt4 REQUIRED)
-    find_package(SIP REQUIRED)
-  endif()
-  separate_arguments(PYQT4_SIP_FLAGS)
 endif()
 
 if(ENABLE_WORKBENCH)
@@ -197,16 +166,12 @@ endif()
 add_custom_target(AllTests)
 add_dependencies(AllTests FrameworkTests)
 
-if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together
   add_dependencies(AllTests GUITests)
   add_subdirectory(qt)
-endif()
-
-if(ENABLE_MANTIDPLOT)
-  message( FATAL_ERROR "MantidPlot has been removed from the source code")
 endif()
 
 add_subdirectory(scripts)
@@ -257,11 +222,6 @@ endif()
 
 # Installation settings
 
-if(ENABLE_MANTIDPLOT)
-  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
-endif()
-
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   function(uppercase_first_letter output_var input)
@@ -300,17 +260,6 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(_app_name_suffix)
   if(CPACK_PACKAGE_SUFFIX)
     uppercase_first_letter(_app_name_suffix ${CPACK_PACKAGE_SUFFIX})
-  endif()
-  if(ENABLE_MANTIDPLOT)
-    set(_icon_filename ${IMAGES_DIR}/mantidplot)
-    if(_icon_suffix)
-      set(_icon_filename ${_icon_filename}${_icon_suffix})
-    endif()
-    install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
-                          "Mantid Plot ${_app_name_suffix}"
-                          ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
-                          ${_icon_filename}.png
-                          mantidplot${CPACK_PACKAGE_SUFFIX}.png )
   endif()
 
   if(ENABLE_WORKBENCH)
@@ -364,10 +313,6 @@ if(ENABLE_CPACK)
       "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
       "hdf,hdf5,jsoncpp >= 0.7.0")
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,qscintilla,qwt5-qt4,qwtplot3d-qt4")
-    endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
           "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
@@ -381,11 +326,6 @@ if(ENABLE_CPACK)
       "python36-six,python36-PyYAML,python36-requests,python36-toml,"
       "python36-ipython,python36-ipython-notebook"
     )
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
-          "python36-matplotlib-qt4,python36-ipython-gui")
-    endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
           "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
@@ -417,19 +357,6 @@ if(ENABLE_CPACK)
       "librdkafka1,librdkafka++1,"
       "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}"
       )
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqtcore4 (>= 4.2),"
-          "libqtgui4 (>= 4.2),"
-          "libqt4-opengl (>= 4.2),"
-          "libqt4-xml (>= 4.2),"
-          "libqt4-svg (>= 4.2),"
-          "libqt4-qt3support (>= 4.2),"
-          "qt4-dev-tools,"
-          "libqwt5-qt4,"
-          "libqwtplot3d-qt4-0v5,"
-          "libqtwebkit4")
-    endif()
 
     if("${UNIX_CODENAME}" STREQUAL "bionic")
       set(CPACK_DEBIAN_PACKAGE_DEPENDS
@@ -460,10 +387,6 @@ if(ENABLE_CPACK)
         "python3-yaml,"
         "ipython3-qtconsole") # transitional package for bionic
 
-    if(ENABLE_MANTIDPLOT)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4")
-    endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_DEBIAN_PACKAGE_DEPENDS
           "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")

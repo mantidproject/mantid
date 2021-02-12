@@ -237,13 +237,6 @@ set ( PARAVIEW_PYTHON_PATHS "" )
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 
-if (ENABLE_MANTIDPLOT)
-  set ( MANTIDPLOT_EXEC MantidPlot_exe )
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
-  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
-            DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
-endif ()
 if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in

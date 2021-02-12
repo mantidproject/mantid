@@ -3,8 +3,6 @@
 #
 # name: mtd_add_qt_library
 # brief: create a library target for linked against Qt
-# The global ENABLE_MANTIDPLOT option controls if a Qt4 target
-# is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
 # To limit the Qt version for a specific library use
@@ -20,9 +18,6 @@ function (mtd_add_qt_library)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
-      mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
-    endif ()
     if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
       mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
     endif ()
@@ -31,8 +26,6 @@ endfunction()
 
 # name: mtd_add_qt_executable
 # brief: create a library target for linked against Qt
-# The global ENABLE_MANTIDPLOT option controls if a Qt4 target
-# is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
 # To limit the Qt version for a specific library use
@@ -47,9 +40,6 @@ function (mtd_add_qt_executable)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
-      mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
-    endif ()
     if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
       mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif ()
@@ -262,9 +252,6 @@ function (mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})
   # Create test executables
   foreach(_ver ${_qt_vers})
-    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
-      mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
-    endif ()
     if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
       mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
     endif ()
@@ -348,7 +335,7 @@ function (mtd_add_qt_test_executable)
 endfunction ()
 
 # Given a list of arguments decide which Qt versions
-# should be built. If ENABLE_MANTIPLOT is true the Qt4 is built.
+# should be built.
 # QT_VERSION can be specified to override this.
 function (_qt_versions output_list)
   # process argument list
@@ -361,9 +348,7 @@ function (_qt_versions output_list)
     list (GET ARGN ${_ver_value_idx} _ver_value)
     list (APPEND _qt_vers ${_ver_value})
   endif()
-  if(NOT ENABLE_MANTIDPLOT)
-    list (REMOVE_ITEM _qt_vers 4)
-  endif()
+  list (REMOVE_ITEM _qt_vers 4)
   if(NOT ENABLE_WORKBENCH)
     list (REMOVE_ITEM _qt_vers 5)
   endif()

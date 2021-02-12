@@ -12,30 +12,6 @@ set(
   inc/MantidQtIcons/Icon.h
 )
 
-if(ENABLE_MANTIDPLOT)
-  mtd_add_qt_library (TARGET_NAME MantidQtIcons
-                      QT_VERSION 4
-                      SRC ${SRC_FILES}
-                      NOMOC ${INC_FILES}
-                      RES ${CMAKE_CURRENT_LIST_DIR}/resources/icons.qrc
-                      DEFS
-                        IN_MANTIDQT_ICONS
-                      INCLUDE_DIRS
-                        ${CMAKE_CURRENT_SOURCE_DIR}/inc
-                      LINK_LIBS
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${JSONCPP_LIBRARIES}
-                        Qt4::QtScript
-                      INSTALL_DIR
-                        ${LIB_DIR}
-                      OSX_INSTALL_RPATH
-                        @loader_path/../MacOS
-                        @loader_path/../Frameworks
-                      LINUX_INSTALL_RPATH
-                        "\$ORIGIN/../${LIB_DIR}")
-endif()
-
 if(ENABLE_WORKBENCH)
   mtd_add_qt_library (TARGET_NAME MantidQtIcons
                       QT_VERSION 5
