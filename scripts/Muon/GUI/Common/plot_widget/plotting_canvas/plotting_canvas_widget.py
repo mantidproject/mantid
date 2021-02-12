@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from Muon.GUI.Common.plot_widget.QuickEdit.quickEdit_widget import QuickEditWidget
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView

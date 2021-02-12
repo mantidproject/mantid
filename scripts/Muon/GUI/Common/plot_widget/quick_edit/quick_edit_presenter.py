@@ -32,8 +32,6 @@ class QuickEditPresenter(object):
     def get_all_subplots(self):
         return self.all()
 
-
-
     @property
     def autoscale(self):
         return self._view.autoscale_state
@@ -100,7 +98,6 @@ class QuickEditPresenter(object):
 
     def get_selection(self):
         name = self.widget.current_selection()
-        print("baa",name, self.all())
         if name == "All":
             return self.all()
         return [name]

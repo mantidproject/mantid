@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
 import qtpy
-from Muon.GUI.Common.plot_widget.QuickEdit.axis_changer.axis_changer_presenter import AxisChangerWidget
+from Muon.GUI.Common.plot_widget.quick_edit.axis_changer.axis_changer_presenter import AxisChangerWidget
 
 
 class QuickEditView(QtWidgets.QWidget):
@@ -49,7 +49,6 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
         self.setFixedHeight(50)
-
 
     """ plot selection """
     def add_subplot(self, name):

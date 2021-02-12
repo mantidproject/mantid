@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.plot_widget.QuickEdit.quickEdit_view import QuickEditView
-from Muon.GUI.Common.plot_widget.QuickEdit.quickEdit_presenter import QuickEditPresenter
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_view import QuickEditView
+from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_presenter import QuickEditPresenter
 
 
 class QuickEditWidget(object):
