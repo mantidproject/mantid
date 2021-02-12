@@ -221,6 +221,25 @@ class BasicFittingModel:
     def fit_to_raw(self, fit_to_raw):
         self._fit_to_raw = fit_to_raw
 
+    def get_active_workspace_names(self):
+        """Returns the names of the workspaces that will be fitted. Single Fit mode only fits the selected workspace."""
+        return [self.current_dataset_name]
+
+    def get_active_fit_results(self):
+        """Returns the results of the currently active fit. For Single Fit there is only one fit result."""
+        if self.number_of_datasets > 0:
+            return self._create_fit_plot_information(self.get_active_workspace_names(), self.function_name)
+        else:
+            return []
+
+    def _create_fit_plot_information(self, workspace_names, function_name):
+        return [FitPlotInformation(input_workspaces=workspace_names,
+                                   fit=self._get_fit_results_from_context(workspace_names, function_name))]
+
+    def _get_fit_results_from_context(self, workspace_names, function_name):
+        return self.context.fitting_context.find_fit_for_input_workspace_list_and_function(workspace_names,
+                                                                                           function_name)
+
     @staticmethod
     def _clone_function(function):
         if function is None:
