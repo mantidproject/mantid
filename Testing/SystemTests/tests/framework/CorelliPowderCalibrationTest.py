@@ -6,7 +6,7 @@
 from numpy.testing import assert_allclose
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import (
-    CompareWorkspaces, ConvertToEventWorkspace, CorelliPowderCalibrationApply, CorelliPowderCalibrationCreate,
+    CompareWorkspaces, ConvertToEventWorkspace, CorelliCalibrationApply, CorelliPowderCalibrationCreate,
     CreateEmptyTableWorkspace, LoadEmptyInstrument, LoadNexus, MoveInstrumentComponent, mtd, RotateInstrumentComponent)
 
 
@@ -40,7 +40,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
                         [-0.01, -1.00, 0.03], atol=0.05)
 
 
-class CorelliPowderCalibrationApplyTest(MantidSystemTest):
+class CorelliCalibrationApplyTest(MantidSystemTest):
     """
     Build an empty/reference CORELLI instrument and a calibration
     table to test the apply functionality.
@@ -147,7 +147,7 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
         LoadEmptyInstrument(Filename="CORELLI_Definition.xml", OutputWorkspace=self.ws_reference)
         ConvertToEventWorkspace(InputWorkspace=self.ws_reference, OutputWorkspace=self.ws_calbrated)
         self.generate_calitab()
-        CorelliPowderCalibrationApply(Workspace=self.ws_calbrated,
+        CorelliCalibrationApply(Workspace=self.ws_calbrated,
                                       CalibrationTable=self.cali_table_name)
         # ensure that the calibration application take place
         _ws_ref = mtd[self.ws_reference]
