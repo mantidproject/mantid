@@ -78,7 +78,8 @@ include(Span)
 # Set ParaView information since later items depend on it
 # VATES flag. Requires ParaView
 option(MAKE_VATES "Switch for compiling the Vates project" Off)
-if(ENABLE_MANTIDPLOT AND MAKE_VATES)
+
+if(ENABLE_MANTIDPLOT OR MAKE_VATES)
   message( STATUS "ParaView is no longer used")
 endif()
 

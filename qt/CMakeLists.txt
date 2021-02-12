@@ -29,8 +29,4 @@ add_subdirectory(icons)
 add_subdirectory(widgets)
 add_subdirectory(python)
 add_subdirectory(scientific_interfaces)
-if(MAKE_VATES)
-  add_subdirectory(paraview_ext)
-endif(MAKE_VATES)
-
 add_subdirectory(applications)
