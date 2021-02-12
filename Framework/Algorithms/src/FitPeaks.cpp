@@ -1081,7 +1081,7 @@ void FitPeaks::fitSpectrumPeaks(
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
 
-  // index of previous peka inn same spectrum (initially innvalid)
+  // index of previous peak inn same spectrum (initially invalid)
   size_t prev_peak_index = m_numPeaksToFit + 1;
   bool neighborPeakSameSpectrum = false;
 
@@ -1105,6 +1105,8 @@ void FitPeaks::fitSpectrumPeaks(
     std::map<size_t, double> tied_values;
     if (!peakfunction->writeTies().empty()) {
       // save value of these parameters which have just been calculated
+      // if they were set to be tied (e.g. for the B2Bexp this would
+      // typically be A and B but not Sigma)
       for (size_t ipar = 0; ipar < peakfunction->nParams(); ++ipar) {
         auto tie = peakfunction->getTie(ipar);
         if (tie) {
@@ -1211,10 +1213,11 @@ void FitPeaks::fitSpectrumPeaks(
     fit_function.peakfunction = peakfunction;
     fit_function.bkgdfunction = bkgdfunction;
 
-    processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
-                               fit_function, fit_result); // sets the record
+    auto good_fit =
+        processSinglePeakFitResult(wi, peak_index, cost, expected_peak_centers,
+                                   fit_function, fit_result); // sets the record
 
-    if (fit_result->getCost(peak_index) < 1e10) {
+    if (good_fit) {
       // reset the flag such that there is at a peak fit in this spectrum
       neighborPeakSameSpectrum = true;
       prev_peak_index = peak_index;
@@ -1306,7 +1309,8 @@ bool FitPeaks::processSinglePeakFitResult(
 
   // get peak position and analyze the fitting is good or not by various
   // criteria
-  double peak_pos = fitfunction.peakfunction->centre();
+  auto peak_pos = fitfunction.peakfunction->centre();
+  auto peak_fwhm = fitfunction.peakfunction->fwhm();
   bool good_fit(false);
   if ((cost < 0) || (cost >= DBL_MAX - 1.) || std::isnan(cost)) {
     // unphysical cost function value
@@ -1326,8 +1330,15 @@ bool FitPeaks::processSinglePeakFitResult(
         g_log.debug() << "Peak position " << peak_pos << " is out of fit "
                       << "window boundary " << fitwindow.first << ", "
                       << fitwindow.second << "\n";
-      } else
+      } else if (peak_fwhm > (fitwindow.second - fitwindow.first)) {
+        // peak is too wide or window is too small
+        peak_pos = -2.25;
+        g_log.debug() << "Peak position " << peak_pos << " has fwhm "
+                      << "wider than the fit window "
+                      << fitwindow.second - fitwindow.first << "\n";
+      } else {
         good_fit = true;
+      }
     } else {
       // use the 1/2 distance to neiboring peak without defined peak window
       double left_bound(-1);
@@ -1345,10 +1356,17 @@ bool FitPeaks::processSinglePeakFitResult(
       if (left_bound < 0 || right_bound < 0)
         throw std::runtime_error("Code logic error such that left or right "
                                  "boundary of peak position is negative.");
-      if (peak_pos < left_bound || peak_pos > right_bound)
+      if (peak_pos < left_bound || peak_pos > right_bound) {
         peak_pos = -2.5;
-      else
+      } else if (peak_fwhm > (right_bound - left_bound)) {
+        // peak is too wide or window is too small
+        peak_pos = -2.75;
+        g_log.debug() << "Peak position " << peak_pos << " has fwhm "
+                      << "wider than the fit window "
+                      << right_bound - left_bound << "\n";
+      } else {
         good_fit = true;
+      }
     }
   } else if (fabs(fitfunction.peakfunction->centre() -
                   expected_peak_positions[peakindex]) > postol) {
