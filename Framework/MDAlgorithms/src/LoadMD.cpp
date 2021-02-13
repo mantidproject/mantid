@@ -36,12 +36,12 @@
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
-using file_holder_type = std::unique_ptr<Mantid::API::IBoxControllerIO>;
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+
+using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
 
 namespace Mantid {
 namespace MDAlgorithms {
