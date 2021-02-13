@@ -16,7 +16,6 @@ New Algorithms
 - :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalman Pings terms
 - :ref:`CorelliCalibrationDatabase <algm-CorelliCalibrationDatabase>` to save CORELLI geometry calibration to database
 - :ref:`CorelliCalibrationApply <algm-CorelliCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
-- :ref:`CorelliCalibrationCreate <algm-CorelliCalibrationCreate>` adjusts the position and orientation of CORELLI banks in order to optimize the comparison of observed peaks to reference data
 - :ref:`ClipPeaks <algm-ClipPeaks>` to clip peaks, providing a background estimation.
 - :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument
 - :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard
