@@ -18,7 +18,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.fit_parameter_changed_notifier = GenericObservable()
         self.fitting_mode_changed_notifier = GenericObservable()
-        self.selected_single_fit_notifier = GenericObservable()
+        self.selected_fit_results_changed = GenericObservable()
 
         self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
@@ -53,7 +53,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.simultaneous_fit_function = self.model.simultaneous_fit_function_cache
         super().handle_undo_fit_clicked()
 
-        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared):
         """Handle when fitting is finished."""
@@ -64,7 +64,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_fit_function_in_view_from_model()
 
         # Send the workspaces to be plotted
-        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
         # Update parameter values in sequential tab.
         parameter_values = self.model.get_fit_function_parameter_values(fit_function)
@@ -76,15 +76,20 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.simultaneous_fitting_mode = self.view.is_simultaneous_fit_ticked
         self.switch_fitting_mode_in_view()
 
-        self.clear_cached_fit_functions()
+        self.update_fit_functions_in_model_from_view()
 
         # Triggers handle_display_workspace_changed
         self.update_dataset_names_in_view_and_model()
+
+        self.reset_start_xs_and_end_xs()
+        self.reset_fit_status_and_chi_squared_information()
+        self.clear_cached_fit_functions()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
 
     def handle_simultaneous_fit_by_changed(self):
         """Handle when the simultaneous fit by combo box is changed."""
+        logger.warning("FIT BY")
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
 
         # Triggers handle_simultaneous_fit_by_specifier_changed
@@ -92,44 +97,39 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_simultaneous_fit_by_specifier_changed(self):
         """Handle when the simultaneous fit by specifier combo box is changed."""
+        logger.warning("FIT BY SPECIFIER")
         self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
 
         # Triggers handle_display_workspace_changed
         self.update_dataset_names_in_view_and_model()
 
+        self.reset_start_xs_and_end_xs()
+        self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
 
     def handle_display_workspace_changed(self):
         """Handle when the display workspace combo box is changed."""
-        logger.warning("DISPLAY WORKSPACE")
+        logger.warning("DISPLAY WORKSPACES")
         self.model.current_dataset_index = self.view.current_dataset_index
 
-        self.update_fit_functions_in_model_from_view()
-
-        ######### maybe update instead of clear?
-        self.clear_fit_status_and_chi_squared_information()
-        self.reset_start_xs_and_end_xs()
-        #########
-
-        self.view.start_time = self.model.current_start_x
-        self.view.end_time = self.model.current_end_x
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
-        ####
-        self.fit_function_changed_notifier.notify_subscribers()
-        ####
-        self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
+
         self.model.update_plot_guess(self.view.plot_guess)
+
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_function_structure_changed(self):
         """Handle when the function structure is changed."""
         self.update_fit_functions_in_model_from_view()
         if not self.view.fit_object:
             self.model.clear_fit_information()
-            self.selected_single_fit_notifier.notify_subscribers(self.model.get_active_fit_results())
+            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
-        self.clear_fit_status_and_chi_squared_information()
+        self.reset_fit_status_and_chi_squared_information()
 
         self.automatically_update_function_name()
 
@@ -159,10 +159,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_and_reset_all_data(self):
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
+        logger.warning("UPDATE RESET ALL")
         self.update_simultaneous_fit_by_specifiers_in_view()
         #self.update_dataset_names_in_view_and_model()
 
-        self.clear_fit_status_and_chi_squared_information()
+        self.reset_fit_status_and_chi_squared_information()
         self.reset_start_xs_and_end_xs()
         self.clear_cached_fit_functions()
         #self.reset_fit_function()
@@ -177,10 +178,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Updates the fit status and chi squared stored in the model. This is used after a fit."""
         if self.model.simultaneous_fitting_mode:
             self.model.fit_statuses = [fit_status] * self.model.number_of_datasets
-            self.model.fit_chi_squares = [chi_squared] * self.model.number_of_datasets
+            self.model.chi_squared = [chi_squared] * self.model.number_of_datasets
         else:
             self.model.current_fit_status = fit_status
-            self.model.current_fit_chi_squared = chi_squared
+            self.model.current_chi_squared = chi_squared
 
     def update_fit_function_in_model(self, fit_function):
         """Updates the fit function stored in the model. This is used after a fit."""
@@ -208,6 +209,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         else:
             self.model.clear_simultaneous_fit_function()
             self.update_single_fit_functions_in_model()
+
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def update_simultaneous_fit_function_in_model(self):
         """Updates the simultaneous fit function in the model using the view."""

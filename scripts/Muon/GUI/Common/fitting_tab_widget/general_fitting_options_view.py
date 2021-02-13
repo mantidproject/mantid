@@ -133,7 +133,7 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
     def current_dataset_index(self):
         """Returns the index of the currently displayed dataset."""
         current_index = self.parameter_display_combo.currentIndex()
-        return current_index if current_index != -1 else 0
+        return current_index if current_index != -1 else None
 
     def hide_simultaneous_fit_options(self):
         """Hides the simultaneous fit options."""
