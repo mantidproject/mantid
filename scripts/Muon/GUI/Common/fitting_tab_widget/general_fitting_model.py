@@ -109,26 +109,11 @@ class GeneralFittingModel(BasicFittingModel):
 
     def reset_fit_functions(self):
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
-        ########
-        ##  I am here. Adding a function and switching to Simultaneous is causing an error.
-        ########
+        if self.simultaneous_fit_function is not None:
+            single_function = self._get_single_domain_reset_function()
+            self.simultaneous_fit_function = single_function if self.number_of_datasets == 1 else \
+                self._create_multi_domain_function_from(single_function)
 
-        if self.simultaneous_fit_function is None:
-            super().reset_fit_functions()
-            return
-        elif isinstance(self.simultaneous_fit_function, MultiDomainFunction):
-            fit_functions = [function.clone() for function in self.simultaneous_fit_function.createEquivalentFunctions()]
-            if self.current_dataset_index is not None:
-                fit_function = self._clone_function(fit_functions[self.current_dataset_index])
-            else:
-                fit_function = self._clone_function(fit_functions[0])
-        else:
-            fit_function = self._clone_function(self.simultaneous_fit_function)
-
-        logger.warning(str(fit_function))
-        logger.warning(str(self.number_of_datasets))
-        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(str(fit_function),
-                                                                                              self.number_of_datasets)
         super().reset_fit_functions()
 
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self):
@@ -231,6 +216,21 @@ class GeneralFittingModel(BasicFittingModel):
     def _check_data_exists(workspace_names):
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
+
+    def _get_single_domain_reset_function(self):
+        """Return a single domain function to use in a reset function based on the previously active function."""
+        if not isinstance(self.simultaneous_fit_function, MultiDomainFunction):
+            return self.simultaneous_fit_function
+
+        functions = [function.clone() for function in self.simultaneous_fit_function.createEquivalentFunctions()]
+        if self.current_dataset_index is not None:
+            return self._clone_function(functions[self.current_dataset_index])
+        else:
+            return self._clone_function(functions[0])
+
+    def _create_multi_domain_function_from(self, fit_function):
+        """Create a MultiDomainFunction containing the same fit function for each domain."""
+        return FunctionFactory.createInitializedMultiDomainFunction(str(fit_function), self.number_of_datasets)
 
     ##############################
     ##  Old
