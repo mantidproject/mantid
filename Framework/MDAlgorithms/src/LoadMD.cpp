@@ -552,7 +552,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ---------------------------------------- DEAL WITH BOXES
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
-    auto loader = std::shared_ptr<API::IBoxControllerNexusIO>(
+    auto loader = std::shared_ptr<DataObjects::BoxControllerNeXusIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);
