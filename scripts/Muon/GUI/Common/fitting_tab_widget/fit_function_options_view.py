@@ -99,7 +99,7 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             self.function_browser.blockSignals(False)
         elif is_simultaneous_fit:
             self.function_browser.blockSignals(True)
-            self.function_browser.updateMultiDatasetParameters(fit_function)
+            self.function_browser.setFunction(str(fit_function))
             self.function_browser.blockSignals(False)
         else:
             self.function_browser.blockSignals(True)
