@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, FunctionFactory, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry, CopyLogs
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
@@ -18,7 +18,6 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 import math
-from typing import List
 from mantid import logger
 
 
@@ -39,7 +38,7 @@ class GeneralFittingModel(BasicFittingModel):
         self._simultaneous_fit_by_specifier = ""
 
         self._global_parameters = []
-        self._tf_asymmetry_mode = False
+        self._tf_asymmetry_mode = False  # TEMPORARY
 
     def clear_simultaneous_fit_function(self):
         self.simultaneous_fit_function = None
@@ -107,6 +106,30 @@ class GeneralFittingModel(BasicFittingModel):
     @tf_asymmetry_mode.setter
     def tf_asymmetry_mode(self, tf_asymmetry_mode):
         self._tf_asymmetry_mode = tf_asymmetry_mode
+
+    def reset_fit_functions(self):
+        """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
+        ########
+        ##  I am here. Adding a function and switching to Simultaneous is causing an error.
+        ########
+
+        if self.simultaneous_fit_function is None:
+            super().reset_fit_functions()
+            return
+        elif isinstance(self.simultaneous_fit_function, MultiDomainFunction):
+            fit_functions = [function.clone() for function in self.simultaneous_fit_function.createEquivalentFunctions()]
+            if self.current_dataset_index is not None:
+                fit_function = self._clone_function(fit_functions[self.current_dataset_index])
+            else:
+                fit_function = self._clone_function(fit_functions[0])
+        else:
+            fit_function = self._clone_function(self.simultaneous_fit_function)
+
+        logger.warning(str(fit_function))
+        logger.warning(str(self.number_of_datasets))
+        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(str(fit_function),
+                                                                                              self.number_of_datasets)
+        super().reset_fit_functions()
 
     def get_simultaneous_fit_by_specifiers_to_display_from_context(self):
         """Returns the simultaneous fit by specifiers to display in the view from the context."""

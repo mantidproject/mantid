@@ -109,24 +109,24 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
         return self.fit_function_options.minimizer
 
     @property
-    def start_time(self):
+    def start_x(self):
         """Returns the selected start X."""
-        return self.fit_function_options.start_time
+        return self.fit_function_options.start_x
 
-    @start_time.setter
-    def start_time(self, value):
+    @start_x.setter
+    def start_x(self, value):
         """Sets the selected start X."""
-        self.fit_function_options.start_time = value
+        self.fit_function_options.start_x = value
 
     @property
-    def end_time(self):
+    def end_x(self):
         """Returns the selected end X."""
-        return self.fit_function_options.end_time
+        return self.fit_function_options.end_x
 
-    @end_time.setter
-    def end_time(self, value):
+    @end_x.setter
+    def end_x(self, value):
         """Sets the selected end X."""
-        self.fit_function_options.end_time = value
+        self.fit_function_options.end_x = value
 
     @property
     def evaluation_type(self):

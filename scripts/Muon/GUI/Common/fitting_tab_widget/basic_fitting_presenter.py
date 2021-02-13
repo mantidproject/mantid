@@ -55,8 +55,8 @@ class BasicFittingPresenter:
 
     def initialize_model_options(self):
         """Initialise the model with the default fitting options."""
-        self.model.start_xs = [self.view.start_time]
-        self.model.end_xs = [self.view.end_time]
+        self.model.start_xs = [self.view.start_x]
+        self.model.end_xs = [self.view.end_x]
         self.model.minimizer = self.view.minimizer
         self.model.evaluation_type = self.view.evaluation_type
         self.model.fit_to_raw = self.view.fit_to_raw
@@ -70,7 +70,7 @@ class BasicFittingPresenter:
         self.clear_and_reset_gui_state()
 
     def handle_gui_changes_made(self, changed_values):
-        """Handle when changes to the context have been made."""
+        """Handle when the good data checkbox is changed in the home tab."""
         for key in changed_values.keys():
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
                 self.reset_start_xs_and_end_xs()
@@ -90,7 +90,7 @@ class BasicFittingPresenter:
         self.model.remove_latest_fit_from_context()
         self.clear_cached_fit_functions()
 
-        self.clear_fit_status_and_chi_squared_information()
+        self.reset_fit_status_and_chi_squared_information()
 
         self.update_fit_function_in_view_from_model()
 
@@ -161,19 +161,19 @@ class BasicFittingPresenter:
 
     def handle_start_x_updated(self):
         """Handle when the start X is changed."""
-        if self.view.start_time > self.view.end_time:
-            self.view.start_time, self.view.end_time = self.view.end_time, self.view.start_time
-            self.model.current_end_x = self.view.end_time
+        if self.view.start_x > self.view.end_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+            self.model.current_end_x = self.view.end_x
 
-        self.model.current_start_x = self.view.start_time
+        self.model.current_start_x = self.view.start_x
 
     def handle_end_x_updated(self):
         """Handle when the end X is changed."""
-        if self.view.end_time < self.view.start_time:
-            self.view.start_time, self.view.end_time = self.view.end_time, self.view.start_time
-            self.model.current_start_x = self.view.start_time
+        if self.view.end_x < self.view.start_x:
+            self.view.start_x, self.view.end_x = self.view.end_x, self.view.start_x
+            self.model.current_start_x = self.view.start_x
 
-        self.model.current_end_x = self.view.end_time
+        self.model.current_end_x = self.view.end_x
 
     def handle_use_rebin_changed(self):
         """Handle the Fit to raw data checkbox state change."""
@@ -184,7 +184,7 @@ class BasicFittingPresenter:
         """Clears all data in the view and updates the model."""
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
 
-        self.clear_fit_status_and_chi_squared_information()
+        self.reset_fit_status_and_chi_squared_information()
         self.reset_start_xs_and_end_xs()
         #self._reset_fit_function()
 
@@ -194,8 +194,6 @@ class BasicFittingPresenter:
         self.model.clear_cached_fit_functions()
 
     def set_current_dataset_index(self, dataset_index):
-        logger.warning(str(len(self.model.dataset_names)))
-        logger.warning(str(dataset_index))
         self.model.current_dataset_index = dataset_index
         self.view.set_current_dataset_index(dataset_index)
 
@@ -245,7 +243,7 @@ class BasicFittingPresenter:
     def update_fit_statuses_and_chi_squared_in_view_from_model(self):
         """Updates the local and global fit status and chi squared in the view."""
         self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
-                                                          self.model.current_fit_chi_squared)
+                                                          self.model.current_chi_squared)
         self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
 
     def _create_thread(self, callback):
@@ -258,7 +256,7 @@ class BasicFittingPresenter:
         self.fsg_model = FitScriptGeneratorModel()
         self.fsg_view = FitScriptGeneratorView(None, fit_options)
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
-                                                         self.view.start_time, self.view.end_time)
+                                                         self.view.start_x, self.view.end_x)
 
         self.fsg_presenter.openFitScriptGenerator()
 
@@ -266,25 +264,16 @@ class BasicFittingPresenter:
     #     """Reset the fit function information."""
     #     self.model.single_fit_functions = self._get_fit_function()
 
-    def clear_fit_status_and_chi_squared_information(self):
+    def reset_fit_status_and_chi_squared_information(self):
         """Clear the fit status and chi squared information in the view and model."""
-        number_of_datasets = self.model.number_of_datasets
-
-        self.model.fit_statuses = [None] * number_of_datasets if number_of_datasets > 0 else [None]
-        self.model.fit_chi_squares = [0.0] * number_of_datasets if number_of_datasets > 0 else [0.0]
+        self.model.reset_fit_statuses_and_chi_squared()
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
-        #self.view.enable_undo_fit(False)
 
     def reset_start_xs_and_end_xs(self):
         """Reset the start Xs and end Xs using the data stored in the context."""
-        number_of_datasets = self.model.number_of_datasets
-
-        self.model.start_xs = [self.model.retrieve_first_good_data_from_run(name)
-                               for name in self.model.dataset_names] if number_of_datasets > 0 else [DEFAULT_START_X]
-        self.model.end_xs = [self.view.end_time] * number_of_datasets if number_of_datasets > 0 else [DEFAULT_END_X]
-
-        self.view.start_time = self.model.start_xs[0]
-        self.view.end_time = self.model.end_xs[0]
+        self.model.reset_start_xs_and_end_xs()
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
 
     def _check_rebin_options(self):
         """Check that a rebin was indeed requested in the fitting tab or in the context."""

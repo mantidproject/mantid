@@ -30,8 +30,8 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         super(FitFunctionOptionsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.start_x = None
-        self.end_x = None
+        self.start_x_line_edit = None
+        self.end_x_line_edit = None
         self.minimizer_combo = None
         self.fit_to_raw_data_checkbox = None
         self.evaluation_combo = None
@@ -63,11 +63,11 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
 
     def set_slot_for_start_x_updated(self, slot):
         """Connect the slot for the start x option."""
-        self.start_x.editingFinished.connect(slot)
+        self.start_x_line_edit.editingFinished.connect(slot)
 
     def set_slot_for_end_x_updated(self, slot):
         """Connect the slot for the end x option."""
-        self.end_x.editingFinished.connect(slot)
+        self.end_x_line_edit.editingFinished.connect(slot)
 
     def set_slot_for_minimizer_changed(self, slot):
         """Connect the slot for changing the Minimizer."""
@@ -118,24 +118,24 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         return str(self.minimizer_combo.currentText())
 
     @property
-    def start_time(self):
+    def start_x(self):
         """Returns the selected start X."""
-        return float(self.start_x.text())
+        return float(self.start_x_line_edit.text())
 
-    @start_time.setter
-    def start_time(self, value):
+    @start_x.setter
+    def start_x(self, value):
         """Sets the selected start X."""
-        self.start_x.setText(str(value))
+        self.start_x_line_edit.setText(str(value))
 
     @property
-    def end_time(self):
+    def end_x(self):
         """Returns the selected end X."""
-        return float(self.end_x.text())
+        return float(self.end_x_line_edit.text())
 
-    @end_time.setter
-    def end_time(self, value):
+    @end_x.setter
+    def end_x(self, value):
         """Sets the selected end X."""
-        self.end_x.setText(str(value))
+        self.end_x_line_edit.setText(str(value))
 
     @property
     def evaluation_type(self):
@@ -187,10 +187,10 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
         table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
-        self.start_x = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
+        self.start_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "Time End")
-        self.end_x = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
+        self.end_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])

@@ -13,8 +13,12 @@ from Muon.GUI.Common.contexts.fitting_context import FitInformation
 import re
 from typing import List, NamedTuple
 
+DEFAULT_CHI_SQUARED = 0.0
+DEFAULT_FIT_STATUS = None
+DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
 DEFAULT_END_X = 15.0
+
 FDA_GUESS_WORKSPACE = "__frequency_domain_analysis_fitting_guess"
 MA_GUESS_WORKSPACE = "__muon_analysis_fitting_guess"
 FDA_SUFFIX = " FD"
@@ -39,17 +43,17 @@ class BasicFittingModel:
     def __init__(self, context):
         self.context = context
 
-        self._current_dataset_index = 0
+        self._current_dataset_index = None
         self._dataset_names = []
 
-        self._single_fit_functions = [None]
-        self._single_fit_functions_cache = [None]
+        self._start_xs = []
+        self._end_xs = []
 
-        self._fit_statuses = [None]
-        self._fit_chi_squares = [0.0]
+        self._single_fit_functions = []
+        self._single_fit_functions_cache = []
 
-        self._start_xs = [DEFAULT_START_X]
-        self._end_xs = [DEFAULT_END_X]
+        self._fit_statuses = []
+        self._chi_squared = []
 
         self._function_name = ""
         self._function_name_auto_update = True
@@ -64,6 +68,9 @@ class BasicFittingModel:
 
     @current_dataset_index.setter
     def current_dataset_index(self, index):
+        if index is not None and index >= self.number_of_datasets:
+            raise RuntimeError(f"The provided dataset index ({index}) is too large.")
+
         self._current_dataset_index = index
 
     @property
@@ -73,6 +80,12 @@ class BasicFittingModel:
     @dataset_names.setter
     def dataset_names(self, names):
         self._dataset_names = names
+
+        self.reset_fit_functions()
+        self.reset_current_dataset_index()
+        self.reset_start_xs_and_end_xs()
+        self.reset_fit_statuses_and_chi_squared()
+        self.clear_cached_fit_functions()
 
     @property
     def current_dataset_name(self):
@@ -86,6 +99,44 @@ class BasicFittingModel:
     def number_of_datasets(self):
         return len(self.dataset_names)
 
+    @property
+    def start_xs(self):
+        return self._start_xs
+
+    @start_xs.setter
+    def start_xs(self, start_xs):
+        self._start_xs = start_xs
+
+    @property
+    def current_start_x(self):
+        if self.number_of_datasets > 0:
+            return self.start_xs[self.current_dataset_index]
+        else:
+            return DEFAULT_START_X
+
+    @current_start_x.setter
+    def current_start_x(self, value):
+        self.start_xs[self.current_dataset_index] = value
+
+    @property
+    def end_xs(self):
+        return self._end_xs
+
+    @end_xs.setter
+    def end_xs(self, end_xs):
+        self._end_xs = end_xs
+
+    @property
+    def current_end_x(self):
+        if self.current_dataset_index is not None:
+            return self.end_xs[self.current_dataset_index]
+        else:
+            return DEFAULT_END_X
+
+    @current_end_x.setter
+    def current_end_x(self, value):
+        self.end_xs[self.current_dataset_index] = value
+
     def clear_single_fit_functions(self):
         self.single_fit_functions = [None] * self.number_of_datasets
 
@@ -95,14 +146,14 @@ class BasicFittingModel:
 
     @single_fit_functions.setter
     def single_fit_functions(self, fit_functions):
-        if len(self._single_fit_functions) == 0:
-            raise ValueError("The provided list of fit functions is empty.")
-
         self._single_fit_functions = [self._clone_function(function) for function in fit_functions]
 
     @property
     def current_single_fit_function(self):
-        return self.single_fit_functions[self.current_dataset_index]
+        if self.current_dataset_index is not None:
+            return self.single_fit_functions[self.current_dataset_index]
+        else:
+            return DEFAULT_SINGLE_FIT_FUNCTION
 
     @current_single_fit_function.setter
     def current_single_fit_function(self, fit_function):
@@ -132,59 +183,33 @@ class BasicFittingModel:
 
     @property
     def current_fit_status(self):
-        return self.fit_statuses[self.current_dataset_index]
+        if self.current_dataset_index is not None:
+            return self.fit_statuses[self.current_dataset_index]
+        else:
+            return DEFAULT_FIT_STATUS
 
     @current_fit_status.setter
     def current_fit_status(self, fit_status):
         self.fit_statuses[self.current_dataset_index] = fit_status
 
     @property
-    def fit_chi_squares(self):
-        return self._fit_chi_squares
+    def chi_squared(self):
+        return self._chi_squared
 
-    @fit_chi_squares.setter
-    def fit_chi_squares(self, fit_chi_squares):
-        self._fit_chi_squares = fit_chi_squares
-
-    @property
-    def current_fit_chi_squared(self):
-        return self.fit_chi_squares[self.current_dataset_index]
-
-    @current_fit_chi_squared.setter
-    def current_fit_chi_squared(self, fit_chi_squared):
-        self.fit_chi_squares[self.current_dataset_index] = fit_chi_squared
+    @chi_squared.setter
+    def chi_squared(self, chi_squared_list):
+        self._chi_squared = chi_squared_list
 
     @property
-    def start_xs(self):
-        return self._start_xs
+    def current_chi_squared(self):
+        if self.current_dataset_index is not None:
+            return self.chi_squared[self.current_dataset_index]
+        else:
+            return DEFAULT_CHI_SQUARED
 
-    @start_xs.setter
-    def start_xs(self, start_xs):
-        self._start_xs = start_xs
-
-    @property
-    def current_start_x(self):
-        return self.start_xs[self.current_dataset_index]
-
-    @current_start_x.setter
-    def current_start_x(self, value):
-        self.start_xs[self.current_dataset_index] = value
-
-    @property
-    def end_xs(self):
-        return self._end_xs
-
-    @end_xs.setter
-    def end_xs(self, end_xs):
-        self._end_xs = end_xs
-
-    @property
-    def current_end_x(self):
-        return self.end_xs[self.current_dataset_index]
-
-    @current_end_x.setter
-    def current_end_x(self, value):
-        self.end_xs[self.current_dataset_index] = value
+    @current_chi_squared.setter
+    def current_chi_squared(self, chi_squared):
+        self.chi_squared[self.current_dataset_index] = chi_squared
 
     @property
     def function_name(self):
@@ -250,6 +275,40 @@ class BasicFittingModel:
     def remove_latest_fit_from_context(self):
         """Removes the latest fit results from the context."""
         self.context.fitting_context.remove_latest_fit()
+
+    def reset_current_dataset_index(self):
+        """Resets the current dataset index stored by the model. This shouldn't be necessary."""
+        if self.number_of_datasets == 0:
+            self.current_dataset_index = None
+        elif self.current_dataset_index is None or self.current_dataset_index >= self.number_of_datasets:
+            self.current_dataset_index = 0
+
+    def reset_start_xs_and_end_xs(self):
+        """Resets the start and end Xs stored by the model."""
+        self._reset_start_xs()
+        self._reset_end_xs()
+
+    def reset_fit_statuses_and_chi_squared(self):
+        """Reset the fit statuses and chi squared stored by the model."""
+        self.fit_statuses = [DEFAULT_FIT_STATUS] * self.number_of_datasets
+        self.chi_squared = [DEFAULT_CHI_SQUARED] * self.number_of_datasets
+
+    def reset_fit_functions(self):
+        """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
+        fit_function = None if len(self.single_fit_functions) == 0 else self.current_single_fit_function
+        self.single_fit_functions = [self._clone_function(fit_function)] * self.number_of_datasets
+
+    def _reset_start_xs(self):
+        """Resets the start Xs stored by the model."""
+        if self.number_of_datasets > 0:
+            self.start_xs = [self.retrieve_first_good_data_from_run(name) for name in self.dataset_names]
+        else:
+            self.start_xs = []
+
+    def _reset_end_xs(self):
+        """Resets the end Xs stored by the model."""
+        end_x = self.current_end_x if len(self.end_xs) > 0 else DEFAULT_END_X
+        self.end_xs = [end_x] * self.number_of_datasets
 
     def retrieve_first_good_data_from_run(self, workspace_name):
         """Returns the first good data value from a run number within a workspace name."""
