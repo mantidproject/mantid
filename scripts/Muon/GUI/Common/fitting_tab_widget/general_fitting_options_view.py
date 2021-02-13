@@ -47,20 +47,26 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         """Connect the slot for the fit specifier combo box being changed."""
         self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
-    def update_displayed_data_combo_box(self, data_list):
+    def update_displayed_data_combo_box(self, dataset_names):
         """Update the data in the parameter display combo box."""
+        old_name = self.parameter_display_combo.currentText()
+        old_index = self.parameter_display_combo.currentIndex()
+
+        self.update_dataset_names_combo_box(dataset_names)
+
+        new_index = self.parameter_display_combo.findText(old_name)
+        new_index = new_index if new_index != -1 else 0
+
+        self.parameter_display_combo.setCurrentIndex(new_index)
+        if new_index == old_index:
+            self.parameter_display_combo.currentIndexChanged.emit(new_index)
+
+    def update_dataset_names_combo_box(self, dataset_names):
+        """Update the datasets displayed in the dataset name combobox."""
         self.parameter_display_combo.blockSignals(True)
-        name = self.parameter_display_combo.currentText()
         self.parameter_display_combo.clear()
-        self.parameter_display_combo.addItems(data_list)
-
-        index = self.parameter_display_combo.findText(name)
+        self.parameter_display_combo.addItems(dataset_names)
         self.parameter_display_combo.blockSignals(False)
-
-        if index != -1:
-            self.parameter_display_combo.setCurrentIndex(index)
-        else:
-            self.parameter_display_combo.setCurrentIndex(0)
 
     def increment_display_combo_box(self):
         """Increment the parameter display combo box."""
@@ -123,8 +129,9 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         """Returns the run, group or pair name."""
         return self.simul_fit_by_specifier.currentText()
 
-    def get_index_for_start_end_times(self):
-        """Returns the index of the currently displayed workspace."""
+    @property
+    def current_dataset_index(self):
+        """Returns the index of the currently displayed dataset."""
         current_index = self.parameter_display_combo.currentIndex()
         return current_index if current_index != -1 else 0
 

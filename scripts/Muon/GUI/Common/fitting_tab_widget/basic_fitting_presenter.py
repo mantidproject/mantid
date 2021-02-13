@@ -24,8 +24,6 @@ class BasicFittingPresenter:
         self.view = view
         self.model = model
 
-        self._number_of_fits_cached = 0
-
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -80,7 +78,7 @@ class BasicFittingPresenter:
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
         self.view.plot_guess = False
-        self.view.enable_undo_fit(False)
+        self.clear_cached_fit_functions()
 
     def handle_plot_guess_changed(self):
         """Handle when plot guess is ticked or un-ticked."""
@@ -90,9 +88,11 @@ class BasicFittingPresenter:
         """Handle when undo fit is clicked."""
         self.model.single_fit_functions = self.model.single_fit_functions_cache
         self.model.remove_latest_fit_from_context()
+        self.clear_cached_fit_functions()
 
         self.clear_fit_status_and_chi_squared_information()
-        self._number_of_fits_cached = 0
+
+        self.update_fit_function_in_view_from_model()
 
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
@@ -188,7 +188,14 @@ class BasicFittingPresenter:
         self.reset_start_xs_and_end_xs()
         #self._reset_fit_function()
 
+    def clear_cached_fit_functions(self):
+        """Clear the cached fit functions."""
+        self.view.enable_undo_fit(False)
+        self.model.clear_cached_fit_functions()
+
     def set_current_dataset_index(self, dataset_index):
+        logger.warning(str(len(self.model.dataset_names)))
+        logger.warning(str(dataset_index))
         self.model.current_dataset_index = dataset_index
         self.view.set_current_dataset_index(dataset_index)
 
@@ -197,6 +204,10 @@ class BasicFittingPresenter:
 
     def update_single_fit_functions_in_model(self):
         self.model.single_fit_functions = self._get_single_fit_functions_from_view()
+
+    def update_fit_function_in_view_from_model(self):
+        """Updates the parameters of a fit function shown in the view."""
+        self.view.update_fit_function(self.model.get_active_fit_function())
 
     def _get_single_fit_functions_from_view(self):
         """Returns the fit functions corresponding to each domain as a list."""
@@ -214,7 +225,6 @@ class BasicFittingPresenter:
 
     def _perform_fit(self):
         """Perform the fit in a thread."""
-        self._number_of_fits_cached += 1
         try:
             logger.warning(str(self.model.get_active_workspace_names()))
             calculation_function = functools.partial(self.model.evaluate_single_fit,
