@@ -41,7 +41,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
+using file_holder_type =
+    std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
 
 namespace Mantid {
 namespace MDAlgorithms {
