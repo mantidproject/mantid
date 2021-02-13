@@ -79,9 +79,10 @@ class GeneralFittingView(BasicFittingView):
         """Returns the run, group or pair name."""
         return self.general_fitting_options.simultaneous_fit_by_specifier
 
-    def get_index_for_start_end_times(self):
-        """Returns the index of the currently displayed workspace."""
-        return self.general_fitting_options.get_index_for_start_end_times()
+    @property
+    def current_dataset_index(self):
+        """Returns the index of the currently displayed dataset."""
+        return self.general_fitting_options.current_dataset_index
 
     def switch_to_simultaneous(self):
         """Switches the view to simultaneous fit mode."""

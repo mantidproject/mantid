@@ -119,6 +119,9 @@ class BasicFittingModel:
     def cache_the_current_fit_functions(self):
         self.single_fit_functions_cache = [self._clone_function(function) for function in self.single_fit_functions]
 
+    def clear_cached_fit_functions(self):
+        self.single_fit_functions_cache = [None] * self.number_of_datasets
+
     @property
     def fit_statuses(self):
         return self._fit_statuses

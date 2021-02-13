@@ -64,6 +64,10 @@ class GeneralFittingModel(BasicFittingModel):
         super().cache_the_current_fit_functions()
         self.simultaneous_fit_function_cache = self._clone_function(self.simultaneous_fit_function)
 
+    def clear_cached_fit_functions(self):
+        super().clear_cached_fit_functions()
+        self.simultaneous_fit_function_cache = None
+
     @property
     def simultaneous_fitting_mode(self):
         return self._simultaneous_fitting_mode
