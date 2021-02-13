@@ -86,9 +86,9 @@ class BasicFittingView(QtWidgets.QWidget, ui_fitting_layout):
     def update_local_fit_status_and_chi_squared(self, fit_status, chi_squared):
         """Updates the view to show the status and results from a fit."""
         if fit_status:
-            self.fit_controls.update_fit_status_labels(fit_status, chi_squared)
+            self.fit_function_options.update_fit_status_labels(fit_status, chi_squared)
         else:
-            self.fit_controls.clear_fit_status()
+            self.fit_function_options.clear_fit_status()
 
     def update_global_fit_status(self, fit_statuses, _):
         """Updates the global fit status label."""
