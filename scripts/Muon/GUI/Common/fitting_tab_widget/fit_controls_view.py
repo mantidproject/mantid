@@ -38,38 +38,6 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
         """Connect the slot for the Plot Guess checkbox."""
         self.plot_guess_checkbox.stateChanged.connect(slot)
 
-    def update_fit_status_labels(self, output_status, output_chi_squared):
-        """Updates the fit status labels."""
-        if output_status == "success":
-            self.fit_status_success_failure.setText("Success")
-            self.fit_status_success_failure.setStyleSheet("color: green")
-        elif output_status is None:
-            self.fit_status_success_failure.setText("No Fit")
-            self.fit_status_success_failure.setStyleSheet("color: black")
-        else:
-            self.fit_status_success_failure.setText(f"Failure: {output_status}")
-            self.fit_status_success_failure.setStyleSheet("color: red")
-        self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared:.4g}")
-
-    def clear_fit_status(self):
-        """Clears the fit status label."""
-        self.fit_status_success_failure.setText("No Fit")
-        self.fit_status_success_failure.setStyleSheet("color: black")
-        self.fit_status_chi_squared.setText(f"Chi squared: 0.0")
-
-    def update_global_fit_status_label(self, success_list):
-        """Updates the global fit status label."""
-        if not success_list:
-            self.global_fit_status_label.setText("No Fit")
-            self.global_fit_status_label.setStyleSheet("color: black")
-        elif all(success_list):
-            self.global_fit_status_label.setText("Fit Successful")
-            self.global_fit_status_label.setStyleSheet("color: green")
-        else:
-            self.global_fit_status_label.setText(
-                f"{len(success_list) - sum(success_list)} of {len(success_list)} fits failed")
-            self.global_fit_status_label.setStyleSheet("color: red")
-
     @property
     def plot_guess(self):
         """Returns true if plot guess is ticked."""
@@ -83,3 +51,16 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
     def enable_undo_fit(self, enable):
         """Sets whether or not undo fit is enabled."""
         self.undo_fit_button.setEnabled(enable)
+
+    def update_global_fit_status_label(self, success_list):
+        """Updates the global fit status label."""
+        if not success_list:
+            self.global_fit_status_label.setText("No Fit")
+            self.global_fit_status_label.setStyleSheet("color: black")
+        elif all(success_list):
+            self.global_fit_status_label.setText("Fit Successful")
+            self.global_fit_status_label.setStyleSheet("color: green")
+        else:
+            self.global_fit_status_label.setText(
+                f"{len(success_list) - sum(success_list)} of {len(success_list)} fits failed")
+            self.global_fit_status_label.setStyleSheet("color: red")

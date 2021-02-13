@@ -47,13 +47,13 @@
        <widget class="QLabel" name="fitting_type_label">
         <property name="minimumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>16777215</height>
          </size>
         </property>

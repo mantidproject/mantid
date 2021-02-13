@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>54</height>
+    <width>595</width>
+    <height>23</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,95 +26,81 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="7">
-      <widget class="QPushButton" name="fit_generator_button">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Fit Generator</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QCheckBox" name="plot_guess_checkbox">
-       <property name="text">
-        <string>Plot guess</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QPushButton" name="undo_fit_button">
-       <property name="text">
-        <string>Undo Fits</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="fit_button">
-       <property name="text">
-        <string>Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="7">
-      <widget class="QLabel" name="global_fit_status_label">
-       <property name="frameShape">
-        <enum>QFrame::Panel</enum>
-       </property>
-       <property name="text">
-        <string>No Fit</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QFrame" name="frame">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="leftMargin">
-         <number>4</number>
+   <item row="0" column="1">
+    <widget class="QFrame" name="frame">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="fit_button">
+        <property name="text">
+         <string>Fit</string>
         </property>
-        <property name="topMargin">
-         <number>0</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="undo_fit_button">
+        <property name="text">
+         <string>Undo Fits</string>
         </property>
-        <property name="rightMargin">
-         <number>0</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fit_generator_button">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
-        <property name="bottomMargin">
-         <number>0</number>
+        <property name="text">
+         <string>Fit Generator</string>
         </property>
-        <item>
-         <widget class="QLabel" name="local_fit_status_label">
-          <property name="text">
-           <string>Fit Status:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="fit_status_success_failure">
-          <property name="text">
-           <string>No fit</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QLabel" name="fit_status_chi_squared">
-       <property name="text">
-        <string>Chi squared: </string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="global_fit_status_label">
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="text">
+         <string>No Fit</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="plot_guess_checkbox">
+     <property name="minimumSize">
+      <size>
+       <width>107</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>107</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Plot guess</string>
+     </property>
+    </widget>
    </item>
   </layout>
-  <zorder></zorder>
  </widget>
  <resources/>
  <connections/>

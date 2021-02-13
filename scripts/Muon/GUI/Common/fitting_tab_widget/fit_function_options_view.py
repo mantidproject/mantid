@@ -81,6 +81,25 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
         """Connect the slot for the Use raw option."""
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
+    def update_fit_status_labels(self, output_status, output_chi_squared):
+        """Updates the fit status labels."""
+        if output_status == "success":
+            self.fit_status_success_failure.setText("Success")
+            self.fit_status_success_failure.setStyleSheet("color: green")
+        elif output_status is None:
+            self.fit_status_success_failure.setText("No Fit")
+            self.fit_status_success_failure.setStyleSheet("color: black")
+        else:
+            self.fit_status_success_failure.setText(f"Failure: {output_status}")
+            self.fit_status_success_failure.setStyleSheet("color: red")
+        self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared:.4g}")
+
+    def clear_fit_status(self):
+        """Clears the fit status label."""
+        self.fit_status_success_failure.setText("No Fit")
+        self.fit_status_success_failure.setStyleSheet("color: black")
+        self.fit_status_chi_squared.setText(f"Chi squared: 0.0")
+
     def set_datasets_in_function_browser(self, dataset_names):
         """Sets the datasets stored in the FunctionBrowser."""
         index_list = range(self.function_browser.getNumberOfDatasets())

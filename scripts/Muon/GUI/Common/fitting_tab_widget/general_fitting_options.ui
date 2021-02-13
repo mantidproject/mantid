@@ -45,13 +45,13 @@
        <widget class="QLabel" name="workspace_combo_box_label">
         <property name="minimumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>16777215</height>
          </size>
         </property>
@@ -115,18 +115,18 @@
        <widget class="QCheckBox" name="simul_fit_checkbox">
         <property name="minimumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>130</width>
+          <width>107</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="text">
-         <string>Simultaneous fit over</string>
+         <string>Simultaneous over</string>
         </property>
        </widget>
       </item>
