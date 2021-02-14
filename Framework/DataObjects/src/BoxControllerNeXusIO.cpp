@@ -15,6 +15,8 @@
 #include "MantidKernel/Exception.h"
 
 #include <string>
+#include <H5Cpp.h>
+
 
 namespace Mantid {
 namespace DataObjects {
@@ -34,6 +36,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
     : m_File(nullptr), m_ReadOnly(true), m_dataChunk(DATA_CHUNK), m_bc(bc),
       m_BlockStart(2, 0), m_BlockSize(2, 0), m_CoordSize(sizeof(coord_t)),
       m_EventType(FatEvent), m_EventsVersion("1.0"),
+      m_EventDataVersion(EventDataVersion::EDVGoniometer),
       m_ReadConversion(noConversion) {
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
@@ -90,6 +93,9 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
   } else
     throw std::invalid_argument("The class currently supports 4(float) and "
                                 "8(double) event coordinates only");
+
+  /// inspect dataspace "data_event" to determine if goniometer info is present
+  setEventDataVersion();
 }
 
 /** As save/load operations use void data type, these function allow set up/get
@@ -372,14 +378,128 @@ void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
   this->saveGenericBlock(DataBlock, blockPosition);
 }
 
-/** Load generic  data block from the opened NeXus file.
-  *@param Block         -- the storage vector to place data into
-  *@param blockPosition -- The starting place to read data from
-  *@param nPoints       -- number of data points (events) to read
+void BoxControllerNeXusIO::setEventDataVersion() {
+  if(m_fileName.empty())
+    throw std::runtime_error("Filename has not been set");
+  H5::H5File file( m_fileName, H5F_ACC_RDONLY );
+  H5::DataSet dataset = file.openDataSet("event_data");
+  H5::DataSpace dataspace = dataset.getSpace();
+  hsize_t dims[2] = {0, 0};
+  dataspace.getSimpleExtentDims(dims);
+  file.close();
+  size_t dataCount = static_cast<size_t>(dims[1]);
+  m_EventDataVersion = static_cast<EventDataVersion>(dataCount - m_bc->getNDims());
+}
 
-  *@returns Block -- resized block of data containing serialized events
-  representation.
-*/
+void BoxControllerNeXusIO::setEventDataVersion(
+    const BoxControllerNeXusIO::EventDataVersion &version) {
+  using EDV = BoxControllerNeXusIO::EventDataVersion;
+
+  // Is the event of type MDLeanEvent of MDEvent
+  size_t coordSize;
+  std::string typeName;
+  getDataType(coordSize, typeName);
+
+  // Cross-validation implemented in a not very elegant way, but does the job
+  // MDLeanEvent only accepts EDVLean
+  if(typeName == MDLeanEvent<1>::getTypeName() && version != EDV::EDVLean)
+    throw std::invalid_argument("Cannot set the event data version to other than EDVLean");
+  // MDEvent cannot accept EDVLean
+  if(typeName == MDEvent<1>::getTypeName() && version == EDV::EDVLean)
+    throw std::invalid_argument("Cannot set the event data version to EDVLean");
+
+  m_EventDataVersion = version;
+}
+
+int64_t BoxControllerNeXusIO::dataEventCount(void) const {
+  // m_BlockSize[1] is the number of data events associated to an MDLeanEvent
+  // or MDEvent object.
+  int64_t size(m_BlockSize[1]);
+  switch (m_EventDataVersion) {
+  case (EventDataVersion::EDVLean):
+    break;      // no adjusting is necessary
+  case (EventDataVersion::EDVOriginal): // we're dealing with an old Nexus file
+    size -= 1;  // old Nexus file doesn't have goniometer index info
+    break;
+  case (EventDataVersion::EDVGoniometer):
+    break; // no adjusting is necessary
+  default:
+    throw std::runtime_error("Unknown event data version");
+  }
+  return size;
+}
+
+template <typename Type>
+void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<Type> &Block,
+                                                const std::string accessMode) const {
+  // check the validity of accessMode
+  const std::vector<std::string> validAccessModes{"READ", "WRITE"};
+  if(std::find(validAccessModes.begin(), validAccessModes.end(), accessMode) == validAccessModes.end())
+    throw std::runtime_error("Unknown access mode");
+
+  switch (m_EventDataVersion) {
+  case (EventDataVersion::EDVLean):
+    break; // no adjusting is necessary
+  // we're dealing with and old Nexus file
+  case (EventDataVersion::EDVOriginal): {
+    int64_t blockSize(static_cast<int64_t>(Block.size()));
+    // number of data items in the old Nexus file associated to a single event
+    int64_t eventSize(dataEventCount());
+
+    // we just read event data from an old Nexus file. Goniometer index must
+    // be inserted
+    if (accessMode == "READ") {
+      // Block size is a multiple of eventSize
+      int64_t eventCount = blockSize / eventSize;
+      if (eventCount * eventSize != blockSize) // this shouldn't happen
+        throw std::runtime_error(
+            "Data block does not represent an integer number of events");
+      // Loop to insert goniometer index
+      std::vector<Type> backupBlock(Block);
+      Block.resize(eventCount * (eventSize + 1));
+      int64_t eventBegin(0);
+      for (int64_t i = 0; i < eventCount; i++) {
+        // signal, error, and runIndex occupy the first three data items
+        for (int64_t j = 0; j < 3; j++)
+          Block[eventBegin + j] = backupBlock[eventBegin + j];
+        Block[eventBegin + 4] = 0; // here's the goniometer index!
+        for (int64_t j = 4; j < eventSize; j++)
+          Block[eventBegin + j + 1] = backupBlock[eventBegin + j];
+        eventBegin += eventCount;
+      }
+    }
+
+    // we want to write the Block to an old Nexus file. Goniometer info must
+    // be removed
+    else if (accessMode == "WRITE") {
+      // Block size is a multiple of (eventSize + 1)
+      int64_t eventCount = blockSize / (eventSize + 1);
+      if (eventCount * (eventSize + 1) != blockSize) // this shouldn't happen
+        throw std::runtime_error(
+            "Data block does not represent an integer number of events");
+      // Loop to remove goniometer index
+      std::vector<Type> backupBlock(Block);
+      Block.resize(eventCount * eventSize);
+      int64_t eventBegin(0);
+      for (int64_t i = 0; i < eventCount; i++) {
+        // signal, error, and runIndex occupy the first three data items
+        for (int64_t j = 0; j < 3; j++)
+          Block[eventBegin + j] = backupBlock[eventBegin + j];
+        for (int64_t j = 4; j < eventSize; j++)
+          Block[eventBegin + j] = backupBlock[eventBegin + j + 1];
+        eventBegin += eventCount;
+      }
+    }
+
+    break;
+  }
+  case (EventDataVersion::EDVGoniometer):
+    break; // no adjusting is necessary
+  default:
+    throw std::runtime_error("Unknown event data version");
+  }
+}
+
 template <typename Type>
 void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
                                             const uint64_t blockPosition,
@@ -389,15 +509,18 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
                                        m_fileName);
 
   std::vector<int64_t> start(2, 0);
+  start[0] = static_cast<int64_t>(blockPosition);
+
   std::vector<int64_t> size(m_BlockSize);
+  size[0] = static_cast<int64_t>(nPoints);
+  size[1] = dataEventCount(); // data item count per event in the Nexus file
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
 
-  start[0] = static_cast<int64_t>(blockPosition);
-  size[0] = static_cast<int64_t>(nPoints);
   Block.resize(size[0] * size[1]);
-
   m_File->getSlab(&Block[0], start, size);
+
+  adjustEventDataBlock(Block, "READ");  // insert goniometer info if necessary
 }
 
 /** Helper funcion which allows to convert one data fomat into another */

@@ -36,12 +36,13 @@
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
-using file_holder_type = std::unique_ptr<Mantid::API::IBoxControllerIO>;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+
+using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -552,7 +553,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ---------------------------------------- DEAL WITH BOXES
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
-    auto loader = std::shared_ptr<API::IBoxControllerIO>(
+    auto loader = std::shared_ptr<DataObjects::BoxControllerNeXusIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);
