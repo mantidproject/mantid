@@ -21,5 +21,8 @@ class FittingTabWidget(object):
 
         self.fitting_tab_view = FittingTabView(parent, context, self.general_fitting_view)
 
+        self.general_fitting_presenter.reset_tab_notifier.add_subscriber(
+            self.fitting_tab_view.reset_tab_observer)
+
         context.update_view_from_model_notifier.add_subscriber(
             self.general_fitting_presenter.update_view_from_model_observer)

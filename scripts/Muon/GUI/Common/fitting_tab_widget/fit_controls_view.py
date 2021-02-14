@@ -54,7 +54,7 @@ class FitControlsView(QtWidgets.QWidget, ui_fit_controls):
 
     def update_global_fit_status_label(self, success_list):
         """Updates the global fit status label."""
-        if not success_list:
+        if len(success_list) == 0:
             self.global_fit_status_label.setText("No Fit")
             self.global_fit_status_label.setStyleSheet("color: black")
         elif all(success_list):

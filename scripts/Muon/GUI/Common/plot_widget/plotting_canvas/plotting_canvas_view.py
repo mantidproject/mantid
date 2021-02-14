@@ -144,10 +144,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         for workspace_plot_info in workspace_plot_info_list:
             workspace_name = workspace_plot_info.workspace_name
-            try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
-            except RuntimeError:
+            if not AnalysisDataService.Instance().doesExist(workspace_name):
                 continue
+
+            workspace = AnalysisDataService.Instance().retrieve(workspace_name)
             for plotted_information in self._plot_information_list.copy():
                 if workspace_plot_info.workspace_name == plotted_information.workspace_name and \
                         workspace_plot_info.axis == plotted_information.axis:

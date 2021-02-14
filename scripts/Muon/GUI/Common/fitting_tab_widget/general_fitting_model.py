@@ -60,12 +60,12 @@ class GeneralFittingModel(BasicFittingModel):
         self._simultaneous_fit_function_cache = fit_function
 
     def cache_the_current_fit_functions(self):
-        super().cache_the_current_fit_functions()
         self.simultaneous_fit_function_cache = self._clone_function(self.simultaneous_fit_function)
+        super().cache_the_current_fit_functions()
 
     def clear_cached_fit_functions(self):
-        super().clear_cached_fit_functions()
         self.simultaneous_fit_function_cache = None
+        super().clear_cached_fit_functions()
 
     @property
     def simultaneous_fitting_mode(self):
@@ -109,6 +109,9 @@ class GeneralFittingModel(BasicFittingModel):
 
     def reset_fit_functions(self):
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
+        if self.number_of_datasets == 0:
+            self.simultaneous_fit_function = None
+
         if self.simultaneous_fit_function is not None:
             single_function = self._get_single_domain_reset_function()
             self.simultaneous_fit_function = single_function if self.number_of_datasets == 1 else \

@@ -172,6 +172,7 @@ class BasicFittingModel:
 
     def clear_cached_fit_functions(self):
         self.single_fit_functions_cache = [None] * self.number_of_datasets
+        self.remove_latest_fit_from_context()
 
     @property
     def fit_statuses(self):
@@ -331,6 +332,10 @@ class BasicFittingModel:
             return self._create_fit_plot_information(self.get_active_workspace_names(), self.function_name)
         else:
             return []
+
+    def get_workspace_names_to_display_from_context(self):
+        """Returns the workspace names to display in the view and store in the model."""
+        raise NotImplementedError("This method must be overridden by a child class.")
 
     def _create_fit_plot_information(self, workspace_names, function_name):
         return [FitPlotInformation(input_workspaces=workspace_names,

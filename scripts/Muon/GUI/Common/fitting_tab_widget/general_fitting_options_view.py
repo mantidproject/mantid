@@ -8,6 +8,8 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy import QtWidgets
 
+from mantid import logger
+
 ui_general_fitting_options, _ = load_ui(__file__, "general_fitting_options.ui")
 
 FDA_FITTING_OPTIONS = []
@@ -50,7 +52,6 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
     def update_displayed_data_combo_box(self, dataset_names):
         """Update the data in the parameter display combo box."""
         old_name = self.parameter_display_combo.currentText()
-        old_index = self.parameter_display_combo.currentIndex()
 
         self.update_dataset_names_combo_box(dataset_names)
 
@@ -58,8 +59,8 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         new_index = new_index if new_index != -1 else 0
 
         self.parameter_display_combo.setCurrentIndex(new_index)
-        if new_index == old_index:
-            self.parameter_display_combo.currentIndexChanged.emit(new_index)
+        # This signal isn't always sent, so I will emit it manually.
+        self.parameter_display_combo.currentIndexChanged.emit(new_index)
 
     def update_dataset_names_combo_box(self, dataset_names):
         """Update the datasets displayed in the dataset name combobox."""

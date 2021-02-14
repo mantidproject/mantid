@@ -24,7 +24,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
 
         self.view.set_slot_for_display_workspace_changed(self.handle_display_workspace_changed)
-        self.view.set_slot_for_display_workspace_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
         self.view.set_slot_for_simultaneous_fit_by_changed(self.handle_simultaneous_fit_by_changed)
         self.view.set_slot_for_simultaneous_fit_by_specifier_changed(self.handle_simultaneous_fit_by_specifier_changed)
@@ -152,21 +151,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.fit_parameter_changed_notifier.notify_subscribers()
         self.model.update_plot_guess(self.view.plot_guess)
 
-    def clear_and_reset_gui_state(self):
-        #"""Clears all data in the view and updates the model."""
-        super().clear_and_reset_gui_state()
-        self.view.update_displayed_data_combo_box(self.model.dataset_names)
-
     def update_and_reset_all_data(self):
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
-        logger.warning("UPDATE RESET ALL")
+        # Triggers handle_simultaneous_fit_by_specifier_changed
         self.update_simultaneous_fit_by_specifiers_in_view()
-        #self.update_dataset_names_in_view_and_model()
-
-        self.reset_fit_status_and_chi_squared_information()
-        self.reset_start_xs_and_end_xs()
-        self.clear_cached_fit_functions()
-        #self.reset_fit_function()
 
     def set_display_workspace(self, workspace_name):
         """Sets the workspace to be displayed in the view programmatically."""
@@ -196,8 +184,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_dataset_names_in_view_and_model(self):
         """Updates the datasets currently displayed. The simultaneous fit by specifier must be updated before this."""
-        self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
-        self.view.set_datasets_in_function_browser(self.model.dataset_names)
+        super().update_dataset_names_in_view_and_model()
         self.view.update_displayed_data_combo_box(self.model.dataset_names)
         self.model.current_dataset_index = self.view.current_dataset_index
 
