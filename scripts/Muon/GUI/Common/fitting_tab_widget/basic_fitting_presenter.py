@@ -12,8 +12,6 @@ from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScr
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
-import functools
-
 from mantid import logger
 
 
@@ -275,9 +273,7 @@ class BasicFittingPresenter:
     def _perform_fit(self):
         """Perform the fit in a thread."""
         try:
-            calculation_function = functools.partial(self.model.evaluate_single_fit,
-                                                     self.model.get_active_workspace_names())
-            self.calculation_thread = self._create_thread(calculation_function)
+            self.calculation_thread = self._create_thread(self.model.perform_fit)
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
                                                        self.handle_error)

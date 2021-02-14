@@ -4,11 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import logger
-from mantid.simpleapi import EvaluateFunction
+from mantid import AlgorithmManager, logger
+from mantid.simpleapi import CopyLogs, EvaluateFunction
 
+from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
+from Muon.GUI.Common.utilities.algorithm_utils import run_Fit
 
+import math
 import re
 from typing import List, NamedTuple
 
@@ -340,6 +344,84 @@ class BasicFittingModel:
         """Returns the workspace names to display in the view and store in the model."""
         raise NotImplementedError("This method must be overridden by a child class.")
 
+    def perform_fit(self):
+        function, fit_status, chi_squared = self._do_single_fit(self._get_parameters_for_single_fit())
+        return function, fit_status, chi_squared
+
+    def _do_single_fit(self, parameter_dict):
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
+            self._do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
+
+        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, function, parameter_table,
+                                                        output_workspace, covariance_matrix)
+        return function, fit_status, chi_squared
+
+    def _do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
+        alg = self._create_fit_algorithm()
+        workspace, parameters, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters_dict, alg)
+
+        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=workspace, StoreInADS=False)
+        return workspace, parameters, function, fit_status, chi_squared, covariance_matrix
+
+    def _get_parameters_for_single_fit(self):
+        params = self._get_common_parameters()
+        params["InputWorkspace"] = self.current_dataset_name
+        params["StartX"] = self.current_start_x
+        params["EndX"] = self.current_end_x
+        return params
+
+    def _get_common_parameters(self):
+        return {"Function": self.get_active_fit_function(),
+                "Minimizer": self.minimizer,
+                "EvaluationType": self.evaluation_type}
+
+    def _create_fit_algorithm(self):
+        if self._double_pulse_enabled():
+            return self._create_double_pulse_alg()
+        else:
+            return AlgorithmManager.create("Fit")
+
+    def _create_double_pulse_alg(self):
+        alg = AlgorithmManager.create("DoublePulseFit")
+        offset = self.context.gui_context['DoublePulseTime']
+        first_pulse_weighting, second_pulse_weighting = self._get_pulse_weightings(offset, 2.2)
+        alg.setProperty("PulseOffset", offset)
+        alg.setProperty("FirstPulseWeight", first_pulse_weighting)
+        alg.setProperty("SecondPulseWeight", second_pulse_weighting)
+        return alg
+
+    def _double_pulse_enabled(self):
+        return "DoublePulseEnabled" in self.context.gui_context and self.context.gui_context["DoublePulseEnabled"]
+
+    @staticmethod
+    def _get_pulse_weightings(offset, muon_halflife):
+        decay = math.exp(-offset / muon_halflife)
+        first_pulse_weighting = decay / (1 + decay)
+        second_pulse_weighting = 1 / (1 + decay)
+        return first_pulse_weighting, second_pulse_weighting
+
+    def _add_single_fit_results_to_ADS_and_context(self, input_workspace, function, parameters_table, output_workspace,
+                                                   covariance_matrix):
+        workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(input_workspace,
+                                                                                             output_workspace,
+                                                                                             covariance_matrix)
+
+        self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory), function,
+                                 input_workspace, [workspace_name])
+
+    def _add_single_fit_workspaces_to_ADS(self, input_workspace, output_workspace, covariance_matrix):
+        workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace, self.function_name)
+        table_name, table_directory = create_parameter_table_name(input_workspace, self.function_name)
+
+        self._add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
+        self._add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+
+        return workspace_name, table_name, table_directory
+
+    def _add_fit_to_context(self, parameter_workspace, input_workspace, output_workspace, global_parameters=None):
+        self.context.fitting_context.add_fit_from_values(parameter_workspace, self.function_name, input_workspace,
+                                                         output_workspace, global_parameters)
+
     def _create_fit_plot_information(self, workspace_names, function_name):
         return [FitPlotInformation(input_workspaces=workspace_names,
                                    fit=self._get_fit_results_from_context(workspace_names, function_name))]
@@ -398,3 +480,10 @@ class BasicFittingModel:
             return fit_function.createEquivalentFunctions()[self.current_dataset_index]
         else:
             return fit_function
+
+    def _add_workspace_to_ADS(self, workspace, name, directory):
+        self.context.ads_observer.observeRename(False)
+        workspace_wrapper = MuonWorkspaceWrapper(workspace)
+        workspace_wrapper.show(directory + name)
+        self.context.ads_observer.observeRename(True)
+        return workspace_wrapper
