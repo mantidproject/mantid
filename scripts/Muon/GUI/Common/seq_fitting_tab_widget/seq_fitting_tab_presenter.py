@@ -135,10 +135,11 @@ class SeqFittingTabPresenter(object):
             self.handle_fit_selected_in_table()
 
     def handle_updated_fit_parameter_in_table(self, index):
-        row = index.row()
-        workspaces = self.get_workspaces_for_row_in_fit_table(row)
-        parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
-        self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
+        pass
+        # row = index.row()
+        # workspaces = self.get_workspaces_for_row_in_fit_table(row)
+        # parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
+        # self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
 
     def handle_fit_selected_in_table(self):
         rows = self.view.fit_table.get_selected_rows()

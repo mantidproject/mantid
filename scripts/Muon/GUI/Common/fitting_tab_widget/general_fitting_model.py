@@ -107,6 +107,15 @@ class GeneralFittingModel(BasicFittingModel):
     def tf_asymmetry_mode(self, tf_asymmetry_mode):
         self._tf_asymmetry_mode = tf_asymmetry_mode
 
+    def automatically_update_function_name(self):
+        if self.function_name_auto_update:
+            self.function_name = self._get_function_name(self.simultaneous_fit_function)
+
+    def use_cached_function(self):
+        """Sets the current function as being the cached function."""
+        self.simultaneous_fit_function = self.simultaneous_fit_function_cache
+        super().use_cached_function()
+
     def reset_fit_functions(self):
         """Reset the fit functions stored by the model. Attempts to use the currently selected function."""
         if self.number_of_datasets == 0:
@@ -602,12 +611,6 @@ class GeneralFittingModel(BasicFittingModel):
             'EndX': self.current_end_x,
             'Minimizer': self.minimizer
         }
-
-    def clear_fit_information(self):
-        self.single_fit_functions = [None]
-        self.simultaneous_fit_function = None
-        self.current_dataset_index = 0
-        self.function_name = ""
 
     def freq_type(self):
         if isinstance(self.context, FrequencyDomainAnalysisContext):

@@ -207,7 +207,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def handle_transform_performed(self, new_data_workspace_name):
         self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
-        self.fitting_tab.fitting_tab_presenter.set_display_workspace(new_data_workspace_name)
+        self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_data_workspace_name)
         self.plot_widget.presenter.update_plot(autoscale=True)
 
     def setup_disable_notifier(self):

@@ -23,6 +23,8 @@ class BasicFittingPresenter:
         self.view = view
         self.model = model
 
+        self.initialize_model_options()
+
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
@@ -30,6 +32,8 @@ class BasicFittingPresenter:
         self.fitting_calculation_model = None
 
         self.fit_function_changed_notifier = GenericObservable()
+        self.fit_parameter_changed_notifier = GenericObservable()
+        self.selected_fit_results_changed = GenericObservable()
 
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
@@ -39,13 +43,11 @@ class BasicFittingPresenter:
         self.fsg_view = None
         self.fsg_presenter = None
 
-        self.initialize_model_options()
-
         self.view.set_slot_for_fit_generator_clicked(self.handle_fit_generator_clicked)
         self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
         self.view.set_slot_for_undo_fit_clicked(self.handle_undo_fit_clicked)
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
-        self.view.set_slot_for_fit_name_changed(self.handle_fit_name_changed_by_user)
+        self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
         self.view.set_slot_for_function_parameter_changed(self.handle_function_parameter_changed)
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
@@ -77,6 +79,8 @@ class BasicFittingPresenter:
 
     def handle_new_data_loaded(self):
         """Handle when new data has been loaded into the interface."""
+        self.update_and_reset_all_data()
+
         self.view.plot_guess = False
         self.clear_cached_fit_functions()
 
@@ -89,13 +93,14 @@ class BasicFittingPresenter:
 
     def handle_undo_fit_clicked(self):
         """Handle when undo fit is clicked."""
-        self.model.single_fit_functions = self.model.single_fit_functions_cache
-        self.model.remove_latest_fit_from_context()
+        self.model.use_cached_function()
         self.clear_cached_fit_functions()
 
         self.reset_fit_status_and_chi_squared_information()
 
         self.update_fit_function_in_view_from_model()
+
+        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_fit_clicked(self):
         """Handle when the fit button is clicked."""
@@ -127,6 +132,10 @@ class BasicFittingPresenter:
         self.view.enable_undo_fit(True)
         self.view.plot_guess = False
 
+    def handle_fitting_finished(self):
+        """Handle when fitting is finished."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
     def handle_error(self, error):
         """Handle when an error occurs while fitting."""
         self.enable_editing_notifier.notify_subscribers()
@@ -137,7 +146,7 @@ class BasicFittingPresenter:
         """Handle when the Fit Generator button has been clicked."""
         self._open_fit_script_generator_interface(self.model.dataset_names, self._get_fit_browser_options())
 
-    def handle_fit_name_changed_by_user(self):
+    def handle_function_name_changed_by_user(self):
         """Handle when the fit name is changed by the user."""
         self.model.function_name_auto_update = False
         self.model.function_name = self.view.function_name
@@ -150,17 +159,28 @@ class BasicFittingPresenter:
         """Handle when the evaluation type is changed."""
         self.model.evaluation_type = self.view.evaluation_type
 
-    def handle_fitting_finished(self):
-        """Handle when fitting is finished."""
-        raise NotImplementedError("This method must be overridden by a child class.")
-
     def handle_function_structure_changed(self):
         """Handle when the function structure is changed."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        self.update_fit_functions_in_model_from_view()
+        self.automatically_update_function_name()
+
+        if self.model.get_active_fit_function() is None:
+            self.clear_cached_fit_functions()
+            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+
+        self.reset_fit_status_and_chi_squared_information()
+
+        self.model.update_plot_guess(self.view.plot_guess)
+
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_function_parameter_changed(self):
-        """Handle when a function parameter is changed."""
-        raise NotImplementedError("This method must be overridden by a child class.")
+        """Handle when the value of a parameter in a function is changed."""
+        self.update_fit_functions_in_model_from_view()
+
+        self.model.update_plot_guess(self.view.plot_guess)
+
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_start_x_updated(self):
         """Handle when the start X is changed."""
@@ -186,17 +206,29 @@ class BasicFittingPresenter:
     def clear_cached_fit_functions(self):
         """Clear the cached fit functions."""
         self.view.enable_undo_fit(False)
+        self.model.remove_latest_fit_from_context()
         self.model.clear_cached_fit_functions()
 
+    def reset_fit_status_and_chi_squared_information(self):
+        """Clear the fit status and chi squared information in the view and model."""
+        self.model.reset_fit_statuses_and_chi_squared()
+        self.update_fit_statuses_and_chi_squared_in_view_from_model()
+
+    def reset_start_xs_and_end_xs(self):
+        """Reset the start Xs and end Xs using the data stored in the context."""
+        self.model.reset_start_xs_and_end_xs()
+        self.view.start_x = self.model.current_start_x
+        self.view.end_x = self.model.current_end_x
+
     def set_current_dataset_index(self, dataset_index):
+        """Set the current dataset index in the model and view."""
         self.model.current_dataset_index = dataset_index
         self.view.set_current_dataset_index(dataset_index)
 
-    def current_single_fit_function_in_view(self):
-        return self._get_single_fit_functions_from_view()[self.model.current_dataset_index]
-
-    def update_single_fit_functions_in_model(self):
-        self.model.single_fit_functions = self._get_single_fit_functions_from_view()
+    def automatically_update_function_name(self):
+        """Updates the function name used within the outputted fit workspaces."""
+        self.model.automatically_update_function_name()
+        self.view.function_name = self.model.function_name
 
     def update_and_reset_all_data(self):
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
@@ -210,6 +242,21 @@ class BasicFittingPresenter:
     def update_fit_function_in_view_from_model(self):
         """Updates the parameters of a fit function shown in the view."""
         self.view.update_fit_function(self.model.get_active_fit_function())
+
+    def update_fit_functions_in_model_from_view(self):
+        """Updates the fit functions stored in the model using the view."""
+        self.update_single_fit_functions_in_model()
+        self.fit_function_changed_notifier.notify_subscribers()
+
+    def update_single_fit_functions_in_model(self):
+        """Updates the single fit functions in the model using the view."""
+        self.model.single_fit_functions = self._get_single_fit_functions_from_view()
+
+    def update_fit_statuses_and_chi_squared_in_view_from_model(self):
+        """Updates the local and global fit status and chi squared in the view."""
+        self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
+                                                          self.model.current_chi_squared)
+        self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
 
     def _get_single_fit_functions_from_view(self):
         """Returns the fit functions corresponding to each domain as a list."""
@@ -238,17 +285,6 @@ class BasicFittingPresenter:
         except ValueError as error:
             self.view.warning_popup(error)
 
-    def automatically_update_function_name(self):
-        """Updates the function name used within the outputted fit workspaces."""
-        self.model.automatically_update_function_name()
-        self.view.function_name = self.model.function_name
-
-    def update_fit_statuses_and_chi_squared_in_view_from_model(self):
-        """Updates the local and global fit status and chi squared in the view."""
-        self.view.update_local_fit_status_and_chi_squared(self.model.current_fit_status,
-                                                          self.model.current_chi_squared)
-        self.view.update_global_fit_status(self.model.fit_statuses, self.model.current_dataset_index)
-
     def _create_thread(self, callback):
         """Create a thread for fitting."""
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -262,21 +298,6 @@ class BasicFittingPresenter:
                                                          self.view.start_x, self.view.end_x)
 
         self.fsg_presenter.openFitScriptGenerator()
-
-    # def _reset_fit_function(self):
-    #     """Reset the fit function information."""
-    #     self.model.single_fit_functions = self._get_fit_function()
-
-    def reset_fit_status_and_chi_squared_information(self):
-        """Clear the fit status and chi squared information in the view and model."""
-        self.model.reset_fit_statuses_and_chi_squared()
-        self.update_fit_statuses_and_chi_squared_in_view_from_model()
-
-    def reset_start_xs_and_end_xs(self):
-        """Reset the start Xs and end Xs using the data stored in the context."""
-        self.model.reset_start_xs_and_end_xs()
-        self.view.start_x = self.model.current_start_x
-        self.view.end_x = self.model.current_end_x
 
     def _check_rebin_options(self):
         """Check that a rebin was indeed requested in the fitting tab or in the context."""
