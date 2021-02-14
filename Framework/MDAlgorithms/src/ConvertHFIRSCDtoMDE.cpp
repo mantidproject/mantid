@@ -277,7 +277,7 @@ void ConvertHFIRSCDtoMDE::exec() {
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
+        inserter.insertMDEvent(signal, signal, 0, 0, 0, q_sample.data());
       }
     }
   }
