@@ -24,7 +24,7 @@ namespace DataObjects {
 // this class
 const char *EventHeaders[] = {
     "signal, errorSquared, center (each dim.)",
-    "signal, errorSquared, runIndex, detectorId, center (each dim.)"};
+    "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
