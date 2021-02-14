@@ -41,7 +41,7 @@ class GeneralFittingView(BasicFittingView):
 
     def update_global_fit_status(self, fit_statuses, index):
         """Updates the global fit status label."""
-        if self.is_simultaneous_fit_ticked:
+        if self.is_simultaneous_fit_ticked and index is not None:
             indexed_fit = fit_statuses[index]
             self.fit_controls.update_global_fit_status_label([indexed_fit == "success"] if indexed_fit else [])
         else:

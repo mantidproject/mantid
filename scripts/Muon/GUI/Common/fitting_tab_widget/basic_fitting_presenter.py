@@ -10,7 +10,6 @@ from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScr
                                                  FitScriptGeneratorView)
 
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import DEFAULT_START_X, DEFAULT_END_X
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 
 import functools
@@ -27,12 +26,14 @@ class BasicFittingPresenter:
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
+        self.reset_tab_notifier = GenericObservable()
         self.fitting_calculation_model = None
 
         self.fit_function_changed_notifier = GenericObservable()
 
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(
+            self.handle_ads_clear_or_remove_workspace_event)
 
         self.fsg_model = None
         self.fsg_view = None
@@ -61,13 +62,12 @@ class BasicFittingPresenter:
         self.model.evaluation_type = self.view.evaluation_type
         self.model.fit_to_raw = self.view.fit_to_raw
 
-    def update_view_from_model(self, workspace_removed=None):
-        """Update the view using the data stored in the model."""
-        if workspace_removed:
-            self.model.dataset_names = [name for name in self.model.dataset_names if name != workspace_removed]
-        else:
-            self.model.dataset_names = []
-        self.clear_and_reset_gui_state()
+    def handle_ads_clear_or_remove_workspace_event(self, _=None):
+        """Handle when there is a clear or remove workspace event in the ADS."""
+        self.update_and_reset_all_data()
+
+        if len(self.model.dataset_names) == 0:
+            self.reset_tab_notifier.notify_subscribers()
 
     def handle_gui_changes_made(self, changed_values):
         """Handle when the good data checkbox is changed in the home tab."""
@@ -79,6 +79,9 @@ class BasicFittingPresenter:
         """Handle when new data has been loaded into the interface."""
         self.view.plot_guess = False
         self.clear_cached_fit_functions()
+
+        if len(self.model.dataset_names) == 0:
+            self.reset_tab_notifier.notify_subscribers()
 
     def handle_plot_guess_changed(self):
         """Handle when plot guess is ticked or un-ticked."""
@@ -180,14 +183,6 @@ class BasicFittingPresenter:
         if self._check_rebin_options():
             self.model.fit_to_raw = self.view.fit_to_raw
 
-    def clear_and_reset_gui_state(self):
-        """Clears all data in the view and updates the model."""
-        self.view.set_datasets_in_function_browser(self.model.dataset_names)
-
-        self.reset_fit_status_and_chi_squared_information()
-        self.reset_start_xs_and_end_xs()
-        #self._reset_fit_function()
-
     def clear_cached_fit_functions(self):
         """Clear the cached fit functions."""
         self.view.enable_undo_fit(False)
@@ -202,6 +197,15 @@ class BasicFittingPresenter:
 
     def update_single_fit_functions_in_model(self):
         self.model.single_fit_functions = self._get_single_fit_functions_from_view()
+
+    def update_and_reset_all_data(self):
+        """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
+        raise NotImplementedError("This method must be overridden by a child class.")
+
+    def update_dataset_names_in_view_and_model(self):
+        """Updates the datasets currently displayed. The simultaneous fit by specifier must be updated before this."""
+        self.model.dataset_names = self.model.get_workspace_names_to_display_from_context()
+        self.view.set_datasets_in_function_browser(self.model.dataset_names)
 
     def update_fit_function_in_view_from_model(self):
         """Updates the parameters of a fit function shown in the view."""
@@ -224,7 +228,6 @@ class BasicFittingPresenter:
     def _perform_fit(self):
         """Perform the fit in a thread."""
         try:
-            logger.warning(str(self.model.get_active_workspace_names()))
             calculation_function = functools.partial(self.model.evaluate_single_fit,
                                                      self.model.get_active_workspace_names())
             self.calculation_thread = self._create_thread(calculation_function)
