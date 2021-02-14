@@ -22,8 +22,8 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         super(GeneralFittingOptionsView, self).__init__(parent)
         self.setupUi(self)
 
-        self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
-        self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
+        self.increment_parameter_display_button.clicked.connect(self.increment_dataset_name_combo_box)
+        self.decrement_parameter_display_button.clicked.connect(self.decrement_dataset_name_combo_box)
 
         self.disable_simultaneous_fit_options()
 
@@ -33,9 +33,9 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         else:
             self._setup_simultaneous_fit_by_combo_box(MA_FITTING_OPTIONS)
 
-    def set_slot_for_display_workspace_changed(self, slot):
+    def set_slot_for_dataset_changed(self, slot):
         """Connect the slot for the display workspace combo box being changed."""
-        self.parameter_display_combo.currentIndexChanged.connect(slot)
+        self.dataset_name_combo_box.currentIndexChanged.connect(slot)
 
     def set_slot_for_fitting_mode_changed(self, slot):
         """Connect the slot for the simultaneous fit check box."""
@@ -49,45 +49,45 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
         """Connect the slot for the fit specifier combo box being changed."""
         self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
-    def update_displayed_data_combo_box(self, dataset_names):
+    def update_dataset_name_combo_box(self, dataset_names):
         """Update the data in the parameter display combo box."""
-        old_name = self.parameter_display_combo.currentText()
+        old_name = self.dataset_name_combo_box.currentText()
 
         self.update_dataset_names_combo_box(dataset_names)
 
-        new_index = self.parameter_display_combo.findText(old_name)
+        new_index = self.dataset_name_combo_box.findText(old_name)
         new_index = new_index if new_index != -1 else 0
 
-        self.parameter_display_combo.setCurrentIndex(new_index)
+        self.dataset_name_combo_box.setCurrentIndex(new_index)
         # This signal isn't always sent, so I will emit it manually.
-        self.parameter_display_combo.currentIndexChanged.emit(new_index)
+        self.dataset_name_combo_box.currentIndexChanged.emit(new_index)
 
     def update_dataset_names_combo_box(self, dataset_names):
         """Update the datasets displayed in the dataset name combobox."""
-        self.parameter_display_combo.blockSignals(True)
-        self.parameter_display_combo.clear()
-        self.parameter_display_combo.addItems(dataset_names)
-        self.parameter_display_combo.blockSignals(False)
+        self.dataset_name_combo_box.blockSignals(True)
+        self.dataset_name_combo_box.clear()
+        self.dataset_name_combo_box.addItems(dataset_names)
+        self.dataset_name_combo_box.blockSignals(False)
 
-    def increment_display_combo_box(self):
+    def increment_dataset_name_combo_box(self):
         """Increment the parameter display combo box."""
-        index = self.parameter_display_combo.currentIndex()
-        count = self.parameter_display_combo.count()
+        index = self.dataset_name_combo_box.currentIndex()
+        count = self.dataset_name_combo_box.count()
 
         if index < count - 1:
-            self.parameter_display_combo.setCurrentIndex(index + 1)
+            self.dataset_name_combo_box.setCurrentIndex(index + 1)
         else:
-            self.parameter_display_combo.setCurrentIndex(0)
+            self.dataset_name_combo_box.setCurrentIndex(0)
 
-    def decrement_display_combo_box(self):
+    def decrement_dataset_name_combo_box(self):
         """Decrement the parameter display combo box."""
-        index = self.parameter_display_combo.currentIndex()
-        count = self.parameter_display_combo.count()
+        index = self.dataset_name_combo_box.currentIndex()
+        count = self.dataset_name_combo_box.count()
 
         if index != 0:
-            self.parameter_display_combo.setCurrentIndex(index - 1)
+            self.dataset_name_combo_box.setCurrentIndex(index - 1)
         else:
-            self.parameter_display_combo.setCurrentIndex(count - 1)
+            self.dataset_name_combo_box.setCurrentIndex(count - 1)
 
     def _setup_simultaneous_fit_by_combo_box(self, item_list):
         """Populate the simultaneous fit by combo box."""
@@ -95,21 +95,19 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
             self.simul_fit_by_combo.addItem(item)
 
     @property
-    def display_workspace(self):
-        """Returns the name of the currently displayed workspace parameter."""
-        return str(self.parameter_display_combo.currentText())
+    def current_dataset_name(self):
+        """Returns the selected dataset name."""
+        return str(self.dataset_name_combo_box.currentText())
 
-    @display_workspace.setter
-    def display_workspace(self, value):
-        """Sets the name of the currently displayed workspace parameter."""
-        index = self.parameter_display_combo.findText(value)
+    @current_dataset_name.setter
+    def current_dataset_name(self, dataset_name):
+        """Sets the currently selected dataset name."""
+        index = self.dataset_name_combo_box.findText(dataset_name)
         if index != -1:
-            self.parameter_display_combo.blockSignals(True)
-            self.parameter_display_combo.setCurrentIndex(index)
-            self.parameter_display_combo.blockSignals(False)
+            self.dataset_name_combo_box.setCurrentIndex(index)
 
-    def number_of_domains(self):
-        return self.parameter_display_combo.count()
+    def number_of_datasets(self):
+        return self.dataset_name_combo_box.count()
 
     @property
     def simultaneous_fit_by(self):
@@ -133,7 +131,7 @@ class GeneralFittingOptionsView(QtWidgets.QWidget, ui_general_fitting_options):
     @property
     def current_dataset_index(self):
         """Returns the index of the currently displayed dataset."""
-        current_index = self.parameter_display_combo.currentIndex()
+        current_index = self.dataset_name_combo_box.currentIndex()
         return current_index if current_index != -1 else None
 
     def hide_simultaneous_fit_options(self):

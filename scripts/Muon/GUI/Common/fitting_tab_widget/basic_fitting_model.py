@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import logger
-from mantid.api import AnalysisDataService
 from mantid.simpleapi import EvaluateFunction
 
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
@@ -232,7 +231,7 @@ class BasicFittingModel:
 
     def automatically_update_function_name(self):
         if self.function_name_auto_update:
-            self.function_name = self._get_function_name(self.single_fit_functions[0])
+            self.function_name = self._get_function_name(self.current_single_fit_function)
 
     @property
     def minimizer(self):
@@ -267,6 +266,10 @@ class BasicFittingModel:
     @property
     def do_rebin(self):
         return self.context._do_rebin()
+
+    def use_cached_function(self):
+        """Sets the current function as being the cached function."""
+        self.single_fit_functions = self.single_fit_functions_cache
 
     def update_plot_guess(self, plot_guess):
         """Updates the guess plot using the current dataset and function."""

@@ -19,9 +19,9 @@ class GeneralFittingView(BasicFittingView):
         self.general_fitting_options = GeneralFittingOptionsView(self, is_frequency_domain)
         self.general_fitting_options_layout.addWidget(self.general_fitting_options)
 
-    def set_slot_for_display_workspace_changed(self, slot):
+    def set_slot_for_dataset_changed(self, slot):
         """Connect the slot for the display workspace combo box being changed."""
-        self.general_fitting_options.set_slot_for_display_workspace_changed(slot)
+        self.general_fitting_options.set_slot_for_dataset_changed(slot)
 
     def set_slot_for_fitting_mode_changed(self, slot):
         """Connect the slot for the simultaneous fit check box."""
@@ -35,9 +35,9 @@ class GeneralFittingView(BasicFittingView):
         """Connect the slot for the fit specifier combo box being changed."""
         self.general_fitting_options.set_slot_for_simultaneous_fit_by_specifier_changed(slot)
 
-    def update_displayed_data_combo_box(self, data_list):
+    def update_dataset_name_combo_box(self, data_list):
         """Update the data in the parameter display combo box."""
-        self.general_fitting_options.update_displayed_data_combo_box(data_list)
+        self.general_fitting_options.update_dataset_name_combo_box(data_list)
 
     def update_global_fit_status(self, fit_statuses, index):
         """Updates the global fit status label."""
@@ -52,17 +52,17 @@ class GeneralFittingView(BasicFittingView):
         self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function)
 
     @property
-    def display_workspace(self):
-        """Returns the name of the currently displayed workspace parameter."""
-        return self.general_fitting_options.display_workspace
+    def current_dataset_name(self):
+        """Returns the selected dataset name."""
+        return self.general_fitting_options.current_dataset_name
 
-    @display_workspace.setter
-    def display_workspace(self, value):
-        """Sets the name of the currently displayed workspace parameter."""
-        self.general_fitting_options.display_workspace = value
+    @current_dataset_name.setter
+    def current_dataset_name(self, dataset_name):
+        """Sets the currently selected dataset name."""
+        self.general_fitting_options.current_dataset_name = dataset_name
 
-    def number_of_domains(self):
-        return self.general_fitting_options.number_of_domains()
+    def number_of_datasets(self):
+        return self.general_fitting_options.number_of_datasets()
 
     @property
     def simultaneous_fit_by(self):
