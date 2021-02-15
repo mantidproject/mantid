@@ -22,7 +22,6 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
-from Muon.GUI.Common.muon_group import MuonDiff
 
 
 def pair_name():
@@ -31,11 +30,13 @@ def pair_name():
         name.append("pair_" + str(i + 1))
     return name
 
+
 def diff_name():
     name = []
     for i in range(21):
         name.append("diff_" + str(i + 1))
     return name
+
 
 #
 def perform_musr_file_finder(self):
