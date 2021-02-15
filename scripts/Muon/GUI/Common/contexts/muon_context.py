@@ -24,7 +24,7 @@ from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObs
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
 from mantidqt.utils.observer_pattern import Observable
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_group import MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
 
 

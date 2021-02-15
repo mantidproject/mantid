@@ -9,7 +9,8 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as MD
 import Muon.GUI.Common.utilities.run_string_utils as run_string_utils
 
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
 

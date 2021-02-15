@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 
-from Muon.GUI.Common.muon_group import MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
 from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
