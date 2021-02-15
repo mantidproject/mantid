@@ -416,15 +416,17 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
-    def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
+    def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None, single_detectors=0):
         """
         Creates the elastic channel table workspace.
         @param epp_ws: EPP workspace
         @param run: run object
         @param epp_equator_ws: EPP workspace of the equatorial line
+        @param single_detectors: the number of single detectors
         """
         speed, phase, _ = self._get_pulse_chopper_info(run, self._pulse_chopper)
         delay = run.getLogData('PSD.time_of_flight_2').value
+        delay_sd = run.getLogData('SingleD.time_of_flight_2').value
         epp_ws.removeColumn('WorkspaceIndex')
         epp_ws.removeColumn('PeakCentreError')
         epp_ws.removeColumn('Sigma')
@@ -440,10 +442,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         epp_ws.addColumn('double', 'ChopperSpeed')
         epp_ws.addColumn('double', 'ChopperPhase')
         epp_ws.addColumn('double', 'PSD_TOF_Delay')
+        equator_epp = 1 if epp_equator_ws else 0
         for row in range(epp_ws.rowCount()):
             epp_ws.setCell('ChopperSpeed', row, speed)
             epp_ws.setCell('ChopperPhase', row, phase)
-            epp_ws.setCell('PSD_TOF_Delay', row, delay)
+            if epp_ws.rowCount() - single_detectors - equator_epp <= row < epp_ws.rowCount() - equator_epp:
+                epp_ws.setCell('PSD_TOF_Delay', row, delay_sd)
+            else:
+                epp_ws.setCell('PSD_TOF_Delay', row, delay)
 
     @staticmethod
     def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
@@ -487,12 +493,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         return [speed, phase, distance]
 
-    def _convert_to_energy_bats(self, ws, epp_ws, t0_offset=0.):
+    def _convert_to_energy_bats(self, ws, epp_ws, t0_offset=0., sd_t0_offset=0.):
         """
         Converts the workspace to TOF for Bats mode.
         @param ws: input workspace
         @param epp_ws: input EPP workspace
         @param t0_offset: TOF offset for the measurements with inelastic shift
+        @param sd_t0_offset: TOF offset for single detectors
         """
         detector_info = ws.detectorInfo()
         l1 = detector_info.l1()
@@ -532,7 +539,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             group = rows - 1 - (ws.getNumberHistograms() - single_detector)
             if epp_ws.cell('FitStatus', group) in ['success', "narrowPeak"]:
                 l2 = detector_info.l2(single_detector)
-                elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
+                elastic_tof = ((l1 + l2) / v_fixed + sd_t0_offset) * 1E+6
                 elastic_channel = epp_ws.cell('PeakCentre', group)
             else:
                 elastic_tof = elastic_tof_equator
@@ -599,6 +606,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         input_epp = self.getProperty('InputElasticChannelWorkspace').value
 
+        single_detectors = mtd[self._ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - N_MONITOR
         if not input_epp:
             equator_epp_ws = _make_name(ws, 'eq_epp')
             equator_ws = _make_name(ws, 'eq')
@@ -611,7 +619,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
             FindEPP(InputWorkspace=equator_ws, OutputWorkspace=equator_epp_ws)
             DeleteWorkspace(equator_ws)
-            single_detectors = mtd[self._ws].getNumberHistograms() - N_TUBES * N_PIXELS_PER_TUBE - N_MONITOR
 
             if self._fit_option == 'FitAllPixelGroups':
                 GroupDetectors(InputWorkspace=ws,
@@ -619,7 +626,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                GroupingPattern=self._group_pixels(self._group_by, single_detectors))
                 CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, XMin=to_crop, XMax=3 * to_crop)
                 FindEPP(InputWorkspace=grouped_ws, OutputWorkspace=epp_ws)
-                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws])
+                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
+                                                single_detectors=single_detectors)
                 DeleteWorkspaces([equator_epp_ws, grouped_ws])
             else:
                 single_det_ws = _make_name(ws, "sds")
@@ -628,20 +636,33 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                StartWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + 1,
                                EndWorkspaceIndex=N_TUBES*N_PIXELS_PER_TUBE + single_detectors)
                 FindEPP(InputWorkspace=single_det_ws, OutputWorkspace=epp_ws)
-                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws])
+                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws],
+                                                single_detectors=single_detectors)
                 DeleteWorkspaces([equator_epp_ws, single_det_ws])
             self._convert_to_energy_bats(mtd[ws], mtd[epp_ws])
         else:
+            run = mtd[ws].getRun()
+
             center_chopper_speed = input_epp.cell('ChopperSpeed', 0)
             center_chopper_phase = input_epp.cell('ChopperPhase', 0)
             center_psd_delay = input_epp.cell('PSD_TOF_Delay', 0)
-            run = mtd[ws].getRun()
+
             shifted_chopper_phase = self._get_pulse_chopper_info(run, self._pulse_chopper)[1]
             shifted_psd_delay = run.getLogData('PSD.time_of_flight_2').value
-            t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase,
-                                        shifted_chopper_phase, center_psd_delay, shifted_psd_delay)
-            self.log().information('T0 Offset is {0} [sec]'.format(t0_offset))
-            self._convert_to_energy_bats(mtd[ws], input_epp, t0_offset)
+
+            psd_t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase,
+                                            shifted_chopper_phase, center_psd_delay, shifted_psd_delay)
+            sd_t0_offset = 0
+            if single_detectors:
+                shifted_sd_delay = run.getLogData('SingleD.time_of_flight_2').value
+                center_sd_delay = input_epp.cell('PSD_TOF_Delay', input_epp.rowCount() - 2)
+                sd_t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase,
+                                               center_sd_delay, shifted_sd_delay)
+
+            self.log().information('T0 Offset is {0} [sec]'.format(psd_t0_offset))
+            self.log().information('SD T0 Offset is {0} [sec]'.format(sd_t0_offset))
+
+            self._convert_to_energy_bats(mtd[ws], input_epp, psd_t0_offset, sd_t0_offset)
 
         rebin_ws = _make_name(ws, 'rebin')
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
