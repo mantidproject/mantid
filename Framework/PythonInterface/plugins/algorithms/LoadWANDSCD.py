@@ -173,6 +173,12 @@ class LoadWANDSCD(PythonAlgorithm):
         outWS.getExperimentInfo(0).run().addProperty('twotheta', twotheta, True)
         outWS.getExperimentInfo(0).run().addProperty('azimuthal', azimuthal, True)
 
+        setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
+        setGoniometer_alg.setProperty("Workspace", outWS)
+        setGoniometer_alg.setProperty("Axis0", 's1,0,1,0,1')
+        setGoniometer_alg.setProperty("Average", False)
+        setGoniometer_alg.execute()
+
         self.setProperty("OutputWorkspace", outWS)
 
 
