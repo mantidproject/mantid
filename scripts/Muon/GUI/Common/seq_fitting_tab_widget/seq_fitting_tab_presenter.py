@@ -62,14 +62,14 @@ class SeqFittingTabPresenter(object):
     def handle_fit_function_parameter_changed(self):
         pass
         # self.view.fit_table.reset_fit_quality()
-        # fit_functions = self.model.stored_fit_functions
+        # fit_functions = self.model.get_active_fit_function()
         # for row in range(self.view.fit_table.get_number_of_fits()):
         #     parameter_values = self.model.get_fit_function_parameter_values(fit_functions[row])
         #     self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
         pass
-        # runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        # runs, groups_and_pairs = self.model.get_selected_runs_groups_and_pairs()
         # self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
         # self.model.create_ws_fit_function_map()
         # self.handle_fit_function_updated()

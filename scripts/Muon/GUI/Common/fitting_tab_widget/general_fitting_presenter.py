@@ -48,12 +48,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
 
-        # Send the workspaces to be plotted
         self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-
-        # Update parameter values in sequential tab.
-        parameter_values = self.model.get_fit_function_parameter_values(fit_function)
-        self.model.update_ws_fit_function_parameters(self.model.get_active_workspace_names(), parameter_values)
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_fitting_mode_changed(self):

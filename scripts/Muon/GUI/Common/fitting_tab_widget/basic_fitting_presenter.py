@@ -98,6 +98,8 @@ class BasicFittingPresenter:
 
         self.update_fit_function_in_view_from_model()
 
+        self.model.update_plot_guess(self.view.plot_guess)
+
         self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def handle_fit_clicked(self):

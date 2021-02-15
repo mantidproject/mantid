@@ -162,6 +162,12 @@ class BasicFittingModel:
     def current_single_fit_function(self, fit_function):
         self.single_fit_functions[self.current_dataset_index] = fit_function
 
+    def get_single_fit_function_for(self, dataset_name):
+        if dataset_name in self.dataset_names:
+            return self.single_fit_functions[self.dataset_names.index(dataset_name)]
+        else:
+            return None
+
     @property
     def single_fit_functions_cache(self):
         return self._single_fit_functions_cache
@@ -345,6 +351,7 @@ class BasicFittingModel:
         raise NotImplementedError("This method must be overridden by a child class.")
 
     def perform_fit(self):
+        """Performs a single fit and returns the resulting function, status and chi squared."""
         function, fit_status, chi_squared = self._do_single_fit(self._get_parameters_for_single_fit())
         return function, fit_status, chi_squared
 
@@ -352,8 +359,8 @@ class BasicFittingModel:
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
-        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, function, parameter_table,
-                                                        output_workspace, covariance_matrix)
+        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, parameter_table, output_workspace,
+                                                        covariance_matrix)
         return function, fit_status, chi_squared
 
     def _do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
@@ -400,13 +407,13 @@ class BasicFittingModel:
         second_pulse_weighting = 1 / (1 + decay)
         return first_pulse_weighting, second_pulse_weighting
 
-    def _add_single_fit_results_to_ADS_and_context(self, input_workspace, function, parameters_table, output_workspace,
+    def _add_single_fit_results_to_ADS_and_context(self, input_workspace, parameters_table, output_workspace,
                                                    covariance_matrix):
         workspace_name, table_name, table_directory = self._add_single_fit_workspaces_to_ADS(input_workspace,
                                                                                              output_workspace,
                                                                                              covariance_matrix)
 
-        self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory), function,
+        self._add_fit_to_context(self._add_workspace_to_ADS(parameters_table, table_name, table_directory),
                                  input_workspace, [workspace_name])
 
     def _add_single_fit_workspaces_to_ADS(self, input_workspace, output_workspace, covariance_matrix):
@@ -418,9 +425,9 @@ class BasicFittingModel:
 
         return workspace_name, table_name, table_directory
 
-    def _add_fit_to_context(self, parameter_workspace, input_workspace, output_workspace, global_parameters=None):
-        self.context.fitting_context.add_fit_from_values(parameter_workspace, self.function_name, input_workspace,
-                                                         output_workspace, global_parameters)
+    def _add_fit_to_context(self, parameter_workspace, input_workspaces, output_workspaces, global_parameters=None):
+        self.context.fitting_context.add_fit_from_values(parameter_workspace, self.function_name, input_workspaces,
+                                                         output_workspaces, global_parameters)
 
     def _create_fit_plot_information(self, workspace_names, function_name):
         return [FitPlotInformation(input_workspaces=workspace_names,
