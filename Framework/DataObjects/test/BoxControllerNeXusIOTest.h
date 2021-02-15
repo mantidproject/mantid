@@ -43,6 +43,7 @@ public:
 
   void test_constructor_setters() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
 
     BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
@@ -53,8 +54,7 @@ public:
     // default settings
     TS_ASSERT_EQUALS(4, CoordSize);
     TS_ASSERT_EQUALS("MDEvent", typeName);
-    TS_ASSERT_EQUALS(BoxControllerNeXusIO::EDVGoniometer,
-                     pSaver->getEventDataVersion());
+    TS_ASSERT_EQUALS(EDV::EDVGoniometer, pSaver->getEventDataVersion());
 
     // set size
     TS_ASSERT_THROWS(pSaver->setDataType(9, typeName),
@@ -73,9 +73,8 @@ public:
     TS_ASSERT_EQUALS("MDLeanEvent", typeName);
 
     // set the event data version
-    pSaver->setEventDataVersion(BoxControllerNeXusIO::EDVOriginal);
-    TS_ASSERT_EQUALS(BoxControllerNeXusIO::EDVOriginal,
-                     pSaver->getEventDataVersion());
+    pSaver->setEventDataVersion(EDV::EDVOriginal);
+    TS_ASSERT_EQUALS(EDV::EDVOriginal, pSaver->getEventDataVersion());
     delete pSaver;
   }
 

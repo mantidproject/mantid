@@ -59,7 +59,7 @@ public:
   void test_constructor_withCoords() {
     // Fixed-size array
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
-    MDEvent<3> b(2.5, 1.5, 123, 42 456789, coords);
+    MDEvent<3> b(2.5, 1.5, 123, 42, 456789, coords);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getCenter(0), 0.125);

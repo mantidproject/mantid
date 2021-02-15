@@ -158,7 +158,7 @@ public:
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
                         const std::vector<coord_t> &point, uint16_t runIndex,
-                        uint16_t goniometernIndex,
+                        uint16_t goniometerIndex,
                         uint32_t detectorId) override;
   void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
                               const std::vector<coord_t> &point,

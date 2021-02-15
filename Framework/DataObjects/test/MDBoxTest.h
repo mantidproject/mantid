@@ -121,7 +121,7 @@ public:
     std::vector<coord_t> coord(2, 2.);
     coord[1] = 3;
 
-    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0);
+    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0, 0);
     TS_ASSERT_EQUALS(b.getNPoints(), 1)
 
     b.refreshCache();
@@ -280,7 +280,7 @@ public:
     int num = 500000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < num; i++) {
-      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 10);
+      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 0, 10);
     }
 
     b.refreshCache();
