@@ -159,9 +159,9 @@ class GroupingTabPresenter(object):
                 self._view.display_warning_box(str(error))
         for diff in diffs:
             try:
-                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
+                if diff.positive in self._model.group_names and diff.negative in self._model.group_names:
                     self._model.add_diff(diff)
-                elif diff.forward_group in self._model.pair_names and diff.backward_group in self._model.pair_names:
+                elif diff.positive in self._model.pair_names and diff.negative in self._model.pair_names:
                     self._model.add_diff(diff)
             except ValueError as error:
                 self._view.display_warning_box(str(error))

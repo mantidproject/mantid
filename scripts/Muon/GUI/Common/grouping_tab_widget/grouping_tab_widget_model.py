@@ -141,7 +141,7 @@ class GroupingTabModel(object):
             if name == pair.forward_group or name == pair.backward_group:
                 used_by += pair.name + ", "
         for diff in self._groups_and_pairs.diffs:
-            if name == diff.forward_group or name == diff.backward_group:
+            if name == diff.positive or name == diff.negative:
                 used_by += diff.name +", "
         if used_by:
             # the -2 removes the space and comma
@@ -153,7 +153,7 @@ class GroupingTabModel(object):
         used_by = ""
         # check diffs
         for diff in self._groups_and_pairs.diffs:
-            if name == diff.forward_group or name == diff.backward_group:
+            if name == diff.positive or name == diff.negative:
                 used_by += diff.name +", "
         if used_by:
             # the -2 removes the space and comma

@@ -46,14 +46,14 @@ def _create_XML_subElement_for_diffs(root_node, diffs):
     diff_nodes = []
     for diff in diffs:
         child = ET.SubElement(root_node, 'diff', name=diff.name)
-        fwd_group = ET.SubElement(child, 'positive-group', val=diff.forward_group)
-        bwd_group = ET.SubElement(child, 'negative-group', val=diff.backward_group)
+        positive = ET.SubElement(child, 'positive', val=diff.positive)
+        negative = ET.SubElement(child, 'negative', val=diff.negative)
         group_or_pair = ET.SubElement(child, 'group-or-pair', val=diff.group_or_pair)
-        periods = ET.SubElement(child, 'periods', val=diff.periods)
-        child.extend(fwd_group)
-        child.extend(bwd_group)
+        #periods = ET.SubElement(child, 'periods', val=diff.periods)
+        child.extend(positive)
+        child.extend(negative)
         child.extend(group_or_pair)
-        child.extend(periods)
+        #child.extend(periods)
         diff_nodes += [child]
     return diff_nodes
 
