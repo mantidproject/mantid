@@ -51,6 +51,7 @@ public:
   Mantid::Kernel::VMD getCenter() const override;
   size_t getNumEvents() const override { return 0; }
   uint16_t getInnerRunIndex(size_t) const override { return 0; }
+  uint16_t getInnerGoniometerIndex(size_t) const override { return 0; }
   int32_t getInnerDetectorID(size_t) const override { return 0; }
   coord_t getInnerPosition(size_t, size_t) const override { return 0; }
   signal_t getInnerSignal(size_t) const override { return 0; }
