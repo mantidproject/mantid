@@ -54,35 +54,6 @@ void SCDCalibratePanels2::init() {
   // Lattice constant group
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  // NOTE:
-  // Build serve does not allow a,b,c,alpha,beta,gamma as names, hence
-  // the awkward naming here.
-  //
-  // Stacktrace
-  // ConfigService-[Information] Unable to locate directory at:
-  // /etc/mantid/instrument ConfigService-[Information] This is Mantid
-  // version 5.1.1-2-rc.1 revision ge9b2c62 ConfigService-[Information] running
-  // on ndw1457 starting 2021-01-18T01:51Z ConfigService-[Information]
-  // Properties file(s) loaded: /opt/mantidunstable/bin/Mantid.properties,
-  // /home/abc/.mantid/Mantid.user.properties ConfigService-[Information] Unable
-  // to locate directory at: /etc/mantid/instrument FrameworkManager-[Notice]
-  // Welcome to Mantid 5.1.1-2-rc.1 FrameworkManager-[Notice] Please cite:
-  // http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release:
-  // http://dx.doi.org/10.5286/Software/Mantid5.1.1
-  // FrameworkManager-[Information] Instrument updates disabled - cannot update
-  // instrument definitions. FrameworkManager-[Information] Version check
-  // disabled. SCDCalibratePanels(v2) property (a) violates conventions
-  // SCDCalibratePanels(v2) property (b) violates conventions
-  // SCDCalibratePanels(v2) property (c) violates conventions
-  // SCDCalibratePanels(v2) property (alpha) violates conventions
-  // SCDCalibratePanels(v2) property (beta) violates conventions
-  // SCDCalibratePanels(v2) property (gamma) violates conventions
-  // RESULT|iteration time_taken|1 0.15
-  // RESULT|time_taken|0.15
-  // Found 6 errors. Coding conventions found at
-  // http://www.mantidproject.org/Mantid_Standards RESULT|memory footprint
-  // increase|8.5703125
-  //
   declareProperty("a", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
@@ -215,6 +186,8 @@ void SCDCalibratePanels2::exec() {
   PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
 
   parseLatticeConstant(m_pws);
+
+  updateUBMatrix(m_pws);
 
   bool calibrateT0 = getProperty("CalibrateT0");
   bool calibrateL1 = getProperty("CalibrateL1");
@@ -573,6 +546,43 @@ void SCDCalibratePanels2::parseLatticeConstant(
     m_beta = lattice.beta();
     m_gamma = lattice.gamma();
   }
+}
+
+/**
+ * @brief update UB matrix embeded in the peakworkspace using lattice constants
+ *        and redo the peak indexation afterwards
+ *
+ * @param pws
+ */
+void SCDCalibratePanels2::updateUBMatrix(std::shared_ptr<PeaksWorkspace> pws) {
+  IAlgorithm_sptr findUB_alg = Mantid::API::AlgorithmFactory::Instance().create(
+      "FindUBUsingLatticeParameters", -1);
+  findUB_alg->initialize();
+  findUB_alg->setChild(true);
+  findUB_alg->setLogging(LOGCHILDALG);
+  findUB_alg->setProperty("PeaksWorkspace", pws);
+  findUB_alg->setProperty("a", m_a);
+  findUB_alg->setProperty("b", m_b);
+  findUB_alg->setProperty("c", m_c);
+  findUB_alg->setProperty("alpha", m_alpha);
+  findUB_alg->setProperty("beta", m_beta);
+  findUB_alg->setProperty("gamma", m_gamma);
+  findUB_alg->setProperty("NumInitial", 15);       // all four properties
+  findUB_alg->setProperty("Tolerance", 0.15);      // are using their default
+  findUB_alg->setProperty("FixParameters", false); // values
+  findUB_alg->setProperty("Iterations", 1);        //
+  findUB_alg->executeAsChildAlg();
+
+  // Since UB is updated, we need to redo the indexation
+  IAlgorithm_sptr idxpks_alg =
+      Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
+  idxpks_alg->initialize();
+  idxpks_alg->setChild(true);
+  idxpks_alg->setLogging(LOGCHILDALG);
+  idxpks_alg->setProperty("PeaksWorkspace", pws);
+  idxpks_alg->setProperty("RoundHKLs", true); // both are using default
+  idxpks_alg->setProperty("Tolerance", 0.15); // values
+  idxpks_alg->executeAsChildAlg();
 }
 
 /**
