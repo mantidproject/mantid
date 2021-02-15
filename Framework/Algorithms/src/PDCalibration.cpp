@@ -266,7 +266,7 @@ void PDCalibration::init() {
   declareProperty("UseChiSq", false,
                   "By default the square of the peak height is used as weights "
                   "in the least-squares fit to find the diffractometer "
-                  "constants, if UseChiSq is true then the square of "
+                  "constants, if UseChiSq is true then the inverse square of "
                   "the error on the fitted peak centres will be used instead.");
 
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
