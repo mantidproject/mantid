@@ -227,7 +227,7 @@ class PairingTablePresenter(object):
             name = self._view.get_table_contents()[-1][0]
             warning = self._model.check_pair_in_use(name)
             if warning:
-                self._View.warning_popup(warning)
+                self._view.warning_popup(warning)
             else:
                 self._view.remove_last_row()
                 self._model.remove_pair_from_analysis(name)
