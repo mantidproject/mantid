@@ -4,7 +4,6 @@ from lib_cross_correlation import (cross_correlate_vulcan_data,
                                    save_calibration, merge_detector_calibration)
 from lib_analysis import (align_focus_event_ws)
 import os
-from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import (CreateGroupingWorkspace,
                               ConvertToMatrixWorkspace,
                               SaveNexusProcessed, LoadNexusProcessed,

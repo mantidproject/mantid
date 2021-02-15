@@ -1,6 +1,7 @@
-from mantid.simpleapi import (LoadEventAndCompress, LoadEventNexus, CropWorkspace,
+from mantid.simpleapi import (LoadEventAndCompress, CropWorkspace,
                               PDCalibration, SaveDiffCal, mtd,
                               AlignDetectors, Rebin, SaveNexusProcessed, CreateGroupingWorkspace)
+from mantid.simpleapi import LoadEventNexus
 
 instrument = "VULCAN"
 
@@ -16,7 +17,7 @@ def main_calibration(load_full=False, bin_step=-.001):
     bad_pulse_threshold = 10
     if load_full:
         # Load full size data
-        LoadEventNeXus(Filename=dia_wksp, OutputWorkspace=dia_wksp,
+        LoadEventNexus(Filename=dia_wksp, OutputWorkspace=dia_wksp,
                        MaxChunkSize=16, FilterBadPulses=bad_pulse_threshold)
     else:
         # Compress and crop
@@ -31,8 +32,11 @@ def main_calibration(load_full=False, bin_step=-.001):
     # oldCal='/SNS/PG3/shared/CALIBRATION/2017_1_2_11A_CAL/PG3_PAC_d37861_2017_07_28-ALL.h5'
 
     # POWGEN uses tabulated reflections for diamond
-    dvalues = (0.3117, 0.3257, 0.3499, 0.4205, 0.4645, 0.4768, 0.4996, 0.5150, 0.5441, 0.5642, 0.5947,
-               0.6307, .6866, .7283, .8185, .8920, 1.0758, 1.2615, 2.0599)
+    # dvalues = (0.3117, 0.3257, 0.3499, 0.4205, 0.4645, 0.4768, 0.4996, 0.5150, 0.5441, 0.5642, 0.5947,
+    #            0.6307, .6866, .7283, .8185, .8920, 1.0758, 1.2615, 2.0599)
+
+    dvalues = [0.31173, 0.32571, 0.34987, 0.42049, 0.46451, 0.47679, 0.49961, 0.51499, 0.54411, 0.56414,
+               0.60309, 0.63073, 0.68665, 0.72830, 0.81854, 0.89198, 1.07577, 1.26146, 2.05995]
 
     PDCalibration(InputWorkspace=dia_wksp,
                   TofBinning=[300, bin_step, 16666.7],
@@ -49,9 +53,9 @@ def main_calibration(load_full=False, bin_step=-.001):
 
     # 3 group mode
     group_ws_name = 'VULCAN_3Banks_Group'
-    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan', 
-                                       GroupDetectorsBy='Group', 
-                                       OutputWorkspace=group_ws_name) 
+    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
+                                       GroupDetectorsBy='Group',
+                                       OutputWorkspace=group_ws_name)
     assert group_ws
 
     SaveDiffCal(CalibrationWorkspace=instrument,

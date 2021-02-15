@@ -1,7 +1,5 @@
 # import mantid algorithms, numpy and matplotlib
 from mantid.simpleapi import *
-import matplotlib.pyplot as plt
-import numpy as np
 
 # Load data
 if False:
@@ -9,9 +7,11 @@ if False:
     ConvertUnits(InputWorkspace='VULCAN_164960_events', OutputWorkspace='VULCAN_164960_events', Target='dSpacing')
     Rebin(InputWorkspace='VULCAN_164960_events', OutputWorkspace='VULCAN_164960_events', Params='-0.0003', FullBinsOnly='1')
     diamond_ws = ConvertToMatrixWorkspace(InputWorkspace='VULCAN_164960_events', OutputWorkspace='VULCAN_164960_matrix')
-    # SaveNexusProcessed(InputWorkspace='VULCAN_164960_matrix', Filename='/SNS/users/wzz/VULCAN_164960_matrix.nxs', Title='Diamond run in dSpacing')
+    # SaveNexusProcessed(InputWorkspace='VULCAN_164960_matrix', Filename='/SNS/users/wzz/VULCAN_164960_matrix.nxs',
+    # Title='Diamond run in dSpacing')
 else:
-    diamond_ws = LoadNexusProcessed(Filename='/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/VULCAN_164960_matrix.nxs', OutputWorkspace='VULCAN_164960_diamond')
+    diamond_ws = LoadNexusProcessed(Filename='/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/VULCAN_164960_matrix.nxs',
+                                    OutputWorkspace='VULCAN_164960_diamond')
     # diamond_ws = ConvertUnits(InputWorkspace='VULCAN_164960_diamond', OutputWorkspace='VULCAN_164960_diamond', Target='TOF')
 
 input_ws_name = 'VULCAN_164960_diamond'

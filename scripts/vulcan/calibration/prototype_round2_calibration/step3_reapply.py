@@ -1,7 +1,7 @@
 # this script does not contain any real functions but just serves as an instruction for testing after
 # step 2
 
-Prerequisite
+# Prerequisite
 # Step 2: generate a new calibration file
 
 # Step 3 ...
