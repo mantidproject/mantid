@@ -97,17 +97,13 @@ measurement of a large Aluminium sample from the neutron training course.
 This example uses a generated dataset so that it will run on automated tests
 of the build system where the above datafiles do not exist.
 
-.. testcode:: ExGenerated
+.. code:: python
 
     ws = CreateSampleWorkspace(binWidth = 0.1, XMin = 0, XMax = 50, XUnit = 'DeltaE')
     ws = ScaleX(ws, -25, "Add")
     LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap = True)
     ws = SofQW(ws, [0, 0.05, 8], 'Direct', 25)
     ws_DOS = ComputeIncoherentDOS(ws)
-
-Output
-
-.. testoutput:: ExGenerated
 
 References
 ----------
