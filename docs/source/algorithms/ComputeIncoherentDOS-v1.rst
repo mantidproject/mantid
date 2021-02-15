@@ -16,7 +16,7 @@ for the 1-phonon incoherent scattering function [#CHAPLOT]_:
 
 .. math::
 
-    S^{(1)}_{\mathrm{inc}}(Q,E) = \exp\left(-2\bar{W}(Q)\right) \frac{Q^2}{E} \langle n+\frac{1}{2}\pm\frac{1}{2} \rangle \left[ \sum_k \frac{\sigma_k^{\mathrm{scatt}}}{2m_k} g_k(E) \right],
+    S^{(1)}_{\mathrm{inc}}(Q,E) = \exp\left(-2\bar{W}(Q)\right) \frac{Q^2}{E} \left< n+\frac{1}{2}\pm\frac{1}{2} \right> \left[ \sum_k \frac{\sigma_k^{\mathrm{scatt}}}{2m_k} g_k(E) \right],
 
 where the term in square brackets is the neutron weighted density of 
 states which is calculated by this algorithm, and :math:`g_k(E)` is

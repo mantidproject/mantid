@@ -27,7 +27,7 @@ The output data will be corrected as:
 
 where :math:`eff` is
 
-:math:`eff = \frac{f(Ei - \Delta E)}{f(E_i)}`
+:math:`eff = \frac{f(E_{i} - \Delta E)}{f(E_i)}`
 
 The function :math:`f` is defined as "formula\_eff" in the IDF. To date
 this has been implemented at the ILL for ILL IN4, IN5 and IN6, and at

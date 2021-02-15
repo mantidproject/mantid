@@ -56,10 +56,10 @@ event splitters that are supported by this algorithm.
    the amount of generated event splitters are not huge;
 -  :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time
    stamp in total nanoseconds and Y-axis to store target workspace. For
-   example, x\_i, x\_i+1 and y\_i construct an event filter as start
-   time is x\_i, stop time is x\_i+1, and target workspace is y\_i-th
-   workspace. If y\_i is less than 0, then it means that all events
-   between time x\_i and x\_i+1 will be discarded. This type of
+   example, :math:`x_{i}, x_{i+1}` and :math:`y_{i}` construct an event filter as start
+   time is :math:`x_{i}`, stop time is :math:`x_{i+1}`, and target workspace is :math:`y_{i}` -th
+   workspace. If :math:`y_{i}` is less than 0, then it means that all events
+   between time :math:`x_{i}` and :math:`x_{i+1}` will be discarded. This type of
    workspace is appropriate for the case that the amount of generated
    event splitters are huge, because processing a
    :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
@@ -95,8 +95,8 @@ this algorithm:
 -  A series filters containing one or multiple time intervals according
    to specified log values incremented by a constant value. Any log
    value of the time that falls into the selected time intervals is
-   equal or within the tolerance of the log value as v\_0 + n x delta\_v
-   +/- tolerance\_v.
+   equal or within the tolerance of the log value as
+   :math:`v_{0}  + n \cdot \Delta_{v} \pm tolerance_{v}`.
 
 .. _filterbytime-GenerateEventFilter-ref:
 
