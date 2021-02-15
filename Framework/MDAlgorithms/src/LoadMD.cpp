@@ -556,6 +556,8 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     auto loader = std::shared_ptr<DataObjects::BoxControllerNeXusIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
+    /// inspect dataspace "data_event" to determine if goniometer info is present
+    loader->setEventDataVersion();
     bc->setFileBacked(loader, m_filename);
     // boxes have been already made file-backed when restoring the boxTree;
     // How much memory for the cache?
@@ -587,6 +589,8 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     auto loader =
         file_holder_type(new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
+    /// inspect dataspace "data_event" to determine if goniometer info is present
+    loader->setEventDataVersion();
 
     loader->openFile(m_filename, "r");
 

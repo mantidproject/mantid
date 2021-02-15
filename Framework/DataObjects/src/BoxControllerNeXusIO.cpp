@@ -38,7 +38,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
       m_EventType(FatEvent), m_EventsVersion("1.0"),
       m_EventDataVersion(EventDataVersion::EDVGoniometer),
       m_ReadConversion(noConversion) {
-  m_BlockSize[1] = 4 + m_bc->getNDims();
+  m_BlockSize[1] = 5 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
     m_EventsTypeHeaders.emplace_back(EventHeader);
@@ -83,9 +83,11 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
     switch (m_EventType) {
     case (LeanEvent):
       m_BlockSize[1] = 2 + m_bc->getNDims();
+      setEventDataVersion(EventDataVersion::EDVLean);
       break;
     case (FatEvent):
-      m_BlockSize[1] = 4 + m_bc->getNDims();
+      m_BlockSize[1] = 5 + m_bc->getNDims();
+      setEventDataVersion(EventDataVersion::EDVGoniometer);
       break;
     default:
       throw std::invalid_argument(" Unsupported event kind Identified  ");
@@ -93,9 +95,6 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
   } else
     throw std::invalid_argument("The class currently supports 4(float) and "
                                 "8(double) event coordinates only");
-
-  /// inspect dataspace "data_event" to determine if goniometer info is present
-  setEventDataVersion();
 }
 
 /** As save/load operations use void data type, these function allow set up/get
@@ -281,7 +280,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
     nFileDim = ndim2 - 2;
     break;
   case (FatEvent):
-    nFileDim = ndim2 - 4;
+    nFileDim = ndim2 - 5;
     break;
   default:
     throw Kernel::Exception::FileError(

@@ -72,8 +72,13 @@ public:
     TS_ASSERT_EQUALS(4, CoordSize);
     TS_ASSERT_EQUALS("MDLeanEvent", typeName);
 
-    // set the event data version
-    pSaver->setEventDataVersion(EDV::EDVOriginal);
+    // MDLeanEvent and EDVOriginal are incompatible
+    pSaver->setDataType(CoordSize, "MDLeanEvent");
+    TS_ASSERT_THROWS(pSaver->setEventDataVersion(EDV::EDVOriginal),
+                     const std::invalid_argument &);
+
+    pSaver->setDataType(CoordSize, "MDEvent");
+    TS_ASSERT_THROWS_NOTHING(pSaver->setEventDataVersion(EDV::EDVOriginal));
     TS_ASSERT_EQUALS(EDV::EDVOriginal, pSaver->getEventDataVersion());
     delete pSaver;
   }
