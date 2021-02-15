@@ -74,7 +74,9 @@ private:
    */
   void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name,
                 const std::string &entry_class,
-                const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
+                const std::shared_ptr<API::MatrixWorkspace> &workspace,
+                const std::vector<std::string> &allow_list,
+                const std::vector<std::string> &block_list) const;
 
   /**
    * Load an NXlog entry

@@ -30,6 +30,31 @@ the number of groups specified, detectors will be left ungrouped in
 the event that the number of detectors does not divide equally into
 the number of groups.
 
+If both the ``CustomGroupingString`` and ``ComponentName`` property are
+given, then the detectors for the given component will be grouped using
+this grouping string. The syntax of the ``CustomGroupingString`` is the
+same as used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm,
+and is explained below:
+
+.. code-block:: sh
+
+  An example CustomGroupingString is 1,2+3,4-6,7:10
+
+  The comma ',' separator denotes the different groups.
+  The plus '+' separator means the adjoining detector IDs will be put in the same group.
+  The dash '-' separator means the detector IDs inclusive to this range will be put in the same group.
+  The colon ':' separator means the detector IDs inclusive to this range will be put in their own individual groups.
+
+  The CustomGroupingString 1,2+3,4-6,7:10 therefore has the following detector grouping:
+
+  Group 1: 1
+  Group 2: 2 3
+  Group 3: 4 5 6
+  Group 4: 7
+  Group 5: 8
+  Group 6: 9
+  Group 7: 10
+
 ``GroupDetectorsBy`` has five options
 
 * ``All`` create one group for the whole instrument
@@ -120,6 +145,22 @@ Output:
 
    Number of grouped spectra: 50
    Number of groups: 5
+
+**Example - CreateGroupingWorkspace using a CustomGroupingString**
+
+.. testcode:: ExCreateGroupingWorkspaceFromCustomGroupingString
+
+   grouping_ws, spectra_count, group_count = CreateGroupingWorkspace(InstrumentName='IRIS', ComponentName='graphite', CustomGroupingString='3-25,26,27+28,29-35,36:53')
+
+   print("Number of grouped spectra: {}".format(spectra_count))
+   print("Number of groups: {}".format(group_count))
+
+Output:
+
+.. testoutput:: ExCreateGroupingWorkspaceFromCustomGroupingString
+
+   Number of grouped spectra: 51
+   Number of groups: 22
 
 .. categories::
 

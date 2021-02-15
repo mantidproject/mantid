@@ -218,6 +218,27 @@ public:
                      (150 * 150) + 2) // Two monitors
   }
 
+  void test_load_event_nexus_v20_ess_log_filtered() {
+    const std::string file = "V20_ESS_example.nxs";
+    std::vector<std::string> allowed = {"proton_charge", "S2HGap", "S2VGap"};
+
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("AllowList", allowed);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
+                     (150 * 150) + 2) // Two monitors
+  }
+
   void test_load_event_nexus_v20_ess_integration_2018() {
     // Only perform this test if the version of hdf5 supports vlen strings
     if (NexusGeometry::Hdf5Version::checkVariableLengthStringSupport()) {
@@ -963,7 +984,9 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
     TSM_ASSERT_EQUALS("Groups size should be same as nperiods",
                       outGroup->size(), nPeriods);
-
+    // mean of proton charge for each period
+    std::array<double, 4> protonChargeMeans = {0.00110488, 0.00110392,
+                                               0.00110343, 0.00110404};
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
           std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
@@ -982,6 +1005,11 @@ public:
           ws->run().hasProperty(periodBoolLog));
       TSM_ASSERT_EQUALS("Current period is not what was expected.",
                         currentPeriod, i + 1);
+
+      // Check we have correctly filtered sample logs based on the period
+      auto protonLog = ws->run().getTimeSeriesProperty<double>("proton_charge");
+      TS_ASSERT(protonLog->isFiltered());
+      TS_ASSERT_DELTA(protonLog->mean(), protonChargeMeans[i], 1e-8);
     }
     // Make sure that the spectraNo are equal for all child workspaces.
     auto isFirstChildWorkspace = true;

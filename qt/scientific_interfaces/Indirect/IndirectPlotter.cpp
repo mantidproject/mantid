@@ -242,6 +242,8 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
 void IndirectPlotter::plotCorrespondingSpectra(
     std::vector<std::string> const &workspaceNames,
     std::vector<int> const &workspaceIndices) {
+  if (workspaceNames.empty() || workspaceIndices.empty())
+    return;
   if (workspaceNames.size() > 1 &&
       workspaceNames.size() != workspaceIndices.size())
     return;

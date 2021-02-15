@@ -62,13 +62,13 @@ class SampleLogsModelTest(unittest.TestCase):
         model = SampleLogsModel(ws)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 293)
+        self.assertEqual(len(log_names), 291)
         self.assertIn("Beam.sample_pressure", log_names)
 
         values = model.get_log_display_values("Beam.sample_pressure")
         self.assertEqual(values[0], "Beam.sample_pressure")
         self.assertEqual(values[1], "number")
-        self.assertEqual(values[2], 0.0)
+        self.assertEqual(values[2], "0.0")
         self.assertEqual(values[3], "Pa")
 
         self.assertFalse(model.is_log_plottable("Beam.sample_pressure"))
@@ -122,7 +122,7 @@ class SampleLogsModelTest(unittest.TestCase):
         values = model.get_log_display_values("duration")
         self.assertEqual(values[0], "duration")
         self.assertEqual(values[1], "number")
-        self.assertEqual(values[2], 120.0)
+        self.assertEqual(values[2], "120.0")
         self.assertEqual(values[3], "Sec")
 
         # Change exp
@@ -131,7 +131,7 @@ class SampleLogsModelTest(unittest.TestCase):
         values = model.get_log_display_values("rb_proposal")
         self.assertEqual(values[0], "rb_proposal")
         self.assertEqual(values[1], "number")
-        self.assertEqual(values[2], 1455001)
+        self.assertEqual(values[2], "1455001")
         self.assertEqual(values[3], "")
 
     def test_Invalid_data_logs(self):
@@ -210,6 +210,13 @@ class SampleLogsModelTest(unittest.TestCase):
 
         # Valid log with multiple different value entries
         self.assertEqual(get_value(all_logs_C[13]), '({} entries)'.format(all_logs_C[13].size())) # Phase2
+
+    def test_filter_logs_with_search_key(self):
+        # Checks that the logs are filtered correctly
+        ws = Load('ILL/D22/192068.nxs')
+        model = SampleLogsModel(ws).getItemModel('flipper')
+        # check if the model contains the expected number of logs
+        self.assertEqual(model.rowCount(), 8)
 
 
 if __name__ == '__main__':

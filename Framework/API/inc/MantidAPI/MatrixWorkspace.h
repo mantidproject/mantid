@@ -121,6 +121,9 @@ public:
 
   bool hasGroupedDetectors() const;
 
+  /// Returns true if the workspace is ragged (has differently sized spectra).
+  virtual bool isRaggedWorkspace() const = 0;
+
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const override;
   virtual size_t getMemorySizeForXAxes() const;
@@ -132,6 +135,10 @@ public:
   /// This throws an exception if the lengths are not identical across the
   /// spectra.
   virtual std::size_t blocksize() const = 0;
+  /// Returns the number of bins for a given histogram index.
+  virtual std::size_t getNumberBins(const std::size_t &index) const = 0;
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  virtual std::size_t getMaxNumberBins() const = 0;
   /// Returns the number of histograms in the workspace
   virtual std::size_t getNumberHistograms() const = 0;
 
@@ -144,7 +151,7 @@ public:
   Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the y index which corresponds to the X Value provided
-  std::size_t yIndexOfX(const double xValue, const std::size_t = 0,
+  std::size_t yIndexOfX(const double xValue, const std::size_t &index = 0,
                         const double tolerance = 0.0) const;
 
   //----------------------------------------------------------------------
@@ -579,11 +586,10 @@ protected:
 
 private:
   std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
-                              double const &xValue, bool const &ascendingOrder,
-                              double const &tolerance) const;
-  std::size_t xIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
-                            double const &xValue,
-                            double const &tolerance) const;
+                              const double xValue,
+                              const bool ascendingOrder) const;
+  std::size_t xIndexOfValue(const Mantid::HistogramData::HistogramX &xValues,
+                            const double xValue, const double tolerance) const;
 
   MatrixWorkspace *doClone() const override = 0;
   MatrixWorkspace *doCloneEmpty() const override = 0;

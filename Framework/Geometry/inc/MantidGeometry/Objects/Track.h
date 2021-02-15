@@ -186,6 +186,7 @@ public:
   Track();
   /// Constructor
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
+  virtual ~Track() = default;
   /// Adds a point of intersection to the track
   void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint,
                 const IObject &obj, const ComponentID compID = nullptr);
@@ -235,6 +236,8 @@ public:
   int surfPointsCount() const { return static_cast<int>(m_surfPoints.size()); }
   /// Is the link complete?
   int nonComplete() const;
+  /// Calculate attenuation across all links
+  virtual double calculateAttenuation(double lambda) const;
 
 private:
   Line m_line;        ///< Line object containing origin and direction

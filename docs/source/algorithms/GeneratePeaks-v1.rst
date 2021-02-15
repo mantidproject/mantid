@@ -97,39 +97,35 @@ Generate peaks from a TableWorkspace
 
 .. testcode:: GeneratePeakFromTable
 
-  # Create an input Tableworkspace by FindPeaks
-  Load(Filename='focussed.nxs', OutputWorkspace='focussed', LoaderName='LoadNexusProcessed',
-    LoaderVersion=1, LoadHistory=False)
-  FindPeaks(InputWorkspace='focussed', WorkspaceIndex=3, BackgroundType='Quadratic', PeaksList='PeakList3')
+   params = CreateEmptyTableWorkspace()
+   params.addColumn("int", "spectrum")
+   params.addColumn("double", "Height")
+   params.addColumn("double", "PeakCentre")
+   params.addColumn("double", "Sigma")
+   params.addColumn("double", "A0")
+   params.addColumn("double", "A1")
+   params.addColumn("double", "chi2")
+   # match array example below
+   params.addRow([3, 10.0, 1, 0.2, 5.0, 1.0, 0.01])
+   fromtable = GeneratePeaks(PeakParametersWorkspace=params, PeakType='Gaussian', BackgroundType='Linear (A0, A1)',
+                             BinningParameters='0,0.01,20', NumberWidths=5)
 
-  # Geneate peaks
-  GeneratePeaks(PeakParametersWorkspace='PeakList3', PeakType='Gaussian', BackgroundType='Quadratic',
-        InputWorkspace='focussed', NumberWidths=5, OutputWorkspace='GaussianPeak', IsRawParameter=False)
-
-  # Print
-  outws = mtd["GaussianPeak"]
-  vecx3 = outws.readX(3)
-  vecy3 = outws.readY(3)
-  for i in range(4277, 4283):
-    print("X = {:.6f}, Y = {:.6f}".format(vecx3[i], vecy3[i]))
+   for i in [92,93,94,95]:
+       print("X = {:.6f}, Y = {:.6f}".format(fromtable.readX(0)[i], fromtable.readY(0)[i]))
 
 .. testcleanup:: GeneratePeakFromTable
 
-  DeleteWorkspace(Workspace=outws)
-  DeleteWorkspace(Workspace="focussed")
-  DeleteWorkspace(Workspace="PeakList3")
+  DeleteWorkspace(Workspace=fromtable)
+  DeleteWorkspace(Workspace=params)
 
 Output:
 
 .. testoutput:: GeneratePeakFromTable
 
-  X = 2.137026, Y = 24074.469544
-  X = 2.139414, Y = 25091.516123
-  X = 2.141805, Y = 25481.643702
-  X = 2.144199, Y = 25120.243602
-  X = 2.146595, Y = 24105.695010
-  X = 2.148994, Y = 22713.122811
-
+  X = 0.920000, Y = 15.151163
+  X = 0.930000, Y = 15.335881
+  X = 0.940000, Y = 15.499975
+  X = 0.950000, Y = 15.642332
 
 Generate peaks from arrays
 ##########################

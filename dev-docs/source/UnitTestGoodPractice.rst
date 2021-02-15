@@ -182,8 +182,9 @@ Mocking is a very powerful tool that allows you to simulate components
 in your unit environment and check how your code operates within this
 environment. Mocking allows you to avoid creating Fake objects of any
 kind, and results in fast executing code with a very high test coverage.
-See `Mocking <Mocking>`__ in Mantid to find out what it is and how it
-works.
+See `Mocking <MVPTutorial/Mocking>`__ in Mantid to find out what it is and how it
+works in Python. Once you are familiar with the general concept, C++ has mocking too - see
+`Dependency Injection and Basic Mocking <https://vladris.com/blog/2016/07/06/dependency-injection-in-c.html>`.
 
 .. figure:: images/Mocking.png
    :alt: Object under test using Mocking to isolate the testing.|400px

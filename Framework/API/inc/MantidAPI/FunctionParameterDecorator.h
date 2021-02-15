@@ -75,8 +75,12 @@ public:
   bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter of decorated function.
   double getError(size_t i) const override;
+  /// Get the fitting error for a parameter of decorated function by name.
+  double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter of decorated function.
   void setError(size_t i, double err) override;
+  /// Set the fitting error for a parameter of decorated function by name.
+  void setError(const std::string &name, double err) override;
 
   /// Return parameter index of decorated function from a parameter reference.
   /// Usefull for constraints and ties in composite functions.

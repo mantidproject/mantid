@@ -25,7 +25,7 @@ class EnggFitPeaks(PythonAlgorithm):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def seeAlso(self):
-        return [ "EnggFitTOFFromPeaks","GSASIIRefineFitPeaks","Fit" ]
+        return ["EnggFitTOFFromPeaks", "GSASIIRefineFitPeaks", "Fit"]
 
     def name(self):
         return "EnggFitPeaks"
@@ -57,13 +57,13 @@ class EnggFitPeaks(PythonAlgorithm):
 
         self.declareProperty('OutFittedPeaksTable', '', direction=Direction.Input,
                              doc='Name for a table workspace with the parameters of the peaks found and '
-                             'fitted. If not given, the table workspace is not created.')
+                                 'fitted. If not given, the table workspace is not created.')
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
                              doc="Information on fitted peaks. The table contains, for every peak fitted "
-                             "the expected peak value (in d-spacing), and the parameters fitted. The expected "
-                             "values are given in the column labelled 'dSpacing'. When fitting "
-                             "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
+                                 "the expected peak value (in d-spacing), and the parameters fitted. The expected "
+                                 "values are given in the column labelled 'dSpacing'. When fitting "
+                                 "back-to-back exponential functions, the 'X0' column has the fitted peak center.")
 
     def PyExec(self):
 
@@ -147,11 +147,11 @@ class EnggFitPeaks(PythonAlgorithm):
 
         startx = center - (width * COEF_LEFT)
         endx = center + (width * COEF_RIGHT)
-        x_diff = endx-startx
+        x_diff = endx - startx
         if x_diff < MIN_RANGE_WIDTH:
-            inc = (min_width-x_diff)/5
-            endx = endx + 3*inc
-            startx = startx - 2*inc
+            inc = (min_width - x_diff) / 5
+            endx = endx + 3 * inc
+            startx = startx - 2 * inc
 
         return startx, endx
 
@@ -184,7 +184,7 @@ class EnggFitPeaks(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=found_peaks.rowCount())
 
         for i in range(found_peaks.rowCount()):
-            prog.report('Fitting peak number ' + str(i+1))
+            prog.report('Fitting peak number ' + str(i + 1))
 
             row = found_peaks.row(i)
             # Peak parameters estimated by FindPeaks
@@ -195,10 +195,9 @@ class EnggFitPeaks(PythonAlgorithm):
             if width <= 0.:
                 failure_msg = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
                                ", width: %s, height: %s" % (initial_params[0], width, initial_params[1]))
-                self.log().notice('For workspace index ' + str(wks_index) + ', a peak that is in the list of '
-                                  'expected peaks and was found by FindPeaks has not been fitted correctly. '
-                                  'It will be ignored. ' + "Expected, dSpacing: {0}. Details: {1}".
-                                  format(peaks[1][i], failure_msg))
+                self.log().notice(f'For workspace index {wks_index} a peak that is in the list of expected peaks and '
+                                  f'was found by FindPeaks has not been fitted correctly. It will be ignored. '
+                                  f'Expected dSpacing: {peaks[1][i]}. Details: {failure_msg}.')
                 continue
 
             try:
@@ -498,7 +497,7 @@ class EnggFitPeaks(PythonAlgorithm):
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
         return (spec_x_axis.min() <= center <= spec_x_axis.max()
-                and intensity > 0 and fitted_params['Chi'] < 10
+                and intensity > 0 and fitted_params['Chi'] < 17
                 and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
@@ -547,9 +546,8 @@ class EnggFitPeaks(PythonAlgorithm):
                 and not math.isnan(fitted_params['X0_Err'])
                 and not math.isnan(fitted_params['A_Err'])
                 and not math.isnan(fitted_params['B_Err'])
-                and fitted_params['X0_Err'] < (fitted_params['X0'] * 100.0 / self.CENTER_ERROR_LIMIT)
-                and (0 != fitted_params['X0_Err'] and 0 != fitted_params['A_Err']
-                     and 0 != fitted_params['B_Err'] and 0 != fitted_params['S_Err']
+                and fitted_params['X0_Err'] < (fitted_params['X0'] * self.CENTER_ERROR_LIMIT / 100)
+                and (0 != fitted_params['X0_Err'] and 0 != fitted_params['S_Err']
                      and 0 != fitted_params['I_Err']))
 
     def _add_parameters_to_map(self, param_map, param_table):

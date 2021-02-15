@@ -44,7 +44,8 @@ private:
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
-  std::function<double(double)> getDSpacingToTof(const detid_t detid);
+  std::function<double(double)>
+  getDSpacingToTof(const std::set<detid_t> &detIds);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
   std::vector<double> getTOFminmax(const double difc, const double difa,
@@ -73,8 +74,8 @@ private:
   API::ITableWorkspace_sptr m_peakHeightTable{nullptr};
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin{0.};
-  double m_tofMax{0.};
+  double m_tofMin{0.}; // first bin boundary when rebinning in TOF (user input)
+  double m_tofMax{0.}; // last bin boundary when rebinning in TOF (user input)
   double m_tzeroMin{0.};
   double m_tzeroMax{0.};
   double m_difaMin{0.};

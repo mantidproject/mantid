@@ -93,7 +93,7 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
  * @param coh_xs :: The coherent neutron cross-section
  * @param inc_xs :: The incoherent neutron cross-section
  * @param tot_xs :: The total neutron cross-section
- * @param abs_xs :: The absolute neutron cross-section
+ * @param abs_xs :: The absorption neutron cross-section
  */
 NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
                          const double coh_b_real, const double coh_b_img,

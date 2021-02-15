@@ -7,7 +7,6 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <cfloat>
 #include <iomanip>
@@ -27,7 +26,7 @@ UnitCell::UnitCell()
     : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
       errorModHKL(3, 3) {
   da[0] = da[1] = da[2] = 1.;
-  da[3] = da[4] = da[5] = deg2rad * 90.0;
+  da[3] = da[4] = da[5] = M_PI_2;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
       0.0;
   MaxOrder = 0;
@@ -45,7 +44,7 @@ UnitCell::UnitCell(double _a, double _b, double _c)
   da[1] = _b;
   da[2] = _c;
   // Angles are 90 degrees in radians ->Pi/2
-  da[3] = da[4] = da[5] = 0.5 * M_PI;
+  da[3] = da[4] = da[5] = M_PI_2;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
       0.0;
   MaxOrder = 0;
@@ -824,12 +823,15 @@ void UnitCell::calculateGstar() {
 
 /// Private function to calculate reciprocal lattice parameters
 void UnitCell::calculateReciprocalLattice() {
-  ra[0] = sqrt(Gstar[0][0]);                 // a*
-  ra[1] = sqrt(Gstar[1][1]);                 // b*
-  ra[2] = sqrt(Gstar[2][2]);                 // c*
-  ra[3] = acos(Gstar[1][2] / ra[1] / ra[2]); // alpha*
-  ra[4] = acos(Gstar[0][2] / ra[0] / ra[2]); // beta*
-  ra[5] = acos(Gstar[0][1] / ra[0] / ra[1]); // gamma*
+  ra[0] = sqrt(Gstar[0][0]); // a*
+  ra[1] = sqrt(Gstar[1][1]); // b*
+  ra[2] = sqrt(Gstar[2][2]); // c*
+  auto acosThreshold = [](double x) {
+    return std::abs(x) > 1e-15 ? acos(x) : M_PI_2;
+  };
+  ra[3] = acosThreshold(Gstar[1][2] / ra[1] / ra[2]); // alpha*
+  ra[4] = acosThreshold(Gstar[0][2] / ra[0] / ra[2]); // beta*
+  ra[5] = acosThreshold(Gstar[0][1] / ra[0] / ra[1]); // gamma*
 }
 
 /// Private function to calculate #B matrix

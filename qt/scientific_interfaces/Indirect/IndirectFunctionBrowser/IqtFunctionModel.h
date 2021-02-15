@@ -39,8 +39,9 @@ public:
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   QStringList getDatasetNames() const override;
+  QStringList getDatasetDomainNames() const override;
   int getNumberDomains() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;
@@ -71,6 +72,7 @@ public:
                             const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
                                    const QString &constraint) override;
+  void setGlobalParameterValue(const QString &paramName, double value) override;
   QString setBackgroundA0(double value) override;
 
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);

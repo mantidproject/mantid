@@ -61,8 +61,12 @@ public:
   bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
   double getError(size_t i) const override;
+  /// Get the fitting error for a parameter by name
+  double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
+  /// Set the fitting error for a parameter by name
+  void setError(const std::string &name, double err) override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const API::ParameterReference &ref) const override;

@@ -1,6 +1,8 @@
 # Unit tests for corelli/calibration
 
 set(TEST_PY_FILES
+    test_all.py
+    test_bank.py
     test_utils.py
     test_database.py
     )

@@ -374,6 +374,7 @@ public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
   void enableDeletePrompt(bool enable);
+  void setOverplotDisabled(bool disabled);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -470,6 +471,7 @@ public:
     auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
     sipRes = sipCpp->findHandler(function);
     %End
+    QString functionName() const;
 };
 
 // ---------------------------------
@@ -492,13 +494,18 @@ public:
     }
 %End
     int sizeOfFunctionsGroup() const;
+    bool isFitEnabled() const;
+    std::string getFunctionString() const;
     void loadFunction(QString funStr);
+    void saveFunction(const QString &fnName);
+    void executeCustomSetupRemove(const QString &name);
     double startX() const;
     void setStartX(double start);
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
     QVector<double> getXRange() throw(std::invalid_argument);
+    std::string getExcludeRange() const;
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;
@@ -540,12 +547,16 @@ SIP_PYOBJECT defaultBackgroundType();
     QStringList registeredOthers() const;
     QStringList getPeakPrefixes() const;
     QString addFunction(QString);
+    PropertyHandler *getPeakHandler(const QString &prefix);
     double getPeakCentreOf(QString);
     void setPeakCentreOf(QString, double);
     double getPeakHeightOf(QString);
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    std::string getWidthParameterNameOf(QString);
+    std::string getCentreParameterNameOf(QString);
+    bool isParameterExplicitlySetOf(QString, std::string);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
     QListWidget* getWorkspaceList() const;
@@ -584,7 +595,7 @@ signals:
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
     void removePlotSignal(PropertyHandler *);
-
+    void fitResultsChanged(const QString &);
 };
 
 // ---------------------------------
@@ -865,7 +876,7 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i);
     int getCurrentDataset() const;
-    void setDatasetNames(const QStringList &names);
+    void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
@@ -979,6 +990,7 @@ public:
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
     void isOptional(bool);
+    void setLastDirectory(const QString &lastDir);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -1056,4 +1068,47 @@ class WorkspaceSelector : QComboBox
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setOptional(bool optional);
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorView
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorView : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+%End
+public:
+    FitScriptGeneratorView(
+        QWidget *parent = nullptr,
+        const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorModel
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorModel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+%End
+public:
+    FitScriptGeneratorModel();
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorPresenter
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorPresenter {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+%End
+public:
+    FitScriptGeneratorPresenter(
+	    FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
+        const QStringList &workspaceNames = QStringList(),
+        double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
+
+    void openFitScriptGenerator();
 };

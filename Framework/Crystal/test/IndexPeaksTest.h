@@ -487,20 +487,74 @@ public:
 
   // --------------------------- Failure tests -----------------------------
 
-  void test_workspace_with_no_oriented_lattice_gives_validateInputs_error() {
-    const auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
-    IndexPeaks alg;
-    alg.initialize();
-    alg.setProperty("PeaksWorkspace", peaksWS);
+  std::shared_ptr<IndexPeaks> setup_validate_inputs_test_alg() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites();
+    auto alg = std::make_shared<IndexPeaks>();
+    alg->initialize();
+    alg->setProperty("PeaksWorkspace", peaksWS);
+    return alg;
+  }
 
-    auto helpMsgs = alg.validateInputs();
+  void
+  assert_helpmsgs_error_from_validate_inputs(std::shared_ptr<IndexPeaks> alg,
+                                             std::string prop,
+                                             std::string err_substring) {
+    auto helpMsgs = alg->validateInputs();
 
-    const auto valueIter = helpMsgs.find("PeaksWorkspace");
+    const auto valueIter = helpMsgs.find(prop);
     TS_ASSERT(valueIter != helpMsgs.cend())
     if (valueIter != helpMsgs.cend()) {
       const auto msg = valueIter->second;
-      TS_ASSERT(msg.find("OrientedLattice") != std::string::npos)
+      TS_ASSERT(msg.find(err_substring) != std::string::npos)
     }
+  }
+
+  void
+  test_inputs_with_save_mod_and_zero_max_order_gives_validateInputs_error() {
+    auto alg = setup_validate_inputs_test_alg();
+    alg->setProperty("SaveModulationInfo", true);
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "MaxOrder",
+                                               "Modulation info");
+  }
+
+  void
+  test_inputs_with_save_mod_and_empty_mod_vectors_gives_validateInputs_error() {
+    auto alg = setup_validate_inputs_test_alg();
+    alg->setProperty("SaveModulationInfo", true);
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "SaveModulationInfo",
+                                               "no valid Modulation");
+  }
+
+  void
+  test_inputs_with_max_order_set_and_empty_mod_vectors_gives_validateInputs_error() {
+    auto alg = setup_validate_inputs_test_alg();
+    alg->setProperty("MaxOrder", 3); // arbitary non-zero max order
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "ModVector1",
+                                               "At least one Modulation");
+  }
+
+  void
+  test_inputs_with_zero_max_order_and_valid_mod_vector_gives_validateInputs_error() {
+    auto alg = setup_validate_inputs_test_alg();
+    alg->setProperty(
+        "ModVector1",
+        std::vector<double>{1.0, 2.0, 3.0}); // arbitary non-zero mod vector
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "MaxOrder",
+                                               "cannot be zero");
+  }
+
+  void test_workspace_with_no_oriented_lattice_gives_validateInputs_error() {
+    const auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    auto alg = std::make_shared<IndexPeaks>();
+    alg->initialize();
+    alg->setProperty("PeaksWorkspace", peaksWS);
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "PeaksWorkspace",
+                                               "No UB Matrix");
   }
 
   void test_negative_max_order_throws_error() {

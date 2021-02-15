@@ -8,9 +8,11 @@
     :copyright: Copyright 2020
         ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
+from distutils.version import LooseVersion
 from docutils import statemachine
 import os
 import matplotlib.sphinxext.plot_directive as mpl_plot_directive_module
+import sphinx
 
 if hasattr(mpl_plot_directive_module, 'PlotDirective'):
 
@@ -26,7 +28,11 @@ if hasattr(mpl_plot_directive_module, 'PlotDirective'):
 
     def setup(app):
         metadata = mpl_plot_directive_module.setup(app)
-        app.add_directive('plot', PlotDirectivePatch)
+        kwargs = dict()
+        # avoid warning overwriting directive
+        if LooseVersion(sphinx.__version__) >= '1.8':
+            kwargs['override'] = True
+        app.add_directive('plot', PlotDirectivePatch, **kwargs)
         return metadata
 
 else:

@@ -9,7 +9,7 @@ import unittest
 
 from unittest.mock import MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
+from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 
 
 @start_qapplication
@@ -19,7 +19,7 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
     def test_construction(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
         fig = MagicMock()
-        canvas = FigureCanvasQTAgg(fig)
+        canvas = MantidFigureCanvas(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertNotEqual(fig_mgr, None)
 
@@ -27,7 +27,7 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
     def test_window_title(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
         fig = MagicMock()
-        canvas = FigureCanvasQTAgg(fig)
+        canvas = MantidFigureCanvas(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertEqual(fig_mgr.get_window_title(), "Figure 1")
 

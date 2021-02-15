@@ -222,9 +222,10 @@ public:
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
-
     TS_ASSERT_THROWS_NOTHING(fn->setError(0, 3.0));
+    TS_ASSERT_THROWS_NOTHING(fn->setError("PeakCentre", 4.0));
     TS_ASSERT_EQUALS(fn->getError(0), 3.0);
+    TS_ASSERT_EQUALS(fn->getError("PeakCentre"), 4.0);
     for (size_t i = 0; i < fn->nParams(); ++i) {
       TS_ASSERT_EQUALS(fn->getError(i), decoratedFunction->getError(i));
     }

@@ -104,6 +104,21 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
   m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
+///  Returns true if the workspace is ragged (has differently sized spectra).
+/// @returns true if the workspace is ragged.
+bool Workspace2D::isRaggedWorkspace() const {
+  if (data.empty()) {
+    throw std::runtime_error("There is no data in the Workspace2D, "
+                             "therefore cannot determine if it is ragged.");
+  } else {
+    const auto numberOfBins = data[0]->size();
+    return std::any_of(data.cbegin(), data.cend(),
+                       [&numberOfBins](const auto &histogram) {
+                         return numberOfBins != histogram->size();
+                       });
+  }
+}
+
 /** Gets the number of histograms
 @return Integer
 */
@@ -131,6 +146,36 @@ size_t Workspace2D::blocksize() const {
         throw std::length_error(
             "blocksize undefined because size of histograms is not equal");
     return numBins;
+  }
+}
+
+/** Returns the number of bins for a given histogram index.
+ * @param index :: The histogram index to check for the number of bins.
+ * @return the number of bins for a given histogram index.
+ */
+std::size_t Workspace2D::getNumberBins(const std::size_t &index) const {
+  if (index < data.size())
+    return data[index]->size();
+
+  throw std::invalid_argument(
+      "Could not find number of bins in a histogram at index " +
+      std::to_string(index) + ": index is too large.");
+}
+
+/** Returns the maximum number of bins in a workspace (works on ragged data).
+ * @return the maximum number of bins in a workspace.
+ */
+std::size_t Workspace2D::getMaxNumberBins() const {
+  if (data.empty()) {
+    return 0;
+  } else {
+    auto maxNumberOfBins = data[0]->size();
+    for (const auto &iter : data) {
+      const auto numberOfBins = iter->size();
+      if (numberOfBins > maxNumberOfBins)
+        maxNumberOfBins = numberOfBins;
+    }
+    return maxNumberOfBins;
   }
 }
 

@@ -13,6 +13,8 @@ VIEW_FRACTION = 0.015
 
 def compute_alpha(z, slicepoint, slicedim_width):
     """Calculate the alpha value based on the peak position and slicepoint
+    If a value cannot be computed, for zero dimension width for example, then
+    ALPHA_MAX is returned
     :param z: Z position of center out of slice plane
     :param slicepoint: float giving current slice point
     :param slicedim_width:
@@ -20,6 +22,9 @@ def compute_alpha(z, slicepoint, slicedim_width):
     """
     # Apply a linear transform to convert from a distance to an opacity between
     # alpha min & max
-    gradient = (ALPHA_MIN - ALPHA_MAX) / (slicedim_width * VIEW_FRACTION)
-    distance = abs(slicepoint - z)
-    return (gradient * distance) + ALPHA_MAX
+    try:
+        gradient = (ALPHA_MIN - ALPHA_MAX) / (slicedim_width * VIEW_FRACTION)
+        distance = abs(slicepoint - z)
+        return (gradient * distance) + ALPHA_MAX
+    except ArithmeticError:
+        return ALPHA_MAX

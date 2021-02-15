@@ -324,8 +324,15 @@ void SequentialFitDialog::accept() {
   alg->initialize();
   alg->setPropertyValue("Input", inputStr.join(";").toStdString());
   alg->setProperty("WorkspaceIndex", m_fitBrowser->workspaceIndex());
-  alg->setProperty("StartX", m_fitBrowser->startX());
-  alg->setProperty("EndX", m_fitBrowser->endX());
+  // Create an array property of start and end X times, each pair startX[i]
+  // endX[i] will be used for the ith fit.
+  // At the moment we read the startX and endX from the single entry in the fit
+  // browser - and duplicate it for each input
+  auto nInputs = rowCount();
+  auto startX = m_fitBrowser->startX();
+  auto endX = m_fitBrowser->endX();
+  alg->setProperty("StartX", std::vector<double>(nInputs, startX));
+  alg->setProperty("EndX", std::vector<double>(nInputs, endX));
   alg->setPropertyValue("OutputWorkspace", m_outputName);
   alg->setPropertyValue("Function", funStr);
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
@@ -336,7 +343,7 @@ void SequentialFitDialog::accept() {
     std::string logName = ui.cbLogValue->currentText().toStdString();
     alg->setPropertyValue("LogValue", logName);
     observeFinish(alg);
-  } else if (rowCount() > 1) {
+  } else if (nInputs > 1) {
     alg->setPropertyValue("LogValue", "SourceName");
   } else {
     observeFinish(alg);

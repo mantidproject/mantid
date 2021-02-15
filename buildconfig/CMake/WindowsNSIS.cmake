@@ -10,48 +10,21 @@ set( CPACK_INSTALL_PREFIX "/")
 set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
-
-set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "mantidplot" )
-set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "mantid_workbench" )
-set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
-
-# Choose the proper suffix for the build.
-# if the string is not empty, capitalise the first letter
-if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
-  # change the icon if this is not a release build - the icons have <suffix> appended, e.g. nightly and unstable
-  # this is done before the capitalisation of the first letter
-  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
-  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}${CPACK_PACKAGE_SUFFIX}")
-  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
-
-  string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
-  # get only first letter
-  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 0 1 WINDOWS_NSIS_CAPITAL_FIRST_LETTER)
-  # capitalize the first letter in place
-  string(TOUPPER ${WINDOWS_NSIS_CAPITAL_FIRST_LETTER} WINDOWS_NSIS_CAPITAL_FIRST_LETTER)
-  # store the rest of the string (without the first letter that is being capitalized)
-  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 1 ${WINDOWS_NSIS_SUFFIX_LENGTH} WINDOWS_NSIS_REST_OF_SUFFIX)
-  # concatenate the capitalized letter and the rest of the suffix
-  set(WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "${WINDOWS_NSIS_CAPITAL_FIRST_LETTER}${WINDOWS_NSIS_REST_OF_SUFFIX}")
-else()
-   # if the string is empty, it is the release suffix, which should be empty
-  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "" )
-endif()
-
-
-# note: the PACKAGE icon uses PNG, the other two use ICO
-set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.png" )
-set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
-set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
 # have the properly capitalsed name for the start menu and install folder
-set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
-set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}Install")
+set( CPACK_NSIS_DISPLAY_NAME "Mantid${CPACK_PACKAGE_SUFFIX_CAMELCASE}")
+set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${CPACK_PACKAGE_SUFFIX_CAMELCASE}Install")
+# note: the PACKAGE icon uses PNG, the other two use ICO
+set ( PACKAGE_IMAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}\\\\images")
+set( PACKAGE_ICON_BASENAME "mantidplot${CPACK_PACKAGE_SUFFIX}" )
+set( CPACK_PACKAGE_ICON "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.png" )
+set( CPACK_NSIS_MUI_ICON "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.ico" )
+set( CPACK_NSIS_MUI_UNIICON "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.ico" )
 
 ###########################################################################
 # Deployment type - currently only works for Release!
 ###########################################################################
 set( WINDOWS_DEPLOYMENT_TYPE "Release" CACHE STRING "Type of deployment used")
-set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release Debug)
+set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release)
 mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 
 ###########################################################################
@@ -112,95 +85,92 @@ set ( MISC_CORE_DIST_DLLS
     zlib.dll
 )
 
-set ( MISC_GUI_DIST_DLLS
-    qwt5.dll
-    qwtplot3d.dll)
-
-set ( BIN_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
-                 ${MISC_GUI_DIST_DLLS} )
+set ( BIN_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS} )
 foreach( DLL ${BIN_DLLS} )
   install ( FILES ${THIRD_PARTY_DIR}/bin/${DLL} DESTINATION bin )
 endforeach()
 
-include( WindowsNSISQt4 )
-include( WindowsNSISQt5 )
+# NSIS variables for shortcuts
+# NOTE: DO NOT REMOVE THE BLANK LINES IN THE CPACK_NSIS_CREATE_ICONS_EXTRA COMMANDS AS THEY ARE REQUIRED
+set (CPACK_NSIS_CREATE_ICONS_EXTRA "")
+set (CPACK_NSIS_DELETE_ICONS_EXTRA "")
+set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "")
+set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "")
 
-###########################################################################
-# Startup files
-###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+# General package icon
+install ( FILES "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.ico" DESTINATION bin )
+# python wrapper
 install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin RENAME mantidpython.bat )
 
-###########################################################################
-# Icons for shortcuts
-###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico DESTINATION bin )
-
-###########################################################################
-# Extra NSIS commands for shortcuts, start menu items etc
-# Three backward slashes are required to escape a character to get the
-# character through to NSIS.
-###########################################################################
-# On install. The blank lines seem to be required or it doesn't create the shortcut
-
-set ( MANTIDPLOT_LINK_NAME "Mantid Plot ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-set ( MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-
-set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
-
+# Notebook
+set ( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook${CPACK_PACKAGE_SUFFIX}")
+set ( MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${CPACK_PACKAGE_SUFFIX_CAMELCASE}.lnk" )
+install ( FILES "${PACKAGE_IMAGES_DIR}\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico" DESTINATION bin )
+set ( CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
 ")
-
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
 ")
-# The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
-
   CreateShortCut '$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
-
-  CreateDirectory \\\"$INSTDIR\\\\logs\\\"
-
-  CreateDirectory \\\"$INSTDIR\\\\docs\\\"
 ")
-# On uninstall reverse stages listed above.
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-  Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
   Delete \\\"$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
-  RMDir \\\"$INSTDIR\\\\logs\\\"
-  RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
 
-# if the workbench is being packaged we want to add the shortcut commands for the installation
-# this is done via appending the relevant commands to the already declared variables
-if ( ENABLE_WORKBENCH )
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
-  set ( MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-  message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")
+# Workbench
+if(ENABLE_WORKBENCH)
+  include( WindowsNSISQt5 )
+  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "mantid_workbench${CPACK_PACKAGE_SUFFIX}" )
+  install ( FILES "${PACKAGE_IMAGES_DIR}\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico" DESTINATION bin )
+  set ( MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${CPACK_PACKAGE_SUFFIX_CAMELCASE}.lnk" )
   set (CPACK_NSIS_CREATE_ICONS_EXTRA "
     CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\MantidWorkbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
     ${CPACK_NSIS_CREATE_ICONS_EXTRA}
   ")
-
   set (CPACK_NSIS_DELETE_ICONS_EXTRA "
     Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDWORKBENCH_LINK_NAME}\\\"
     ${CPACK_NSIS_DELETE_ICONS_EXTRA}
   ")
-
   set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
     CreateShortCut '$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\MantidWorkbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
     ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
   ")
-
   set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
     Delete \\\"$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}\\\"
     ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
   ")
-endif ()
+endif()
+
+# MantidPlot
+if(ENABLE_MANTIDPLOT)
+  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${PACKAGE_ICON_BASENAME}" )
+  set( MANTIDPLOT_LINK_NAME "Mantid Plot ${CPACK_PACKAGE_SUFFIX_CAMELCASE}.lnk" )
+  include( WindowsNSISQt4 )
+  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
+  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+  # shortcuts
+  set (CPACK_NSIS_CREATE_ICONS_EXTRA "
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
+
+  ${CPACK_NSIS_CREATE_ICONS_EXTRA}
+")
+
+  set (CPACK_NSIS_DELETE_ICONS_EXTRA "
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
+  ${CPACK_NSIS_DELETE_ICONS_EXTRA}
+")
+  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+  CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
+
+  ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
+")
+  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+  Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
+  ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
+")
+
+endif()

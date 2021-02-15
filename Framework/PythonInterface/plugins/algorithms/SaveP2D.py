@@ -28,7 +28,7 @@ class SaveP2D(PythonAlgorithm):
         return "SaveP2D"
 
     def seeAlso(self):
-        return ["PowderReduceP2D", "Bin2DPowderDiffraction"]
+        return ["Bin2DPowderDiffraction"]
 
     def PyInit(self):
         # Input file

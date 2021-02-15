@@ -35,6 +35,13 @@ class AlphaTest(unittest.TestCase):
 
         self.assertTrue(alpha < 0)
 
+    def test_compute_alpha_with_zero_width_returns_max_value(self):
+        peak_center_z, slice_pt, slicedim_width = 1.8, 1, 0
+
+        alpha = compute_alpha(peak_center_z, slice_pt, slicedim_width)
+
+        self.assertAlmostEqual(ALPHA_MAX, alpha)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -58,7 +58,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/instrument/2theta")) {
+  // the second one is to recognize D1B
+  if (descriptor.pathExists("/entry0/instrument/2theta") ||
+      descriptor.pathExists("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -87,7 +89,7 @@ const std::string LoadILLDiffraction::summary() const {
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B"}) {}
+    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -105,6 +107,8 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
+  declareProperty("TwoThetaOffset", 0.0,
+                  "2 theta offset for D1B data, in degrees.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
@@ -195,8 +199,20 @@ void LoadILLDiffraction::loadDataScan() {
   axis.load();
 
   // read the starting two theta
-  NXFloat twoTheta0 = firstEntry.openNXFloat("instrument/2theta/value");
-  twoTheta0.load();
+  double twoThetaValue;
+  if (m_instName == "D1B") {
+    if (getPointerToProperty("TwoThetaOffset")->isDefault()) {
+      g_log.notice("A 2theta offset angle is necessary for D1B data.");
+      twoThetaValue = 0;
+    } else {
+      twoThetaValue = getProperty("TwoThetaOffset");
+    }
+  } else {
+    std::string twoThetaPath = "instrument/2theta/value";
+    NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
+    twoTheta0.load();
+    twoThetaValue = double(twoTheta0[0]);
+  }
 
   // figure out the dimensions
   m_sizeDim1 = static_cast<size_t>(data.dim1());
@@ -222,8 +238,8 @@ void LoadILLDiffraction::loadDataScan() {
     initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
-    initStaticWorkspace();
-    fillStaticInstrumentScan(data, scan, twoTheta0);
+    initStaticWorkspace(start_time);
+    fillStaticInstrumentScan(data, scan, twoThetaValue);
   }
 
   fillDataScanMetaData(scan);
@@ -260,8 +276,10 @@ void LoadILLDiffraction::loadMetaData() {
 /**
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
+ *
+ * @param start_time :: the date the run started, in ISO compliant format
  */
-void LoadILLDiffraction::initStaticWorkspace() {
+void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
   size_t nBins = 1;
 
@@ -272,6 +290,9 @@ void LoadILLDiffraction::initStaticWorkspace() {
   }
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
+
+  // the start time is needed in the workspace when loading the parameter file
+  m_outWorkspace->mutableRun().addProperty("start_time", start_time);
 }
 
 /**
@@ -528,7 +549,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
  */
 void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan,
-                                                  const NXFloat &twoTheta0) {
+                                                  const double &twoTheta0) {
 
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
@@ -577,7 +598,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   }
 
   // Move to the starting 2theta
-  moveTwoThetaZero(double(twoTheta0[0]));
+  moveTwoThetaZero(twoTheta0);
 }
 
 /**
@@ -827,7 +848,10 @@ LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
   loadInst->setPropertyValue("InstrumentName", m_instName);
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = ws->mutableRun();
-  run.addProperty("run_start", start_time);
+
+  // the start time is needed in the workspace when loading the parameter file
+  run.addProperty("start_time", start_time);
+
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();

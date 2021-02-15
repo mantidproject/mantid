@@ -23,7 +23,7 @@ using namespace Mantid::Kernel::Strings;
 struct SetViewSpectra {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
-  void operator()(const Spectra &spectra) const {
+  void operator()(const FunctionModelSpectra &spectra) const {
     if (spectra.isContinuous()) {
       m_view->displaySpectra(spectra.getMinMax());
     } else {
@@ -196,7 +196,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(
-    Spectra const &spectra) {
+    FunctionModelSpectra const &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
     m_spectraError.clear();
@@ -211,13 +211,13 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(Spectra(createSpectraString(spectraList)));
+  setModelSpectra(FunctionModelSpectra(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  setModelSpectra(Spectra(minimum, maximum));
+  setModelSpectra(FunctionModelSpectra(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
 

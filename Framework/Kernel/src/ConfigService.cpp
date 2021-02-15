@@ -953,6 +953,9 @@ void ConfigServiceImpl::setString(const std::string &key,
     cacheInstrumentPaths();
   } else if (key == "defaultsave.directory") {
     appendDataSearchDir(value);
+  } else if (key == "logging.channels.consoleChannel.class") {
+    // this key requires reloading logging for it to take effect
+    configureLogging();
   }
 
   m_notificationCenter.postNotification(new ValueChanged(key, value, old));

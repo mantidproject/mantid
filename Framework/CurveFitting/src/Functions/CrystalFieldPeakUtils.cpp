@@ -263,7 +263,8 @@ void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
     }
   } else {
     peak.setHeight(0.0);
-    peak.fixAllActive(fixByDefault);
+    peak.fixIntensity(fixByDefault);
+    peak.fixCentre(fixByDefault);
   }
 }
 
@@ -315,11 +316,15 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
   }
   // If there are any peaks above the maxNPeaks, ignore them
   // but don't remove
+  const bool fixByDefault = true;
   for (size_t i = maxNPeaks; i < nFunctions - iFirst; ++i) {
     auto fun = spectrum.getFunction(i + iFirst);
     auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
     const auto fwhm = peak.fwhm();
-    ignorePeak(peak, fwhm);
+    peak.setHeight(0.0);
+    peak.setFwhm(fwhm);
+    peak.fixIntensity(fixByDefault);
+    peak.fixCentre(fixByDefault);
   }
   return nGoodPeaks;
 }

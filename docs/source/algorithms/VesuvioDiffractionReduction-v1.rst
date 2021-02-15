@@ -30,6 +30,13 @@ Usage
 
 **Example - Running VesuvioDiffractionReduction.**
 
+.. testsetup:: ExVesuvioDiffractionReductionSimple
+
+    default_facility_orig = config['default.facility']
+    default_instrument_orig = config['default.instrument']
+    config['default.facility'] = 'ISIS'
+    config['default.instrument'] = 'Vesuvio'
+
 .. testcode:: ExVesuvioDiffractionReductionSimple
 
     VesuvioDiffractionReduction(InputFiles='15289',
@@ -41,6 +48,11 @@ Usage
     print('Workspace name: %s' % ws.name())
     print('Number of spectra: %d' % ws.getNumberHistograms())
     print('Number of bins: %s' % ws.blocksize())
+
+.. testcleanup:: ExVesuvioDiffractionReductionSimple
+
+    config['default.facility'] = default_facility_orig
+    config['default.instrument'] = default_instrument_orig
 
 Output:
 

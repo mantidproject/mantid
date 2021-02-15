@@ -17,8 +17,9 @@ This algorithm calibrates the detector pixels and creates a
 calibration is done in TOF not d spacing. The peak d values are
 converted to TOF based on either the old calibration or the instrument
 geometry. The ``InputWorkspace`` contains the data from a standard
-sample. The results are then fitted with up to (in order) difc, t_zero and difa,
-these values are details in :ref:`algm-AlignDetectors`.
+sample. The results are then fitted with up to (in order) ``difc``,
+``t_zero``, and ``difa``. These values are described in detail
+in :ref:`algm-AlignDetectors`.
 
 The peak fitting properties are explained in more detail in
 :ref:`algm-FitPeaks`. This is used to perform a refinement of peaks

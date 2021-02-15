@@ -22,7 +22,7 @@ Note that it is currently not possible to save out workspaces with more than thr
 Usage
 -----
 
-.. testcode:: SaveMDWorkspaceToVTK
+.. code-block:: python
   
     import os
     signalInput = [i for i in range(1,28)]
@@ -39,15 +39,6 @@ Usage
 
     print("File created: {}".format(os.path.exists(savefile)))
 
-.. testoutput:: SaveMDWorkspaceToVTK
-
-    File created: True
-
-
-.. testcleanup:: SaveMDWorkspaceToVTK
-
-    os.remove(savefile)
-  
 .. categories::
 
 .. sourcelink::

@@ -36,20 +36,8 @@ public:
   std::string name() const override { return "DynamicKuboToyabe"; }
   const std::string category() const override { return "Muon\\MuonGeneric"; }
 
-  /// Returns the number of attributes associated with the function
-  size_t nAttributes() const override { return 1; }
-
-  /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const override;
-
-  /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const override;
-
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName, const Attribute &) override;
-
-  /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const override;
 
 protected:
   void function1D(double *out, const double *xValues,

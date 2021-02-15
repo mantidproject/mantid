@@ -20,7 +20,7 @@ const char* MantidVersion::version()
 {
   // The major and minor version numbers are specified in Build/CMake/VersionNumber.cmake
   // The patch number is the number of commits since the most recent tag of the repository
-  return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@";
+  return "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@";
 }
 
 const char* MantidVersion::versionShort()

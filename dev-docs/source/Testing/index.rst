@@ -20,8 +20,11 @@ creation is outlined in :ref:`issue_tracking`.
 .. toctree::
    :maxdepth: 1
 
+   Core/Core
+   SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
+   ElementalAnalysis/ElementalAnalysisGUITests
    IndirectInelastic/IndirectInelasticAcceptanceTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting

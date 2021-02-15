@@ -8,6 +8,7 @@
 #
 #
 from mantid.kernel import ConfigService
+from mantidqt.widgets import instrumentselector
 from workbench.config import CONF
 from workbench.widgets.settings.general.view import GeneralSettingsView
 
@@ -55,10 +56,13 @@ class GeneralSettings(object):
         self.setup_confirmations()
 
     def setup_facilities_group(self):
-        facilities = ConfigService.getFacilityNames()
+        facilities = sorted(ConfigService.getFacilityNames())
         if not facilities:
             return
         self.view.facility.addItems(facilities)
+        self.view.instrument = instrumentselector.InstrumentSelector()
+        self.view.horizontalLayout_4.replaceWidget(self.view.instrument_dummy, self.view.instrument)
+        self.view.instrument_dummy.setVisible(False)
 
         try:
             default_facility = ConfigService.getFacility().name()
@@ -70,7 +74,6 @@ class GeneralSettings(object):
 
         try:
             default_instrument = ConfigService.getInstrument().name()
-            self.view.instrument.setCurrentIndex(self.view.instrument.findText(default_instrument))
         except RuntimeError:
             default_instrument = self.view.instrument.itemText(0)
         self.action_instrument_changed(default_instrument)
@@ -83,10 +86,6 @@ class GeneralSettings(object):
             self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
             self.action_facility_changed(default_facility)
             self.view.instrument.blockSignals(False)
-
-        instrument = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
-        if not self.view.instrument.findText(instrument) == -1:
-            self.view.instrument.setCurrentIndex(self.view.instrument.findText(instrument))
 
     def setup_general_group(self):
         self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
@@ -126,9 +125,9 @@ class GeneralSettings(object):
         if new_facility != current_value:
             ConfigService.setFacility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
-        self.view.instrument.clear()
-        self.view.instrument.addItems(
-            [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
+        self.view.instrument.facility = new_facility
+        if new_facility != current_value:
+            self.view.instrument.setCurrentIndex(0)
 
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)

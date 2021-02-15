@@ -57,7 +57,7 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-- Added compressorType option to :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>`.
+- Added compressorType option to ``SaveMDWorkspaceToVTK``.
 
 Python
 ######

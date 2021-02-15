@@ -7,8 +7,8 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QObject>
@@ -16,6 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL IIndirectFitPlotView : public API::MantidWidget {
   Q_OBJECT

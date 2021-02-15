@@ -100,6 +100,8 @@ public:
   void setParameterError(const QString &paramName, double error) override;
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const override;
+  /// Get a value of a attribute
+  IFunction::Attribute getAttribute(const QString &attrName) const override;
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
@@ -186,12 +188,15 @@ protected:
   QString getIndex(QtProperty *prop) const;
   /// Get name of the parameter for a property
   QString getParameterName(QtProperty *prop) const;
+  /// Get name of the attribute for a property
+  QString getAttributeName(QtProperty *prop) const;
   /// Get function property for the index
   QtProperty *getFunctionProperty(const QString &index) const;
   ///// Get a property for a parameter
-  // QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &paramName) const;
+  /// Get a property for a parameter
+  QtProperty *getAttributeProperty(const QString &paramName) const;
   /// Get a property for a parameter which is a parent of a given
   /// property (tie or constraint).
   QtProperty *getParentParameterProperty(QtProperty *prop) const;
@@ -356,11 +361,20 @@ protected:
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
   bool m_emitParameterValueChange = true;
+  bool m_emitAttributeValueChange = true;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;
 
 private:
+  /// Update a double attribute
+  void setDoubleAttribute(const QString &attrName, double value) override;
+  void setIntAttribute(const QString &attrName, int value) override;
+  void setStringAttribute(const QString &attrName, std::string &value) override;
+  void setBooleanAttribute(const QString &attrName, bool value) override;
+  void setVectorAttribute(const QString &attrName,
+                          std::vector<double> &val) override;
+
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;
   QRect visualItemRect(QtProperty *prop) const;

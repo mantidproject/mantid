@@ -44,9 +44,6 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
     : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
       m_radius(peakRadius), m_backgroundInnerRadius(peakInnerRadius),
       m_backgroundOuterRadius(peakOuterRadius) {
-  if (peakRadius == m_backgroundInnerRadius) {
-    m_backgroundInnerRadius.reset();
-  }
   if (peakRadius == m_backgroundOuterRadius) {
     m_backgroundOuterRadius.reset();
   }

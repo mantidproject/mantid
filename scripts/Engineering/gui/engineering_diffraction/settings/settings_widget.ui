@@ -65,13 +65,47 @@ QGroupBox:title {
       <string>Fitting</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
+	  <item row="0" column="0">
+	   <widget class="QLabel" name="log_list_label"></widget>
+	  </item>
+      <item row="1" column="0">
        <widget class="QListWidget" name="log_list">
 		<property name="verticalScrollBarPolicy">
 		  <enum>Qt::ScrollBarAlwaysOn</enum>
         </property>
        </widget>
       </item>
+	  <item row="2" column="0">
+	   <widget class="QLabel" name="primary_log_label"></widget>
+	  </item>
+	  <item row="3" column="0">
+       <widget class="QComboBox" name="primary_log">
+       </widget>
+      </item>
+	  <item row="3" column="1">
+	   <layout class="QVBoxLayout" name="SeqFitOrder_layout">
+	    <item>
+         <widget class="QCheckBox" name="check_ascending">
+          <property name="text">
+           <string>Ascending</string>
+          </property>
+		  <property name="checked">
+           <bool>true</bool>
+          </property>
+	    </widget>
+	    </item>
+		<item>
+         <widget class="QCheckBox" name="check_descending">
+          <property name="text">
+           <string>Descending</string>
+          </property>
+		  <property name="checked">
+           <bool>false</bool>
+          </property>
+	    </widget>
+	    </item>
+	   </layout>
+	  </item>
      </layout>
     </widget>
    </item>

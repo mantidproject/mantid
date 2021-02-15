@@ -188,7 +188,7 @@ std::string ParamFunction::parameterDescription(size_t i) const {
 }
 
 /**
- * Get the fitting error for a parameter
+ * Get the fitting error for a parameter.
  * @param i :: The index of a parameter
  * @return :: the error
  */
@@ -198,13 +198,53 @@ double ParamFunction::getError(size_t i) const {
 }
 
 /**
- * Set the fitting error for a parameter
+ * Get the fitting error for a parameter by name.
+ * @param name :: The name of a parameter
+ * @return :: the error
+ */
+double ParamFunction::getError(const std::string &name) const {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
+    std::ostringstream msg;
+    msg << "ParamFunction tries to get error of non-existing parameter ("
+        << name << ") "
+        << "to function " << this->name();
+    msg << "\nAllowed parameters: ";
+    for (const auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
+    throw std::invalid_argument(msg.str());
+  }
+  return m_errors[static_cast<int>(it - m_parameterNames.begin())];
+}
+
+/**
+ * Set the fitting error for a parameter.
  * @param i :: The index of a parameter
  * @param err :: The error value to set
  */
 void ParamFunction::setError(size_t i, double err) {
   checkParameterIndex(i);
   m_errors[i] = err;
+}
+
+/**
+ * Get the fitting error for a parameter by name.
+ * @param name :: The name of a parameter
+ * @param err :: The error value to set
+ */
+void ParamFunction::setError(const std::string &name, double err) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
+    std::ostringstream msg;
+    msg << "ParamFunction tries to set error of non-existing parameter ("
+        << name << ") "
+        << "to function " << this->name();
+    msg << "\nAllowed parameters: ";
+    for (const auto &parameterName : m_parameterNames)
+      msg << parameterName << ", ";
+    throw std::invalid_argument(msg.str());
+  }
+  m_errors[static_cast<int>(it - m_parameterNames.begin())] = err;
 }
 
 /**

@@ -17,8 +17,6 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (  # noqa: F401
-    FigureCanvasQTAgg, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
 from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
@@ -36,6 +34,8 @@ from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresente
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
+from workbench.plotting.mantidfigurecanvas import (  # noqa: F401
+    MantidFigureCanvas, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
@@ -45,6 +45,7 @@ from workbench.plotting.plothelppages import PlotHelpPages
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -136,11 +137,13 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
+
         for ax in self.canvas.figure.axes:
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    for ws_name, artists in ax.tracked_workspaces.items():
+                    for ws_name in list(ax.tracked_workspaces.keys()):
+                        # loop over list as items is iterable of object that is changed (throws error)
                         if ws_name == oldName:
                             ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
                 elif isinstance(ws, ITableWorkspace):
@@ -161,6 +164,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
@@ -428,8 +432,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                     if ax.lines:  # Relim causes issues with colour plots, which have no lines.
                         ax.relim()
                     elif isinstance(ax, Axes3D):
-                        if hasattr(ax, 'original_data'):
-                            ax.collections[0]._vec = copy.deepcopy(ax.original_data)
+                        if hasattr(ax, 'original_data_surface'):
+                            ax.collections[0]._vec = copy.deepcopy(ax.original_data_surface)
+                        elif hasattr(ax, 'original_data_wireframe'):
+                            ax.collections[0].set_segments(copy.deepcopy(ax.original_data_wireframe))
                         else:
                             ax.view_init()
                     elif ax.images:
@@ -493,11 +499,12 @@ def new_figure_manager(num, *args, **kwargs):
 
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
+
     def _new_figure_manager_given_figure_impl(num, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.
         """
-        canvas = FigureCanvasQTAgg(figure)
+        canvas = MantidFigureCanvas(figure)
         return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
 
     # figure manager & canvas must be created on the QApplication thread

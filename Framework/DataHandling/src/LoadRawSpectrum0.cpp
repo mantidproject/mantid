@@ -55,7 +55,7 @@ void LoadRawSpectrum0::exec() {
   // Need to check that the file is not a text file as the ISISRAW routines
   // don't deal with these very well, i.e
   // reading continues until a bad_alloc is encountered.
-  if (isAscii(file)) {
+  if (Kernel::FileDescriptor::isAscii(file)) {
     g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
     throw std::invalid_argument("Incorrect file type encountered.");
   }

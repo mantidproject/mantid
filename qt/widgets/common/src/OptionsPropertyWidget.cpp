@@ -48,6 +48,9 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
     connect(m_combo->lineEdit(), SIGNAL(editingFinished()),
             SLOT(editingFinished()));
   }
+  m_combo->setSizeAdjustPolicy(
+      QComboBox::AdjustToMinimumContentsLengthWithIcon);
+  m_combo->setMinimumContentsLength(20);
   m_widgets.push_back(m_combo);
 
   std::vector<std::string> items = prop->allowedValues();

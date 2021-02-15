@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitData.h"
+#include "IIndirectFitDataModel.h"
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
@@ -17,12 +18,18 @@
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
 
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+
 #include <boost/optional.hpp>
 
 #include <QtCore>
 
 #include <memory>
 #include <type_traits>
+
+#include <QList>
+#include <QPair>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -49,20 +56,19 @@ public:
   WorkspaceIndex getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(TableDatasetIndex dataIndex,
                                 WorkspaceIndex spectrum) const;
-
-  virtual std::string tabName() const = 0;
-
-  virtual bool hasResolution() const = 0;
-  QString selectedFitType() const;
-  size_t numberOfCustomFunctions(const std::string &functionName) const;
+  QString getSelectedFitType() const;
+  size_t getNumberOfCustomFunctions(const std::string &functionName) const;
   void setConvolveMembers(bool convolveMembers);
 
   static size_t
   getNumberOfSpecificFunctionContained(const std::string &functionName,
                                        const IFunction *compositeFunction);
 
+  virtual std::string getTabName() const = 0;
+  virtual bool hasResolution() const = 0;
+
 protected:
-  IndirectFittingModel *fittingModel() const;
+  IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
   void setSampleFBSuffixes(const QStringList &suffices);
@@ -85,16 +91,38 @@ protected:
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
 
-signals:
-  void functionChanged();
-  void parameterChanged(const Mantid::API::IFunction * /*_t1*/);
-  void customBoolChanged(const QString &key, bool value);
-  void updateAvailableFitTypes();
+private:
+  void setup() override;
+  void loadSettings(const QSettings &settings) override;
+  bool validate() override;
+  virtual void setupFitTab() = 0;
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
+  void connectPlotPresenter();
+  void connectSpectrumPresenter();
+  void connectFitPropertyBrowser();
+  void connectDataPresenter();
+  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
+  std::string getOutputBasename() const;
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
+  std::vector<std::string> getFitParameterNames() const;
+  QList<MantidWidgets::FunctionModelDataset> getDatasets() const;
+  void enableFitButtons(bool enable);
+  void enableOutputOptions(bool enable);
+  void setPDFWorkspace(std::string const &workspaceName);
+  void updateParameterEstimationData();
+
+  std::unique_ptr<IndirectFittingModel> m_fittingModel;
+  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
+  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
+  TableDatasetIndex m_currentTableDatasetIndex;
+  WorkspaceIndex m_singleFitWorkspaceIndex;
 
 protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
-  void setModelEndX(double startX);
+  void setModelEndX(double endX);
   void setDataTableStartX(double startX);
   void setDataTableEndX(double endX);
   void setDataTableExclude(const std::string &exclude);
@@ -116,7 +144,9 @@ protected slots:
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
-  void updateFitBrowserParameterValues();
+  void updateFitBrowserParameterValues(
+      std::unordered_map<std::string, ParameterValue> parameters =
+          std::unordered_map<std::string, ParameterValue>());
   void updateFitBrowserParameterValuesFromAlg();
   void updateFitStatus();
   void updateDataReferences();
@@ -125,46 +155,24 @@ protected slots:
 
 private slots:
   void plotSelectedSpectra();
-  void respondToChangeOfSpectraRange(TableDatasetIndex);
+  void respondToChangeOfSpectraRange(TableDatasetIndex index);
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToSingleDataViewSelected();
   void respondToMultipleDataViewSelected();
   void respondToDataAdded();
   void respondToDataRemoved();
-  void respondToSelectedFitDataChanged(TableDatasetIndex);
+  void respondToSelectedFitDataChanged(TableDatasetIndex index);
   void respondToNoFitDataSelected();
   void respondToPlotSpectrumChanged(WorkspaceIndex);
   void respondToFwhmChanged(double);
-  void respondToBackgroundChanged(double);
+  void respondToBackgroundChanged(double value);
 
-private:
-  void setup() override;
-  void loadSettings(const QSettings &settings) override;
-  bool validate() override;
-  virtual void setupFitTab() = 0;
-  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
-  void connectPlotPresenter();
-  void connectSpectrumPresenter();
-  void connectFitPropertyBrowser();
-  void connectDataPresenter();
-  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
-  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
-  std::string getOutputBasename() const;
-  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
-  std::vector<std::string> getFitParameterNames() const;
-  QStringList getDatasetNames() const;
-  void enableFitButtons(bool enable);
-  void enableOutputOptions(bool enable);
-  void setPDFWorkspace(std::string const &workspaceName);
-  void updateParameterEstimationData();
-
-  std::unique_ptr<IndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
-  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
-  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  TableDatasetIndex m_currentTableDatasetIndex;
-  WorkspaceIndex m_singleFitWorkspaceIndex;
+signals:
+  void functionChanged();
+  void parameterChanged(const Mantid::API::IFunction *fun);
+  void customBoolChanged(const QString &key, bool value);
+  void updateAvailableFitTypes();
 };
 
 } // namespace IDA

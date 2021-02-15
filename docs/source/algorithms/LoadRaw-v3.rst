@@ -62,6 +62,30 @@ aspects of the output :ref:`Workspace <Workspace>`:
    directory as the RAW file and load their data into the workspace's
    :py:obj:`sample objects <mantid.api.Sample>`.
 
+Alternate Data Stream
+#####################
+
+RAW data files from the ISIS archive contain a second stream of data associated with
+the same file object using the
+`NTFS Alternate Data Stream <https://en.wikipedia.org/wiki/Fork_(file_system)#Microsoft>`_
+feature. The alternate stream can be accessed by appending ``:checksum`` to the filename
+when opening the file. The stream stores MD5 checksums of all of the files associated with
+the RAW file including log files and the corresponding ISIS NeXus file that can be loaded
+with :ref:`LoadISISNexus <algm-LoadISISNexus-v2>`.
+The following shows an example of the content found in the ``:checksum`` stream::
+
+    ad0bc56c4c556fa368565000f01e77f7 *IRIS00055132.log
+    d5ace6dc7ac6c4365d48ee1f2906c6f4 *IRIS00055132.nxs
+    9c70ad392023515f775af3d3984882f3 *IRIS00055132.raw
+    66f74b6c0cc3eb497b92d4956ed8d6b5 *IRIS00055132_ICPdebug.txt
+    e200aa65186b61e487175d5263b315aa *IRIS00055132_ICPevent.txt
+    91be40aa4f54d050a9eb4abea394720e *IRIS00055132_ICPstatus.txt
+    50aa2872110a9b862b01c6c83f8ce9a8 *IRIS00055132_Status.txt
+
+The MD5 checksum of the RAW file itself is not affected by the presence of the alternate stream.
+If the RAW file is copied to a filesystem that does not support the alternate stream then
+the stream is dropped.
+
 Previous Versions
 -----------------
 

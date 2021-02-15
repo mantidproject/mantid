@@ -13,7 +13,7 @@
 #include <cmath>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sf_erf.h>
-#include <limits>
+#include <gsl/gsl_sf_lambert.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,17 +41,15 @@ void BackToBackExponential::init() {
 }
 
 /**
- * Get approximate height of the peak: function value at X0.
+ * Get approximate height (maximum value) of the peak (not at X0)
  */
 double BackToBackExponential::height() const {
-  double x0 = getParameter(3);
-  std::vector<double> vec(1, x0);
-  FunctionDomain1DVector domain(vec);
-  FunctionValues values(domain);
-
-  function(domain, values);
-
-  return values[0];
+  // height = I * ln2 /(FWHM - ln2 * S)
+  const double I = getParameter(0);
+  const double s = getParameter(4);
+  const auto width = fwhm();
+  const auto h = I * M_LN2 / (width - M_LN2 * s);
+  return h;
 }
 
 /**
@@ -64,7 +62,7 @@ void BackToBackExponential::setHeight(const double h) {
     setParameter(0, 1e-6);
     h0 = height();
   }
-  double area = getParameter(0); // == I
+  double area = getParameter(0); // ==I
   area *= h / h0;
   if (area <= 0.0) {
     area = 1e-6;
@@ -78,14 +76,37 @@ void BackToBackExponential::setHeight(const double h) {
 /**
  * Get approximate peak width.
  */
-double BackToBackExponential::fwhm() const { return 2 * getParameter("S"); }
+double BackToBackExponential::fwhm() const {
+  // intrinsic width of B2B exp
+  auto s = getParameter("S");
+  auto w0 = expWidth();
+  // Gaussian and B2B exp widths don't add in quadrature. The following
+  // tends to gaussian at large S and at S=0 is equal to the intrinsic width of
+  // the B2B exp (good to <3% for typical params)
+  return w0 * exp(-0.5 * M_LN2 * s / w0) + 2 * sqrt(2 * M_LN2) * s;
+}
 
 /**
  * Set new peak width approximately.
  * @param w :: New value for the width.
  */
 void BackToBackExponential::setFwhm(const double w) {
-  setParameter("S", w / 2.0);
+  // get height so can reset after changing S
+  const auto h0 = height();
+  const auto w0 = expWidth();
+  if (w > w0) {
+    const auto a = 0.5 * M_LN2;
+    const auto b = 2 * sqrt(2 * M_LN2);
+    // calculate new value of S (from solving eq in fwhm func)
+    setParameter(
+        "S", w0 * (gsl_sf_lambert_W0(-(a / b) * exp(-(a / b) * (w / w0))) / a +
+                   (w / w0) / b));
+  } else {
+    // set to some small number relative to w0
+    setParameter("S", 1e-6);
+  }
+  // reset height
+  setHeight(h0);
 }
 
 void BackToBackExponential::function1D(double *out, const double *xValues,

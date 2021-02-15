@@ -16,7 +16,7 @@ Let's load a calibrated workspace: MERLIN 12024 (cycle 11/05):
 
 .. code-block:: python
 
-    mer12024 = :ref:`Load <algm-Load>`('MER12024')
+    mer12024 = Load('MER12024')
 
 Open the Instrument View and select Cylindrical Rendering, you will see
 something like:

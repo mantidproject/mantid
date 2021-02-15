@@ -265,8 +265,6 @@ void IndirectFitPlotPresenter::updatePlots() {
 
 void IndirectFitPlotPresenter::updateFit() {
   HoldRedrawing holdRedrawing(m_view);
-  updateRangeSelectors();
-  updateFitRangeSelector();
   updateGuess();
 }
 

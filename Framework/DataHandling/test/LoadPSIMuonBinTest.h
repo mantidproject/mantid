@@ -13,11 +13,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadPSIMuonBin.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -192,7 +194,6 @@ public:
   void test_time_zero_list_loaded_correctly() {
     LoadPSIMuonBin alg;
     alg.initialize();
-    alg.isInitialized();
     alg.setProperty("SearchForTempFile", false);
 
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
@@ -207,6 +208,55 @@ public:
     TS_ASSERT_DELTA(timeZeroList[3], 0.1602, 0.0001);
 
     AnalysisDataService::Instance().remove("ws");
+  }
+
+  void test_time_zero_table_loaded_correctly() {
+    LoadPSIMuonBin alg;
+    alg.initialize();
+    alg.setProperty("SearchForTempFile", false);
+    alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
+    alg.setProperty("OutputWorkspace", "ws");
+    alg.setPropertyValue("TimeZeroTable", "tzt");
+    alg.execute();
+
+    auto &ads = AnalysisDataService::Instance();
+    ITableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
+
+    TS_ASSERT_EQUALS(tbl->columnCount(), 1);
+    TS_ASSERT_EQUALS(tbl->getColumnNames(),
+                     std::vector<std::string>{"time zero"});
+    TS_ASSERT_EQUALS(tbl->rowCount(), 4);
+    TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(0), 0.1582, 0.0001);
+    TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(1), 0.1553, 0.0001);
+    TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(2), 0.1592, 0.0001);
+    TS_ASSERT_DELTA(tbl->getColumn(0)->toDouble(3), 0.1602, 0.0001);
+  }
+
+  void test_dead_time_table_loaded_correctly() {
+    LoadPSIMuonBin alg;
+    alg.initialize();
+    alg.setProperty("SearchForTempFile", false);
+
+    alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
+    alg.setProperty("OutputWorkspace", "ws");
+    alg.setPropertyValue("DeadTimeTable", "dtt");
+    alg.execute();
+
+    auto &ads = AnalysisDataService::Instance();
+    ITableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("dtt");
+
+    TS_ASSERT_EQUALS(tbl->columnCount(), 2);
+    std::vector<std::string> colNames{"spectrum", "dead-time"};
+    TS_ASSERT_EQUALS(tbl->getColumnNames(), colNames);
+    TS_ASSERT_EQUALS(tbl->rowCount(), 4);
+    TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(0), 1.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(1)->toDouble(0), 0.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(1), 2.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(1)->toDouble(1), 0.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(2), 3.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(1)->toDouble(2), 0.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(0)->toDouble(3), 4.0);
+    TS_ASSERT_EQUALS(tbl->getColumn(1)->toDouble(3), 0.0);
   }
 
   void test_uncorected_time_loaded_if_corrected_time_flag_is_false() {

@@ -8,14 +8,17 @@
 from os import path
 from mantidqt.utils.observer_pattern import Observable
 
-SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str}
+SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
+                 "primary_log": str, "sort_ascending": bool}
 
 DEFAULT_SETTINGS = {
     "full_calibration": "",
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "recalc_vanadium": False,
     "logs": ','.join(
-        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go'])
+        ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
+    "primary_log": 'strain',
+    "sort_ascending": True
 }
 
 ALL_LOGS = ','.join(
@@ -45,14 +48,13 @@ class SettingsPresenter(object):
         self.view.set_on_apply_clicked(self.save_new_settings)
         self.view.set_on_ok_clicked(self.save_and_close_dialog)
         self.view.set_on_cancel_clicked(self.close_dialog)
-        self.view.set_on_log_changed(self.save_new_settings)
+        self.view.set_on_log_changed(self.update_logs)
+        self.view.set_on_check_ascending_changed(self.ascending_changed)
+        self.view.set_on_check_descending_changed(self.descending_changed)
 
     def show(self):
-        self.view.show()
-
-    def load_existing_settings(self):
-        self.load_settings_from_file_or_default()
         self._show_settings_in_view()
+        self.view.show()
 
     def close_dialog(self):
         self.view.close()
@@ -60,6 +62,15 @@ class SettingsPresenter(object):
     def save_and_close_dialog(self):
         self.save_new_settings()
         self.close_dialog()
+
+    def update_logs(self):
+        self.view.set_primary_log_combobox(self.settings["primary_log"])
+
+    def ascending_changed(self, state):
+        self.view.set_descending_checked(not bool(state))
+
+    def descending_changed(self, state):
+        self.view.set_ascending_checked(not bool(state))
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
@@ -70,6 +81,8 @@ class SettingsPresenter(object):
         self.settings["full_calibration"] = self.view.get_full_calibration()
         self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
+        self.settings["primary_log"] = self.view.get_primary_log()
+        self.settings["sort_ascending"] = self.view.get_ascending_checked()
 
     def _show_settings_in_view(self):
         if self._validate_settings(self.settings):
@@ -77,6 +90,8 @@ class SettingsPresenter(object):
             self.view.set_full_calibration(self.settings["full_calibration"])
             self.view.set_van_recalc(self.settings["recalc_vanadium"])
             self.view.set_checked_logs(self.settings["logs"])
+            self.view.set_primary_log_combobox(self.settings["primary_log"])
+            self.view.set_ascending_checked(self.settings["sort_ascending"])
         self._find_files()
 
     def _find_files(self):
@@ -93,16 +108,18 @@ class SettingsPresenter(object):
         if not self._validate_settings(self.settings):
             self.settings = DEFAULT_SETTINGS.copy()
             self._save_settings_to_file()
+        self._find_files()
 
     @staticmethod
     def _validate_settings(settings):
         try:
             all_keys = settings.keys() == SETTINGS_DICT.keys()
+            not_none = all([val is not None for val in settings.values()])
             save_location = str(settings["save_location"])
-            save_valid = save_location != "" and save_location is not None
-            recalc_valid = settings["recalc_vanadium"] is not None
+            save_valid = save_location != ""
             log_valid = settings["logs"] != ""
-            return all_keys and save_valid and recalc_valid and log_valid
+            ascending_valid = settings["sort_ascending"] != ""
+            return all_keys and not_none and save_valid and log_valid and ascending_valid
         except KeyError:  # Settings contained invalid key.
             return False
 

@@ -87,4 +87,13 @@ public:
     TS_ASSERT_EQUALS(attrNames.at(1), "Att2");
     TS_ASSERT_EQUALS(attrNames.at(2), "Att3");
   }
+
+  void test_setError_with_name() {
+    FakeParamFunctionAttributeHolder funct;
+    funct.initialize();
+    funct.setError(0, 1.0);
+    TS_ASSERT_EQUALS(funct.getError(0), 1.0);
+    funct.setError("Par1", 5.0);
+    TS_ASSERT_EQUALS(funct.getError("Par1"), 5.0);
+  }
 };

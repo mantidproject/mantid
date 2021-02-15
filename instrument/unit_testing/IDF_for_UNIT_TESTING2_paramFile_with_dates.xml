@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="IDF_for_UNIT_TESTING2">
+<component-link name="IDF_for_UNIT_TESTING2.xml/combined translation6" >
+
+  <parameter name="date-most-recent">
+    <value val="0" valid-from="1850-01-01T00:00:00" valid-to="1950-01-01T00:00:00"/>
+    <value val="1" valid-from="1875-01-01T00:00:00"/>
+  </parameter>
+  <parameter name="date-within-bound">
+    <value val="0" valid-from="1875-01-01T00:00:00" valid-to="1890-01-01T00:00:00"/>
+    <value val="1" valid-from="1850-01-01T00:00:00" valid-to="1950-01-01T00:00:00"/>
+  </parameter>
+  <parameter name="date-no-bounds-vs-end">
+    <value val="0"/>
+    <value val="1" valid-to="2000-01-01T00:00:00"/>
+  </parameter>
+  <parameter name="date-same-start-no-end">
+    <value val="0" valid-from="1875-01-01T00:00:00"/>
+    <value val="1" valid-from="1875-01-01T00:00:00" valid-to="2000-01-01T00:00:00"/>
+  </parameter>
+    <parameter name="date-no-bounds-vs-start">
+    <value val="0"/>
+    <value val="1" valid-from="1850-01-01T00:00:00"/>
+  </parameter>
+    <parameter name="date-same-start">
+    <value val="0" valid-from="1875-01-01T00:00:00" valid-to="2050-01-01T00:00:00"/>
+    <value val="1" valid-from="1875-01-01T00:00:00" valid-to="2000-01-01T00:00:00"/>
+  </parameter>
+    <parameter name="date-no-bounds-vs-invalid">
+    <value val="0" valid-from="1950-01-01T00:00:00" valid-to="2000-01-01T00:00:00"/>
+    <value val="1"/>
+  </parameter>
+</component-link>
+</parameter-file>

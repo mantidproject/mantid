@@ -11,6 +11,7 @@ from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import
 from Engineering.gui.engineering_diffraction.tabs.common.vanadium_corrections import check_workspaces_exist
 from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widget import CroppingWidget
 from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.observer_pattern import GenericObservable
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -21,6 +22,9 @@ class FocusPresenter(object):
         self.view = view
         self.worker = None
         self.calibration_observer = CalibrationObserver(self)
+
+        # Observable Setup
+        self.focus_run_notifier = GenericObservable()
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
@@ -35,6 +39,9 @@ class FocusPresenter(object):
         # Cropping Options
         self.cropping_widget = CroppingWidget(self.view, view=self.view.get_cropping_widget())
         self.show_cropping(False)
+
+    def add_focus_subscriber(self, obs):
+        self.focus_run_notifier.add_subscriber(obs)
 
     def on_focus_clicked(self):
         if not self._validate():
@@ -56,9 +63,13 @@ class FocusPresenter(object):
         self.worker = AsyncTask(self.model.focus_run,
                                 (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers),
                                 error_cb=self._on_worker_error,
-                                finished_cb=self.emit_enable_button_signal)
+                                finished_cb=self._on_worker_success)
         self.set_focus_controls_enabled(False)
         self.worker.start()
+
+    def _on_worker_success(self):
+        self.emit_enable_button_signal()
+        self.focus_run_notifier.notify_subscribers(self.model.get_last_path())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]

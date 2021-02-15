@@ -10,6 +10,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadILLTOF2.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -64,6 +66,10 @@ public:
     MatrixWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
+
+    TS_ASSERT(output->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        output->run().getProperty("start_time")->value()));
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), numberOfHistograms)
     const auto &spectrumInfo = output->spectrumInfo();

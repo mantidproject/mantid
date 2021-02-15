@@ -10,6 +10,7 @@
 #include "IndirectSpectrumSelectionView.h"
 
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
@@ -56,7 +57,7 @@ private slots:
 
 private:
   void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  void setModelSpectra(Spectra const &spectra);
+  void setModelSpectra(MantidWidgets::FunctionModelSpectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);

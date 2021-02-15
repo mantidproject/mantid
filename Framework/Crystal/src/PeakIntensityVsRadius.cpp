@@ -187,9 +187,11 @@ void PeakIntensityVsRadius::exec() {
                                    progStep *double(step + 1), false);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("PeaksWorkspace", peaksWS);
-    alg->setProperty("PeakRadius", radius);
-    alg->setProperty("BackgroundOuterRadius", OuterRadius);
-    alg->setProperty("BackgroundInnerRadius", InnerRadius);
+    alg->setProperty<std::vector<double>>("PeakRadius", {radius});
+    alg->setProperty<std::vector<double>>("BackgroundOuterRadius",
+                                          {OuterRadius});
+    alg->setProperty<std::vector<double>>("BackgroundInnerRadius",
+                                          {InnerRadius});
     alg->setPropertyValue("OutputWorkspace", "__tmp__PeakIntensityVsRadius");
     alg->execute();
     if (alg->isExecuted()) {

@@ -35,6 +35,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Subtract empty instrument runs, as long as this run isn't an empty, user hasn't turned empty subtraction off, or
     # The user has not supplied a sample empty
     is_run_empty = common.runs_overlap(run_number, run_details.empty_runs)
+    summed_empty = None
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
         if os.path.isfile(run_details.summed_empty_file_path):
             logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_file_path)
@@ -47,8 +48,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)
-    input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
-                                                  empty_sample=summed_empty)
+    if summed_empty is not None:
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
+                                                      empty_sample=summed_empty)
 
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)

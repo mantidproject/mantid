@@ -25,6 +25,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
         self.finder_fullCalib.setLabelText("Full Calibration")
         self.finder_fullCalib.isForRunFiles(False)
 
+        # set text of labels
+        self.log_list_label.setText("Check logs to average when loading focused data")
+        self.primary_log_label.setText(
+            "Sort workspaces by selected log average in sequential fitting (default is ascending order)\n"
+            "If the box below is empty the workspaces will be fitted in the order they appear in the table.")
+
     # ===============
     # Slot Connectors
     # ===============
@@ -40,6 +46,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def set_on_log_changed(self, slot):
         self.log_list.itemChanged.connect(slot)
+
+    def set_on_check_ascending_changed(self, slot):
+        self.check_ascending.stateChanged.connect(slot)
+
+    def set_on_check_descending_changed(self, slot):
+        self.check_descending.stateChanged.connect(slot)
 
     # =================
     # Component Getters
@@ -57,6 +69,12 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_checked_logs(self):
         return ','.join([self.log_list.item(ilog).text() for ilog in range(self.log_list.count()) if
                          self.log_list.item(ilog).checkState() == QtCore.Qt.Checked])
+
+    def get_primary_log(self):
+        return self.primary_log.currentText()
+
+    def get_ascending_checked(self):
+        return self.check_ascending.isChecked()
 
     # =================
     # Component Setters
@@ -79,9 +97,27 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
             self.log_list.addItem(item)
 
     def set_checked_logs(self, logs):
+        # block signal so as not to reset primary log
+        self.log_list.blockSignals(True)
         for log in logs.split(','):
             items = self.log_list.findItems(log, QtCore.Qt.MatchExactly)
             items[0].setCheckState(QtCore.Qt.Checked)
+        self.log_list.blockSignals(False)
+
+    def set_primary_log_combobox(self, primary_log):
+        checked_logs = self.get_checked_logs().split(',') + ['']
+        self.primary_log.clear()
+        self.primary_log.addItems(checked_logs)
+        if primary_log in checked_logs:
+            self.primary_log.setCurrentText(primary_log)
+        else:
+            self.primary_log.setCurrentText('')
+
+    def set_ascending_checked(self, checked):
+        self.check_ascending.setChecked(checked)
+
+    def set_descending_checked(self, checked):
+        self.check_descending.setChecked(checked)
 
     # =================
     # Force Actions

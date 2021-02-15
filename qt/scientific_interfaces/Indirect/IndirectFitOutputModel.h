@@ -8,14 +8,19 @@
 
 #include "DllConfig.h"
 #include "IIndirectFitOutput.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
+
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IIndirectFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputModel : public IIndirectFitOutput {

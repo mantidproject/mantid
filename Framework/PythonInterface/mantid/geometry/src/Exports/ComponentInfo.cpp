@@ -99,8 +99,18 @@ void export_ComponentInfo() {
       .def("hasSource", &ComponentInfo::hasSource, arg("self"),
            "Returns True if a source is present.")
 
+      .def("hasEquivalentSource", &ComponentInfo::hasEquivalentSource,
+           arg("self"), arg("other"),
+           "Returns True is both beamlines either lack a Source or "
+           "have a Source at the same position.")
+
       .def("hasSample", &ComponentInfo::hasSample, arg("self"),
            "Returns True if a sample is present.")
+
+      .def("hasEquivalentSample", &ComponentInfo::hasEquivalentSample,
+           arg("self"), arg("other"),
+           "Returns True is both beamlines either lack a Sample or "
+           "have a Sample at the same position.")
 
       .def("source", &ComponentInfo::source, arg("self"),
            "Returns the source component index.")

@@ -39,7 +39,7 @@ void calculateFromOffset(API::Progress &progress,
   }
 }
 
-// look through the columns of detid and difc and put it into the
+// look through the columns of detid and difc and copy theminto the
 // SpecialWorkspace2D
 void calculateFromTable(API::Progress &progress,
                         DataObjects::SpecialWorkspace2D &outputWs,
@@ -100,15 +100,15 @@ void CalculateDIFC::init() {
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "CalibrationWorkspace", "", Direction::Input,
                       Mantid::API::PropertyMode::Optional),
-                  "Optional: A OffsetsWorkspace containing the calibration "
-                  "offsets.  This cannot be specified with an "
-                  "OffsetsWorkspace.");
+                  "Optional: A TableWorkspace containing the DIFC values, "
+                  "which will be copied. This property cannot be set in "
+                  "conjunction with property OffsetsWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OffsetsWorkspace", "", Direction::Input,
                       Mantid::API::PropertyMode::Optional),
                   "Optional: A OffsetsWorkspace containing the calibration "
-                  "offsets. This cannot be specified with a "
-                  "CalibrationWorkspace.");
+                  "offsets. This property cannot be set in conjunction with "
+                  "property CalibrationWorkspace.");
 }
 
 std::map<std::string, std::string> CalculateDIFC::validateInputs() {
@@ -139,6 +139,8 @@ void CalculateDIFC::exec() {
   API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 
   if ((!bool(inputWs == outputWs)) ||
+      // SpecialWorkspace2D is a Workspace2D where each spectrum
+      // has one detector pixel, one X-value, and one Y-value.
       (!bool(std::dynamic_pointer_cast<SpecialWorkspace2D>(outputWs)))) {
     outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         std::make_shared<SpecialWorkspace2D>(inputWs->getInstrument()));
@@ -153,7 +155,8 @@ void CalculateDIFC::exec() {
   if (bool(calibWs)) {
     calculateFromTable(progress, *outputSpecialWs, *calibWs);
   } else {
-    // this method handles calculating from instrument geometry as well
+    // this method handles calculating from instrument geometry as well,
+    // and even when OffsetsWorkspace hasn't been set
     const auto &detectorInfo = inputWs->detectorInfo();
     calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(),
                         detectorInfo);

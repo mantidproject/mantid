@@ -143,3 +143,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
     def warning_popup(self, message):
         message_box.warning(str(message))
+
+    def hide_browse(self):
+        self.browse_button.hide()

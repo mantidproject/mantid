@@ -184,7 +184,6 @@ public:
     // Check oringal Log was copied correctly
     auto &memberRun = matrixMember->mutableRun();
     auto &originalRun = redWs->mutableRun();
-    auto foo = memberRun.getLogData();
     TS_ASSERT_EQUALS(memberRun.getLogData().at(3)->value(),
                      originalRun.getLogData().at(1)->value());
 

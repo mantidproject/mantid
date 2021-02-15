@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
+from os import path
 
 from mantidqt.utils.qt import load_ui
 
@@ -51,6 +52,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_plotBG_clicked(self, slot):
         self.button_plotBG.clicked.connect(slot)
 
+    def set_on_seq_fit_clicked(self, slot):
+        self.button_SeqFit.clicked.connect(slot)
+
     def set_on_table_cell_changed(self, slot):
         self.table_selection.cellChanged.connect(slot)  # Row, Col
 
@@ -61,11 +65,19 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Component Setters
     # =================
 
+    def set_file_last(self, filepath):
+        self.finder_data.setUserInput(filepath)
+        directory, discard = path.split(filepath)
+        self.finder_data.setLastDirectory(directory)
+
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
 
     def set_inspect_bg_button_enabled(self, enabled):
         self.button_plotBG.setEnabled(enabled)
+
+    def set_seq_fit_button_enabled(self, enabled):
+        self.button_SeqFit.setEnabled(enabled)
 
     def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
@@ -129,6 +141,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         for row in reversed(sorted(selected)):
             self.remove_table_row(row)
         return selected
+
+    def set_item_checkstate(self, row, col, checked):
+        if checked:
+            self.get_table_item(row, col).setCheckState(QtCore.Qt.Checked)
+        else:
+            self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
     # =================
     # Component Getters

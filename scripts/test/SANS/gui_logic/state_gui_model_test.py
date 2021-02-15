@@ -343,8 +343,8 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.q_xy_max, "")
         self.assertEqual(state_gui_model.q_xy_step, "")
         self.assertEqual(state_gui_model.q_xy_step_type, None)
-        self.assertEqual(state_gui_model.r_cut, "")
-        self.assertEqual(state_gui_model.w_cut, "")
+        self.assertEqual(state_gui_model.r_cut, 0.0)
+        self.assertEqual(state_gui_model.w_cut, 0.0)
 
     def test_that_can_set_the_q_limits(self):
         state_gui_model = StateGuiModel(AllStates())
@@ -376,7 +376,7 @@ class StateGuiModelTest(unittest.TestCase):
     def test_that_gravity_extra_length_empty_by_default_and_usage_true_by_default(self):
         state_gui_model = StateGuiModel(AllStates())
         self.assertTrue(state_gui_model.gravity_on_off)
-        self.assertEqual(state_gui_model.gravity_extra_length, "")
+        self.assertEqual(state_gui_model.gravity_extra_length, 0.0)
 
     def test_that_can_set_gravity(self):
         state_gui_model = StateGuiModel(AllStates())
@@ -391,14 +391,14 @@ class StateGuiModelTest(unittest.TestCase):
     def test_that_q_resolution_settings_show_empty_defaults(self):
         state_gui_model = StateGuiModel(AllStates())
         self.assertFalse(state_gui_model.use_q_resolution)
-        self.assertEqual(state_gui_model.q_resolution_source_a, "")
-        self.assertEqual(state_gui_model.q_resolution_sample_a, "")
-        self.assertEqual(state_gui_model.q_resolution_source_h, "")
-        self.assertEqual(state_gui_model.q_resolution_sample_h, "")
-        self.assertEqual(state_gui_model.q_resolution_source_w, "")
-        self.assertEqual(state_gui_model.q_resolution_sample_w, "")
+        self.assertEqual(state_gui_model.q_resolution_source_a, 0.0)
+        self.assertEqual(state_gui_model.q_resolution_sample_a, 0.0)
+        self.assertEqual(state_gui_model.q_resolution_source_h, 0.0)
+        self.assertEqual(state_gui_model.q_resolution_sample_h, 0.0)
+        self.assertEqual(state_gui_model.q_resolution_source_w, 0.0)
+        self.assertEqual(state_gui_model.q_resolution_sample_w, 0.0)
         self.assertEqual(state_gui_model.q_resolution_collimation_length, "")
-        self.assertEqual(state_gui_model.q_resolution_delta_r, "")
+        self.assertEqual(state_gui_model.q_resolution_delta_r, 0.0)
         self.assertEqual(state_gui_model.q_resolution_moderator_file, "")
 
     def test_that_q_resolution_can_be_set_correctly(self):
@@ -454,8 +454,8 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_radius_mask_defaults_to_empty(self):
         state_gui_model = StateGuiModel(AllStates())
-        self.assertEqual(state_gui_model.radius_limit_min, "")
-        self.assertEqual(state_gui_model.radius_limit_max, "")
+        self.assertEqual(state_gui_model.radius_limit_min, 0.0)
+        self.assertEqual(state_gui_model.radius_limit_max, 0.0)
 
     def test_that_radius_mask_can_be_set(self):
         state_gui_model = StateGuiModel(AllStates())

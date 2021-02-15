@@ -635,7 +635,6 @@ void InstrumentActor::resetColors() {
 
 void InstrumentActor::updateColors() {
   setIntegrationRange(m_BinMinValue, m_BinMaxValue);
-  resetColors();
 }
 
 /**

@@ -151,6 +151,12 @@ double FunctionGenerator::getError(size_t i) const {
   }
 }
 
+/// Get the fitting error for a parameter by name
+double FunctionGenerator::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  return getError(index);
+}
+
 /// Set the fitting error for a parameter
 void FunctionGenerator::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
@@ -159,6 +165,12 @@ void FunctionGenerator::setError(size_t i, double err) {
     checkTargetFunction();
     m_target->setError(i - m_nOwnParams, err);
   }
+}
+
+/// Set the fitting error for a parameter by name
+void FunctionGenerator::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  setError(index, err);
 }
 
 /// Change status of parameter

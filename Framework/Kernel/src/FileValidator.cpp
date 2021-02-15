@@ -9,7 +9,9 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <fstream>
 #include <memory>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -88,6 +90,16 @@ std::string FileValidator::checkValidity(const std::string &value) const {
   // If the file is required to exist check it is there
   if (m_testExist && (value.empty() || !Poco::File(value).exists())) {
     return "File \"" + abspath + "\" not found";
+  }
+
+  if (m_testExist && (Poco::File(value).exists())) {
+    std::ifstream in;
+    in.open(value.c_str());
+    if (!in) {
+      std::stringstream error;
+      error << "Failed to open " + value + ": " << strerror(errno);
+      return error.str();
+    }
   }
 
   // Otherwise we are okay, file extensions are just a suggestion so no

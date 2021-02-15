@@ -120,6 +120,18 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         should_normalise_before_fit = ws_artist.is_normalized and not ws_is_distribution
         self.normaliseData(should_normalise_before_fit)
 
+    def _set_peak_initial_fwhm(self, fun, fwhm):
+        """
+        Overwrite fwhm if has not been set already - this is for back to back exponential type funcs
+        which have had the width parameter (S) as func d-spacing refined for a standard sample (coefs stored in
+        instrument Paramters.xml) and has already been set.
+        :param fun: peak function prefix
+        :param fwhm: estimated fwhm of peak added
+        """
+        if not self.getWidthParameterNameOf(fun) or not \
+                self.isParameterExplicitlySetOf(fun, self.getWidthParameterNameOf(fun)):
+            self.setPeakFwhmOf(fun, fwhm)
+
     def closeEvent(self, event):
         """
         Emit self.closing signal used by figure manager to put the menu buttons
@@ -384,7 +396,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
-        self.setPeakFwhmOf(fun, fwhm)
+        self._set_peak_initial_fwhm(fun, fwhm)
         if height != 0:
             self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun
@@ -446,7 +458,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
                 prefix), self.getPeakFwhmOf(prefix)
             if w > (self.endX() - self.startX()):
-                w = (self.endX() - self.startX())/20.
+                w = (self.endX() - self.startX()) / 20.
                 self.setPeakFwhmOf(prefix, w)
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)

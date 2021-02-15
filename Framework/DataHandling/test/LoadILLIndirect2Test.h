@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -85,6 +86,7 @@ public:
     const auto &detInfo = output2D->detectorInfo();
     constexpr double degToRad = M_PI / 180.;
     TS_ASSERT_DELTA(detInfo.twoTheta(65), 33.1 * degToRad, 0.01)
+    checkTimeFormat(output2D);
   }
 
   void test_first_tube_251() {
@@ -108,6 +110,7 @@ public:
     const std::string idf = output2D->getInstrument()->getFilename();
     TS_ASSERT_EQUALS(output2D->getInstrument()->getName(), "IN16BF");
     TS_ASSERT(boost::ends_with(idf, "IN16BF_Definition.xml"));
+    checkTimeFormat(output2D);
   }
 
   void test_diffraction_bats() {
@@ -134,6 +137,7 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(1050)[1156], 16)
     TS_ASSERT_EQUALS(output2D->dataY(871)[1157], 17)
     TS_ASSERT_EQUALS(output2D->dataY(746)[1157], 18)
+    checkTimeFormat(output2D);
 
     AnalysisDataService::Instance().clear();
   }
@@ -161,6 +165,7 @@ public:
     TS_ASSERT_EQUALS(output2D->dataY(1050)[558], 2)
     TS_ASSERT_EQUALS(output2D->dataY(873)[557], 2)
     TS_ASSERT_EQUALS(output2D->dataY(724)[561], 3)
+    checkTimeFormat(output2D);
 
     AnalysisDataService::Instance().clear();
   }
@@ -191,9 +196,16 @@ public:
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));
     TS_ASSERT_EQUALS(runlogs.getProperty("Facility")->value(), "ILL");
+    checkTimeFormat(output);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("start_time")->value()));
   }
 
 private:

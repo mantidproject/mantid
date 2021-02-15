@@ -32,7 +32,7 @@ Improved
 - All algorithms using AsciiPointBase now have a new property 'Separator' which allows the delimiter to be set to either comma, space or tab. This affects ``SaveReflCustomAscii``, ``SaveReflThreeColumnAscii``, ``SaveANSTOAscii`` and ``SaveILLCosmosAscii``.
 - :ref:`ReplaceSpecialValues <algm-ReplaceSpecialValues>` allows for 'small' values, which are below a user specified threshold, to be replaced.
 - :ref:`Stitch1DMany <algm-Stitch1DMany>` has a new property 'ScaleFactorFromPeriod', which enables it to apply scale factors from a particular period when stitching group workspaces. The documentation for this algorithm has also been improved.
-- :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` has a working progress bar.
+- ``SaveMDWorkspaceToVTK`` has a working progress bar.
 - :ref:`SumSpectra <algm-SumSpectra>` has an option to ignore special floating point values called 'RemoveSpecialValues'. This is off by default. When enabled it will ignore values such as NaN or Infinity during the summation of the spectra.  It was also updated to fix special values being used in some cases when the option was selected.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`:
    - An `Interpolation` option has been added. The availabile options are: `Linear` & `CSpline`.

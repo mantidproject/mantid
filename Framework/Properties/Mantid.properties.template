@@ -232,12 +232,6 @@ projectSaving.warningSize = 10737418240
 # Whether to show titles on plots
 plots.ShowTitle = On
 
-# Whether to show minor ticks on plots
-plots.ShowMinorTicks = Off
-
-# Whether to show minor gridlines on plots
-plots.ShowMinorGridlines = Off
-
 # Whether to show the legend by default
 plots.ShowLegend = On
 
@@ -247,6 +241,36 @@ plots.font=
 # The default scale on 1d plots. Options are Linear or Log
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear
+
+# The default width of the lines for the axes
+plots.axesLineWidth = 1
+
+# Whether to enable the grid by default
+plots.enableGrid = Off
+
+# Whether to show minor ticks on plots
+plots.ShowMinorTicks = Off
+
+# Whether to show minor gridlines on plots
+plots.ShowMinorGridlines = Off
+
+# Whether to show ticks and tick labels on each side of the plot
+plots.showTicksLeft = On
+plots.showTicksBottom = On
+plots.showTicksRight = Off
+plots.showTicksTop = Off
+plots.showLabelsLeft = On
+plots.showLabelsBottom = On
+plots.showLabelsRight = Off
+plots.showLabelsTop = Off
+
+# The length, width, and direction of major and minor ticks
+plots.ticks.major.length = 6
+plots.ticks.major.width = 1
+plots.ticks.major.direction = Out
+plots.ticks.minor.length = 3
+plots.ticks.minor.width = 1
+plots.ticks.minor.direction = Out
 
 # Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
 plots.line.Style = solid

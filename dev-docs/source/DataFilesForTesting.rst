@@ -129,7 +129,7 @@ This does the following:
    ``Testing/Data/UnitTest/d6948514d78db7fe251efb6cce4a9b83``
 -  runs ``git add Testing/Data/UnitTest/INST12345.nxs.md5``
 -  tells the user to upload the file(s),
-   ``d6948514d78db7fe251efb6cce4a9b83``, to the `remote store <http://198.74.56.37/ftp/external-data/upload>`_
+   ``d6948514d78db7fe251efb6cce4a9b83``, to the `remote store <https://testdata.mantidproject.org/ftp/external-data/upload>`_
 
 **Notes:**
 
@@ -147,7 +147,7 @@ This does the following:
    calculated. You then have to manually put ``.md5`` file to requested
    reference data location and add it to Git by usual means. The
    hash-sum named file should be, as in the case of Unix, placed to the
-   `remote store <http://198.74.56.37/ftp/external-data/upload>`__
+   `remote store <https://testdata.mantidproject.org/ftp/external-data/upload>`__
 -  Note, that ILL test data should be placed under ``ILL/${INSTRUMENT}``
    subdirectories (e.g. ``ILL/IN16B``), and should not contain any
    instrument prefix in the file name.

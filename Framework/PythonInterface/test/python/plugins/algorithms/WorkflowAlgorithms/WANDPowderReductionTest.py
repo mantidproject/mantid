@@ -11,6 +11,11 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     CloneWorkspace,
     AddSampleLog,
+    GroupWorkspaces,
+)
+from mantid.api import (
+    MatrixWorkspace,
+    WorkspaceGroup,
 )
 from mantid.kernel import V3D
 import unittest
@@ -115,7 +120,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         # NOTE:
         # still needs to check physics
         pd_out_multi = WANDPowderReduction(
-            InputWorkspace=[data, data], Target="Theta", NumberBins=1000
+            InputWorkspace=[data, data], Target="Theta", NumberBins=1000,
+            Sum=True,
         )
 
         x = pd_out_multi.extractX()
@@ -156,6 +162,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NumberBins=2000,
             XMin=10,
             XMax=40,
+            Sum=True,
         )
 
         x = pd_out2_multi.extractX()
@@ -192,10 +199,11 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out3_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="Time",
+            Sum=True
         )
 
         x = pd_out3_multi.extractX()
@@ -229,10 +237,11 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="ElasticDSpacing",
             EFixed=30,
             NumberBins=1000,
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()
@@ -269,11 +278,12 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="ElasticQ",
             EFixed=30,
             NumberBins=2000,
             MaskAngle=60,
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()
@@ -308,11 +318,12 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             BackgroundScale=0.5,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="Time",
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()
@@ -351,6 +362,8 @@ class WANDPowderReductionTest(unittest.TestCase):
             Function="Flat background",
         )
 
+        # CASE 1
+        # input single workspace, output single workspace
         pd_out = WANDPowderReduction(
             InputWorkspace=event_data,
             CalibrationWorkspace=event_cal,
@@ -358,7 +371,10 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            Sum=False,
         )
+
+        assert isinstance(pd_out, MatrixWorkspace)
 
         x = pd_out.extractX()
         y = pd_out.extractY()
@@ -367,13 +383,16 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
 
+        # CASE 2
+        # input multiple single ws, output (single) summed ws
         pd_out = WANDPowderReduction(
             InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
-            BackgroundWorkspace="event_bkg,event_bkg",
+            BackgroundWorkspace=event_bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            Sum=True,
         )
 
         x = pd_out.extractX()
@@ -382,6 +401,83 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.min(), 0.03517355)
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
+        assert isinstance(pd_out, MatrixWorkspace)
+
+        # CASE 3
+        # input group ws containing several ws, output group ws containing several ws
+        pd_out = WANDPowderReduction(
+            InputWorkspace=[event_data, event_data],
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        for i in pd_out:
+
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+
+        event_data_group = WorkspaceGroup()
+        event_data_group.addWorkspace(event_data)
+        event_data_group.addWorkspace(event_data2)
+
+        # CASE 4 - input group ws, output group ws
+        pd_out = WANDPowderReduction(
+            InputWorkspace=event_data_group,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+        event_data_group = GroupWorkspaces([event_data, event_data2])
+
+        pd_out = WANDPowderReduction(
+            InputWorkspace=event_data_group,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
 
 
 if __name__ == "__main__":

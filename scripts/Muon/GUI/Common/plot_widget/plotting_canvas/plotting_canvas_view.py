@@ -26,15 +26,28 @@ if is_pyqt5():
 else:
     from matplotlib.backends.backend_qt4agg import FigureCanvas
 
+# The y limit to use when y_min == y_max when autoscaling y
+ARBITRARY_Y_LIMIT = 1.0
 DEFAULT_X_LIMITS = [0, 15]
 # Default color cycle using Matplotlib color codes C0, C1...ect
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(10)]
+# The y axis margin when autoscaling is 20%
+Y_AXIS_MARGIN = 0.2
 
 
 def _do_single_plot(ax, workspace, index, errors, plot_kwargs):
     plot_fn = ax.errorbar if errors else ax.plot
     plot_kwargs['wkspIndex'] = index
     plot_fn(workspace, **plot_kwargs)
+
+
+def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
+    x, y = line.get_data()
+    for i in range(len(x)):
+        if x_min <= x[i] <= x_max:
+            y_min = min(y_min, y[i])
+            y_max = max(y_max, y[i])
+    return y_min, y_max
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
@@ -213,7 +226,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         ymin = 1e9
         ymax = -1e9
         for axis in self.fig.axes:
-            ymin_i, ymax_i = self._get_y_axis_autoscale_limts(axis)
+            ymin_i, ymax_i = self._get_y_axis_autoscale_limits(axis)
             if ymin_i < ymin:
                 ymin = ymin_i
             if ymax_i > ymax:
@@ -225,7 +238,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         if axis_number >= len(self.fig.axes):
             return
         axis = self.fig.axes[axis_number]
-        bottom, top, = self._get_y_axis_autoscale_limts(axis)
+        bottom, top, = self._get_y_axis_autoscale_limits(axis)
         axis.set_ylim(bottom, top)
 
     def set_title(self, axis_number, title):
@@ -258,23 +271,23 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         return plot_kwargs
 
     @staticmethod
-    def _get_y_axis_autoscale_limts(axis):
-        bottom = 1e9
-        top = -1e9
-        ylim = np.inf, -np.inf
-        xmin, xmax = axis.get_xlim()
+    def _get_y_axis_autoscale_limits(axis):
+        x_min, x_max = sorted(axis.get_xlim())
+        y_min, y_max = np.inf, -np.inf
         for line in axis.lines:
-            x, y = line.get_data()
-            start, stop = np.searchsorted(x, tuple([xmin, xmax]))
-            y_within_range = y[max(start - 1, 0):(stop + 1)]
-            ylim = min(ylim[0], np.nanmin(y_within_range)), max(ylim[1], np.nanmax(y_within_range))
-            bottom_i = ylim[0] * 1.3 if ylim[0] < 0.0 else ylim[0] * 0.7
-            top_i = ylim[1] * 1.3 if ylim[1] > 0.0 else ylim[1] * 0.7
-            if bottom_i < bottom:
-                bottom = bottom_i
-            if top_i > top:
-                top = top_i
-        return bottom, top
+            y_min, y_max = get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max)
+
+        if y_min == np.inf:
+            y_min = -ARBITRARY_Y_LIMIT
+        if y_max == -np.inf:
+            y_max = ARBITRARY_Y_LIMIT
+        if y_min == y_max:
+            y_min -= ARBITRARY_Y_LIMIT
+            y_max += ARBITRARY_Y_LIMIT
+
+        y_margin = abs(y_max - y_min) * Y_AXIS_MARGIN
+
+        return y_min - y_margin, y_max + y_margin
 
     def _reset_color_cycle(self):
         for i, ax in enumerate(self.fig.axes):

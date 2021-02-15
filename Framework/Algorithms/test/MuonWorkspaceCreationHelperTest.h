@@ -251,6 +251,25 @@ public:
     TS_ASSERT_DELTA(deadTimeTable->getColumn(1)->toDouble(4), 0.005, 0.0001);
   }
 
+  void test_createTimeZeroTable_empty_for_incorrect_length() {
+    std::vector<double> timeZeros = {0.5, 1.0};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(3, timeZeros);
+
+    TS_ASSERT_EQUALS(timeZeroTable->columnCount(), 1);
+    TS_ASSERT_EQUALS(timeZeroTable->rowCount(), 0);
+  }
+
+  void test_createTimeZeroTable_correct_value() {
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(3, timeZeros);
+
+    TS_ASSERT_EQUALS(timeZeroTable->columnCount(), 1);
+    TS_ASSERT_EQUALS(timeZeroTable->rowCount(), 3);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(0), 0.5, 0.01);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(1), 1.0, 0.01);
+    TS_ASSERT_DELTA(timeZeroTable->getColumn(0)->toDouble(2), 1.5, 0.01);
+  }
+
   void
   test_createWorkspaceWithInstrumentandRun_run_number_and_instrument_set_correctly() {
     MatrixWorkspace_sptr ws =

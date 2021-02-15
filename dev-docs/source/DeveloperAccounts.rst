@@ -22,9 +22,7 @@ Account Creation
 	+ Contact one of the "Owners" on `this list <https://github.com/orgs/mantidproject/people?query=role%3Aowner>`__ to add you to the developer team.
 	+ Set up Git on your workstation; see `this guide <https://help.github.com/articles/set-up-git/>`__.
 	+ The Git workflow is described on the :ref:`GitWorkflow` page.
-
-- Consider signing up for **Skype**; follow `this link <https://www.skype.com/>`__.
-- Sign up for a **Gravatar** account; follow `this link <https://en.gravatar.com/>`__.
+- If based at ISIS, please sign up for a `User Facilities account <https://users.facilities.rl.ac.uk/>`__ that among other things, grants access to IDAaaS.
 
 SNS Git
 -------
@@ -43,8 +41,7 @@ If you are based at SNS, in order to be able to ssh out of the lab, you need to 
 Introducing Yourself
 --------------------
 
-- Post a short introduction of yourself to the rest of the team in the General chatroom on Mantid Slack.
-- Add yourself together with your contact details and a photo (selfies are fine) to :ref:`DevelopmentTeam`.
+- Post a short introduction of yourself to the rest of the team in the #general chatroom on Mantid Slack.
 
 Admin Notes
 -----------

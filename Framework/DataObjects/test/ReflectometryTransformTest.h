@@ -48,13 +48,13 @@ public:
 
     TS_ASSERT_DELTA(0.04, cache.detectorHeights[0], 1e-6);
 
-    auto calculatedThetaW =
+    auto calculatedTwoThetaW =
         2.0 * std::fabs(std::atan((cache.detectorHeights[0] / 2) / l2)) *
         180.0 / M_PI;
 
     TSM_ASSERT_DELTA(
         "Calculated theta width should agree with detector height calculation",
-        cache.thetaWidths[0], calculatedThetaW, 1e-6)
+        cache.twoThetaWidths[0], calculatedTwoThetaW, 1e-6)
   }
 
   void test_cache_calculation_when_x_is_up() {

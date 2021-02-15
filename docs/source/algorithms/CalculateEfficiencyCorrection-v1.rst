@@ -31,12 +31,13 @@ where
 - :math:`\lambda_{ref}` = 1.7982 :math:`\AA`,
 - :math:`\sigma (\lambda)` is the wavelength-dependent cross-section which is either:
 
-    - :math:`\sigma (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``AttenuationXSection`` where :math:`\sigma_a` is the absorption cross-section in units of barns 
-    - or :math:`\sigma (\lambda) = \sigma_s + \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``TotalXSection`` where :math:`\sigma_s` is the total scattering cross-section in units of barns
+  - :math:`\sigma (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``AttenuationXSection`` where :math:`\sigma_a` is the absorption cross-section in units of barns
+
+  - or :math:`\sigma (\lambda) = \sigma_s + \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``TotalXSection`` where :math:`\sigma_s` is the total scattering cross-section in units of barns
 
 - :math:`\rho_{A}` is the area density (:math:`\rho_{A}=\rho * T`) in units of atoms*cm/:math:`\AA^3`,
-- :math:`\alpha = \rho_{A} * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}} = \rho * T * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}}` in units of 1/:math:`\AA`.
-- :math:`\lambda` is in units of :math:`\AA`. 
+- :math:`\alpha = \rho_{A} \cdot \frac{\sigma (\lambda_{ref})}{\lambda_{ref}} = \rho \cdot T \cdot \frac{\sigma (\lambda_{ref})}{\lambda_{ref}}` in units of 1/:math:`\AA`.
+- :math:`\lambda` is in units of :math:`\AA`.
 
 NOTE: :math:`1 \AA^2 = 10^{8}` barns and :math:`1 \AA = 10^{-8}` cm.
 
@@ -49,8 +50,8 @@ The ``MeasuredEfficiency`` is the :math:`\epsilon` term measured at a specific w
 if the efficiency has been directly measured experimentally at a given wavelength. This will calculate the
 :math:`\rho * T` term, where it will be either:
 
-- :math:`\rho * T = - ln(1-\epsilon) \frac{1}{ \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``AttenuationXSection``
-- :math:`\rho * T = - ln(1-\epsilon) \frac{1}{ \sigma_s + \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``TotalXSection``
+- :math:`\rho * T = - \ln(1-\epsilon) \frac{1}{ \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``AttenuationXSection``
+- :math:`\rho * T = - \ln(1-\epsilon) \frac{1}{ \sigma_s + \frac{\lambda_{\epsilon} \sigma (\lambda_{ref})}{\lambda_{ref}}}` for ``XSectionType`` == ``TotalXSection``
 
 For the ``XSectionType``, if the efficiency correction is applied to a beam monitor to determine the incident spectrum, then the ``AttenuationXSection`` option should be used. This is due to the fact that scatter events do not lead to neutrons that will be in the incident beam. If the efficiency correction is to be used similar to a transmission measurement for an actual sample measurement, such as in :ref:`algm-CalculateSampleTransmission-v1`, then the ``TotalXSection`` should be used to include both types of events.
 
@@ -216,22 +217,22 @@ The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lam
 
 .. testcode:: ExTransmissionCalcualteEfficiencyCorrection
 
-    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',  
-                                     ChemicalFormula='H2-O')  
-    print('Transmission: {} ...'.format(ws.readY(0)[:3]))  
-     
-    corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0", 
-                                              Density=0.1, 
-                                              Thickness=0.1, 
-                                              ChemicalFormula="H2-O", 
-                                              XSectionType="TotalXSection") 
-    dataX = corr_wksp.readX(0) 
-    dataY = np.ones(len(corr_wksp.readX(0))) 
-    ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength") 
+    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
+                                     ChemicalFormula='H2-O')
+    print('Transmission: {} ...'.format(ws.readY(0)[:3]))
+
+    corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0",
+                                              Density=0.1,
+                                              Thickness=0.1,
+                                              ChemicalFormula="H2-O",
+                                              XSectionType="TotalXSection")
+    dataX = corr_wksp.readX(0)
+    dataY = np.ones(len(corr_wksp.readX(0)))
+    ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength")
     efficiency = Divide(LHSWorkspace=ones, RHSWorkspace=corr_wksp) # 1 + -1 * transmission
     negative_trans = Minus(LHSWorkspace=efficiency, RHSWorkspace=ones) # -1 * transmission
-    transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones) 
-    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))        
+    transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones)
+    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))
 
 Output:
 

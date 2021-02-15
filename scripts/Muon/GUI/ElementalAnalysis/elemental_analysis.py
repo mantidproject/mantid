@@ -357,6 +357,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
+            self._update_checked_data()
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
+from sys import platform
 import numpy as np
 from Direct.AbsorptionShapes import *
 from Direct.PropertyManager import PropertyManager
@@ -1259,8 +1259,43 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(got.material, cyl.material)
         self.assertEqual(got.shape, cyl.shape)
 
+    #
+    def test_lastrun_log_default(self):
+        #
+        if platform.startswith("linux"):
+            self.assertEqual(PropertyManager.archive_upload_log_template,
+                             '/archive/NDX{0}/Instrument/logs/lastrun.txt')
+            log_dir = '/archive/NDXMARI/Instrument/logs/'
+        elif platform == "darwin":
+            self.assertEqual(PropertyManager.archive_upload_log_template,'')
+            log_dir = ''
+        elif platform == "win32":
+            self.assertEqual(PropertyManager.archive_upload_log_template,
+                             r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt')
+            log_dir = r'\\isis\inst$\NDXMARI\Instrument\logs\\'
+
+        propman = self.prop_man
+
+        if os.path.isdir(log_dir):
+            # in case test server or test machine is connected to the archive
+            self.assertEqual(propman.archive_upload_log_file,
+                             os.path.normpath(log_dir+'lastrun.txt'))
+        else:
+            self.assertEqual(propman.archive_upload_log_file,'')
+
+        test_dir = config.getString('defaultsave.directory')
+        test_file = os.path.normpath(test_dir + 'lastrun.txt')
+        f = open(test_file, 'w')
+        f.write('aaaaaa')
+        f.close()
+
+        propman.archive_upload_log_file = test_file
+        self.assertEqual(propman.archive_upload_log_file,test_file)
+
+        os.remove(test_file)
+
 
 if __name__ == "__main__":
-    # tester = DirectPropertyManagerTest('test_abs_shapes_container')
-    # tester.run()
+    #tester = DirectPropertyManagerTest('test_lastrun_log_default')
+    #tester.run()
     unittest.main()

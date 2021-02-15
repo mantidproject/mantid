@@ -113,8 +113,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()
 
-    def toggle_grid(self):
-        enable = self._actions['toggle_grid'].isChecked()
+    def toggle_grid(self, enable=None):
+        if enable is None:
+            # Toggle grid to whatever state the toolbar button is in
+            enable = self._actions['toggle_grid'].isChecked()
+        else:
+            # Otherwise toggle grid to whatever state we were given
+            self._actions['toggle_grid'].setChecked(enable)
         self.sig_grid_toggle_triggered.emit(enable)
 
     def toggle_fit(self):

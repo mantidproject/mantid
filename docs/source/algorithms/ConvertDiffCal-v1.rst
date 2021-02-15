@@ -27,7 +27,7 @@ Usage
 The file needed for this example are not present in our standard usage
 data download due to its size. It be downloaded from
 `pg3_mantid_det.cal
-<http://198.74.56.37/ftp/external-data/MD5/e2b281817b76eadbc26a0a2617477e97>`_.
+<https://testdata.mantidproject.org/ftp/external-data/MD5/e2b281817b76eadbc26a0a2617477e97>`_.
 
 .. testcode:: ConvertDiffCalExample
 

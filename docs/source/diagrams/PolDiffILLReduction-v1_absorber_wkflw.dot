@@ -1,0 +1,23 @@
+digraph Absorber {
+  $global_style
+
+  subgraph params {
+    $param_style
+    Run
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    Divide [label="Normalize to monitor"]
+  }
+
+  Run -> Load
+  Load -> Divide
+  Divide -> OutputWorkspace
+}

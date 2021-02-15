@@ -102,6 +102,12 @@ Mantid supports a space delimited text file format for the externally measured p
 - attenuation factor (in :math:`mm^{-1}`)
 - error (currently ignored)
 
+The Xray Attenuation coefficients can also be provided by text file with the following columns containing:
+
+- energy (in :math:`KeV`)
+- attenuation factor (in :math:`mm^{-1}`)
+- error (currently ignored)
+
 Any lines not following this format (eg header rows) are ignored. The file must have a .DAT file extension.
 
 Normalized Laue

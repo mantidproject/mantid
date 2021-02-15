@@ -92,6 +92,7 @@ public:
   void selectTool(const ToolType tool);
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
+  void clearWidgets();
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file

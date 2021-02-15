@@ -11,6 +11,10 @@
 #include "MantidKernel/FileValidator.h"
 #include <Poco/File.h>
 
+#if defined(__GNUC__) || defined(__clang__)
+#include "boost/filesystem.hpp"
+#endif
+
 using namespace Mantid::Kernel;
 
 class FileValidatorTest : public CxxTest::TestSuite {
@@ -97,6 +101,22 @@ public:
     std::vector<std::string> vec{"cpp"};
     FileValidator v(vec, false);
     TS_ASSERT_EQUALS(v.isValid(NoFile), "");
+  }
+  void testFailsIfNoPermissions() {
+#if defined(__GNUC__) || defined(__clang__)
+    const char *filename = "testfile.txt";
+    Poco::File txt_file(filename);
+    txt_file.createFile();
+    boost::filesystem::permissions(filename,
+                                   boost::filesystem::perms::owner_read |
+                                       boost::filesystem::remove_perms);
+    std::vector<std::string> vec;
+    FileValidator v(vec);
+
+    TS_ASSERT_EQUALS(v.isValid(txt_file.path()),
+                     "Failed to open testfile.txt: Permission denied");
+    txt_file.remove();
+#endif
   }
 
   void testFailsOnEmptyFileString() {

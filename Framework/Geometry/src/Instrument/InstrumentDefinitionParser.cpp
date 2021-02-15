@@ -23,6 +23,8 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -2179,13 +2181,14 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
  *  @param comp :: Some component
  *  @param pElem ::  Poco::XML element that may hold \<parameter\> elements
  *  @param logfileCache :: Cache to add information about parameter to
- *
+ *  @param requestedDate :: Reference date to check the validity of the
+ * parameter against
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
 void InstrumentDefinitionParser::setLogfile(
     const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
-    InstrumentParameterCache &logfileCache) {
+    InstrumentParameterCache &logfileCache, std::string requestedDate) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
   // The purpose below is to have a quicker way to judge if pElem contains a
@@ -2230,8 +2233,19 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
+    DateAndTime validityDate;
+
+    if (requestedDate.empty()) {
+      validityDate = DateAndTime::getCurrentTime();
+    } else {
+      validityDate.setFromISO8601(requestedDate);
+    }
+
     std::string logfileID;
     std::string value;
+
+    DateAndTime validFrom;
+    DateAndTime validTo;
 
     std::string type = "double";               // default
     std::string extractSingleValueAs = "mean"; // default
@@ -2255,13 +2269,15 @@ void InstrumentDefinitionParser::setLogfile(
         pParamElem->getElementsByTagName("formula");
     size_t numberFormula = pNLFormula->length();
 
-    if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula > 1) {
+    if ((numberValueEle > 0 &&
+         numberLogfileEle + numberLookUp + numberFormula > 0) ||
+        (numberValueEle == 0 &&
+         numberLogfileEle + numberLookUp + numberFormula > 1)) {
       g_log.warning() << "XML element with name or type = " << comp->getName()
-                      << " contains <parameter> element where the value of "
-                         "the parameter has been specified"
-                      << " more than once. See www.mantidproject.org/IDF for "
-                         "how the value"
-                      << " of the parameter is set in this case.";
+                      << " contains <parameter> element where the value of the "
+                      << "parameter has been specified more than once. See "
+                      << "www.mantidproject.org/IDF for how the value of the "
+                      << "parameter is set in this case.";
     }
 
     if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0) {
@@ -2272,18 +2288,50 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
-    // if more than one <value> specified for a parameter use only the first
-    // <value> element
+    DateAndTime currentValidFrom;
+    DateAndTime currentValidTo;
+    currentValidFrom.setToMinimum();
+    currentValidTo.setToMaximum();
+
+    // if more than one <value> specified for a parameter, check the validity
+    // range
     if (numberValueEle >= 1) {
-      pValueElem = static_cast<Element *>(pNLvalue->item(0));
-      if (!pValueElem->hasAttribute("val"))
+      bool hasValue = false;
+
+      for (unsigned long i = 0; i < numberValueEle; ++i) {
+        pValueElem = static_cast<Element *>(pNLvalue->item(i));
+
+        if (!pValueElem->hasAttribute(("val")))
+          continue;
+
+        validFrom.setToMinimum();
+        if (pValueElem->hasAttribute("valid-from"))
+          validFrom.setFromISO8601(pValueElem->getAttribute("valid-from"));
+
+        validTo.setToMaximum();
+        if (pValueElem->hasAttribute("valid-to"))
+          validTo.setFromISO8601(pValueElem->getAttribute("valid-to"));
+
+        if (validFrom <= validityDate && validityDate <= validTo &&
+            (validFrom > currentValidFrom ||
+             (validFrom == currentValidFrom && validTo <= currentValidTo))) {
+
+          currentValidFrom = validFrom;
+          currentValidTo = validTo;
+        } else
+          continue;
+        hasValue = true;
+        value = pValueElem->getAttribute("val");
+      }
+
+      if (!hasValue) {
         throw Kernel::Exception::InstrumentDefinitionError(
             "XML element with name or type = " + comp->getName() +
                 " contains <parameter> element with invalid syntax for its "
-                "subelement <value>." +
-                " Correct syntax is <value val=\"\"/>",
+                "subelement <value>. Correct syntax is <value val=\"\"/>",
             filename);
-      value = pValueElem->getAttribute("val");
+      }
+
     } else if (numberLogfileEle >= 1) {
       // <logfile > tag was used at least once.
       pLogfileElem = static_cast<Element *>(pNLlogfile->item(0));
@@ -2480,10 +2528,13 @@ void InstrumentDefinitionParser::setLogfile(
  *\<component-link\> elements
  *  @param progress :: Optional progress object for reporting progress to an
  *algorithm
+ * @param requestedDate :: Optional Date against which to check the validity of
+ *an IPF parameter
  */
 void InstrumentDefinitionParser::setComponentLinks(
     std::shared_ptr<Geometry::Instrument> &instrument,
-    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress) {
+    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress,
+    std::string requestedDate) {
   // check if any logfile cache units set. As of this writing the only unit to
   // check is if "angle=radian"
   std::map<std::string, std::string> &units = instrument->getLogfileUnit();
@@ -2576,9 +2627,10 @@ void InstrumentDefinitionParser::setComponentLinks(
           // Not empty Component
           if (sharedComp->isParametrized()) {
             setLogfile(sharedComp->base(), curElem,
-                       instrument->getLogfileCache());
+                       instrument->getLogfileCache(), requestedDate);
           } else {
-            setLogfile(ptr.get(), curElem, instrument->getLogfileCache());
+            setLogfile(ptr.get(), curElem, instrument->getLogfileCache(),
+                       requestedDate);
           }
         }
       }

@@ -138,7 +138,7 @@ Deprecated
 MD Algorithms (VATES CLI)
 #########################
 
--  The algorithm :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK>` is now available. It allows the
+-  The algorithm ``SaveMDWorkspaceToVTK`` is now available. It allows the
    user to save 3D MDHisto or 3D MDEvent workspaces as either a ``.vts`` or
    ``.vtu`` files. These file types can be loaded into a standalone version
    of ParaView.
