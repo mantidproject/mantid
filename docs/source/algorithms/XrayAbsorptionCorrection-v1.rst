@@ -12,8 +12,11 @@ Description
 This algorithm calculates the correction factors due to the absorption of Xrays 
 by the sample. This is done by determining path of an xray from a 
 muon in sample to detector and using the calculated distance travelled by emitted xray in sample to 
-calculate correction factor using 
-.. math:: \exp(-absorptioncoefficient(energy) * distance)
+calculate correction factor using
+
+.. math::
+
+   \exp(-absorptionCoefficient(energy) \cdot distance) .
 
 Input Workspace Requirements
 ############################

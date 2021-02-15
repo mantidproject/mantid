@@ -193,11 +193,11 @@ filtering events.
 Double value log
 ================
 
-Let user-specified minimum log value to be :math:`L_{min}`, 
+Let user-specified minimum log value to be :math:`L_{\text{min}}`,
 LogValueTolerance to be :math:`t`, and LogValueInterval to be :math:`\delta`, 
 then the log value intervals are 
 
-.. math:: [L_{min}-t, L_{min}-tol+\delta), [L_{min}-tol+\delta, L_{min}-tol+2\cdot\delta), \cdots
+.. math:: [L_{\text{min}}-t, L_{\text{min}}-tol+\delta), [L_{\text{min}}-tol+\delta, L_{\text{min}}-tol+2\cdot\delta), \cdots
 
 The default value of LogValueTolerance is LogValueInterval divided by 2.
 
