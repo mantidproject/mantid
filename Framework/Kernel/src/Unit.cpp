@@ -555,7 +555,9 @@ DECLARE_UNIT(dSpacing)
 
 const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
 
-dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
+dSpacing::dSpacing()
+    : Unit(), difa(0), difc(DBL_MIN), tzero(0),
+      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {
   const double factor = 2.0 * M_PI;
   addConversion("MomentumTransfer", factor, -1.0);
   addConversion("QSquared", (factor * factor), -2.0);
@@ -632,9 +634,9 @@ double dSpacing::singleFromTOF(const double tof) const {
     sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
   }
   if (sqrtTerm < difc)
-    return -2 * ((tzero - tof) / (difc - sqrtTerm));
+    return (tof - tzero) / (0.5 * (difc - sqrtTerm));
   else
-    return -2 * ((tzero - tof) / (difc + sqrtTerm));
+    return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
 double dSpacing::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
@@ -643,7 +645,7 @@ double dSpacing::conversionTOFMin() const {
     return std::max(0., tzero - difc * difc / (4 * difa));
   } else {
     // no min so just pick value closest to zero that works
-    double TOFmin = singleToTOF(0.);
+    double TOFmin = singleToTOF(valueThatGivesSmallestTOF);
     if (TOFmin < std::numeric_limits<double>::min()) {
       TOFmin = 0.;
     }
@@ -656,7 +658,7 @@ double dSpacing::conversionTOFMax() const {
     return std::min(DBL_MAX, tzero - difc * difc / (4 * difa));
   } else {
     // no max so just pick value closest to DBL_MAX that works
-    double TOFmax = singleToTOF(DBL_MAX);
+    double TOFmax = singleToTOF(valueThatGivesLargestTOF);
     if (std::isinf(TOFmax)) {
       TOFmax = DBL_MAX;
     }
@@ -784,68 +786,28 @@ DECLARE_UNIT(MomentumTransfer)
 
 const UnitLabel MomentumTransfer::label() const { return Symbol::InverseAngstrom; }
 
-MomentumTransfer::MomentumTransfer() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
+MomentumTransfer::MomentumTransfer() : dSpacing() {
   addConversion("QSquared", 1.0, 2.0);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -1.0);
-}
-
-void MomentumTransfer::validateUnitParams(const int,
-                                          const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
-    throw std::runtime_error(
-        "A l2 value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
-  }
-  it = params.find(UnitParams::twoTheta);
-  if (it == params.end()) {
-    throw std::runtime_error(
-        "A two theta value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
-  }
-}
-
-void MomentumTransfer::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
-  it = m_params->find(UnitParams::twoTheta);
-  if (it != m_params->end()) {
-    twoTheta = it->second;
-  }
-  // First the crux of the conversion
-  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
-  // Now adjustments for the scale of units used
-  const double TOFisinMicroseconds = 1e6;
-  const double toAngstroms = 1e10;
-  factorTo *= TOFisinMicroseconds / toAngstroms;
-  // First the crux of the conversion
-  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
-
-  // Now adjustments for the scale of units used
-  factorFrom *= TOFisinMicroseconds / toAngstroms;
+  valueThatGivesLargestTOF = 2 * M_PI / DBL_MAX;
+  valueThatGivesSmallestTOF = DBL_MAX;
 }
 
 double MomentumTransfer::singleToTOF(const double x) const {
-  double temp = x;
-  if (temp == 0.0)
-    temp = DBL_MIN; // Protect against divide by zero
-  return factorTo / temp;
+  return dSpacing::singleToTOF(2. * M_PI / x);
 }
 //
 double MomentumTransfer::singleFromTOF(const double tof) const {
-  double temp = tof;
-  if (temp == 0.0)
-    temp = DBL_MIN; // Protect against divide by zero
-  return factorFrom / temp;
+  return 2. * M_PI / dSpacing::singleFromTOF(tof);
 }
 
-double MomentumTransfer::conversionTOFMin() const { return factorFrom / DBL_MAX; }
-double MomentumTransfer::conversionTOFMax() const { return DBL_MAX; }
+double MomentumTransfer::conversionTOFMin() const {
+  return dSpacing::conversionTOFMin();
+}
+double MomentumTransfer::conversionTOFMax() const {
+  return dSpacing::conversionTOFMax();
+}
 
 Unit *MomentumTransfer::clone() const { return new MomentumTransfer(*this); }
 
@@ -857,76 +819,24 @@ DECLARE_UNIT(QSquared)
 
 const UnitLabel QSquared::label() const { return Symbol::InverseAngstromSq; }
 
-QSquared::QSquared() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
+QSquared::QSquared() : MomentumTransfer() {
   addConversion("MomentumTransfer", 1.0, 0.5);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -0.5);
 }
 
-void QSquared::validateUnitParams(const int, const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
-    throw std::runtime_error(
-        "A l2 value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
-  }
-  it = params.find(UnitParams::twoTheta);
-  if (it == params.end()) {
-    throw std::runtime_error(
-        "A two theta value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
-  }
-}
-
-void QSquared::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
-  it = m_params->find(UnitParams::twoTheta);
-  if (it != m_params->end()) {
-    twoTheta = it->second;
-  }
-  // First the crux of the conversion
-  factorTo = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
-  // Now adjustments for the scale of units used
-  const double TOFisinMicroseconds = 1e6;
-  const double toAngstroms = 1e10;
-  factorTo *= TOFisinMicroseconds / toAngstroms;
-
-  // First the crux of the conversion
-  factorFrom = (4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) * sin(twoTheta / 2.0)) / PhysicalConstants::h;
-  // Now adjustments for the scale of units used
-  factorFrom *= TOFisinMicroseconds / toAngstroms;
-  factorFrom = factorFrom * factorFrom;
-}
-
 double QSquared::singleToTOF(const double x) const {
-  double temp = x;
-  if (temp == 0.0)
-    temp = DBL_MIN; // Protect against divide by zero
-  return factorTo / sqrt(temp);
+  return MomentumTransfer::singleToTOF(sqrt(x));
 }
 double QSquared::singleFromTOF(const double tof) const {
-  double temp = tof;
-  if (temp == 0.0)
-    temp = DBL_MIN; // Protect against divide by zero
-  return factorFrom / (temp * temp);
+  return pow(MomentumTransfer::singleFromTOF(tof), 2);
 }
 
 double QSquared::conversionTOFMin() const {
-  if (factorTo > 0)
-    return factorTo / sqrt(DBL_MAX);
-  else
-    return -sqrt(DBL_MAX);
+  return MomentumTransfer::conversionTOFMin();
 }
 double QSquared::conversionTOFMax() const {
-  if (factorTo > 0)
-    return sqrt(DBL_MAX);
-  else
-    return factorTo / sqrt(DBL_MAX);
+  return MomentumTransfer::conversionTOFMax();
 }
 
 Unit *QSquared::clone() const { return new QSquared(*this); }
