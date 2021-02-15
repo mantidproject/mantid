@@ -1587,7 +1587,8 @@ public:
        const std::vector<uint32_t> &detectorId, size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++)
       pBox->addEvent(MDEvent<nd>(sigErrSq[2 * i], sigErrSq[2 * i + 1],
-                                 runIndex[i], goniometerIndex[i], detectorId[i], &Coord[i * nd]));
+                                 runIndex[i], goniometerIndex[i], detectorId[i],
+                                 &Coord[i * nd]));
   }
 };
 /* Specialize for the case of LeanEvent */
@@ -1621,11 +1622,13 @@ public:
  */
 TMDE(size_t MDGridBox)::buildAndAddEvents(
     const std::vector<signal_t> &sigErrSq, const std::vector<coord_t> &Coord,
-    const std::vector<uint16_t> &runIndex, const std::vector<uint16_t> &goniometerIndex,
+    const std::vector<uint16_t> &runIndex,
+    const std::vector<uint16_t> &goniometerIndex,
     const std::vector<uint32_t> &detectorId) {
 
   size_t nEvents = sigErrSq.size() / 2;
-  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, runIndex, goniometerIndex, detectorId, nEvents);
+  IF_EVENT<MDE, nd>::EXEC(this, sigErrSq, Coord, runIndex, goniometerIndex,
+                          detectorId, nEvents);
 
   return 0;
 }
@@ -1640,9 +1643,11 @@ TMDE(size_t MDGridBox)::buildAndAddEvents(
 TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal,
                                        const signal_t errorSq,
                                        const std::vector<coord_t> &point,
-                                       uint16_t runIndex, uint16_t goniometerIndex, uint32_t detectorId) {
-  this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, goniometerIndex,
-                                          detectorId));
+                                       uint16_t runIndex,
+                                       uint16_t goniometerIndex,
+                                       uint32_t detectorId) {
+  this->addEvent(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex,
+                                          goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1661,10 +1666,11 @@ TMDE(void MDGridBox)::buildAndAddEvent(const signal_t Signal,
 TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
                                              const signal_t errorSq,
                                              const std::vector<coord_t> &point,
-                                             uint16_t runIndex, uint16_t goniometerIndex,
+                                             uint16_t runIndex,
+                                             uint16_t goniometerIndex,
                                              uint32_t detectorId) {
-  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(Signal, errorSq, &point[0],
-                                                runIndex, goniometerIndex, detectorId));
+  this->addEventUnsafe(IF<MDE, nd>::BUILD_EVENT(
+      Signal, errorSq, &point[0], runIndex, goniometerIndex, detectorId));
 }
 
 //-----------------------------------------------------------------------------------------------

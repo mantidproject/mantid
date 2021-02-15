@@ -88,7 +88,8 @@ private:
                                        const uint16_t &run_index,
                                        const uint16_t &goniometer_index,
                                        const uint32_t &det_id, coord_t *coord) {
-      return MDEventType<ND>(sig, err, run_index, goniometer_index, det_id, coord);
+      return MDEventType<ND>(sig, err, run_index, goniometer_index, det_id,
+                             coord);
     }
   };
 };
@@ -151,7 +152,8 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 
       mdEventsForSpectrum.emplace_back(
           MDEventMaker<ND, MDEventType>::makeMDEvent(
-              signal, errorSq, runIndexLoc, goniometerIndex, detID, &locCoord[0]));
+              signal, errorSq, runIndexLoc, goniometerIndex, detID,
+              &locCoord[0]));
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined
@@ -273,8 +275,8 @@ template <size_t ND>
 struct ConvToMDEventsWSIndexing::MDEventMaker<
     ND, Mantid::DataObjects::MDLeanEvent> {
   static Mantid::DataObjects::MDLeanEvent<ND>
-  makeMDEvent(const double &sig, const double &err, const uint16_t, const uint16_t,
-              const uint32_t, coord_t *coord) {
+  makeMDEvent(const double &sig, const double &err, const uint16_t,
+              const uint16_t, const uint32_t, coord_t *coord) {
     return Mantid::DataObjects::MDLeanEvent<ND>(sig, err, coord);
   }
 };

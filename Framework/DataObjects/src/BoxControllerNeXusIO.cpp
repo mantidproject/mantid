@@ -14,9 +14,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 
-#include <string>
 #include <H5Cpp.h>
-
+#include <string>
 
 namespace Mantid {
 namespace DataObjects {
@@ -24,7 +23,8 @@ namespace DataObjects {
 // this class
 const char *EventHeaders[] = {
     "signal, errorSquared, center (each dim.)",
-    "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each dim.)"};
+    "signal, errorSquared, runIndex, goniometerIndex, detectorId, center (each "
+    "dim.)"};
 
 std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
 std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
@@ -379,16 +379,17 @@ void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
 }
 
 void BoxControllerNeXusIO::setEventDataVersion() {
-  if(m_fileName.empty())
+  if (m_fileName.empty())
     throw std::runtime_error("Filename has not been set");
-  H5::H5File file( m_fileName, H5F_ACC_RDONLY );
+  H5::H5File file(m_fileName, H5F_ACC_RDONLY);
   H5::DataSet dataset = file.openDataSet("event_data");
   H5::DataSpace dataspace = dataset.getSpace();
   hsize_t dims[2] = {0, 0};
   dataspace.getSimpleExtentDims(dims);
   file.close();
   size_t dataCount = static_cast<size_t>(dims[1]);
-  m_EventDataVersion = static_cast<EventDataVersion>(dataCount - m_bc->getNDims());
+  m_EventDataVersion =
+      static_cast<EventDataVersion>(dataCount - m_bc->getNDims());
 }
 
 void BoxControllerNeXusIO::setEventDataVersion(
@@ -402,10 +403,11 @@ void BoxControllerNeXusIO::setEventDataVersion(
 
   // Cross-validation implemented in a not very elegant way, but does the job
   // MDLeanEvent only accepts EDVLean
-  if(typeName == MDLeanEvent<1>::getTypeName() && version != EDV::EDVLean)
-    throw std::invalid_argument("Cannot set the event data version to other than EDVLean");
+  if (typeName == MDLeanEvent<1>::getTypeName() && version != EDV::EDVLean)
+    throw std::invalid_argument(
+        "Cannot set the event data version to other than EDVLean");
   // MDEvent cannot accept EDVLean
-  if(typeName == MDEvent<1>::getTypeName() && version == EDV::EDVLean)
+  if (typeName == MDEvent<1>::getTypeName() && version == EDV::EDVLean)
     throw std::invalid_argument("Cannot set the event data version to EDVLean");
 
   m_EventDataVersion = version;
@@ -417,9 +419,9 @@ int64_t BoxControllerNeXusIO::dataEventCount(void) const {
   int64_t size(m_BlockSize[1]);
   switch (m_EventDataVersion) {
   case (EventDataVersion::EDVLean):
-    break;      // no adjusting is necessary
+    break;                              // no adjusting is necessary
   case (EventDataVersion::EDVOriginal): // we're dealing with an old Nexus file
-    size -= 1;  // old Nexus file doesn't have goniometer index info
+    size -= 1; // old Nexus file doesn't have goniometer index info
     break;
   case (EventDataVersion::EDVGoniometer):
     break; // no adjusting is necessary
@@ -430,11 +432,12 @@ int64_t BoxControllerNeXusIO::dataEventCount(void) const {
 }
 
 template <typename Type>
-void BoxControllerNeXusIO::adjustEventDataBlock(std::vector<Type> &Block,
-                                                const std::string accessMode) const {
+void BoxControllerNeXusIO::adjustEventDataBlock(
+    std::vector<Type> &Block, const std::string accessMode) const {
   // check the validity of accessMode
   const std::vector<std::string> validAccessModes{"READ", "WRITE"};
-  if(std::find(validAccessModes.begin(), validAccessModes.end(), accessMode) == validAccessModes.end())
+  if (std::find(validAccessModes.begin(), validAccessModes.end(), accessMode) ==
+      validAccessModes.end())
     throw std::runtime_error("Unknown access mode");
 
   switch (m_EventDataVersion) {
@@ -520,7 +523,7 @@ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
   Block.resize(size[0] * size[1]);
   m_File->getSlab(&Block[0], start, size);
 
-  adjustEventDataBlock(Block, "READ");  // insert goniometer info if necessary
+  adjustEventDataBlock(Block, "READ"); // insert goniometer info if necessary
 }
 
 /** Helper funcion which allows to convert one data fomat into another */

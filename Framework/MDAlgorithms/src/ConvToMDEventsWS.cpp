@@ -39,8 +39,9 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
   std::vector<coord_t> allCoord;
   std::vector<float> sig_err;      // array for signal and error.
   std::vector<uint16_t> run_index; // Buffer for run index for each event
-  std::vector<uint16_t> goniometer_index; // Buffer for goniometer index for each event
-  std::vector<uint32_t> det_ids;   // Buffer of det Id-s for each event
+  std::vector<uint16_t>
+      goniometer_index;          // Buffer for goniometer index for each event
+  std::vector<uint32_t> det_ids; // Buffer of det Id-s for each event
 
   allCoord.reserve(this->m_NDims * numEvents);
   sig_err.reserve(2 * numEvents);
@@ -72,8 +73,8 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
   // Add them to the MDEW
   size_t n_added_events = run_index.size();
-  m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord,
-                            n_added_events);
+  m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids,
+                            allCoord, n_added_events);
   return n_added_events;
 }
 

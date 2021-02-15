@@ -281,8 +281,8 @@ public:
     uint16_t detectorId = 45678;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.emplace_back(
-          MDEvent<3>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events3.emplace_back(MDEvent<3>(signal, error, runIndex, goniometerIndex,
+                                      detectorId, center));
   }
 
   void test_create_MDEvent4() {
@@ -293,8 +293,8 @@ public:
     uint16_t detectorId = 45678;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.emplace_back(
-          MDEvent<4>(signal, error, runIndex, goniometerIndex, detectorId, center));
+      events4.emplace_back(MDEvent<4>(signal, error, runIndex, goniometerIndex,
+                                      detectorId, center));
   }
 
   void test_create_MDLeanEvent3() {

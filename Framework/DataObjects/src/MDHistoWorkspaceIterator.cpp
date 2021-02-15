@@ -464,7 +464,8 @@ uint16_t MDHistoWorkspaceIterator::getInnerRunIndex(size_t /*index*/) const {
 }
 
 /// For a given event/point in this box, return the goniometer index
-uint16_t MDHistoWorkspaceIterator::getInnerGoniometerIndex(size_t /*index*/) const {
+uint16_t
+MDHistoWorkspaceIterator::getInnerGoniometerIndex(size_t /*index*/) const {
   return 0;
   // throw std::runtime_error("MDHistoWorkspaceIterator: No events are
   // contained, so it is not possible to return inner goniometer index.");

@@ -63,25 +63,25 @@ public:
   ::NeXus::File *getFile() { return m_File.get(); }
 
   /**@brief The version of the "event_data" Nexus dataset
- *
- * @details The "event_data" Nexus dataset may contain all or only a subset
- * of the attributes of the current event object.
- *
- * | class      | attributes stored (besides coordinates)
- * -------------------------------------------------------
- *  MDLeanEvent | signal, error
- *  MDEvent     | signal, error, run-index, detector-index
- *  MDEvent     | signal, error, run-index, goniometer-index, detector-index
- *
- * The number of attributes stored (neglecting coordinates) define the version
- */
+   *
+   * @details The "event_data" Nexus dataset may contain all or only a subset
+   * of the attributes of the current event object.
+   *
+   * | class      | attributes stored (besides coordinates)
+   * -------------------------------------------------------
+   *  MDLeanEvent | signal, error
+   *  MDEvent     | signal, error, run-index, detector-index
+   *  MDEvent     | signal, error, run-index, goniometer-index, detector-index
+   *
+   * The number of attributes stored (neglecting coordinates) define the version
+   */
   enum class EventDataVersion : size_t {
     EDVLean = 2,
     EDVOriginal = 4,
     EDVGoniometer = 5
   };
 
-  EventDataVersion getEventDataVersion() const {return m_EventDataVersion;}
+  EventDataVersion getEventDataVersion() const { return m_EventDataVersion; }
 
   void setEventDataVersion();
 
@@ -95,18 +95,18 @@ public:
    */
   int64_t dataEventCount(void) const;
 
- /**
- * @brief Insert goniometer info in a block of event data, if necessary
- *
- * @details The dataset "event_data" in old Nexus files lack goniometer info,
- * thus it's necessary to insert the default goniometerIndex value into
- * a data-block that has been read from the file before it's consumed
- * by MDEvent::dataToEvents()
- *
- * @param Block : the storage vector containing the event data
- * @param accessMode : string specifying if we're reading from or writing to
- * file. Valid values are "READ" and "WRITE"
- */
+  /**
+   * @brief Insert goniometer info in a block of event data, if necessary
+   *
+   * @details The dataset "event_data" in old Nexus files lack goniometer info,
+   * thus it's necessary to insert the default goniometerIndex value into
+   * a data-block that has been read from the file before it's consumed
+   * by MDEvent::dataToEvents()
+   *
+   * @param Block : the storage vector containing the event data
+   * @param accessMode : string specifying if we're reading from or writing to
+   * file. Valid values are "READ" and "WRITE"
+   */
   template <typename Type>
   void adjustEventDataBlock(std::vector<Type> &Block,
                             std::string accessMode) const;

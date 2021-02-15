@@ -158,10 +158,12 @@ public:
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
                         const std::vector<coord_t> &point, uint16_t runIndex,
-                        uint16_t goniometernIndex, uint32_t detectorId) override;
+                        uint16_t goniometernIndex,
+                        uint32_t detectorId) override;
   void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
                               const std::vector<coord_t> &point,
-                              uint16_t runIndex, uint16_t goniometernIndex, uint32_t detectorId) override;
+                              uint16_t runIndex, uint16_t goniometernIndex,
+                              uint32_t detectorId) override;
   size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
                            const std::vector<coord_t> &Coord,
                            const std::vector<uint16_t> &runIndex,
@@ -296,8 +298,7 @@ public:
   // create single lean event from event's data
   static inline MDLeanEvent<nd>
   BUILD_EVENT(const signal_t Signal, const signal_t Error, const coord_t *Coord,
-              const uint16_t /*runIndex*/,
-              const uint16_t /*goniometerIndex*/,
+              const uint16_t /*runIndex*/, const uint16_t /*goniometerIndex*/,
               const uint32_t /*detectorId*/) {
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }

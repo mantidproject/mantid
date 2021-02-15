@@ -91,9 +91,8 @@ coordinates of nd-dimensional events
 */
 template <size_t nd>
 void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
-                                   uint16_t *goniometerIndex,
-                                   uint32_t *detId, coord_t *Coord,
-                                   size_t dataSize) const {
+                                   uint16_t *goniometerIndex, uint32_t *detId,
+                                   coord_t *Coord, size_t dataSize) const {
 
   auto *const pWs = dynamic_cast<
       DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
@@ -102,8 +101,7 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
     for (size_t i = 0; i < dataSize; i++) {
       pWs->addEvent(DataObjects::MDEvent<nd>(
           *(sigErr + 2 * i), *(sigErr + 2 * i + 1), *(runIndex + i),
-          *(goniometerIndex + i),
-          *(detId + i), (Coord + i * nd)));
+          *(goniometerIndex + i), *(detId + i), (Coord + i * nd)));
     }
   } else {
     auto *const pLWs = dynamic_cast<
@@ -125,8 +123,7 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
 /// the function used in template metaloop termination on 0 dimensions and to
 /// throw the error in attempt to add data to 0-dimension workspace
 template <>
-void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/,
-                                      uint16_t * /*unused*/,
+void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
                                       uint16_t * /*unused*/,
                                       uint32_t * /*unused*/,
                                       coord_t * /*unused*/,
@@ -237,8 +234,8 @@ void MDEventWSWrapper::addMDData(std::vector<float> &sigErr,
     return;
   // perform the actual dimension-dependent addition
   (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0], &runIndex[0],
-                                             &goniometerIndex[0],
-                                             &detId[0], &Coord[0], dataSize);
+                                             &goniometerIndex[0], &detId[0],
+                                             &Coord[0], dataSize);
 }
 
 /** method should be called at the end of the algorithm, to let the workspace

@@ -145,8 +145,8 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
       // calculate number of events
       nBufEvents++;
       if (nBufEvents >= m_bufferSize) {
-        m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord,
-                                  nBufEvents);
+        m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids,
+                                  allCoord, nBufEvents);
         nAddedEvents += nBufEvents;
         // reset buffer counts
         n_coordinates = 0;
@@ -156,8 +156,8 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
   }   // end detectors loop;
 
   if (nBufEvents > 0) {
-    m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids, allCoord,
-                              nBufEvents);
+    m_OutWSWrapper->addMDData(sig_err, run_index, goniometer_index, det_ids,
+                              allCoord, nBufEvents);
     nAddedEvents += nBufEvents;
     nBufEvents = 0;
   }

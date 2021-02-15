@@ -34,8 +34,9 @@ class MDEventWSWrapper;
 using fpVoidMethod = void (MDEventWSWrapper::*)();
 /// signature for the internal templated function pointer to add data to an
 /// existing workspace
-using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint16_t *, uint32_t *,
-                                             coord_t *, size_t) const;
+using fpAddData = void (MDEventWSWrapper::*)(float *, uint16_t *, uint16_t *,
+                                             uint32_t *, coord_t *,
+                                             size_t) const;
 /// signature for the internal templated function pointer to create workspace
 using fpCreateWS = void (MDEventWSWrapper::*)(const MDWSDescription &);
 
@@ -106,12 +107,12 @@ private:
   // internal function tempates to generate as function of dimensions and
   // assign to function pointers
   template <size_t nd>
-  void addMDDataND(float *sigErr, uint16_t *runIndex, uint16_t *goniometerIndex, uint32_t *detId,
-                   coord_t *Coord, size_t dataSize) const;
+  void addMDDataND(float *sigErr, uint16_t *runIndex, uint16_t *goniometerIndex,
+                   uint32_t *detId, coord_t *Coord, size_t dataSize) const;
   template <size_t nd>
-  void addAndTraceMDDataND(float *sig_err, uint16_t *run_index, uint16_t *goniometerIndex,
-                           uint32_t *det_id, coord_t *Coord,
-                           size_t data_size) const;
+  void addAndTraceMDDataND(float *sig_err, uint16_t *run_index,
+                           uint16_t *goniometerIndex, uint32_t *det_id,
+                           coord_t *Coord, size_t data_size) const;
 
   template <size_t nd> void calcCentroidND();
 

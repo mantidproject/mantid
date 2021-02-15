@@ -290,26 +290,32 @@ void ConvertToDetectorFaceMD::exec() {
         case TOF:
           if (nd == 3)
             this->convertEventList<TofEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<TofEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         case WEIGHTED:
           if (nd == 3)
             this->convertEventList<WeightedEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<WeightedEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         case WEIGHTED_NOTIME:
           if (nd == 3)
             this->convertEventList<WeightedEventNoTime, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<WeightedEventNoTime, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         default:
           throw std::runtime_error("EventList had an unexpected data type!");

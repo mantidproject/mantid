@@ -725,8 +725,7 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   auto error = pixel[8];
   auto added = m_outputWS->addEvent(
       MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
-                 goniometerIndex,
-                 static_cast<detid_t>(pixel[5]), centers));
+                 goniometerIndex, static_cast<detid_t>(pixel[5]), centers));
   // At this point the workspace should be setup so that we always add the
   // event so only do a runtime check in debug mode
   assert(added == 1);

@@ -112,7 +112,7 @@ public:
                                   const std::vector<coord_t> &, uint16_t,
                                   uint16_t, uint32_t, size_t){};
   void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t,
-                              const std::vector<coord_t> &, uint16_t,  uint16_t,
+                              const std::vector<coord_t> &, uint16_t, uint16_t,
                               uint32_t) override{};
 
   /** Perform centerpoint binning of events
