@@ -34,6 +34,7 @@ Bugfixes
 - New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 - New options "cache directory" and "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
+- Correct unit to TOF for ``_tof_xye`` files output for PEARL, when the focusing mode is set to *all*.
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
