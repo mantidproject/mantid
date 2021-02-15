@@ -24,11 +24,11 @@ Input Workspace Requirements
 The algorithm will compute the correction factors on a bin-by-bin basis for each spectrum within
 the input workspace. The following assumptions on the input workspace are made:
    
-     - properties of the sample and optionally its environment have been set with :ref:`SetSample <algm-SetSample>`
-	 
-     - Xray Attenuation profile data is provided by using :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+- properties of the sample and optionally its environment have been set with :ref:`SetSample <algm-SetSample>`
 
-     - Muon Implantation Profile has a single spectrum. The x data is the muon depth in cm and the y data is intensity in counts.
+- Xray Attenuation profile data is provided by using :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+
+- Muon Implantation Profile has a single spectrum. The x data is the muon depth in cm and the y data is intensity in counts.
 
 Usage
 -----
