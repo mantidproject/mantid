@@ -14,8 +14,8 @@ diffractomers. The parameters that can be refined are Dtt1, Zero, Dtt1t,
 Dtt2t, Zerot, Width and Tcross.
 
 It serves as the second step to fit/refine instrumental parameters that
-will be introduced in Le Bail Fit. It uses the outcome from algorithm
-FitPowderDiffPeaks().
+will be introduced in Le Bail Fit. It uses the outcome from
+:ref:`FitPowderDiffPeaks <algm-FitPowderDiffPeaks>` algorithm.
 
 
 Introduction
