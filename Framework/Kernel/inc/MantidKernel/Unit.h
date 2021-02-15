@@ -417,6 +417,8 @@ protected:
   double difa;
   double difc;
   double tzero;
+  double valueThatGivesLargestTOF;
+  double valueThatGivesSmallestTOF;
 };
 
 //=================================================================================================
@@ -451,7 +453,7 @@ protected:
 
 //=================================================================================================
 /// Momentum Transfer in Angstrom^-1
-class MANTID_KERNEL_DLL MomentumTransfer : public Unit {
+class MANTID_KERNEL_DLL MomentumTransfer : public dSpacing {
 public:
   const std::string unitID() const override; ///< "MomentumTransfer"
   const std::string caption() const override { return "q"; }
@@ -459,25 +461,16 @@ public:
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  void init() override;
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
   /// Constructor
   MomentumTransfer();
-
-protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
-  /// twoTheta :: The scattering angle (in radians)
-  double twoTheta;
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================
 /// Momentum transfer squared in Angstrom^-2
-class MANTID_KERNEL_DLL QSquared : public Unit {
+class MANTID_KERNEL_DLL QSquared : public MomentumTransfer {
 public:
   const std::string unitID() const override; ///< "QSquared"
   const std::string caption() const override { return "Q2"; }
@@ -485,20 +478,12 @@ public:
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  void init() override;
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
 
   /// Constructor
   QSquared();
-
-protected:
-  void validateUnitParams(const int emode,
-                          const UnitParametersMap &params) override;
-  double twoTheta;
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
 };
 
 //=================================================================================================

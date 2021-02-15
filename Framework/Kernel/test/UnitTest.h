@@ -638,8 +638,7 @@ public:
     double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
                   (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
     d.toTOF(x, x, 99.0, 0, {{UnitParams::difc, difc}});
-    q.fromTOF(x, x, 99.0, 0,
-              {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 1.0}});
+    q.fromTOF(x, x, 99.0, 0, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
 
     // To QSquared
@@ -648,8 +647,7 @@ public:
     result = factor * std::pow(input, power);
     x[0] = input;
     d.toTOF(x, x, 99.0, 0, {{UnitParams::difc, difc}});
-    q2.fromTOF(x, x, 99.0, 0,
-               {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 1.0}});
+    q2.fromTOF(x, x, 99.0, 0, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
   }
   void testdSpacingRange() {
@@ -807,8 +805,9 @@ public:
   void testQTransfer_toTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q.toTOF(
-        x, y, 1.0, 1, {{UnitParams::l2, 1.0}, {UnitParams::twoTheta, 1.0}}))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(q.toTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 2768.9067, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -816,8 +815,10 @@ public:
   void testQTransfer_fromTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q.fromTOF(
-        x, y, 1.0, 1, {{UnitParams::l2, 1.0}, {UnitParams::twoTheta, 1.0}}))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(
+        q.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 2768.9067, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -830,10 +831,10 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    q.toTOF(x, x, 99.0, 99,
-            {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 99.0}});
-    q2.fromTOF(x, x, 99.0, 99,
-               {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 99.0}});
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
+                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    q.toTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
+    q2.fromTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-30)
 
     // To dSpacing
@@ -841,10 +842,7 @@ public:
     input = 1.1;
     result = factor * std::pow(input, power);
     x[0] = input;
-    q.toTOF(x, x, 99.0, 99,
-            {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 1.0}});
-    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
-                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    q.toTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     d.fromTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
   }
@@ -889,8 +887,9 @@ public:
   void testQ2_toTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q2.toTOF(
-        x, y, 1.0, 1, {{UnitParams::l2, 1.0}, {UnitParams::twoTheta, 1.0}}))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(q2.toTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 1522.899, 0.001)
     TS_ASSERT(yy == y)
   }
@@ -898,8 +897,9 @@ public:
   void testQ2_fromTOF() {
     std::vector<double> x(1, 200.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q2.fromTOF(
-        x, y, 1.0, 1, {{UnitParams::l2, 1.0}, {UnitParams::twoTheta, 1.0}}))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(q2.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 231.9220, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -912,10 +912,10 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    q2.toTOF(x, x, 99.0, 99,
-             {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 99.0}});
-    q.fromTOF(x, x, 99.0, 99,
-              {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 99.0}});
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
+                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    q2.toTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
+    q.fromTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-30)
 
     // To dSpacing
@@ -923,23 +923,20 @@ public:
     input = 1.1;
     result = factor * std::pow(input, power);
     x[0] = input;
-    q2.toTOF(x, x, 99.0, 99,
-             {{UnitParams::l2, 99.0}, {UnitParams::twoTheta, 1.0}});
-    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
-                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    q2.toTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     d.fromTOF(x, x, 99.0, 99, {{UnitParams::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-15)
   }
   void testQ2Range() {
     std::vector<double> sample, rezult;
 
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
+                  (1.1 + 1.1) * 1e-4 / Mantid::PhysicalConstants::h;
     q2.initialize(1.1, 0,
-                  {{UnitParams::l2, 1.1},
-                   {UnitParams::twoTheta, 99.0},
-                   {UnitParams::efixed, 99.0}});
+                  {{UnitParams::difc, difc}, {UnitParams::efixed, 99.0}});
 
     std::string err_mess =
-        convert_units_check_range(q2, sample, rezult, -DBL_EPSILON);
+        convert_units_check_range(q2, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
 
     for (size_t i = 0; i < sample.size(); i++) {
