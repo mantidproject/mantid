@@ -96,7 +96,8 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
         d_tof_conversion_ws = ConvertTableToMatrixWorkspace(
             InputWorkspace=fitted_peaks_table,
             ColumnX='dSpacing',
-            ColumnY='X0'
+            ColumnY='X0',
+            StoreInADS=False
         )
 
         # Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
@@ -105,6 +106,7 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
             InputWorkspace=d_tof_conversion_ws,
             WorkspaceIndex=0,
             CreateOutput=True,
+            StoreInADS=False
         )
 
         tzero = fit_output.OutputParameters.cell('Value', 0)  # A0
