@@ -21,6 +21,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Logger.h"
 #include <boost/container/flat_set.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -54,6 +55,7 @@ void SCDCalibratePanels2::init() {
   // Lattice constant group
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+  declareProperty("RecalculateUB", true);
   declareProperty("a", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
@@ -73,12 +75,25 @@ void SCDCalibratePanels2::init() {
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   const std::string LATTICE("Lattice Constants");
+  setPropertyGroup("RecalculateUB", LATTICE);
   setPropertyGroup("a", LATTICE);
   setPropertyGroup("b", LATTICE);
   setPropertyGroup("c", LATTICE);
   setPropertyGroup("alpha", LATTICE);
   setPropertyGroup("beta", LATTICE);
   setPropertyGroup("gamma", LATTICE);
+  setPropertySettings(
+      "a", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
+  setPropertySettings(
+      "b", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
+  setPropertySettings(
+      "c", std::make_unique<EnabledWhenProperty>("RecalculateUB", IS_DEFAULT));
+  setPropertySettings("alpha", std::make_unique<EnabledWhenProperty>(
+                                   "RecalculateUB", IS_DEFAULT));
+  setPropertySettings("beta", std::make_unique<EnabledWhenProperty>(
+                                  "RecalculateUB", IS_DEFAULT));
+  setPropertySettings("gamma", std::make_unique<EnabledWhenProperty>(
+                                   "RecalculateUB", IS_DEFAULT));
 
   // Calibration options group
   declareProperty("CalibrateT0", false, "Calibrate the T0 (initial TOF)");
@@ -130,7 +145,7 @@ void SCDCalibratePanels2::init() {
                   "Translations in meters found below this value will be set "
                   "to 0");
   declareProperty("ToleranceOfReorientation", 5e-2, mustBePositive,
-                  "Reorientation (rotation) angles in degress found below "
+                  "Reorientation (rotation) angles in degree found below "
                   "this value will be set to 0");
   declareProperty(
       "TranslationSearchRadius", 5e-2, mustBePositive,
@@ -185,9 +200,15 @@ void SCDCalibratePanels2::exec() {
   // parse all inputs
   PeaksWorkspace_sptr m_pws = getProperty("PeakWorkspace");
 
-  parseLatticeConstant(m_pws);
+  // recalculate UB with given lattice constant
+  // if required
+  if (getProperty("RecalculateUB")) {
+    // parse lattice constants
+    parseLatticeConstant(m_pws);
 
-  updateUBMatrix(m_pws);
+    // recalculate UB and index peaks
+    updateUBMatrix(m_pws);
+  }
 
   bool calibrateT0 = getProperty("CalibrateT0");
   bool calibrateL1 = getProperty("CalibrateL1");
@@ -420,6 +441,7 @@ void SCDCalibratePanels2::optimizeBanks(std::shared_ptr<PeaksWorkspace> pws) {
       g_log.notice() << "-- Bank " << bankname << " have only " << nBankPeaks
                      << " (<" << MINIMUM_PEAKS_PER_BANK
                      << ") Peaks, skipping\n";
+      AnalysisDataService::Instance().remove(pwsBankiName);
       continue;
     }
 
