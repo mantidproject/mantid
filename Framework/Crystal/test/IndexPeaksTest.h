@@ -485,6 +485,32 @@ public:
     TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
   }
 
+  void test_exec_mod_vectors_save_cleared_across_runs() {
+    const auto peakWS = createTestPeaksWorkspaceWithSatellites();
+
+    auto alg = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                                   {"MaxOrder", "1"},
+                                   {"ModVector1", "0.333, 0.667, -0.333"},
+                                   {"ModVector2", "-0.333, 0.667, 0.333"},
+                                   {"ModVector3", "0.333, -0.667, 0.333"},
+                                   {"SaveModulationInfo", "1"}});
+
+    // Repeat indexPeaks with 1 mod vector, verify lattice only has one set
+    alg = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                              {"MaxOrder", "1"},
+                              {"ModVector1", "0.333, 0.667, -0.333"},
+                              {"SaveModulationInfo", "1"}});
+
+    const auto &lattice = peakWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(1).norm(),
+                    1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(2).norm(),
+                    1e-8)
+  }
+
   // --------------------------- Failure tests -----------------------------
 
   std::shared_ptr<IndexPeaks> setup_validate_inputs_test_alg() {
