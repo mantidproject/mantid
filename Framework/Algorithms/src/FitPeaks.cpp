@@ -1189,8 +1189,14 @@ void FitPeaks::fitSpectrumPeaks(
           getPeakFitWindow(wi, peak_index);
 
       // Decide whether to estimate peak width by observation
+      // If no peaks fitted in the same or cross spectrum then the user supplied
+      // parameters will be used if present and the width will not be estimated
+      // (note this will overwrite parameter values caluclated from
+      // Parameters.xml)
+      auto useUserSpecifedIfGiven =
+          !(samePeakCrossSpectrum || neighborPeakSameSpectrum);
       bool observe_peak_width =
-          decideToEstimatePeakParams(!samePeakCrossSpectrum, peakfunction);
+          decideToEstimatePeakParams(useUserSpecifedIfGiven, peakfunction);
 
       if (observe_peak_width &&
           m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
