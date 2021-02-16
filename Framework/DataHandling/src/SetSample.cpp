@@ -418,7 +418,8 @@ void SetSample::assertNonNegative(
  * @brief Checks if a json dictionary parameter is populated or not
  * @param dict map
  */
-bool SetSample::isDictionaryPopulated(const PropertyManager_const_sptr dict) {
+bool SetSample::isDictionaryPopulated(
+    const PropertyManager_const_sptr &dict) const {
   bool isPopulated = false;
   if (dict)
     if (dict->propertyCount() > 0)
