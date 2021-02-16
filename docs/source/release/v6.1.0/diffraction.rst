@@ -21,6 +21,7 @@ Improvements
 ############
 
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
+- Support fitting diffractometer constants with chi-squared cost function in <algm-PDCalibration>.
 
 Bugfixes
 ########
@@ -38,6 +39,7 @@ Bugfixes
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
+
 
 Engineering Diffraction
 -----------------------
