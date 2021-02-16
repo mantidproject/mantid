@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
 
-from Muon.GUI.Common.fitting_tab_widget.basic_fitting_view import BasicFittingView
-from Muon.GUI.Common.fitting_tab_widget.general_fitting_options_view import GeneralFittingOptionsView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
+from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_options_view import GeneralFittingOptionsView
 
 from qtpy.QtWidgets import QWidget
 

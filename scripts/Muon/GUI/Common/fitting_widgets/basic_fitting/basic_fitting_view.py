@@ -7,8 +7,8 @@
 from mantid.api import IFunction
 from mantidqt.utils.qt import load_ui
 
-from Muon.GUI.Common.fitting_tab_widget.fit_controls_view import FitControlsView
-from Muon.GUI.Common.fitting_tab_widget.fit_function_options_view import FitFunctionOptionsView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import FitFunctionOptionsView
 from Muon.GUI.Common.message_box import warning
 
 from qtpy.QtWidgets import QWidget

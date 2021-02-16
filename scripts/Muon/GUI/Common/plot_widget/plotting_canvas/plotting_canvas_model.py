@@ -7,7 +7,7 @@
 from typing import NamedTuple, List
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import MA_GUESS_WORKSPACE, FDA_GUESS_WORKSPACE
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import MA_GUESS_WORKSPACE, FDA_GUESS_WORKSPACE
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
