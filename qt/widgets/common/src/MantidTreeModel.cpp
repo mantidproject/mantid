@@ -206,7 +206,6 @@ void MantidTreeModel::enableSaveNexus(
 void MantidTreeModel::disableSaveNexus() { /* handled by widget*/
 }
 
-void MantidTreeModel::showVatesSimpleInterface() {}
 void MantidTreeModel::showSpectrumViewer() {}
 void MantidTreeModel::showSliceViewer() {}
 void MantidTreeModel::showAlgorithmHistory() {}
@@ -221,9 +220,6 @@ void MantidTreeModel::importTransposed() {}
 void MantidTreeModel::showLogFileWindow() {}
 void MantidTreeModel::showSampleMaterialWindow() {}
 void MantidTreeModel::importWorkspace() {}
-#ifdef MAKE_VATES
-bool MantidTreeModel::doesVatesSupportOpenGL() { return false; }
-#endif
 
 MantidMatrix *MantidTreeModel::importMatrixWorkspace(
     const Mantid::API::MatrixWorkspace_sptr workspace, int lower, int upper,

@@ -37,16 +37,6 @@ enable_testing()
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
-  set(PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/plugins/paraview
-  )
-else()
-  set(PVPLUGINS_LIBRARY_OUTPUT_DIRECTORY
-      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins/paraview
-  )
-endif()
-
 # This allows us to group targets logically in Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -217,7 +207,7 @@ if(GIT_FOUND)
     # otherwise the variable is "Unknown"
     if (ENABLE_CONDA)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} branch --show-current
+        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
         OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_BRANCHNAME
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       )

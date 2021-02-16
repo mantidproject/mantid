@@ -397,7 +397,7 @@ class MantidConfigDirectInelastic(object):
         # the common part of all strings, generated dynamically as function of input class parameters.
         self._dynamic_options_base = ['default.facility=ISIS']
         # Path to python scripts, defined and used by Mantid wrt to Mantid Root (this path may be version specific)
-        self._python_mantid_path = ['scripts/Calibration/', 'scripts/Examples/', 'scripts/Interface/', 'scripts/Vates/']
+        self._python_mantid_path = ['scripts/Calibration/', 'scripts/Examples/', 'scripts/Interface/']
         # Static paths to user scripts, defined wrt script repository root
         self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
         # Relative to a particular user path to place links, important to user

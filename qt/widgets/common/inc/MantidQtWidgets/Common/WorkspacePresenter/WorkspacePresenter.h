@@ -62,7 +62,6 @@ private:
   void showColourFillPlot();
   void showDetectorsTable();
   void showBoxDataTable();
-  void showVatesGUI();
   void showMDPlot();
   void showListData();
   void showSpectrumViewer();
