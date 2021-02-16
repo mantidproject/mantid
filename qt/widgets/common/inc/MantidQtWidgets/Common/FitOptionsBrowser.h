@@ -149,8 +149,8 @@ private:
   // PlotPeakByLogValue properties
   /// Store special properties of the sequential Fit
   QList<QtProperty *> m_sequentialProperties;
-  /// FitType property
-  QtProperty *m_fitType;
+  /// PlotPeakByLogValue FitType property
+  QtProperty *m_plotPeakByLogValueFitType;
   /// OutputWorkspace property
   QtProperty *m_outputWorkspace;
   /// LogValue property

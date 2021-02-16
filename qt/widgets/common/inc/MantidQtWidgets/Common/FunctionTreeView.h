@@ -9,7 +9,7 @@
 #include "DllOption.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"

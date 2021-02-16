@@ -249,16 +249,17 @@ void FitOptionsBrowser::createSimultaneousFitProperties() {
 
 void FitOptionsBrowser::createSequentialFitProperties() {
   // Create FitType property, a property of algorithm PlotPeakByLogValue
-  m_fitType = m_enumManager->addProperty("Fit Type");
+  m_plotPeakByLogValueFitType = m_enumManager->addProperty("Fit Type");
   {
     QStringList types;
     types << "Sequential"
           << "Individual";
-    m_enumManager->setEnumNames(m_fitType, types);
-    m_enumManager->setValue(m_fitType, 0);
-    addProperty("FitType", m_fitType, &FitOptionsBrowser::getStringEnumProperty,
+    m_enumManager->setEnumNames(m_plotPeakByLogValueFitType, types);
+    m_enumManager->setValue(m_plotPeakByLogValueFitType, 0);
+    addProperty("FitType", m_plotPeakByLogValueFitType,
+                &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
-    m_sequentialProperties << m_fitType;
+    m_sequentialProperties << m_plotPeakByLogValueFitType;
   }
 
   // Create OutputWorkspace property

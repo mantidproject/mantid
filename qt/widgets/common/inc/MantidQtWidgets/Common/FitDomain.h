@@ -30,16 +30,18 @@ public:
   FitDomain(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
             double startX, double endX);
 
-  inline std::string workspaceName() const noexcept { return m_workspaceName; }
-  inline WorkspaceIndex workspaceIndex() const noexcept {
+  [[nodiscard]] std::string workspaceName() const noexcept {
+    return m_workspaceName;
+  }
+  [[nodiscard]] WorkspaceIndex workspaceIndex() const noexcept {
     return m_workspaceIndex;
   }
 
   [[nodiscard]] bool setStartX(double startX);
   [[nodiscard]] bool setEndX(double startX);
 
-  inline double startX() const noexcept { return m_startX; }
-  inline double endX() const noexcept { return m_endX; }
+  [[nodiscard]] double startX() const noexcept { return m_startX; }
+  [[nodiscard]] double endX() const noexcept { return m_endX; }
 
   void setFunction(Mantid::API::IFunction_sptr const &function);
   [[nodiscard]] Mantid::API::IFunction_sptr getFunctionCopy() const;
