@@ -85,7 +85,11 @@ public:
 
   void setEventDataVersion(const EventDataVersion &version);
 
-  void setEventDataVersion(::NeXus::File *const file);
+  /**
+   * @brief set the data version based on the number of attributes of the event,
+   * not counting its coordinates.
+   */
+  void setEventDataVersion(const size_t &traitsCount);
 
   /**
    * @brief Number of data items in Nexus dataset "data_event" associated

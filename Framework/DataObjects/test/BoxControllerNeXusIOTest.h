@@ -80,6 +80,29 @@ public:
     pSaver->setDataType(CoordSize, "MDEvent");
     TS_ASSERT_THROWS_NOTHING(pSaver->setEventDataVersion(EDV::EDVOriginal));
     TS_ASSERT_EQUALS(EDV::EDVOriginal, pSaver->getEventDataVersion());
+
+    delete pSaver;
+  }
+
+  void test_eventDataVersion() {
+    // initialization
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
+    BoxControllerNeXusIO *pSaver(nullptr);
+    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+
+    // valid values
+    std::map<EDV, size_t> traitsCountToEDV ={{EDV::EDVLean, 2},
+                                             {EDV::EDVOriginal, 4},
+                                             {EDV::EDVGoniometer, 5}};
+    for (auto const &pair : traitsCountToEDV)
+    TS_ASSERT_EQUALS(pair.first, static_cast<EDV>(pair.second));
+
+    // some invalid values
+    std::vector<size_t> invalids{3, 6, 7, 8, 9, 42};
+    for (auto const &invalid : invalids)
+      TS_ASSERT_THROWS(pSaver->setEventDataVersion(invalid),
+                       const std::invalid_argument &)
     delete pSaver;
   }
 

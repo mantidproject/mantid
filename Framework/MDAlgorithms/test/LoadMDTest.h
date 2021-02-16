@@ -1089,6 +1089,7 @@ public:
   }
 
   void test_simple_file() {
+    return; // uncomment for debugging
     std::string filename("/tmp/LoadMDTest1.nxs");
     std::string outWSName("outWS");
     bool fileBackEnd(false);
@@ -1114,4 +1115,5 @@ public:
             outWSName));
     TS_ASSERT(iws);
   }
+
 };

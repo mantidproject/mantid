@@ -170,10 +170,6 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
   // DiskBuffer information;
   getDiskBufferFileData();
 
-  /// inspect dataspace "data_event" to determine if goniometer info is
-  /// present
-  setEventDataVersion();
-
   if (m_ReadOnly)
     prepareNxSdata_CurVersion();
   else
@@ -230,6 +226,7 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
     m_BlockSize[0] = NX_UNLIMITED;
 
     // Now the chunk size.
+    // m_Blocksize == (number_events_to_write_at_a_time, data_items_per_event)
     std::vector<int64_t> chunk(m_BlockSize);
     chunk[0] = static_cast<int64_t>(m_dataChunk);
 
@@ -277,8 +274,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   }
 
   auto ndim2 = static_cast<size_t>(info.dims[1]); // number of columns
-  auto edv = static_cast<EventDataVersion>(ndim2 - m_bc->getNDims());
-  setEventDataVersion(edv);
+  setEventDataVersion(ndim2 - m_bc->getNDims());
 
   // HACK -- there is no difference between empty event dataset and the dataset
   // with 1 event.
@@ -384,6 +380,22 @@ void BoxControllerNeXusIO::setEventDataVersion(
     throw std::invalid_argument("Cannot set the event data version to EDVLean");
 
   m_EventDataVersion = version;
+}
+
+void BoxControllerNeXusIO::setEventDataVersion(const size_t &traitsCount){
+  using EDV = EventDataVersion;
+  auto edv = static_cast<EventDataVersion>(traitsCount);
+  // sucks I couldn't create this list dynamically
+  std::initializer_list<EDV> valid_versions =
+      {EDV::EDVLean, EDV::EDVOriginal, EDV::EDVGoniometer};
+  for (auto const &valid_edv : valid_versions){
+    if (edv == valid_edv){
+      setEventDataVersion(valid_edv);
+      return;
+    }
+  }
+  // should not reach here
+  throw std::invalid_argument("Could not find a valid version");
 }
 
 int64_t BoxControllerNeXusIO::dataEventCount(void) const {
