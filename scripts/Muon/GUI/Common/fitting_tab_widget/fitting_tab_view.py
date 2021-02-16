@@ -9,7 +9,7 @@ from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QStackedWidget, QWidget
 
-ui_fitting_tab, _ = load_ui(__file__, "fitting_tab2.ui")
+ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
 
 NORMAL_FITTING_COMBO_INDEX = 0
 TF_ASYMMETRY_FITTING_COMBO_INDEX = 1
