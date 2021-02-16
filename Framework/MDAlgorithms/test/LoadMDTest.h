@@ -1103,8 +1103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("BoxStructureOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BoxStructureOnly", false));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -1115,5 +1114,4 @@ public:
             outWSName));
     TS_ASSERT(iws);
   }
-
 };

@@ -92,11 +92,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
 
     // valid values
-    std::map<EDV, size_t> traitsCountToEDV ={{EDV::EDVLean, 2},
-                                             {EDV::EDVOriginal, 4},
-                                             {EDV::EDVGoniometer, 5}};
+    std::map<EDV, size_t> traitsCountToEDV = {
+        {EDV::EDVLean, 2}, {EDV::EDVOriginal, 4}, {EDV::EDVGoniometer, 5}};
     for (auto const &pair : traitsCountToEDV)
-    TS_ASSERT_EQUALS(pair.first, static_cast<EDV>(pair.second));
+      TS_ASSERT_EQUALS(pair.first, static_cast<EDV>(pair.second));
 
     // some invalid values
     std::vector<size_t> invalids{3, 6, 7, 8, 9, 42};
