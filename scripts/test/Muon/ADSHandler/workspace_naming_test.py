@@ -86,7 +86,6 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual("EMU19489; PhaseQuad; test_Re; MA", get_pair_phasequad_name(context, "test_Re", "19489",False))
         self.assertEqual("EMU19489; PhaseQuad; test_Re; Rebin; MA", get_pair_phasequad_name(context, "test_Re", "19489",True))
 
-
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function_name = "GausOsc"
