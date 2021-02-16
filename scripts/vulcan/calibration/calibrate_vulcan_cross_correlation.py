@@ -98,6 +98,9 @@ def calibrate_vulcan(diamond_nexus: str,
     -------
 
     """
+    # NOTE TODO FIXME - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5. those are centers.
+
+
     # TODO FIXME - this can be 2
     CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
 

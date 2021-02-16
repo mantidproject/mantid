@@ -21,13 +21,14 @@ def main(prm_file_name):
     vulcan_profile_dict = scan_prm_content(prm_lines)
 
     for bank_id in [3]:
-        calculate_vulcan_peak_parameters(vulcan_profile_dict[bank_id], 1.75)
+        calculate_vulcan_peak_parameters(vulcan_profile_dict[bank_id], 1.075)
 
     return
 
 
 def calculate_vulcan_peak_parameters(gsas_profile: GSASBackToBackExponential,
-                                     dspace: float):
+                                     dspace: float,
+                                     difc: float = 21489.498991239565):
     """
 
     https://usermanual.wiki/Pdf/GSAS20Manual.1353272546/html
@@ -51,7 +52,20 @@ def calculate_vulcan_peak_parameters(gsas_profile: GSASBackToBackExponential,
     beta = gsas_profile.bet_0 + gsas_profile.bet_1 / dspace**4
     sq_sigma = gsas_profile.sig_0**2 + gsas_profile.sig_1 * dspace**2 + gsas_profile.sig_2**2 * dspace**4
 
-    print(f'@ d = {dspace}: A = {alpha}, B = {beta}, S = {math.sqrt(sq_sigma)}')
+    print(f'@ d = {dspace}\nTOF = {dspace * difc}\nA = {alpha}\nB = {beta}\nS = {math.sqrt(sq_sigma)}')
+
+
+def generate_python_code_fit_tof(peak_d_list):
+    """Generate (partial) python codes to test Fitting in TOF
+
+    Parameters
+    ----------
+    peak_d_list
+
+    Returns
+    -------
+
+    """
 
 
 def scan_prm_content(content: List[str]):
