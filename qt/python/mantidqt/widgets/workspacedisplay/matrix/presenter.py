@@ -198,8 +198,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
     def action_overplot_spectrum(self, table):
-        self._do_overaction_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
-                                 plot_errors=False, overplot=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
+                             plot_errors=False, overplot=True)
 
     def action_overplot_spectrum_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
