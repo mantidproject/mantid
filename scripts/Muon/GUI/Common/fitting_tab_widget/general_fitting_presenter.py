@@ -14,7 +14,7 @@ from Muon.GUI.Common.fitting_tab_widget.general_fitting_view import GeneralFitti
 
 class GeneralFittingPresenter(BasicFittingPresenter):
     """
-    The GeneralFittingPresenter holds a GeneralFittingView and GeneralFittingModel.
+    The GeneralFittingPresenter has a GeneralFittingView and GeneralFittingModel and derives from BasicFittingPresenter.
     """
 
     def __init__(self, view: GeneralFittingView, model: GeneralFittingModel):
