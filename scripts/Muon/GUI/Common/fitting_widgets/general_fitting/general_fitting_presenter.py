@@ -7,9 +7,9 @@
 from mantid.api import IFunction
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
-from Muon.GUI.Common.fitting_tab_widget.basic_fitting_presenter import BasicFittingPresenter
-from Muon.GUI.Common.fitting_tab_widget.general_fitting_model import GeneralFittingModel
-from Muon.GUI.Common.fitting_tab_widget.general_fitting_view import GeneralFittingView
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
+from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
+from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
 
 
 class GeneralFittingPresenter(BasicFittingPresenter):

@@ -15,9 +15,9 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, c
                                                          get_run_number_from_workspace_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import (BasicFittingModel, FitPlotInformation,
-                                                                    FDA_GUESS_WORKSPACE, MA_GUESS_WORKSPACE, FDA_SUFFIX,
-                                                                    MA_SUFFIX)
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import (BasicFittingModel, FitPlotInformation,
+                                                                               FDA_GUESS_WORKSPACE, MA_GUESS_WORKSPACE,
+                                                                               FDA_SUFFIX, MA_SUFFIX)
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
