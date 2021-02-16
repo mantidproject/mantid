@@ -135,7 +135,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
     m_ReadOnly = false;
   }
 
-  // open file if it exists or crate it if not in the mode requested
+  // open file if it exists or create it if not in the mode requested
   m_fileName = API::FileFinder::Instance().getFullPath(fileName);
   if (m_fileName.empty()) {
     if (!m_ReadOnly) {
@@ -149,6 +149,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
       throw Kernel::Exception::FileError("Can not open file to read ",
                                          m_fileName);
   }
+
   auto nDims = static_cast<int>(this->m_bc->getNDims());
 
   bool group_exists;
@@ -168,6 +169,10 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
   // read if exist and create if not the group, which is responsible for saving
   // DiskBuffer information;
   getDiskBufferFileData();
+
+  /// inspect dataspace "data_event" to determine if goniometer info is
+  /// present
+  setEventDataVersion();
 
   if (m_ReadOnly)
     prepareNxSdata_CurVersion();
@@ -271,26 +276,9 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
                                        m_fileName);
   }
 
-  // check if the number of dimensions in the file corresponds to the number of
-  // dimesnions to read.
-  size_t nFileDim;
-  auto ndim2 = static_cast<size_t>(info.dims[1]);
-  switch (m_EventType) {
-  case (LeanEvent):
-    nFileDim = ndim2 - 2;
-    break;
-  case (FatEvent):
-    nFileDim = ndim2 - 5;
-    break;
-  default:
-    throw Kernel::Exception::FileError(
-        "Unexpected type of events in the data file", m_fileName);
-  }
-
-  if (nFileDim != m_bc->getNDims())
-    throw Kernel::Exception::FileError(
-        "Trying to open event data with different number of dimensions ",
-        m_fileName);
+  auto ndim2 = static_cast<size_t>(info.dims[1]); // number of columns
+  auto edv = static_cast<EventDataVersion>(ndim2 - m_bc->getNDims());
+  setEventDataVersion(edv);
 
   // HACK -- there is no difference between empty event dataset and the dataset
   // with 1 event.
@@ -375,20 +363,6 @@ void BoxControllerNeXusIO::saveBlock(const std::vector<float> &DataBlock,
 void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
                                      const uint64_t blockPosition) const {
   this->saveGenericBlock(DataBlock, blockPosition);
-}
-
-void BoxControllerNeXusIO::setEventDataVersion() {
-  if (m_fileName.empty())
-    throw std::runtime_error("Filename has not been set");
-  H5::H5File file(m_fileName, H5F_ACC_RDONLY);
-  H5::DataSet dataset = file.openDataSet("event_data");
-  H5::DataSpace dataspace = dataset.getSpace();
-  hsize_t dims[2] = {0, 0};
-  dataspace.getSimpleExtentDims(dims);
-  file.close();
-  size_t dataCount = static_cast<size_t>(dims[1]);
-  m_EventDataVersion =
-      static_cast<EventDataVersion>(dataCount - m_bc->getNDims());
 }
 
 void BoxControllerNeXusIO::setEventDataVersion(

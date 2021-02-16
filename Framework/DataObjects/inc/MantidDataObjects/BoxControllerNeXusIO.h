@@ -83,8 +83,6 @@ public:
 
   EventDataVersion getEventDataVersion() const { return m_EventDataVersion; }
 
-  void setEventDataVersion();
-
   void setEventDataVersion(const EventDataVersion &version);
 
   void setEventDataVersion(::NeXus::File *const file);
@@ -125,7 +123,7 @@ private:
   /// identifier if the file open only for reading or is  in read/write
   bool m_ReadOnly;
   /// The size of the events block which can be written in the neXus array at
-  /// once (continious part of the data block)
+  /// once (continuous part of the data block)
   size_t m_dataChunk;
   /// shared pointer to the box controller, which is repsoponsible for this IO
   API::BoxController *const m_bc;
