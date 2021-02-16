@@ -20,7 +20,8 @@ DEFAULT_CHI_SQUARED = 0.0
 DEFAULT_FIT_STATUS = None
 DEFAULT_SINGLE_FIT_FUNCTION = None
 DEFAULT_START_X = 0.0
-DEFAULT_END_X = 15.0
+DEFAULT_FDA_END_X = 250.0
+DEFAULT_MA_END_X = 15.0
 
 FDA_GUESS_WORKSPACE = "__frequency_domain_analysis_fitting_guess"
 MA_GUESS_WORKSPACE = "__muon_analysis_fitting_guess"
@@ -43,8 +44,10 @@ class FitPlotInformation(NamedTuple):
 
 
 class BasicFittingModel:
-    def __init__(self, context):
+    def __init__(self, context, is_frequency_domain):
         self.context = context
+
+        self._default_end_x = DEFAULT_FDA_END_X if is_frequency_domain else DEFAULT_MA_END_X
 
         self._current_dataset_index = None
         self._dataset_names = []
@@ -134,7 +137,7 @@ class BasicFittingModel:
         if self.current_dataset_index is not None:
             return self.end_xs[self.current_dataset_index]
         else:
-            return DEFAULT_END_X
+            return self._default_end_x
 
     @current_end_x.setter
     def current_end_x(self, value):
@@ -181,7 +184,7 @@ class BasicFittingModel:
 
     def clear_cached_fit_functions(self):
         self.single_fit_functions_cache = [None] * self.number_of_datasets
-        self.remove_latest_fit_from_context()
+        self.remove_all_fits_from_context()
 
     @property
     def fit_statuses(self):
@@ -286,9 +289,9 @@ class BasicFittingModel:
         guess_workspace_name = self._evaluate_plot_guess(plot_guess)
         self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_workspace_name)
 
-    def remove_latest_fit_from_context(self):
-        """Removes the latest fit results from the context."""
-        self.context.fitting_context.remove_latest_fit()
+    def remove_all_fits_from_context(self):
+        """Removes all fit results from the context."""
+        self.context.fitting_context.remove_all_fits()
 
     def reset_current_dataset_index(self):
         """Resets the current dataset index stored by the model. This shouldn't be necessary."""
@@ -321,7 +324,7 @@ class BasicFittingModel:
 
     def _reset_end_xs(self):
         """Resets the end Xs stored by the model."""
-        end_x = self.current_end_x if len(self.end_xs) > 0 else DEFAULT_END_X
+        end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
         self.end_xs = [end_x] * self.number_of_datasets
 
     def retrieve_first_good_data_from_run(self, workspace_name):
