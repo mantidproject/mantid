@@ -261,10 +261,18 @@ class FigureInteraction(object):
                 legend_set_draggable(ax.get_legend(), False)
                 legend_texts = ax.get_legend().get_texts()
                 active_lines = datafunctions.get_legend_handles(ax)
+
+                remove_legend_flag = True  # remove the legend if no curve texts were clicked
                 for legend_text, curve in zip(legend_texts, active_lines):
                     if legend_text.contains(event)[0]:
+                        remove_legend_flag = False
                         move_and_show(LegendEditor(canvas, legend_text, curve))
                 legend_set_draggable(ax.get_legend(), True)
+
+                if remove_legend_flag:
+                    legend = ax.get_legend()
+                    legend.setVisible(False)
+                    canvas.draw()
 
     def _show_markers_menu(self, markers, event):
         """
