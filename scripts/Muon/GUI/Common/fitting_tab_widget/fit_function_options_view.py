@@ -4,12 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.api import IFunction
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 from Muon.GUI.Common.utilities import table_utils
 
-from qtpy import QtWidgets, QtCore
+from qtpy.QtWidgets import QWidget
 
 ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
 
@@ -24,9 +25,14 @@ RAW_DATA_TABLE_ROW = 3
 EVALUATE_AS_TABLE_ROW = 4
 
 
-class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
+class FitFunctionOptionsView(QWidget, ui_fit_function_options):
+    """
+    The FitFunctionOptionsView includes the Function Name line edit, FunctionBrowser and the fitting options table
+    widget. It also holds the Fit Status and Chi Squared labels.
+    """
 
-    def __init__(self, parent=None, is_frequency_domain=False):
+    def __init__(self, parent: QWidget = None, is_frequency_domain: bool = False):
+        """Initializes the FitFunctionOptionsView and sets up the fit options table and FunctionBrowser."""
         super(FitFunctionOptionsView, self).__init__(parent)
         self.setupUi(self)
 
@@ -49,153 +55,155 @@ class FitFunctionOptionsView(QtWidgets.QWidget, ui_fit_function_options):
             table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
             self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
-    def set_slot_for_fit_name_changed(self, slot):
+    def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
         self.function_name_line_edit.textChanged.connect(slot)
 
-    def set_slot_for_function_structure_changed(self, slot):
+    def set_slot_for_function_structure_changed(self, slot) -> None:
         """Connect the slot for the function structure changing."""
         self.function_browser.functionStructureChanged.connect(slot)
 
-    def set_slot_for_function_parameter_changed(self, slot):
+    def set_slot_for_function_parameter_changed(self, slot) -> None:
         """Connect the slot for a function parameter changing."""
         self.function_browser.parameterChanged.connect(slot)
 
-    def set_slot_for_start_x_updated(self, slot):
+    def set_slot_for_start_x_updated(self, slot) -> None:
         """Connect the slot for the start x option."""
         self.start_x_line_edit.editingFinished.connect(slot)
 
-    def set_slot_for_end_x_updated(self, slot):
+    def set_slot_for_end_x_updated(self, slot) -> None:
         """Connect the slot for the end x option."""
         self.end_x_line_edit.editingFinished.connect(slot)
 
-    def set_slot_for_minimizer_changed(self, slot):
+    def set_slot_for_minimizer_changed(self, slot) -> None:
         """Connect the slot for changing the Minimizer."""
         self.minimizer_combo.currentIndexChanged.connect(slot)
 
-    def set_slot_for_evaluation_type_changed(self, slot):
+    def set_slot_for_evaluation_type_changed(self, slot) -> None:
         """Connect the slot for changing the Evaluation type."""
         self.evaluation_combo.currentIndexChanged.connect(slot)
 
-    def set_slot_for_use_raw_changed(self, slot):
+    def set_slot_for_use_raw_changed(self, slot) -> None:
         """Connect the slot for the Use raw option."""
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
-    def update_fit_status_labels(self, output_status, output_chi_squared):
-        """Updates the fit status labels."""
-        if output_status == "success":
+    def update_fit_status_labels(self, fit_status: str, chi_squared: float) -> None:
+        """Updates the fit status and chi squared label."""
+        if fit_status == "success":
             self.fit_status_success_failure.setText("Success")
             self.fit_status_success_failure.setStyleSheet("color: green")
-        elif output_status is None:
+        elif fit_status is None:
             self.fit_status_success_failure.setText("No Fit")
             self.fit_status_success_failure.setStyleSheet("color: black")
         else:
-            self.fit_status_success_failure.setText(f"Failure: {output_status}")
+            self.fit_status_success_failure.setText(f"Failure: {fit_status}")
             self.fit_status_success_failure.setStyleSheet("color: red")
-        self.fit_status_chi_squared.setText(f"Chi squared: {output_chi_squared:.4g}")
+        self.fit_status_chi_squared.setText(f"Chi squared: {chi_squared:.4g}")
 
-    def clear_fit_status(self):
-        """Clears the fit status label."""
+    def clear_fit_status(self) -> None:
+        """Clears the fit status and chi squared label."""
         self.fit_status_success_failure.setText("No Fit")
         self.fit_status_success_failure.setStyleSheet("color: black")
         self.fit_status_chi_squared.setText(f"Chi squared: 0.0")
 
-    def set_datasets_in_function_browser(self, dataset_names):
+    def set_datasets_in_function_browser(self, dataset_names: list) -> None:
         """Sets the datasets stored in the FunctionBrowser."""
         index_list = range(self.function_browser.getNumberOfDatasets())
         self.function_browser.removeDatasets(index_list)
         self.function_browser.addDatasets(dataset_names)
 
-    def set_current_dataset_index(self, dataset_index):
+    def set_current_dataset_index(self, dataset_index: int) -> None:
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
-    def update_function_browser_parameters(self, is_simultaneous_fit, fit_function):
+    def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction) -> None:
         """Updates the parameters in the function browser."""
+        self.function_browser.blockSignals(True)
+
         if fit_function is None:
-            self.function_browser.blockSignals(True)
             self.function_browser.setFunction("")
-            self.function_browser.blockSignals(False)
         elif is_simultaneous_fit:
-            self.function_browser.blockSignals(True)
             self.function_browser.setFunction(str(fit_function))
-            self.function_browser.blockSignals(False)
         else:
-            self.function_browser.blockSignals(True)
             self.function_browser.updateParameters(fit_function)
-            self.function_browser.blockSignals(False)
+
+        self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
 
     @property
-    def fit_object(self):
+    def fit_object(self) -> IFunction:
         """Returns the global fitting function."""
         return self.function_browser.getGlobalFunction()
 
     @property
-    def minimizer(self):
+    def minimizer(self) -> str:
         """Returns the selected minimizer."""
         return str(self.minimizer_combo.currentText())
 
     @property
-    def start_x(self):
+    def start_x(self) -> float:
         """Returns the selected start X."""
         return float(self.start_x_line_edit.text())
 
     @start_x.setter
-    def start_x(self, value):
+    def start_x(self, value: float) -> None:
         """Sets the selected start X."""
         self.start_x_line_edit.setText(str(value))
 
     @property
-    def end_x(self):
+    def end_x(self) -> float:
         """Returns the selected end X."""
         return float(self.end_x_line_edit.text())
 
     @end_x.setter
-    def end_x(self, value):
+    def end_x(self, value: float) -> None:
         """Sets the selected end X."""
         self.end_x_line_edit.setText(str(value))
 
     @property
-    def evaluation_type(self):
+    def evaluation_type(self) -> str:
         """Returns the selected evaluation type."""
         return str(self.evaluation_combo.currentText())
 
     @property
-    def fit_to_raw(self):
+    def fit_to_raw(self) -> bool:
         """Returns whether or not fitting to raw data is ticked."""
         return self.fit_to_raw_data_checkbox.isChecked()
 
     @fit_to_raw.setter
-    def fit_to_raw(self, value):
+    def fit_to_raw(self, check: bool) -> None:
         """Sets whether or not you are fitting to raw data."""
-        self.fit_to_raw_data_checkbox.setCheckState(QtCore.Qt.Checked if value else QtCore.Qt.Unchecked)
+        self.fit_to_raw_data_checkbox.setChecked(check)
 
     @property
-    def function_name(self):
+    def function_name(self) -> str:
         """Returns the function name being used."""
         return str(self.function_name_line_edit.text())
 
     @function_name.setter
-    def function_name(self, function_name):
+    def function_name(self, function_name: str) -> None:
         """Sets the function name being used."""
         self.function_name_line_edit.blockSignals(True)
         self.function_name_line_edit.setText(function_name)
         self.function_name_line_edit.blockSignals(False)
 
-    def get_global_parameters(self):
+    def number_of_datasets(self) -> int:
+        """Returns the number of domains in the FunctionBrowser."""
+        return self.function_browser.getNumberOfDatasets()
+
+    def get_global_parameters(self) -> list:
         """Returns a list of global parameters."""
         return self.function_browser.getGlobalParameters()
 
-    def switch_to_simultaneous(self):
+    def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous mode."""
         self.function_browser.showGlobalCheckbox()
 
-    def switch_to_single(self):
+    def switch_to_single(self) -> None:
         """Switches the view to single mode."""
         self.function_browser.hideGlobalCheckbox()
 
-    def _setup_fit_options_table(self):
+    def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
         self.fit_options_table.setRowCount(5)
         self.fit_options_table.setColumnCount(2)

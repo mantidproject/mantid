@@ -14,7 +14,6 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, c
                                                          get_pair_asymmetry_name, get_pair_phasequad_name,
                                                          get_run_number_from_workspace_name,
                                                          get_run_numbers_as_string_from_workspace_name)
-from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.fitting_tab_widget.basic_fitting_model import (BasicFittingModel, FitPlotInformation,
                                                                     FDA_GUESS_WORKSPACE, MA_GUESS_WORKSPACE, FDA_SUFFIX,
                                                                     MA_SUFFIX)
@@ -25,10 +24,10 @@ from mantid import logger
 
 
 class GeneralFittingModel(BasicFittingModel):
-    def __init__(self, context):
-        super(GeneralFittingModel, self).__init__(context)
+    def __init__(self, context, is_frequency_domain):
+        super(GeneralFittingModel, self).__init__(context, is_frequency_domain)
 
-        self._x_data_type = self._get_x_data_type()
+        self._x_data_type = self.context._frequency_context.plot_type if is_frequency_domain else "None"
 
         self._group_or_pair_index = {}
 
@@ -41,7 +40,6 @@ class GeneralFittingModel(BasicFittingModel):
         self._simultaneous_fit_by_specifier = ""
 
         self._global_parameters = []
-        self._tf_asymmetry_mode = False  # TEMPORARY
 
     def clear_simultaneous_fit_function(self):
         self.simultaneous_fit_function = None
@@ -101,14 +99,6 @@ class GeneralFittingModel(BasicFittingModel):
     @global_parameters.setter
     def global_parameters(self, global_parameters):
         self._global_parameters = global_parameters
-
-    @property
-    def tf_asymmetry_mode(self):
-        return self._tf_asymmetry_mode
-
-    @tf_asymmetry_mode.setter
-    def tf_asymmetry_mode(self, tf_asymmetry_mode):
-        self._tf_asymmetry_mode = tf_asymmetry_mode
 
     def automatically_update_function_name(self):
         if self.function_name_auto_update:
@@ -208,13 +198,6 @@ class GeneralFittingModel(BasicFittingModel):
         workspace_list = self.context.data_context.current_data["OutputWorkspace"]
         return [get_run_numbers_as_string_from_workspace_name(workspace.workspace_name, instrument)
                 for workspace in workspace_list]
-
-    def _get_x_data_type(self):
-        """Returns the type of data in the x domain. Returns string "None" if it cannot be determined."""
-        if isinstance(self.context, FrequencyDomainAnalysisContext):
-            return self.context._frequency_context.plot_type
-        else:
-            return "None"
 
     def _get_workspace_names_to_display_from_context(self, runs, group_and_pair):
         """Returns the workspace names for the given runs and group/pair to be displayed in the view."""
@@ -412,67 +395,66 @@ class GeneralFittingModel(BasicFittingModel):
     ##  Old
     ##############################
 
-    # sequential fitting
-    def evaluate_sequential_fit(self, workspaces, use_initial_values):
-        # workspaces are stored as list of list [[Fit1 workspaces], [Fit2 workspaces], [Fit3 workspaces]]
-        if not self.simultaneous_fitting_mode:
-            # flatten the workspace list
-            workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
-            if self.tf_asymmetry_mode:
-                function_object, output_status, output_chi_squared = self.do_sequential_tf_fit(workspace_list,
-                                                                                               use_initial_values)
-            else:
-                function_object, output_status, output_chi_squared = self.do_sequential_fit(workspace_list,
-                                                                                            use_initial_values)
-        else:
-            # in a simultaneous-sequential fit, each fit corresponds to a list of workspaces
-            if self.tf_asymmetry_mode:
-                function_object, output_status, output_chi_squared = \
-                    self.do_sequential_simultaneous_tf_fit(workspaces, use_initial_values)
-            else:
-                function_object, output_status, output_chi_squared = \
-                    self.do_sequential_simultaneous_fit(workspaces, use_initial_values)
-
-        return function_object, output_status, output_chi_squared
-
-    def do_sequential_fit(self, workspace_list, use_initial_values=False):
-        function_object_list = []
-        output_status_list = []
-        output_chi_squared_list = []
-
-        for i, input_workspace in enumerate(workspace_list):
-            params = self.get_parameters_for_single_fit(input_workspace)
-
-            if not use_initial_values and i >= 1:
-                previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-                self._set_fit_function_parameter_values(params['Function'],
-                                                       previous_values)
-
-            function_object, output_status, output_chi_squared = self.do_single_fit(params)
-
-            function_object_list.append(function_object)
-            output_status_list.append(output_status)
-            output_chi_squared_list.append(output_chi_squared)
-
-        return function_object_list, output_status_list, output_chi_squared_list
-
-    def do_sequential_simultaneous_fit(self, workspaces, use_initial_values=False):
-        function_object_list = []
-        output_status_list = []
-        output_chi_squared_list = []
-
-        # workspaces defines a list of lists [[ws1,ws2],[ws1,ws2]...]
-        for i, workspace_list in enumerate(workspaces):
-            params = self._get_parameters_for_simultaneous_fit(workspace_list)
-
-            if not use_initial_values and i >= 1:
-                previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-                self._set_fit_function_parameter_values(params['Function'], previous_values)
-
-            function_object, output_status, output_chi_squared = \
-                self.do_simultaneous_fit(params, self.global_parameters)
-            function_object_list.append(function_object)
-            output_status_list.append(output_status)
-            output_chi_squared_list.append(output_chi_squared)
-
-        return function_object_list, output_status_list, output_chi_squared_list
+    # def evaluate_sequential_fit(self, workspaces, use_initial_values):
+    #     # workspaces are stored as list of list [[Fit1 workspaces], [Fit2 workspaces], [Fit3 workspaces]]
+    #     if not self.simultaneous_fitting_mode:
+    #         # flatten the workspace list
+    #         workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
+    #         if self.tf_asymmetry_mode:
+    #             function_object, output_status, output_chi_squared = self.do_sequential_tf_fit(workspace_list,
+    #                                                                                            use_initial_values)
+    #         else:
+    #             function_object, output_status, output_chi_squared = self.do_sequential_fit(workspace_list,
+    #                                                                                         use_initial_values)
+    #     else:
+    #         # in a simultaneous-sequential fit, each fit corresponds to a list of workspaces
+    #         if self.tf_asymmetry_mode:
+    #             function_object, output_status, output_chi_squared = \
+    #                 self.do_sequential_simultaneous_tf_fit(workspaces, use_initial_values)
+    #         else:
+    #             function_object, output_status, output_chi_squared = \
+    #                 self.do_sequential_simultaneous_fit(workspaces, use_initial_values)
+    #
+    #     return function_object, output_status, output_chi_squared
+    #
+    # def do_sequential_fit(self, workspace_list, use_initial_values=False):
+    #     function_object_list = []
+    #     output_status_list = []
+    #     output_chi_squared_list = []
+    #
+    #     for i, input_workspace in enumerate(workspace_list):
+    #         params = self.get_parameters_for_single_fit(input_workspace)
+    #
+    #         if not use_initial_values and i >= 1:
+    #             previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
+    #             self._set_fit_function_parameter_values(params['Function'],
+    #                                                    previous_values)
+    #
+    #         function_object, output_status, output_chi_squared = self.do_single_fit(params)
+    #
+    #         function_object_list.append(function_object)
+    #         output_status_list.append(output_status)
+    #         output_chi_squared_list.append(output_chi_squared)
+    #
+    #     return function_object_list, output_status_list, output_chi_squared_list
+    #
+    # def do_sequential_simultaneous_fit(self, workspaces, use_initial_values=False):
+    #     function_object_list = []
+    #     output_status_list = []
+    #     output_chi_squared_list = []
+    #
+    #     # workspaces defines a list of lists [[ws1,ws2],[ws1,ws2]...]
+    #     for i, workspace_list in enumerate(workspaces):
+    #         params = self._get_parameters_for_simultaneous_fit(workspace_list)
+    #
+    #         if not use_initial_values and i >= 1:
+    #             previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
+    #             self._set_fit_function_parameter_values(params['Function'], previous_values)
+    #
+    #         function_object, output_status, output_chi_squared = \
+    #             self.do_simultaneous_fit(params, self.global_parameters)
+    #         function_object_list.append(function_object)
+    #         output_status_list.append(output_status)
+    #         output_chi_squared_list.append(output_chi_squared)
+    #
+    #     return function_object_list, output_status_list, output_chi_squared_list

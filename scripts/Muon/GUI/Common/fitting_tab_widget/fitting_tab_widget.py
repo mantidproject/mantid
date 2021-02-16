@@ -16,13 +16,15 @@ class FittingTabWidget(object):
         is_frequency_domain = isinstance(context, FrequencyDomainAnalysisContext)
 
         self.general_fitting_view = GeneralFittingView(parent, is_frequency_domain)
-        self.general_fitting_model = GeneralFittingModel(context)
+        self.general_fitting_model = GeneralFittingModel(context, is_frequency_domain)
         self.general_fitting_presenter = GeneralFittingPresenter(self.general_fitting_view, self.general_fitting_model)
 
         self.fitting_tab_view = FittingTabView(parent, context, self.general_fitting_view)
 
         self.general_fitting_presenter.reset_tab_notifier.add_subscriber(
             self.fitting_tab_view.reset_tab_observer)
+        self.general_fitting_presenter.enable_editing_notifier.add_subscriber(
+            self.fitting_tab_view.enable_tab_observer)
 
         context.update_view_from_model_notifier.add_subscriber(
             self.general_fitting_presenter.update_view_from_model_observer)
