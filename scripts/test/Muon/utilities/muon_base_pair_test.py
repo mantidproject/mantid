@@ -29,16 +29,6 @@ class MuonBasePairTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             MuonBasePair()
 
-    def test_that_MuonBasePair_name_is_set_correctly(self):
-        pair = MuonBasePair(pair_name="pair1")
-        self.assertEqual(pair.name, "pair1")
-
-    def test_that_cannot_set_new_name_on_pair(self):
-        pair = MuonBasePair(pair_name="pair1")
-        with self.assertRaises(AttributeError):
-            pair.name = "new_name"
-        self.assertEqual(pair.name, "pair1")
-
     def test_that_can_only_set_workspace_if_MuonWorkspace_object(self):
         pair = MuonBasePair(pair_name="pair1")
         self.assertEqual(pair.workspace, {})

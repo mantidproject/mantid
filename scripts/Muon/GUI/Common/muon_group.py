@@ -12,7 +12,7 @@ import itertools
 
 
 class MuonDiff(MuonBase):
-    def __init__(self,diff_name,positive,negative, group_or_pair="group", periods =[1]):
+    def __init__(self, diff_name, positive, negative, group_or_pair="group", periods =[1]):
         super(MuonDiff, self).__init__(diff_name, periods)
         self._positive = positive
         self._negative = negative
