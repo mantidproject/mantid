@@ -306,9 +306,9 @@ public:
 
     // insert goniometerIndex
     pSaver->adjustEventDataBlock(blockREAD, "READ");
-    std::vector<float> expectedREAD
-        {1.,  2.,  3.,  0.,   4.,   -1., -2., -3., -4.,
-         10.,  20.,  30., 0.,  40., -10., -20., -30., -40.};
+    std::vector<float> expectedREAD{1.,  2.,  3.,   0.,   4.,   -1.,
+                                    -2., -3., -4.,  10.,  20.,  30.,
+                                    0.,  40., -10., -20., -30., -40.};
 
     TS_ASSERT_EQUALS(blockREAD.size(), expectedREAD.size());
     for (size_t i = 0; i < blockREAD.size(); i++)
@@ -316,13 +316,13 @@ public:
 
     // A data block is to be written to the file, containing two events.
     // Each event has 9 items
-    std::vector<float> blockWRITE
-        {1.,  2.,   3.,   0.,   4.0,  -1., -2., -3.,  -4.,
-         10.,  20.,  30., 0.,  40.0, -10., -20., -30., -40.};
+    std::vector<float> blockWRITE{1.,  2.,   3.,   0.,   4.0,  -1.,
+                                  -2., -3.,  -4.,  10.,  20.,  30.,
+                                  0.,  40.0, -10., -20., -30., -40.};
     pSaver->adjustEventDataBlock(blockWRITE, "WRITE"); // remove goniometerIndex
-    std::vector<float> expectedWRITE
-        {1.,   2.,   3.,   4.0, -1., -2., -3.,  -4.,
-         10.,  20., 30., 40.0, -10., -20., -30., -40.};
+    std::vector<float> expectedWRITE{1.,   2.,   3.,   4.0, -1., -2.,
+                                     -3.,  -4.,  10.,  20., 30., 40.0,
+                                     -10., -20., -30., -40.};
     TS_ASSERT_EQUALS(blockWRITE.size(), expectedWRITE.size());
     for (size_t i = 0; i < blockWRITE.size(); i++)
       TS_ASSERT_DELTA(blockWRITE[i], expectedWRITE[i], 1.e-6);

@@ -456,7 +456,7 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
         }
         Block[blockCounter] = 0; // here's the goniometer index!
         blockCounter++;
-        for (size_t j = 3; j < eventSize; j++){
+        for (size_t j = 3; j < eventSize; j++) {
           Block[blockCounter] = backupBlock[backupBlockCounter];
           blockCounter++;
           backupBlockCounter++;
@@ -478,13 +478,13 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
       size_t backupBlockCounter(0);
       for (size_t i = 0; i < eventCount; i++) {
         // signal, error, and runIndex occupy the first three data items
-        for (size_t j = 0; j < 3; j++){
+        for (size_t j = 0; j < 3; j++) {
           Block[blockCounter] = backupBlock[backupBlockCounter];
           blockCounter++;
           backupBlockCounter++;
         }
         backupBlockCounter++; // skip the goniometer index
-        for (size_t j = 3; j < eventSize; j++){
+        for (size_t j = 3; j < eventSize; j++) {
           Block[blockCounter] = backupBlock[backupBlockCounter];
           blockCounter++;
           backupBlockCounter++;
