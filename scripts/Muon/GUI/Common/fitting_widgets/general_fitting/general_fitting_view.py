@@ -120,7 +120,7 @@ class GeneralFittingView(BasicFittingView):
     @is_simultaneous_fit_ticked.setter
     def is_simultaneous_fit_ticked(self, simultaneous: bool) -> None:
         """Sets whether or not you are in simultaneous mode."""
-        self.general_fitting_options.is_simultaneous_fit_ticked(simultaneous)
+        self.general_fitting_options.is_simultaneous_fit_ticked = simultaneous
 
     def setup_fit_by_specifier(self, specifiers: list) -> None:
         """Setup the fit by specifier combo box."""
