@@ -55,7 +55,8 @@ void SCDCalibratePanels2::init() {
   // Lattice constant group
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("RecalculateUB", true);
+  declareProperty("RecalculateUB", true,
+                  "Recalculate UB matrix using given lattice constants");
   declareProperty("a", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter a (Leave empty to use lattice constants "
                   "in peaks workspace)");
@@ -188,6 +189,22 @@ std::map<std::string, std::string> SCDCalibratePanels2::validateInputs() {
   if (calibrateT0)
     issues["CalibrateT0"] = "Caliration of T0 is not ready for production, "
                             "please set it to False to continue";
+
+  // Lattice constants are required if no UB is attached to the input
+  // peak workspace
+  PeaksWorkspace_sptr pws = getProperty("PeakWorkspace");
+  double a = getProperty("a");
+  double b = getProperty("b");
+  double c = getProperty("c");
+  double alpha = getProperty("alpha");
+  double beta = getProperty("beta");
+  double gamma = getProperty("gamma");
+  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
+       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
+      (!pws->sample().hasOrientedLattice())) {
+    issues["RecalculateUB"] = "Lattice constants are needed for peak "
+                              "workspace without a UB mattrix";
+  }
 
   return issues;
 }
