@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import MultiDomainFunction
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObservable, GenericObserver
-from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
+from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
@@ -153,7 +153,9 @@ class BasicFittingPresenter:
 
     def handle_fit_generator_clicked(self) -> None:
         """Handle when the Fit Generator button has been clicked."""
-        self._open_fit_script_generator_interface(self.model.dataset_names, self._get_fit_browser_options())
+        fitting_mode = FittingMode.SIMULTANEOUS if self.model.simultaneous_fitting_mode else FittingMode.SEQUENTIAL
+        self._open_fit_script_generator_interface(self.model.dataset_names, fitting_mode,
+                                                  self._get_fit_browser_options())
 
     def handle_function_name_changed_by_user(self) -> None:
         """Handle when the fit name is changed by the user."""
@@ -277,9 +279,7 @@ class BasicFittingPresenter:
 
     def _get_fit_browser_options(self) -> dict:
         """Returns the fitting options to use in the Fit Script Generator interface."""
-        return {"FittingType": "Simultaneous" if self.model.simultaneous_fitting_mode else "Sequential",
-                "Minimizer": self.model.minimizer,
-                "EvaluationType": self.model.evaluation_type}
+        return {"Minimizer": self.model.minimizer, "EvaluationType": self.model.evaluation_type}
 
     def _perform_fit(self) -> None:
         """Perform the fit in a thread."""
@@ -297,10 +297,11 @@ class BasicFittingPresenter:
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return ThreadModel(self.fitting_calculation_model)
 
-    def _open_fit_script_generator_interface(self, workspaces: list, fit_options: dict) -> None:
+    def _open_fit_script_generator_interface(self, workspaces: list, fitting_mode: FittingMode,
+                                             fit_options: dict) -> None:
         """Open the Fit Script Generator interface."""
         self.fsg_model = FitScriptGeneratorModel()
-        self.fsg_view = FitScriptGeneratorView(None, fit_options)
+        self.fsg_view = FitScriptGeneratorView(None, fitting_mode, fit_options)
         self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, workspaces,
                                                          self.view.start_x, self.view.end_x)
 
