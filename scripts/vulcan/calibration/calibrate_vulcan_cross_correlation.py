@@ -187,7 +187,8 @@ def test_main_report_calibration():
 def test_main_apply_calibration():
     # Load raw workspace
     # Load data
-    diamond_nexus = '/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5'
+    # diamond_nexus = '/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5'
+    diamond_nexus = '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'
     load_cutoff_time = None   # seconds
     diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time, unit_dspace=False)
 
@@ -195,12 +196,13 @@ def test_main_apply_calibration():
     # Round 1:
     # calib_file_name = 'vulcan_cc_1fit.h5'
     # calib_file_name = 'VULCAN_pdcalibration.h5'
+    calib_file_name='VULCAN_calibration_pre_beta.h5'
 
     # Round 2:
-    calib_file_name = 'VULCAN_calibration_pd2.h5'
+    # calib_file_name = 'VULCAN_calibration_pd2.h5'
 
     # Load calibration file
-    calib_tuple = load_calibration_file(calib_file_name, 'Vulcan_Testing_Calib', diamond_ws_name)
+    calib_tuple = load_calibration_file(calib_file_name, 'VulcanX_PD_Calib', diamond_ws_name)
     calib_cal_ws = calib_tuple.OutputCalWorkspace
     calib_group_ws = calib_tuple.OutputGroupingWorkspace
     calib_mask_ws = calib_tuple.OutputMaskWorkspace
@@ -210,9 +212,9 @@ def test_main_apply_calibration():
 
 
 def test_main_calibrate():
-    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5',
+    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5',
                      load_cutoff_time=None,  # 300
-                     difc_file_name='vulcan_cc_21356.h5')
+                     difc_file_name='VULCAN_calibration_cc_beta.h5')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from mantid.simpleapi import (LoadEventAndCompress, CropWorkspace,
+from mantid.simpleapi import (LoadEventAndCompress, CropWorkspace, Plus,
                               PDCalibration, SaveDiffCal, mtd, LoadInstrument,
                               AlignDetectors, Rebin, SaveNexusProcessed, CreateGroupingWorkspace)
 from mantid.simpleapi import LoadEventNexus
@@ -9,17 +9,25 @@ instrument = "VULCAN"
 def main_calibration(load_full=False, bin_step=-.001):
 
     # Define diamond run and vanadium run (None)
-    dia_run = 164960
-    dia_run = 192217
-    dia_run = 192230
+    # dia_run = 164960
+    # dia_run = 192217
+    dia_runs = [192227, 192228, 192229, 192230]
 
     # Load data and process
-    dia_wksp = "%s_%d" % (instrument, dia_run)
+    dia_wksp = "%s_%d" % (instrument, dia_runs[0])
 
     bad_pulse_threshold = 10
     if load_full:
         # Load full size data
         LoadEventNexus(Filename=dia_wksp, OutputWorkspace=dia_wksp)
+        # Load more files
+        for file_index in range(1, 4):
+            dia_wksp_i = "%s_%d" % (instrument, dia_runs[file_index])
+            LoadEventNexus(Filename=dia_wksp_i, OutputWorkspace=dia_wksp_i)
+            Plus(LHSWorkspace=dia_wksp,
+                 RHSWorkspace=dia_wksp_i,
+                 OutputWorkspace=dia_wksp, ClearRHSWorkspace=True)
+        # Reload insturment (do not trust the old one)
         LoadInstrument(Workspace=dia_wksp,
                        Filename='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/vulcan-x-alpha/VULCAN_Definition_pete02.xml',
                        MonitorList='-3--2', InstrumentName='VULCAN', RewriteSpectraMap=True)
@@ -68,7 +76,7 @@ def main_calibration(load_full=False, bin_step=-.001):
                                        OutputWorkspace=group_ws_name)
 
     SaveNexusProcessed(InputWorkspace=instrument, Filename=f'cal_table.nxs')
-    SaveNexusProcessed(InputWorkspace=group_ws_name, Filename=f'group_table.nxs')
+    # FIXME - group workspace cannot be saved SaveNexusProcessed(InputWorkspace=group_ws_name, Filename=f'group_table.nxs')
 
     assert group_ws
 
