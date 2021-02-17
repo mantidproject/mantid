@@ -17,11 +17,13 @@ set ( VERSION_MINOR 0 )
 # pep440 is incompatible with semantic versioning
 # https://www.python.org/dev/peps/pep-0440/
 # example: First release cadidate for tweak 1 is ".1rc.1"
-string ( REPLACE "-rc."
-                 "rc"
-                 VERSION_TWEAK_PY
-                 ${VERSION_TWEAK})
-string ( REPLACE "-"
-                 "."
-                 VERSION_TWEAK_PY
-                 ${VERSION_TWEAK_PY})
+if ( VERSION_TWEAK )
+  string ( REPLACE "-rc."
+                   "rc"
+                   VERSION_TWEAK_PY
+                   ${VERSION_TWEAK})
+  string ( REPLACE "-"
+                   "."
+                   VERSION_TWEAK_PY
+                   ${VERSION_TWEAK_PY})
+endif()
