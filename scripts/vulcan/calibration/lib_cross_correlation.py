@@ -318,7 +318,7 @@ def cross_correlate_calibrate(ws_name: str,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
         # TODO FIXME - may remove this save effort later
-        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'{offset_ws_name}.nxs')
+        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'CC_Step1_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
         raise run_err
