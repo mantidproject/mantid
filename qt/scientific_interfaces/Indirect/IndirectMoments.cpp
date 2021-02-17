@@ -84,7 +84,9 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectMoments::~IndirectMoments() {}
+IndirectMoments::~IndirectMoments() {
+  m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager);
+}
 
 void IndirectMoments::setup() {}
 

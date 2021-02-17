@@ -15,7 +15,6 @@ add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
 add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
-add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
 set(TEST_FILES

@@ -85,7 +85,6 @@ set(SRC_FILES
     src/MinusMD.cpp
     src/MultiplyMD.cpp
     src/NotMD.cpp
-    src/OneStepMDEW.cpp
     src/OrMD.cpp
     src/PlusMD.cpp
     src/PowerMD.cpp
@@ -202,7 +201,6 @@ set(
   inc/MantidMDAlgorithms/MinusMD.h
   inc/MantidMDAlgorithms/MultiplyMD.h
   inc/MantidMDAlgorithms/NotMD.h
-  inc/MantidMDAlgorithms/OneStepMDEW.h
   inc/MantidMDAlgorithms/OrMD.h
   inc/MantidMDAlgorithms/PlusMD.h
   inc/MantidMDAlgorithms/PowerMD.h
@@ -310,7 +308,6 @@ set(TEST_FILES
     MinusMDTest.h
     MultiplyMDTest.h
     NotMDTest.h
-    OneStepMDEWTest.h
     OrMDTest.h
     PlusMDTest.h
     PowerMDTest.h

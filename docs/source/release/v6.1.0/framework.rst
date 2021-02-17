@@ -54,4 +54,6 @@ Improvements
 Bugfixes
 ########
 
+- Fix problem with dictionary parameters on :ref:`SetSample <algm-SetSample>` algorithm when running from the algorithm dialog
+
 :ref:`Release 6.1.0 <v6.1.0>`

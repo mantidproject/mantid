@@ -73,6 +73,7 @@ public:
   };
 
   explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
+  ~InstrumentWidgetMaskTab();
   void initSurface() override;
   void setMode(Mode mode);
   void selectTool(Activity tool);

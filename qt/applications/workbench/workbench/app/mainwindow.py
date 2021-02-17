@@ -135,6 +135,8 @@ class MainWindow(QMainWindow):
         self.messagedisplay = LogMessageDisplay(self)
         # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
+        # read settings early so that logging level is in place before framework mgr created
+        self.messagedisplay.readSettings(CONF)
         self.widgets.append(self.messagedisplay)
 
         self.set_splash("Loading Algorithm Selector")
@@ -722,8 +724,8 @@ class MainWindow(QMainWindow):
         # read in settings for children
         AlgorithmInputHistory().readSettings(settings)
         for widget in self.widgets:
-            if hasattr(widget, 'readSettings'):
-                widget.readSettings(settings)
+            if hasattr(widget, 'readSettingsIfNotDone'):
+                widget.readSettingsIfNotDone(settings)
 
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize

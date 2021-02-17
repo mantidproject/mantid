@@ -142,7 +142,6 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   m_configPaths.insert("mantidqt.python_interfaces_directory");
   m_configPaths.insert("framework.plugins.directory");
-  m_configPaths.insert("pvplugins.directory");
   m_configPaths.insert("mantidqt.plugins.directory");
   m_configPaths.insert("instrumentDefinition.directory");
   m_configPaths.insert("instrumentDefinition.vtpDirectory");
