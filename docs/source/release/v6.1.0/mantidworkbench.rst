@@ -8,6 +8,8 @@ Mantid Workbench Changes
 New and Improved
 ----------------
 
+- It is now possible to overplot bin data from the matrix workspace view.
+
 Bugfixes
 --------
 
