@@ -319,6 +319,12 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         peak->setIntMNP(std::get<1>(satelliteInfo));
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+      } else {
+        // clear these to make sure leftover values from previous index peaks
+        // run are not used
+        peak->setHKL(V3D(0, 0, 0));
+        peak->setIntHKL(V3D(0, 0, 0));
+        peak->setIntMNP(V3D(0, 0, 0));
       }
     } else {
       peak->setHKL(V3D(0, 0, 0));
@@ -459,8 +465,8 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
   bool isAllVecZero = true;
-  // parse() validates all the mod vectors. There should not be any modulated vector
-  // in modVectors is equal to (0, 0, 0)
+  // parse() validates all the mod vectors. There should not be any modulated
+  // vector in modVectors is equal to (0, 0, 0)
   for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
@@ -510,18 +516,21 @@ void IndexPeaks::exec() {
       lattice.setModVec1(args.satellites.modVectors[0]);
     } else {
       g_log.warning("empty modVector 1, skipping saving");
+      lattice.setModVec1(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 2) {
       lattice.setModVec2(args.satellites.modVectors[1]);
     } else {
       g_log.warning("empty modVector 2, skipping saving");
+      lattice.setModVec2(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 3) {
       lattice.setModVec3(args.satellites.modVectors[2]);
     } else {
       g_log.warning("empty modVector 3, skipping saving");
+      lattice.setModVec3(V3D(0.0, 0.0, 0.0));
     }
   }
 

@@ -550,7 +550,7 @@ public:
                                          {"ModVector1", "0.5, 0.5, 0"},
                                          {"SaveModulationInfo", "1"}});
 
-    for (auto i = 0u; i < peakWS->getNumberPeaks(); ++i) {
+    for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
       const auto &peak_onemod = peakWS_onemod->getPeak(i);
       const auto &peak = peakWS->getPeak(i);
       // Verify the HKL and MNP of each peak since these would change if the
