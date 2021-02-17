@@ -1,9 +1,10 @@
 # Zoo of methods that are develooped for analyze the calibration
 from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, DiffractionFocussing, Rebin,
                               ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed,
-                              MaskDetectors)
+                              MaskDetectors, ConvertUnits)
 from mantid.simpleapi import mtd
 import numpy as np
+from typing import Union
 
 
 class FindDiamondPeaks(object):
@@ -177,30 +178,46 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
     return report
 
 
-def align_focus_event_ws(event_ws_name, calib_ws_name: str, group_ws_name: str, mask_ws_name: str):
+def align_focus_event_ws(event_ws_name,
+                         calib_ws_name: Union[str, None],
+                         group_ws_name: str,
+                         mask_ws_name: Union[str, None]):
     """
     overwrite the input
     """
-    # Align detector
+    # determine tag
+    file_tag = ''
+
+    # Align detector or not
     print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
 
     if calib_ws_name:
+        # align detectors and convert unit to dSpacing
         AlignDetectors(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                        CalibrationWorkspace=calib_ws_name)
+        file_tag += '_Cal'
 
-        matrix_ws_name = f'{event_ws_name}_matrix'
-        Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
-        ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
-        SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=f'{event_ws_name}_aligned.nxs')
-        print(f'[CHECK] saved aligned workspace size: {mtd[matrix_ws_name].extractY().shape}')
+    else:
+        # optionally not align detectors: convert to dSpacing
+        ConvertUnits(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Target='dSpacing')
+        file_tag += '_Raw'
 
-    # Get units
-    event_ws = mtd[event_ws_name]
-    assert event_ws.getAxis(0).getUnit().unitID() == 'dSpacing', f'Expecting {event_ws_name} to be dSpacing but ' \
-                                                                 f'it is {event_ws.getAxis(0).getUnit().unitID()}'
+    # Rebin
+    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
+    # Convert to matrix workspace
+    matrix_ws_name = f'{event_ws_name}_matrix'
+    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
-    # Mask group worksapce
-    MaskDetectors(Workspace=group_ws_name, MaskedWorkspace=mask_ws_name)
+    # Save nexus for 2D alignment view
+    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=f'{event_ws_name}{file_tag}.nxs')
+    print(f'[CHECK] saved aligned workspace size: {mtd[matrix_ws_name].extractY().shape}')
+
+    # Mask group workspace
+    if mask_ws_name:
+        MaskDetectors(Workspace=group_ws_name, MaskedWorkspace=mask_ws_name)
+        file_tag += 'Masked'
+    else:
+        file_tag += '_Nomask'
 
     # Diffraction focus
     DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,

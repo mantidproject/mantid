@@ -1,8 +1,7 @@
-from mantid_helper import mtd_convert_units, load_nexus, load_calibration_file
+from mantid_helper import mtd_convert_units, load_nexus
 from lib_cross_correlation import (cross_correlate_vulcan_data,
                                    verify_vulcan_difc,
                                    save_calibration, merge_detector_calibration)
-from lib_analysis import (align_focus_event_ws)
 import os
 from mantid.simpleapi import (CreateGroupingWorkspace,
                               ConvertToMatrixWorkspace,
@@ -146,69 +145,9 @@ def calibrate_vulcan(diamond_nexus: str,
                      calib_file_prefix='vulcan_cc_1fit')
 
 
-def test_main_report_calibration():
-    """(Testing) main to import a calibration file and make reports
-    """
-    # Set up
-    # calib_file = 'pdcalibration/VULCAN_pdcalibration.h5'
-    calib_file = 'vulcan_cc_1fit.h5'
-    counts_file = 'VULCAN_164960_matrix.nxs'
-
-    # Load counts for each pixel
-    diamond_count_ws = LoadNexusProcessed(Filename=counts_file, OutputWorkspace='Diamond_Counts')
-    # counts_vec = diamond_count_ws.extractY().sum(axis=1).flatten()
-
-    # Load calibration file
-    calib_ws_tuple = load_calibration_file(calib_file,
-                                           output_name='VULCAN_calibration',
-                                           ref_ws_name=str(diamond_count_ws))
-
-    # FIXME - This is hard coded and bound to VULCAN but not VULCAN-X
-    pixels_range = {'west': (0, 3234),
-                    'east': (3234, 6468),
-                    'high angle': (6468, None)}
-
-    # Report offsets
-    verify_vulcan_difc(ws_name=str(diamond_count_ws),
-                       cal_table_name=str(calib_ws_tuple.OutputCalWorkspace),
-                       mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace),
-                       fallback_incorrect_difc_pixels=False,
-                       mask_incorrect_difc_pixels=False)
-
-    # Report masks
-    from lib_analysis import report_masked_pixels
-    for bank in ['west', 'east', 'high angle']:
-        print(f'[MASK] Bank {bank}')
-        report = report_masked_pixels(diamond_count_ws, calib_ws_tuple.OutputMaskWorkspace,
-                                      pixels_range[bank][0], pixels_range[bank][1])
-        print(report)
 
 
-def test_main_apply_calibration():
-    # Load raw workspace
-    # Load data
-    # diamond_nexus = '/SNS/VULCAN/IPTS-21356/nexus/VULCAN_164960.nxs.h5'
-    diamond_nexus = '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'
-    load_cutoff_time = None   # seconds
-    diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time, unit_dspace=False)
 
-    # Specify a specific calibration file
-    # Round 1:
-    # calib_file_name = 'vulcan_cc_1fit.h5'
-    # calib_file_name = 'VULCAN_pdcalibration.h5'
-    calib_file_name='VULCAN_calibration_pre_beta.h5'
-
-    # Round 2:
-    # calib_file_name = 'VULCAN_calibration_pd2.h5'
-
-    # Load calibration file
-    calib_tuple = load_calibration_file(calib_file_name, 'VulcanX_PD_Calib', diamond_ws_name)
-    calib_cal_ws = calib_tuple.OutputCalWorkspace
-    calib_group_ws = calib_tuple.OutputGroupingWorkspace
-    calib_mask_ws = calib_tuple.OutputMaskWorkspace
-
-    # Align, focus and export
-    align_focus_event_ws(diamond_ws_name, str(calib_cal_ws), str(calib_group_ws), str(calib_mask_ws))
 
 
 def test_main_calibrate():
@@ -221,8 +160,6 @@ if __name__ == '__main__':
     choice = '3'
     if choice == '1':
         test_main_calibrate()
-    elif choice == '2':
-        test_main_report_calibration()
     elif choice == '3':
         test_main_apply_calibration()
     else:
