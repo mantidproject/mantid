@@ -20,12 +20,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
@@ -257,8 +259,12 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
+    inc/MantidQtWidgets/Common/FitDomain.h
+    inc/MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+    inc/MantidQtWidgets/Common/FittingGlobals.h
+    inc/MantidQtWidgets/Common/FittingMode.h
     inc/MantidQtWidgets/Common/FlowLayout.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
@@ -448,12 +454,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
@@ -652,8 +660,11 @@ set(
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/GraphOptions.h
   inc/MantidQtWidgets/Common/DistributionOptions.h
+  inc/MantidQtWidgets/Common/FitDomain.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+  inc/MantidQtWidgets/Common/FittingGlobals.h
+  inc/MantidQtWidgets/Common/FittingMode.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
@@ -1019,9 +1030,11 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitDomainTest.h
   test/FitOptionsBrowserTest.h
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h
+  test/FitScriptGeneratorModelTest.h
   test/FitScriptGeneratorPresenterTest.h
   test/FitScriptGeneratorViewTest.h
   test/FunctionTreeViewTest.h
