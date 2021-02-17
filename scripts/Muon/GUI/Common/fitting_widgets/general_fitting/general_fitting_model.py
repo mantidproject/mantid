@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService, FunctionFactory, IFunction, MultiDomainFunction
-from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry, CopyLogs
+from mantid.simpleapi import RenameWorkspace, CopyLogs
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
@@ -15,9 +15,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, c
                                                          get_run_number_from_workspace_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import (BasicFittingModel, FitPlotInformation,
-                                                                               FDA_GUESS_WORKSPACE, MA_GUESS_WORKSPACE,
-                                                                               FDA_SUFFIX, MA_SUFFIX)
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
