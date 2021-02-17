@@ -88,14 +88,13 @@ void GetEi2::init()
       "The energy of neutron in meV, it is also printed to the Mantid's log",
       Direction::Output);
 
-  declareProperty(
-      "FirstMonitorPeak", -1.0,
-      "The time in :math:`\\rm{\\mu s}` when the count rate of the "
-      "first monitor, which defaults to the last monitor the beam "
-      "hits before the sample, is greatest. It is the mean X value "
-      "for the bin with the highest number of counts per second "
-      "and is also writen to Mantid's log.",
-      Direction::Output);
+  declareProperty("FirstMonitorPeak", -1.0,
+                  "The time in :math:`\\rm{\\mu s}` when the count rate of the "
+                  "first monitor, which defaults to the last monitor the beam "
+                  "hits before the sample, is greatest. It is the mean X value "
+                  "for the bin with the highest number of counts per second "
+                  "and is also writen to Mantid's log.",
+                  Direction::Output);
 
   declareProperty(
       "FirstMonitorIndex", 0,
