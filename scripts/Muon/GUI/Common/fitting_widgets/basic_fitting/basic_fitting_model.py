@@ -536,7 +536,8 @@ class BasicFittingModel:
         if not plot_guess or self.current_dataset_name is None:
             return None
 
-        if fit_function := self._get_plot_guess_fit_function():
+        fit_function = self._get_plot_guess_fit_function()
+        if fit_function is not None:
             return self._evaluate_function(fit_function, self._get_plot_guess_name())
         return None
 

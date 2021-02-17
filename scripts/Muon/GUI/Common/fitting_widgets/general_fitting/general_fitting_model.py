@@ -384,7 +384,8 @@ class GeneralFittingModel(BasicFittingModel):
     def _update_fit_function_parameters_for_single_fit(self, dataset_names: list, parameter_values: list) -> None:
         """Updates the function parameters for the given dataset names if in single fit mode."""
         for name in dataset_names:
-            if fit_function := self.get_single_fit_function_for(name):
+            fit_function = self.get_single_fit_function_for(name)
+            if fit_function is not None:
                 self._set_fit_function_parameter_values(fit_function, parameter_values)
 
     @staticmethod
