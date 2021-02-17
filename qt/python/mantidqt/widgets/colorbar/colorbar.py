@@ -125,6 +125,8 @@ class ColorbarWidget(QWidget):
         """
         When a new plot is created this method should be called with the new mappable
         """
+        # sanity check the mappable
+        mappable = self._validate_mappable(mappable)
         self.ax.clear()
         try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
@@ -307,3 +309,24 @@ class ColorbarWidget(QWidget):
                 self.cmax_value = cmax
             else:  # reset values back
                 self.update_clim_text()
+
+    def _create_linear_normalize_object(self):
+        if self.autoscale.isChecked():
+            cmin = cmax = None
+        else:
+            cmin = self.cmin_value
+            cmax = self.cmax_value
+        return Normalize(vmin=cmin, vmax=cmax)
+
+    def _validate_mappable(self, mappable):
+        if mappable.get_array() is not None:
+            if np.any(mappable.get_array() <= 0):
+                self.norm.model().item(NORM_OPTS.index("Log"), 0).setEnabled(False)
+                if isinstance(mappable.norm, LogNorm):
+                    mappable.norm = self._create_linear_normalize_object()
+                    self.norm.blockSignals(True)
+                    self.norm.setCurrentIndex(0)
+                    self.norm.blockSignals(False)
+            else:
+                self.norm.model().item(NORM_OPTS.index("Log"), 0).setEnabled(True)
+        return mappable
