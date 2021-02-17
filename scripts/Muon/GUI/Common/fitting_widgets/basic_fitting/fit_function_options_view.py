@@ -17,9 +17,8 @@ ui_fit_function_options, _ = load_ui(__file__, "fit_function_options.ui")
 ALLOWED_MINIMIZERS = ["Levenberg-Marquardt", "BFGS", "Conjugate gradient (Fletcher-Reeves imp.)",
                       "Conjugate gradient (Polak-Ribiere imp.)", "Damped GaussNewton",
                       "Levenberg-MarquardtMD", "Simplex", "SteepestDescent", "Trust Region"]
-DEFAULT_FREQUENCY_FIT_END_X = 250
-FIT_START_TABLE_ROW = 0
-FIT_END_TABLE_ROW = 1
+START_X_TABLE_ROW = 0
+END_X_TABLE_ROW = 1
 MINIMIZER_TABLE_ROW = 2
 RAW_DATA_TABLE_ROW = 3
 EVALUATE_AS_TABLE_ROW = 4
@@ -51,9 +50,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
 
         if is_frequency_domain:
             self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
-            table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Start X")
-            table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
-            self.end_time = DEFAULT_FREQUENCY_FIT_END_X
+            table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Start X")
+            table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "End X")
 
     def set_slot_for_fit_name_changed(self, slot) -> None:
         """Connect the slot for the fit name being changed by the user."""
@@ -148,7 +146,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @start_x.setter
     def start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        self.start_x_line_edit.setText(str(value))
+        if value < self.end_x:
+            self.start_x_line_edit.setText(str(value))
 
     @property
     def end_x(self) -> float:
@@ -158,7 +157,8 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     @end_x.setter
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
-        self.end_x_line_edit.setText(str(value))
+        if value > self.start_x:
+            self.end_x_line_edit.setText(str(value))
 
     @property
     def evaluation_type(self) -> str:
@@ -213,11 +213,11 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
 
-        table_utils.setRowName(self.fit_options_table, FIT_START_TABLE_ROW, "Time Start")
-        self.start_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 0.0, FIT_START_TABLE_ROW, 1)
+        table_utils.setRowName(self.fit_options_table, START_X_TABLE_ROW, "Time Start")
+        self.start_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 0.0, START_X_TABLE_ROW, 1)
 
-        table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "Time End")
-        self.end_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 15.0, FIT_END_TABLE_ROW, 1)
+        table_utils.setRowName(self.fit_options_table, END_X_TABLE_ROW, "Time End")
+        self.end_x_line_edit = table_utils.addDoubleToTable(self.fit_options_table, 15.0, END_X_TABLE_ROW, 1)
 
         table_utils.setRowName(self.fit_options_table, MINIMIZER_TABLE_ROW, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, MINIMIZER_TABLE_ROW, [])

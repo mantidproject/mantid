@@ -144,7 +144,8 @@ class BasicFittingModel:
     @current_start_x.setter
     def current_start_x(self, value: float) -> None:
         """Sets the value of the currently selected start X."""
-        self.start_xs[self.current_dataset_index] = value
+        if value < self.current_end_x:
+            self.start_xs[self.current_dataset_index] = value
 
     @property
     def end_xs(self) -> list:
@@ -167,7 +168,8 @@ class BasicFittingModel:
     @current_end_x.setter
     def current_end_x(self, value: float) -> None:
         """Sets the value of the currently selected end X."""
-        self.end_xs[self.current_dataset_index] = value
+        if value > self.current_start_x:
+            self.end_xs[self.current_dataset_index] = value
 
     def clear_single_fit_functions(self) -> None:
         """Clears the single fit functions corresponding to each dataset."""

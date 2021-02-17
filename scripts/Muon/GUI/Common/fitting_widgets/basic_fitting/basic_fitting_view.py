@@ -95,7 +95,7 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         else:
             self.fit_function_options.clear_fit_status()
 
-    def update_global_fit_status(self, fit_statuses: list, _: int) -> None:
+    def update_global_fit_status(self, fit_statuses: list, _: int = None) -> None:
         """Updates the global fit status label."""
         self.fit_controls.update_global_fit_status_label([status == "success" for status in fit_statuses if status])
 
