@@ -68,7 +68,7 @@ class SphericallyIntergratedPeakRepresentation():
 
         # add background if we have one
         bkgd_inner_radius, bkgd_outer_radius = _bkgd_radius_info(shape_info)
-        if bkgd_outer_radius is not None:
+        if bkgd_outer_radius is not None and bkgd_outer_radius > 0:
             _, bkgd_circle_radius = slice_sphere(peak_origin, bkgd_outer_radius, slice_info.z_value)
             _, bkgd_circle_radius_inner = slice_sphere(peak_origin, bkgd_inner_radius, slice_info.z_value)
             thickness = bkgd_circle_radius - bkgd_circle_radius_inner
