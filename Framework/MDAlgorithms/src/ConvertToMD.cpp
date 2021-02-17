@@ -94,9 +94,9 @@ void ConvertToMD::init() {
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
       "quickly create a huge number of :math:`boxes = "
-      "SplitInto^{MinRercursionDepth \times NumDimensions}`. \n But setting this "
-      "property equal to MaxRecursionDepth "
-      "property is necessary if one wants to generate multiple file based "
+      "SplitInto^{MinRercursionDepth \\times NumDimensions}`. \n But setting "
+      "this property equal to MaxRecursionDepth "
+      "is necessary if one wants to generate multiple file based "
       "workspaces in order to merge them later.");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 

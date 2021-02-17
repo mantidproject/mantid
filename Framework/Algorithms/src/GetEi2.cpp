@@ -88,13 +88,14 @@ void GetEi2::init()
       "The energy of neutron in meV, it is also printed to the Mantid's log",
       Direction::Output);
 
-  declareProperty("FirstMonitorPeak", -1.0,
-                  "The time in :math:`\text{\\mu}`s when the count rate of the "
-                  "first monitor, which defaults to the last monitor the beam "
-                  "hits before the sample, is greatest. It is the mean X value "
-                  "for the bin with the highest number of counts per second "
-                  "and is also writen to Mantid's log.",
-                  Direction::Output);
+  declareProperty(
+      "FirstMonitorPeak", -1.0,
+      "The time in :math:`\\rm{\\mu s}` when the count rate of the "
+      "first monitor, which defaults to the last monitor the beam "
+      "hits before the sample, is greatest. It is the mean X value "
+      "for the bin with the highest number of counts per second "
+      "and is also writen to Mantid's log.",
+      Direction::Output);
 
   declareProperty(
       "FirstMonitorIndex", 0,
@@ -109,7 +110,7 @@ void GetEi2::init()
   declareProperty("PeakSearchRange", 0.1, inRange0toOne,
                   "Specifies the relative TOF range where the algorithm tries "
                   "to find the monitor peak. Search occurs within "
-                  ":math:`PEAK_TOF_Guess\cdot(1 \pm PeakSearchRange)` ranges.\n"
+                  "PEAK_TOF_Guess * (1 +/- PeakSearchRange) ranges.\n"
                   "Defaults are almost always sufficient but decrease this "
                   "value for very narrow peaks and increase for wide.",
                   Direction::Input);
