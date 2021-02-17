@@ -72,8 +72,8 @@ def reduce_calibration(diamond_runs: List[int],
 if __name__ == '__main__':
     dia_runs = [192227, 192228, 192229, 192230]
 
-    reduce_calibration(dia_runs[:1],
-                       calibration_file='',
-                       idf_file='',
+    reduce_calibration(dia_runs[:],
+                       calibration_file='/SNS/VULCAN/shared/wzz/pd_4runs/VULCAN_pdcalibration.h5',
+                       idf_file=None,  #  'data/VULCAN_Definition_pete02.xml',
                        apply_mask=True,
                        align_detectors=True)

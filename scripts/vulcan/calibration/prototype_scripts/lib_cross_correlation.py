@@ -15,18 +15,6 @@ from typing import Dict, Tuple, Any, Union
 import h5py
 
 
-"""
-Total = 81920 * 2 + (24900 - 6468) * 2 = 200704
-Bank 1: 81920 .. center = 40,960 - ??? ...  40960
-Bank 2: 81920 ... center = 61,140  ...  61140
-Bank 5: 36864 ... center = 182,272 ...182272
-"""
-VULCAN_X_PIXEL_RANGE = {'Bank1': (0, 81920),  # 160 tubes
-                        'Bank2': (81920, 163840),   # 160 tubes
-                        'Bank5': (163840, 200704)   # 72 tubes
-                        }
-
-
 # TODO - all the hardcoded pixel numbers will be replaced!
 def verify_vulcan_difc(ws_name: str,
                        cal_table_name: str,
@@ -57,19 +45,17 @@ def verify_vulcan_difc(ws_name: str,
     difc_col_index = 1
 
     # Generate a dictionary for each bank
-    bank_info_dict = VULCAN_X_PIXEL_RANGE
-    # bank_info_dict = {'Bank1': (0, 81920),  # 160 tubes
-    #                   'Bank2': (81920, 163840),   # 160 tubes
-    #                   'Bank5': (163840, 200704)   # 72 tubes
-    #                   }
-
-    if diamond_event_ws.getNumberHistograms() != 200704:
+    # FIXME - this is for VULCAN (but not X)
+    bank_info_dict = {'west': (0, 3234),
+                      'east': (3234, 6468),
+                      'high angle': (6468, 24900)}
+    if diamond_event_ws.getNumberHistograms() != 24900:
         raise NotImplementedError('Bank information dictionary is out of date')
 
     # Init file
     difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'w')
 
-    for bank_name in ['Bank1', 'Bank2', 'Bank5']:
+    for bank_name in ['west', 'east', 'high angle']:
         # pixel range
         pid_0, pid_f = bank_info_dict[bank_name]
         num_pixels = pid_f - pid_0
@@ -151,17 +137,14 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
     None
 
     """
-    start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
-    row_range = range(start_pid, end_pi)
-
-    # if bank_name == 'Bank1':
-    #     row_range = range(0, 3234)
-    # elif bank_name == 'east':
-    #     row_range = range(3234, 6468)
-    # elif bank_name == 'high angle':
-    #     row_range = range(6468, 24900)
-    # else:
-    #     raise RuntimeError('balbal {}'.format(bank_name))
+    if bank_name == 'west':
+        row_range = range(0, 3234)
+    elif bank_name == 'east':
+        row_range = range(3234, 6468)
+    elif bank_name == 'high angle':
+        row_range = range(6468, 24900)
+    else:
+        raise RuntimeError('balbal {}'.format(bank_name))
 
     # Get the workspaces handlers
     if isinstance(target_calib_ws, str):
@@ -191,17 +174,14 @@ def copy_bank_wise_masks(target_mask_ws, ref_mask_ws: Union[str, Any], bank_name
     None
 
     """
-    start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
-    ws_index_range = range(start_pid, end_pi)
-
-    # if bank_name == 'west':
-    #     ws_index_range = range(0, 3234)
-    # elif bank_name == 'east':
-    #     ws_index_range = range(3234, 6468)
-    # elif bank_name == 'high angle':
-    #     ws_index_range = range(6468, 24900)
-    # else:
-    #     raise RuntimeError('balbal {}'.format(bank_name))
+    if bank_name == 'west':
+        ws_index_range = range(0, 3234)
+    elif bank_name == 'east':
+        ws_index_range = range(3234, 6468)
+    elif bank_name == 'high angle':
+        ws_index_range = range(6468, 24900)
+    else:
+        raise RuntimeError('balbal {}'.format(bank_name))
 
     # apply
     if isinstance(target_mask_ws, str):

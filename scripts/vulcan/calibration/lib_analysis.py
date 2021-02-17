@@ -231,7 +231,7 @@ def align_focus_event_ws(event_ws_name,
                            Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
                            InstrumentName='vulcan_3bank')
 
-    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}_3banks.nxs')
+    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}{file_tag}_3banks.nxs')
 
     return event_ws_name
 

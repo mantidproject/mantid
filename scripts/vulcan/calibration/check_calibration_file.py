@@ -57,4 +57,7 @@ def main_report_calibration(calib_file, diamond_file):
 
 
 if __name__ == '__main__':
-    main_report_calibration(sys.argv[1], sys.argv[2])
+    # sys.argv[1], sys.argv[2])
+    calibration_file='/SNS/VULCAN/shared/wzz/pd_4runs/VULCAN_pdcalibration.h5'
+    diamond_nxs = 'VULCAN_192227_192230_Cal.nxs'
+    main_report_calibration(calibration_file, diamond_nxs)
