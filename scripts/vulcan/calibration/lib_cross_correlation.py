@@ -86,7 +86,7 @@ def verify_vulcan_difc(ws_name: str,
         h5_data = np.array([bank_cal_vec, bank_idf_vec, difc_diff_vec]).transpose()
         bank_entry.create_dataset('DIFC_cal_raw_diff', data=h5_data)
 
-        # correct the unphysical (bad) calibrated DIFC to default DIF: west, east and high angle
+        # correct the unphysical (bad) calibrated DIFC to default DIF: Bank1, Bank2, Bank5
         param_dict = {}
         if fallback_incorrect_difc_pixels:
             param_dict['cal_table'] = cal_table_ws
@@ -144,7 +144,7 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
     ref_calib_ws: str
         source TableWorkspace
     bank_name: str
-        bank name in (west, east, high angle)
+        bank name in (Bank1, Bank2, Bank5)
 
     Returns
     -------
@@ -152,7 +152,7 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
 
     """
     start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
-    row_range = range(start_pid, end_pi)
+    row_range = range(start_pid, end_pid)
 
     # if bank_name == 'Bank1':
     #     row_range = range(0, 3234)
@@ -191,17 +191,9 @@ def copy_bank_wise_masks(target_mask_ws, ref_mask_ws: Union[str, Any], bank_name
     None
 
     """
+    # Get pixel ID (detector ID) range
     start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
-    ws_index_range = range(start_pid, end_pi)
-
-    # if bank_name == 'west':
-    #     ws_index_range = range(0, 3234)
-    # elif bank_name == 'east':
-    #     ws_index_range = range(3234, 6468)
-    # elif bank_name == 'high angle':
-    #     ws_index_range = range(6468, 24900)
-    # else:
-    #     raise RuntimeError('balbal {}'.format(bank_name))
+    ws_index_range = range(start_pid, end_pid)
 
     # apply
     if isinstance(target_mask_ws, str):
@@ -439,7 +431,14 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
                                 prefix: str = '1fit') -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Calibrate VULCAN runs with cross correlation algorithm
 
-    Main entrance cross-correlation (for VULCAN west/east/high angle).
+    Main entrance cross-correlation (for VULCAN Bank1/2/5).
+
+    Vulcan Team (Ke):
+    VULCAN-X: when auto reducing, time focus data to pixel (ID) 48840 for bank 1 and 2,
+    ...       and 422304 (ID) for bank 5.
+    ...       those are centers.
+    wsindex = 40704    pixel id = 48840
+    wsindex = 182528   pixel id = 422304
 
     Parameters
     ----------
@@ -471,57 +470,69 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
     offset_ws_dict = dict()
     mask_ws_dict = dict()
 
-    # West bank
-    if calib_flag['west']:
-        ref_ws_index = 1613
+    # Bank 1
+    if calib_flag['Bank1']:
+        bank_name = 'Bank1'
+        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+        ref_ws_index = 40704
         peak_width = 0.04  # modified from 0.005
-        cc_number_west = 80
-        west_offset, west_mask = cross_correlate_calibrate(diamond_ws_name, peakpos1, peakpos1 - peak_width, peakpos1 + peak_width,
-                                                           [0, 3234 - 1],
-                                                           ref_ws_index, cc_number_west, 1, -0.0003, 'west_{0}'.format(prefix),
-                                                           peak_fit_time=cc_fit_time)
-        if west_offset is None:
-            err_msg = west_mask
-            print ('[ERROR] Unable to calibrate West Bank by cross correlation: {}'.format(err_msg))
+        cc_number_bank1 = 80
+        bank1_offset, bank1_mask = cross_correlate_calibrate(diamond_ws_name, peakpos1,
+                                                             peakpos1 - peak_width, peakpos1 + peak_width,
+                                                             (start_ws_index, end_ws_index - 1),  # Note: inclusive
+                                                             ref_ws_index, cc_number_bank1,
+                                                             1, -0.0003, f'{bank_name}_{prefix}',
+                                                             peak_fit_time=cc_fit_time)
+        if bank1_offset is None:
+            err_msg = bank1_mask
+            print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
         else:
-            offset_ws_dict['west'] = west_offset
-            mask_ws_dict['west'] = west_mask
+            offset_ws_dict[bank_name] = bank1_offset
+            mask_ws_dict[bank_name] = bank1_mask
     # END-IF
 
     # East bank
-    if calib_flag['east']:
-        ref_ws_index = 4847 - 7  # 4854 ends with an even right-shift spectrum
+    if calib_flag['Bank2']:
+        bank_name = 'Bank2'
+        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+        ref_ws_index = 40704  # 4854 ends with an even right-shift spectrum
         peak_width = 0.04
-        cc_number_east = 80
-        east_offset, east_mask = cross_correlate_calibrate(diamond_ws_name, peakpos2, peakpos2 - peak_width, peakpos2 + peak_width,
-                                                           [3234, 6468 - 1],
-                                                           ref_ws_index, cc_number_east, 1, -0.0003, 'east_{0}'.format(prefix),
-                                                           peak_fit_time=cc_fit_time)
-        if east_offset is None:
-            err_msg = east_mask
-            print ('[ERROR] Unable to calibrate West Bank by cross correlation: {}'.format(err_msg))
+        cc_number_bank2 = 80
+        bank2_offset, bank2_mask = cross_correlate_calibrate(diamond_ws_name, peakpos2,
+                                                             peakpos2 - peak_width, peakpos2 + peak_width,
+                                                             (start_ws_index, end_ws_index - 1),
+                                                             ref_ws_index, cc_number_bank2,
+                                                             1, -0.0003, f'{bank_name}_{prefix}',
+                                                             peak_fit_time=cc_fit_time)
+        if bank2_offset is None:
+            err_msg = bank2_mask
+            print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
         else:
-            offset_ws_dict['east'] = east_offset
-            mask_ws_dict['east'] = east_mask
+            offset_ws_dict[bank_name] = bank2_offset
+            mask_ws_dict[bank_name] = bank2_mask
     # END-IF
 
     # High angle
-    if calib_flag['high angle']:
+    if calib_flag['Bank5']:
         # High angle bank
-        ref_ws_index = 15555
+        bank_name = 'Bank5'
+        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+        ref_ws_index = 182528
         peak_width = 0.01
         cc_number = 20
-        ha_offset, ha_mask = cross_correlate_calibrate(diamond_ws_name, peakpos3, peakpos3 - peak_width, peakpos3 + peak_width,
-                                                       [6468, 24900 - 1],
-                                                       ref_ws_index, cc_number=cc_number, max_offset=1, binning=-0.0003,
-                                                       ws_name_posfix='high_angle_{0}'.format(prefix),
-                                                       peak_fit_time=cc_fit_time)
-        if ha_offset is None:
-            err_msg = ha_mask
-            print ('[ERROR] Unable to calibrate West Bank by cross correlation: {}'.format(err_msg))
+        bank5_offset, bank5_mask = cross_correlate_calibrate(diamond_ws_name, peakpos3,
+                                                             peakpos3 - peak_width, peakpos3 + peak_width,
+                                                             (start_ws_index, end_ws_index - 1),
+                                                             ref_ws_index, cc_number=cc_number,
+                                                             max_offset=1, binning=-0.0003,
+                                                             ws_name_posfix=f'{bank_name}_{prefix}',
+                                                             peak_fit_time=cc_fit_time)
+        if bank5_offset is None:
+            err_msg = bank5_mask
+            print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
         else:
-            offset_ws_dict['high angle'] = ha_offset
-            mask_ws_dict['high angle'] = ha_mask
+            offset_ws_dict[bank_name] = bank5_offset
+            mask_ws_dict[bank_name] = bank5_mask
     # END-IF
 
     if len(offset_ws_dict) == 0:
@@ -587,7 +598,7 @@ def merge_detector_calibration(offset_ws_dict: Dict,
     # 1. some bank is not calibrated
     # 2. reference mask and offset workspaces are provided
     # TODO FIXME - VULCAN's banks name shall be defined as enumerate constants
-    vulcan_bank_list = ['west', 'east', 'high angle']
+    vulcan_bank_list = ['Bank1', 'Bank2', 'Bank2']
     for bank_name in vulcan_bank_list:
         # skip calibrated banks
         if bank_name in offset_ws_dict.keys():
@@ -616,7 +627,7 @@ def instrument_wide_cross_correlation_prototye(focused_ws_name, reference_ws_ind
     This is the second round calibration using the data file
     1. calibrated by previous calibration file based on inner bank cross correlation
     2. diffraction focused
-    For the instrument with west, east and high angle banks, the input file shall be a 3 bank
+    For the instrument with bank 1/2/5, the input file shall be a 3 bank
 
     Parameters
     ----------
@@ -849,7 +860,7 @@ def analyze_instrument_cross_correlation_quality(cross_correlation_ws_dict, getd
     :return:
     """
     cost_ws_dict = dict()
-    for bank_name in ['west', 'east', 'high angle']:
+    for bank_name in ['Bank1', 'Bank2', 'Bank5']:
         cc_diamond_ws_name = cross_correlation_ws_dict[bank_name]
         fit_result_table_name = getdetoffset_result_ws_dict[bank_name]
 

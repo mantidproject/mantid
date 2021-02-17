@@ -10,6 +10,11 @@ from mantid.simpleapi import (CreateGroupingWorkspace,
 from typing import Union
 
 
+# Cross correlation algorithm setup
+# TODO FIXME - this can be 2
+CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
+
+
 def load_event_data(nexus_path,
                     cutoff_time: int = 300,
                     counts_nxs_name: Union[str, None] = None,
@@ -23,6 +28,8 @@ def load_event_data(nexus_path,
         max time to load in seconds
     counts_nxs_name: str
         Path for OUTPUT processed nexus file containing counts of each spectrum
+    unit_dspace: bool
+        Flag to convert the workspace unit to dSpacing
 
     Returns
     -------
@@ -78,8 +85,7 @@ def create_groups() -> str:
 
 
 def calibrate_vulcan(diamond_nexus: str,
-                     load_cutoff_time: Union[None, int],
-                     difc_file_name: Union[None, str]):
+                     load_cutoff_time: Union[None, int]):
     """Main calibration workflow algorithm
 
     Refer to pyvdrive.script.calibration.vulcan_cal_instruent_calibration.py
@@ -90,24 +96,23 @@ def calibrate_vulcan(diamond_nexus: str,
         path to diamond Nexus file
     load_cutoff_time: int, None
         maximum relative time to load in second
-    difc_file_name: str, None
-        path to output DIFC
 
     Returns
     -------
 
     """
-    # NOTE TODO FIXME - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5. those are centers.
+    # TODO - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
+    # TODO  -          those are centers.
 
-
-    # TODO FIXME - this can be 2
-    CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
-
-    # Load data
-    diamond_ws_name = load_event_data(diamond_nexus, load_cutoff_time)
+    # Load data and convert unit to dSpacing
+    count_ws_name = f'{os.path.basename(diamond_nexus).split(".")[0]}_counts.nxs'
+    diamond_ws_name = load_event_data(diamond_nexus,
+                                      load_cutoff_time,
+                                      counts_nxs_name=count_ws_name,
+                                      unit_dspace=True)
 
     # do cross correlation:
-    calib_flag = {'west': True, 'east': True, 'high angle': True}
+    calib_flag = {'Bank1': True, 'Bank2': True, 'Bank5': True}
     r = cross_correlate_vulcan_data(diamond_ws_name, calib_flag,
                                     cc_fit_time=CROSS_CORRELATE_PEAK_FIT_NUMBER,
                                     prefix='1fit')
@@ -115,7 +120,6 @@ def calibrate_vulcan(diamond_nexus: str,
     offset_ws_dict, mask_ws_dict = r
 
     # About output
-    # TODO - this can be more flexible
     base_output_ws_name = f'VULCAN_Calibration_{CROSS_CORRELATE_PEAK_FIT_NUMBER}Fit'
 
     # Merge calibration and masks
@@ -142,25 +146,17 @@ def calibrate_vulcan(diamond_nexus: str,
     save_calibration(calib_ws_name=calib_ws_name,
                      mask_ws_name=str(mask_ws),
                      group_ws_name=grouping_ws_name,
-                     calib_file_prefix='vulcan_cc_1fit')
-
-
-
-
-
+                     calib_file_prefix='VULCAN_Calibration_CC')
 
 
 def test_main_calibrate():
-    calibrate_vulcan(diamond_nexus='/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5',
-                     load_cutoff_time=None,  # 300
-                     difc_file_name='VULCAN_calibration_cc_beta.h5')
+    # Testing files
+    diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5']
+
+    calibrate_vulcan(diamond_nexus=diamond_run[0],
+                     load_cutoff_time=None)
 
 
 if __name__ == '__main__':
-    choice = '3'
-    if choice == '1':
-        test_main_calibrate()
-    elif choice == '3':
-        test_main_apply_calibration()
-    else:
-        raise NotImplementedError(f'Workspace choice {choice} is not supported')
+    test_main_calibrate()
