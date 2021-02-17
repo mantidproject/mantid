@@ -430,55 +430,67 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
     break; // no adjusting is necessary
   // we're dealing with and old Nexus file
   case (EventDataVersion::EDVOriginal): {
-    int64_t blockSize(static_cast<int64_t>(Block.size()));
+    size_t blockSize(static_cast<size_t>(Block.size()));
     // number of data items in the old Nexus file associated to a single event
-    int64_t eventSize(dataEventCount());
+    size_t eventSize(dataEventCount());
 
     // we just read event data from an old Nexus file. Goniometer index must
     // be inserted
     if (accessMode == "READ") {
       // Block size is a multiple of eventSize
-      int64_t eventCount = blockSize / eventSize;
+      size_t eventCount = blockSize / eventSize;
       if (eventCount * eventSize != blockSize) // this shouldn't happen
         throw std::runtime_error(
             "Data block does not represent an integer number of events");
       // Loop to insert goniometer index
       std::vector<FloatOrDouble> backupBlock(Block);
       Block.resize(eventCount * (eventSize + 1));
-      int64_t eventBegin(0);
-      for (int64_t i = 0; i < eventCount; i++) {
+      size_t blockCounter(0);
+      size_t backupBlockCounter(0);
+      for (size_t i = 0; i < eventCount; i++) {
         // signal, error, and runIndex occupy the first three data items
-        for (int64_t j = 0; j < 3; j++)
-          Block[eventBegin + j] = backupBlock[eventBegin + j];
-        Block[eventBegin + 4] = 0; // here's the goniometer index!
-        for (int64_t j = 4; j < eventSize; j++)
-          Block[eventBegin + j + 1] = backupBlock[eventBegin + j];
-        eventBegin += eventCount;
+        for (size_t j = 0; j < 3; j++) {
+          Block[blockCounter] = backupBlock[backupBlockCounter];
+          blockCounter++;
+          backupBlockCounter++;
+        }
+        Block[blockCounter] = 0; // here's the goniometer index!
+        blockCounter++;
+        for (size_t j = 3; j < eventSize; j++){
+          Block[blockCounter] = backupBlock[backupBlockCounter];
+          blockCounter++;
+          backupBlockCounter++;
+        }
       }
     }
-
     // we want to write the Block to an old Nexus file. Goniometer info must
     // be removed
     else if (accessMode == "WRITE") {
       // Block size is a multiple of (eventSize + 1)
-      int64_t eventCount = blockSize / (eventSize + 1);
+      size_t eventCount = blockSize / (eventSize + 1);
       if (eventCount * (eventSize + 1) != blockSize) // this shouldn't happen
         throw std::runtime_error(
             "Data block does not represent an integer number of events");
       // Loop to remove goniometer index
       std::vector<FloatOrDouble> backupBlock(Block);
       Block.resize(eventCount * eventSize);
-      int64_t eventBegin(0);
-      for (int64_t i = 0; i < eventCount; i++) {
+      size_t blockCounter(0);
+      size_t backupBlockCounter(0);
+      for (size_t i = 0; i < eventCount; i++) {
         // signal, error, and runIndex occupy the first three data items
-        for (int64_t j = 0; j < 3; j++)
-          Block[eventBegin + j] = backupBlock[eventBegin + j];
-        for (int64_t j = 4; j < eventSize; j++)
-          Block[eventBegin + j] = backupBlock[eventBegin + j + 1];
-        eventBegin += eventCount;
+        for (size_t j = 0; j < 3; j++){
+          Block[blockCounter] = backupBlock[backupBlockCounter];
+          blockCounter++;
+          backupBlockCounter++;
+        }
+        backupBlockCounter++; // skip the goniometer index
+        for (size_t j = 3; j < eventSize; j++){
+          Block[blockCounter] = backupBlock[backupBlockCounter];
+          blockCounter++;
+          backupBlockCounter++;
+        }
       }
     }
-
     break;
   }
   case (EventDataVersion::EDVGoniometer):
