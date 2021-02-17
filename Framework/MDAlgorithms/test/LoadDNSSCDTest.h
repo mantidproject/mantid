@@ -39,7 +39,7 @@ bool cmp_Events(const std::vector<coord_t> &ev1,
   float eps = 1.0e-07f;
 
   if (std::abs(ev1[4] - ev2[4]) > eps) {
-    return ev1[4] < ev2[4];  // sort by detector ID
+    return ev1[4] < ev2[4]; // sort by detector ID
   } else {
     return ev1[8] < ev2[8]; // sort by coordinate of last dimension
   }
