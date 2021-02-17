@@ -303,6 +303,9 @@ public:
     // Each event has 8 data items
     std::vector<float> blockREAD{1.,  2.,  3.,  4.,  -1.,  -2.,  -3.,  -4.,
                                  10., 20., 30., 40., -10., -20., -30., -40.};
+
+    pSaver->loadGenericBlock(blockREAD, 0, 0); // debug only
+
     pSaver->adjustEventDataBlock(blockREAD, "READ"); // insert goniometerIndex
     std::vector<float> expectedREAD{1.,  2.,  3.,   0.,   4.,   -1.,
                                     -2., -3., -4.,  10.,  20.,  30.,
