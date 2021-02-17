@@ -500,6 +500,13 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
   }
 }
 
+// explicit instantiation
+template void
+BoxControllerNeXusIO::adjustEventDataBlock<float>(std::vector<float> &Block,
+                                                  std::string accessMode) const;
+template void BoxControllerNeXusIO::adjustEventDataBlock<double>(
+    std::vector<double> &Block, std::string accessMode) const;
+
 template <typename Type>
 void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> &Block,
                                             const uint64_t blockPosition,
