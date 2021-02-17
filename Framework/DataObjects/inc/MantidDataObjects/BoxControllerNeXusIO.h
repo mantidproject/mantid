@@ -109,7 +109,7 @@ public:
    * @param accessMode : string specifying if we're reading from or writing to
    * file. Valid values are "READ" and "WRITE"
    */
-  template <typename FloatOrDouble >
+  template <typename FloatOrDouble>
   void adjustEventDataBlock(std::vector<FloatOrDouble> &Block,
                             std::string accessMode) const;
 
