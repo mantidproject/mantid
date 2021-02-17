@@ -416,9 +416,9 @@ int64_t BoxControllerNeXusIO::dataEventCount(void) const {
   return size;
 }
 
-template <typename Type>
+template <typename FloatOrDouble>
 void BoxControllerNeXusIO::adjustEventDataBlock(
-    std::vector<Type> &Block, const std::string accessMode) const {
+    std::vector<FloatOrDouble> &Block, const std::string accessMode) const {
   // check the validity of accessMode
   const std::vector<std::string> validAccessModes{"READ", "WRITE"};
   if (std::find(validAccessModes.begin(), validAccessModes.end(), accessMode) ==
@@ -443,7 +443,7 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
         throw std::runtime_error(
             "Data block does not represent an integer number of events");
       // Loop to insert goniometer index
-      std::vector<Type> backupBlock(Block);
+      std::vector<FloatOrDouble> backupBlock(Block);
       Block.resize(eventCount * (eventSize + 1));
       int64_t eventBegin(0);
       for (int64_t i = 0; i < eventCount; i++) {
@@ -466,7 +466,7 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
         throw std::runtime_error(
             "Data block does not represent an integer number of events");
       // Loop to remove goniometer index
-      std::vector<Type> backupBlock(Block);
+      std::vector<FloatOrDouble> backupBlock(Block);
       Block.resize(eventCount * eventSize);
       int64_t eventBegin(0);
       for (int64_t i = 0; i < eventCount; i++) {
