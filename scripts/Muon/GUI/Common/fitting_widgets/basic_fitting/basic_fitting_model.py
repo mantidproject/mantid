@@ -131,6 +131,9 @@ class BasicFittingModel:
     @start_xs.setter
     def start_xs(self, start_xs: list) -> None:
         """Sets all of the start Xs in the model."""
+        if len(start_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of start Xs is not equal to the number of datasets.")
+
         self._start_xs = start_xs
 
     @property
@@ -155,6 +158,9 @@ class BasicFittingModel:
     @end_xs.setter
     def end_xs(self, end_xs: list) -> None:
         """Sets all of the end Xs in the model."""
+        if len(end_xs) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of end Xs is not equal to the number of datasets.")
+
         self._end_xs = end_xs
 
     @property
@@ -183,6 +189,9 @@ class BasicFittingModel:
     @single_fit_functions.setter
     def single_fit_functions(self, fit_functions: list) -> None:
         """Sets all of the single fit functions stored in the model."""
+        if len(fit_functions) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of functions is not equal to the number of datasets.")
+
         self._single_fit_functions = [self._clone_function(function) for function in fit_functions]
 
     @property
@@ -213,6 +222,9 @@ class BasicFittingModel:
     @single_fit_functions_cache.setter
     def single_fit_functions_cache(self, fit_functions: list) -> None:
         """Sets the cache of fit functions used for single fitting."""
+        if len(fit_functions) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of fit functions is not equal to the number of datasets.")
+
         self._single_fit_functions_cache = fit_functions
 
     def cache_the_current_fit_functions(self) -> None:
@@ -232,6 +244,9 @@ class BasicFittingModel:
     @fit_statuses.setter
     def fit_statuses(self, fit_statuses: list) -> None:
         """Sets the value of all fit statuses."""
+        if len(fit_statuses) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of fit statuses is not equal to the number of datasets.")
+
         self._fit_statuses = fit_statuses
 
     @property
@@ -255,6 +270,9 @@ class BasicFittingModel:
     @chi_squared.setter
     def chi_squared(self, chi_squared: list) -> None:
         """Sets all of the chi squared values."""
+        if len(chi_squared) != self.number_of_datasets:
+            raise RuntimeError(f"The provided number of chi squared is not equal to the number of datasets.")
+
         self._chi_squared = chi_squared
 
     @property
