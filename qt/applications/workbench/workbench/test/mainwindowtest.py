@@ -14,6 +14,9 @@ import unittest
 import sys
 
 from unittest.mock import patch, Mock, MagicMock, call
+
+import matplotlib
+
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.api import FrameworkManager
 from qtpy.QtWidgets import QMessageBox, QAction, QMenu
@@ -81,6 +84,7 @@ class MainWindowTest(unittest.TestCase):
         original_stderr = sys.stderr
 
         try:
+            matplotlib.use("agg")
             self.main_window.setup()
             print('test stdout')
             print('test stderr', file=sys.stderr)
