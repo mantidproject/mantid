@@ -38,6 +38,11 @@ double SN(const Mantid::Geometry::IPeak &p) {
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 } // namespace
 
+std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
+  return p.getBankName();
+}
+// namespace
+
 namespace Mantid {
 namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
@@ -66,15 +71,14 @@ void FilterPeaks::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
-  std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
-                                   "Signal/Noise", "QMod",        "Wavelength",
-                                   "DSpacing",     "TOF",         "RunNumber"};
+  std::vector<std::string> filters{
+      "h+k+l",      "h^2+k^2+l^2", "Intensity", "Signal/Noise", "QMod",
+      "Wavelength", "DSpacing",    "TOF",       "RunNumber",    "BankName"};
   declareProperty("FilterVariable", "",
                   std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
 
-  declareProperty("FilterValue", EMPTY_DBL(),
-                  std::make_shared<MandatoryValidator<double>>(),
+  declareProperty("FilterValue", "",
                   "The value of the FilterVariable to compare each peak to");
 
   std::vector<std::string> operation{"<", ">", "=", "!=", "<=", ">="};
@@ -92,33 +96,47 @@ void FilterPeaks::exec() {
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
-  const double filterValue = getProperty("FilterValue");
   const std::string Operator = getProperty("Operator");
   const std::string filterVariable = getProperty("FilterVariable");
 
-  const auto filterFunction = getFilterVariableFunction(filterVariable);
-
-  // Choose which version of the function to use based on the operator
-  if (Operator == "<")
-    filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
-                                   filterValue);
-  else if (Operator == ">")
-    filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
-                                      filterValue);
-  else if (Operator == "=")
-    filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
-                                       filterValue);
-  else if (Operator == "!=")
-    filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
-                                           filterFunction, filterValue);
-  else if (Operator == "<=")
-    filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction,
-                                         filterValue);
-  else if (Operator == ">=")
-    filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
+  // BankName is the only string type comparison in the bunch,
+  if (filterVariable == "BankName") {
+    const std::string filterValue = getProperty("FilterValue");
+    FilterFunctionStr filterFunction = &BANKNAME;
+    if (Operator == "=")
+      filterPeaksStr<std::equal_to<std::string>>(*inputWS, *filteredWS,
+                                                 filterFunction, filterValue);
+    else if (Operator == "!=")
+      filterPeaksStr<std::not_equal_to<std::string>>(
+          *inputWS, *filteredWS, filterFunction, filterValue);
+    else
+      throw std::invalid_argument("Unsupport operator " + Operator +
+                                  "for BankName filter");
+  } else {
+    const double filterValue = std::stod(getProperty("FilterValue"));
+    const auto filterFunction = getFilterVariableFunction(filterVariable);
+    // Choose which version of the function to use based on the operator
+    if (Operator == "<")
+      filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
+                                    filterValue);
+    else if (Operator == ">")
+      filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
+                                        filterValue);
+    else if (Operator == "=")
+      filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
+                                        filterValue);
+    else if (Operator == "!=")
+      filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
                                             filterFunction, filterValue);
-  else
-    throw std::invalid_argument("Unknown Operator " + Operator);
+    else if (Operator == "<=")
+      filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction,
+                                          filterValue);
+    else if (Operator == ">=")
+      filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
+                                              filterFunction, filterValue);
+    else
+      throw std::invalid_argument("Unknown Operator " + Operator);
+  }
 
   setProperty("OutputWorkspace", filteredWS);
 }
