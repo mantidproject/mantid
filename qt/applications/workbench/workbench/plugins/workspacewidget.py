@@ -22,6 +22,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
+from mantidqt.widgets.samplematerialdialog.presenter import SampleMaterialDialogPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
@@ -76,6 +77,7 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_3D, plot_type='wireframe'))
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
+        self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
@@ -274,6 +276,10 @@ class WorkspaceWidget(PluginWidget):
 
     def _run_create_detector_table(self, ws):
         CreateDetectorTable(InputWorkspace=ws)
+
+    def _do_sample_material(self, names):
+        presenter = SampleMaterialDialogPresenter(parent = self)
+        presenter.show_view()
 
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)
