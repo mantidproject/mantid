@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import IFunction
+from mantid.api import IFunction, MultiDomainFunction
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
@@ -114,16 +114,23 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Sets the index of the current dataset."""
         self.function_browser.setCurrentDataset(dataset_index)
 
-    def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction) -> None:
+    def update_function_browser_parameters(self, is_simultaneous_fit: bool, fit_function: IFunction,
+                                           global_parameters: list = []) -> None:
         """Updates the parameters in the function browser."""
         self.function_browser.blockSignals(True)
 
         if fit_function is None:
             self.function_browser.setFunction("")
-        elif is_simultaneous_fit:
-            self.function_browser.setFunction(str(fit_function))
-        else:
+        elif not isinstance(fit_function, MultiDomainFunction):
             self.function_browser.updateParameters(fit_function)
+        else:
+            if self.function_browser.getNumberOfDatasets() == fit_function.getNumberDomains():
+                self.function_browser.updateMultiDatasetParameters(fit_function.clone())
+            else:
+                self.function_browser.setFunction(str(fit_function))
+
+        if is_simultaneous_fit:
+            self.function_browser.setGlobalParameters(global_parameters)
 
         self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)

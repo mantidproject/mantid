@@ -61,8 +61,6 @@ class BasicFittingPresenter:
 
     def initialize_model_options(self) -> None:
         """Initialise the model with the default fitting options."""
-        self.model.start_xs = [self.view.start_x]
-        self.model.end_xs = [self.view.end_x]
         self.model.minimizer = self.view.minimizer
         self.model.evaluation_type = self.view.evaluation_type
         self.model.fit_to_raw = self.view.fit_to_raw
@@ -252,7 +250,8 @@ class BasicFittingPresenter:
 
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
-        self.view.update_fit_function(self.model.get_active_fit_function())
+        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
+        self.view.set_current_dataset_index(self.model.current_dataset_index)
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""

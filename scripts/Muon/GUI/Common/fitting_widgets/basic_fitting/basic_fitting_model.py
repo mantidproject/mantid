@@ -352,6 +352,11 @@ class BasicFittingModel:
         return False
 
     @property
+    def global_parameters(self) -> list:
+        """Returns the global parameters stored in the model. Override this method if you require global parameters."""
+        return []
+
+    @property
     def do_rebin(self) -> bool:
         """Returns true if rebin is selected within the context."""
         return self.context._do_rebin()

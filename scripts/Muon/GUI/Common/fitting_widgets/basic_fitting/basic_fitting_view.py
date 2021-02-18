@@ -86,7 +86,8 @@ class BasicFittingView(QWidget, ui_fitting_layout):
 
     def set_current_dataset_index(self, dataset_index: int) -> None:
         """Sets the index of the current dataset."""
-        self.fit_function_options.set_current_dataset_index(dataset_index)
+        if dataset_index is not None:
+            self.fit_function_options.set_current_dataset_index(dataset_index)
 
     def update_local_fit_status_and_chi_squared(self, fit_status: str, chi_squared: float) -> None:
         """Updates the view to show the status and results from a fit."""
