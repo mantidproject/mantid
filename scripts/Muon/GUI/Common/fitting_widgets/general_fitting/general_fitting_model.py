@@ -55,6 +55,9 @@ class GeneralFittingModel(BasicFittingModel):
     @simultaneous_fit_function.setter
     def simultaneous_fit_function(self, fit_function: IFunction) -> None:
         """Sets the simultaneous fit function stored in the model."""
+        if fit_function is not None and self.number_of_datasets == 0:
+            raise RuntimeError(f"Cannot set a simultaneous fit function when there are no datasets in the model.")
+
         self._simultaneous_fit_function = fit_function
 
     @property
@@ -65,6 +68,9 @@ class GeneralFittingModel(BasicFittingModel):
     @simultaneous_fit_function_cache.setter
     def simultaneous_fit_function_cache(self, fit_function: IFunction) -> None:
         """Sets the simultaneous fit function cache stored in the model."""
+        if fit_function is not None and self.number_of_datasets == 0:
+            raise RuntimeError(f"Cannot cache a simultaneous fit function when there are no datasets in the model.")
+
         self._simultaneous_fit_function_cache = fit_function
 
     def cache_the_current_fit_functions(self) -> None:
@@ -375,7 +381,7 @@ class GeneralFittingModel(BasicFittingModel):
     def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
         """Updates the function parameter values for the given dataset names."""
         if self.simultaneous_fitting_mode:
-            self._set_fit_function_parameter_values(self.simultaneous_fit_function, parameter_values)
+            self._update_fit_function_parameters_for_simultaneous_fit(dataset_names, parameter_values)
         else:
             self._update_fit_function_parameters_for_single_fit(dataset_names, parameter_values)
 
@@ -385,6 +391,17 @@ class GeneralFittingModel(BasicFittingModel):
             fit_function = self.get_single_fit_function_for(name)
             if fit_function is not None:
                 self._set_fit_function_parameter_values(fit_function, parameter_values)
+
+    def _update_fit_function_parameters_for_simultaneous_fit(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in simultaneous fit mode."""
+        for name in dataset_names:
+            if name in self.dataset_names:
+                if isinstance(self.simultaneous_fit_function, MultiDomainFunction):
+                    function_index = self.dataset_names.index(name)
+                    self._set_fit_function_parameter_values(self.simultaneous_fit_function.getFunction(function_index),
+                                                            parameter_values)
+                else:
+                    self._set_fit_function_parameter_values(self.simultaneous_fit_function, parameter_values)
 
     @staticmethod
     def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list) -> None:
