@@ -149,7 +149,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.single_fit_functions = self.single_fit_functions
 
-        self.assertEqual(self.single_fit_functions, self.single_fit_functions)
+        self.assertEqual(self.model.single_fit_functions, self.single_fit_functions)
 
     def test_that_setting_the_single_fit_function_will_raise_if_the_number_of_functions_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
