@@ -203,7 +203,7 @@ def align_focus_event_ws(event_ws_name,
         file_tag += '_Raw'
 
     # Rebin
-    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,3')
+    Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,1.5')
     # Convert to matrix workspace
     matrix_ws_name = f'{event_ws_name}_matrix'
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
@@ -227,9 +227,12 @@ def align_focus_event_ws(event_ws_name,
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
 
     # Edit instrument geometry
-    EditInstrumentGeometry(Workspace=event_ws_name, PrimaryFlightPath=42, SpectrumIDs='1-3', L2='2,2,2',
-                           Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
-                           InstrumentName='vulcan_3bank')
+    # NOTE: Disable EditInstrumentGeometry as
+    #   1.  The geometry information won't be saved to processed NeXus
+    #   2.  It destroys the geometry information that can be used for FitPeaks with instrument parameters
+    # EditInstrumentGeometry(Workspace=event_ws_name, PrimaryFlightPath=42, SpectrumIDs='1-3', L2='2,2,2',
+    #                        Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
+    #                        InstrumentName='vulcan_3bank')
 
     SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}{file_tag}_3banks.nxs')
 

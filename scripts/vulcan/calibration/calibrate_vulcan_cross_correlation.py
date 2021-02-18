@@ -16,10 +16,10 @@ CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
 
 
 def load_event_data(nexus_path,
-                    cutoff_time: int = 300,
+                    cutoff_time: Union[int, None] = None,
                     counts_nxs_name: Union[str, None] = None,
-                    unit_dspace: bool=True,
-                    idf_name: Union[str, None]=None) -> str:
+                    unit_dspace: bool = True,
+                    idf_name: Union[str, None] = None) -> str:
     """Load event file
 
     Parameters
@@ -77,16 +77,21 @@ def load_event_data(nexus_path,
     return diamond_ws_name
 
 
-def create_groups() -> str:
+def create_groups(vulcan_ws_name=None) -> str:
     """Create group workspace
     """
     # create group workspace
     group_ws_name = 'VULCAN_3Bank_Groups'
 
     # 3 group mode
-    group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
-                                       GroupDetectorsBy='Group',
-                                       OutputWorkspace=group_ws_name)
+    if vulcan_ws_name is None:
+        group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
+                                           GroupDetectorsBy='Group',
+                                           OutputWorkspace=group_ws_name)
+    else:
+        group_ws = CreateGroupingWorkspace(InputWorkspace=vulcan_ws_name,
+                                           GroupDetectorsBy='bank', 
+                                           OutputWorkspace=group_ws_name)
 
     # sanity check
     assert group_ws
@@ -155,7 +160,7 @@ def calibrate_vulcan(diamond_nexus: str,
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis
     # Generate grouping workspace
-    grouping_ws_name = create_groups()
+    grouping_ws_name = create_groups(diamond_ws_name)
 
     save_calibration(calib_ws_name=calib_ws_name,
                      mask_ws_name=str(mask_ws),
@@ -166,11 +171,13 @@ def calibrate_vulcan(diamond_nexus: str,
 def test_main_calibrate():
     # Testing files
     diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5']
     # 
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
 
-    calibrate_vulcan(diamond_nexus=diamond_run[1],
+    calibrate_vulcan(diamond_nexus=diamond_run[2],
                      load_cutoff_time=None,
                      user_idf=vulcan_x_idf)
 
