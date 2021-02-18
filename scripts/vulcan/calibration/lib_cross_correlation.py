@@ -292,7 +292,8 @@ def cross_correlate_calibrate(ws_name: str,
     # get reference detector position
     det_pos = diamond_event_ws.getDetector(reference_ws_index).getPos()
     twotheta = calculate_detector_2theta(diamond_event_ws, reference_ws_index)
-    print('[INFO] Reference spectra = {0}  positoin @ {1}   2-theta = {2}'.format(reference_ws_index, det_pos, twotheta))
+    print('[INFO] Reference spectra = {0}  position @ {1}   2-theta = {2}'
+          ''.format(reference_ws_index, det_pos, twotheta))
     print(f'[INFO] Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
     # TODO - NIGHT - shall change from bank to bank
