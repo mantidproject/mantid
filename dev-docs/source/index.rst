@@ -18,7 +18,6 @@ Guides
    GettingStarted
    BuildingOnOSX
    BuildingWithCMake
-   BuildingVATES
    Standards/index
    Testing/index
    DoxygenSetup

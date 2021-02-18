@@ -109,7 +109,6 @@ public:
                            const QList<QString> &workspaceNames) = 0;
 
   // Interface Methods
-  virtual void showVatesSimpleInterface() = 0;
   virtual void showSpectrumViewer() = 0;
   virtual void showSliceViewer() = 0;
   virtual void showLogFileWindow() = 0;
@@ -123,9 +122,6 @@ public:
 
   virtual void updateProject() = 0;
   virtual void showCritical(const QString & /*unused*/) {}
-#ifdef MAKE_VATES
-  virtual bool doesVatesSupportOpenGL() = 0;
-#endif
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

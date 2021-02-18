@@ -16,7 +16,6 @@
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
-#include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -48,9 +47,6 @@ QList<QPointer<UserSubWindow>> &existingInterfaces() {
 
 } // namespace
 
-// initialise VATES factory
-Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
-    *InterfaceManager::m_vatesGuiFactory = nullptr;
 // initialise HelpWindow factory
 Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
     *InterfaceManager::m_helpViewer = nullptr;
@@ -237,35 +233,6 @@ InterfaceManager::InterfaceManager() {
 
 /// Destructor
 InterfaceManager::~InterfaceManager() {}
-
-void InterfaceManager::registerVatesGuiFactory(
-    Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory) {
-  m_vatesGuiFactory = factory;
-}
-
-/*
-Getter to determine if vates components have been installed.
-@return true if they are available.
-*/
-bool InterfaceManager::hasVatesLibraries() {
-  return nullptr != m_vatesGuiFactory;
-}
-
-VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const {
-  if (m_vatesGuiFactory == nullptr) {
-    g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid "
-                     "Vates package is probably not installed.\n";
-    throw Mantid::Kernel::Exception::NullPointerException(
-        "InterfaceManager::createVatesSimpleGui", "m_vatesGuiFactory");
-  } else {
-    VatesViewerInterface *vsg =
-        this->m_vatesGuiFactory->createUnwrappedInstance();
-    if (!vsg) {
-      g_log.error() << "Error creating Vates Simple GUI\n";
-    }
-    return vsg;
-  }
-}
 
 void InterfaceManager::registerHelpWindowFactory(
     Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory) {

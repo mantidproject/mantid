@@ -273,7 +273,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-  // legacy interface requires paraview version
+  // legacy interface requires paraview version DON'T REMOVE
   message["ParaView"] = 0;
 
   // mantid version and sha1
