@@ -292,11 +292,11 @@ def cross_correlate_calibrate(ws_name: str,
     # get reference detector position
     det_pos = diamond_event_ws.getDetector(reference_ws_index).getPos()
     twotheta = calculate_detector_2theta(diamond_event_ws, reference_ws_index)
-    print('[INFO] Reference spectra = {0}  @ {1}   2-theta = {2}'.format(reference_ws_index, det_pos, twotheta))
-    print(f'Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
+    print('[INFO] Reference spectra = {0}  positoin @ {1}   2-theta = {2}'.format(reference_ws_index, det_pos, twotheta))
+    print(f'[INFO] Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
     # TODO - NIGHT - shall change from bank to bank
-    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 3.'.format(abs(binning)))
+    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 2.0'.format(abs(binning)))
 
     # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
     cc_ws_name = 'cc_' + ws_name + '_' + ws_name_posfix
@@ -315,6 +315,8 @@ def cross_correlate_calibrate(ws_name: str,
 
     print('[DB...BAT] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
     try:
+        print(f'[DEBUG] Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number}, MaxOffset = {max_offset}')
+        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
         GetDetectorOffsets(InputWorkspace=cc_ws_name,
                            OutputWorkspace=offset_ws_name,
                            MaskWorkspace=mask_ws_name,
@@ -330,7 +332,7 @@ def cross_correlate_calibrate(ws_name: str,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
         # TODO FIXME - may remove this save effort later
-        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'CC_Step1_{offset_ws_name}.nxs')
+        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
         raise run_err
@@ -816,6 +818,7 @@ def save_calibration(calib_ws_name: str,
           f'Masked = {mtd[mask_ws_name].getNumberMasked()}')
 
     # Save for Mantid diffraction calibration file
+    SaveNexusProcessed(InputWorkspace=calib_ws_name, Filename=f'{calib_ws_name}.nxs')
     SaveDiffCal(CalibrationWorkspace=calib_ws_name,
                 GroupingWorkspace=group_ws_name,
                 MaskWorkspace=mask_ws_name,
