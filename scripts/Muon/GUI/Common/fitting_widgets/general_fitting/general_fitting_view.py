@@ -52,9 +52,10 @@ class GeneralFittingView(BasicFittingView):
         else:
             super().update_global_fit_status(fit_statuses, index)
 
-    def update_fit_function(self, fit_function: IFunction) -> None:
+    def update_fit_function(self, fit_function: IFunction, global_parameters: list = []) -> None:
         """Updates the parameters of a fit function shown in the view."""
-        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function)
+        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function,
+                                                                     global_parameters)
 
     @property
     def current_dataset_name(self) -> str:
