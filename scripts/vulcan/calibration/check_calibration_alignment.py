@@ -72,11 +72,11 @@ def reduce_calibration(diamond_runs: List[int],
 if __name__ == '__main__':
     dia_runs = [192227, 192228, 192229, 192230]
 
-    test_calib_file ='/SNS/VULCAN/shared/wzz/pd_4runs/VULCAN_pdcalibration.h5',
-    test_calib_file ='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/VULCAN_Calibration_CC.h5'
+    test_calib_file='/SNS/VULCAN/shared/wzz/pd_4runs/VULCAN_pdcalibration.h5',
+    test_calib_file='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/VULCAN_Calibration_CC.h5'
 
     reduce_calibration(dia_runs[0:1],
                        calibration_file=test_calib_file,
-                       idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
+                       idf_file=None,  #  'data/VULCAN_Definition_pete02.xml',
                        apply_mask=True,
                        align_detectors=True)

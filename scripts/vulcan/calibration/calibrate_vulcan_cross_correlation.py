@@ -3,11 +3,11 @@ from lib_cross_correlation import (cross_correlate_vulcan_data,
                                    verify_vulcan_difc,
                                    save_calibration, merge_detector_calibration)
 import os
-from mantid.simpleapi import (CreateGroupingWorkspace, LoadEventNexus, Plus,
+from mantid.simpleapi import (CreateGroupingWorkspace,
                               ConvertToMatrixWorkspace,
                               SaveNexusProcessed, LoadNexusProcessed, mtd,
                               DeleteWorkspace, LoadInstrument)
-from typing import Union, List
+from typing import Union
 
 
 # Cross correlation algorithm setup
@@ -15,7 +15,7 @@ from typing import Union, List
 CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
 
 
-def load_event_data(nexus_paths: List[str],
+def load_event_data(nexus_path,
                     cutoff_time: Union[int, None] = None,
                     counts_nxs_name: Union[str, None] = None,
                     unit_dspace: bool = True,
@@ -24,16 +24,13 @@ def load_event_data(nexus_paths: List[str],
 
     Parameters
     ----------
-    nexus_paths: ~list
-        List of nexus files
+    nexus_path
     cutoff_time: int
         max time to load in seconds
     counts_nxs_name: str
         Path for OUTPUT processed nexus file containing counts of each spectrum
     unit_dspace: bool
         Flag to convert the workspace unit to dSpacing
-    idf_name: str, None
-        Mantid IDF to override the geometry from NeXus file
 
     Returns
     -------
@@ -41,47 +38,30 @@ def load_event_data(nexus_paths: List[str],
         EventWorkspace name
 
     """
-    assert isinstance(nexus_paths, list) and not isinstance(nexus_paths, str), f'Nexus paths {nexus_paths}' \
-                                                                               f' must be a list'
 
     # load data
-    diamond_ws_name = os.path.basename(nexus_paths[0]).split('.')[0] + '_diamond'
-    print(f'[INFO] Loading {nexus_paths} to {diamond_ws_name}')
+    diamond_ws_name = os.path.basename(nexus_path).split('.')[0] + '_diamond'
+    print(f'[INFO] Loading {nexus_path} to {diamond_ws_name}')
 
-    # Load a file or files
-    if len(nexus_paths) == 1:
-        # Load a single file
-        # tet mode?
-        test_arg = {}
-        if cutoff_time:
-            test_arg['max_time'] = cutoff_time
-        # load
-        load_nexus(data_file_name=nexus_paths[0],
-                   output_ws_name=diamond_ws_name,
-                   meta_data_only=False,
-                   **test_arg)
-    else:
-        # Load a series of data files
-        LoadEventNexus(Filename=nexus_paths[0], OutputWorkspace=diamond_ws_name)
-        # Load more files
-        for file_index in range(1, len(nexus_paths)):
-            dia_wksp_i = "%s_diamond_%d" % ('VULCANX', file_index)
-            LoadEventNexus(Filename=nexus_paths[file_index], OutputWorkspace=dia_wksp_i)
-            Plus(LHSWorkspace=diamond_ws_name,
-                 RHSWorkspace=dia_wksp_i,
-                 OutputWorkspace=diamond_ws_name,
-                 ClearRHSWorkspace=True)
+    # Test mode
+    test_arg = {}
+    if cutoff_time:
+        test_arg['max_time'] = cutoff_time
+
+    # Load file
+    load_nexus(data_file_name=nexus_path,
+               output_ws_name=diamond_ws_name,
+               meta_data_only=False,
+               **test_arg)
 
     if idf_name:
-        print(f'[CHECK 1] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()},'
-              f'Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
-        # Reload instrument (do not trust the old one)
+        print(f'[CHECK 1] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()}, Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
+        # Reload insturment (do not trust the old one) 
         LoadInstrument(Workspace=diamond_ws_name,
                        Filename=idf_name,
                        InstrumentName='VULCAN',
                        RewriteSpectraMap=False) 
-        print(f'[CHECK 2] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()},'
-              f'Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
+        print(f'[CHECK 2] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()}, Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
 
     # convert to d-Spacing
     if unit_dspace:
@@ -119,7 +99,7 @@ def create_groups(vulcan_ws_name=None) -> str:
     return group_ws_name
 
 
-def calibrate_vulcan(diamond_nexus: List[str],
+def calibrate_vulcan(diamond_nexus: str,
                      load_cutoff_time: Union[None, int],
                      user_idf: Union[None, str]):
     """Main calibration workflow algorithm
@@ -195,10 +175,8 @@ def calibrate_vulcan(diamond_nexus: List[str],
         print(f'Workspace: {diamond_ws_name} type = {type(diamond_ws)} Histograms = {diamond_ws.getNumberHistograms()}')
     else:
         print(f'Workspace: {diamond_ws_name} is deleted')
-    # END-IF-ELSE
-
-    return diamond_ws_name
-
+    
+    # END-IF-ELSE  
 
 def test_main_calibrate():
     # Testing files
@@ -209,12 +187,9 @@ def test_main_calibrate():
     # 
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
 
-    calibrate_vulcan(diamond_nexus=diamond_run[0:1],
+    calibrate_vulcan(diamond_nexus=diamond_run[1],
                      load_cutoff_time=None,
-                     user_idf=vulcan_x_idf,
-                     )
-
-    # Align the event workspace (todo)
+                     user_idf=vulcan_x_idf)
 
 
 if __name__ == '__main__':
