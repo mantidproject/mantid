@@ -16,6 +16,7 @@ def main(focused_diamond_nxs, figure_title, ws_tag, src_diff_cal_h5, target_diff
     # Load focused diamond diffraction data from process NeXus file
     base_name = os.path.basename(focused_diamond_nxs).split('.')[0]
     diamond_ws_name = f'{base_name}_{ws_tag}'
+    print(focused_diamond_nxs, diamond_ws_name)
     LoadNexusProcessed(Filename=focused_diamond_nxs, OutputWorkspace=diamond_ws_name)
     diamond_ws = mtd[diamond_ws_name]
     assert diamond_ws
@@ -30,7 +31,9 @@ def main(focused_diamond_nxs, figure_title, ws_tag, src_diff_cal_h5, target_diff
     # apply 2nd round calibration to diffraction calibration file
     if src_diff_cal_h5:
         # Load calibration file
-        calib_outputs = LoadDiffCal(Filename=src_diff_cal_h5, InstrumentName='vulcan',
+        calib_outputs = LoadDiffCal(Filename=src_diff_cal_h5,
+                                    InputWorkspace=diamond_ws_name,
+                                    #nstrumentName='vulcan',
                                     WorkspaceName='DiffCal_Vulcan')
         diff_cal_table_name = str(calib_outputs.OutputCalWorkspace)
 
@@ -48,9 +51,9 @@ def apply_peaks_positions_calibration(diff_cal_table_name, residual_list):
     west_bank_residual, east_bank_residual, high_angle_bank_residual = residual_list
 
     # 2nd-round calibration
-    for residual, start_index, end_index in [(west_bank_residual, 0, 3234),
-                                                 (east_bank_residual, 3234, 6468),
-                                                 (high_angle_bank_residual, 6469, 24900)]:
+    for residual, start_index, end_index in [(west_bank_residual, 0, 81920),
+                                             (east_bank_residual, 81920, 163840),
+                                             (high_angle_bank_residual, 163840, 200704)]:
 
         # update calibration table
         update_calibration_table(mtd[diff_cal_table_name], residual, start_index, end_index)
@@ -391,35 +394,34 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
 
 
 def demo_calibration():
-    diamond_dir = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/LatestTestPD2Round'
+    diamond_dir = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration'
     if os.path.exists(diamond_dir) is False:
         diamond_dir = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/backup/calibration-real/LatestTestPD2Round/'
-    diamond_nxs = os.path.join(diamond_dir, 'VULCAN_164960_diamond_3banks.nxs')
+    diamond_nxs = os.path.join(diamond_dir, 'VULCAN_192227_CalMasked_3banks.nxs')
     title = f'Diamond PDCalibration (Fit by Gaussian)'
     tag = 'PDCalibrated'
     print(diamond_nxs)
 
     # calibration
-    src_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/backup/calibration-real/' \
-                 'LatestTestPD2Round/VULCAN_pdcalibration.h5'
-    target_cal_h5 = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/VULCAN_pdcalibration_peakcalibration.h5'
+    src_cal_h5 = os.path.join(diamond_dir, 'VULCAN_Calibration_CC_4runs.h5')
+    target_cal_h5 = f'VULCAN_Calibration_CC_4runs_hybrid.h5'
 
     main(diamond_nxs, title, tag, src_cal_h5, target_cal_h5)
 
 
 def demo_report():
-    diamond_dir = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/calibration/demo'
+    diamond_dir = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration'
     if os.path.exists(diamond_dir) is False:
         diamond_dir = '/home/wzz/Projects/Mantid/mantid/scripts/vulcan/backup/calibration-real/LatestTestPD2Round/'
-    diamond_nxs = os.path.join(diamond_dir, 'VULCAN_164960_diamond_3banks.nxs')
-    title = f'Diamond PDCalibration (Fit by Gaussian)'
-    tag = 'PDCalibrated_2ndRoundCalibrated'
+    diamond_nxs = os.path.join(diamond_dir, 'VULCAN_192227_CalMasked_3banks.nxs')
+    title = f'Diamond Cross-correlatin + Hybrid'
+    tag = 'CC_2ndRoundCalibrated'
 
     main(diamond_nxs, title, tag, None, None)
 
 
 if __name__ in ['__main__', 'mantidqt.widgets.codeeditor.execution']:
-    if True:
+    if False:
         demo_calibration()
     else:
         demo_report()
