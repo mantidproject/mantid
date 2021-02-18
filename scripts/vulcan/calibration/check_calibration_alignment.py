@@ -74,8 +74,10 @@ if __name__ == '__main__':
 
     test_calib_file ='/SNS/VULCAN/shared/wzz/pd_4runs/VULCAN_pdcalibration.h5',
     test_calib_file ='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/VULCAN_Calibration_CC.h5'
+    test_calib_file ='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/VULCAN_Calibration_CC_4runs.h5'
+    test_calib_file ='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/VULCAN_Calibration_CC_4runs_hybrid.h5'
 
-    reduce_calibration(dia_runs[0:1],
+    reduce_calibration(dia_runs[:],
                        calibration_file=test_calib_file,
                        idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
                        apply_mask=True,

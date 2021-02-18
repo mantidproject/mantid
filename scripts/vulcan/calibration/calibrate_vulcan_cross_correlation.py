@@ -143,7 +143,7 @@ def calibrate_vulcan(diamond_nexus: List[str],
     # TODO  -          those are centers.
 
     # Load data and convert unit to dSpacing
-    count_ws_name = f'{os.path.basename(diamond_nexus).split(".")[0]}_counts.nxs'
+    count_ws_name = f'{os.path.basename(diamond_nexus[0]).split(".")[0]}_counts.nxs'
     diamond_ws_name = load_event_data(diamond_nexus,
                                       load_cutoff_time,
                                       counts_nxs_name=count_ws_name,
@@ -209,7 +209,7 @@ def test_main_calibrate():
     # 
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
 
-    calibrate_vulcan(diamond_nexus=diamond_run[0:1],
+    calibrate_vulcan(diamond_nexus=diamond_run[:],
                      load_cutoff_time=None,
                      user_idf=vulcan_x_idf,
                      )
