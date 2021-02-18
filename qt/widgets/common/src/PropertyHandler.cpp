@@ -541,6 +541,8 @@ PropertyHandler *PropertyHandler::getHandler(std::size_t i) const {
     return nullptr;
   PropertyHandler *ph =
       static_cast<PropertyHandler *>(m_cf->getFunction(i)->getHandler());
+  //auto foo = m_cf->getFunction(0)->getHandler();
+  //auto bar = m_cf->getFunction(1)->getHandler();
   return ph;
 }
 /** Returns 'this' if item == m_item and this is a composite function or

@@ -82,10 +82,10 @@ void DiffSphere::init() {
   this->declareAttribute("Q", API::IFunction::Attribute(1.0));
 
   // Set the aliases
-  this->setAlias("f1.Intensity", "Intensity");
-  this->setAlias("f1.Radius", "Radius");
-  this->setAlias("f1.Diffusion", "Diffusion");
-  this->setAlias("f1.Shift", "Shift");
+  //this->setAlias("f1.Intensity", "Intensity");
+  //this->setAlias("f1.Radius", "Radius");
+  //this->setAlias("f1.Diffusion", "Diffusion");
+  //this->setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   this->addDefaultTies(
