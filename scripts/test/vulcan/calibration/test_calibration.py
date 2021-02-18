@@ -29,8 +29,9 @@ class TestUtils(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         r"""
-        Load the tests cases for calibrate_bank, consisting of data for only one bank
-        CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
+        Load the testing file(s) for Vulcan calibration
+        
+        NOTE: called once before the test begin
         """
         # load the testing data
         Load(
@@ -41,9 +42,25 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        r"""Delete temporary workspaces"""
+        r"""
+        Delete temporary workspaces
+
+        NOTE: called once before exiting test
+        """
         if len(cls.workspaces_temporary) > 0:
             DeleteWorkspaces(cls.workspaces_temporary)
+
+    def setUp(self) -> None:
+        r"""
+        Per test based setup
+        """
+        pass
+
+    def tearDown(self) -> None:
+        r"""
+        Per test case cleanup
+        """
+        pass
 
     # ------------------ #
     # -- System tests -- #
