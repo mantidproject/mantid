@@ -7,7 +7,7 @@ from mantid.simpleapi import (CreateGroupingWorkspace, LoadEventNexus, Plus,
                               ConvertToMatrixWorkspace,
                               SaveNexusProcessed, LoadNexusProcessed, mtd,
                               DeleteWorkspace, LoadInstrument)
-from typing import Union, List
+from typing import Union, List, Tuple
 
 
 # Cross correlation algorithm setup
@@ -120,8 +120,9 @@ def create_groups(vulcan_ws_name=None) -> str:
 
 
 def calibrate_vulcan(diamond_nexus: List[str],
-                     load_cutoff_time: Union[None, int],
-                     user_idf: Union[None, str]):
+                     output_calib_file_name='VULCAN_Calibration_CC',
+                     load_cutoff_time: Union[None, int] = None,
+                     user_idf: Union[None, str] = None) -> Tuple[str, str]:
     """Main calibration workflow algorithm
 
     Refer to pyvdrive.script.calibration.vulcan_cal_instruent_calibration.py
@@ -130,6 +131,8 @@ def calibrate_vulcan(diamond_nexus: List[str],
     ----------
     diamond_nexus: str
         path to diamond Nexus file
+    output_calib_file_name: str:
+        Path to the output calibration file (.h5)
     load_cutoff_time: int, None
         maximum relative time to load in second
     user_idf: str, None
@@ -137,6 +140,8 @@ def calibrate_vulcan(diamond_nexus: List[str],
 
     Returns
     -------
+    tuple
+        calibration file name, diamond event workspace
 
     """
     # TODO - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
@@ -185,7 +190,7 @@ def calibrate_vulcan(diamond_nexus: List[str],
     save_calibration(calib_ws_name=calib_ws_name,
                      mask_ws_name=str(mask_ws),
                      group_ws_name=grouping_ws_name,
-                     calib_file_prefix='VULCAN_Calibration_CC')
+                     calib_file_prefix=output_calib_file_name)
 
     # Align the diamond workspace 
     # very diamond workspace
@@ -197,7 +202,7 @@ def calibrate_vulcan(diamond_nexus: List[str],
         print(f'Workspace: {diamond_ws_name} is deleted')
     # END-IF-ELSE
 
-    return diamond_ws_name
+    return output_calib_file_name, diamond_ws_name
 
 
 def test_main_calibrate():

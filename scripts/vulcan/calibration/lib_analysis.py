@@ -4,7 +4,7 @@ from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, Diff
                               MaskDetectors, ConvertUnits)
 from mantid.simpleapi import mtd
 import numpy as np
-from typing import Union
+from typing import Union, Tuple
 
 
 class FindDiamondPeaks(object):
@@ -181,7 +181,7 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
 def align_focus_event_ws(event_ws_name,
                          calib_ws_name: Union[str, None],
                          group_ws_name: str,
-                         mask_ws_name: Union[str, None]):
+                         mask_ws_name: Union[str, None]) -> Tuple[str, str]:
     """
     overwrite the input
     """
@@ -234,9 +234,12 @@ def align_focus_event_ws(event_ws_name,
     #                        Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
     #                        InstrumentName='vulcan_3bank')
 
-    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}{file_tag}_3banks.nxs')
+    # TODO - need to relax to allow user to  determine
+    focused_run_nxs = f'{event_ws_name}{file_tag}_3banks.nxs'
 
-    return event_ws_name
+    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=focused_run_nxs)
+
+    return event_ws_name, focused_run_nxs
 
 
 def get_masked_ws_indexes(mask_ws):

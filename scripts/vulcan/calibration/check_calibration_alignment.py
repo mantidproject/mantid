@@ -7,14 +7,14 @@
 from mantid.simpleapi import LoadEventNexus, Plus, LoadInstrument
 from lib_analysis import (align_focus_event_ws)
 from mantid_helper import load_calibration_file
-from typing import List
+from typing import List, Tuple
 
 
 def reduce_calibration(diamond_runs: List[int],
                        calibration_file: str,
                        idf_file=None,
                        apply_mask=True,
-                       align_detectors=True):
+                       align_detectors=True) -> Tuple[str, str]:
     """
 
     Parameters
@@ -29,6 +29,8 @@ def reduce_calibration(diamond_runs: List[int],
 
     Returns
     -------
+    ~tuple
+        focused workspace name, path to processed nexus file saved from focused workspace
 
     """
 
@@ -63,10 +65,12 @@ def reduce_calibration(diamond_runs: List[int],
         align_detectors = False
 
     # Align, focus and export
-    align_focus_event_ws(dia_wksp,
-                         str(calib_cal_ws) if align_detectors else None,
-                         str(calib_group_ws),
-                         str(calib_mask_ws) if apply_mask else None)
+    focused_tuple = align_focus_event_ws(dia_wksp,
+                                         str(calib_cal_ws) if align_detectors else None,
+                                         str(calib_group_ws),
+                                         str(calib_mask_ws) if apply_mask else None)
+
+    return focused_tuple
 
 
 if __name__ == '__main__':
