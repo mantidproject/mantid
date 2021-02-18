@@ -44,6 +44,11 @@ Bugfixes
 Engineering Diffraction
 -----------------------
 
+Improvements
+############
+
+- BackToBackExponential fitting parameters read from .xml file and output to .prm file for GSAS-II.
+
 Single Crystal Diffraction
 --------------------------
 - New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
