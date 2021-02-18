@@ -315,8 +315,6 @@ def cross_correlate_calibrate(ws_name: str,
 
     print('[DB...BAT] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
     try:
-        print(f'[DEBUG] Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number}, MaxOffset = {max_offset}')
-        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
         GetDetectorOffsets(InputWorkspace=cc_ws_name,
                            OutputWorkspace=offset_ws_name,
                            MaskWorkspace=mask_ws_name,
@@ -332,18 +330,20 @@ def cross_correlate_calibrate(ws_name: str,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
         # TODO FIXME - may remove this save effort later
-        SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
+        # SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
-        raise run_err
-        # return None, run_err
+        print(f'[DEBUG] Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number}, MaxOffset = {max_offset}')
+        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
+        # raise run_err
+        return None, run_err
 
     # Do analysis to the calibration result
     # TODO - NIGHT - Make it better
     # it returns full set of spectra
-    print('[INFO] OffsetsWorkspace {}: spectra number = {}'
-          ''.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
-    report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
+    # print('[INFO] OffsetsWorkspace {}: spectra number = {}'
+    #       ''.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
+    # report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
     # TODO - FUTURE NEXT - consider whether the cross correlate workspace shall be removed or not

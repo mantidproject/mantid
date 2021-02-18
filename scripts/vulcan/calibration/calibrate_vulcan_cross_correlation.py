@@ -168,6 +168,17 @@ def calibrate_vulcan(diamond_nexus: str,
                      calib_file_prefix='VULCAN_Calibration_CC')
 
 
+    # Align the diamond workspace 
+    # very diamond workspace
+    # TODO FIXME - remove this if-else-block afterwards
+    if mtd.doesExist(diamond_ws_name):
+        diamond_ws = mtd[diamond_ws_name]
+        print(f'Workspace: {diamond_ws_name} type = {type(diamond_ws)} Histograms = {diamond_ws.getNumberHistograms()}')
+    else:
+        print(f'Workspace: {diamond_ws_name} is deleted')
+    
+    # END-IF-ELSE  
+
 def test_main_calibrate():
     # Testing files
     diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
@@ -177,7 +188,7 @@ def test_main_calibrate():
     # 
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
 
-    calibrate_vulcan(diamond_nexus=diamond_run[2],
+    calibrate_vulcan(diamond_nexus=diamond_run[1],
                      load_cutoff_time=None,
                      user_idf=vulcan_x_idf)
 
