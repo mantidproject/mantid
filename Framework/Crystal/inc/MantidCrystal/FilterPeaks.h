@@ -34,6 +34,7 @@ public:
 private:
   /// Typedef for the function to get the variable we're filtering against
   using FilterFunction = std::function<double(const Geometry::IPeak &)>;
+  using FilterFunctionStr = std::function<std::string(const Geometry::IPeak &)>;
 
   /// Override for algorithm init
   void init() override;
@@ -62,6 +63,30 @@ private:
                    Mantid::API::IPeaksWorkspace &filteredWS,
                    const FilterFunction &filterFunction,
                    const double filterValue) {
+    Comparator operatorFunc;
+    for (int i = 0; i < inputWS.getNumberPeaks(); ++i) {
+      const Geometry::IPeak &currentPeak = inputWS.getPeak(i);
+      const auto currentValue = filterFunction(currentPeak);
+
+      if (operatorFunc(currentValue, filterValue))
+        filteredWS.addPeak(currentPeak);
+    }
+  }
+
+  /**
+   * @brief
+   *
+   * @tparam Comparator
+   * @param inputWS
+   * @param filteredWS
+   * @param filterFunction
+   * @param filterValue
+   */
+  template <typename Comparator>
+  void filterPeaksStr(const Mantid::API::IPeaksWorkspace &inputWS,
+                      Mantid::API::IPeaksWorkspace &filteredWS,
+                      const FilterFunctionStr &filterFunction,
+                      const std::string filterValue) {
     Comparator operatorFunc;
     for (int i = 0; i < inputWS.getNumberPeaks(); ++i) {
       const Geometry::IPeak &currentPeak = inputWS.getPeak(i);
