@@ -11,7 +11,7 @@ from numpy.testing import assert_allclose
 # from os import path
 #
 from mantid import AnalysisDataService
-from mantid.simpleapi import LoadDiffCal
+from mantid.simpleapi import Load, mtd
 # from mantid import config
 # from mantid.kernel import V3D
 # from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
@@ -23,14 +23,21 @@ from mantid.simpleapi import DeleteWorkspaces
 
 
 class TestUtils(unittest.TestCase):
+
+    workspaces_temporary = list()
+
     @classmethod
     def setUpClass(cls) -> None:
         r"""
         Load the tests cases for calibrate_bank, consisting of data for only one bank
         CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
         """
-        cls.workspaces_temporary = list()
-        print(f'setUpClass')
+        # load the testing data
+        Load(
+            Filename="VULCAN_192226.nxs.h5",
+            OutputWorkspace="VULCAN_192226",
+        )
+        cls.workspaces_temporary.append("VULCAN_192226")
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -38,14 +45,11 @@ class TestUtils(unittest.TestCase):
         if len(cls.workspaces_temporary) > 0:
             DeleteWorkspaces(cls.workspaces_temporary)
 
-    def setUp(self) -> None:
-        # load the testing data
-        test_file = "VULCAN_192226.nxs.h5"
-
-    def tearDown(self) -> None:
-        to_delete = [w for w in ['a', 'b'] if AnalysisDataService.doesExist(w)]
-        if len(to_delete) > 0:
-            DeleteWorkspaces(to_delete)
+    # ------------------ #
+    # -- System tests -- #
+    # ------------------ #
+    def test_calibration(self):
+        assert ("VULCAN_192226" in mtd)
 
 
 if __name__ == "__main__":
