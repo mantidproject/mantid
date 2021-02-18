@@ -500,11 +500,11 @@ void BoxControllerNeXusIO::adjustEventDataBlock(
   }
 }
 
-// explicit instantiation
-template void
+// explicit instantiations
+template DLLExport void
 BoxControllerNeXusIO::adjustEventDataBlock<float>(std::vector<float> &Block,
                                                   std::string accessMode) const;
-template void BoxControllerNeXusIO::adjustEventDataBlock<double>(
+template DLLExport void BoxControllerNeXusIO::adjustEventDataBlock<double>(
     std::vector<double> &Block, std::string accessMode) const;
 
 template <typename Type>
