@@ -145,7 +145,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._view.set_axes_limits(xlims, ylims)
         # override y values 
         if autoscale:
-                self._view.autoscale_y_axes()
+                self._handle_autoscale_y_axes()
         titles = self._model.create_axes_titles()
         for axis_number, title in enumerate(titles):
             self._view.set_title(axis_number, title)
@@ -179,7 +179,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             ylim = self._context.get_ylim_all
             autoscale = self._context.get_autoscale_all
             error = self._context.get_error_all
-            print("boo",error)
         #update the quick edit
         self._options_presenter.set_plot_x_range(xlim)
         self._options_presenter.set_plot_y_range(ylim)
@@ -344,7 +343,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         
     """ error checkbox"""
     def set_errors(self, state:bool):
-        print("moo", state)
         self._options_presenter.set_errors(state)
         self._options_presenter.set_errors(state)
 
@@ -356,7 +354,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
         if len(selected_subplots)>1:
             self._context.set_error_all(state)
-            print(":P",state)
 
         for plot in selected_subplots:
             self._context.update_error_state(plot, state)

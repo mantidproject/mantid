@@ -233,7 +233,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 ymin = ymin_i
             if ymax_i > ymax:
                 ymax = ymax_i
-
+        print("moo", ymax, ymin)
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
 
     @property
@@ -300,7 +300,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         if y_min == y_max:
             y_min -= self._min_y_range
             y_max += self._min_y_range
-
         y_margin = abs(y_max - y_min) * self._y_axis_margin
 
         return y_min - y_margin, y_max + y_margin
