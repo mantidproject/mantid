@@ -47,7 +47,6 @@ std::string BANKNAME(const Mantid::Geometry::IPeak &p) {
 
 } // namespace
 
-
 // namespace
 namespace Mantid {
 namespace Crystal {
@@ -76,12 +75,12 @@ void FilterPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
-  
+
   // filter by property
   const std::string FILTER("Filter Options");
-  std::vector<std::string> filters{
-      "h+k+l",      "h^2+k^2+l^2", "Intensity", "Signal/Noise", "QMod",
-      "Wavelength", "DSpacing",    "TOF",       "RunNumber"};
+  std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
+                                   "Signal/Noise", "QMod",        "Wavelength",
+                                   "DSpacing",     "TOF",         "RunNumber"};
   declareProperty("FilterVariable", "h+k+l",
                   std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
@@ -95,13 +94,14 @@ void FilterPeaks::init() {
   setPropertyGroup("FilterVariable", FILTER);
   setPropertyGroup("FilterValue", FILTER);
   setPropertyGroup("Operator", FILTER);
-  
+
   // select by bankname
   const std::string SELECT("Select Bank by Name");
   std::vector<std::string> action{"=", "!="};
-  declareProperty("Criterion", "=", 
+  declareProperty("Criterion", "=",
                   std::make_shared<StringListValidator>(action), "");
-  declareProperty("BankName", "", "Selected bank name, empty means skip selection");
+  declareProperty("BankName", "",
+                  "Selected bank name, empty means skip selection");
   setPropertyGroup("Criterion", SELECT);
   setPropertyGroup("BankName", SELECT);
 }
@@ -123,16 +123,16 @@ void FilterPeaks::exec() {
   const std::string bankname = getProperty("BankName");
   const std::string criterion = getProperty("Criterion");
 
-  if (!bankname.empty()){
+  if (!bankname.empty()) {
     FilterFunctionStr filterFunction = &BANKNAME;
     PeaksWorkspace_sptr selectedWS = filteredWS->clone();
 
     if (criterion == "=")
-      filterPeaksStr<std::equal_to<std::string>>(
-          *inputWS, *selectedWS, filterFunction, bankname);
+      filterPeaksStr<std::equal_to<std::string>>(*inputWS, *selectedWS,
+                                                 filterFunction, bankname);
     else if (criterion == "!=")
-      filterPeaksStr<std::not_equal_to<std::string>>(
-          *inputWS, *selectedWS, filterFunction, bankname);
+      filterPeaksStr<std::not_equal_to<std::string>>(*inputWS, *selectedWS,
+                                                     filterFunction, bankname);
     else
       throw std::invalid_argument("Unsupport operator " + criterion +
                                   " for BankName filter");
@@ -141,33 +141,32 @@ void FilterPeaks::exec() {
     setProperty("OutputWorkspace", selectedWS);
   }
 
-  if (!isDefault("FilterValue")){
+  if (!isDefault("FilterValue")) {
     const auto filterFunction = getFilterVariableFunction(filterVariable);
     // Choose which version of the function to use based on the operator
     if (Operator == "<")
       filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
-                                    filterValue);
+                                     filterValue);
     else if (Operator == ">")
       filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
                                         filterValue);
     else if (Operator == "=")
       filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
-                                        filterValue);
+                                         filterValue);
     else if (Operator == "!=")
       filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
-                                            filterFunction, filterValue);
+                                             filterFunction, filterValue);
     else if (Operator == "<=")
-      filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction,
-                                          filterValue);
+      filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS,
+                                           filterFunction, filterValue);
     else if (Operator == ">=")
       filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
                                               filterFunction, filterValue);
     else
       throw std::invalid_argument("Unknown Operator " + Operator);
-    
+
     setProperty("OutputWorkspace", filteredWS);
   }
-
 }
 
 /** Get the filter function to use to filter peaks
