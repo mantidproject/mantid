@@ -77,7 +77,7 @@ class BasicFittingModel:
 
         self._minimizer = ""
         self._evaluation_type = ""
-        self._fit_to_raw = False
+        self._fit_to_raw = True
 
     @property
     def current_dataset_index(self) -> int:
@@ -343,8 +343,11 @@ class BasicFittingModel:
     @fit_to_raw.setter
     def fit_to_raw(self, fit_to_raw: bool) -> None:
         """Sets the fit to raw property."""
-        self._fit_to_raw = fit_to_raw
-        self.context.fitting_context.fit_raw = fit_to_raw
+        if fit_to_raw != self._fit_to_raw:
+            self._fit_to_raw = fit_to_raw
+            self.context.fitting_context.fit_raw = fit_to_raw
+            # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
+            self._dataset_names = self.get_equivalent_binned_or_unbinned_workspaces()
 
     @property
     def simultaneous_fitting_mode(self) -> bool:
@@ -355,6 +358,10 @@ class BasicFittingModel:
     def global_parameters(self) -> list:
         """Returns the global parameters stored in the model. Override this method if you require global parameters."""
         return []
+
+    def get_equivalent_binned_or_unbinned_workspaces(self):
+        """Returns the equivalent binned or unbinned workspaces for the current datasets."""
+        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(self.dataset_names)
 
     @property
     def do_rebin(self) -> bool:
