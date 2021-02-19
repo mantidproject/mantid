@@ -74,13 +74,16 @@ private:
   }
 
   /**
-   * @brief
+   * @brief Select peaks from the input peak workspace by checking a string
+   *        value
    *
    * @tparam Comparator
-   * @param inputWS
-   * @param filteredWS
-   * @param filterFunction
-   * @param filterValue
+   * @param inputWS :: the input peaks workspace containing peaks to be filtered
+   * @param filteredWS :: the output peaks workspace which will contain a subset
+   * of the inputWS
+   * @param filterFunction :: function extracting the value to filter on from
+   * the peak object
+   * @param filterValue :: the string value to check
    */
   template <typename Comparator>
   void filterPeaksStr(const Mantid::API::IPeaksWorkspace &inputWS,
