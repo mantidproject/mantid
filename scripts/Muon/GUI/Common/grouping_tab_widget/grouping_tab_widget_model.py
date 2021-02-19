@@ -97,7 +97,7 @@ class GroupingTabModel(object):
 
     @property
     def selected_groups_and_pairs(self):
-        return self.selected_groups+self.selected_pairs+self.selected_diffs
+        return self._groups_and_pairs.selected_groups_and_pairs
 
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
@@ -140,24 +140,27 @@ class GroupingTabModel(object):
         for pair in self._groups_and_pairs.pairs:
             if name == pair.forward_group or name == pair.backward_group:
                 used_by += pair.name + ", "
-        for diff in self._groups_and_pairs.diffs:
-            if name == diff.positive or name == diff.negative:
-                used_by += diff.name +", "
+        # Check diffs
+        used_by_diffs = self.check_if_used_by_diff(name, True)
+        if used_by_diffs:
+            used_by += used_by_diffs + ", "
         if used_by:
             # the -2 removes the space and comma
-            return name + " is used by: "+ used_by[0:-2]
+            return name + " is used by: " + used_by[0:-2]
         else:
             return used_by
 
-    def check_pair_in_use(self, name):
-        used_by = ""
+    def check_if_used_by_diff(self, name, called_from_check_group=False):
         # check diffs
+        used_by = ""
         for diff in self._groups_and_pairs.diffs:
             if name == diff.positive or name == diff.negative:
-                used_by += diff.name +", "
+                used_by += diff.name + ", "
         if used_by:
             # the -2 removes the space and comma
-            return name + " is used by: "+ used_by[0:-2]
+            if called_from_check_group:
+                return used_by[0:-2]
+            return name + " is used by: " + used_by[0:-2]
         else:
             return used_by
 
