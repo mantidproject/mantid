@@ -154,7 +154,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.function_name, " FlatBackground")
 
-    def test_that_automatically_update_function_name_will_not_set_the_function_name_if_automatic_update_is_turned_off_in_single_fit_mode(self):
+    def test_that_automatically_update_function_name_wont_set_the_name_if_automatic_update_is_off_in_single_fit_mode(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
         self.model.simultaneous_fitting_mode = False
@@ -175,7 +175,7 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(self.model.function_name, " FlatBackground")
 
-    def test_that_automatically_update_function_name_will_not_set_the_function_name_if_automatic_update_is_turned_off_in_simultaneous_fit_mode(self):
+    def test_that_automatically_update_function_name_wont_set_the_name_if_automatic_update_is_off_in_simultaneous_fit_mode(self):
         self.model.dataset_names = self.dataset_names
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
         self.model.simultaneous_fitting_mode = True
@@ -225,7 +225,8 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(str(self.model.single_fit_functions[0]), "name=FlatBackground,A0=0")
         self.assertEqual(str(self.model.simultaneous_fit_function), "name=FlatBackground,A0=0")
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._get_selected_runs')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_selected_runs')
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self,
                                                                                                       mock_get_runs):
         self.model.simultaneous_fit_by = "Run"
@@ -235,9 +236,10 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.assertEqual(1, mock_get_runs.call_count)
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._get_selected_groups_and_pairs')
-    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_runs(self,
-                                                                                                      mock_get_group_pairs):
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_selected_groups_and_pairs')
+    def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_attempts_to_get_the_groups_pairs(self,
+                                                                                                              mock_get_group_pairs):
         self.model.simultaneous_fit_by = "Group/Pair"
 
         self.model.get_simultaneous_fit_by_specifiers_to_display_from_context()
@@ -248,8 +250,10 @@ class GeneralFittingModelTest(unittest.TestCase):
     def test_that_get_simultaneous_fit_by_specifiers_to_display_from_context_returns_an_empty_list_if_fit_by_is_not_specified(self):
         self.assertEqual(self.model.get_simultaneous_fit_by_specifiers_to_display_from_context(), [])
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._get_workspace_names_to_display_from_context')
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._sort_workspace_names')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_workspace_names_to_display_from_context')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_sort_workspace_names')
     def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_single_fit_mode(self,
                                                                                                                       mock_sort,
                                                                                                                       mock_get_workspaces):
@@ -274,11 +278,13 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(1, mock_get_workspaces.call_count)
         self.assertEqual(1, mock_sort.call_count)
 
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._get_workspace_names_to_display_from_context')
-    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel._sort_workspace_names')
-    def test_that_get_workspace_names_to_display_from_context_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self,
-                                                                                                                            mock_sort,
-                                                                                                                            mock_get_workspaces):
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_get_workspace_names_to_display_from_context')
+    @mock.patch('Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model.GeneralFittingModel.'
+                '_sort_workspace_names')
+    def test_that_get_workspace_names_to_display_will_attempt_to_get_runs_and_groups_for_simultaneous_fit_mode(self,
+                                                                                                               mock_sort,
+                                                                                                               mock_get_workspaces):
         workspace_names = ["Name"]
         runs = ["62260"]
         group_or_pair = "long"
