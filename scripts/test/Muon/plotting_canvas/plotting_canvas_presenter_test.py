@@ -10,8 +10,12 @@ from unittest import mock
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import PlottingCanvasModel, \
     WorkspacePlotInformation
-from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter, \
-    DEFAULT_Y_LIMITS, DEFAULT_X_LIMITS
+from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter import PlottingCanvasPresenter
+
+from Muon.GUI.Common.contexts.muon_context import MUON_ANALYSIS_DEFAULT_Y_RANGE as  DEFAULT_Y_LIMITS
+from Muon.GUI.Common.contexts.muon_context import MUON_ANALYSIS_DEFAULT_X_RANGE as  DEFAULT_X_LIMITS
+from Muon.GUI.Common.contexts.plotting_context import PlottingContext
+
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateWorkspace, AnalysisDataService
@@ -38,10 +42,12 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.Mock(spec=PlottingCanvasViewInterface)
         self.model = mock.Mock(spec=PlottingCanvasModel)
+        self.context = PlottingContext()
+        self.context.set_defaults(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
         self.figure_options = mock.Mock(spec=QuickEditPresenter)
         self.figure_options.get_selection.return_value = ['1']
 
-        self.presenter = PlottingCanvasPresenter(self.view, self.model, self.figure_options)
+        self.presenter = PlottingCanvasPresenter(self.view, self.model, self.figure_options, self.context)
         self.view.plotted_workspace_information = []
 
     def tearDown(self):
