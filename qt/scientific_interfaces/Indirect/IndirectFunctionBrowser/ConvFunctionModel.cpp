@@ -700,6 +700,12 @@ ConvFunctionModel::buildElasticDiffRotDiscreteCircleFunctionString() const {
          "constraints=(Height>0, Radius>0)";
 }
 
+std::string
+ConvFunctionModel::buildDiffRotDiscreteCircleFunctionString() const {
+  return "name=DiffRotDiscreteCircle, Intensity=1, Radius=1, Decay=1, "
+         "Shift=0, constraints=(Intensity>0, Radius>0)";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_lorentzianType == LorentzianType::OneLorentzian) {
@@ -714,12 +720,14 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::DiffSphere) {
+    functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
     functions.append(buildElasticDiffSphereFunctionString());
   } else if (m_fitType == FitType::InelasticDiffSphere) {
     functions.append(buildInelasticDiffSphereFunctionString());
-  } else if (m_fitType == FitType::DiffSphere) {
-    functions.append(buildDiffSphereFunctionString());
+  } else if (m_fitType == FitType::DiffRotDiscreteCircle) {
+    functions.append(buildDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {
@@ -747,12 +755,14 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
+  } else if (m_fitType == FitType::DiffSphere) {
+    functions.append(buildDiffSphereFunctionString());
   } else if (m_fitType == FitType::ElasticDiffSphere) {
     functions.append(buildElasticDiffSphereFunctionString());
   } else if (m_fitType == FitType::InelasticDiffSphere) {
     functions.append(buildInelasticDiffSphereFunctionString());
-  } else if (m_fitType == FitType::DiffSphere) {
-    functions.append(buildDiffSphereFunctionString());
+  } else if (m_fitType == FitType::DiffRotDiscreteCircle) {
+    functions.append(buildDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::InelasticDiffRotDiscreteCircle) {
     functions.append(buildInelasticDiffRotDiscreteCircleFunctionString());
   } else if (m_fitType == FitType::ElasticDiffRotDiscreteCircle) {

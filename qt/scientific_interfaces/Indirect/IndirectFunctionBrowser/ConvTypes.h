@@ -27,11 +27,12 @@ enum class FitType {
   None,
   TeixeiraWater,
   StretchedExpFT,
+  DiffSphere,
+  DiffRotDiscreteCircle,
   ElasticDiffSphere,
   ElasticDiffRotDiscreteCircle,
   InelasticDiffSphere,
   InelasticDiffRotDiscreteCircle,
-  DiffSphere,
 };
 
 enum class LorentzianType {
@@ -84,6 +85,10 @@ enum class ParamID {
   IDP_SHIFT,
   DP_SHIFT,
   DP_INTENSITY,
+  DRDC_INTENSITY,
+  DRDC_RADIUS,
+  DRDC_DECAY,
+  DRDC_SHIFT,
   IDRDC_INTENSITY,
   IDRDC_RADIUS,
   IDRDC_DECAY,

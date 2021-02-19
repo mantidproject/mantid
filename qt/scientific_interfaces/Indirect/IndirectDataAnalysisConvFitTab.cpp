@@ -70,10 +70,11 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
 
   // Initialise fitTypeStrings
   m_fitStrings["Lorentzian"] = "L";
+  m_fitStrings["DiffSphere"] = "DS";
+  m_fitStrings["DiffRotDiscreteCircle"] = "DC";
   m_fitStrings["InelasticDiffSphere"] = "IDS";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
   m_fitStrings["ElasticDiffSphere"] = "EDS";
-  m_fitStrings["DiffSphere"] = "DS";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["StretchedExpFT"] = "SFT";
   m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
