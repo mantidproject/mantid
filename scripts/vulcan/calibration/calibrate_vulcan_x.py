@@ -42,8 +42,8 @@ def load_diamond_runs(diamond_runs: List[Union[str, int]],
 
 
 def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
-                              vulcan_x_idf: Union[None, str],
-                              output_dir):
+                              output_dir: str,
+                              vulcan_x_idf: Union[str, None] = None):
 
     if isinstance(diamond_runs, str):
         # Check a valid workspace
@@ -59,9 +59,9 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
     return cal_file_name, diamond_ws_name
 
 
-def align_vulcan_data(dia_runs, diff_cal_file_name):
+def align_vulcan_data(dia_runs, diff_cal_file_name, output_dir):
     print(f'Reduce data with calibration file {diff_cal_file_name}')
-    focused_ws_name, focused_nexus = reduce_calibration(dia_runs[:],
+    focused_ws_name, focused_nexus = reduce_calibration(dia_runs,
                                                         calibration_file=diff_cal_file_name,
                                                         idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
                                                         apply_mask=True,
@@ -106,7 +106,7 @@ def main():
     diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5']
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][0:1]
 
     # Optional user specified Mantid IDF
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
@@ -118,13 +118,13 @@ def main():
     # ---------------------------------------------------------------------------
 
     # Load data (set)
-    diamond_ws_name = load_diamond_runs(diamond_run[0:2], vulcan_x_idf, output_dir)
+    diamond_ws_name, _ = load_diamond_runs(diamond_run, vulcan_x_idf, output_dir)
 
     # Step 1: do cross correlation calibration
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir)
 
     # use the calibration file generated from previous step to align diamond runs
-    cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(dia_runs=diamond_run[0:1],
+    cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(dia_runs=diamond_run,
                                                          diff_cal_file_name=cc_calib_file,
                                                          output_dir=output_dir)
 
