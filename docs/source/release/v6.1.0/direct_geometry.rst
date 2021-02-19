@@ -9,4 +9,6 @@ Direct Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+* Updated instrument geometry for CHESS
+
 :ref:`Release 6.1.0 <v6.1.0>`
