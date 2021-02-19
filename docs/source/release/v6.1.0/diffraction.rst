@@ -22,6 +22,7 @@ Powder Diffraction
 
 Engineering Diffraction
 -----------------------
+- New IDF for upgraded VULCAN instrument
 
 Single Crystal Diffraction
 --------------------------
