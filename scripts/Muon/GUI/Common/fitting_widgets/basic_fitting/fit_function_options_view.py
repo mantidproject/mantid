@@ -123,7 +123,7 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
             self.function_browser.setFunction("")
         elif is_simultaneous_fit:
             self.function_browser.updateMultiDatasetParameters(fit_function.clone())
-            self.function_browser.setGlobalParameters(global_parameters)
+            self.global_parameters = global_parameters
         else:
             self.function_browser.updateParameters(fit_function)
 
@@ -193,9 +193,15 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Returns the number of domains in the FunctionBrowser."""
         return self.function_browser.getNumberOfDatasets()
 
-    def get_global_parameters(self) -> list:
+    @property
+    def global_parameters(self) -> list:
         """Returns a list of global parameters."""
         return self.function_browser.getGlobalParameters()
+
+    @global_parameters.setter
+    def global_parameters(self, global_parameters: list) -> None:
+        """Sets the global parameters in the function browser."""
+        self.function_browser.setGlobalParameters(global_parameters)
 
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous mode."""

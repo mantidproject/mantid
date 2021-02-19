@@ -39,7 +39,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         super().initialize_model_options()
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
         self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
-        self.model.global_parameters = self.view.get_global_parameters()
+        self.model.global_parameters = self.view.global_parameters
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
@@ -47,9 +47,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_and_reset_all_data()
         self._update_plot = True
 
-    def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared) -> None:
+    def handle_fitting_finished(self, fit_function, fit_status, chi_squared) -> None:
         """Handle when fitting is finished."""
-        self.update_fit_statuses_and_chi_squared_in_model(fit_status, fit_chi_squared)
+        self.update_fit_statuses_and_chi_squared_in_model(fit_status, chi_squared)
         self.update_fit_function_in_model(fit_function)
 
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
@@ -60,7 +60,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_fitting_mode_changed(self) -> None:
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
-        self.model.simultaneous_fitting_mode = self.view.is_simultaneous_fit_ticked
+        self.model.simultaneous_fitting_mode = self.view.simultaneous_fitting_mode
         self.switch_fitting_mode_in_view()
 
         self.update_fit_functions_in_model_from_view()
@@ -109,6 +109,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
+        # Triggers handle_dataset_name_changed which updates the model
         self.view.current_dataset_name = dataset_name
 
     def switch_fitting_mode_in_view(self) -> None:
@@ -151,7 +152,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""
-        self.model.global_parameters = self.view.get_global_parameters()
+        self.model.global_parameters = self.view.global_parameters
 
         if self.model.simultaneous_fitting_mode:
             self.model.clear_single_fit_functions()
