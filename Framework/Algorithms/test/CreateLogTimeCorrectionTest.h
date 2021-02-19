@@ -39,7 +39,7 @@ public:
   static void destroySuite(CreateLogTimeCorrectionTest *suite) { delete suite; }
 
   CreateLogTimeCorrectionTest() {
-    m_inpws = createEmptyWorkspace("VULCAN");
+    m_inpws = createEmptyWorkspace("VULCAN_Definition_2019-06-20.xml");
     AnalysisDataService::Instance().add("Vulcan", m_inpws);
   }
 
@@ -178,7 +178,7 @@ private:
       load.initialize();
       load.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
       load.setProperty("Workspace", ws);
-      load.setProperty("InstrumentName", instrument);
+      load.setProperty("Filename", instrument);
       load.execute();
     }
 
