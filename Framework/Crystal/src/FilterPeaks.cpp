@@ -134,7 +134,7 @@ void FilterPeaks::exec() {
       filterPeaksStr<std::not_equal_to<std::string>>(*inputWS, *selectedWS,
                                                      filterFunction, bankname);
     else
-      throw std::invalid_argument("Unsupport operator " + criterion +
+      throw std::invalid_argument("Unsupported operator " + criterion +
                                   " for BankName filter");
 
     inputWS = selectedWS;
