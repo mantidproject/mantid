@@ -4,13 +4,14 @@
 #  or Reload instrument (raw)
 # 3. Export unfocused data
 # 4. Diffraction focus and export
+import os
 from mantid.simpleapi import LoadEventNexus, Plus, LoadInstrument
 from lib_analysis import (align_focus_event_ws)
 from mantid_helper import load_calibration_file
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
-def reduce_calibration(diamond_runs: List[int],
+def reduce_calibration(diamond_runs: List[Union[int, str]],
                        calibration_file: str,
                        idf_file=None,
                        apply_mask=True,
@@ -35,16 +36,27 @@ def reduce_calibration(diamond_runs: List[int],
     """
 
     # Load event data from single or multiple file
-    dia_wksp = "%s_%d" % ('VULCAN', dia_runs[0])
+    if isinstance(diamond_runs[0], int):
+        dia_wksp = "%s_%d" % ('VULCAN', diamond_runs[0])
+        file_name = dia_wksp
+    else:
+        dia_wksp = os.path.basename(diamond_runs[0]).split('.')[0]
+        file_name = diamond_runs[0]
 
     # Load full size data
-    LoadEventNexus(Filename=dia_wksp, OutputWorkspace=dia_wksp)
+    LoadEventNexus(Filename=diamond_runs[0], OutputWorkspace=dia_wksp)
 
     # Load more files
     for file_index in range(1, len(diamond_runs)):
         # Load next file
-        dia_wksp_i = "%s_%d" % ('VULCAN', dia_runs[file_index])
-        LoadEventNexus(Filename=dia_wksp_i, OutputWorkspace=dia_wksp_i)
+        if isinstance(diamond_runs[0], int):
+            dia_wksp_i = "%s_%d" % ('VULCAN', diamond_runs[file_index])
+            file_name_i = dia_wksp_i
+        else:
+            dia_wksp_i = os.path.basename(diamond_runs[file_index]).split('.')[0]
+            file_name_i = diamond_runs[0]
+        # dia_wksp_i = "%s_%d" % ('VULCAN', dia_runs[file_index])
+        LoadEventNexus(Filename=file_name_i, OutputWorkspace=dia_wksp_i)
         # Merge
         Plus(LHSWorkspace=dia_wksp,
              RHSWorkspace=dia_wksp_i,

@@ -235,8 +235,8 @@ def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_ve
 
     plt.legend()
     plt.savefig(os.path.join('/tmp', f'predicted_position_bank{ws_index}'))
-    plt.show()
-    time.sleep(1)
+    # plt.show()
+    # time.sleep(1)
 
 
 def process_fit_result(peak_pos_ws_name, param_ws_name, param_error_ws_name):
@@ -360,7 +360,7 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     #     plt.plot(vec_d ** 2, vec_s ** 2, label='b2b: s^2', linestyle='None', marker='o')
 
     plt.savefig(os.path.join('/tmp/', f'peak_param_bank{ws_index}.png'))
-    plt.show()
+    # plt.show()
 
     # Plot data, model and difference
     time.sleep(1)
@@ -390,7 +390,7 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     plt.xlim(0.3, 1.5)
 
     plt.savefig(os.path.join('/tmp', f'bank_{ws_index}.png'))
-    plt.show()
+    # plt.show()
 
 
 def demo_calibration():

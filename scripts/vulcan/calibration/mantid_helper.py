@@ -80,7 +80,7 @@ def load_calibration_file(calib_file_name: str,
 
     """
     # check
-    assert os.path.exists(calib_file_name)
+    assert os.path.exists(calib_file_name), f'Calibration file {calib_file_name} cannot be found.'
 
     # determine file names
     if calib_file_name.endswith('.h5'):

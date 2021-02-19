@@ -11,7 +11,7 @@ from typing import List, Union
 def cross_correlate_calibrate(diamond_runs: List[Union[int, str]],
                               vulcan_x_idf: Union[None, str]):
 
-    cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_nexus=diamond_runs[1:2],
+    cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_nexus=diamond_runs,
                                                       load_cutoff_time=None,
                                                       user_idf=vulcan_x_idf)
 
@@ -19,6 +19,7 @@ def cross_correlate_calibrate(diamond_runs: List[Union[int, str]],
 
 
 def align_vulcan_data(dia_runs, diff_cal_file_name):
+    print(f'Reduce data with calibration file {diff_cal_file_name}')
     focused_ws_name, focused_nexus = reduce_calibration(dia_runs[:],
                                                         calibration_file=diff_cal_file_name,
                                                         idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
@@ -64,12 +65,13 @@ def main():
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5']
     #
-    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
+    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
 
     # output name
     final_calib_file = 'VULCAN_Calibration_Hybrid.h5'
 
     # do cross correlation calibration
+    print(diamond_run[0:1])
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_run[0:1], vulcan_x_idf)
 
     # use the calibration file generated from previous step to align diamond runs

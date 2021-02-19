@@ -120,7 +120,7 @@ def create_groups(vulcan_ws_name=None) -> str:
 
 
 def calibrate_vulcan(diamond_nexus: List[str],
-                     output_calib_file_name='VULCAN_Calibration_CC',
+                     output_calib_file_name='VULCAN_Calibration_CC',   # FIXME - this is prefix!
                      load_cutoff_time: Union[None, int] = None,
                      user_idf: Union[None, str] = None) -> Tuple[str, str]:
     """Main calibration workflow algorithm
@@ -148,6 +148,7 @@ def calibrate_vulcan(diamond_nexus: List[str],
     # TODO  -          those are centers.
 
     # Load data and convert unit to dSpacing
+    print(f'[DEBUG] diamond_nexus: {diamond_nexus} of type {type(diamond_nexus)}')
     count_ws_name = f'{os.path.basename(diamond_nexus[0]).split(".")[0]}_counts.nxs'
     diamond_ws_name = load_event_data(diamond_nexus,
                                       load_cutoff_time,
@@ -187,10 +188,10 @@ def calibrate_vulcan(diamond_nexus: List[str],
     # Generate grouping workspace
     grouping_ws_name = create_groups(diamond_ws_name)
 
-    save_calibration(calib_ws_name=calib_ws_name,
-                     mask_ws_name=str(mask_ws),
-                     group_ws_name=grouping_ws_name,
-                     calib_file_prefix=output_calib_file_name)
+    calib_file_name = save_calibration(calib_ws_name=calib_ws_name,
+                                       mask_ws_name=str(mask_ws),
+                                       group_ws_name=grouping_ws_name,
+                                       calib_file_prefix=output_calib_file_name)
 
     # Align the diamond workspace 
     # very diamond workspace
@@ -202,7 +203,7 @@ def calibrate_vulcan(diamond_nexus: List[str],
         print(f'Workspace: {diamond_ws_name} is deleted')
     # END-IF-ELSE
 
-    return output_calib_file_name, diamond_ws_name
+    return calib_file_name, diamond_ws_name
 
 
 def test_main_calibrate():
