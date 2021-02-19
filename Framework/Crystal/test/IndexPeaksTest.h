@@ -485,6 +485,82 @@ public:
     TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
   }
 
+  void test_exec_mod_vectors_save_cleared_across_runs() {
+    const auto peakWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg_three_mod =
+        indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                            {"MaxOrder", "1"},
+                            {"ModVector1", "0.333, 0.667, -0.333"},
+                            {"ModVector2", "-0.333, 0.667, 0.333"},
+                            {"ModVector3", "0.333, -0.667, 0.333"},
+                            {"SaveModulationInfo", "1"}});
+
+    // Repeat indexPeaks with 1 mod vector, verify lattice only has one set
+    const auto alg_one_mod =
+        indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                            {"MaxOrder", "1"},
+                            {"ModVector1", "0.333, 0.667, -0.333"},
+                            {"SaveModulationInfo", "1"}});
+
+    const auto &lattice = peakWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(1).norm(),
+                    1e-8)
+    TS_ASSERT_DELTA(V3D(0.0, 0.0, 0.0).norm(), lattice.getModVec(2).norm(),
+                    1e-8)
+  }
+
+  void test_exec_compare_after_modvec_changes() {
+    const std::vector<double> ub = {0.0971,  0.1179, 0.0433, 0.1056, -0.0305,
+                                    -0.0190, 0.0311, 0.0820, -0.0698};
+
+    constexpr int npeaks{5};
+    constexpr int run{39056};
+    // peak numbers 7, 25, 66, 72, and 76 from TOPAZ_39056
+    constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
+        MinimalPeak{run, V3D(-1.44683, 1.07978, 2.06781)},
+        MinimalPeak{run, V3D(-1.70476, 1.12522, 2.46955)},
+        MinimalPeak{run, V3D(1.22626, 1.20112, 4.88867)},
+        MinimalPeak{run, V3D(0.934964, 1.19063, 4.15398)},
+        MinimalPeak{run, V3D(1.19216, 1.75244, 4.69207)}};
+
+    const auto peakWS_onemod = createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+    const auto peakWS = createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
+
+    // Index with one modulation vector on the first peaks workspace
+    const auto alg_one_mod =
+        indexPeaks(peakWS_onemod, {{"RoundHKLs", "0"},
+                                   {"MaxOrder", "1"},
+                                   {"ModVector1", "0.5, 0.5, 0"},
+                                   {"SaveModulationInfo", "1"}});
+
+    // Re-index using two modulation vectors
+    const auto alg_two_mod = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                                                 {"MaxOrder", "1"},
+                                                 {"ModVector1", "0.5, 0, 0"},
+                                                 {"ModVector2", "0, 0.5, 0"},
+                                                 {"SaveModulationInfo", "1"}});
+
+    // Re-index with one modulation vector, and compare to before
+    const auto alg = indexPeaks(peakWS, {{"RoundHKLs", "0"},
+                                         {"MaxOrder", "1"},
+                                         {"ModVector1", "0.5, 0.5, 0"},
+                                         {"SaveModulationInfo", "1"}});
+
+    for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
+      const auto &peak_onemod = peakWS_onemod->getPeak(i);
+      const auto &peak = peakWS->getPeak(i);
+      // Verify the HKL and MNP of each peak since these would change if the
+      // last indexPeaks call was using a second modulation vector
+      TS_ASSERT(peak_onemod.getHKL() == peak.getHKL());
+      TS_ASSERT(peak_onemod.getIntHKL() == peak.getIntHKL());
+      TS_ASSERT(peak_onemod.getIntMNP() == peak.getIntMNP());
+    }
+  }
+
   // --------------------------- Failure tests -----------------------------
 
   std::shared_ptr<IndexPeaks> setup_validate_inputs_test_alg() {
