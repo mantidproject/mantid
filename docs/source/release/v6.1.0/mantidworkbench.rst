@@ -11,6 +11,7 @@ New and Improved
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
 - Improved the performance of the table workspace display for large datasets
+- A new facility named "NONE" is the default facility now
 
 Bugfixes
 --------
@@ -19,5 +20,6 @@ Bugfixes
 - For the elliptical shell of integrated peaks, the background is correct when plotting with varying background thicknesses
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Fixed a bug that use wrong help links in certain interfaces
+- First time dialog box will not appear recurrently
 
 :ref:`Release 6.1.0 <v6.1.0>`
