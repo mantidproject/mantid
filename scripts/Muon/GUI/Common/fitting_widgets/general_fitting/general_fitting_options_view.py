@@ -164,12 +164,12 @@ class GeneralFittingOptionsView(QWidget, ui_general_fitting_options):
         self.simul_fit_by_specifier.setEnabled(True)
 
     @property
-    def is_simultaneous_fit_ticked(self) -> bool:
+    def simultaneous_fitting_mode(self) -> bool:
         """Returns true if in simultaneous mode."""
         return self.simul_fit_checkbox.isChecked()
 
-    @is_simultaneous_fit_ticked.setter
-    def is_simultaneous_fit_ticked(self, simultaneous: bool) -> None:
+    @simultaneous_fitting_mode.setter
+    def simultaneous_fitting_mode(self, simultaneous: bool) -> None:
         """Sets whether or not you are in simultaneous mode."""
         self.simul_fit_checkbox.blockSignals(True)
         self.simul_fit_checkbox.setChecked(simultaneous)

@@ -46,7 +46,7 @@ class GeneralFittingView(BasicFittingView):
 
     def update_global_fit_status(self, fit_statuses: list, index: int) -> None:
         """Updates the global fit status label."""
-        if self.is_simultaneous_fit_ticked and index is not None:
+        if self.simultaneous_fitting_mode and index is not None:
             indexed_fit = fit_statuses[index]
             self.fit_controls.update_global_fit_status_label([indexed_fit == "success"] if indexed_fit else [])
         else:
@@ -54,7 +54,7 @@ class GeneralFittingView(BasicFittingView):
 
     def update_fit_function(self, fit_function: IFunction, global_parameters: list = []) -> None:
         """Updates the parameters of a fit function shown in the view."""
-        self.fit_function_options.update_function_browser_parameters(self.is_simultaneous_fit_ticked, fit_function,
+        self.fit_function_options.update_function_browser_parameters(self.simultaneous_fitting_mode, fit_function,
                                                                      global_parameters)
 
     @property
@@ -114,14 +114,14 @@ class GeneralFittingView(BasicFittingView):
         self.general_fitting_options.enable_simultaneous_fit_options()
 
     @property
-    def is_simultaneous_fit_ticked(self) -> bool:
+    def simultaneous_fitting_mode(self) -> bool:
         """Returns true if in simultaneous mode."""
-        return self.general_fitting_options.is_simultaneous_fit_ticked
+        return self.general_fitting_options.simultaneous_fitting_mode
 
-    @is_simultaneous_fit_ticked.setter
-    def is_simultaneous_fit_ticked(self, simultaneous: bool) -> None:
+    @simultaneous_fitting_mode.setter
+    def simultaneous_fitting_mode(self, simultaneous: bool) -> None:
         """Sets whether or not you are in simultaneous mode."""
-        self.general_fitting_options.is_simultaneous_fit_ticked = simultaneous
+        self.general_fitting_options.simultaneous_fitting_mode = simultaneous
 
     def setup_fit_by_specifier(self, specifiers: list) -> None:
         """Setup the fit by specifier combo box."""

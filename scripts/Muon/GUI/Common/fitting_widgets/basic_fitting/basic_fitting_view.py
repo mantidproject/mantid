@@ -181,9 +181,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Displays a warning message."""
         warning(message, parent=self)
 
-    def get_global_parameters(self) -> list:
+    @property
+    def global_parameters(self) -> list:
         """Returns a list of global parameters."""
-        return self.fit_function_options.get_global_parameters()
+        return self.fit_function_options.global_parameters
 
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""

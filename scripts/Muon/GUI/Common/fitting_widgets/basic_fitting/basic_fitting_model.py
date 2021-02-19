@@ -115,7 +115,7 @@ class BasicFittingModel:
 
     @current_dataset_name.setter
     def current_dataset_name(self, name: str) -> None:
-        """Sets the currently selected dataset name."""
+        """Sets the currently selected dataset name to have a different name."""
         self.dataset_names[self.current_dataset_index] = name
 
     @property
