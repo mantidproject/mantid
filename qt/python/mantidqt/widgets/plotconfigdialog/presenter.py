@@ -108,3 +108,18 @@ class PlotConfigDialogPresenter:
             if presenter == tab_presenter:
                 self.tab_widget_presenters[index] = None
                 return
+
+    def activate_curves_tab(self, axes):
+        curves_tab_presenter = self.tab_widget_presenters[2]
+        if not curves_tab_presenter:
+            return
+        curves_tab_widget, _ = self.tab_widget_views[1]
+
+        try:
+            curves_tab_presenter.set_axes_combo_from_ax_object(axes)
+        except ValueError:
+            # The axes was not found in the curves tab widget. This can happen when there are no
+            # curves on the given axes. Return and do not set the current tab to be the curves tab.
+            return
+
+        self.view.set_current_tab_widget(curves_tab_widget)

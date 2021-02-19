@@ -421,3 +421,19 @@ class CurvesTabWidgetPresenter:
         else:
             self.view.enable_curve_config(True)
             self.set_errorbars_tab_enabled()
+
+    def set_axes_combo_from_ax_object(self, axes_to_set):
+        """
+        Given the axes object, sets the selected index of the axes combo
+        to be the index corresponding to this object.
+        """
+        axes_index_to_set = None
+        for index, axes in enumerate(self.axes_names_dict.values()):
+            if axes_to_set == axes:
+                axes_index_to_set = index
+                break
+
+        if axes_index_to_set is None:  # could be 0, incorrectly raising error.
+            raise ValueError("Axes object does not exist in curves tab. There may be no curves on these axes.")
+
+        self.view.select_axes_combo_box.setCurrentIndex(axes_index_to_set)
