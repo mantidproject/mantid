@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
    fitting_widgets/basic_fitting/basic_fitting_model_test.py
+   fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
    fitting_widgets/basic_fitting/basic_fitting_view_test.py
    fitting_widgets/basic_fitting/fit_controls_view_test.py
    fitting_widgets/basic_fitting/fit_function_options_view_test.py
