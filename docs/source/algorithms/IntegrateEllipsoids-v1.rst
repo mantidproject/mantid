@@ -187,7 +187,7 @@ For every point on the edge, the trajectory in reciprocal space is a straight li
 Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
-:math:`\vec{E}=(-k \cdot \sin(\theta) * \cos(\phi), -k \cdot \sin(\theta) \cdot \sin(\phi), k - k \cdot \cos(\phi))`
+:math:`\vec{E}=(-k \cdot \sin(\theta) \cdot \cos(\phi), -k \cdot \sin(\theta) \cdot \sin(\phi), k - k \cdot \cos(\phi))`
 
 Normalize E to 1:
 
