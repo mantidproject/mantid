@@ -121,16 +121,11 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
 
         if fit_function is None:
             self.function_browser.setFunction("")
-        elif not isinstance(fit_function, MultiDomainFunction):
-            self.function_browser.updateParameters(fit_function)
-        else:
-            if self.function_browser.getNumberOfDatasets() == fit_function.getNumberDomains():
-                self.function_browser.updateMultiDatasetParameters(fit_function.clone())
-            else:
-                self.function_browser.setFunction(str(fit_function))
-
-        if is_simultaneous_fit:
+        elif is_simultaneous_fit:
+            self.function_browser.updateMultiDatasetParameters(fit_function.clone())
             self.function_browser.setGlobalParameters(global_parameters)
+        else:
+            self.function_browser.updateParameters(fit_function)
 
         self.function_browser.blockSignals(False)
         self.function_browser.setErrorsEnabled(True)
@@ -205,10 +200,12 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous mode."""
         self.function_browser.showGlobalCheckbox()
+        self.function_browser.setGlobalParameters([])
 
     def switch_to_single(self) -> None:
         """Switches the view to single mode."""
         self.function_browser.hideGlobalCheckbox()
+        self.function_browser.setGlobalParameters([])
 
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""

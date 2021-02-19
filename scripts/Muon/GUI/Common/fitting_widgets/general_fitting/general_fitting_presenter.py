@@ -20,6 +20,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def __init__(self, view: GeneralFittingView, model: GeneralFittingModel):
         super(GeneralFittingPresenter, self).__init__(view, model)
 
+        # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab
+        self._update_plot = True
+
         self.fitting_mode_changed_notifier = GenericObservable()
 
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
@@ -40,7 +43,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
+        self._update_plot = False
         self.update_and_reset_all_data()
+        self._update_plot = True
 
     def handle_fitting_finished(self, fit_function, fit_status, fit_chi_squared) -> None:
         """Handle when fitting is finished."""
@@ -99,7 +104,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.model.update_plot_guess(self.view.plot_guess)
 
-        self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+        if self._update_plot:
+            self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
