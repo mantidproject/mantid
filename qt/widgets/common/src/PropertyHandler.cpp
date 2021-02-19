@@ -851,6 +851,7 @@ void PropertyHandler::setAttribute(QString const &attName,
     }
   }
   if (cfun()) {
+    auto foo = cfun()->asString();
     for (auto i = 0u; i < cfun()->nFunctions(); ++i) {
       PropertyHandler *h = getHandler(i);
       h->setAttribute(attName, attValue);

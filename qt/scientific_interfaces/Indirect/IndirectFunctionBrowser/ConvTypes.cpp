@@ -21,6 +21,7 @@ std::map<FitType, bool> FitTypeQDepends =
                              {FitType::StretchedExpFT, false},
                              {FitType::ElasticDiffSphere, true},
                              {FitType::InelasticDiffSphere, true},
+                             {FitType::DiffSphere, true},
                              {FitType::InelasticDiffRotDiscreteCircle, true},
                              {FitType::ElasticDiffRotDiscreteCircle, true}});
 
@@ -29,6 +30,7 @@ std::unordered_map<FitType, std::string> FitTypeEnumToString(
      {FitType::StretchedExpFT, "StretchedExpFT"},
      {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
      {FitType::InelasticDiffSphere, "InelasticDiffSphere"},
+     {FitType::DiffSphere, "DiffSphere"},
      {FitType::InelasticDiffRotDiscreteCircle,
       "InelasticDiffRotDiscreteCircle"},
      {FitType::ElasticDiffRotDiscreteCircle, "ElasticDiffRotDiscreteCircle"}});
@@ -38,6 +40,7 @@ std::unordered_map<std::string, FitType> FitTypeStringToEnum(
      {"StretchedExpFT", FitType::StretchedExpFT},
      {"ElasticDiffSphere", FitType::ElasticDiffSphere},
      {"InelasticDiffSphere", FitType::InelasticDiffSphere},
+     {"DiffSphere", FitType::DiffSphere},
      {"InelasticDiffRotDiscreteCircle",
       FitType::InelasticDiffRotDiscreteCircle},
      {"ElasticDiffRotDiscreteCircle", FitType::ElasticDiffRotDiscreteCircle}});
@@ -102,6 +105,10 @@ std::map<FitType, TemplateSubTypeDescriptor>
          {"InelasticDiffSphere",
           "InelasticDiffSphere",
           {ParamID::IDP_INTENSITY, ParamID::IDP_SHIFT}}},
+        {FitType::DiffSphere,
+         {"DiffSphere",
+          "DiffSphere",
+          {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
         {FitType::InelasticDiffRotDiscreteCircle,
          {"InelasticDiffRotDiscreteCircle",
           "InelasticDiffRotDiscreteCircle",

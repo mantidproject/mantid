@@ -31,6 +31,7 @@ enum class FitType {
   ElasticDiffRotDiscreteCircle,
   InelasticDiffSphere,
   InelasticDiffRotDiscreteCircle,
+  DiffSphere,
 };
 
 enum class LorentzianType {
@@ -81,6 +82,8 @@ enum class ParamID {
   IDP_RADIUS,
   IDP_DIFFUSION,
   IDP_SHIFT,
+  DP_SHIFT,
+  DP_INTENSITY,
   IDRDC_INTENSITY,
   IDRDC_RADIUS,
   IDRDC_DECAY,
