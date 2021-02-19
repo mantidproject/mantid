@@ -44,7 +44,7 @@ def reduce_calibration(diamond_runs: List[Union[int, str]],
         file_name = diamond_runs[0]
 
     # Load full size data
-    LoadEventNexus(Filename=diamond_runs[0], OutputWorkspace=dia_wksp)
+    LoadEventNexus(Filename=file_name, OutputWorkspace=dia_wksp)
 
     # Load more files
     for file_index in range(1, len(diamond_runs)):

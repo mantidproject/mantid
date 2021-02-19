@@ -15,7 +15,7 @@ from typing import Union, List, Tuple
 CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
 
 
-def load_event_data(nexus_paths: List[str],
+def load_event_data(nexus_paths: List[Union[str, int]],
                     cutoff_time: Union[int, None] = None,
                     counts_nxs_name: Union[str, None] = None,
                     unit_dspace: bool = True,
@@ -41,6 +41,20 @@ def load_event_data(nexus_paths: List[str],
         EventWorkspace name
 
     """
+    def load_nexus_run(nexus_run):
+        if isinstance(nexus_run, int):
+            # user provide run number
+            wksp = "%s_%d" % ('VULCAN', nexus_run)
+            file_name = wksp
+        else:
+            # user provide file name
+            wksp = os.path.basename(nexus_run).split('.')[0]
+            file_name = nexus_run
+        LoadEventNexus(Filename=file_name, OutputWorkspace=wksp, NumberOfBins=1)
+
+        return wksp
+
+    # Check input (not very Python)
     assert isinstance(nexus_paths, list) and not isinstance(nexus_paths, str), f'Nexus paths {nexus_paths}' \
                                                                                f' must be a list'
 
@@ -51,7 +65,7 @@ def load_event_data(nexus_paths: List[str],
     # Load a file or files
     if len(nexus_paths) == 1:
         # Load a single file
-        # tet mode?
+        # and allow test mode?
         test_arg = {}
         if cutoff_time:
             test_arg['max_time'] = cutoff_time
@@ -62,26 +76,23 @@ def load_event_data(nexus_paths: List[str],
                    **test_arg)
     else:
         # Load a series of data files
-        LoadEventNexus(Filename=nexus_paths[0], OutputWorkspace=diamond_ws_name)
+        diamond_ws_name = load_nexus_run(nexus_paths[0])
+
         # Load more files
         for file_index in range(1, len(nexus_paths)):
-            dia_wksp_i = "%s_diamond_%d" % ('VULCANX', file_index)
-            LoadEventNexus(Filename=nexus_paths[file_index], OutputWorkspace=dia_wksp_i)
+            dia_wksp_i = load_nexus_run(nexus_paths[file_index])
             Plus(LHSWorkspace=diamond_ws_name,
                  RHSWorkspace=dia_wksp_i,
                  OutputWorkspace=diamond_ws_name,
                  ClearRHSWorkspace=True)
 
+    # Load IDF if the one in Nexus shall be replaced
     if idf_name:
-        print(f'[CHECK 1] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()},'
-              f'Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
         # Reload instrument (do not trust the old one)
         LoadInstrument(Workspace=diamond_ws_name,
                        Filename=idf_name,
                        InstrumentName='VULCAN',
-                       RewriteSpectraMap=False) 
-        print(f'[CHECK 2] number of histograms = {mtd[diamond_ws_name].getNumberHistograms()},'
-              f'Spectrum 1 Detector = {mtd[diamond_ws_name].getDetector(0).getID()}')
+                       RewriteSpectraMap=False)
 
     # convert to d-Spacing
     if unit_dspace:
@@ -119,24 +130,16 @@ def create_groups(vulcan_ws_name=None) -> str:
     return group_ws_name
 
 
-def calibrate_vulcan(diamond_nexus: List[str],
-                     output_calib_file_name='VULCAN_Calibration_CC',   # FIXME - this is prefix!
-                     load_cutoff_time: Union[None, int] = None,
-                     user_idf: Union[None, str] = None) -> Tuple[str, str]:
+def calibrate_vulcan(diamond_ws_name: str,
+                     output_dir: str) -> Tuple[str, str]:
     """Main calibration workflow algorithm
 
     Refer to pyvdrive.script.calibration.vulcan_cal_instruent_calibration.py
 
     Parameters
     ----------
-    diamond_nexus: str
-        path to diamond Nexus file
-    output_calib_file_name: str:
-        Path to the output calibration file (.h5)
-    load_cutoff_time: int, None
-        maximum relative time to load in second
-    user_idf: str, None
-        if given, load user provided IDF to EventWorksapce loaded from diamond nexus
+    diamond_ws_name:
+    output_dir:
 
     Returns
     -------
@@ -147,14 +150,8 @@ def calibrate_vulcan(diamond_nexus: List[str],
     # TODO - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
     # TODO  -          those are centers.
 
-    # Load data and convert unit to dSpacing
-    print(f'[DEBUG] diamond_nexus: {diamond_nexus} of type {type(diamond_nexus)}')
-    count_ws_name = f'{os.path.basename(diamond_nexus[0]).split(".")[0]}_counts.nxs'
-    diamond_ws_name = load_event_data(diamond_nexus,
-                                      load_cutoff_time,
-                                      counts_nxs_name=count_ws_name,
-                                      unit_dspace=True,
-                                      idf_name=user_idf)
+    # Check inputs
+    assert mtd.doesExist(diamond_ws_name), f'Workspace {diamond_ws_name} does not exist'
 
     # do cross correlation:
     calib_flag = {'Bank1': True, 'Bank2': True, 'Bank5': True}
@@ -188,10 +185,12 @@ def calibrate_vulcan(diamond_nexus: List[str],
     # Generate grouping workspace
     grouping_ws_name = create_groups(diamond_ws_name)
 
+    output_calib_file_name = f'{diamond_ws_name}_Calibration_CC'
     calib_file_name = save_calibration(calib_ws_name=calib_ws_name,
                                        mask_ws_name=str(mask_ws),
                                        group_ws_name=grouping_ws_name,
-                                       calib_file_prefix=output_calib_file_name)
+                                       calib_file_prefix=output_calib_file_name,
+                                       output_dir=output_dir)
 
     # Align the diamond workspace 
     # very diamond workspace

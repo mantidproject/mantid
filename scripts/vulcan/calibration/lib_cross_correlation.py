@@ -791,7 +791,8 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name: str,
 def save_calibration(calib_ws_name: str,
                      mask_ws_name: str,
                      group_ws_name: str,
-                     calib_file_prefix: str) -> str:
+                     calib_file_prefix: str,
+                     output_dir:str) -> str:
     """Export calibrated result to calibration file
 
     Save calibration (calibration table, mask and grouping) to legacy .cal and current .h5 file
@@ -813,7 +814,7 @@ def save_calibration(calib_ws_name: str,
     # save
     #  get file name and unlink existing one
     # TODO/FIXME - output directory shall be specified by users
-    out_file_name = os.path.join(os.getcwd(), calib_file_prefix + '.h5')
+    out_file_name = os.path.join(output_dir, calib_file_prefix + '.h5')
     if os.path.exists(out_file_name):
         os.unlink(out_file_name)
 
