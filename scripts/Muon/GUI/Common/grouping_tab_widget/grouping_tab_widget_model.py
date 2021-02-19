@@ -197,12 +197,6 @@ class GroupingTabModel(object):
     def remove_groups_by_name(self, name_list):
         for name in name_list:
             self._groups_and_pairs.remove_group(name)
-            self.remove_pairs_with_removed_name(name)
-
-    def remove_pairs_with_removed_name(self, group_name):
-        for pair in self._groups_and_pairs.pairs:
-            if pair.forward_group == group_name or pair.backward_group == group_name:
-                self._groups_and_pairs.remove_pair(pair.name)
 
     def remove_pairs_by_name(self, name_list):
         for name in name_list:
