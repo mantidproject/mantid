@@ -9,7 +9,8 @@ New and Improved
 ----------------
 
 - It is now possible to overplot bin data from the matrix workspace view.
-- A new facility named "NONE" is the default facility now
+- A new facility named "NONE" is the default facility now, and
+  user has to select their choice of facility and instrument for the first time, including ISIS
 
 Bugfixes
 --------
