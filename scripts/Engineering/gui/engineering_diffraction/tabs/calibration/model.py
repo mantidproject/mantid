@@ -10,8 +10,9 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
-from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii
+from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
+    EditInstrumentGeometry, ConvertUnits, Load
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -45,24 +46,21 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
-        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
-            vanadium_path, instrument, rb_num=rb_num)
         sample_workspace = path_handling.load_workspace(sample_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
             full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
             output = self.run_calibration(sample_workspace,
-                                          van_integration,
-                                          van_curves,
+                                          vanadium_path,
                                           bank,
                                           spectrum_numbers,
                                           full_calib_ws=full_calib)
         else:
-            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank,
-                                          spectrum_numbers)
+            output = self.run_calibration(sample_workspace, vanadium_path, bank, spectrum_numbers)
         if plot_output:
-            self._plot_vanadium_curves()
+            # TODO determine output to plot
+            #self._plot_vanadium_curves()
             for i in range(len(output)):
                 if spectrum_numbers:
                     bank_name = "cropped"
@@ -70,9 +68,9 @@ class CalibrationModel(object):
                     bank_name = str(i + 1)
                 else:
                     bank_name = bank
-                difa = output[i].DIFA
-                difc = output[i].DIFC
-                tzero = output[i].TZERO
+                difa = output[i]['difa']
+                difc = output[i]['difc']
+                tzero = output[i]['tzero']
                 self._generate_tof_fit_workspace(difa, difc, tzero, bank_name)
             if bank is None and spectrum_numbers is None:
                 self._plot_tof_fit()
@@ -176,6 +174,7 @@ class CalibrationModel(object):
 
     @staticmethod
     def _generate_tof_fit_workspace(difa, difc, tzero, bank):
+        # TODO this function errors with current input
         bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank))
 
         x_val = []
@@ -237,8 +236,7 @@ class CalibrationModel(object):
 
     def run_calibration(self,
                         sample_ws,
-                        van_integration,
-                        van_curves,
+                        vanadium_workspace,
                         bank,
                         spectrum_numbers,
                         full_calib_ws=None):
@@ -252,35 +250,76 @@ class CalibrationModel(object):
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
         :return: The output of the algorithm.
         """
+
+        def run_pd_calibration(kwargs_to_pass):
+            return PDCalibration(**kwargs_to_pass)
+
+        # TODO get peak positions from EnggUtils as in EnggCal
+        dpks = (2.705702376, 1.913220892, 1.631600313, 1.352851554, 1.104598643)
+
+        # TODO if full_calib_ws, PreviousCalibrationTable =
+
         kwargs = {
             "InputWorkspace": sample_ws,
-            "VanIntegrationWorkspace": van_integration,
-            "VanCurvesWorkspace": van_curves
+            "PeakPositions": dpks,
+            "TofBinning": [10000, -0.0005, 46000],  # TODO bung all this in constants as well
+            "PeakWindow": 0.03,
+            "MinimumPeakHeight": 0.5,
+            "PeakFunction": 'BackToBackExponential',
+            "CalibrationParameters": 'DIFC+TZERO',
+            "OutputCalibrationTable": 'cal_B2B_DIFC_TZERO_chisq',
+            "DiagnosticWorkspaces": 'diag_B2B_DIFC_TZERO_chisq'
         }
 
-        def run_engg_calibrate(kwargs_to_pass):
-            return EnggCalibrate(**kwargs_to_pass)
+        # initial calibration of instrument
+        cal_initial = run_pd_calibration(kwargs)[0]
 
-        if full_calib_ws is not None:
-            kwargs["DetectorPositions"] = full_calib_ws
-        if spectrum_numbers is None:
-            if bank is None:
-                output = [None] * 2
-                for i in range(len(output)):
-                    kwargs["Bank"] = str(i+1)
-                    kwargs["FittedPeaks"] = self._generate_table_workspace_name(str(i+1))
-                    output[i] = run_engg_calibrate(kwargs)
-            else:
-                output = [None]
-                kwargs["Bank"] = bank
-                kwargs["FittedPeaks"] = self._generate_table_workspace_name(bank)
-                output[0] = run_engg_calibrate(kwargs)
+        ws_van = Load(vanadium_workspace)
+        NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)  # or van curves? or neither
+        ws_van_d = AlignDetectors(InputWorkspace=ws_van, CalibrationWorkspace=cal_initial)
 
-        else:
-            output = [None]
-            kwargs["SpectrumNumbers"] = spectrum_numbers
-            kwargs["FittedPeaks"] = self._generate_table_workspace_name("cropped")
-            output[0] = run_engg_calibrate(kwargs)
+        # sensitivity correction
+        nbins = ws_van.blocksize()
+        ws_van_int = Integration(InputWorkspace=ws_van)
+        ws_van_int /= nbins
+
+        ws_van_d /= ws_van_int  # TODO this produces lots of warnings about division by zero
+
+        # focus van data
+
+        focused = DiffractionFocussing(InputWorkspace=ws_van_d, GroupingFileName='/home/tom/dev/stfc/scripts/dummy.cal')
+        # TODO get detector groupings from Engg
+        # ue groupings dependent on bank (n/s)
+
+        # normalise to focused vanadium
+
+        EditInstrumentGeometry(Workspace=focused, L2='1.5', Polar='90', InstrumentName='ENGIN-X')
+        ConvertUnits(InputWorkspace=focused, OutputWorkspace=focused, Target='TOF')
+
+        # final calibration of focused data
+
+        dpks_final = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
+		1.241461538, 1.210027059,1.104598643, 1.04142562, 0.956610446,
+		0.914694494, 0.901900955, 0.855618487]
+        # TODO again get this from EnggUtils
+
+        cal = PDCalibration(InputWorkspace=focused,
+                      TofBinning=[15500, -0.0003, 52000],  # using a finer binning now have better stats
+                      PeakPositions=dpks_final,
+                      PeakWindow=0.04,  # reduce this a bit as fitting peaks at lower d-spacing
+                      MinimumPeakHeight=0.5,
+                      PeakFunction='BackToBackExponential',
+                      CalibrationParameters='DIFC+TZERO+DIFA',  # use DIFA as well now
+                      OutputCalibrationTable='cal_North',
+                      DiagnosticWorkspaces='diag_North')
+                      #UseChiSq=True)
+        cal_table = cal[0]
+        n_rows = cal_table.rowCount()
+        output = dict()
+        for row_no in range(n_rows):
+            row = cal_table.row(row_no)
+            current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}  # difc, difa, tzero
+            output[row_no] = current_fit_params
         return output
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
