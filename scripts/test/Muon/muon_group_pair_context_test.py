@@ -223,8 +223,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
         self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
         self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
-        self.assertEquals(self.context.diffs[0].forward_group, 'long1')
-        self.assertEquals(self.context.diffs[0].backward_group, 'long2')
+        self.assertEquals(self.context.diffs[0].positive, 'long1')
+        self.assertEquals(self.context.diffs[0].negative, 'long2')
         self.assertEquals(self.context.selected, 'long1')
 
     def test_get_group_pair_name_and_run_from_workspace_name(self):

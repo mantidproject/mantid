@@ -174,8 +174,8 @@ class GroupingTabPresenter(object):
                 self._model.add_pair_to_analysis(default)
 
         self.grouping_table_widget.update_view_from_model()
-        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.update_description_text(description)
         self._model._context.group_pair_context.selected = default
         self.plot_default_groups_or_pairs()
