@@ -22,6 +22,7 @@ Improvements
 
 - :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
 - Support fitting diffractometer constants with chi-squared cost function in <algm-PDCalibration>.
+- :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 
 Bugfixes
 ########
