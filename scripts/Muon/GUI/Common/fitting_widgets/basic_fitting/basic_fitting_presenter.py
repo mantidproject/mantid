@@ -77,7 +77,7 @@ class BasicFittingPresenter:
     def handle_gui_changes_made(self, changed_values: dict) -> None:
         """Handle when the good data checkbox is changed in the home tab."""
         for key in changed_values.keys():
-            if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
+            if key in ["FirstGoodDataFromFile", "FirstGoodData"]:
                 self.reset_start_xs_and_end_xs()
 
     def handle_new_data_loaded(self) -> None:

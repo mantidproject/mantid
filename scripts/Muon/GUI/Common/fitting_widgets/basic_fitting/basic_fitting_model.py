@@ -347,7 +347,7 @@ class BasicFittingModel:
             self._fit_to_raw = fit_to_raw
             self.context.fitting_context.fit_raw = fit_to_raw
             # Avoids resetting the start/end xs and etc. by not using the dataset_names setter.
-            self._dataset_names = self.get_equivalent_binned_or_unbinned_workspaces()
+            self._dataset_names = self._get_equivalent_binned_or_unbinned_workspaces()
 
     @property
     def simultaneous_fitting_mode(self) -> bool:
@@ -358,10 +358,6 @@ class BasicFittingModel:
     def global_parameters(self) -> list:
         """Returns the global parameters stored in the model. Override this method if you require global parameters."""
         return []
-
-    def get_equivalent_binned_or_unbinned_workspaces(self):
-        """Returns the equivalent binned or unbinned workspaces for the current datasets."""
-        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(self.dataset_names)
 
     @property
     def do_rebin(self) -> bool:
@@ -542,6 +538,10 @@ class BasicFittingModel:
         """Gets the fit results from the context using the workspace names and function name."""
         return self.context.fitting_context.find_fit_for_input_workspace_list_and_function(workspace_names,
                                                                                            function_name)
+
+    def _get_equivalent_binned_or_unbinned_workspaces(self):
+        """Returns the equivalent binned or unbinned workspaces for the current datasets."""
+        return self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(self.dataset_names)
 
     @staticmethod
     def _clone_function(function: IFunction) -> IFunction:
