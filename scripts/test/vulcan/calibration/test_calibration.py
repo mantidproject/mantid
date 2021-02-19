@@ -6,20 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-import numpy as np
-from numpy.testing import assert_allclose
-# from os import path
-#
-from mantid import AnalysisDataService
-from mantid.simpleapi import Load, mtd
-# from mantid import config
-# from mantid.kernel import V3D
-# from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
-#                               LoadNexusProcessed, mtd)
-#
-# from corelli.calibration.utils import (apply_calibration, preprocess_banks, bank_numbers, calculate_peak_y_table,
-#                                        calibrate_tube, load_banks, trim_calibration_table, wire_positions)
-from mantid.simpleapi import DeleteWorkspaces
+import os
+import tempfile
+from mantid.simpleapi import mtd
+from vulcan.calibration.calibrate_vulcan_x import align_vulcan_data, cross_correlate_calibrate, peak_position_calibrate
 
 
 class TestUtils(unittest.TestCase):
@@ -33,12 +23,11 @@ class TestUtils(unittest.TestCase):
         
         NOTE: called once before the test begin
         """
-        # load the testing data
-        Load(
-            Filename="VULCAN_192226.nxs.h5",
-            OutputWorkspace="VULCAN_192226",
-        )
-        cls.workspaces_temporary.append("VULCAN_192226")
+        # load the testing data (diamond run)
+        # NOTE: the calibration functions takes filenames
+        #       as input, therefore we do not have to
+        #       pre-load any workspace into memory
+        pass
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -47,8 +36,8 @@ class TestUtils(unittest.TestCase):
 
         NOTE: called once before exiting test
         """
-        if len(cls.workspaces_temporary) > 0:
-            DeleteWorkspaces(cls.workspaces_temporary)
+        # remove all workspace from memory before exiting
+        mtd.clear()
 
     def setUp(self) -> None:
         r"""
@@ -66,7 +55,25 @@ class TestUtils(unittest.TestCase):
     # -- System tests -- #
     # ------------------ #
     def test_calibration(self):
-        assert ("VULCAN_192226" in mtd)
+        diamond_run = ["VULCAN_192226.nxs.h5"]
+        vulcan_x_idf = "VULCAN_Definition.xml"  # Should be in Mantid instrument folder
+        calibration_rst = os.path.join(tempfile.gettempdir(), "VULCAN_Calibration_Hybrid.h5")
+
+        # perform calibration
+        # step_1:
+        cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_run, vulcan_x_idf)
+        # step_2:
+        cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(
+            dia_runs=diamond_run,
+            diff_cal_file_name=cc_calib_file,
+            )
+        # step_3:
+        peak_position_calibrate(cc_focus_ws_name, cc_calib_file, calibration_rst)
+
+        # verify calibration file is created
+        # NOTE: this is step 1, we will add more reliable asseration once
+        #       we have a reference calibration results
+        assert os.path.exists(calibration_rst)
 
 
 if __name__ == "__main__":
