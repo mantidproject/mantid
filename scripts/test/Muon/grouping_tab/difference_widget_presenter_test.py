@@ -133,6 +133,33 @@ class DifferenceWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.pair_view.num_rows())
         self.assertEqual(0, self.presenter.group_view.num_rows())
 
+    def test_tables_are_disabled_correctly(self):
+        self.presenter.group_view.disable_editing = mock.Mock()
+        self.presenter.pair_view.disable_editing = mock.Mock()
+        self.presenter.disable_editing()
+
+        self.assertEqual(1, self.presenter.group_view.disable_editing.call_count)
+        self.assertEqual(1, self.presenter.pair_view.disable_editing.call_count)
+
+    def test_tables_are_enabled_correctly(self):
+        self.presenter.group_view.enable_editing = mock.Mock()
+        self.presenter.pair_view.enable_editing = mock.Mock()
+        self.presenter.enable_editing()
+
+        self.assertEqual(1, self.presenter.group_view.enable_editing.call_count)
+        self.assertEqual(1, self.presenter.pair_view.enable_editing.call_count)
+
+    def test_add_subscribers(self):
+        # Make some fake observers
+        observer_1 = Observer()
+        observer_2 = Observer()
+        self.presenter.add_subscribers([observer_1, observer_2])
+
+        self.assertEqual([observer_1, observer_2],
+                         self.presenter.group_widget.selected_diff_changed_notifier._subscribers)
+        self.assertEqual([observer_1, observer_2],
+                         self.presenter.pair_widget.selected_diff_changed_notifier._subscribers)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

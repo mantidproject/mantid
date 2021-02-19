@@ -26,6 +26,7 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(get_group_or_pair_from_name('MUSR62260; Pair Asym; long; Periods; #1; MA'), "long")
 
         self.assertEqual(get_group_or_pair_from_name('MUSR62260; PhaseQuad; test_Re_;MA'),"test_Re_")
+        self.assertEqual(get_group_or_pair_from_name('MUSR62260; Diff; diff; Asymmetry; MA'), "diff")
 
     def test_removeRebinFromName(self):
         # std name
