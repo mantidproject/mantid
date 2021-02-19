@@ -17,7 +17,7 @@ motions of molecules. Fick's law for diffusion has the form:
 
    Gamma(Q) = D \cdot Q^{2},
 
-where :math:`D=<l^{2}> \cdot \frac{Q^2}{6} \cdot tau`
+where :math:`D=\langle l^{2} \rangle \cdot \frac{Q^2}{6} \cdot tau`
 
 .. attributes::
 
