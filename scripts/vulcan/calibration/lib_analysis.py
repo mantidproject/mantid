@@ -216,6 +216,8 @@ def align_focus_event_ws(event_ws_name,
     # Save nexus for 2D alignment view
     SaveNexusProcessed(InputWorkspace=matrix_ws_name,
                        Filename=os.path.join(output_dir, f'{event_ws_name}{file_tag}.nxs'))
+    # remove matrix workspace after being saved
+    mtd.remove(matrix_ws_name)
 
     # Mask group workspace
     if mask_ws_name:
@@ -224,7 +226,7 @@ def align_focus_event_ws(event_ws_name,
     else:
         file_tag += '_Nomask'
 
-    # Diffraction focus
+    # Diffraction focus: original EventWorkspace is then aligned and focused for next step
     DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
                          GroupingWorkspace=group_ws_name)
 
@@ -242,7 +244,7 @@ def align_focus_event_ws(event_ws_name,
     # TODO - need to relax to allow user to  determine
     focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
 
-    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=focused_run_nxs)
+    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
 
     return event_ws_name, focused_run_nxs
 

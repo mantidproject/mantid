@@ -145,7 +145,7 @@ def main():
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
 
     # Output path
-    output_dir = os.getcwd()
+    output_dir = '/tmp/'  # os.getcwd()
     final_calib_file = 'VULCAN_Calibration_Hybrid.h5'
     #
     # ---------------------------------------------------------------------------
