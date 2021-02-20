@@ -203,24 +203,3 @@ def calibrate_vulcan(diamond_ws_name: str,
     # END-IF-ELSE
 
     return calib_file_name, diamond_ws_name
-
-
-def test_main_calibrate():
-    # Testing files
-    diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5']
-    # 
-    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/data/VULCAN_Definition_pete02.xml'
-
-    calibrate_vulcan(diamond_nexus=diamond_run[:],
-                     load_cutoff_time=None,
-                     user_idf=vulcan_x_idf,
-                     )
-
-    # Align the event workspace (todo)
-
-
-if __name__ == '__main__':
-    test_main_calibrate()

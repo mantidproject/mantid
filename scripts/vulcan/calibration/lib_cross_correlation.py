@@ -25,6 +25,14 @@ VULCAN_X_PIXEL_RANGE = {'Bank1': (0, 81920),  # 160 tubes
                         'Bank2': (81920, 163840),   # 160 tubes
                         'Bank5': (163840, 200704)   # 72 tubes
                         }
+VULCAN_X_PIXEL_NUMBER = 200704
+
+from collections import namedtuple
+
+CrossCorrelateParameter = namedtuple('CrossCorrelateParameter', ['reference_peak_position',
+                                                                 'reference_peak_width',
+                                                                 'reference_ws_index',
+                                                                 'cross_correlate_number'])
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
@@ -58,12 +66,8 @@ def verify_vulcan_difc(ws_name: str,
 
     # Generate a dictionary for each bank
     bank_info_dict = VULCAN_X_PIXEL_RANGE
-    # bank_info_dict = {'Bank1': (0, 81920),  # 160 tubes
-    #                   'Bank2': (81920, 163840),   # 160 tubes
-    #                   'Bank5': (163840, 200704)   # 72 tubes
-    #                   }
 
-    if diamond_event_ws.getNumberHistograms() != 200704:
+    if diamond_event_ws.getNumberHistograms() != VULCAN_X_PIXEL_NUMBER:
         raise NotImplementedError('Bank information dictionary is out of date')
 
     # Init file
@@ -154,15 +158,6 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
     start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
     row_range = range(start_pid, end_pid)
 
-    # if bank_name == 'Bank1':
-    #     row_range = range(0, 3234)
-    # elif bank_name == 'east':
-    #     row_range = range(3234, 6468)
-    # elif bank_name == 'high angle':
-    #     row_range = range(6468, 24900)
-    # else:
-    #     raise RuntimeError('balbal {}'.format(bank_name))
-
     # Get the workspaces handlers
     if isinstance(target_calib_ws, str):
         target_calib_ws = mantid_helper.retrieve_workspace(target_calib_ws, True)
@@ -242,8 +237,9 @@ def cross_correlate_calibrate(ws_name: str,
                               cc_number: int,
                               max_offset: float,
                               binning: float,
-                              ws_name_posfix='',
-                              peak_fit_time=1):
+                              ws_name_posfix: str = '',
+                              peak_fit_time: int = 1,
+                              debug_mode: bool = False):
     """Calibrate instrument (with a diamond run) with cross correlation algorithm
     on a specified subset of spectra in a diamond workspace
 
@@ -273,6 +269,8 @@ def cross_correlate_calibrate(ws_name: str,
         posfix of the workspace created in the algorithm
     peak_fit_time: int
         number of peak fitting in GetDetectorOffsets
+    debug_mode: bool
+        Flag to output internal workspace to process NeXus files for debugging
 
     Returns
     -------
@@ -292,20 +290,21 @@ def cross_correlate_calibrate(ws_name: str,
     # get reference detector position
     det_pos = diamond_event_ws.getDetector(reference_ws_index).getPos()
     twotheta = calculate_detector_2theta(diamond_event_ws, reference_ws_index)
-    print('[INFO] Reference spectra = {0}  position @ {1}   2-theta = {2}'
-          ''.format(reference_ws_index, det_pos, twotheta))
-    print(f'[INFO] Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
+    print(f'[INFO] Reference spectra = {reference_ws_index}  position @ {det_pos}   2-theta = {twotheta}  '
+          f'Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
     # TODO - NIGHT - shall change from bank to bank
-    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 2.0'.format(abs(binning)))
+    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 1.5'.format(abs(binning)))
 
     # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
     cc_ws_name = 'cc_' + ws_name + '_' + ws_name_posfix
     CrossCorrelate(InputWorkspace=ws_name,
                    OutputWorkspace=cc_ws_name,
                    ReferenceSpectra=reference_ws_index,
-                   WorkspaceIndexMin=ws_index_range[0], WorkspaceIndexMax=ws_index_range[1],
-                   XMin=peak_min, XMax=peak_max)
+                   WorkspaceIndexMin=ws_index_range[0],
+                   WorkspaceIndexMax=ws_index_range[1],
+                   XMin=peak_min,
+                   XMax=peak_max)
 
     # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
     offset_ws_name = 'offset_' + ws_name + '_' + ws_name_posfix
@@ -314,7 +313,7 @@ def cross_correlate_calibrate(ws_name: str,
     # TODO - THIS IS AN IMPORTANT PARAMETER TO SET THE MASK
     # min_peak_height = 1.0
 
-    print('[DB...BAT] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
+    print('[INFO] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
     try:
         GetDetectorOffsets(InputWorkspace=cc_ws_name,
                            OutputWorkspace=offset_ws_name,
@@ -330,12 +329,15 @@ def cross_correlate_calibrate(ws_name: str,
                            # FitEachPeakTwice=fit_twice,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
-        # TODO FIXME - may remove this save effort later
-        # SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
+        if debug_mode:
+            SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
-        print(f'[DEBUG] Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number}, MaxOffset = {max_offset}')
-        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
+        print(f'[ERROR] Failed to cross correlation on ({ws_index_range[0]}, {ws_index_range[1]}):'
+              f' Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number},'
+              f'MaxOffset = {max_offset}')
+        if debug_mode:
+            SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
         # raise run_err
         return None, run_err
 
@@ -347,8 +349,7 @@ def cross_correlate_calibrate(ws_name: str,
     # report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
-    # TODO - FUTURE NEXT - consider whether the cross correlate workspace shall be removed or not
-    if False and mtd.doesExist(ws_name + "cc" + ws_name_posfix):
+    if mtd.doesExist(ws_name + "cc" + ws_name_posfix):
         mtd.remove(ws_name + "cc")
 
     return offset_ws_name, mask_ws_name
@@ -466,6 +467,9 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
 
     # peak position in d-Spacing
     # FIXME TODO - make this flexible
+
+    bank1_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80)
+
     peakpos1 = 1.2614
     peakpos2 = 1.2614
     peakpos3 = 1.07577
@@ -477,11 +481,12 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
     if calib_flag['Bank1']:
         bank_name = 'Bank1'
         start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-        ref_ws_index = 40704
-        peak_width = 0.04  # modified from 0.005
-        cc_number_bank1 = 80
+        peak_pos = bank1_cc_param.reference_peak_position
+        ref_ws_index = bank1_cc_param.reference_ws_index
+        peak_width = bank1_cc_param.reference_peak_width
+        cc_number_bank1 = bank1_cc_param.cross_correlate_number
         bank1_offset, bank1_mask = cross_correlate_calibrate(diamond_ws_name, peakpos1,
-                                                             peakpos1 - peak_width, peakpos1 + peak_width,
+                                                             peak_pos - peak_width, peak_pos + peak_width,
                                                              (start_ws_index, end_ws_index - 1),  # Note: inclusive
                                                              ref_ws_index, cc_number_bank1,
                                                              1, -0.0003, f'{bank_name}_{prefix}',
