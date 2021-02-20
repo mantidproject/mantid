@@ -3,9 +3,10 @@ from calibrate_vulcan_cross_correlation import calibrate_vulcan, load_event_data
 from check_calibration_alignment import reduce_calibration
 from peak_position_calibration_step1 import fit_diamond_peaks, apply_peaks_positions_calibration
 from mantid.simpleapi import LoadDiffCal, SaveDiffCal, mtd
+from lib_cross_correlation import CrossCorrelateParameter
 
 import os
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 
 
 def load_diamond_runs(diamond_runs: List[Union[str, int]],
@@ -47,9 +48,28 @@ def load_diamond_runs(diamond_runs: List[Union[str, int]],
 
 
 def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
-                              output_dir: str,
+                              cross_correlate_param_dict: Union[None, Dict[str, CrossCorrelateParameter]] = None,
+                              bank_calibration_flag: Union[None, Dict[str, bool]] = None,
+                              output_dir: str = os.getcwd(),
                               vulcan_x_idf: Union[str, None] = None):
+    """
 
+    Default VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
+    those are centers.
+
+    Parameters
+    ----------
+    diamond_runs
+    cross_correlate_param_dict
+    bank_calibration_flag
+    output_dir
+    vulcan_x_idf
+
+    Returns
+    -------
+
+    """
+    # Check input diamond runs or diamond workspace
     if isinstance(diamond_runs, str):
         # Check a valid workspace
         assert mtd.doesExist(diamond_runs)
@@ -58,7 +78,23 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
         # must be a list of nexus file names or runs
         diamond_ws_name, _ = load_diamond_runs(diamond_runs, vulcan_x_idf, output_dir)
 
-    cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_ws_name=diamond_ws_name,
+    # Set up default
+    if cross_correlate_param_dict is None:
+        # peak position in d-Spacing
+        bank1_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
+        bank2_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
+        bank5_cc_param = CrossCorrelateParameter(1.07577, 0.01, 182528, 20, -0.0003)
+
+        # do cross correlation
+        cross_correlate_param_dict = {'Bank1': bank1_cc_param,
+                                      'Bank2': bank2_cc_param,
+                                      'Bank5': bank5_cc_param}
+    if bank_calibration_flag is None:
+        bank_calibration_flag = {'Bank1': True, 'Bank2': True, 'Bank5': True}
+
+    cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_ws_name,
+                                                      cross_correlate_param_dict,
+                                                      bank_calibration_flag,
                                                       output_dir=output_dir)
 
     return cal_file_name, diamond_ws_name
