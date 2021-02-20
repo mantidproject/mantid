@@ -467,6 +467,9 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
         offset workspace dictionary, mask workspace dictionary
 
     """
+    # Check input
+    assert isinstance(cross_correlate_param_dict, dict), f'Type mismatch: {cross_correlate_param_dict}:  {type(cross_correlate_param_dict)}'
+
     # Version issue
     if cc_fit_time == 2:
         raise RuntimeError(f'Current GetDetectorOffsets cannot support cc_fit_time = {cc_fit_time}')
