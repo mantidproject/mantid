@@ -10,14 +10,15 @@ from typing import List, Union, Tuple
 
 def load_diamond_runs(diamond_runs: List[Union[str, int]],
                       user_idf: Union[None,  str],
-                      output_dir: str) -> Tuple[str, str]:
+                      output_dir: Union[str, None]) -> Tuple[str, str]:
     """Load diamond run(s)
 
     Parameters
     ----------
     diamond_runs: ~list
     user_idf
-    output_dir
+    output_dir: str, None
+        if None, then do not write count file
 
     Returns
     -------
@@ -26,12 +27,16 @@ def load_diamond_runs(diamond_runs: List[Union[str, int]],
 
     """
     # counts ws name
-    counts_nexus_file_base = 'Counts_'
-    if isinstance(diamond_runs[0], int):
-        counts_nexus_file_base += f'{diamond_runs[0]}'
+    if output_dir:
+        # only
+        counts_nexus_file_base = 'Counts_'
+        if isinstance(diamond_runs[0], int):
+            counts_nexus_file_base += f'{diamond_runs[0]}'
+        else:
+            counts_nexus_file_base += os.path.basename(diamond_runs[0]).split('.')[0]
+        counts_nexus_file = os.path.join(output_dir, f'{counts_nexus_file_base}.nxs')
     else:
-        counts_nexus_file_base += os.path.basename(diamond_runs[0]).split('.')[0]
-    counts_nexus_file = os.path.join(output_dir, f'{counts_nexus_file_base}.nxs')
+        counts_nexus_file = None
 
     diamond_ws_name = load_event_data(diamond_runs, None,
                                       counts_nxs_name=counts_nexus_file,
@@ -59,25 +64,49 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
     return cal_file_name, diamond_ws_name
 
 
-def align_vulcan_data(dia_runs, diff_cal_file_name, output_dir):
+def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
+                      diff_cal_file_name: str,
+                      output_dir: str) -> Tuple[str, str]:
+    """
+
+    Parameters
+    ----------
+    diamond_runs: ~list, str
+        list of diamond runs (nexus file path) or diamond EventWorkspace
+    diff_cal_file_name
+    output_dir
+
+    Returns
+    -------
+
+    """
+    if isinstance(diamond_runs, str):
+        # Check a valid workspace
+        assert mtd.doesExist(diamond_runs)
+        diamond_ws_name = diamond_runs
+    else:
+        # must be a list of nexus file names or runs
+        diamond_ws_name, _ = load_diamond_runs(diamond_runs, None, output_dir)
+
     print(f'Reduce data with calibration file {diff_cal_file_name}')
-    focused_ws_name, focused_nexus = reduce_calibration(dia_runs,
+    focused_ws_name, focused_nexus = reduce_calibration(diamond_ws_name,
                                                         calibration_file=diff_cal_file_name,
                                                         idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
                                                         apply_mask=True,
-                                                        align_detectors=True)
+                                                        align_detectors=True,
+                                                        output_dir=output_dir)
 
     return focused_ws_name, focused_nexus
 
 
-def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_diff_cal_h5):
+def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_diff_cal_h5, output_dir):
 
     # Fit west bank
-    west_res = fit_diamond_peaks(focused_diamond_ws_name, 0)
+    west_res = fit_diamond_peaks(focused_diamond_ws_name, 0, output_dir)
     # Fit east bank
-    east_res = fit_diamond_peaks(focused_diamond_ws_name, 1)
+    east_res = fit_diamond_peaks(focused_diamond_ws_name, 1, output_dir)
     # Fit high angle bank
-    high_angel_res = fit_diamond_peaks(focused_diamond_ws_name, 2)
+    high_angel_res = fit_diamond_peaks(focused_diamond_ws_name, 2, output_dir)
 
     # apply 2nd round calibration to diffraction calibration file
     # Load calibration file
@@ -88,6 +117,10 @@ def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_dif
 
     # Update calibration table and save
     apply_peaks_positions_calibration(diff_cal_table_name, [west_res, east_res, high_angel_res])
+
+    # Target calibration file
+    if os.path.dirname(target_diff_cal_h5) == '':
+        target_diff_cal_h5 = os.path.join(output_dir, target_diff_cal_h5)
 
     # Save to new diffraction calibration file
     SaveDiffCal(CalibrationWorkspace=diff_cal_table_name,
@@ -124,7 +157,7 @@ def main():
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir)
 
     # use the calibration file generated from previous step to align diamond runs
-    cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(dia_runs=diamond_run,
+    cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(diamond_runs=diamond_ws_name,
                                                          diff_cal_file_name=cc_calib_file,
                                                          output_dir=output_dir)
 

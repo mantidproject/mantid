@@ -4,6 +4,7 @@ from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, Diff
                               MaskDetectors, ConvertUnits)
 from mantid.simpleapi import mtd
 import numpy as np
+import os
 from typing import Union, Tuple
 
 
@@ -181,7 +182,8 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
 def align_focus_event_ws(event_ws_name,
                          calib_ws_name: Union[str, None],
                          group_ws_name: str,
-                         mask_ws_name: Union[str, None]) -> Tuple[str, str]:
+                         mask_ws_name: Union[str, None],
+                         output_dir: str) -> Tuple[str, str]:
     """
     overwrite the input
     """
@@ -209,8 +211,8 @@ def align_focus_event_ws(event_ws_name,
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
     # Save nexus for 2D alignment view
-    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=f'{event_ws_name}{file_tag}.nxs')
-    print(f'[CHECK] saved aligned workspace size: {mtd[matrix_ws_name].extractY().shape}')
+    SaveNexusProcessed(InputWorkspace=matrix_ws_name,
+                       Filename=os.path.join(output_dir, f'{event_ws_name}{file_tag}.nxs'))
 
     # Mask group workspace
     if mask_ws_name:
@@ -224,7 +226,7 @@ def align_focus_event_ws(event_ws_name,
                          GroupingWorkspace=group_ws_name)
 
     # Convert from event workspace to workspace 2D
-    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
+    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
     # Edit instrument geometry
     # NOTE: Disable EditInstrumentGeometry as
@@ -235,7 +237,7 @@ def align_focus_event_ws(event_ws_name,
     #                        InstrumentName='vulcan_3bank')
 
     # TODO - need to relax to allow user to  determine
-    focused_run_nxs = f'{event_ws_name}{file_tag}_3banks.nxs'
+    focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
 
     SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=focused_run_nxs)
 

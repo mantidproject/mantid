@@ -117,8 +117,11 @@ def generate_high_angle_bank_parameters():
     return exp_centers, fit_window_list, rightmost_peak_param_values
 
 
-def fit_diamond_peaks(diamond_ws_name, bank_index):
+def fit_diamond_peaks(diamond_ws_name: str,
+                      bank_index: str,
+                      output_dir: str):
 
+    # TODO - make the peak parameter as user-specifiable
     # Generate peak fitting parameters for back-to-back exponential
     if bank_index in [0, 1]:
         exp_centers, fit_window_list, rightmost_peak_param_values = generate_90_degree_bank_parameters()
@@ -167,7 +170,8 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
 
     plot_predicted_calibrated_peak_positions(param_value_dict['ExpectedX0'],
                                              calib_model, param_value_dict['X0'],
-                                             calib_res, bank_index)
+                                             calib_res, bank_index,
+                                             output_dir)
 
     return calib_res
 
@@ -198,7 +202,8 @@ def calibrate_peak_positions(exp_pos_vec, calibrated_pos_vec, poly_order=1):
     return my_model, res
 
 
-def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_vec, residual, ws_index):
+def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_vec, residual, ws_index,
+                                             output_dir):
     # calculate the optimized positions
     predicted_pos_vec = poly_model(raw_pos_vec)
 
@@ -234,7 +239,7 @@ def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_ve
     plt.ylim(-max(y_limit, 0.00012), max(y_limit, 0.00012))
 
     plt.legend()
-    plt.savefig(os.path.join('/tmp', f'predicted_position_bank{ws_index}'))
+    plt.savefig(os.path.join(output_dir, f'predicted_position_bank{ws_index}'))
     # plt.show()
     # time.sleep(1)
 
