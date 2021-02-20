@@ -139,7 +139,7 @@ def main():
     diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][0:1]
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][1:4]
 
     # Optional user specified Mantid IDF
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'

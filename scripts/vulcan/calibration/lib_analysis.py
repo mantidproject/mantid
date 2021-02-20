@@ -192,6 +192,9 @@ def align_focus_event_ws(event_ws_name,
 
     # Align detector or not
     print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
+    unit = mtd[event_ws_name].getAxis(0).getUnit().unitID()
+    if unit != 'TOF':
+        ConvertUnits(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Target='TOF')
 
     if calib_ws_name:
         # align detectors and convert unit to dSpacing
