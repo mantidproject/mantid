@@ -1,5 +1,5 @@
 from mantid_helper import mtd_convert_units, load_nexus
-from lib_cross_correlation import (cross_correlate_vulcan_data,
+from lib_cross_correlation import (CrossCorrelateParameter, cross_correlate_vulcan_data,
                                    verify_vulcan_difc,
                                    save_calibration, merge_detector_calibration)
 import os
@@ -7,7 +7,7 @@ from mantid.simpleapi import (CreateGroupingWorkspace, LoadEventNexus, Plus,
                               ConvertToMatrixWorkspace,
                               SaveNexusProcessed, LoadNexusProcessed, mtd,
                               DeleteWorkspace, LoadInstrument)
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Dict
 
 
 # Cross correlation algorithm setup
@@ -131,6 +131,8 @@ def create_groups(vulcan_ws_name=None) -> str:
 
 
 def calibrate_vulcan(diamond_ws_name: str,
+                     cross_correlate_param_dict: Dict[str, CrossCorrelateParameter],
+                     calibration_flag: Dict[str, bool],
                      output_dir: str) -> Tuple[str, str]:
     """Main calibration workflow algorithm
 
@@ -147,15 +149,13 @@ def calibrate_vulcan(diamond_ws_name: str,
         calibration file name, diamond event workspace
 
     """
-    # TODO - VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
-    # TODO  -          those are centers.
-
     # Check inputs
     assert mtd.doesExist(diamond_ws_name), f'Workspace {diamond_ws_name} does not exist'
 
-    # do cross correlation:
-    calib_flag = {'Bank1': True, 'Bank2': True, 'Bank5': True}
-    r = cross_correlate_vulcan_data(diamond_ws_name, calib_flag,
+    # Call workflow algorithm to calibrate VULCAN data by cross-correlation
+    r = cross_correlate_vulcan_data(diamond_ws_name,
+                                    cross_correlate_param_dict,
+                                    calibration_flag,
                                     cc_fit_time=CROSS_CORRELATE_PEAK_FIT_NUMBER,
                                     prefix='1fit')
     print(f'Type of returned value from cross_correlate_vulcan_data: {type(r)}')
