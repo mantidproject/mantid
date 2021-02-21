@@ -1,6 +1,6 @@
 # This is the workflow script to calibrate VULCAN-X
 from calibrate_vulcan_cross_correlation import calibrate_vulcan, load_event_data
-from check_calibration_alignment import reduce_calibration
+from check_calibration_alignment import reduce_calibration, make_group_workspace
 from peak_position_calibration_step1 import fit_diamond_peaks, apply_peaks_positions_calibration
 from mantid.simpleapi import LoadDiffCal, SaveDiffCal, mtd
 from lib_cross_correlation import CrossCorrelateParameter
@@ -124,18 +124,29 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
         # must be a list of nexus file names or runs
         diamond_ws_name, _ = load_diamond_runs(diamond_runs, None, output_dir)
 
+    # TODO FIXME - shall this method be revealed to the client?
+    src_ws_name = 'AlignedDiamond'
+    tube_group_ws_name = 'TubeGroup'
+    tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
+    tube_group = make_group_workspace(src_ws_name, tube_group_ws_name, tube_grouping_plan)
+
     print(f'Reduce data with calibration file {diff_cal_file_name}')
     focused_ws_name, focused_nexus = reduce_calibration(diamond_ws_name,
                                                         calibration_file=diff_cal_file_name,
                                                         idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
                                                         apply_mask=True,
                                                         align_detectors=True,
+                                                        customized_group_ws_name=tube_group,
                                                         output_dir=output_dir)
 
     return focused_ws_name, focused_nexus
 
 
 def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_diff_cal_h5, output_dir):
+
+    #
+    print(f'Peak position calibration: input workspace {focused_diamond_ws_name}: '
+          f'number of spectra = {mtd[focused_diamond_ws_name].getNumberHistograms()}')
 
     # Fit west bank
     west_res = fit_diamond_peaks(focused_diamond_ws_name, 0, output_dir)
@@ -192,12 +203,12 @@ def main():
     # Step 1: do cross correlation calibration
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
 
-    # use the calibration file generated from previous step to align diamond runs
+    # Step 2: use the calibration file generated from previous step to align diamond runs
     cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(diamond_runs=diamond_ws_name,
                                                          diff_cal_file_name=cc_calib_file,
                                                          output_dir=output_dir)
 
-    # do peak position calibration
+    # Step 3: do peak position calibration
     peak_position_calibrate(cc_focus_ws_name, cc_calib_file, final_calib_file, output_dir)
 
     # use the calibration file generated from last step to align diamond runs again

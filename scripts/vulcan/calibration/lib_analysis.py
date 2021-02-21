@@ -183,6 +183,7 @@ def align_focus_event_ws(event_ws_name,
                          calib_ws_name: Union[str, None],
                          group_ws_name: str,
                          mask_ws_name: Union[str, None],
+                         customized_grouping_ws_name: Union[str, None],
                          output_dir: str) -> Tuple[str, str]:
     """
     overwrite the input
@@ -241,7 +242,6 @@ def align_focus_event_ws(event_ws_name,
     #                        Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
     #                        InstrumentName='vulcan_3bank')
 
-    # TODO - need to relax to allow user to  determine
     focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
 
     SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)

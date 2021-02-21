@@ -116,6 +116,8 @@ def create_groups(vulcan_ws_name=None) -> str:
 
     # 3 group mode
     if vulcan_ws_name is None:
+        #
+        raise RuntimeError('This is for VULCAN-NOT-X.')
         group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
                                            GroupDetectorsBy='Group',
                                            OutputWorkspace=group_ws_name)
