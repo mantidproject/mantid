@@ -125,10 +125,9 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
         diamond_ws_name, _ = load_diamond_runs(diamond_runs, None, output_dir)
 
     # TODO FIXME - shall this method be revealed to the client?
-    src_ws_name = 'AlignedDiamond'
     tube_group_ws_name = 'TubeGroup'
     tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
-    tube_group = make_group_workspace(src_ws_name, tube_group_ws_name, tube_grouping_plan)
+    tube_group = make_group_workspace(diamond_ws_name, tube_group_ws_name, tube_grouping_plan)
 
     print(f'Reduce data with calibration file {diff_cal_file_name}')
     focused_ws_name, focused_nexus = reduce_calibration(diamond_ws_name,
@@ -186,7 +185,7 @@ def main():
     diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
                    '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][1:3]
+                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][:]
 
     # Optional user specified Mantid IDF
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
