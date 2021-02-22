@@ -24,6 +24,11 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
+namespace {
+const std::string VULCAN_INSTR("VULCAN_Definition_2019-06-20.xml");
+const std::string POWGEN_INSTR("POWGEN");
+} // namespace
+
 class LoadMaskTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -35,7 +40,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "POWGEN");
+    loadfile.setProperty("Instrument", POWGEN_INSTR);
     loadfile.setProperty("InputFile", "testmasking.xml");
     loadfile.setProperty("OutputWorkspace", "PG3Mask");
 
@@ -89,7 +94,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
     loadfile.setProperty("InputFile", maskDetFile.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
@@ -123,7 +128,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
     loadfile.setProperty("InputFile", maskDetFile1.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
@@ -144,7 +149,7 @@ public:
       }
     }
 
-    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
     loadfile.setProperty("InputFile", maskDetFile2.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
@@ -195,7 +200,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
     loadfile.setProperty("InputFile", isisMaskFile.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
@@ -414,7 +419,7 @@ public:
     LoadMask loadfile;
     loadfile.initialize();
 
-    loadfile.setProperty("Instrument", "VULCAN");
+    loadfile.setProperty("Instrument", VULCAN_INSTR);
     loadfile.setProperty("InputFile", maskFile1.getFileName());
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask1");
 
@@ -427,7 +432,7 @@ public:
     LoadMask loadfile2;
     loadfile2.initialize();
 
-    loadfile2.setProperty("Instrument", "VULCAN");
+    loadfile2.setProperty("Instrument", VULCAN_INSTR);
     loadfile2.setProperty("InputFile", maskFile2.getFileName());
     loadfile2.setProperty("OutputWorkspace", "VULCAN_Mask2");
 
@@ -593,7 +598,7 @@ public:
 
   void setUp() override {
     loadFile.initialize();
-    loadFile.setProperty("Instrument", "POWGEN");
+    loadFile.setProperty("Instrument", POWGEN_INSTR);
     loadFile.setProperty("InputFile", "testmasking.xml");
     loadFile.setProperty("OutputWorkspace", "outputWS");
   }
