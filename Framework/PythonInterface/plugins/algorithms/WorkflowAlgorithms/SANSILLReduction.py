@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 from math import fabs
 import numpy as np
 import os
+import re
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -95,6 +96,23 @@ class SANSILLReduction(PythonAlgorithm):
     def _mask(ws, masked_ws):
         if masked_ws.detectorInfo().hasMaskedDetectors():
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+
+    @staticmethod
+    def _return_numors(paths):
+        regex_all = r'(\*)|(//)|(\+)|(\-)'
+        p = re.compile(regex_all)
+        list_entries = []
+        binary_op = []
+        prev_pos = 0
+        for obj in p.finditer(paths):
+            list_entries.append(paths[prev_pos:obj.span()[0]])
+            prev_pos = obj.span()[1]
+            binary_op.append(obj.group())
+        list_entries.append(paths[prev_pos:])  # add the last remaining file
+        list_entries = [entry[entry.rfind('/')+1:] for entry in list_entries]
+        binary_op.append('') # there are one fewer binary operators that numors
+        list_entries = [entry + operation for entry, operation in zip(list_entries, binary_op)]
+        return ''.join(list_entries)
 
     def PyInit(self):
 
@@ -547,6 +565,10 @@ class SANSILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
+        mtd[ws].getRun().addProperty('Facility', 'ILL', True)
+        mtd[ws].getRun().addProperty('run_number', self._return_numors(self.getPropertyValue('Run')), True)
+        mtd[ws].getRun().addProperty('sample_transmission',
+                                     self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
