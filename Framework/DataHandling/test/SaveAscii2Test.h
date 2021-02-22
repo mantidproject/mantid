@@ -404,6 +404,38 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void testExec_samplelogs_header() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+    wsToSave->mutableRun().addProperty("wavelength", 6.0);
+    wsToSave->mutableRun().addProperty("instrument_name",
+                                       std::string{"CustomInstrument"});
+    SaveAscii2 save;
+    std::vector<std::string> logList = {"wavelength", "instrument_name",
+                                        "does_not_exist"};
+    std::string filename = initSaveAscii2(save, logList);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now we check that the first line of the file without header matches the
+    // second line of the file with header
+    std::ifstream in1(filename.c_str());
+    std::string line1, line2, line3;
+    getline(in1, line1);
+    getline(in1, line2);
+    getline(in1, line3);
+    TS_ASSERT_EQUALS(line1, "wavelength,6,");
+    TS_ASSERT_EQUALS(line2, "instrument_name,CustomInstrument,");
+    TS_ASSERT_EQUALS(line3, "does_not_exist,Not defined,");
+    in1.close();
+    // Remove files
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
   void test_CustomSeparator_override() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;
     writeSampleWS(wsToSave);
@@ -976,12 +1008,14 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 
-  std::string initSaveAscii2(SaveAscii2 &save) {
+  std::string initSaveAscii2(SaveAscii2 &save,
+                             std::vector<std::string> logList = {}) {
     save.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(save.initialize());
     TS_ASSERT(save.isInitialized());
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", m_filename));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("InputWorkspace", m_name));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("LogList", logList));
     return save.getPropertyValue("Filename"); // return absolute path
   }
 
