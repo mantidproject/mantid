@@ -60,11 +60,3 @@ class SampleMaterialDialogPresenter:
 
     def close_view(self):
         self.view.close()
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-    presenter = SampleMaterialDialogPresenter()
-    window = presenter.view
-    window.show()
-    app.exec_()
