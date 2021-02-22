@@ -85,6 +85,12 @@ private:
   bool
   findElementInUnorderedStringVector(const std::vector<std::string> &vector,
                                      const std::string &toFind);
+  /// Retrieve sample log value and its unit
+  std::pair<std::string, std::string>
+  sampleLogValueUnit(const std::string &logName);
+  /// Write file header
+  void writeFileHeader(const std::vector<std::string> &logList,
+                       std::ofstream &file);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
