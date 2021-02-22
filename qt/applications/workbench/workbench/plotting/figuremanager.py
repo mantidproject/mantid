@@ -331,12 +331,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def launch_plot_options(self):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
-    def launch_plot_options_on_curves_tab(self, axes):
+    def launch_plot_options_on_curves_tab(self, axes, curve):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
-        try:
-            self.plot_options_dialog.activate_curves_tab(axes)
-        except ValueError:
-            pass
+        self.plot_options_dialog.focus_and_configure_curves_tab(axes, curve)
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
