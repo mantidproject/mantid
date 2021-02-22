@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-from qtpy import QtCore
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QTreeWidgetItem
 
@@ -16,16 +16,17 @@ from mantidqt.utils.qt import load_ui
 
 class SampleMaterialDialogView(QDialog):
 
-    set_material_signal = QtCore.Signal()
-    copy_material_signal = QtCore.Signal()
-
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, presenter=None):
         super(SampleMaterialDialogView, self).__init__(parent=parent)
 
         self.ui = load_ui(__file__, 'samplematerialdialog.ui', baseinstance=self)
 
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setModal(True)
+
+        self.presenter = presenter
+
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Top level items in the tree.
         self.formula_item = QTreeWidgetItem(self.material_properties_tree, ["Formula", ""])
@@ -48,23 +49,27 @@ class SampleMaterialDialogView(QDialog):
         self.scattering_item.setExpanded(True)
 
         # Connect button signals.
-        self.close_button.clicked.connect(self.close)
+        self.close_button.clicked.connect(self.close_request)
         self.copy_material_button.clicked.connect(self.copy_material_request)
         self.set_material_button.clicked.connect(self.set_material_request)
 
     # Set the text of the second columns for all the relevant tree items.
     def update_material(self, formula, number_density, temperature, pressure, absorption, total, coherent, incoherent):
         self.formula_item.setText(1, formula)
-        self.number_density_item.setText(1, number_density)
-        self.temperature_item.setText(1, temperature)
-        self.pressure_item.setText(1, pressure)
-        self.absorption_item.setText(1, absorption)
-        self.total_item.setText(1, total)
-        self.coherent_item.setText(1, coherent)
-        self.incoherent_item.setText(1, incoherent)
+        self.number_density_item.setText(1, str(number_density))
+        self.temperature_item.setText(1, str(temperature))
+        self.pressure_item.setText(1, str(pressure))
+        self.absorption_item.setText(1, str(absorption))
+        self.total_item.setText(1, str(total))
+        self.coherent_item.setText(1, str(coherent))
+        self.incoherent_item.setText(1, str(incoherent))
 
     def copy_material_request(self):
-        self.copy_material_signal.emit()
+        self.presenter.copy_material()
 
     def set_material_request(self):
-        self.set_material_signal.emit()
+        self.presenter.set_material()
+
+    def close_request(self):
+        self.presenter.close_view()
+

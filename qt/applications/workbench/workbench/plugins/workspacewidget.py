@@ -22,7 +22,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
-from mantidqt.widgets.samplematerialdialog.presenter import SampleMaterialDialogPresenter
+from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import SampleMaterialDialogPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
@@ -278,8 +278,16 @@ class WorkspaceWidget(PluginWidget):
         CreateDetectorTable(InputWorkspace=ws)
 
     def _do_sample_material(self, names):
-        presenter = SampleMaterialDialogPresenter(parent = self)
-        presenter.show_view()
+        workspaces = self._ads.retrieveWorkspaces(names, unrollGroups=True);
+        # It only makes sense to show the sample material dialog with one workspace
+        # selected. The context menu should only add the sample material action
+        # if there's only one workspace selected.
+        if len(workspaces) == 1:
+            presenter = SampleMaterialDialogPresenter(workspaces[0], parent=self)
+            presenter.show_view()
+        else:
+            pass
+            # TODO - display an error or warning. Shouldn't be able to reach this point.
 
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)
@@ -290,7 +298,7 @@ class WorkspaceWidget(PluginWidget):
             self._do_show_data([name])
         except ValueError:
             if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
-                #If this is ws is just a single value show the data, else plot the bin
+                # If this ws is just a single value show the data, else plot the bin
                 if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])
                 else:
