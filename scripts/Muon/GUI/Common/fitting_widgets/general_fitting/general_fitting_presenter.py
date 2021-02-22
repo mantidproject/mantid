@@ -18,6 +18,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     """
 
     def __init__(self, view: GeneralFittingView, model: GeneralFittingModel):
+        """Initialize the GeneralFittingPresenter. Sets up the slots and event observers."""
         super(GeneralFittingPresenter, self).__init__(view, model)
 
         # This prevents plotting the wrong data when selecting different group/pairs on the grouping tab

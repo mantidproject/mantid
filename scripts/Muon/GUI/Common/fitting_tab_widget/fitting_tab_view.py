@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 
 from qtpy.QtWidgets import QStackedWidget, QWidget
@@ -27,6 +27,9 @@ class FittingTabView(QWidget, ui_fitting_tab):
 
         self.layout().addWidget(self.fit_type_stacked_widget)
 
+        self.switch_to_normal_fitting_notifier = GenericObservable()
+        self.switch_to_tf_asymmetry_fitting_notifier = GenericObservable()
+
         self.reset_tab_observer = GenericObserver(self.reset_tab)
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
@@ -34,6 +37,8 @@ class FittingTabView(QWidget, ui_fitting_tab):
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+
+        self.fitting_type_combo_box.currentIndexChanged.connect(self.handle_fitting_type_changed)
 
         self.disable_view()
 
@@ -43,6 +48,14 @@ class FittingTabView(QWidget, ui_fitting_tab):
     def handle_pulse_type_changed(self, updated_variables):
         if "DoublePulseEnabled" in updated_variables:
             self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
+
+    def handle_fitting_type_changed(self):
+        notifiers = {NORMAL_FITTING_COMBO_INDEX: self.switch_to_normal_fitting_notifier,
+                     TF_ASYMMETRY_FITTING_COMBO_INDEX: self.switch_to_tf_asymmetry_fitting_notifier}
+
+        notifier = notifiers.get(self.fitting_type_combo_box.currentIndex(), None)
+        if notifier is not None:
+            notifier.notify_subscribers()
 
     def reset_tab(self):
         """Disable all widgets in the fitting tab."""
