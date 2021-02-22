@@ -289,8 +289,18 @@ class FigureInteraction(object):
         return action_taken
 
     def _show_plot_options(self, event):
+        if not event.inaxes:
+            return
+
         axes = event.inaxes
-        self.fig_manager.launch_plot_options_on_curves_tab(axes)
+        clicked_curve = None
+        for curve in axes.lines:
+            if curve.contains(event)[0]:
+                clicked_curve = curve
+                break
+
+        # Launch with the first curve that contains the event
+        self.fig_manager.launch_plot_options_on_curves_tab(axes, clicked_curve)
 
     def _show_markers_menu(self, markers, event):
         """
