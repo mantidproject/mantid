@@ -230,20 +230,10 @@ if(GIT_FOUND)
     if(WIN32)
       execute_process(
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${GIT_TOP_LEVEL}/.githooks/pre-commit
-                ${GIT_TOP_LEVEL}/.git/hooks
-      )
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 ${GIT_TOP_LEVEL}/.githooks/commit-msg
                 ${GIT_TOP_LEVEL}/.git/hooks
       )
     else()
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-                ${GIT_TOP_LEVEL}/.githooks/pre-commit
-                ${GIT_TOP_LEVEL}/.git/hooks/pre-commit
-      )
       execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink
                 ${GIT_TOP_LEVEL}/.githooks/commit-msg
@@ -410,6 +400,33 @@ endif()
 # ##############################################################################
 if(NOT BUNDLES)
   set(BUNDLES "./")
+endif()
+
+# ##############################################################################
+# Setup pre-commit here as otherwise it will be overwritten by earlier
+# pre-commit hooks being added
+# ##############################################################################
+option(ENABLE_PRECOMMIT "Enable pre-commit framework" ON)
+if (ENABLE_PRECOMMIT)
+  if (MSVC)
+    # Use downloaded ThirdParty version of pre-commit
+    execute_process(COMMAND "${MSVC_PYTHON_EXECUTABLE_DIR}/Scripts/pre-commit.cmd" install --overwrite WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE PRE_COMMIT_RESULT)
+    if(NOT PRE_COMMIT_RESULT EQUAL "0")
+        message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
+    endif()
+    # Create pre-commit script wrapper to use mantid third party python for pre-commit
+    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+    file(WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "#!/usr/bin/env sh\n${MSVC_PYTHON_EXECUTABLE_DIR}/python.exe ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
+  else()
+    # Use system installed pre-commit if not present it should just fail but
+    # continue anyway.
+    execute_process(COMMAND bash -c "pre-commit install" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE STATUS)
+    if (STATUS AND NOT STATUS EQUAL 0)
+      message(FATAL_ERROR "Pre-commit tried to install itself into your repository, but failed to do so. Is it installed on your system?")
+    endif()
+  endif()
+else()
+  message(AUTHOR_WARNING "Pre-commit not enabled by CMake, please enable manually.")
 endif()
 
 # ##############################################################################
