@@ -52,8 +52,14 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaT0", 0.0, "delta of TOF");
 
   // attributes
-  declareAttribute("Workspace", Attribute(""));
-  declareAttribute("ComponentName", Attribute(""));
+  // declareAttribute("Workspace", Attribute(""));
+  // declareAttribute("ComponentName", Attribute(""));
+}
+
+void SCDCalibratePanels2ObjFunc::setPeakWorkspace(
+    IPeaksWorkspace_sptr &pws, const std::string componentName) {
+  m_pws = pws->clone();
+  m_cmpt = componentName;
 }
 
 /**
@@ -92,87 +98,42 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   UNUSED_ARG(order);
 
   // Get workspace and component name (string type)
-  m_ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-      getAttribute("Workspace").asString());
-  m_cmpt = getAttribute("ComponentName").asString();
+  // m_ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
+  //     getAttribute("Workspace").asString());
+  // m_cmpt = getAttribute("ComponentName").asString();
 
   // Special adjustment for CORELLI
-  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(m_ws);
   Instrument_sptr inst =
-      std::const_pointer_cast<Instrument>(pws->getInstrument());
+      std::const_pointer_cast<Instrument>(m_pws->getInstrument());
   if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
     m_cmpt.append("/sixteenpack");
-
-  // NOTE: Since the feature vectors are all deltas with respect to the starting
-  // position,
-  //       we need to only operate on a copy instead of the original to avoid
-  //       changing the base value
-  std::shared_ptr<API::Workspace> calc_ws = m_ws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
   if (m_cmpt != "none/sixteenpack") {
     // rotation
     // NOTE: moderator should not be reoriented
-    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, calc_ws);
+    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, m_pws);
 
     // translation
-    moveInstruentComponentBy(dx, dy, dz, m_cmpt, calc_ws);
+    moveInstruentComponentBy(dx, dy, dz, m_cmpt, m_pws);
   }
 
-  // generate a flatten Q_sampleframe from calculated ws (by moving instrument
-  // component) so that a direct comparison can be performed between measured
-  // and calculated
-  PeaksWorkspace_sptr calc_pws =
-      std::dynamic_pointer_cast<PeaksWorkspace>(calc_ws);
-  Instrument_sptr calc_inst =
-      std::const_pointer_cast<Instrument>(calc_pws->getInstrument());
+  // TODO:
+  // need to do something with dT0
 
-  // NOTE: We are not sure if the PeaksWorkspace level T0
-  //       if going go affect the peak.getTOF
-  Mantid::API::Run &run = calc_pws->mutableRun();
-  double T0 = 0.0;
-  if (run.hasProperty("T0")) {
-    T0 = run.getPropertyValueAsType<double>("T0");
-  }
-  T0 += dT0;
-  run.addProperty<double>("T0", T0, true);
+  // Now when we query qSample, it should be updated with the perturbed
+  // detector positions
+  for (int i = 0; i < m_pws->getNumberPeaks(); ++i) {
+    // NOTE: we will skip over non-indexed peaks
+    V3D hkl = V3D(boost::math::iround(m_pws->getPeak(i).getH()),
+                  boost::math::iround(m_pws->getPeak(i).getK()),
+                  boost::math::iround(m_pws->getPeak(i).getL()));
 
-  for (int i = 0; i < calc_pws->getNumberPeaks(); ++i) {
-    const Peak pk = calc_pws->getPeak(i);
-
-    V3D hkl =
-        V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
-            boost::math::iround(pk.getL()));
-    // if (hkl == UNSET_HKL)
-    //   throw std::runtime_error("Found unindexed peak in input workspace!");
-
-    // construct the out vector (Qvectors)
-    Units::Wavelength wl;
-    V3D calc_qv;
-    // somehow calibration results works better with direct method
-    // but moderator requires the strange in-and-out way
-    if (m_cmpt != "moderator") {
-      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                    pk.getInitialEnergy(), 0.0);
-      // create a peak with shifted wavelength
-      Peak calc_pk(calc_inst, pk.getDetectorID(),
-                   wl.singleFromTOF(pk.getTOF() + dT0), hkl,
-                   pk.getGoniometerMatrix());
-      calc_qv = calc_pk.getQSampleFrame();
-    } else {
-      Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
-                   pk.getGoniometerMatrix());
-      wl.initialize(calc_pk.getL1(), calc_pk.getL2(), calc_pk.getScattering(),
-                    0, calc_pk.getInitialEnergy(), 0.0);
-      // adding the TOF shift here
-      calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
-      calc_qv = calc_pk.getQSampleFrame();
+    if (hkl != UNSET_HKL) {
+      V3D qv = m_pws->getPeak(i).getQSampleFrame();
+      for (int j = 0; j < 3; ++j)
+        out[i * 3 + j] = qv[j];
     }
-
-    // get the updated/calculated q vector in sample frame and set it to out
-    // V3D calc_qv = calc_pk.getQSampleFrame();
-    for (int j = 0; j < 3; ++j)
-      out[i * 3 + j] = calc_qv[j];
   }
 }
 

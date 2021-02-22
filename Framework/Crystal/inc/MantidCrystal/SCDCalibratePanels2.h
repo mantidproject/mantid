@@ -83,11 +83,16 @@ private:
   /// Private function for calibrating banks
   void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws);
 
-  /// Private function for selecting peaks based on given bank name
+  /// Helper function for selecting peaks based on given bank name
   Mantid::API::IPeaksWorkspace_sptr
   selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,
                         const std::string bankname,
                         const std::string outputwsn);
+
+  /// Helper function that calculates the ideal qSample based on
+  /// integer HKL
+  Mantid::API::MatrixWorkspace_sptr
+  getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Helper functions for adjusting T0 for all peaks
   void adjustT0(double dT0, Mantid::API::IPeaksWorkspace_sptr &pws);
@@ -128,6 +133,7 @@ private:
   double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
+  const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {

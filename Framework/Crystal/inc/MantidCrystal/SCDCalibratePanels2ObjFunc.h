@@ -39,8 +39,8 @@ public:
 
 private:
   /// temp workspace holder
-  mutable Mantid::API::Workspace_sptr m_ws;
   mutable std::string m_cmpt;
+  mutable Mantid::API::IPeaksWorkspace_sptr m_pws;
 
   const bool LOGCHILDALG{false};
   const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
