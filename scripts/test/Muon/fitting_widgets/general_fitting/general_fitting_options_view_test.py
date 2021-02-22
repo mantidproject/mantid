@@ -172,7 +172,7 @@ class GeneralFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
     def test_that_is_simultaneous_fit_ticked_will_change_the_fitting_mode_as_expected(self):
         self.assertTrue(not self.view.simul_fit_checkbox.isChecked())
 
-        self.view.is_simultaneous_fit_ticked = True
+        self.view.simultaneous_fitting_mode = True
 
         self.assertTrue(self.view.simul_fit_checkbox.isChecked())
 
