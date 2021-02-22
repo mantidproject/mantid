@@ -17,17 +17,17 @@ Roles
 The roles are defined in terms of person responsible.
 This does not mean that the person needs to do the jobs himself/herself, but that they are responsible for ensuring that the work gets done.
 
-* Technical Release Manager - Person responsible for technical tasks such as renaming branches, creating tags, configuring build servers.
-* Release Editor - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
-* Release Manager - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be collection point for information between all of the Local Project Managers.
-* Local Project Manager(s) - People in charge of communicating with local development teams, facility management, and other people at their sponsoring facility.
-* Quality Assurance Manager - Person responsible for making sure that manual testing has been performed. They will ensure Mantid meets quality requirements before delivery in consultation with the *Release Manager*.
+* **Technical Release Manager** - Person responsible for technical tasks such as renaming branches, creating tags, configuring build servers.
+* **Release Editor** - Person responsible for editing the release notes and giving them a common language, layout, and collecting images.
+* **Release Manager** - Person in charge of the go/no go decision of the release. The main task is to reiterate the timeline and be the collection point for information between all of the Local Project Managers.
+* **Local Project Manager(s)** - People in charge of communicating with local development teams, facility management, and other people at their sponsoring facility.
+* **Quality Assurance Manager** - Person responsible for making sure that manual testing has been performed. They will ensure Mantid meets quality requirements before delivery in consultation with the *Release Manager*.
 
 Timeline
 ########
 
 Releases are normally planned to occur on a Monday, therefore this
-page will be refer to days assuming that is correct, if the final
+page will refer to days assuming that is correct. If the final
 release day is not planned to be Monday then the names of the days
 will have to be changed.
 
@@ -36,11 +36,11 @@ will have to be changed.
    were raised with the newly released version.
 
 Friday, Release-4 weeks (one week before code freeze)
-#########################################################
+#####################################################
 
 **Task Priorities**: Development, Testing, Documentation.
 
-*  Post on the General slack channel reminding developers of the
+*  Post on the *\#general* slack channel reminding developers of the
    impending release and stating that they have only 5 days left before
    the code freeze.
 *  Send an email to beta test users explaining the dates for the
@@ -57,7 +57,7 @@ Documentation.
 Code Freeze
 -----------
 
-*  Post on the General slack channel asking everyone to ensure they
+*  Post on the *\#general* slack channel asking everyone to ensure they
    have moved any incomplete issues to the next milestone, stating the code freeze is in place, and
    warning developers that non-blocker issues will be moved from the
    milestone on Monday morning.
@@ -81,7 +81,7 @@ Clearing the project board
 
 
 Manual and Final Testing
-----------------------------
+------------------------
 
 *  Ensure the
    `master build and system
@@ -106,19 +106,33 @@ Create the Release Branch (once most PR's are merged)
    jobs have passed for all build environments for this release.
 *  Run
    `open-release-testing <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
-   to create the release branch and prepare build jobs
-*  Check state of all open pull requests for this milestone and decide which should be kept for the release,
-   liaise with PM on this. Move any pull requests not targeted for release out of the milestone
-   and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
-   to update the base branches of those pull requests.
+   to create the release branch and prepare build jobs by clicking ``Build Now``.
+*  Check the state of all open pull requests for this milestone and decide which should be kept for the release,
+   liaise with PM on this. Move any pull requests not targeted for release out of the milestone. To update 
+   the base branches of these pull requests run `update-pr-base-branch.py 
+   <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   
+   ```sh
+   cd <mantid source directory>/tools/scripts
+   python update-pr-base-branch.py --token '<github token>' milestone '<milestone>' newbase 'release-next'
+   ```
+   
+   You might need to setup a token on Github if this is your first time. This can be done on Github under
+   Settings->Developer Settings->Personal Access Tokens, then click Generate New Token. Tick *public_repo*
+   and generate the token. Make sure you save this token somewhere safe.
+   
 *  Inform other developers that release-next has been created by adapting/posting the following announcement:
 
   .. code
 
   The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
 
-*  Create a skeleton set of release notes on master for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
+*  Create a skeleton set of release notes on master for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``. Make sure the ``docs/source/release/index.rst`` file has a link to the new release docs.
 
+   ```sh
+   cd <mantid source directory>/tools/scripts/release_generator
+   python release.py --release '<next version>' --milestone 'Release <next version>'
+   ```
 
 Wednesday, Release- 2 weeks & 3 days
 ####################################
@@ -197,7 +211,7 @@ Once the manual testing has passed:
 
 * Check the release notes and remove the "Under Construction" paragraph
   on the main index page.
-* Disable release deploy jobs by executing
+* Disable release deploy jobs by building the
   `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
   job.
 * On the ``release-next`` branch, update the git SHA for MSlice 
@@ -219,8 +233,7 @@ Once the manual testing has passed:
   `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
   job to put the packages, with the exception of Windows, on Sourceforge.
 
-  * Have someone at ISIS signs the Windows binary and upload this
-    manually to Sourceforge
+  * Have someone at ISIS sign the Windows binary and upload this manually to Sourceforge
 
   * Set the default package for each OS to the new version using the information icon
     next to the file list on Sourceforge
@@ -245,7 +258,7 @@ Finalise
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
-* Also post the contents of the message on Announcements on Slack
+* Also post the contents of the message to the *\#announcements* channel on Slack
 * Create a new item on the forum news
 * Close the release milestone on github
 
