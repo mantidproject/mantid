@@ -402,8 +402,10 @@ void SequentialFitDialog::getFitResults() {
   auto columnNames = ws->getColumnNames();
 
   size_t rowNo = 0;
-  if (rowCount() > 1) {
-    // first column contains ws names
+  if (rowCount() > 1 && columnNames[0] == "SourceName") {
+    // first column contains ws names (only if the log value is SourceName)
+    // otherwise, the first column contains the values of the log value and
+    // cannot compare workspace names
     auto firstColumn = ws->getColumn(0);
     for (size_t i = 0; i < ws->rowCount(); ++i) {
       if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
