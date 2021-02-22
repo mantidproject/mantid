@@ -10,6 +10,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -33,9 +34,12 @@ public:
   void function1D(double *out, const double *xValues,
                   const size_t order) const override;
 
+  void setPeakWorkspace(Mantid::API::IPeaksWorkspace_sptr &pws,
+                        const std::string componentName);
+
 private:
   /// temp workspace holder
-  mutable std::shared_ptr<API::Workspace> m_ws;
+  mutable Mantid::API::Workspace_sptr m_ws;
   mutable std::string m_cmpt;
 
   const bool LOGCHILDALG{false};
@@ -45,11 +49,11 @@ private:
   /// helper functions
   void moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
                                 std::string componentName,
-                                const API::Workspace_sptr &ws) const;
+                                const Mantid::API::Workspace_sptr &ws) const;
 
   void rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
                                    double rotAng, std::string componentName,
-                                   const API::Workspace_sptr &ws) const;
+                                   const Mantid::API::Workspace_sptr &ws) const;
 };
 
 } // namespace Crystal
