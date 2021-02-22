@@ -474,6 +474,22 @@ class SANSILLReduction(PythonAlgorithm):
             @param transmission_ws: transmission workspace
         """
         theta_dependent = self.getProperty('ThetaDependent').value
+
+        run = mtd[ws].getRun()
+
+        if run.hasProperty("Gamma.value") and 75 < run.getLogData('Gamma.value').value < 105:
+            # range in which it possible some pixels are nearing 90 degrees
+            # normally, we are talking about D16 here
+
+            sp_info = mtd[ws].spectrumInfo()
+            number_of_tubes = 320
+            number_of_pixels = 320
+            epsilon = 1e-2
+            for i in range(number_of_tubes):
+                if abs(sp_info.two_theta((i + 0.5)*number_of_pixels) - 90) < epsilon:
+                    MaskBTP(Workspace=ws, Instrument="D16", Tube=i)
+                    break
+
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
         if transmission_ws.blocksize() == 1:
