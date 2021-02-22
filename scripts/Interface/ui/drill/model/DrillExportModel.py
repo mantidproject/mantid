@@ -205,7 +205,16 @@ class DrillExportModel:
                         if wsName not in self._exports:
                             self._exports[wsName] = set()
                         self._exports[wsName].add(filename)
+                        kwargs = {}
+                        if 'Ascii' in a:
+                            kwargs['LogList'] = ['facility', 'instrument_name', 'experiment_identifier',
+                                                 'experiment_title', 'start_time', 'end_time', 'run_number',
+                                                 'processedAs', 'wavelength', 'sample_transmission',
+                                                 'collimation.actual_position', 'L2']
+                            if 'Reflectometry' in a:
+                                kwargs['WriteHeader'] = True
+                                kwargs['FileExtension'] = 'custom'
                         task = DrillTask(name, a, InputWorkspace=wsName,
-                                         FileName=filename)
+                                         FileName=filename, **kwargs)
                         tasks.append(task)
         self._pool.addProcesses(tasks)
