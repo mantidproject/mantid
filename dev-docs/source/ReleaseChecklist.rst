@@ -112,10 +112,11 @@ Create the Release Branch (once most PR's are merged)
    the base branches of these pull requests run `update-pr-base-branch.py 
    <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
    
-   ```sh
+   .. code-block:: sh
+   
    cd <mantid source directory>/tools/scripts
    python update-pr-base-branch.py --token '<github token>' milestone '<milestone>' newbase 'release-next'
-   ```
+   
    
    You might need to setup a token on Github if this is your first time. This can be done on Github under
    Settings->Developer Settings->Personal Access Tokens, then click Generate New Token. Tick *public_repo*
@@ -129,10 +130,11 @@ Create the Release Branch (once most PR's are merged)
 
 *  Create a skeleton set of release notes on master for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``. Make sure the ``docs/source/release/index.rst`` file has a link to the new release docs.
 
-   ```sh
+   .. code-block:: sh
+   
    cd <mantid source directory>/tools/scripts/release_generator
    python release.py --release '<next version>' --milestone 'Release <next version>'
-   ```
+   
 
 Wednesday, Release- 2 weeks & 3 days
 ####################################
