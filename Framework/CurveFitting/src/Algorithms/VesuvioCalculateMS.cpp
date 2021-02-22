@@ -145,8 +145,9 @@ void VesuvioCalculateMS::exec() {
   const size_t nhist = m_inputWS->getNumberHistograms();
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  for (size_t i = 0; i < nhist; ++i) {
-
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
+  for (int64_t i = 0; i < nhist; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
     multsc->setSharedX(i, m_inputWS->sharedX(i));
@@ -163,7 +164,9 @@ void VesuvioCalculateMS::exec() {
     // the output spectrum objects have references to where the data will be
     // stored
     calculateMS(i, totalsc->getSpectrum(i), multsc->getSpectrum(i));
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("TotalScatteringWS", totalsc);
   setProperty("MultipleScatteringWS", multsc);
