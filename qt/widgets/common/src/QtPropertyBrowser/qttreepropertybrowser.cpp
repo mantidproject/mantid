@@ -728,6 +728,10 @@ void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2) {
   }
 }
 
+void QtTreePropertyBrowserPrivate::setStretchLastColumn(bool stretch) {
+  m_treeWidget->header()->setStretchLastSection(stretch);
+}
+
 void QtTreePropertyBrowserPrivate::hideColumn(int col) {
   m_treeWidget->header()->hideSection(col);
 }
@@ -1097,6 +1101,10 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
 
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
   d_ptr->setColumnSizes(s0, s1, s2);
+}
+
+void QtTreePropertyBrowser::setStretchLastColumn(bool stretch) {
+  d_ptr->setStretchLastColumn(stretch);
 }
 
 void QtTreePropertyBrowser::hideColumn(int col) { d_ptr->hideColumn(col); }

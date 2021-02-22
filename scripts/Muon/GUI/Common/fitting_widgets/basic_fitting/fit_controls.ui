@@ -85,13 +85,13 @@
     <widget class="QCheckBox" name="plot_guess_checkbox">
      <property name="minimumSize">
       <size>
-       <width>107</width>
+       <width>120</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>107</width>
+       <width>120</width>
        <height>16777215</height>
       </size>
      </property>

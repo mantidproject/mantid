@@ -47,6 +47,7 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.function_browser_layout.addWidget(self.function_browser)
         self.function_browser.setErrorsEnabled(True)
         self.function_browser.hideGlobalCheckbox()
+        self.function_browser.setStretchLastColumn(True)
 
         if is_frequency_domain:
             self.fit_options_table.hideRow(RAW_DATA_TABLE_ROW)
@@ -218,7 +219,6 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         self.fit_options_table.setRowCount(5)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 150)
-        self.fit_options_table.setColumnWidth(1, 300)
         self.fit_options_table.verticalHeader().setVisible(False)
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
         self.fit_options_table.setHorizontalHeaderLabels(["Property", "Value"])
