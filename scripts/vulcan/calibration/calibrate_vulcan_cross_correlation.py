@@ -180,7 +180,8 @@ def calibrate_vulcan(diamond_ws_name: str,
                        cal_table_name=calib_ws_name,
                        mask_ws_name=str(mask_ws),
                        fallback_incorrect_difc_pixels=False,
-                       mask_incorrect_difc_pixels=True)
+                       mask_incorrect_difc_pixels=True,
+                       output_dir=output_dir)
 
     # merge calibration result from bank-based cross correlation and  save calibration file
     # Export cross correlated result, DIFC and etc for analysis

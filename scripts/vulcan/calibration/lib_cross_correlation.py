@@ -44,7 +44,8 @@ def verify_vulcan_difc(ws_name: str,
                        cal_table_name: str,
                        mask_ws_name: str,
                        fallback_incorrect_difc_pixels: bool,
-                       mask_incorrect_difc_pixels: bool):
+                       mask_incorrect_difc_pixels: bool,
+                       output_dir: str):
     """Verify and possibly correct DIFCs if necessary
 
     Parameters
@@ -57,6 +58,8 @@ def verify_vulcan_difc(ws_name: str,
         If calibrated DIFC is obviously wrong, fallback to the engineered value
     mask_incorrect_difc_pixels: bool
         if fallback_incorrect_difc_pixels==False, choice to discard (aka mask) bad pixels
+    output_dir: str
+        output directory for DIFC
 
     Returns
     -------
@@ -75,7 +78,7 @@ def verify_vulcan_difc(ws_name: str,
         raise NotImplementedError('Bank information dictionary is out of date')
 
     # Init file
-    difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'w')
+    difc_h5 = h5py.File(os.path.join(output_dir, f'{diamond_event_ws}_DIFC.h5'), 'w')
 
     for bank_name in ['Bank1', 'Bank2', 'Bank5']:
         # pixel range
@@ -849,7 +852,7 @@ def save_calibration(calib_ws_name: str,
     GeneratePythonScript(InputWorkspace=calib_ws_name, Filename=py_name)
 
     # Save DIFC
-    difc_file_name = os.path.join(os.getcwd(), calib_file_prefix + '_difc.dat')
+    difc_file_name = os.path.join(output_dir, calib_file_prefix + '_difc.dat')
     export_difc(calib_ws_name, difc_file_name)
 
     return out_file_name
