@@ -23,7 +23,7 @@ from mantid.dataobjects import Workspace2D
 class PlotWidgetPresenterCommon(HomeTabSubWidget):
 
     def __init__(self, view: PlotWidgetViewInterface, model: PlotWidgetModel, context,
-                 figure_presenter: PlottingCanvasPresenterInterface, get_active_fit_results,
+                 figure_presenter: PlottingCanvasPresenterInterface, get_selected_fit_workspaces,
                  external_plotting_view=None, external_plotting_model=None):
         """
         :param view: A reference to the QWidget object for plotting
@@ -39,7 +39,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         self._view = view
         self._model = model
         self.context = context
-        self._get_active_fit_results = get_active_fit_results
+        self._get_selected_fit_workspaces  = get_selected_fit_workspaces
         # figure presenter - the common presenter talks to this through an interface
         self._figure_presenter = figure_presenter
         self._external_plotting_view = external_plotting_view if external_plotting_view else ExternalPlottingView()
@@ -100,7 +100,9 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         if self.context.gui_context['PlotMode'] == PlotMode.Data:
             self.handle_data_updated(autoscale=autoscale)
         elif self.context.gui_context['PlotMode'] == PlotMode.Fitting:  # Plot the displayed workspace
-            self.handle_plot_selected_fits(self._get_active_fit_results(), autoscale)
+            self.handle_plot_selected_fits(
+                self._get_selected_fit_workspaces(), autoscale
+            )
 
     def handle_plot_mode_changed(self, plot_mode : PlotMode):
         if isinstance(self.context, FrequencyDomainAnalysisContext):
