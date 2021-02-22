@@ -133,7 +133,6 @@ private:
   double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
-  const Mantid::Kernel::V3D UNSET_HKL{0, 0, 0};
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {

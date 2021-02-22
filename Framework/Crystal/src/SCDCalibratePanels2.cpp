@@ -627,13 +627,10 @@ SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
   pws_ideal->copyExperimentInfoFrom(pws.get());
 
   for (int i = 0; i < npeaks; ++i) {
-    // NOTE: we will skip over non-indexed peaks
-    V3D hkl = V3D(boost::math::iround(pws->getPeak(i).getH()),
-                  boost::math::iround(pws->getPeak(i).getK()),
-                  boost::math::iround(pws->getPeak(i).getL()));
-
-    if (hkl != UNSET_HKL)
-      pws_ideal->createPeakHKL(hkl);
+    if (!pws->getPeak(i).isIndexed())
+      continue;
+    auto pk = pws_ideal->createPeakHKL(pws->getPeak(i).getIntHKL());
+    pws_ideal->addPeak(*pk);
   }
 
   // prepare workspace to store qSample as Histogram1D
