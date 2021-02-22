@@ -45,7 +45,7 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertTrue(self.model.function_name_auto_update)
         self.assertEqual(self.model.minimizer, "")
         self.assertEqual(self.model.evaluation_type, "")
-        self.assertTrue(not self.model.fit_to_raw)
+        self.assertTrue(self.model.fit_to_raw)
 
         self.assertEqual(self.model.simultaneous_fit_function, None)
         self.assertEqual(self.model.simultaneous_fit_function_cache, None)

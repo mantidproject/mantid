@@ -41,7 +41,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertTrue(self.model.function_name_auto_update)
         self.assertEqual(self.model.minimizer, "")
         self.assertEqual(self.model.evaluation_type, "")
-        self.assertTrue(not self.model.fit_to_raw)
+        self.assertTrue(self.model.fit_to_raw)
 
     def test_that_dataset_names_will_set_the_names_of_the_datasets_as_expected(self):
         self.model.dataset_names = self.dataset_names
@@ -149,7 +149,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.single_fit_functions = self.single_fit_functions
 
-        self.assertEqual(self.model.single_fit_functions, self.single_fit_functions)
+        self.assertEqual(str(self.model.single_fit_functions), str(self.single_fit_functions))
 
     def test_that_setting_the_single_fit_function_will_raise_if_the_number_of_functions_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
