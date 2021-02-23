@@ -335,6 +335,7 @@ void VesuvioCalculateMS::calculateMS(const size_t wsIndex,
   CurveFitting::MSVesuvioHelper::SimulationWithErrors avgCounts =
       accumulator.average();
   avgCounts.normalise();
+  PARALLEL_CRITICAL(assignToOutput)
   assignToOutput(avgCounts, totalsc, multsc);
 }
 
