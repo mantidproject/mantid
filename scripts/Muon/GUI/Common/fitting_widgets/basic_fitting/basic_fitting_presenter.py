@@ -199,6 +199,8 @@ class BasicFittingPresenter:
 
         self.model.current_start_x = self.view.start_x
 
+        self.model.update_plot_guess(self.view.plot_guess)
+
     def handle_end_x_updated(self) -> None:
         """Handle when the end X is changed."""
         if self.view.end_x < self.view.start_x:
@@ -206,6 +208,8 @@ class BasicFittingPresenter:
             self.model.current_start_x = self.view.start_x
 
         self.model.current_end_x = self.view.end_x
+
+        self.model.update_plot_guess(self.view.plot_guess)
 
     def handle_use_rebin_changed(self) -> None:
         """Handle the Fit to raw data checkbox state change."""

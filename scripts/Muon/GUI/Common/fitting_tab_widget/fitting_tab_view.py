@@ -27,13 +27,13 @@ class FittingTabView(QWidget, ui_fitting_tab):
 
         self.layout().addWidget(self.fit_type_stacked_widget)
 
-        self.switch_to_normal_fitting_notifier = GenericObservable()
-        self.switch_to_tf_asymmetry_fitting_notifier = GenericObservable()
+        self.tf_asymmetry_mode_changed_notifier = GenericObservable()
 
         self.reset_tab_observer = GenericObserver(self.reset_tab)
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+        self.tf_asymmetry_mode_changed_observer = GenericObserverWithArgPassing(self.handle_tf_asymmetry_mode_changed)
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
@@ -50,12 +50,19 @@ class FittingTabView(QWidget, ui_fitting_tab):
             self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
 
     def handle_fitting_type_changed(self):
-        notifiers = {NORMAL_FITTING_COMBO_INDEX: self.switch_to_normal_fitting_notifier,
-                     TF_ASYMMETRY_FITTING_COMBO_INDEX: self.switch_to_tf_asymmetry_fitting_notifier}
+        current_index = self.fitting_type_combo_box.currentIndex()
+        if current_index == NORMAL_FITTING_COMBO_INDEX:
+            self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
+        elif current_index == TF_ASYMMETRY_FITTING_COMBO_INDEX:
+            self.tf_asymmetry_mode_changed_notifier.notify_subscribers(True)
 
-        notifier = notifiers.get(self.fitting_type_combo_box.currentIndex(), None)
-        if notifier is not None:
-            notifier.notify_subscribers()
+    def handle_tf_asymmetry_mode_changed(self, tf_asymmetry_on):
+        self.fitting_type_combo_box.blockSignals(True)
+        if not tf_asymmetry_on:
+            self.fitting_type_combo_box.setCurrentIndex(NORMAL_FITTING_COMBO_INDEX)
+        else:
+            self.fitting_type_combo_box.setCurrentIndex(TF_ASYMMETRY_FITTING_COMBO_INDEX)
+        self.fitting_type_combo_box.blockSignals(False)
 
     def reset_tab(self):
         """Disable all widgets in the fitting tab."""

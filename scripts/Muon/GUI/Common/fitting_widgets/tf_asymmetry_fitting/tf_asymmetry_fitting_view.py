@@ -26,11 +26,18 @@ class TFAsymmetryFittingView(GeneralFittingView):
         self.tf_asymmetry_fitting_options = TFAsymmetryFittingOptionsView(self)
         self.tf_asymmetry_fitting_options_layout.addWidget(self.tf_asymmetry_fitting_options)
 
-        self.switch_to_normal_fitting_observer = GenericObserver(self.switch_to_normal_fitting)
-        self.switch_to_tf_asymmetry_fitting_observer = GenericObserver(self.switch_to_tf_asymmetry_fitting)
+    @property
+    def tf_asymmetry_mode(self):
+        return self.tf_asymmetry_fitting_options.tf_asymmetry_mode
 
-    def switch_to_normal_fitting(self):
-        self.tf_asymmetry_fitting_options.hide_normalisation_options()
+    @tf_asymmetry_mode.setter
+    def tf_asymmetry_mode(self, tf_asymmetry_on):
+        self.tf_asymmetry_fitting_options.tf_asymmetry_mode = tf_asymmetry_on
 
-    def switch_to_tf_asymmetry_fitting(self):
-        self.tf_asymmetry_fitting_options.show_normalisation_options()
+    @property
+    def normalisation(self):
+        return self.tf_asymmetry_fitting_options.normalisation
+
+    @normalisation.setter
+    def normalisation(self, value):
+        self.tf_asymmetry_fitting_options.normalisation = value
