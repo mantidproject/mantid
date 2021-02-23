@@ -86,8 +86,10 @@ private:
   struct MDEventMaker {
     static MDEventType<ND> makeMDEvent(const double &sig, const double &err,
                                        const uint16_t &run_index,
+                                       const uint16_t &goniometer_index,
                                        const uint32_t &det_id, coord_t *coord) {
-      return MDEventType<ND>(sig, err, run_index, det_id, coord);
+      return MDEventType<ND>(sig, err, run_index, goniometer_index, det_id,
+                             coord);
     }
   };
 };
@@ -125,6 +127,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
     MDTransf_sptr localQConverter = qConverters[PARALLEL_THREAD_NUMBER];
     int32_t detID = m_detID[workspaceIndex];
     uint16_t runIndexLoc = m_RunIndex;
+    uint16_t goniometerIndex(0); // default value
 
     std::vector<coord_t> locCoord(ND);
     // set up unit conversion and calculate up all coordinates, which depend on
@@ -149,7 +152,8 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 
       mdEventsForSpectrum.emplace_back(
           MDEventMaker<ND, MDEventType>::makeMDEvent(
-              signal, errorSq, runIndexLoc, detID, &locCoord[0]));
+              signal, errorSq, runIndexLoc, goniometerIndex, detID,
+              &locCoord[0]));
 
       // Filter events before adding to the ndEvents vector to add in workspace
       // The bounds of the resulting WS have to be already defined
@@ -272,7 +276,7 @@ struct ConvToMDEventsWSIndexing::MDEventMaker<
     ND, Mantid::DataObjects::MDLeanEvent> {
   static Mantid::DataObjects::MDLeanEvent<ND>
   makeMDEvent(const double &sig, const double &err, const uint16_t,
-              const uint32_t, coord_t *coord) {
+              const uint16_t, const uint32_t, coord_t *coord) {
     return Mantid::DataObjects::MDLeanEvent<ND>(sig, err, coord);
   }
 };

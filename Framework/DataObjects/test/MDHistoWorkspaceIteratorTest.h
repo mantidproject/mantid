@@ -88,6 +88,7 @@ public:
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_EQUALS(it->getInnerDetectorID(0), 0);
       TS_ASSERT_EQUALS(it->getInnerRunIndex(0), 0);
+      TS_ASSERT_EQUALS(it->getInnerGoniometerIndex(0), 0);
       TS_ASSERT_EQUALS(it->getInnerSignal(0), double(i));
       TS_ASSERT_EQUALS(it->getInnerError(0), 1.0);
       i++;

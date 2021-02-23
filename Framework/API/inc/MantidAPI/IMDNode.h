@@ -168,17 +168,18 @@ public:
   /// Add a single event defined by its components
   virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
                                 const std::vector<coord_t> &point,
-                                uint16_t runIndex, uint32_t detectorId) = 0;
+                                uint16_t runIndex, uint16_t goniometerIndex,
+                                uint32_t detectorId) = 0;
   /// Add a single event, with no mutex locking
-  virtual void buildAndAddEventUnsafe(const signal_t Signal,
-                                      const signal_t errorSq,
-                                      const std::vector<coord_t> &point,
-                                      uint16_t runIndex,
-                                      uint32_t detectorId) = 0;
+  virtual void
+  buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
+                         const std::vector<coord_t> &point, uint16_t runIndex,
+                         uint16_t goniometerIndex, uint32_t detectorId) = 0;
   /// Add several events from the vector of event parameters
   virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
                                    const std::vector<coord_t> &Coord,
                                    const std::vector<uint16_t> &runIndex,
+                                   const std::vector<uint16_t> &goniometerIndex,
                                    const std::vector<uint32_t> &detectorId) = 0;
 
   // -------------------------------------------------------------------------------------------
