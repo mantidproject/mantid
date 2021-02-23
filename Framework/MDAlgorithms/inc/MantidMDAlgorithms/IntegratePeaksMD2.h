@@ -69,16 +69,17 @@ private:
                      const coord_t &radiusSquared, const bool &qAxisBool,
                      const double &bgDensity,
                      std::vector<Mantid::Kernel::V3D> &eigenvects,
-                     std::vector<double> &eigenvals,
-                     Mantid::Kernel::V3D &translation, size_t depth = 0,
-                     size_t max_depth = 3);
+                     std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean,
+                     int maxIter = 1);
 
-  /*template <typename MDE, size_t nd>
-  void calcCovar(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+  void calcCovar(
+      const std::vector<std::pair<std::vector<double>, double>> &peak_events,
       const Mantid::Kernel::V3D &pos, const bool &qAxisIsFixed,
       std::vector<Mantid::Kernel::V3D> &eigenvects,
       std::vector<double> &eigenvals, Mantid::Kernel::V3D &translation,
-      Mantid::Kernel::Matrix<double> cov_mat);*/
+      const int &maxIter, const int &nIter = 1,
+      const Mantid::Kernel::Matrix<double> &prev_cov_mat =
+          Mantid::Kernel::Matrix<double>());
 
   // get matrix to transform from Qlab to plane perp to Q
   void getPinv(const Mantid::Kernel::V3D &q,
