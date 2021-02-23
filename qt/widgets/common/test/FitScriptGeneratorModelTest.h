@@ -621,7 +621,7 @@ public:
 
   void test_that_setFittingMode_will_throw_if_given_an_invalid_fitting_mode() {
     TS_ASSERT_THROWS(
-        m_model->setFittingMode(FittingMode::SIMULTANEOUS_SEQUENTIAL),
+        m_model->setFittingMode(FittingMode::SEQUENTIAL_AND_SIMULTANEOUS),
         std::invalid_argument const &);
   }
 
