@@ -79,7 +79,7 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   // which is a child of this class so the lifetime of this pointer is handled
   // by Qt
   m_fitOptionsBrowser =
-      new FitOptionsBrowser(nullptr, FittingMode::SIMULTANEOUS_SEQUENTIAL);
+      new FitOptionsBrowser(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
