@@ -621,18 +621,6 @@ MatrixWorkspace_sptr
 SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
   int npeaks = pws->getNumberPeaks();
 
-  // generate ideal peaks based on integer HKL
-  PeaksWorkspace_sptr pws_ideal = std::dynamic_pointer_cast<PeaksWorkspace>(
-      WorkspaceFactory::Instance().createPeaks());
-  pws_ideal->copyExperimentInfoFrom(pws.get());
-
-  for (int i = 0; i < npeaks; ++i) {
-    if (!pws->getPeak(i).isIndexed())
-      continue;
-    auto pk = pws_ideal->createPeakHKL(pws->getPeak(i).getIntHKL());
-    pws_ideal->addPeak(*pk);
-  }
-
   // prepare workspace to store qSample as Histogram1D
   MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create(
@@ -644,8 +632,14 @@ SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
   auto &xvector = spectrum.mutableX();
   auto &yvector = spectrum.mutableY();
   auto &evector = spectrum.mutableE();
-  for (int i = 0; i < pws_ideal->getNumberPeaks(); ++i) {
-    V3D qv = pws_ideal->getPeak(i).getQSampleFrame();
+
+  // directly compute qsample from UBmatrix and HKL
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < npeaks; ++i) {
+    if (!pws->getPeak(i).isIndexed())
+      continue; // skip over non-indexed peaks
+
+    V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
