@@ -188,14 +188,6 @@ def peak_position_calibrate(focused_diamond_ws_name,
         last_focused_group_index = end_group_index
         # END-FOR
 
-        # # old style
-        # # Fit west bank
-        # bank1_residual = fit_diamond_peaks(focused_diamond_ws_name, 0, 1, output_dir)
-        # # Fit east bank
-        # bank2_residual = fit_diamond_peaks(focused_diamond_ws_name, 1, 2, output_dir)
-        # # Fit high angle bank
-        # bank5_residual = fit_diamond_peaks(focused_diamond_ws_name, 2, 3, output_dir)
-
     # apply 2nd round calibration to diffraction calibration file
     # Load calibration file
     calib_outputs = LoadDiffCal(Filename=src_diff_cal_h5,

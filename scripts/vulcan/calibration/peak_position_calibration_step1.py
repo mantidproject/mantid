@@ -136,68 +136,6 @@ def generate_high_angle_bank_parameters():
     return exp_centers, fit_window_list, rightmost_peak_param_values
 
 
-def retrieve_profile_parameters(det_id, peak_position):
-    """
-
-    Parameters
-    ----------
-    det_id
-    peak_position
-
-    Returns
-    -------
-
-    """
-    bank_index = locate_detector_in_bank(det_id)
-
-    # TODO - make the peak parameter as user-specifiable
-    # Generate peak fitting parameters for back-to-back exponential
-    if bank_index in [0, 1]:
-        exp_centers, fit_window_list, rightmost_peak_param_values = generate_90_degree_bank_parameters(peak_position)
-    elif bank_index in [2]:
-        exp_centers, fit_window_list, rightmost_peak_param_values = generate_high_angle_bank_parameters(peak_position)
-    else:
-        raise RuntimeError(f'Bank with index {bank_index} is not supported')
-
-
-def fit_diamond_peak():
-    pass
-
-
-    # create a table workspace for Back-to-back exponential parameters
-    # Get detector ID
-    det_id = mtd[diamond_ws_name].getDetector(group_index).getID()
-    guess_param_table = calculate_back_to_back_params(diamond_ws, peak_pos)
-
-    # Fit peaks
-    peak_param_names = 'A, B, S'
-
-    FitPeaks(InputWorkspace=diamond_ws_name,
-             StartWorkspaceIndex=group_index,
-             StopWorkspaceIndex=group_index,
-             PeakFunction="BackToBackExponential",
-             BackgroundType="Linear",
-             PeakCenters=exp_centers,
-             FitWindowBoundaryList=fit_window_list,
-             PeakParameterNames=peak_param_names,
-             PeakParameterValues=rightmost_peak_param_values,
-             FitFromRight=True,
-             HighBackground=False,
-             OutputWorkspace=out_ws_name,
-             OutputPeakParametersWorkspace=param_ws_name,
-             OutputParameterFitErrorsWorkspace=error_ws_name,
-             FittedPeaksWorkspace=model_ws_name)
-
-
-# NEW
-def fit_focused_diamond_peaks():
-
-    for peak_pos in diamond_peaks:
-        # all in dSpacing
-
-        fit_diamond_peak(diamond_ws, peak_pos)
-
-
 def fit_diamond_peaks(diamond_ws_name: str,
                       start_group_index: int,
                       end_group_index: int,
@@ -364,12 +302,17 @@ def cal_back_to_back_exponential_fwhm(a, b, s):
 
     Parameters
     ----------
-    a
-    b
-    s
+    a: float
+        parameter A
+    b: float
+        parameter B
+    s: float
+        parameter S
 
     Returns
     -------
+    floag
+        FWHM
 
     """
     # M_LN2 = 0.693147180559945309417
@@ -381,7 +324,6 @@ def cal_back_to_back_exponential_fwhm(a, b, s):
     return fwhm
 
 
-# TODO/FIXME - Peak parameters are hardcoded with Back-to-back exponential
 def process_fit_result(peak_pos_ws_name, param_ws_name, param_error_ws_name, num_peaks, relative_group_index):
     # work include
     # 1. get peak positions and errors
@@ -504,25 +446,6 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     axis.set_xlabel('d (A): expected peak position')
     axis.set_ylabel('Relative error on peak position (d_obs - d_exp) / d_exp')
     axis.legend()
-
-    # print(exp_pos_vec)
-    # print(param_value_dict['X0'])
-    # print(param_error_dict['X0'])
-    # plot 1/d ~ A
-    # FIXME - diable plot
-    # axis = param_figure.add_subplot(412)
-    # print(1/exp_pos_vec, (1/exp_pos_vec).shape)
-    # axis.errorbar(1/exp_pos_vec, param_value_dict['A'], param_error_dict['A'], linestyle='None', marker='o')
-    # axis.set_xlabel('1/d (A)')
-    # axis.set_ylabel('Back-to-back Exponential: A')
-    # axis.legend()
-
-    # ...
-    # plt.plot(1 / vec_d ** 4, vec_b, label='b2b: b', linestyle='None', marker='o')
-
-    # ...
-    #     plt.plot(vec_d ** 2, vec_s ** 2, label='b2b: s^2', linestyle='None', marker='o')
-
     plt.savefig(os.path.join(output_dir, f'peak_param_bank{ws_index}.png'))
     plt.close()
 
