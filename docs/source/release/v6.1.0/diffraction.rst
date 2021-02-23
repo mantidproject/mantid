@@ -57,4 +57,8 @@ Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 
+Known Defects
+#############
+- When using new ellipsoidal peak integration capability in :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`, some peak intensities are returned as zero. When using the default spherical integration, the same behavior is not observed.
+
 :ref:`Release 6.1.0 <v6.1.0>`
