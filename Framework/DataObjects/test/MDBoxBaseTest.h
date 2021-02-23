@@ -100,18 +100,19 @@ public:
   buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,
                     const std::vector<coord_t> & /*Coord*/,
                     const std::vector<uint16_t> & /*runIndex*/,
+                    const std::vector<uint16_t> & /*goniometerIndex*/,
                     const std::vector<uint32_t> & /*detectorId*/) override {
     return 0;
   }
   void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t,
-                        const std::vector<coord_t> &, uint16_t,
+                        const std::vector<coord_t> &, uint16_t, uint16_t,
                         uint32_t) override{};
   virtual void buildAndTraceEvent(const Mantid::signal_t,
                                   const Mantid::signal_t,
                                   const std::vector<coord_t> &, uint16_t,
-                                  uint32_t, size_t){};
+                                  uint16_t, uint32_t, size_t){};
   void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t,
-                              const std::vector<coord_t> &, uint16_t,
+                              const std::vector<coord_t> &, uint16_t, uint16_t,
                               uint32_t) override{};
 
   /** Perform centerpoint binning of events
