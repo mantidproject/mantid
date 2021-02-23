@@ -278,16 +278,26 @@ class WorkspaceWidget(PluginWidget):
         CreateDetectorTable(InputWorkspace=ws)
 
     def _do_sample_material(self, names):
+        """
+        Show a sample material dialog for the workspace for names[0]. It only makes sense
+        to show the dialog for a single workspace, and the context menu option should
+        only be available if a single workspace is selected.
+
+        :param names: A list of workspace names
+        """
         workspaces = self._ads.retrieveWorkspaces(names, unrollGroups=True);
         # It only makes sense to show the sample material dialog with one workspace
         # selected. The context menu should only add the sample material action
         # if there's only one workspace selected.
         if len(workspaces) == 1:
-            presenter = SampleMaterialDialogPresenter(workspaces[0], parent=self)
-            presenter.show_view()
+            try:
+                presenter = SampleMaterialDialogPresenter(workspaces[0], parent=self)
+                presenter.show_view()
+            except Exception as exception:
+                logger.warning("Could not show sample material for workspace "
+                               "'{}':\n{}\n".format(workspaces[0].name(), exception))
         else:
-            pass
-            # TODO - display an error or warning. Shouldn't be able to reach this point.
+            logger.warning("Sample material can only be viewed for a single workspace.")
 
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)

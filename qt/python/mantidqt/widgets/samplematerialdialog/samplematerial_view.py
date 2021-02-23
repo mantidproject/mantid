@@ -15,7 +15,10 @@ from mantidqt.utils.qt import load_ui
 
 
 class SampleMaterialDialogView(QDialog):
-
+    """
+    View for the sample material dialog. It displays sample material properties
+    in a tree widget, and has buttons for setting and copying the sample material.
+    """
     def __init__(self, parent=None, presenter=None):
         super(SampleMaterialDialogView, self).__init__(parent=parent)
 
@@ -53,8 +56,10 @@ class SampleMaterialDialogView(QDialog):
         self.copy_material_button.clicked.connect(self.copy_material_request)
         self.set_material_button.clicked.connect(self.set_material_request)
 
-    # Set the text of the second columns for all the relevant tree items.
     def update_material(self, formula, number_density, temperature, pressure, absorption, total, coherent, incoherent):
+        """
+        Set the text of the second columns for all the relevant tree items.
+        """
         self.formula_item.setText(1, formula)
         self.number_density_item.setText(1, str(number_density))
         self.temperature_item.setText(1, str(temperature))
