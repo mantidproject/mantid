@@ -146,7 +146,7 @@ void VesuvioCalculateMS::exec() {
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nhist * m_nruns * 2);
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
-  for (int64_t i = 0; i < nhist; ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
