@@ -473,7 +473,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         # line should be index 1 in the curves list
         mock_view.select_curve_list.setCurrentRow.assert_called_with(1)
 
-    def test_set_curve_from_object_when_multiple_curves_exist_on_fig(self):
+    def test_set_axes_from_object_raises_error_when_curve_not_found(self):
         fig, axes = subplots(2, subplot_kw={'projection': 'mantid'})
         axes[0].plot(self.ws, specNum=1, label='Workspace')
         mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
