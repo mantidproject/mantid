@@ -92,6 +92,9 @@ private:
   /// Check the group is valid
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
 
+  /// Get path from files
+  std::string getPathFromFiles();
+
   /// View which the object works with
   IALCDataLoadingView *const m_view;
 
