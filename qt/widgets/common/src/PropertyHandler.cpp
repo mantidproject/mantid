@@ -427,10 +427,11 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
+  f->setHandler(
+      std::move(std::make_unique<PropertyHandler>(f, m_cf, m_browser)));
+  auto h = static_cast<PropertyHandler *>(f->getHandler());
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
-  f->setHandler(std::move(h));
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
@@ -541,8 +542,6 @@ PropertyHandler *PropertyHandler::getHandler(std::size_t i) const {
     return nullptr;
   PropertyHandler *ph =
       static_cast<PropertyHandler *>(m_cf->getFunction(i)->getHandler());
-  //auto foo = m_cf->getFunction(0)->getHandler();
-  //auto bar = m_cf->getFunction(1)->getHandler();
   return ph;
 }
 /** Returns 'this' if item == m_item and this is a composite function or
@@ -851,7 +850,6 @@ void PropertyHandler::setAttribute(QString const &attName,
     }
   }
   if (cfun()) {
-    auto foo = cfun()->asString();
     for (auto i = 0u; i < cfun()->nFunctions(); ++i) {
       PropertyHandler *h = getHandler(i);
       h->setAttribute(attName, attValue);

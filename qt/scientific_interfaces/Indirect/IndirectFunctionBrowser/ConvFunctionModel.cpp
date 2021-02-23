@@ -682,8 +682,8 @@ std::string ConvFunctionModel::buildInelasticDiffSphereFunctionString() const {
 }
 
 std::string ConvFunctionModel::buildDiffSphereFunctionString() const {
-  return "name = DiffSphere, NumDeriv = true, Q = 1, f0.Q = 1, "
-         "f0.WorkspaceIndex = 2147483647, f1.Q = 1, f1.WorkspaceIndex = "
+  return "name=DiffSphere, Q=1, f0.Q=1, "
+         "f0.WorkspaceIndex=2147483647, f1.Q = 1, f1.WorkspaceIndex = "
          "2147483647, f0.Height = 1, f0.Centre = 0, f0.Radius = 2, "
          "f1.Intensity = 1, f1.Radius = 2, f1.Diffusion = 0.05, f1.Shift = 0";
 }
