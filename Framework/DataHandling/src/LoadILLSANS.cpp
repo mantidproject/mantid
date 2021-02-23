@@ -860,6 +860,9 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   std::string startDate = entry.getString("start_time");
   runDetails.addProperty<std::string>(
       "start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
+  // set the facility
+  runDetails.addProperty<std::string>("Facility", std::string("ILL"));
+
 }
 
 /**

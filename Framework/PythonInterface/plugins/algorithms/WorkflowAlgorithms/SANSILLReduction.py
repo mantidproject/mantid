@@ -565,7 +565,6 @@ class SANSILLReduction(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
-        mtd[ws].getRun().addProperty('Facility', 'ILL', True)
         mtd[ws].getRun().addProperty('run_number', self._return_numors(self.getPropertyValue('Run')), True)
         mtd[ws].getRun().addProperty('sample_transmission',
                                      self._return_numors(self.getPropertyValue('TransmissionInputWorkspace')), True)
