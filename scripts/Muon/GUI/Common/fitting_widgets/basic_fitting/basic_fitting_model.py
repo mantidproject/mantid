@@ -300,9 +300,9 @@ class BasicFittingModel:
     @function_name.setter
     def function_name(self, new_name: str) -> None:
         """Sets the function name to add to the end of a fitted workspace."""
-        self._function_name = " " + new_name
-        if self._function_name.isspace():
-            self._function_name = ""
+        self._function_name = new_name
+        if self._function_name != "" and self._function_name[:1] != " ":
+            self._function_name = " " + self._function_name
 
     @property
     def function_name_auto_update(self) -> bool:

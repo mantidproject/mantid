@@ -27,11 +27,11 @@ class FittingTabWidget(object):
             self.fitting_tab_view.reset_tab_observer)
         self.tf_asymmetry_fitting_presenter.enable_editing_notifier.add_subscriber(
             self.fitting_tab_view.enable_tab_observer)
+        self.tf_asymmetry_fitting_presenter.tf_asymmetry_mode_changed_notifier.add_subscriber(
+            self.fitting_tab_view.tf_asymmetry_mode_changed_observer)
 
-        self.fitting_tab_view.switch_to_normal_fitting_notifier.add_subscriber(
-            self.tf_asymmetry_fitting_view.switch_to_normal_fitting_observer)
-        self.fitting_tab_view.switch_to_tf_asymmetry_fitting_notifier.add_subscriber(
-            self.tf_asymmetry_fitting_view.switch_to_tf_asymmetry_fitting_observer)
+        self.fitting_tab_view.tf_asymmetry_mode_changed_notifier.add_subscriber(
+            self.tf_asymmetry_fitting_presenter.tf_asymmetry_mode_changed_observer)
 
         context.update_view_from_model_notifier.add_subscriber(
             self.tf_asymmetry_fitting_presenter.update_view_from_model_observer)

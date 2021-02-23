@@ -26,7 +26,26 @@ class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
         self.normalisation_validator.setBottom(0.0)
         self.normalisation_line_edit.setValidator(self.normalisation_validator)
 
-        self.hide_normalisation_options()
+        self.tf_asymmetry_mode = False
+
+    @property
+    def tf_asymmetry_mode(self):
+        return not self.normalisation_line_edit.isHidden()
+
+    @tf_asymmetry_mode.setter
+    def tf_asymmetry_mode(self, tf_asymmetry_on):
+        if tf_asymmetry_on:
+            self.show_normalisation_options()
+        else:
+            self.hide_normalisation_options()
+
+    @property
+    def normalisation(self):
+        return float(self.normalisation_line_edit.text())
+
+    @normalisation.setter
+    def normalisation(self, value):
+        self.normalisation_line_edit.setText(str(value))
 
     def hide_normalisation_options(self) -> None:
         """Hides the normalisation options."""
