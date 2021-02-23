@@ -4,9 +4,10 @@ from check_calibration_alignment import reduce_calibration, make_group_workspace
 from peak_position_calibration_step1 import fit_diamond_peaks, apply_peaks_positions_calibration
 from mantid.simpleapi import LoadDiffCal, SaveDiffCal, mtd, LoadNexusProcessed
 from lib_cross_correlation import CrossCorrelateParameter
-
 import os
 from typing import List, Union, Tuple, Dict
+from matplotlib import pyplot as plt
+import numpy as np
 
 
 def load_diamond_runs(diamond_runs: List[Union[str, int]],
@@ -102,7 +103,8 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
 
 def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
                       diff_cal_file_name: str,
-                      output_dir: str) -> Tuple[str, str]:
+                      output_dir: str,
+                      tube_grouping_plan: List[Tuple[int, int, int]]) -> Tuple[str, str]:
     """
 
     Parameters
@@ -110,7 +112,10 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
     diamond_runs: ~list, str
         list of diamond runs (nexus file path) or diamond EventWorkspace
     diff_cal_file_name
-    output_dir
+    output_dir: str
+        output directory
+    tube_grouping_plan: ~list
+        List of 3 tuples to indicate how to group
 
     Returns
     -------
@@ -125,9 +130,11 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
         diamond_ws_name, _ = load_diamond_runs(diamond_runs, None, output_dir)
 
     # TODO FIXME - shall this method be revealed to the client?
-    tube_group_ws_name = 'TubeGroup'
-    tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
-    tube_group = make_group_workspace(diamond_ws_name, tube_group_ws_name, tube_grouping_plan)
+    if tube_grouping_plan:
+        tube_group_ws_name = 'TubeGroup'
+        tube_group = make_group_workspace(diamond_ws_name, tube_group_ws_name, tube_grouping_plan)
+    else:
+        tube_group = None
 
     print(f'Reduce data with calibration file {diff_cal_file_name}')
     focused_ws_name, focused_nexus = reduce_calibration(diamond_ws_name,
@@ -141,23 +148,53 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
     return focused_ws_name, focused_nexus
 
 
-def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_diff_cal_h5, output_dir):
+def peak_position_calibrate(focused_diamond_ws_name,
+                            grouping_plan: List[Tuple[int, int, int]],
+                            src_diff_cal_h5,
+                            target_diff_cal_h5,
+                            output_dir):
 
     #
     print(f'Peak position calibration: input workspace {focused_diamond_ws_name}: '
           f'number of spectra = {mtd[focused_diamond_ws_name].getNumberHistograms()}')
 
-    if False:
-        # Newer solution
-        diamond_peaks = fit_focused_diamond_peaks(focused_diamond_ws_name)
-    else:
-        # old style
-        # Fit west bank
-        bank1_residual = fit_diamond_peaks(focused_diamond_ws_name, 0, 1, output_dir)
-        # Fit east bank
-        bank2_residual = fit_diamond_peaks(focused_diamond_ws_name, 1, 2, output_dir)
-        # Fit high angle bank
-        bank5_residual = fit_diamond_peaks(focused_diamond_ws_name, 2, 3, output_dir)
+    # Fit peaks
+    tube_res_list = list()
+    pixel_range_left_list = list()
+    pixel_range_right_list = list()
+    last_focused_group_index = 0
+    for start_ws_index, step, end_ws_index in grouping_plan:
+        # calculate new workspace index range in the focused workspace
+        # NOTE that whatever in the grouping plan is for raw workspace!
+        num_groups = (end_ws_index - start_ws_index) // step
+        start_group_index = last_focused_group_index
+        end_group_index = start_group_index + num_groups
+
+        # Pixel range
+        bank_group_left_pixels = list(np.arange(start_ws_index, end_ws_index, step))
+        bank_group_right_pixels = list(np.arange(start_ws_index, end_ws_index, step) + step)
+        # fit: num groups spectra
+        print(f'{focused_diamond_ws_name}: Fit from {start_group_index} to {end_group_index} (exclusive)')
+        bank_residual_list = fit_diamond_peaks(focused_diamond_ws_name, start_group_index, end_group_index, output_dir)
+
+        # sanity check
+        assert len(bank_residual_list) == end_group_index - start_group_index
+        # append
+        tube_res_list.extend(bank_residual_list)
+        pixel_range_left_list.extend(bank_group_left_pixels)
+        pixel_range_right_list.extend(bank_group_right_pixels)
+
+        # update
+        last_focused_group_index = end_group_index
+        # END-FOR
+
+        # # old style
+        # # Fit west bank
+        # bank1_residual = fit_diamond_peaks(focused_diamond_ws_name, 0, 1, output_dir)
+        # # Fit east bank
+        # bank2_residual = fit_diamond_peaks(focused_diamond_ws_name, 1, 2, output_dir)
+        # # Fit high angle bank
+        # bank5_residual = fit_diamond_peaks(focused_diamond_ws_name, 2, 3, output_dir)
 
     # apply 2nd round calibration to diffraction calibration file
     # Load calibration file
@@ -167,9 +204,8 @@ def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_dif
     diff_cal_table_name = str(calib_outputs.OutputCalWorkspace)
 
     # apply  2nd-round calibration
-    apply_peaks_positions_calibration(diff_cal_table_name, [(bank1_residual, 0, 81920),
-                                                            (bank2_residual,  81920, 163840),
-                                                            (bank5_residual, 163840, 200704)])
+    apply_peaks_positions_calibration(diff_cal_table_name,
+                                      zip(tube_res_list, pixel_range_left_list, pixel_range_right_list))
 
     # Target calibration file
     if os.path.dirname(target_diff_cal_h5) == '':
@@ -209,13 +245,17 @@ def main():
     # Step 1: do cross correlation calibration
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
 
+    # Define group plan as a check for step 1 and a plan for step 3
+    tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
+
     # Step 2: use the calibration file generated from previous step to align diamond runs
     cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(diamond_runs=diamond_ws_name,
                                                          diff_cal_file_name=cc_calib_file,
-                                                         output_dir=output_dir)
+                                                         output_dir=output_dir,
+                                                         tube_grouping_plan=tube_grouping_plan)
 
     # Step 3: do peak position calibration
-    peak_position_calibrate(cc_focus_ws_name, cc_calib_file, final_calib_file, output_dir)
+    peak_position_calibrate(cc_focus_ws_name, tube_grouping_plan, cc_calib_file, final_calib_file, output_dir)
 
     # use the calibration file generated from last step to align diamond runs again
 
@@ -223,23 +263,32 @@ def main():
 def test_bank_wise_calibration():
 
     # Set up
-    cc_focus_ws_name = 'FocusedDiamond'
+    cc_focus_ws_name = 'VULCAN_384Banks'
     cc_focus_nexus = os.path.join('peakdatafull',
-                                  'VULCAN_192227_CalMasked_3banks.nxs')
+                                  'VULCAN_192245_CalMasked_384banks')
     LoadNexusProcessed(Filename=cc_focus_nexus, OutputWorkspace=cc_focus_ws_name)
 
-    cc_calib_file = 'Keep_VULCAN_192227_Calibration_CC.h5'
+    # source and target calibration file
+    cc_calib_file = os.path.join('peakdatafull', 'VULCAN_192245_Calibration_CC.h5')
 
     final_calib_file = 'TestHybrid.h5'
     output_dir = os.path.join(os.getcwd(), 'temp')
 
-    peak_position_calibrate(cc_focus_ws_name, cc_calib_file, final_calib_file, output_dir)
+    # tube group plan
+    tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
+
+    # calibrate
+    output = peak_position_calibrate(cc_focus_ws_name, tube_grouping_plan, cc_calib_file, final_calib_file, output_dir)
+    print(f'Writing calibration file to {output}')
 
 
 def test_single_spectrum_peak_fitting():
+    """Test peak fitting methods
 
-    from matplotlib import pyplot as plt
-    import numpy as np
+    Returns
+    -------
+
+    """
 
     # Set up
     cc_focus_ws_name = 'FocusedDiamond'
@@ -250,36 +299,81 @@ def test_single_spectrum_peak_fitting():
     output_dir = os.path.join(os.getcwd(), 'temp')
 
     # Fit west bank
-    num_tubes = 16
+    bank_1_num_tubes = 160
+    bank_2_num_tubes = 80
+    bank_5_num_tubes = 144
+    # Define the pixel (workspace range)
+    bank_group_index_ranges = {'Bank1': (0, bank_1_num_tubes),
+                               'Bank2': (bank_1_num_tubes, bank_1_num_tubes + bank_2_num_tubes),
+                               'Bank5': (bank_1_num_tubes + bank_2_num_tubes,
+                                         bank_1_num_tubes + bank_2_num_tubes + bank_5_num_tubes)}
 
     tube_res_list = list()
-    tube_i_res = fit_diamond_peaks(cc_focus_ws_name, 0, num_tubes, output_dir)
-    tube_res_list.extend(tube_i_res)
+    for bank_name in bank_group_index_ranges:
+        # get workspace range information
+        start_group_index, end_group_index = bank_group_index_ranges[bank_name]
+        # fit
+        tube_i_res = fit_diamond_peaks(cc_focus_ws_name, start_group_index, end_group_index, output_dir)
+        print(f'{bank_name}: Tube number: {len(tube_i_res)}')
+        # append
+        tube_res_list.extend(tube_i_res)
+    # END-FOR
 
-    for i_tube in range(num_tubes):
-        print(f'Tube {i_tube}:  Number fitted peaks = {tube_res_list[i_tube].num_points}')
+    print(f'Tube number: {len(tube_res_list)}')
 
-    print('Tube index\t\tRight most peak position')
+    # for i_tube in range(num_tubes):
+    #     print(f'Tube {i_tube}:  Number fitted peaks = {tube_res_list[i_tube].num_points}')
+
+    # Prepare plotting
     vec_tube_index = list()
     vec_pos = list()
-    for i_tube in range(num_tubes):
-        last_peak_pos = tube_res_list[i_tube].vec_x[-1]
-        if last_peak_pos > 1.1:
-            vec_tube_index.append(i_tube)
-            vec_pos.append(last_peak_pos)
-            # print(f'{i_tube}      {last_peak_pos}')
+    vec_fwhm = list()
+    vec_calibrated_pos = list()
+
+    plot_peak_pos = 1.07577
+
+    for i_tube in range(len(tube_res_list)):
+        # Find a peak to plot
+        peak_pos_vec = tube_res_list[i_tube].vec_x
+        num_peaks = len(peak_pos_vec)
+        peak_index = -1
+        for ipeak in range(num_peaks - 1, -1, -1):
+            if abs(peak_pos_vec[peak_index] - plot_peak_pos) / plot_peak_pos < 0.2:
+                peak_index = ipeak
+                break
+        # not found
+        if peak_index < 0:
+            continue
+
+        # append tube index
+        vec_tube_index.append(i_tube)
+        # append peak position
+        vec_pos.append(peak_pos_vec[peak_index])
+        # append peak width
+        vec_fwhm.append(tube_res_list[i_tube].vec_width[peak_index])
+        # calculate model
+        exp_pos = tube_res_list[i_tube].optimized_d_vec[peak_index]
+        vec_calibrated_pos.append(exp_pos)
+    # convert all to vector
     vec_tube_index = np.array(vec_tube_index)
     vec_pos = np.array(vec_pos)
+    vec_fwhm = np.array(vec_fwhm)
+    vec_calibrated_pos = np.array(vec_calibrated_pos)
+    print(f'Number of data points = {len(vec_calibrated_pos)}')
 
+    # Plot
     import time
     time.sleep(0.5)
     plt.cla()
-    plt.plot(vec_tube_index, vec_pos)
-    plt.plot()
+    plt.figure(figsize=(40, 30))
+    plt.errorbar(vec_tube_index, vec_pos, vec_fwhm, linestyle='None', color='black', marker='o')
+    plt.plot(vec_tube_index, vec_calibrated_pos, linestyle='None', color='red', marker='D', label='Expected')
+    plt.legend()
     plt.savefig('raw_positions_vs_tube.png')
 
 
 if __name__ == '__main__':
     # main()
     # test_bank_wise_calibration()
-    test_single_spectrum_peak_fitting()
+    # test_single_spectrum_peak_fitting()
+    test_bank_wise_calibration()

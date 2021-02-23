@@ -18,6 +18,8 @@ BANK5_START_PID = 400000
 CAL_TABLE_DIFC_COLUMN = 1
 CAL_TABLE_TZERO_COLUMN = 3
 
+PLOT_SLEEP = 0.01
+
 
 class Res(object):
     """
@@ -199,8 +201,7 @@ def fit_focused_diamond_peaks():
 def fit_diamond_peaks(diamond_ws_name: str,
                       start_group_index: int,
                       end_group_index: int,
-                      output_dir: Union[str, None],
-                      output_raw_parameters: bool = True):
+                      output_dir: Union[str, None]) -> List[Res]:
     """Fit diamond peaks from a workspace
 
     Parameters
@@ -236,8 +237,8 @@ def fit_diamond_peaks(diamond_ws_name: str,
     model_ws_name = f'{out_ws_name}_Model'
 
     # Fit peaks
+    # NOTE: RawPeakParameters cannot be False because effective parameters won't have fitted error associated
     peak_param_names = 'A, B, S'
-
     FitPeaks(InputWorkspace=diamond_ws_name,
              StartWorkspaceIndex=start_group_index,
              StopWorkspaceIndex=end_group_index - 1,  # convert from exclusive to inclusive
@@ -252,7 +253,8 @@ def fit_diamond_peaks(diamond_ws_name: str,
              OutputWorkspace=out_ws_name,
              OutputPeakParametersWorkspace=param_ws_name,
              OutputParameterFitErrorsWorkspace=error_ws_name,
-             FittedPeaksWorkspace=model_ws_name)
+             FittedPeaksWorkspace=model_ws_name,
+             RawPeakParameters=True)
 
     # process fitting information
     num_peaks = len(exp_centers)
@@ -286,86 +288,6 @@ def fit_diamond_peaks(diamond_ws_name: str,
     return calibrated_residual_list
 
 
-def fit_diamond_peaks_old(diamond_ws_name: str,
-                      bank_index: int,
-                      output_dir: Union[str, None],
-                      # TODO - implement this asap! different scenario needs different parameters
-                      output_raw_parameters: bool = True):
-    """Fit diamond peaks from a workspace
-    
-    Parameters
-    ----------
-    diamond_ws_name: str
-        Name of diamond workspace that still keeps the original VULCAN-X geometry regardless how it is focused
-    bank_index: int
-        workspace index for the focused data
-    output_dir: str
-        output directory for results.  If None, then do not output
-
-    Returns
-    -------
-
-    """
-    # This is ad hoc!
-
-    # Get detector ID of the first detector in the bank
-    det_id = mtd[diamond_ws_name].getDetector(bank_index).getID()
-
-    # Generate peak fitting parameters for back-to-back exponential
-    if det_id < BANK5_START_PID:
-        # Bank 1 and 2
-        exp_centers, fit_window_list, rightmost_peak_param_values = generate_90_degree_bank_parameters()
-    else:
-        # Bank 5 detector ID starting from 40000
-        exp_centers, fit_window_list, rightmost_peak_param_values = generate_high_angle_bank_parameters()
-
-    # Set up workspace names
-    out_ws_name = f'Bank{bank_index}_Peaks'
-    param_ws_name = f'{out_ws_name}_Params'
-    error_ws_name = f'{out_ws_name}_FitErrors'
-    model_ws_name = f'{out_ws_name}_Model'
-
-    # Fit peaks
-    peak_param_names = 'A, B, S'
-
-    FitPeaks(InputWorkspace=diamond_ws_name,
-             StartWorkspaceIndex=bank_index,
-             StopWorkspaceIndex=bank_index,
-             PeakFunction="BackToBackExponential",
-             BackgroundType="Linear",
-             PeakCenters=exp_centers,
-             FitWindowBoundaryList=fit_window_list,
-             PeakParameterNames=peak_param_names,
-             PeakParameterValues=rightmost_peak_param_values,
-             FitFromRight=True,
-             HighBackground=False,
-             OutputWorkspace=out_ws_name,
-             OutputPeakParametersWorkspace=param_ws_name,
-             OutputParameterFitErrorsWorkspace=error_ws_name,
-             FittedPeaksWorkspace=model_ws_name)
-
-    # process fitting information
-    param_value_dict, param_error_dict = process_fit_result(out_ws_name, param_ws_name, error_ws_name)
-
-    # report
-    report_calibrated_diamond_data(param_value_dict, param_error_dict, diamond_ws_name, model_ws_name, bank_index,
-                                   output_dir)
-
-    # 2nd round calibration
-    calib_model, calib_res = calibrate_peak_positions(exp_pos_vec=param_value_dict['ExpectedX0'],
-                                                      calibrated_pos_vec=param_value_dict['X0'],
-                                                      pos_error_vec=param_error_dict['X0'],
-                                                      peak_width_vec=param_value_dict['S'],
-                                                      poly_order=1)
-
-    plot_predicted_calibrated_peak_positions(param_value_dict['ExpectedX0'],
-                                             calib_model, param_value_dict['X0'],
-                                             calib_res, bank_index,
-                                             output_dir)
-
-    return calib_res
-
-
 def calibrate_peak_positions(exp_pos_vec, calibrated_pos_vec, pos_error_vec, peak_width_vec,  poly_order=1):
 
     # TODO can be changed to 2 only after we find out how to do the math to superpose with DIFC
@@ -387,6 +309,8 @@ def calibrate_peak_positions(exp_pos_vec, calibrated_pos_vec, pos_error_vec, pea
     res.vec_y = y
     res.vec_e = pos_error_vec
     res.vec_width = peak_width_vec
+    # optimized peak positions (how good that we can expect)
+    res.optimized_d_vec = res.intercept + res.slope * x
 
     # Set others
     res.num_points = len(x)
@@ -401,11 +325,11 @@ def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_ve
 
     percent_relative_diff = (predicted_pos_vec - exp_pos_vec) / exp_pos_vec
     prev_percent_relative_diff = (raw_pos_vec - exp_pos_vec) / exp_pos_vec
-    for i in range(len(predicted_pos_vec)):
-        print(f'{exp_pos_vec[i]:.5f}: {percent_relative_diff[i]:.3f}   {prev_percent_relative_diff[i]:.3f}')
+    # for i in range(len(predicted_pos_vec)):
+    #     print(f'{exp_pos_vec[i]:.5f}: {percent_relative_diff[i]:.3f}   {prev_percent_relative_diff[i]:.3f}')
 
     # plot
-    time.sleep(1)
+    time.sleep(PLOT_SLEEP)
     plt.cla()
     plt.plot(exp_pos_vec, prev_percent_relative_diff,
              linestyle='None',
@@ -432,10 +356,32 @@ def plot_predicted_calibrated_peak_positions(exp_pos_vec, poly_model, raw_pos_ve
 
     plt.legend()
     plt.savefig(os.path.join(output_dir, f'predicted_position_bank{ws_index}'))
-    # plt.show()
-    # time.sleep(1)
+    plt.close()
 
 
+def cal_back_to_back_exponential_fwhm(a, b, s):
+    """Calculate back-to-back exponential convoluted with Gaussian's peak width
+
+    Parameters
+    ----------
+    a
+    b
+    s
+
+    Returns
+    -------
+
+    """
+    # M_LN2 = 0.693147180559945309417
+    M_LN2 = np.log(2)
+
+    w0 = M_LN2 * (a + b) / (a * b)
+    fwhm = w0 * np.exp(-0.5 * M_LN2 * s / w0) + 2 * np.sqrt(2 * M_LN2) * s
+
+    return fwhm
+
+
+# TODO/FIXME - Peak parameters are hardcoded with Back-to-back exponential
 def process_fit_result(peak_pos_ws_name, param_ws_name, param_error_ws_name, num_peaks, relative_group_index):
     # work include
     # 1. get peak positions and errors
@@ -464,6 +410,8 @@ def process_fit_result(peak_pos_ws_name, param_ws_name, param_error_ws_name, num
         param_value_dict[param_name] = list()
     for param_name in error_dict_query.keys():
         param_error_dict[param_name] = list()
+    # Extra calculated one
+    param_value_dict['FWHM'] = list()
 
     # Retrieve information from parameter value and error table workspace
     # assume that there is only 1 spectrum that is fitted a time
@@ -485,6 +433,14 @@ def process_fit_result(peak_pos_ws_name, param_ws_name, param_error_ws_name, num
             for param_name in error_dict_query.keys():
                 # set fitting error for parameter
                 param_error_dict[param_name].append(error_ws.cell(row_number, error_dict_query[param_name]))
+
+            # TODO - convert to vector operation?
+            #  calculate FWHM
+            a = param_ws.cell(row_number, param_dict_query['A'])
+            b = param_ws.cell(row_number, param_dict_query['B'])
+            s = param_ws.cell(row_number, param_dict_query['S'])
+            fwhm = cal_back_to_back_exponential_fwhm(a, b, s)
+            param_value_dict['FWHM'].append(fwhm)
 
     # convert to array
     for param_name in param_dict_query.keys():
@@ -529,7 +485,7 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
 
     """
     # Initialize figure with multiple subplots
-    time.sleep(0.5)
+    time.sleep(PLOT_SLEEP)
     plt.cla()
     param_figure = plt.figure()
 
@@ -549,9 +505,9 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     axis.set_ylabel('Relative error on peak position (d_obs - d_exp) / d_exp')
     axis.legend()
 
-    print(exp_pos_vec)
-    print(param_value_dict['X0'])
-    print(param_error_dict['X0'])
+    # print(exp_pos_vec)
+    # print(param_value_dict['X0'])
+    # print(param_error_dict['X0'])
     # plot 1/d ~ A
     # FIXME - diable plot
     # axis = param_figure.add_subplot(412)
@@ -568,11 +524,11 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     #     plt.plot(vec_d ** 2, vec_s ** 2, label='b2b: s^2', linestyle='None', marker='o')
 
     plt.savefig(os.path.join(output_dir, f'peak_param_bank{ws_index}.png'))
-    # plt.show()
+    plt.close()
 
     # 2. plot and save relative peak positions and errors
     # Plot data, model and difference
-    time.sleep(0.5)
+    time.sleep(PLOT_SLEEP)
     plt.cla()
     data_vec_x = mtd[data_ws_name].extractX()[ws_index]
     data_vec_y = mtd[data_ws_name].extractY()[ws_index]
@@ -603,3 +559,4 @@ def report_calibrated_diamond_data(param_value_dict, param_error_dict, data_ws_n
     plt.xlim(0.3, 1.5)
 
     plt.savefig(os.path.join(output_dir, f'bank_{ws_index}.png'))
+    plt.close()
