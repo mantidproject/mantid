@@ -258,6 +258,37 @@ def main():
     # use the calibration file generated from last step to align diamond runs again
 
 
+def main_check_calibration_quality():
+    """ Check calibration quality
+    """
+    # Calibration file to check
+    diff_cal_file = os.path.join(os.getcwd(), 'TestHybrid210222X.h5')
+
+    # Output
+    output_dir = '/tmp/'
+
+    # latest
+    diamond_runs = [192245, 192246, 192247, 192248][0:1]
+
+    # Optional user specified Mantid IDF
+    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition.xml'
+
+    # Define group plan as a check for step 1 and a plan for step 3
+    tube_grouping_plan = [(0, 512, 81920), (81920, 512, 81920 * 2), (81920 * 2, 512, 200704)]
+
+    # No-user touch below this line
+    # Step 1: Load data (set)
+    diamond_ws_name, _ = load_diamond_runs(diamond_runs, vulcan_x_idf, output_dir)
+
+    # Step 2: use the calibration file generated from previous step to align diamond runs
+    # focused_ws_name, focused_nexus =  ...
+    align_vulcan_data(diamond_runs=diamond_ws_name, diff_cal_file_name=diff_cal_file,
+                      output_dir=output_dir, tube_grouping_plan=tube_grouping_plan)
+
+    # Step 3: check qualities (peak fitting with tube)
+    pass  # not implemented yet
+
+
 def test_bank_wise_calibration():
 
     # Set up
