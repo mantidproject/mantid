@@ -199,6 +199,8 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
   if (ws) {
     const std::vector<Mantid::Kernel::Property *> logs = ws->run().getLogData();
     QStringList logNames;
+    // add the option that displays workspace names
+    logNames << "SourceName";
     for (auto log : logs) {
       Mantid::Kernel::TimeSeriesProperty<double> *p =
           dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
