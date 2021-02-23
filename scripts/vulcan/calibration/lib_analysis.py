@@ -4,7 +4,8 @@ from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, Diff
                               MaskDetectors, ConvertUnits)
 from mantid.simpleapi import mtd
 import numpy as np
-from typing import Union
+import os
+from typing import Union, Tuple
 
 
 class FindDiamondPeaks(object):
@@ -181,7 +182,9 @@ def report_masked_pixels(data_workspace, mask_ws, wi_start, wi_stop):
 def align_focus_event_ws(event_ws_name,
                          calib_ws_name: Union[str, None],
                          group_ws_name: str,
-                         mask_ws_name: Union[str, None]):
+                         mask_ws_name: Union[str, None],
+                         customized_grouping_ws_name: Union[str, None],
+                         output_dir: str) -> Tuple[str, str]:
     """
     overwrite the input
     """
@@ -190,6 +193,9 @@ def align_focus_event_ws(event_ws_name,
 
     # Align detector or not
     print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
+    unit = mtd[event_ws_name].getAxis(0).getUnit().unitID()
+    if unit != 'TOF':
+        ConvertUnits(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Target='TOF')
 
     if calib_ws_name:
         # align detectors and convert unit to dSpacing
@@ -206,11 +212,14 @@ def align_focus_event_ws(event_ws_name,
     Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,1.5')
     # Convert to matrix workspace
     matrix_ws_name = f'{event_ws_name}_matrix'
+    print(f'[PROGRESS] Converting EventWorkspace {event_ws_name} to Workspace2D {matrix_ws_name}')
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
     # Save nexus for 2D alignment view
-    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=f'{event_ws_name}{file_tag}.nxs')
-    print(f'[CHECK] saved aligned workspace size: {mtd[matrix_ws_name].extractY().shape}')
+    SaveNexusProcessed(InputWorkspace=matrix_ws_name,
+                       Filename=os.path.join(output_dir, f'{event_ws_name}{file_tag}.nxs'))
+    # remove matrix workspace after being saved
+    mtd.remove(matrix_ws_name)
 
     # Mask group workspace
     if mask_ws_name:
@@ -219,12 +228,32 @@ def align_focus_event_ws(event_ws_name,
     else:
         file_tag += '_Nomask'
 
-    # Diffraction focus
-    DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
-                         GroupingWorkspace=group_ws_name)
+
+    # Diffraction focus to standard group
+    if customized_grouping_ws_name is not None:
+        # focus to matrix workspace and save
+        DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name,
+                             GroupingWorkspace=group_ws_name, PreserveEvents=False)
+        focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
+        SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
+        # clean memory
+        mtd.remove(matrix_ws_name)
+
+        # Diffraction focus: original EventWorkspace is then aligned and focused for next step
+        DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
+                             GroupingWorkspace=customized_grouping_ws_name, PreserveEvents=True)
+
+    else:
+        # focus with standard group and keep events
+        DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
+                             GroupingWorkspace=group_ws_name, PreserveEvents=True)
 
     # Convert from event workspace to workspace 2D
-    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name)
+    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
+    num_hist = mtd[event_ws_name].getNumberHistograms()
+    focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_{num_hist}banks.nxs')
+    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
+    mtd.remove(matrix_ws_name)
 
     # Edit instrument geometry
     # NOTE: Disable EditInstrumentGeometry as
@@ -234,9 +263,7 @@ def align_focus_event_ws(event_ws_name,
     #                        Polar='89.9284,90.0716,150.059', Azimuthal='0,0,0', DetectorIDs='1-3',
     #                        InstrumentName='vulcan_3bank')
 
-    SaveNexusProcessed(InputWorkspace=event_ws_name, Filename=f'{event_ws_name}{file_tag}_3banks.nxs')
-
-    return event_ws_name
+    return event_ws_name, focused_run_nxs
 
 
 def get_masked_ws_indexes(mask_ws):

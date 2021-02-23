@@ -13,6 +13,10 @@ import mantid_helper
 from lib_analysis import report_masked_pixels
 from typing import Dict, Tuple, Any, Union
 import h5py
+from collections import namedtuple
+
+
+__all__ = ['cross_correlate_vulcan_data', 'CrossCorrelateParameter']
 
 
 """
@@ -25,6 +29,14 @@ VULCAN_X_PIXEL_RANGE = {'Bank1': (0, 81920),  # 160 tubes
                         'Bank2': (81920, 163840),   # 160 tubes
                         'Bank5': (163840, 200704)   # 72 tubes
                         }
+VULCAN_X_PIXEL_NUMBER = 200704
+
+
+CrossCorrelateParameter = namedtuple('CrossCorrelateParameter', ['reference_peak_position',
+                                                                 'reference_peak_width',
+                                                                 'reference_ws_index',
+                                                                 'cross_correlate_number',
+                                                                 'bin_step'])
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
@@ -32,7 +44,8 @@ def verify_vulcan_difc(ws_name: str,
                        cal_table_name: str,
                        mask_ws_name: str,
                        fallback_incorrect_difc_pixels: bool,
-                       mask_incorrect_difc_pixels: bool):
+                       mask_incorrect_difc_pixels: bool,
+                       output_dir: str):
     """Verify and possibly correct DIFCs if necessary
 
     Parameters
@@ -45,6 +58,8 @@ def verify_vulcan_difc(ws_name: str,
         If calibrated DIFC is obviously wrong, fallback to the engineered value
     mask_incorrect_difc_pixels: bool
         if fallback_incorrect_difc_pixels==False, choice to discard (aka mask) bad pixels
+    output_dir: str
+        output directory for DIFC
 
     Returns
     -------
@@ -58,16 +73,12 @@ def verify_vulcan_difc(ws_name: str,
 
     # Generate a dictionary for each bank
     bank_info_dict = VULCAN_X_PIXEL_RANGE
-    # bank_info_dict = {'Bank1': (0, 81920),  # 160 tubes
-    #                   'Bank2': (81920, 163840),   # 160 tubes
-    #                   'Bank5': (163840, 200704)   # 72 tubes
-    #                   }
 
-    if diamond_event_ws.getNumberHistograms() != 200704:
+    if diamond_event_ws.getNumberHistograms() != VULCAN_X_PIXEL_NUMBER:
         raise NotImplementedError('Bank information dictionary is out of date')
 
     # Init file
-    difc_h5 = h5py.File(f'{diamond_event_ws}_DIFC.h5', 'w')
+    difc_h5 = h5py.File(os.path.join(output_dir, f'{diamond_event_ws}_DIFC.h5'), 'w')
 
     for bank_name in ['Bank1', 'Bank2', 'Bank5']:
         # pixel range
@@ -154,15 +165,6 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
     start_pid, end_pid = VULCAN_X_PIXEL_RANGE[bank_name]
     row_range = range(start_pid, end_pid)
 
-    # if bank_name == 'Bank1':
-    #     row_range = range(0, 3234)
-    # elif bank_name == 'east':
-    #     row_range = range(3234, 6468)
-    # elif bank_name == 'high angle':
-    #     row_range = range(6468, 24900)
-    # else:
-    #     raise RuntimeError('balbal {}'.format(bank_name))
-
     # Get the workspaces handlers
     if isinstance(target_calib_ws, str):
         target_calib_ws = mantid_helper.retrieve_workspace(target_calib_ws, True)
@@ -242,8 +244,9 @@ def cross_correlate_calibrate(ws_name: str,
                               cc_number: int,
                               max_offset: float,
                               binning: float,
-                              ws_name_posfix='',
-                              peak_fit_time=1):
+                              ws_name_posfix: str = '',
+                              peak_fit_time: int = 1,
+                              debug_mode: bool = False):
     """Calibrate instrument (with a diamond run) with cross correlation algorithm
     on a specified subset of spectra in a diamond workspace
 
@@ -273,6 +276,8 @@ def cross_correlate_calibrate(ws_name: str,
         posfix of the workspace created in the algorithm
     peak_fit_time: int
         number of peak fitting in GetDetectorOffsets
+    debug_mode: bool
+        Flag to output internal workspace to process NeXus files for debugging
 
     Returns
     -------
@@ -292,20 +297,21 @@ def cross_correlate_calibrate(ws_name: str,
     # get reference detector position
     det_pos = diamond_event_ws.getDetector(reference_ws_index).getPos()
     twotheta = calculate_detector_2theta(diamond_event_ws, reference_ws_index)
-    print('[INFO] Reference spectra = {0}  position @ {1}   2-theta = {2}'
-          ''.format(reference_ws_index, det_pos, twotheta))
-    print(f'[INFO] Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
+    print(f'[INFO] Reference spectra = {reference_ws_index}  position @ {det_pos}   2-theta = {twotheta}  '
+          f'Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
     # TODO - NIGHT - shall change from bank to bank
-    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 2.0'.format(abs(binning)))
+    Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 1.5'.format(abs(binning)))
 
     # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
     cc_ws_name = 'cc_' + ws_name + '_' + ws_name_posfix
     CrossCorrelate(InputWorkspace=ws_name,
                    OutputWorkspace=cc_ws_name,
                    ReferenceSpectra=reference_ws_index,
-                   WorkspaceIndexMin=ws_index_range[0], WorkspaceIndexMax=ws_index_range[1],
-                   XMin=peak_min, XMax=peak_max)
+                   WorkspaceIndexMin=ws_index_range[0],
+                   WorkspaceIndexMax=ws_index_range[1],
+                   XMin=peak_min,
+                   XMax=peak_max)
 
     # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
     offset_ws_name = 'offset_' + ws_name + '_' + ws_name_posfix
@@ -314,7 +320,7 @@ def cross_correlate_calibrate(ws_name: str,
     # TODO - THIS IS AN IMPORTANT PARAMETER TO SET THE MASK
     # min_peak_height = 1.0
 
-    print('[DB...BAT] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
+    print('[INFO] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
     try:
         GetDetectorOffsets(InputWorkspace=cc_ws_name,
                            OutputWorkspace=offset_ws_name,
@@ -330,12 +336,15 @@ def cross_correlate_calibrate(ws_name: str,
                            # FitEachPeakTwice=fit_twice,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
-        # TODO FIXME - may remove this save effort later
-        # SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
+        if debug_mode:
+            SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation
-        print(f'[DEBUG] Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number}, MaxOffset = {max_offset}')
-        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
+        print(f'[ERROR] Failed to cross correlation on ({ws_index_range[0]}, {ws_index_range[1]}):'
+              f' Step = {abs(binning)}, DReference = {peak_position}, XMin/XMax = +/- {cc_number},'
+              f'MaxOffset = {max_offset}')
+        if debug_mode:
+            SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=f'Step1_CC_{cc_ws_name}.nxs')
         # raise run_err
         return None, run_err
 
@@ -347,8 +356,7 @@ def cross_correlate_calibrate(ws_name: str,
     # report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
-    # TODO - FUTURE NEXT - consider whether the cross correlate workspace shall be removed or not
-    if False and mtd.doesExist(ws_name + "cc" + ws_name_posfix):
+    if mtd.doesExist(ws_name + "cc" + ws_name_posfix):
         mtd.remove(ws_name + "cc")
 
     return offset_ws_name, mask_ws_name
@@ -427,9 +435,9 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
         apply_masks(mask_ws)
 
 
-# TODO - FUTURE - Convert this method to a more general form
 def cross_correlate_vulcan_data(diamond_ws_name: str,
-                                calib_flag: Dict,
+                                cross_correlate_param_dict: Dict[str, CrossCorrelateParameter],
+                                calib_flag: Dict[str, bool],
                                 cc_fit_time: int = 1,
                                 prefix: str = '1fit') -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Calibrate VULCAN runs with cross correlation algorithm
@@ -447,6 +455,8 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
     ----------
     diamond_ws_name: str
         input diamond workspace name
+    cross_correlate_param_dict: ~dict
+        parameters for cross correlation
     calib_flag: ~dict
         calibration panel flag
     cc_fit_time: int
@@ -460,83 +470,91 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
         offset workspace dictionary, mask workspace dictionary
 
     """
+    # Check input
+    assert isinstance(cross_correlate_param_dict, dict), f'Type mismatch: {cross_correlate_param_dict}:  {type(cross_correlate_param_dict)}'
+
     # Version issue
     if cc_fit_time == 2:
         raise RuntimeError(f'Current GetDetectorOffsets cannot support cc_fit_time = {cc_fit_time}')
 
-    # peak position in d-Spacing
-    # FIXME TODO - make this flexible
-    peakpos1 = 1.2614
-    peakpos2 = 1.2614
-    peakpos3 = 1.07577
+    # peakpos1 = 1.2614
+    # peakpos2 = 1.2614
+    # peakpos3 = 1.07577
 
     offset_ws_dict = dict()
     mask_ws_dict = dict()
 
     # Bank 1
-    if calib_flag['Bank1']:
-        bank_name = 'Bank1'
+    for bank_name in calib_flag:
+        # skip disabled bank
+        if not calib_flag[bank_name]:
+            continue
+        # retrieve parameter to set up cross correlation
         start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-        ref_ws_index = 40704
-        peak_width = 0.04  # modified from 0.005
-        cc_number_bank1 = 80
-        bank1_offset, bank1_mask = cross_correlate_calibrate(diamond_ws_name, peakpos1,
-                                                             peakpos1 - peak_width, peakpos1 + peak_width,
-                                                             (start_ws_index, end_ws_index - 1),  # Note: inclusive
-                                                             ref_ws_index, cc_number_bank1,
-                                                             1, -0.0003, f'{bank_name}_{prefix}',
-                                                             peak_fit_time=cc_fit_time)
-        if bank1_offset is None:
-            err_msg = bank1_mask
+
+        bank_i_cc_param = cross_correlate_param_dict[bank_name]
+        peak_pos_i = bank_i_cc_param.reference_peak_position
+        ref_ws_index = bank_i_cc_param.reference_ws_index
+        peak_width = bank_i_cc_param.reference_peak_width
+        cc_number_i = bank_i_cc_param.cross_correlate_number
+        bank_i_offset, bank_i_mask = cross_correlate_calibrate(diamond_ws_name, peak_pos_i,
+                                                               peak_pos_i - peak_width, peak_pos_i + peak_width,
+                                                               (start_ws_index, end_ws_index - 1),  # Note: inclusive
+                                                               ref_ws_index, cc_number_i,
+                                                               1, bank_i_cc_param.bin_step,
+                                                               f'{bank_name}_{prefix}',
+                                                               peak_fit_time=cc_fit_time)
+        if bank_i_offset is None:
+            err_msg = bank_i_mask
             print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
         else:
-            offset_ws_dict[bank_name] = bank1_offset
-            mask_ws_dict[bank_name] = bank1_mask
+            offset_ws_dict[bank_name] = bank_i_offset
+            mask_ws_dict[bank_name] = bank_i_mask
     # END-IF
 
-    # East bank
-    if calib_flag['Bank2']:
-        bank_name = 'Bank2'
-        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-        ref_ws_index = 40704  # 4854 ends with an even right-shift spectrum
-        peak_width = 0.04
-        cc_number_bank2 = 80
-        bank2_offset, bank2_mask = cross_correlate_calibrate(diamond_ws_name, peakpos2,
-                                                             peakpos2 - peak_width, peakpos2 + peak_width,
-                                                             (start_ws_index, end_ws_index - 1),
-                                                             ref_ws_index, cc_number_bank2,
-                                                             1, -0.0003, f'{bank_name}_{prefix}',
-                                                             peak_fit_time=cc_fit_time)
-        if bank2_offset is None:
-            err_msg = bank2_mask
-            print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
-        else:
-            offset_ws_dict[bank_name] = bank2_offset
-            mask_ws_dict[bank_name] = bank2_mask
-    # END-IF
-
-    # High angle
-    if calib_flag['Bank5']:
-        # High angle bank
-        bank_name = 'Bank5'
-        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-        ref_ws_index = 182528
-        peak_width = 0.01
-        cc_number = 20
-        bank5_offset, bank5_mask = cross_correlate_calibrate(diamond_ws_name, peakpos3,
-                                                             peakpos3 - peak_width, peakpos3 + peak_width,
-                                                             (start_ws_index, end_ws_index - 1),
-                                                             ref_ws_index, cc_number=cc_number,
-                                                             max_offset=1, binning=-0.0003,
-                                                             ws_name_posfix=f'{bank_name}_{prefix}',
-                                                             peak_fit_time=cc_fit_time)
-        if bank5_offset is None:
-            err_msg = bank5_mask
-            print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
-        else:
-            offset_ws_dict[bank_name] = bank5_offset
-            mask_ws_dict[bank_name] = bank5_mask
-    # END-IF
+    # # East bank
+    # if calib_flag['Bank2']:
+    #     bank_name = 'Bank2'
+    #     start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+    #     ref_ws_index = 40704  # 4854 ends with an even right-shift spectrum
+    #     peak_width = 0.04
+    #     cc_number_bank2 = 80
+    #     bank2_offset, bank2_mask = cross_correlate_calibrate(diamond_ws_name, peakpos2,
+    #                                                          peakpos2 - peak_width, peakpos2 + peak_width,
+    #                                                          (start_ws_index, end_ws_index - 1),
+    #                                                          ref_ws_index, cc_number_bank2,
+    #                                                          1, -0.0003, f'{bank_name}_{prefix}',
+    #                                                          peak_fit_time=cc_fit_time)
+    #     if bank2_offset is None:
+    #         err_msg = bank2_mask
+    #         print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
+    #     else:
+    #         offset_ws_dict[bank_name] = bank2_offset
+    #         mask_ws_dict[bank_name] = bank2_mask
+    # # END-IF
+    #
+    # # High angle
+    # if calib_flag['Bank5']:
+    #     # High angle bank
+    #     bank_name = 'Bank5'
+    #     start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+    #     ref_ws_index = 182528
+    #     peak_width = 0.01
+    #     cc_number = 20
+    #     bank5_offset, bank5_mask = cross_correlate_calibrate(diamond_ws_name, peakpos3,
+    #                                                          peakpos3 - peak_width, peakpos3 + peak_width,
+    #                                                          (start_ws_index, end_ws_index - 1),
+    #                                                          ref_ws_index, cc_number=cc_number,
+    #                                                          max_offset=1, binning=-0.0003,
+    #                                                          ws_name_posfix=f'{bank_name}_{prefix}',
+    #                                                          peak_fit_time=cc_fit_time)
+    #     if bank5_offset is None:
+    #         err_msg = bank5_mask
+    #         print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
+    #     else:
+    #         offset_ws_dict[bank_name] = bank5_offset
+    #         mask_ws_dict[bank_name] = bank5_mask
+    # # END-IF
 
     if len(offset_ws_dict) == 0:
         raise RuntimeError('No bank is calibrated.  Either none of them is flagged Or all of them failed')
@@ -791,7 +809,8 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name: str,
 def save_calibration(calib_ws_name: str,
                      mask_ws_name: str,
                      group_ws_name: str,
-                     calib_file_prefix: str):
+                     calib_file_prefix: str,
+                     output_dir:str) -> str:
     """Export calibrated result to calibration file
 
     Save calibration (calibration table, mask and grouping) to legacy .cal and current .h5 file
@@ -806,12 +825,14 @@ def save_calibration(calib_ws_name: str,
 
     Returns
     -------
-    None
+    str
+        calibration file name
 
     """
     # save
     #  get file name and unlink existing one
-    out_file_name = os.path.join(os.getcwd(), calib_file_prefix + '.h5')
+    # TODO/FIXME - output directory shall be specified by users
+    out_file_name = os.path.join(output_dir, calib_file_prefix + '.h5')
     if os.path.exists(out_file_name):
         os.unlink(out_file_name)
 
@@ -831,8 +852,10 @@ def save_calibration(calib_ws_name: str,
     GeneratePythonScript(InputWorkspace=calib_ws_name, Filename=py_name)
 
     # Save DIFC
-    difc_file_name = os.path.join(os.getcwd(), calib_file_prefix + '_difc.dat')
+    difc_file_name = os.path.join(output_dir, calib_file_prefix + '_difc.dat')
     export_difc(calib_ws_name, difc_file_name)
+
+    return out_file_name
 
 
 def export_difc(calib_ws_name, out_file_name):

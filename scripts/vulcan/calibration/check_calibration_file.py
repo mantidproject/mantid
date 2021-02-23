@@ -6,7 +6,7 @@ from lib_cross_correlation import (verify_vulcan_difc)
 from lib_analysis import report_masked_pixels
 from mantid.simpleapi import (LoadNexusProcessed)
 from mantid_helper import load_calibration_file
-import sys
+import os
 
 """
 Total = 81920 * 2 + (24900 - 6468) * 2 = 200704
@@ -53,7 +53,8 @@ def main_report_calibration(calib_file, diamond_file):
                        cal_table_name=str(calib_ws_tuple.OutputCalWorkspace),
                        mask_ws_name=str(calib_ws_tuple.OutputMaskWorkspace),
                        fallback_incorrect_difc_pixels=False,
-                       mask_incorrect_difc_pixels=False)
+                       mask_incorrect_difc_pixels=False,
+                       output_dir=os.getcwd())
 
 
 if __name__ == '__main__':
