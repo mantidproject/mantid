@@ -845,7 +845,7 @@ def save_calibration(calib_ws_name: str,
 
     # Save calibration script to python file
     # FIXME - I doubt how many useful information can be saved
-    py_name = os.path.join(os.getcwd(), calib_file_prefix + '.py')
+    py_name = os.path.join(output_dir, calib_file_prefix + '.py')
     GeneratePythonScript(InputWorkspace=calib_ws_name, Filename=py_name)
 
     # Save DIFC

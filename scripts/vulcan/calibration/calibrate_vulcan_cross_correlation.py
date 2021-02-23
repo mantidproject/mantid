@@ -58,17 +58,17 @@ def load_event_data(nexus_paths: List[Union[str, int]],
     assert isinstance(nexus_paths, list) and not isinstance(nexus_paths, str), f'Nexus paths {nexus_paths}' \
                                                                                f' must be a list'
 
-    # load data
-    diamond_ws_name = os.path.basename(nexus_paths[0]).split('.')[0] + '_diamond'
-    print(f'[INFO] Loading {nexus_paths} to {diamond_ws_name}')
-
     # Load a file or files
-    if len(nexus_paths) == 1:
+    if len(nexus_paths) == 1 and cutoff_time:
         # Load a single file
+        if isinstance(nexus_paths[0], int):
+            raise RuntimeError(f'Single run with cutoff time does not support run-number-only input.')
+        # determine diamone workspace name
+        diamond_ws_name = os.path.basename(nexus_paths[0]).split('.')[0] + '_diamond'
+        print(f'[INFO] Loading {nexus_paths} to {diamond_ws_name}')
         # and allow test mode?
         test_arg = {}
-        if cutoff_time:
-            test_arg['max_time'] = cutoff_time
+        test_arg['max_time'] = cutoff_time
         # load
         load_nexus(data_file_name=nexus_paths[0],
                    output_ws_name=diamond_ws_name,

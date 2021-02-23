@@ -180,24 +180,30 @@ def peak_position_calibrate(focused_diamond_ws_name, src_diff_cal_h5, target_dif
 def main():
     # --------------------------------------------------------------------------
     # User setup
+    # 
     #
     # Testing files
-    diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-                   '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][:]
+    # diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
+    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
+    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
+    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][:]
+
+    # day 1: diamond_runs = [192227, 192228]
+    # latest
+    diamond_runs = [192245, 192246, 192247, 192248][:]
 
     # Optional user specified Mantid IDF
-    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
+    # vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
+    vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition.xml'
 
     # Output path
-    output_dir = '/tmp/'  # os.getcwd()
+    output_dir = '/SNS/VULCAN/shared/wzz/calibrtion_6hour_192245/'
     final_calib_file = 'VULCAN_Calibration_Hybrid.h5'
     #
     # ---------------------------------------------------------------------------
 
     # Load data (set)
-    diamond_ws_name, _ = load_diamond_runs(diamond_run, vulcan_x_idf, output_dir)
+    diamond_ws_name, _ = load_diamond_runs(diamond_runs, vulcan_x_idf, output_dir)
 
     # Step 1: do cross correlation calibration
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
