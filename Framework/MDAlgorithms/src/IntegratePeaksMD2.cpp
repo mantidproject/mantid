@@ -990,64 +990,83 @@ void IntegratePeaksMD2::findEllipsoid(
   do {
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(MDiter.getBox());
     if (box && !box->getIsMasked()) {
-      const std::vector<MDE> &events = box->getConstEvents();
-      auto bg = bgDensity / (static_cast<double>(events.size()) *
-                             (box->getInverseVolume()));
-      // For each event
-      for (const auto &evnt : events) {
-        std::vector<coord_t> center(nd);
-        for (size_t d = 0; d < nd; ++d) {
-          center[d] = evnt.getCenter(d);
-        }
-        coord_t out[nd];
-        getRadiusSq.apply(center.data(), out);
 
-        if (evnt.getSignal() > bg && out[0] < radiusSquared) {
-          // Create the event
-          /*MDE newEvent(evnt.getSignal() - bg, evnt.getErrorSquared(),
-                       evnt.getCenter());*/
-          MDE newEvent(evnt);
-          newEvent.setSignal(evnt.getSignal() - bg);
-          // Add it to the workspace
-          peakRegionMD->addEvent(newEvent);
+      // simple check whether box is defintely not contained
+      coord_t boxCenter[nd];
+      box->getCenter(boxCenter);
+      V3D displacement; // vector between peak pos and box center
+      coord_t rboxSq = 0; // dist from center to vertex sq
+      for (size_t d = 0; d < nd; ++d) {
+        auto dim = box->getExtents(d);
+        rboxSq += 0.25 * dim.getSize() * dim.getSize();
+        displacement[d] = pos[d] - static_cast<double>(boxCenter[d]);
+      }
 
-          V3D center(evnt.getCenter(0), evnt.getCenter(1), evnt.getCenter(2)); // prbs better as vector - keep mean as V3D though
-          const auto signal = evnt.getSignal();
-
-          w_sum += signal;
-
-          if (qAxisIsFixed) {
-            // transform coords to Q, uhat, vhat basis
-            // use V3D for matrix algebra
-            center = Pinv * center;
-          }
-
-          // update mean
+      if (displacement.norm() < static_cast<double>(sqrt(rboxSq)) +
+                                    static_cast<double>(sqrt(radiusSquared))) {
+        // box MIGHT intersect peak spherical region so go through events
+        const std::vector<MDE> &events = box->getConstEvents();
+        auto bg = bgDensity / (static_cast<double>(events.size()) *
+                               (box->getInverseVolume()));
+        // For each event
+        for (const auto &evnt : events) {
+          std::vector<coord_t> center(nd);
           for (size_t d = 0; d < nd; ++d) {
-            mean[d] += (signal / w_sum) * (center[d] - mean[d]);
+            center[d] = evnt.getCenter(d);
           }
+          coord_t out[nd];
+          getRadiusSq.apply(center.data(), out);
 
-          if (qAxisIsFixed) {
-            // get variance along Q
-            var_Qhat += signal * pow((center[0] - mean[0]), 2);
-          }
-          for (size_t row = 0; row < cov_mat.numRows(); ++row) {
-            for (size_t col = 0; col < cov_mat.numRows(); ++col) {
-              // symmeteric matrix
-              if (row <= col) {
-                double cov = 0.0;
-                if (!qAxisIsFixed) {
-                  cov = signal * (center[row] - mean[row]) *
-                        (center[col] - mean[col]);
-                } else {
-                  cov = signal * (center[row + 1] - mean[row + 1]) *
-                        (center[col + 1] - mean[col + 1]);
-                }
-                if (row == col) {
-                  cov_mat[row][col] += cov;
-                } else {
-                  cov_mat[row][col] += cov;
-                  cov_mat[col][row] += cov;
+          if (evnt.getSignal() > bg && out[0] < radiusSquared) {
+            // Create the event
+            /*MDE newEvent(evnt.getSignal() - bg, evnt.getErrorSquared(),
+                         evnt.getCenter());*/
+            MDE newEvent(evnt);
+            newEvent.setSignal(evnt.getSignal() - bg);
+            // Add it to the workspace
+            peakRegionMD->addEvent(newEvent);
+
+            V3D center(
+                evnt.getCenter(0), evnt.getCenter(1),
+                evnt.getCenter(
+                    2)); // prbs better as vector - keep mean as V3D though
+            const auto signal = evnt.getSignal();
+
+            w_sum += signal;
+
+            if (qAxisIsFixed) {
+              // transform coords to Q, uhat, vhat basis
+              // use V3D for matrix algebra
+              center = Pinv * center;
+            }
+
+            // update mean
+            for (size_t d = 0; d < nd; ++d) {
+              mean[d] += (signal / w_sum) * (center[d] - mean[d]);
+            }
+
+            if (qAxisIsFixed) {
+              // get variance along Q
+              var_Qhat += signal * pow((center[0] - mean[0]), 2);
+            }
+            for (size_t row = 0; row < cov_mat.numRows(); ++row) {
+              for (size_t col = 0; col < cov_mat.numRows(); ++col) {
+                // symmeteric matrix
+                if (row <= col) {
+                  double cov = 0.0;
+                  if (!qAxisIsFixed) {
+                    cov = signal * (center[row] - mean[row]) *
+                          (center[col] - mean[col]);
+                  } else {
+                    cov = signal * (center[row + 1] - mean[row + 1]) *
+                          (center[col + 1] - mean[col + 1]);
+                  }
+                  if (row == col) {
+                    cov_mat[row][col] += cov;
+                  } else {
+                    cov_mat[row][col] += cov;
+                    cov_mat[col][row] += cov;
+                  }
                 }
               }
             }
