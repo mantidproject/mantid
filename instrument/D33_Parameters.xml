@@ -36,6 +36,13 @@
     <parameter name="y-pixel-size" type="number">
       <value val="5"/>
     </parameter>
+
+    <parameter name="log_list_to_save" type="string">
+      <value val="facility,instrument.name,experiment_identifier,
+		  start_time,end_time,numor_list,processedAs,
+		  wavelength,sample_transmission,L2"/>
+    </parameter>
+
   </component-link>
 
   <!-- These parameters are used in ParallaxCorrection algorithm -->

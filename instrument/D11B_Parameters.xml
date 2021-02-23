@@ -23,6 +23,14 @@
       <parameter name="y-pixel-size" type="number">
         <value val="8"/>
       </parameter>
+
+      <parameter name="log_list_to_save" type="string">
+	<value val="facility,instrument_name,experiment_identifier,
+		    experiment_title,start_time,end_time,numor_list,
+		    processedAs,wavelength,sample_transmission,
+                    collimation.actual_position,L2"/>
+      </parameter>
+
     </component-link>
     <!-- These parameters are used in ParallaxCorrection algorithm -->
     <component-link name="detector_center">

@@ -23,6 +23,10 @@
 		<parameter name="chi2_ndof" type="float">
 			<value val="0.01" />
 	  </parameter>
-
+	  <parameter name="log_list_to_save" type="string">
+	    <value val="facility,instrument.name,experiment_identifier,
+			title,start_time,end_time,numor_list,
+			processedAs,wavelength,sample_transmission"/>
+	  </parameter>
 	</component-link>
 </parameter-file>

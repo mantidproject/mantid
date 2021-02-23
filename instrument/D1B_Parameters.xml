@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D1B" valid-from="2012-10-01T00:00:00">
+
+  <component-link name="D1B">
+
+    <parameter name="log_list_to_save" type="string">
+      <value val="facility,instrument.name,experiment_identifier,
+		  title,start_time,end_time,numor_list,
+		  processedAs,wavelength,sample_transmission"/>
+    </parameter>
+
+  </component-link>
+</parameter-file>

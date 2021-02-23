@@ -207,10 +207,8 @@ class DrillExportModel:
                         self._exports[wsName].add(filename)
                         kwargs = {}
                         if 'Ascii' in a:
-                            kwargs['LogList'] = ['facility', 'instrument_name', 'experiment_identifier',
-                                                 'experiment_title', 'start_time', 'end_time', 'run_number',
-                                                 'processedAs', 'wavelength', 'sample_transmission',
-                                                 'collimation.actual_position', 'L2']
+                            log_list = (mtd[wsName].getInstrument().getStringParameter('log_list_to_save')[0]).split(',')
+                            kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                             if 'Reflectometry' in a:
                                 kwargs['WriteHeader'] = True
                                 kwargs['FileExtension'] = 'custom'
