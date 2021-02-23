@@ -561,6 +561,7 @@ SaveAscii2::sampleLogValueUnit(const std::string &logName) {
     sampleLogValue =
         boost::lexical_cast<std::string>(run.getLogData(logName)->value());
   } catch (Exception::NotFoundError &) {
+    g_log.warning("Log " + logName + " not found.");
     sampleLogValue = "Not defined";
   }
   // Gets the sample log unit
