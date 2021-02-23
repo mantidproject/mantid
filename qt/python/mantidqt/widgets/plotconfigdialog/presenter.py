@@ -109,7 +109,7 @@ class PlotConfigDialogPresenter:
                 self.tab_widget_presenters[index] = None
                 return
 
-    def focus_and_configure_curves_tab(self, axes, curve):
+    def configure_curves_tab(self, axes, curve):
         curves_tab_presenter = self.tab_widget_presenters[2]
         if not curves_tab_presenter:
             return
