@@ -35,6 +35,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ["out", "D11_AutoProcess_Reference.nxs"]
 
     def editCell(self, row, column, text):
