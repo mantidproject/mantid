@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.kernel import config
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
@@ -133,4 +134,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(mtd.getObjectNames(), [])
 
 if __name__ == "__main__":
+    config.setFacility("ISIS")
     unittest.main()
+    config.setFacility("NONE")
