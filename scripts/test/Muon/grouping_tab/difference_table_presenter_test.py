@@ -103,6 +103,12 @@ class DifferenceTablePresenterTest(unittest.TestCase):
     def test_that_view_is_initialized_as_empty(self):
         self.assert_view_empty()
 
+    def test_header_labels_set_correctly(self):
+        self.assertEqual('Group 1', self.presenter.group_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual('Group 2', self.presenter.group_view.diff_table.horizontalHeaderItem(3).text())
+        self.assertEqual('Pair 1', self.presenter.pair_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual('Pair 2', self.presenter.pair_view.diff_table.horizontalHeaderItem(3).text())
+
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : Adding and removing diffs
     # ------------------------------------------------------------------------------------------------------------------

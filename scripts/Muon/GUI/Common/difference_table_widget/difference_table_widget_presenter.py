@@ -32,6 +32,11 @@ class DifferenceTablePresenter(object):
 
         self._dataChangedNotifier = lambda: 0
 
+        if group_or_pair == 'pair':
+            self._view.set_table_headers_pairs()
+        else:
+            self._view.set_table_headers_groups()
+
     def show(self):
         self._view.show()
 
