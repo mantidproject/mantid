@@ -188,7 +188,6 @@ public:
                                           "EFG2H123", instrument));
 
     ConfigService::Instance().setString("default.facility", "NONE");
-
   }
 
   void testMakeFileNameForSNS() {
@@ -221,7 +220,6 @@ public:
                                       "REF_L666", instrument));
 
     ConfigService::Instance().setString("default.facility", "NONE");
-
   }
 
   void testGetInstrument() {
