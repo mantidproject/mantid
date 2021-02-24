@@ -17,9 +17,11 @@ class SampleMaterialDialogPresenter(AlgorithmObserver):
     Presenter for the sample material dialog view. User can view the material,
     set the material, or copy the material to another workspace.
     """
-    def __init__(self, workspace, parent=None):
+    def __init__(self, workspace, parent=None, view=None):
         super(SampleMaterialDialogPresenter, self).__init__()
-        self.view = SampleMaterialDialogView(parent, self)
+        # Optional view argument allows mocking of the view.
+        self.view = view if view else SampleMaterialDialogView(self, parent)
+
         self.parent = parent
         self.workspace = workspace
         self.update_material()

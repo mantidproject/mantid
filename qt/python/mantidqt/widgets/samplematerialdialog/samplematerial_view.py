@@ -19,7 +19,7 @@ class SampleMaterialDialogView(QDialog):
     View for the sample material dialog. It displays sample material properties
     in a tree widget, and has buttons for setting and copying the sample material.
     """
-    def __init__(self, parent=None, presenter=None):
+    def __init__(self, presenter, parent=None):
         super(SampleMaterialDialogView, self).__init__(parent=parent)
 
         self.ui = load_ui(__file__, 'samplematerialdialog.ui', baseinstance=self)
