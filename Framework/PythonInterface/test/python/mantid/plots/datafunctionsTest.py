@@ -877,9 +877,11 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(isinstance(bin_indices, range))
 
     def test_get_bin_indices_returns_a_numpy_ndarray_with_monitors(self):
+        config.setFacility("ISIS")
         ws = LoadRaw("GEM40979", SpectrumMin=1, SpectrumMax=102)
         bin_indices = funcs.get_bin_indices(ws)
         self.assertTrue(isinstance(bin_indices, np.ndarray))
+        config.setFacility("NONE")
 
 
 if __name__ == '__main__':
