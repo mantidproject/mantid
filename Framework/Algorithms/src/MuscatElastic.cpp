@@ -28,7 +28,7 @@ using namespace Mantid::Kernel;
 using Mantid::DataObjects::Workspace2D;
 
 namespace {
-constexpr int DEFAULT_NEVENTS = 1000;
+constexpr int DEFAULT_NPATHS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
 constexpr size_t DEFAULT_NSCATTERINGS = 1;
 constexpr int DEFAULT_LATITUDINAL_DETS = 5;
@@ -62,11 +62,18 @@ void MuscatElastic::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SofqWorkspace", "", Direction::Input, wsQValidator),
                   "The name of the workspace containing S(q).  The input "
-                  "workspace must "
+                  "workspace must contain a single spectrum and "
                   "have X units of momentum transfer.");
-  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Name for the WorkspaceGroup that will be created.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                          Direction::Output),
+      "Name for the WorkspaceGroup that will be created. Each workspace in the "
+      "group contains a calculated weight for a particular number of "
+      "scattering events. The number of scattering events varies from 1 up to "
+      "the number supplied in the NumberOfScatterings parameter. The group "
+      "will also include an additional workspace for a calculation with a "
+      "single scattering event where the absorption post scattering has been "
+      "set to zero");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "ScatteringCrossSection", "", Direction::Input,
@@ -77,11 +84,11 @@ void MuscatElastic::init() {
   auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty(
-      "NeutronEventsSingle", DEFAULT_NEVENTS, positiveInt,
-      "The number of \"neutron\" events to generate for single scattering");
+      "NeutronPathsSingle", DEFAULT_NPATHS, positiveInt,
+      "The number of \"neutron\" paths to generate for single scattering");
   declareProperty(
-      "NeutronEventsMultiple", DEFAULT_NEVENTS, positiveInt,
-      "The number of \"neutron\" events to generate for multiple scattering");
+      "NeutronPathsMultiple", DEFAULT_NPATHS, positiveInt,
+      "The number of \"neutron\" paths to generate for multiple scattering");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
   auto nScatteringsValidator =
@@ -115,6 +122,39 @@ void MuscatElastic::init() {
       "NumberOfDetectorColumns",
       std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+}
+
+/**
+ * Validate the input properties.
+ * @return a map where keys are property names and values the found issues
+ */
+std::map<std::string, std::string> MuscatElastic::validateInputs() {
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  std::map<std::string, std::string> issues;
+  Geometry::IComponent_const_sptr sample =
+      inputWS->getInstrument()->getSample();
+  if (!sample) {
+    issues["InputWorkspace"] = "Input workspace does not have a Sample";
+  } else {
+    if (inputWS->sample().hasEnvironment()) {
+      issues["InputWorkspace"] = "Sample must not have a sample environment";
+    }
+
+    if (inputWS->sample().getMaterial().numberDensity() == 0) {
+      issues["InputWorkspace"] =
+          "Sample must have a material set up with a non-zero number density";
+    }
+  }
+  MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
+  if (SQWS->getNumberHistograms() != 1) {
+    issues["SofqWorkspace"] = "S(Q) workspace must contain a single spectrum";
+  }
+  auto y = SQWS->y(0);
+  if (std::any_of(y.cbegin(), y.cend(),
+                  [](const auto yval) { return (yval <= 0); })) {
+    issues["SofqWorkspace"] = "S(Q) workspace must have all y > 0";
+  }
+  return issues;
 }
 
 /**
@@ -195,13 +235,13 @@ void MuscatElastic::exec() {
     // no two theta for monitors
     if (!instrumentWS.spectrumInfo().isMonitor(i)) {
       for (int bin = 0; bin < nbins; bin++) {
-        double kinc = 2 * M_PI / instrumentWS.histogram(i).x()[bin];
+        double kinc = 2 * M_PI / instrumentWS.histogram(i).points()[bin];
 
         auto detPos = instrumentWS.detectorInfo().position(i);
 
         double total(0);
-        total = simulateEvents(nSingleScatterEvents, 1, sample, *instrument,
-                               rng, sigmaSSWS, SQWS, kinc, detPos, true);
+        total = simulatePaths(nSingleScatterEvents, 1, sample, *instrument, rng,
+                              sigmaSSWS, SQWS, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
         /*if (!useSparseInstrument && lambdaStepSize > 1) {
         }*/
@@ -209,8 +249,8 @@ void MuscatElastic::exec() {
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total = simulateEvents(nEvents, ne + 1, sample, *instrument, rng,
-                                 sigmaSSWS, SQWS, kinc, detPos, false);
+          total = simulatePaths(nEvents, ne + 1, sample, *instrument, rng,
+                                sigmaSSWS, SQWS, kinc, detPos, false);
           simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
 
           // interpolate through points not simulated
@@ -284,12 +324,20 @@ double MuscatElastic::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
   return sig_total;
 }
 
+/**
+ * Interpolate a value from a spectrum where the y value is quadratic and e^y
+ * represents some physical quantity
+ * @param workspaceToInterpolate The workspace containing the data to
+ * interpolate (pass whole workspace to get access to yIndexOfX method)
+ * @param x The x value to interpolate at
+ * @return The interpolated value
+ */
 double MuscatElastic::interpolateLogQuadratic(
-    const MatrixWorkspace_sptr workspaceToInterpolate, double x) {
-  if (x > workspaceToInterpolate->x(0).back()) {
+    const MatrixWorkspace_sptr &workspaceToInterpolate, double x) {
+  if (x > workspaceToInterpolate->points(0).back()) {
     return exp(workspaceToInterpolate->y(0).back());
   }
-  if (x < workspaceToInterpolate->x(0).front()) {
+  if (x < workspaceToInterpolate->points(0).front()) {
     return exp(workspaceToInterpolate->y(0).front());
   }
   // assume log(cross section) is quadratic in k
@@ -308,8 +356,8 @@ double MuscatElastic::interpolateLogQuadratic(
     idx = ny - 3;
   }
   // this interpolation assumes the set of 3 bins\point have the same width
-  // U=0 on at point or bin edge to the left of where x lies
-  auto U = (x - workspaceToInterpolate->x(0)[idx]) / binWidth;
+  // U=0 on point or bin edge to the left of where x lies
+  auto U = (x - workspaceToInterpolate->points(0)[idx]) / binWidth;
   auto &y = workspaceToInterpolate->y(0);
   auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
   auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
@@ -317,14 +365,31 @@ double MuscatElastic::interpolateLogQuadratic(
   return exp(A * U * U + B * U + C);
 }
 
-double MuscatElastic::simulateEvents(const int nEvents, const size_t nScatters,
-                                     const Sample &sample,
-                                     const Geometry::Instrument &instrument,
-                                     Kernel::PseudoRandomNumberGenerator &rng,
-                                     const MatrixWorkspace_sptr sigmaSSWS,
-                                     const MatrixWorkspace_sptr SOfQ,
-                                     const double kinc, Kernel::V3D detPos,
-                                     bool specialSingleScatterCalc) {
+/**
+ * Simulates a set of neutron paths through the sample to a specific detector
+ * position with each path containing the specified number of scattering events.
+ * Each path represents a group of neutrons and the proportion of neutrons
+ * making it to the destination without being scattered or absorbed is
+ * calculated as a weight using the cross section information from the sample
+ * material. The average weight across all the simulated paths is returned
+ * @param nPaths The number of paths to simulate
+ * @param nScatters The number of scattering events to simulate along each path
+ * @param instrument An instrument object used to obtain the source position
+ * @param rng Random number generator
+ * @param sigmaSSWS
+ * @param SOfQ
+ * @param detPos
+ * @param specialSingleScatterCalc
+ * @return An average weight across all of the paths
+ */
+double MuscatElastic::simulatePaths(const int nPaths, const size_t nScatters,
+                                    const Sample &sample,
+                                    const Geometry::Instrument &instrument,
+                                    Kernel::PseudoRandomNumberGenerator &rng,
+                                    const MatrixWorkspace_sptr sigmaSSWS,
+                                    const MatrixWorkspace_sptr SOfQ,
+                                    const double kinc, Kernel::V3D detPos,
+                                    bool specialSingleScatterCalc) {
   double sumOfWeights = 0;
   auto sourcePos = instrument.getSource()->getPos();
 
@@ -333,7 +398,7 @@ double MuscatElastic::simulateEvents(const int nEvents, const size_t nScatters,
   sigma_total = new_vector(sigmaSSWS, sample.getMaterial(), kinc,
                            specialSingleScatterCalc);
 
-  for (int ie = 0; ie < nEvents; ie++) {
+  for (int ie = 0; ie < nPaths; ie++) {
     auto [success, weight] = scatter(nScatters, sample, instrument, sourcePos,
                                      rng, sigma_total, scatteringXSection, SOfQ,
                                      kinc, detPos, specialSingleScatterCalc);
@@ -342,7 +407,7 @@ double MuscatElastic::simulateEvents(const int nEvents, const size_t nScatters,
     else
       ie--;
   }
-  return sumOfWeights / nEvents;
+  return sumOfWeights / nPaths;
 }
 
 std::tuple<bool, double> MuscatElastic::scatter(
@@ -537,36 +602,6 @@ void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
   startPoint = V3D(x, y, z);
   track.clearIntersectionResults();
   track.reset(startPoint, track.direction());
-}
-
-/**
- * Validate the input properties.
- * @return a map where keys are property names and values the found issues
- */
-std::map<std::string, std::string> MuscatElastic::validateInputs() {
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  std::map<std::string, std::string> issues;
-  Geometry::IComponent_const_sptr sample =
-      inputWS->getInstrument()->getSample();
-  if (!sample) {
-    issues["InputWorkspace"] = "Input workspace does not have a Sample";
-  } else {
-    if (inputWS->sample().hasEnvironment()) {
-      issues["InputWorkspace"] = "Sample must not have a sample environment";
-    }
-
-    if (inputWS->sample().getMaterial().numberDensity() == 0) {
-      issues["InputWorkspace"] =
-          "Sample must have a material set up with a non-zero number density";
-    }
-  }
-  MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
-  auto y = SQWS->y(0);
-  if (std::any_of(y.cbegin(), y.cend(),
-                  [](const auto yval) { return (yval <= 0); })) {
-    issues["SofqWorkspace"] = "S(Q) workspace must have all y > 0";
-  }
-  return issues;
 }
 
 /**

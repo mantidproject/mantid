@@ -894,6 +894,7 @@ set(TEST_FILES
     MostLikelyMeanTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
+    MuscatElasticTest.h
     MuonWorkspaceCreationHelperTest.h
     NormaliseByCurrentTest.h
     NormaliseByDetectorTest.h

@@ -39,7 +39,7 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"MayersSampleCorrection", "CarpenterSampleCorrection",
-            "PearlMCAbsorption", "VesuvioCalculateMS"};
+            "VesuvioCalculateMS"};
   }
   /// Algorithm's category for identification
   const std::string category() const override {
@@ -67,14 +67,14 @@ private:
                     const Kernel::Material &material, double kinc,
                     bool specialSingleScatterCalc);
   double interpolateLogQuadratic(
-      const API::MatrixWorkspace_sptr workspaceToInterpolate, double x);
-  double simulateEvents(const int nEvents, const size_t nScatters,
-                        const API::Sample &sample,
-                        const Geometry::Instrument &instrument,
-                        Kernel::PseudoRandomNumberGenerator &rng,
-                        const API::MatrixWorkspace_sptr sigmaSSWS,
-                        const API::MatrixWorkspace_sptr SOfQ, const double kinc,
-                        Kernel::V3D detPos, bool specialSingleScatterCalc);
+      const API::MatrixWorkspace_sptr &workspaceToInterpolate, double x);
+  double simulatePaths(const int nEvents, const size_t nScatters,
+                       const API::Sample &sample,
+                       const Geometry::Instrument &instrument,
+                       Kernel::PseudoRandomNumberGenerator &rng,
+                       const API::MatrixWorkspace_sptr sigmaSSWS,
+                       const API::MatrixWorkspace_sptr SOfQ, const double kinc,
+                       Kernel::V3D detPos, bool specialSingleScatterCalc);
   std::tuple<bool, double>
   scatter(const size_t nScatters, const API::Sample &sample,
           const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
@@ -98,7 +98,7 @@ private:
              const double kinc, const double scatteringXSection,
              Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
              double &weight);
-  int m_callsToInterceptSurface;
+  int m_callsToInterceptSurface{0};
 };
 } // namespace Algorithms
 } // namespace Mantid
