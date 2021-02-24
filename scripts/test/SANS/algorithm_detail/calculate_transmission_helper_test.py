@@ -234,4 +234,6 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    config.setFacility("ISIS")
     unittest.main()
+    config.setFacility("NONE")
