@@ -66,13 +66,14 @@ private:
 public:
   void setUp() override {
 
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "ISIS");
   }
 
   void tearDown() override {
 
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "NONE");
-
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "NONE");
   }
 
   // This pair of boilerplate methods prevent the suite being created statically
