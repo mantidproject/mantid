@@ -3,7 +3,7 @@
 
 <!--  EMPTY  -->
 <facility name="NONE" FileExtensions=" ">
-  <timezone> </timezone>
+  <timezone></timezone>
 
   <instrument name="NONE">
     <technique> </technique>
