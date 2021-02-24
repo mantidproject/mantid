@@ -104,7 +104,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(43, presenter.view.instrument.count())
+        self.assertEqual(1, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
