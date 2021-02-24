@@ -26,6 +26,8 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self.tf_asymmetry_mode_changed_notifier = GenericObservable()
         self.tf_asymmetry_mode_changed_observer = GenericObserverWithArgPassing(self.handle_tf_asymmetry_mode_changed)
 
+        self.view.set_slot_for_normalisation_changed(self.handle_normalisation_changed)
+
     def initialize_model_options(self) -> None:
         """Returns the fitting options to be used when initializing the model."""
         super().initialize_model_options()
@@ -37,7 +39,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def handle_dataset_name_changed(self) -> None:
         super().handle_dataset_name_changed()
-        self.view.normalisation = self.model.current_normalisation
+        self.view.normalisation = self.model.current_normalisation()
 
     def handle_tf_asymmetry_mode_changed(self, tf_asymmetry_on):
         if not self._check_tf_asymmetry_compliance(tf_asymmetry_on):
@@ -59,14 +61,17 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
+    def handle_normalisation_changed(self):
+        self.model.set_current_normalisation(self.view.normalisation)
+
     def update_and_reset_all_data(self):
         super().update_and_reset_all_data()
         self.update_normalisations_in_model_and_view()
 
     def update_normalisations_in_model_and_view(self):
-        if not self.model.recalculate_normalisations():
-            self.view.warning_popup("Failed to calculate the normalisation: the fit function may be invalid.")
-        self.view.normalisation = self.model.current_normalisation
+        if not self.model.recalculate_tf_asymmetry_functions():
+            self.view.warning_popup("Failed to convert fit function to a TF Asymmetry function.")
+        self.view.normalisation = self.model.current_normalisation()
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on):
         if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():

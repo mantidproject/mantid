@@ -26,6 +26,9 @@ class TFAsymmetryFittingView(GeneralFittingView):
         self.tf_asymmetry_fitting_options = TFAsymmetryFittingOptionsView(self)
         self.tf_asymmetry_fitting_options_layout.addWidget(self.tf_asymmetry_fitting_options)
 
+    def set_slot_for_normalisation_changed(self, slot):
+        self.tf_asymmetry_fitting_options.set_slot_for_normalisation_changed(slot)
+
     @property
     def tf_asymmetry_mode(self):
         return self.tf_asymmetry_fitting_options.tf_asymmetry_mode
