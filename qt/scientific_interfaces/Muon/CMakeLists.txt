@@ -191,7 +191,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-     		     MantidQtWidgetsMplCpp
+                     MantidQtWidgetsMplCpp
                      MantidQtWidgetsPlotting
                    INSTALL_DIR_BASE
                      ${WORKBENCH_PLUGINS_DIR}
