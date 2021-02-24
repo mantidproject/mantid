@@ -6,7 +6,7 @@
 #
 # WORKSPACE, JOB_NAME, NODE_LABEL, PACKAGE_SUFFIX, GIT_COMMIT are
 # environment variables that are set by Jenkins. The last one
-# corresponds to any labels set on a slave.  BUILD_THREADS should 
+# corresponds to any labels set on a slave.  BUILD_THREADS should
 # be set in the configuration of each slave.
 ###############################################################################
 # Set all string comparisons to case insensitive (i.e. Release == release)
@@ -277,7 +277,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
-        elif [[ ${JOB_NAME} == ornl ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        elif [[ ${JOB_NAME} == ornl-stable ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
