@@ -285,17 +285,17 @@ class WorkspaceWidget(PluginWidget):
 
         :param names: A list of workspace names
         """
-        workspaces = self._ads.retrieveWorkspaces(names, unrollGroups=True);
         # It only makes sense to show the sample material dialog with one workspace
         # selected. The context menu should only add the sample material action
         # if there's only one workspace selected.
-        if len(workspaces) == 1:
+        if len(names) == 1:
             try:
-                presenter = SampleMaterialDialogPresenter(workspaces[0], parent=self)
+                workspace = self._ads.retrieve(names[0]);
+                presenter = SampleMaterialDialogPresenter(workspace, parent=self)
                 presenter.show_view()
             except Exception as exception:
                 logger.warning("Could not show sample material for workspace "
-                               "'{}':\n{}\n".format(workspaces[0].name(), exception))
+                               "'{}':\n{}\n".format(workspace.name(), exception))
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
 
