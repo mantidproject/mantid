@@ -283,7 +283,7 @@ class FigureInteraction(object):
                 if remove_legend_flag:
                     action_taken = True
                     legend = ax.get_legend()
-                    legend.setVisible(False)
+                    legend.set_visible(False)
                     canvas.draw()
 
         return action_taken
