@@ -57,6 +57,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(instrument, 'MUSR')
 
     def test_that_load_dead_time_from_filename_places_table_in_ADS(self):
+        ConfigService["default.facility"] = "ISIS"
         filename = 'MUSR00022725.nsx'
 
         name = utils.load_dead_time_from_filename(filename)
@@ -64,8 +65,10 @@ class MuonFileUtilsTest(unittest.TestCase):
 
         self.assertEqual(name, 'MUSR00022725.nsx_deadtime_table')
         self.assertTrue(isinstance(dead_time_table, ITableWorkspace))
+        ConfigService["default.facility"] = "NONE"
 
     def test_load_workspace_from_filename_for_existing_file(self):
+        ConfigService["default.facility"] = "ISIS"
         filename = 'MUSR00022725.nsx'
         load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
@@ -74,6 +77,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)
+        ConfigService["default.facility"] = "NONE"
 
     def test_load_workspace_from_filename_for_file_path(self):
         filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
@@ -84,8 +88,5 @@ class MuonFileUtilsTest(unittest.TestCase):
         alg, _ = utils.create_load_algorithm(filename,inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
 
-
 if __name__ == '__main__':
-    ConfigService.setFacility("ISIS")
     unittest.main(buffer=False, verbosity=2)
-    ConfigService.setFacility("NONE")
