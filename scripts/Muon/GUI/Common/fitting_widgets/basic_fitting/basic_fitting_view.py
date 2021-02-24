@@ -186,6 +186,10 @@ class BasicFittingView(QWidget, ui_fitting_layout):
         """Returns a list of global parameters."""
         return self.fit_function_options.global_parameters
 
+    def parameter_value(self, full_parameter: str) -> float:
+        """Returns the value of the specified parameter."""
+        return self.fit_function_options.parameter_value(full_parameter)
+
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous fit mode."""
         self.fit_function_options.switch_to_simultaneous()

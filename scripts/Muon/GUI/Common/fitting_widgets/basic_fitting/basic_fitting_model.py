@@ -363,6 +363,11 @@ class BasicFittingModel:
         """Returns the global parameters stored in the model. Override this method if you require global parameters."""
         return []
 
+    def update_parameter_value(self, full_parameter: str, value: float) -> None:
+        """Update the value of a parameter in the fit function."""
+        if self.current_single_fit_function is not None:
+            self.current_single_fit_function.setParameter(full_parameter, value)
+
     @property
     def do_rebin(self) -> bool:
         """Returns true if rebin is selected within the context."""

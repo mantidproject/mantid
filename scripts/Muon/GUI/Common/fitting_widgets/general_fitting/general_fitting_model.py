@@ -62,7 +62,13 @@ class GeneralFittingModel(BasicFittingModel):
 
     def current_domain_fit_function(self):
         """Returns the fit function in the simultaneous function corresponding to the currently displayed dataset."""
-        return self._get_single_domain_fit_function_from(self.simultaneous_fit_function, self.current_dataset_index)
+        if not isinstance(self.simultaneous_fit_function, MultiDomainFunction):
+            return self.simultaneous_fit_function
+
+        if self.current_dataset_index is not None:
+            return self.simultaneous_fit_function.getFunction(self.current_dataset_index)
+        else:
+            return self.simultaneous_fit_function.getFunction(0)
 
     @property
     def simultaneous_fit_function_cache(self) -> IFunction:
@@ -127,6 +133,15 @@ class GeneralFittingModel(BasicFittingModel):
         """Sets the global parameters stored in the model."""
         self._global_parameters = global_parameters
 
+    def update_parameter_value(self, full_parameter: str, value: float) -> None:
+        """Update the value of a parameter in the fit function."""
+        if self.simultaneous_fitting_mode:
+            current_domain_function = self.current_domain_fit_function()
+            if current_domain_function is not None:
+                current_domain_function.setParameter(full_parameter, value)
+        else:
+            super().update_parameter_value(full_parameter, value)
+
     def automatically_update_function_name(self) -> None:
         """Attempt to update the function name automatically."""
         if self.function_name_auto_update:
@@ -147,6 +162,8 @@ class GeneralFittingModel(BasicFittingModel):
 
         if self.simultaneous_fit_function is not None:
             single_function = self.current_domain_fit_function()
+            if single_function is not None:
+                single_function = single_function.clone()
             self.simultaneous_fit_function = single_function if self.number_of_datasets == 1 else \
                 self._create_multi_domain_function_from(single_function)
 
@@ -265,17 +282,6 @@ class GeneralFittingModel(BasicFittingModel):
     def _check_data_exists(workspace_names: list) -> list:
         """Returns only the workspace names that exist in the ADS."""
         return [workspace_name for workspace_name in workspace_names if AnalysisDataService.doesExist(workspace_name)]
-
-    def _get_single_domain_fit_function_from(self, fit_function, domain_index):
-        """Gets a function from a MultiDomainFunction corresponding to a domain index."""
-        if not isinstance(fit_function, MultiDomainFunction):
-            return fit_function
-
-        functions = [function.clone() for function in fit_function.createEquivalentFunctions()]
-        if self.current_dataset_index is not None:
-            return functions[domain_index]
-        else:
-            return functions[0]
 
     def _create_multi_domain_function_from(self, fit_function: IFunction) -> MultiDomainFunction:
         """Create a MultiDomainFunction containing the same fit function for each domain."""
