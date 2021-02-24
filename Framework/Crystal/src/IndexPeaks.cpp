@@ -57,35 +57,52 @@ struct SatelliteIndexingArgs {
 };
 
 struct IndexPeaksArgs {
+  /**
+   * @brief parse input arguments about mod vector and max order
+   * @param alg: reference to algorithm instance
+   * @return: SatelliteIndexingArgs
+   */
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
     const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
     const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
+    // Init variables
     int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
 
-    // default behavior: map everything automatically
-    maxOrderToUse = maxOrderFromAlg;
-    crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+    // Parse mod vectors
     modVectorsToUse =
         addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
                              alg.getProperty(ModulationProperties::ModVector2),
                              alg.getProperty(ModulationProperties::ModVector3));
+    // check the 3 mod vectors added from properties
+    modVectorsToUse = validModulationVectors(
+        modVectorsToUse[0], modVectorsToUse[1], modVectorsToUse[2]);
 
-    // deal with special cases
-    if (maxOrderFromAlg <= 0) {
+    // deal with case: max order > 0 and no mod vector is specified
+    if (maxOrderFromAlg > 0 && modVectorsToUse.size() == 0) {
+      // Max Order is larger than zero but no modulated vector specified
+      // Assume that the caller method will handle this
+      maxOrderToUse = maxOrderFromAlg;
+    } else if (maxOrderFromAlg == 0 && modVectorsToUse.size() == 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
       crossTermToUse = lattice.getCrossTerm();
       maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+
       // if lattice has maxOrder, we will use the modVec from it, otherwise
       // stick to the input got from previous assignment
       if (maxOrderToUse > 0) {
         modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
+    } else {
+      // Use user specified
+      // default behavior: map everything automatically
+      maxOrderToUse = maxOrderFromAlg;
+      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
     }
 
     return {peaksWS,
@@ -302,6 +319,12 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
         peak->setIntMNP(std::get<1>(satelliteInfo));
         stats.satellites.numIndexed++;
         stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+      } else {
+        // clear these to make sure leftover values from previous index peaks
+        // run are not used
+        peak->setHKL(V3D(0, 0, 0));
+        peak->setIntHKL(V3D(0, 0, 0));
+        peak->setIntMNP(V3D(0, 0, 0));
       }
     } else {
       peak->setHKL(V3D(0, 0, 0));
@@ -442,9 +465,14 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
   bool isAllVecZero = true;
+  // parse() validates all the mod vectors. There should not be any modulated
+  // vector in modVectors is equal to (0, 0, 0)
   for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
+    } else {
+      g_log.warning() << "Mod vector " << vecNo << " is invalid (0, 0, 0)"
+                      << "\n";
     }
   }
   if (isMOZero && !isAllVecZero) {
@@ -488,18 +516,21 @@ void IndexPeaks::exec() {
       lattice.setModVec1(args.satellites.modVectors[0]);
     } else {
       g_log.warning("empty modVector 1, skipping saving");
+      lattice.setModVec1(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 2) {
       lattice.setModVec2(args.satellites.modVectors[1]);
     } else {
       g_log.warning("empty modVector 2, skipping saving");
+      lattice.setModVec2(V3D(0.0, 0.0, 0.0));
     }
 
     if (args.satellites.modVectors.size() >= 3) {
       lattice.setModVec3(args.satellites.modVectors[2]);
     } else {
       g_log.warning("empty modVector 3, skipping saving");
+      lattice.setModVec3(V3D(0.0, 0.0, 0.0));
     }
   }
 

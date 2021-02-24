@@ -43,6 +43,7 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+- New IDF for upgraded VULCAN instrument
 
 Single Crystal Diffraction
 --------------------------
@@ -54,5 +55,10 @@ Improvements
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` now allows ellipsoidal shapes to be manually defined for the PeakRadius and Background radii options.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now check if previous container is created using the same method before reusing it.
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
+- :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
+
+Known Defects
+#############
+- When using new ellipsoidal peak integration capability in :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`, some peak intensities are returned as zero. When using the default spherical integration, the same behavior is not observed.
 
 :ref:`Release 6.1.0 <v6.1.0>`
