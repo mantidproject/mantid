@@ -9,6 +9,7 @@ import unittest
 from isis_reflectometry import quick
 
 from mantid.simpleapi import *
+from mantid.kernel import config
 
 
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
@@ -131,4 +132,6 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    config.setFacility("ISIS")
     unittest.main()
+    config.setFacility("NONE")
