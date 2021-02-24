@@ -133,7 +133,6 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEqual(mtd.getObjectNames(), [])
 
+
 if __name__ == "__main__":
-    config.setFacility("ISIS")
     unittest.main()
-    config.setFacility("NONE")

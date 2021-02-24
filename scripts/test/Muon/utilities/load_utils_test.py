@@ -88,5 +88,6 @@ class MuonFileUtilsTest(unittest.TestCase):
         alg, _ = utils.create_load_algorithm(filename,inputs)
         self.assertTrue(filename in alg.getProperty("Filename").value)
 
+
 if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)
