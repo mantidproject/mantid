@@ -204,6 +204,10 @@ class FitFunctionOptionsView(QWidget, ui_fit_function_options):
         """Sets the global parameters in the function browser."""
         self.function_browser.setGlobalParameters(global_parameters)
 
+    def parameter_value(self, full_parameter: str) -> float:
+        """Returns the value of the specified parameter."""
+        return self.function_browser.getParameter(full_parameter)
+
     def switch_to_simultaneous(self) -> None:
         """Switches the view to simultaneous mode."""
         self.function_browser.showGlobalCheckbox()

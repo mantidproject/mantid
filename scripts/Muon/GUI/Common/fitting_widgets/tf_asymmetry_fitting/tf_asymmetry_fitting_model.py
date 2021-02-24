@@ -7,12 +7,14 @@
 from mantid.simpleapi import ConvertFitFunctionForMuonTFAsymmetry
 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 
 from mantid import logger
 
 DEFAULT_NORMALISATION = 0.0
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
+TF_ASYMMETRY_PREFIX_FUNCTION_INDEX = "f0.f1.f1."
 TF_ASYMMETRY_FUNCTION_NAME_APPENDAGE = ",TFAsymmetry"
 
 
@@ -51,12 +53,29 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         self._tf_asymmetry_single_functions = tf_asymmetry_functions
 
     @property
+    def current_tf_asymmetry_single_function(self):
+        if self.current_dataset_index is not None:
+            return self.tf_asymmetry_single_functions[self.current_dataset_index]
+        else:
+            return DEFAULT_SINGLE_FIT_FUNCTION
+
+    @property
     def tf_asymmetry_simultaneous_function(self):
         return self._tf_asymmetry_simultaneous_function
 
     @tf_asymmetry_simultaneous_function.setter
     def tf_asymmetry_simultaneous_function(self, tf_asymmetry_simultaneous_function):
         self._tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
+
+    def current_domain_tf_asymmetry_fit_function(self):
+        """Returns the fit function in the tf asymmetry simultaneous function corresponding to the current dataset."""
+        if self.number_of_datasets < 2:
+            return self.tf_asymmetry_simultaneous_function
+
+        if self.current_dataset_index is not None:
+            return self.tf_asymmetry_simultaneous_function.getFunction(self.current_dataset_index)
+        else:
+            return self.tf_asymmetry_simultaneous_function.getFunction(0)
 
     def reset_tf_asymmetry_functions(self):
         self.tf_asymmetry_single_functions = [None] * self.number_of_datasets
@@ -99,6 +118,14 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION
 
+    def update_parameter_value(self, full_parameter: str, value: float) -> None:
+        """Update the value of a parameter in the TF Asymmetry fit functions."""
+        super().update_parameter_value(full_parameter, value)
+
+        if self.tf_asymmetry_mode:
+            tf_asymmetry_full_parameter = f"{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}{full_parameter}"
+            self._update_tf_asymmetry_parameter_value(tf_asymmetry_full_parameter, value)
+
     def automatically_update_function_name(self) -> None:
         """Attempt to update the function name automatically."""
         if self.function_name_auto_update:
@@ -127,6 +154,15 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     #         new_function = self._calculate_tf_asymmetry_fit_function(self.simultaneous_fit_function)
     #         self._fit_function = [new_function.clone()]
     #         func_str = str(self._fit_function[0])
+
+    def _update_tf_asymmetry_parameter_value(self, full_parameter: str, value: float):
+        if self.simultaneous_fitting_mode:
+            current_domain_function = self.current_domain_tf_asymmetry_fit_function()
+            if current_domain_function is not None:
+                current_domain_function.setParameter(full_parameter, value)
+        else:
+            if self.current_tf_asymmetry_single_function is not None:
+                self.current_tf_asymmetry_single_function.setParameter(full_parameter, value)
 
     def _recalculate_tf_asymmetry_functions(self):
         if self.simultaneous_fitting_mode:

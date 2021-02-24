@@ -52,7 +52,8 @@ class BasicFittingPresenter:
         self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
         self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
         self.view.set_slot_for_function_structure_changed(self.handle_function_structure_changed)
-        self.view.set_slot_for_function_parameter_changed(self.handle_function_parameter_changed)
+        self.view.set_slot_for_function_parameter_changed(
+            lambda function_index, parameter: self.handle_function_parameter_changed(function_index, parameter))
         self.view.set_slot_for_start_x_updated(self.handle_start_x_updated)
         self.view.set_slot_for_end_x_updated(self.handle_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
@@ -183,12 +184,14 @@ class BasicFittingPresenter:
 
         self.fit_function_changed_notifier.notify_subscribers()
 
-    def handle_function_parameter_changed(self) -> None:
+    def handle_function_parameter_changed(self, function_index, parameter) -> None:
         """Handle when the value of a parameter in a function is changed."""
-        self.update_fit_functions_in_model_from_view()
+        full_parameter = f"{function_index}{parameter}"
+        self.model.update_parameter_value(full_parameter, self.view.parameter_value(full_parameter))
 
         self.model.update_plot_guess(self.view.plot_guess)
 
+        self.fit_function_changed_notifier.notify_subscribers()
         self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_start_x_updated(self) -> None:
@@ -254,8 +257,8 @@ class BasicFittingPresenter:
 
     def update_fit_function_in_view_from_model(self) -> None:
         """Updates the parameters of a fit function shown in the view."""
-        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
         self.view.set_current_dataset_index(self.model.current_dataset_index)
+        self.view.update_fit_function(self.model.get_active_fit_function(), self.model.global_parameters)
 
     def update_fit_functions_in_model_from_view(self) -> None:
         """Updates the fit functions stored in the model using the view."""
