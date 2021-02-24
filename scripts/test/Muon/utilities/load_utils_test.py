@@ -86,4 +86,6 @@ class MuonFileUtilsTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    ConfigService.setFacility("ISIS")
     unittest.main(buffer=False, verbosity=2)
+    ConfigService.setFacility("NONE")
