@@ -34,7 +34,9 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     @staticmethod
     def _create_flat_background_test_workspace(workspace_name):
+        config.setString("default.facility", "ISIS")
         LoadNexusProcessed(Filename="LOQ48127", OutputWorkspace=workspace_name)
+        config.setString("default.facility", "NONE")
         workspace = AnalysisDataService.retrieve(workspace_name)
         # Rebin to only have four values at 11, 31, 51, 70.5
         workspace = Rebin(workspace, "1,20,80")
@@ -61,6 +63,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        config.setString("default.facility", "ISIS")
         # A small workspace for general tests
         test_workspace = LoadNexusProcessed(Filename="LOQ48127")
         cls.immutable_test_workspace = test_workspace
@@ -88,6 +91,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
                         "\t</detector-masking>\n")
         cls.mask_file_path = cls._get_path(cls.mask_file)
         cls._save_file(cls.mask_file_path, mask_content)
+        config.setString("default.facility", "NONE")
 
     @classmethod
     def tearDownClass(cls):
@@ -234,6 +238,4 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    config.setFacility("ISIS")
     unittest.main()
-    config.setFacility("NONE")

@@ -20,7 +20,9 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         super(ReflectometryQuickAuxiliaryTest, self).__init__(methodName)
 
     def setUp(self):
+        config.setString("default.facility", "ISIS")
         LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=self.__wsName)
+        config.setString("default.facility", "NONE")
 
     def tearDown(self):
         DeleteWorkspace(mtd[self.__wsName])
@@ -132,6 +134,4 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    config.setFacility("ISIS")
     unittest.main()
-    config.setFacility("NONE")
