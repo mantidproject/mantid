@@ -286,7 +286,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${ON_RHEL7} == true ]]; then
-            if [[ -n "${RELEASE_NUMBER}" ]]; then
+            if [[ -z "${RELEASE_NUMBER}" ]]; then
                 RELEASE_NUMBER="1"
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
