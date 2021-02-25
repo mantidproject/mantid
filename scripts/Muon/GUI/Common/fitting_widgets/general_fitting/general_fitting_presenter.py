@@ -102,10 +102,10 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.update_fit_statuses_and_chi_squared_in_view_from_model()
         self.update_fit_function_in_view_from_model()
 
-        self.model.update_plot_guess(self.view.plot_guess)
-
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
+
+        self.model.update_plot_guess(self.view.plot_guess)
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
