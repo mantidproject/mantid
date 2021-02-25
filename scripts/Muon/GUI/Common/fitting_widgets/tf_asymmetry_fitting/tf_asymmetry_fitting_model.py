@@ -5,14 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import IFunction
+from mantid.api import IFunction, MultiDomainFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
+                                                         create_multi_domain_fitted_workspace_name,
+                                                         get_diff_asymmetry_name, get_group_asymmetry_name,
+                                                         get_pair_asymmetry_name, get_pair_phasequad_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalculateMuonAsymmetry
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 DEFAULT_NORMALISATION = 0.0
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
@@ -61,6 +65,11 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
+    def update_current_single_fit_functions(self, fit_function: IFunction) -> None:
+        """Updates the currently selected TF asymmetry and ordinary single fit function."""
+        self.tf_asymmetry_single_functions[self.current_dataset_index] = fit_function
+        self.current_single_fit_function = self._get_normal_fit_function_from(fit_function)
+
     @property
     def tf_asymmetry_simultaneous_function(self):
         return self._tf_asymmetry_simultaneous_function
@@ -68,6 +77,23 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     @tf_asymmetry_simultaneous_function.setter
     def tf_asymmetry_simultaneous_function(self, tf_asymmetry_simultaneous_function):
         self._tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
+
+    def update_simultaneous_fit_functions(self, tf_asymmetry_simultaneous_function):
+        self.tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
+
+        if self.number_of_datasets > 1:
+            self._update_parameters_of_multi_domain_simultaneous_function_from(tf_asymmetry_simultaneous_function)
+        else:
+            self.simultaneous_fit_function = self._get_normal_fit_function_from(tf_asymmetry_simultaneous_function)
+
+    def _update_parameters_of_multi_domain_simultaneous_function_from(self, tf_asymmetry_simultaneous_function):
+        for domain_index in range(tf_asymmetry_simultaneous_function.nFunctions()):
+            tf_asymmetry_domain_function = tf_asymmetry_simultaneous_function.getFunction(domain_index)
+            parameter_values = self.get_fit_function_parameter_values(self._get_normal_fit_function_from(
+                tf_asymmetry_domain_function))
+
+            self._set_fit_function_parameter_values(self.simultaneous_fit_function.getFunction(domain_index),
+                                                    parameter_values)
 
     def current_domain_tf_asymmetry_fit_function(self):
         """Returns the fit function in the tf asymmetry simultaneous function corresponding to the current dataset."""
@@ -140,6 +166,25 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         non_compliant_workspaces = [item for item in self.dataset_names if "Group" not in item]
         return False if len(non_compliant_workspaces) > 0 else True
 
+    @staticmethod
+    def get_fit_function_parameter_values(fit_function: IFunction) -> list:
+        """Get all the parameter values within a given fit function."""
+        if fit_function is not None:
+            return [fit_function.getParameterValue(i) for i in range(fit_function.nParams())]
+        return []
+
+    @staticmethod
+    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list) -> None:
+        """Set the parameter values within a fit function."""
+        for i in range(fit_function.nParams()):
+            fit_function.setParameter(i, parameter_values[i])
+
+    def _get_normal_fit_function_from(self, tf_asymmetry_function):
+        if tf_asymmetry_function is not None:
+            return tf_asymmetry_function.getFunction(0).getFunction(1).getFunction(1)
+        else:
+            return tf_asymmetry_function
+
     # def perform_fit_or_plot_guess(self):
     #     if self._tf_asymmetry_mode:
     #         new_global_parameters = [str("f0.f1.f1." + item) for item in self.global_parameters]
@@ -198,17 +243,17 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _current_normalisation_from_tf_asymmetry_single_fit_function(self):
         current_tf_single_fit_function = self.tf_asymmetry_single_functions[self.current_dataset_index]
         if current_tf_single_fit_function is not None:
-            return current_tf_single_fit_function.getParameter(NORMALISATION_FUNCTION_INDEX)
+            return current_tf_single_fit_function.getParameterValue(NORMALISATION_FUNCTION_INDEX)
         else:
             return DEFAULT_NORMALISATION
 
     def _current_normalisation_from_tf_asymmetry_simultaneous_function(self):
         if self.tf_asymmetry_simultaneous_function is not None:
             if self.number_of_datasets > 1:
-                return self.tf_asymmetry_simultaneous_function.getParameter(
+                return self.tf_asymmetry_simultaneous_function.getParameterValue(
                     f"f{self.current_dataset_index}.{NORMALISATION_FUNCTION_INDEX}")
             else:
-                return self.tf_asymmetry_simultaneous_function.getParameter(NORMALISATION_FUNCTION_INDEX)
+                return self.tf_asymmetry_simultaneous_function.getParameterValue(NORMALISATION_FUNCTION_INDEX)
         else:
             return DEFAULT_NORMALISATION
 
@@ -238,37 +283,60 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def _do_tf_asymmetry_fit(self) -> tuple:
         if self.simultaneous_fitting_mode:
-            pass
             return self._do_tf_asymmetry_simultaneous_fit(self._get_parameters_for_tf_asymmetry_simultaneous_fit(),
                                                           self._get_global_parameters_for_tf_asymmetry_fit())
         else:
             return self._do_tf_asymmetry_single_fit(self._get_parameters_for_tf_asymmetry_single_fit())
 
     def _do_tf_asymmetry_single_fit(self, parameters):
-        alg = AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
-            run_CalculateMuonAsymmetry(parameters, alg)
+            self._run_tf_asymmetry_fit(parameters)
 
         CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
         self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, parameter_table, output_workspace,
                                                         covariance_matrix)
         return function, fit_status, chi_squared
 
+    def _do_tf_asymmetry_simultaneous_fit(self, parameters, global_parameters):
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
+            self._run_tf_asymmetry_fit(parameters)
+
+        self._copy_logs(output_workspace)
+        self._add_simultaneous_fit_results_to_ADS_and_context(parameter_table, output_workspace, covariance_matrix,
+                                                              global_parameters)
+        return function, fit_status, chi_squared
+
+    def _run_tf_asymmetry_fit(self, parameters):
+        alg = AlgorithmManager.create("CalculateMuonAsymmetry")
+        return run_CalculateMuonAsymmetry(parameters, alg)
+
     def _get_parameters_for_tf_asymmetry_single_fit(self):
-        params = dict()
+        params = self._get_common_tf_asymmetry_parameters()
         params["InputFunction"] = self.current_tf_asymmetry_single_function.clone()
         params["ReNormalizedWorkspaceList"] = self.current_dataset_name
-        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list()
-        params["StartX"] = self.current_start_x
-        params["EndX"] = self.current_end_x
-        params["Minimizer"] = self.minimizer
+        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list([self.current_dataset_name])[0]
 
         fit_workspace_name, _ = create_fitted_workspace_name(self.current_dataset_name, self.function_name)
         params["OutputFitWorkspace"] = fit_workspace_name
+        return params
+
+    def _get_parameters_for_tf_asymmetry_simultaneous_fit(self):
+        params = self._get_common_tf_asymmetry_parameters()
+        params["InputFunction"] = self.tf_asymmetry_simultaneous_function.clone()
+        params["ReNormalizedWorkspaceList"] = self.dataset_names
+        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list(self.dataset_names)
+
+        fit_workspace_name, _ = create_multi_domain_fitted_workspace_name(self.dataset_names[0], self.function_name)
+        params["OutputFitWorkspace"] = fit_workspace_name
+        return params
+
+    def _get_common_tf_asymmetry_parameters(self):
+        params = {"StartX": self.current_start_x,
+                  "EndX": self.current_end_x,
+                  "Minimizer": self.minimizer}
 
         if self._double_pulse_enabled():
             params.update(self._get_common_double_pulse_parameters())
-
         return params
 
     def _get_common_double_pulse_parameters(self):
@@ -279,5 +347,59 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 "EnableDoublePulse": True,
                 "FirstPulseWeight": first_pulse_weighting}
 
-    def _get_unnormalised_workspace_list(self):
-        return self.context.group_pair_context.get_unormalisised_workspace_list([self.current_dataset_name])[0]
+    def _get_global_parameters_for_tf_asymmetry_fit(self):
+        return [str(TF_ASYMMETRY_PREFIX_FUNCTION_INDEX + global_param) for global_param in self.global_parameters]
+
+    def _get_unnormalised_workspace_list(self, normalised_workspaces):
+        return self.context.group_pair_context.get_unormalisised_workspace_list(normalised_workspaces)
+
+    """
+    Methods used by the Sequential Fitting Tab
+    """
+
+    def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameter values for the given dataset names."""
+        if self.simultaneous_fitting_mode:
+            self._update_fit_function_parameters_for_simultaneous_fit(dataset_names, parameter_values)
+        else:
+            self._update_fit_function_parameters_for_single_fit(dataset_names, parameter_values)
+
+    def _update_fit_function_parameters_for_single_fit(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in single fit mode."""
+        for name in dataset_names:
+            fit_function = self.get_single_fit_function_for(name)
+            if fit_function is not None:
+                self._set_fit_function_parameter_values(fit_function, parameter_values)
+
+    def _update_fit_function_parameters_for_simultaneous_fit(self, dataset_names: list, parameter_values: list) -> None:
+        """Updates the function parameters for the given dataset names if in simultaneous fit mode."""
+        for name in dataset_names:
+            if name in self.dataset_names:
+                if isinstance(self.simultaneous_fit_function, MultiDomainFunction):
+                    function_index = self.dataset_names.index(name)
+                    self._set_fit_function_parameter_values(self.simultaneous_fit_function.getFunction(function_index),
+                                                            parameter_values)
+                else:
+                    self._set_fit_function_parameter_values(self.simultaneous_fit_function, parameter_values)
+
+    def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:
+        """Returns the workspace names to use for the given runs and groups/pairs."""
+        workspace_names = []
+        for run in runs:
+            for group_or_pair in groups_and_pairs:
+                workspace_names += self._get_workspace_name_from_run_and_group_or_pair(run, group_or_pair)
+        return workspace_names
+
+    def _get_workspace_name_from_run_and_group_or_pair(self, run: str, group_or_pair: str) -> list:
+        """Returns the workspace name to use for the given run and group/pair."""
+        if check_phasequad_name(group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_phasequad_name(self.context, group_or_pair, run, not self.fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_pairs:
+            return [get_pair_asymmetry_name(self.context, group_or_pair, run, not self.fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_diffs:
+            return [get_diff_asymmetry_name(self.context, group_or_pair, run, not self.fit_to_raw)]
+        elif group_or_pair in self.context.group_pair_context.selected_groups:
+            period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
+            return [get_group_asymmetry_name(self.context, group_or_pair, run, period_string, not self.fit_to_raw)]
+        else:
+            return []

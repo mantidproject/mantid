@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
+from mantid.api import IFunction
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
@@ -80,6 +81,16 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         if not self.model.recalculate_tf_asymmetry_functions():
             self.view.warning_popup("Failed to convert fit function to a TF Asymmetry function.")
         self.view.normalisation = self.model.current_normalisation()
+
+    def update_fit_function_in_model(self, fit_function: IFunction) -> None:
+        """Updates the fit function stored in the model. This is used after a fit."""
+        if self.model.tf_asymmetry_mode:
+            if self.model.simultaneous_fitting_mode:
+                self.model.update_simultaneous_fit_functions(fit_function)
+            else:
+                self.model.update_current_single_fit_functions(fit_function)
+        else:
+            super().update_fit_function_in_model(fit_function)
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on):
         if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
