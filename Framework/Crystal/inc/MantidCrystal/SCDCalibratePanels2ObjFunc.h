@@ -47,13 +47,15 @@ private:
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   /// helper functions
-  void moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
-                                std::string componentName,
-                                const Mantid::API::Workspace_sptr &ws) const;
+  Mantid::API::IPeaksWorkspace_sptr
+  moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
+                           std::string componentName,
+                           Mantid::API::IPeaksWorkspace_sptr &pws) const;
 
-  void rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
-                                   double rotAng, std::string componentName,
-                                   const Mantid::API::Workspace_sptr &ws) const;
+  Mantid::API::IPeaksWorkspace_sptr
+  rotateInstrumentComponentBy(double rotVx, double rotVy, double rotVz,
+                              double rotAng, std::string componentName,
+                              Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };
 
 } // namespace Crystal

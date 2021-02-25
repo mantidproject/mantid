@@ -460,6 +460,8 @@ public:
     g_log.notice() << "-- start calibration\n";
     runCalibration(filenamebase.string(), pws, false, true, true);
 
+    g_log.notice() << "-- calibration now completes!!!";
+
     // Check if the calibration returns the same instrument as we put in
     g_log.notice() << "-- validate calibration output\n";
     TS_ASSERT(validateCalibrationResults(pwsref, wsraw, filenamebase.string()));

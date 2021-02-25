@@ -50,10 +50,6 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaRotationAngle", 0.0,
                    "angle of relative rotation in degree");
   declareParameter("DeltaT0", 0.0, "delta of TOF");
-
-  // attributes
-  // declareAttribute("Workspace", Attribute(""));
-  // declareAttribute("ComponentName", Attribute(""));
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(
@@ -90,17 +86,12 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   const double drotang = getParameter("DeltaRotationAngle");
 
   //-- delta in TOF
-  const double dT0 = getParameter("DeltaT0");
+  // const double dT0 = getParameter("DeltaT0");
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
   //         xValues
   UNUSED_ARG(xValues);
   UNUSED_ARG(order);
-
-  // Get workspace and component name (string type)
-  // m_ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-  //     getAttribute("Workspace").asString());
-  // m_cmpt = getAttribute("ComponentName").asString();
 
   // Special adjustment for CORELLI
   Instrument_sptr inst =
@@ -112,10 +103,10 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   if (m_cmpt != "none/sixteenpack") {
     // rotation
     // NOTE: moderator should not be reoriented
-    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, m_pws);
+    m_pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, m_pws);
 
     // translation
-    moveInstruentComponentBy(dx, dy, dz, m_cmpt, m_pws);
+    m_pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, m_pws);
   }
 
   // TODO:
@@ -125,15 +116,15 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   // detector positions
   for (int i = 0; i < m_pws->getNumberPeaks(); ++i) {
     // NOTE: we will skip over non-indexed peaks
-    V3D hkl = V3D(boost::math::iround(m_pws->getPeak(i).getH()),
-                  boost::math::iround(m_pws->getPeak(i).getK()),
-                  boost::math::iround(m_pws->getPeak(i).getL()));
+    // V3D hkl = V3D(boost::math::iround(m_pws->getPeak(i).getH()),
+    //               boost::math::iround(m_pws->getPeak(i).getK()),
+    //               boost::math::iround(m_pws->getPeak(i).getL()));
 
-    if (hkl != UNSET_HKL) {
-      V3D qv = m_pws->getPeak(i).getQSampleFrame();
-      for (int j = 0; j < 3; ++j)
-        out[i * 3 + j] = qv[j];
-    }
+    // if (hkl != UNSET_HKL) {
+    V3D qv = m_pws->getPeak(i).getQSampleFrame();
+    for (int j = 0; j < 3; ++j)
+      out[i * 3 + j] = qv[j];
+    // }
   }
 }
 
@@ -150,42 +141,62 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
  * @param componentName  :: string representation of a component
  * @param ws  :: input workspace (mostly peaksworkspace)
  */
-void SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
+IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
     double deltaX, double deltaY, double deltaZ, std::string componentName,
-    const API::Workspace_sptr &ws) const {
+    IPeaksWorkspace_sptr &pws) const {
+  // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
+
   // move instrument is really fast, even with zero input
   IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
       "MoveInstrumentComponent", -1);
+  //
   mv_alg->initialize();
-  mv_alg->setChild(true);
   mv_alg->setLogging(LOGCHILDALG);
-  mv_alg->setProperty<Workspace_sptr>("Workspace", ws);
+  mv_alg->setProperty("Workspace", pws);
   mv_alg->setProperty("ComponentName", componentName);
   mv_alg->setProperty("X", deltaX);
   mv_alg->setProperty("Y", deltaY);
   mv_alg->setProperty("Z", deltaZ);
   mv_alg->setProperty("RelativePosition", true);
-  mv_alg->executeAsChildAlg();
+  mv_alg->execute();
+
+  g_log.notice() << "done move\n";
+
+  return pws;
+
+  // Workspace_sptr outws = mv_alg->getProperty("Workspace");
+  // IPeaksWorkspace_sptr outpws =
+  //     std::dynamic_pointer_cast<IPeaksWorkspace>(outws);
+  // return outpws;
 }
 
-void SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
+IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
     double rotVx, double rotVy, double rotVz, double rotAng,
-    std::string componentName, const API::Workspace_sptr &ws) const {
+    std::string componentName, IPeaksWorkspace_sptr &pws) const {
+  // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
+
   // rotate
   IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
       "RotateInstrumentComponent", -1);
   //
   rot_alg->initialize();
-  rot_alg->setChild(true);
   rot_alg->setLogging(LOGCHILDALG);
-  rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
+  rot_alg->setProperty("Workspace", pws);
   rot_alg->setProperty("ComponentName", componentName);
   rot_alg->setProperty("X", rotVx);
   rot_alg->setProperty("Y", rotVy);
   rot_alg->setProperty("Z", rotVz);
   rot_alg->setProperty("Angle", rotAng);
   rot_alg->setProperty("RelativeRotation", true);
-  rot_alg->executeAsChildAlg();
+  rot_alg->execute();
+
+  g_log.notice() << "done rot\n";
+  return pws;
+
+  // Workspace_sptr outws = rot_alg->getProperty("Workspace");
+  // IPeaksWorkspace_sptr outpws =
+  //     std::dynamic_pointer_cast<IPeaksWorkspace>(outws);
+  // return outpws;
 }
 
 } // namespace Crystal

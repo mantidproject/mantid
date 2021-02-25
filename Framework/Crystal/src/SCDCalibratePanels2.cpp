@@ -251,15 +251,28 @@ void SCDCalibratePanels2::exec() {
   // get names of banks that can be calibrated
   getBankNames(m_pws);
 
+  for (auto bn : m_BankNames) {
+    g_log.notice() << bn << "\n";
+  }
+
   // STEP_2: optimize T0,L1,L2,etc.
-  if (calibrateT0)
+  if (calibrateT0) {
+    g_log.notice() << "** Calibrating T0 as requested\n";
     optimizeT0(m_pws);
-  if (calibrateL1)
+  }
+
+  if (calibrateL1) {
+    g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     optimizeL1(m_pws);
-  if (calibrateBanks)
+  }
+
+  if (calibrateBanks) {
+    g_log.notice() << "** Calibrating L2 and orientation (bank) as requested\n";
     optimizeBanks(m_pws);
+  }
 
   // STEP_3: generate a table workspace to save the calibration results
+  g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated =
       std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
   ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated);
@@ -413,28 +426,6 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
 
     //-- step 1: prepare a mocked workspace with QSample as its yValues
     MatrixWorkspace_sptr wsBankCali = getIdealQSampleAsHistogram1D(pwsBanki);
-
-    // MatrixWorkspace_sptr wsBankCali =
-    //     std::dynamic_pointer_cast<MatrixWorkspace>(
-    //         WorkspaceFactory::Instance().create(
-    //             "Workspace2D",    // use workspace 2D to mock a histogram
-    //             1,                // one vector
-    //             3 * nBankPeaks,   // X :: anything is fine
-    //             3 * nBankPeaks)); // Y :: flattened Q vector
-    // auto &measured = wsBankCali->getSpectrum(0);
-    // auto &xv = measured.mutableX();
-    // auto &yv = measured.mutableY();
-    // auto &ev = measured.mutableE();
-    // // TODO: non-uniform weighting (ev) will be implemented at a later date
-    // for (int i = 0; i < nBankPeaks; ++i) {
-    //   const IPeak &pk = pwsBanki->getPeak(i);
-    //   V3D qv = pk.getQSampleFrame();
-    //   for (int j = 0; j < 3; ++j) {
-    //     xv[i * 3 + j] = i * 3 + j;
-    //     yv[i * 3 + j] = qv[j];
-    //     ev[i * 3 + j] = 1;
-    //   }
-    // }
 
     //-- step 2&3: invoke fit to find both traslation and rotation
     IAlgorithm_sptr fitBank_alg = createChildAlgorithm("Fit", -1, -1, false);
@@ -636,8 +627,8 @@ SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
   // directly compute qsample from UBmatrix and HKL
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < npeaks; ++i) {
-    if (!pws->getPeak(i).isIndexed())
-      continue; // skip over non-indexed peaks
+    // if (!pws->getPeak(i).isIndexed())
+    //   continue; // skip over non-indexed peaks
 
     V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
     for (int j = 0; j < 3; ++j) {
