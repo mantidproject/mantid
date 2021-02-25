@@ -191,5 +191,50 @@ This approach attempts to correct the instrument component positions based on th
    * At ISIS enter the resulting workspace as the calibration workspace into the DAE software when recording new runs.  The calibrated workspace will be copied into the resulting NeXuS file of the run.
 
 
+Instrument Specific Calibration
+-------------------------------
+
+Each instrument, such as POWGEN, NOMAND or VULCAN, can have specific calibration workflow by
+combining various calibration algorithms.
+
+
+VULCAN-X
+########
+
+Calbiration for VULCAN-X comprises two steps.  The first step is to do pixel-to-pixel cross-correlation in order to make each pixel is aligned to its reference pixel.
+The second step is to refine ``DIFC`` and ``T0`` based on the first step.
+
+Here is an example to calibrate VULCAN-X.
+
+.. code::
+
+    from calibrate_vulcan_x import load_diamond_runs, cross_correlate_calibrate, align_vulcan_data, peak_position_calibrate
+
+    # Specify diamond runs
+    diamond_runs = [192245, 192246, 192247, 192248]
+
+    # Specify output path
+    output_dir = '/SNS/VULCAN/shared/CALIBRATION/'
+    final_calib_file = 'VULCAN_Calibration_Hybrid.h5'
+
+    # Load data (set)
+    diamond_ws_name, _ = load_diamond_runs(diamond_runs, output_dir)
+
+    # Do pixel-to-pixel cross correlation calibration
+    cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
+
+    # Define group plan as a check for step 1 and a plan for 2nd round calibration
+    tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
+
+    # Use the calibration file generated from previous step to align diamond runs
+    cc_focus_ws_name, cc_focus_nexus = align_vulcan_data(diamond_runs=diamond_ws_name,
+                                                         diff_cal_file_name=cc_calib_file,
+                                                         output_dir=output_dir,
+                                                         tube_grouping_plan=tube_grouping_plan)
+
+    # Do pixel-group calibration to refine DIFC and T0
+    peak_position_calibrate(cc_focus_ws_name, tube_grouping_plan, cc_calib_file, final_calib_file, output_dir)
+
+
 
 .. categories:: Calibration
