@@ -5,13 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-try:
-   from collections.abc import Iterable
-except ImportError:
-   # check Python 2 location
-   from collections import Iterable
+from collections.abc import Iterable
 import copy
 import numpy as np
+import re
 
 from matplotlib.axes import Axes
 from matplotlib.cbook import safe_masked_invalid
@@ -446,6 +443,17 @@ class MantidAxes(Axes):
                 artist_info.pop(index)
 
         return True
+
+    def rename_workspace_artists(self, new_name, old_name):
+        """
+        Rename a workspace and update the artists accordingly
+        """
+        for ws_name, ws_artist_list in list(self.tracked_workspaces.items()):
+            for ws_artist in ws_artist_list:
+                if ws_artist.workspace_name == old_name:
+                    ws_artist.rename_data(new_name)
+            if ws_name == old_name:
+                self.tracked_workspaces[new_name] = self.tracked_workspaces.pop(old_name)
 
     def replot_artist(self, artist, errorbars=False, **kwargs):
         """
@@ -1604,9 +1612,22 @@ class _WorkspaceArtists(object):
         self._set_artists(new_artists)
         return len(self._artists) == 0
 
+    def rename_data(self, new_name):
+        """
+        Rename a workspace and update the artists label
+        """
+        self._update_artist_label_with_new_workspace_name(new_name)
+        self.workspace_name = new_name
+
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
         if isinstance(artists, Container) or not isinstance(artists, Iterable):
             self._artists = [artists]
         else:
             self._artists = artists
+
+    def _update_artist_label_with_new_workspace_name(self, new_workspace_name):
+        for artist in self._artists:
+            old_workspace_name = self.workspace_name
+            prev_label = artist.get_label()
+            artist.set_label(re.sub(rf'\b{old_workspace_name}\b', new_workspace_name, prev_label))
