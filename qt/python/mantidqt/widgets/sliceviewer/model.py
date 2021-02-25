@@ -259,8 +259,8 @@ class SliceViewerModel:
         except (AttributeError, KeyError):  # run can be None so no .get()
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
-
-        display_indices = slice_info.transform([0, 1, 2]).astype(int)
+        display_indices = list(range(0, proj_matrix.shape[0]))
+        display_indices.pop(slice_info.z_index)
         return NonOrthogonalTransform.from_lattice(lattice,
                                                    x_proj=proj_matrix[:, display_indices[0]],
                                                    y_proj=proj_matrix[:, display_indices[1]])

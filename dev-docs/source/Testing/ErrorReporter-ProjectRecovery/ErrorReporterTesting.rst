@@ -21,13 +21,12 @@ Error Reporter test
   suitable method and update these instructions.
 - Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.
 - These tests should be run with someone who has access to the error reports database. Please contact Daniel Murphy when you are going to run these tests.
-- Test Workbench and Plot
 
 **Time required 10 - 20  minutes**
 
 --------------
 
-1. Open MantidPlot
+1. Open MantidWorkbench
 
 - Cause a crash by running the `Segfault` algorithm
 - The error report dialog should pop up
@@ -39,7 +38,7 @@ Error Reporter test
 
 ---------------
 
-2. Open MantidPlot
+2. Open MantidWorkbench
 
 - Cause a crash by running the `Segfault` algorithm
 - The error report dialog should pop up
@@ -49,7 +48,7 @@ Error Reporter test
 
 ---------------
 
-3. Open MantidPlot
+3. Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
@@ -64,7 +63,7 @@ Error Reporter test
 
 ---------------
 
-4. Open MantidPlot
+4. Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
@@ -76,7 +75,7 @@ Error Reporter test
 
 ---------------
 
-5. Open MantidPlot
+5. Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
@@ -91,7 +90,7 @@ Error Reporter test
 
 ---------------
 
-6. Open MantidPlot
+6. Open MantidWorkbench
 
 - Load the file `Training_Exercise3a_SNS.nxs`
 - Run the `NormaliseToMonitor` algorithm
@@ -104,4 +103,3 @@ Error Reporter test
 - Mantid should shut down
 - Check with the database admin
 
-**Repeat these 6 steps for Workbench**

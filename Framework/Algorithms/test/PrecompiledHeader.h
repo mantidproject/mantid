@@ -11,6 +11,7 @@
 
 // Mantid
 #include "MantidAPI/Algorithm.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 // STL
 #include <set>

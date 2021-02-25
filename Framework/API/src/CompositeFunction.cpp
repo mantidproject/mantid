@@ -659,6 +659,18 @@ void CompositeFunction::replaceFunction(size_t functionIndex,
 }
 
 /**
+ * @param functionName :: The function name to search for.
+ * @returns true if the composite function has at least one of a function with a
+ * matching name.
+ */
+bool CompositeFunction::hasFunction(const std::string &functionName) const {
+  return std::any_of(m_functions.cbegin(), m_functions.cend(),
+                     [&functionName](const IFunction_const_sptr &function) {
+                       return function->name() == functionName;
+                     });
+}
+
+/**
  * @param i :: The index of the function
  * @return function at the requested index
  */
@@ -669,6 +681,27 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
                             ").");
   }
   return m_functions[i];
+}
+
+/**
+ * Gets the index of the first function with a matching function string.
+ * @param functionName :: The name of the function to search for.
+ * @returns function index of the first function with a matching function
+ * string.
+ */
+std::size_t
+CompositeFunction::functionIndex(const std::string &functionName) const {
+  const auto iter =
+      std::find_if(m_functions.cbegin(), m_functions.cend(),
+                   [&functionName](const IFunction_const_sptr &function) {
+                     return function->name() == functionName;
+                   });
+
+  if (iter != m_functions.cend())
+    return std::distance(m_functions.cbegin(), iter);
+
+  throw std::invalid_argument("A function with name '" + functionName +
+                              "' does not exist in this composite function.");
 }
 
 /**

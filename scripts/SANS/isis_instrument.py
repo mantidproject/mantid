@@ -1357,11 +1357,7 @@ class SANS2D(ISISInstrument):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]
                 from datetime import datetime
-                if sys.version_info[0] == 2 and sys.version_info[1] < 5:
-                    import time
-                    return datetime(*(time.strptime(date_string, format)[0:6]))
-                else:
-                    return datetime.strptime(date_string, format)
+                return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
             property = log_data.getLogData(log_name)
@@ -1588,11 +1584,7 @@ class LARMOR(ISISInstrument):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]
                 from datetime import datetime
-                if sys.version_info[0] == 2 and sys.version_info[1] < 5:
-                    import time
-                    return datetime(*(time.strptime(date_string, format)[0:6]))
-                else:
-                    return datetime.strptime(date_string, format)
+                return datetime.strptime(date_string, format)
 
             # if the value was stored as a time series we have an array here
             property = log_data.getLogData(log_name)

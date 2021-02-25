@@ -20,6 +20,8 @@ creation is outlined in :ref:`issue_tracking`.
 .. toctree::
    :maxdepth: 1
 
+   Core/Core
+   SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
    ElementalAnalysis/ElementalAnalysisGUITests
@@ -30,5 +32,4 @@ creation is outlined in :ref:`issue_tracking`.
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/SANSGUITests
-   VSI/VSITesting
 
