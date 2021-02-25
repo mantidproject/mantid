@@ -38,8 +38,7 @@ public:
   LeanPeak();
   LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
            const Mantid::Kernel::Matrix<double> &goniometer);
-  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-           boost::optional<const Mantid::Kernel::Matrix<double>> &goniometer);
+  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame);
 
   /// Copy constructor
   LeanPeak(const LeanPeak &other);

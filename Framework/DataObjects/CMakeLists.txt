@@ -177,6 +177,7 @@ set(TEST_FILES
     PeakShapeSphericalFactoryTest.h
     PeakShapeSphericalTest.h
     PeakTest.h
+    LeanPeakTest.h
     PeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h

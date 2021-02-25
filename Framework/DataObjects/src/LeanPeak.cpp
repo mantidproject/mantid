@@ -35,8 +35,9 @@ LeanPeak::LeanPeak()
       m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
       m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
+      m_row(-1), m_col(-1), m_Qsample(V3D(0, 0, 0)), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -50,10 +51,10 @@ LeanPeak::LeanPeak()
 LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
                    const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(goniometer),
+      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -72,18 +73,14 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
  * @param goniometer :: optional, a 3x3 rotation matrix, to allow convertion to
  *QLab
  */
-LeanPeak::LeanPeak(
-    const Mantid::Kernel::V3D &QSampleFrame,
-    boost::optional<const Mantid::Kernel::Matrix<double>> &goniometer)
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_initialEnergy(0.0), m_finalEnergy(0.0),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  if (goniometer.is_initialized())
-    this->setGoniometerMatrix(goniometer.get());
   this->setQSampleFrame(QSampleFrame);
 }
 
@@ -102,10 +99,10 @@ LeanPeak::LeanPeak(const LeanPeak &other)
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
-      m_row(other.m_row), m_col(other.m_col), m_peakNumber(other.m_peakNumber),
-      m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP),
-      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
-
+      m_row(other.m_row), m_col(other.m_col), m_Qsample(other.m_Qsample),
+      m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL),
+      m_intMNP(other.m_intMNP), m_peakShape(other.m_peakShape->clone()),
+      convention(other.convention) {}
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
@@ -615,6 +612,30 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
     m_absorptionWeightedPathLength = other.m_absorptionWeightedPathLength;
   }
   return *this;
+}
+
+/** After creating a peak using the Q in the lab frame,
+ * the detPos is set to the direction of the detector (but the detector is
+ *unknown)
+ *
+ * Using the instrument set in the peak, perform ray tracing
+ * to find the exact detector.
+ *
+ * @return true if the detector ID was found.
+ */
+bool LeanPeak::findDetector() { throw std::runtime_error("not implemented"); }
+
+/**
+ * Performs the same algorithm as findDetector() but uses a pre-existing
+ * InstrumentRayTracer object to be able to take adavtange of its caches.
+ * This method should be preferred if findDetector is to be called many times
+ * over the same instrument.
+ * @param tracer A reference to an existing InstrumentRayTracer object.
+ * @return true if the detector ID was found.
+ */
+bool LeanPeak::findDetector([
+    [maybe_unused]] const InstrumentRayTracer &tracer) {
+  throw std::runtime_error("not implemented");
 }
 
 /**
