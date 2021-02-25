@@ -4,13 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import logger
+from mantid import AlgorithmManager, logger
 from mantid.api import IFunction
-from mantid.simpleapi import ConvertFitFunctionForMuonTFAsymmetry
+from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
+from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
+from Muon.GUI.Common.utilities.algorithm_utils import run_CalculateMuonAsymmetry
 
 DEFAULT_NORMALISATION = 0.0
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
@@ -227,3 +229,55 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 return self.current_tf_asymmetry_single_function
         else:
             return super().get_active_fit_function()
+
+    def perform_fit(self) -> tuple:
+        if self.tf_asymmetry_mode:
+            return self._do_tf_asymmetry_fit()
+        else:
+            return super().perform_fit()
+
+    def _do_tf_asymmetry_fit(self) -> tuple:
+        if self.simultaneous_fitting_mode:
+            pass
+            return self._do_tf_asymmetry_simultaneous_fit(self._get_parameters_for_tf_asymmetry_simultaneous_fit(),
+                                                          self._get_global_parameters_for_tf_asymmetry_fit())
+        else:
+            return self._do_tf_asymmetry_single_fit(self._get_parameters_for_tf_asymmetry_single_fit())
+
+    def _do_tf_asymmetry_single_fit(self, parameters):
+        alg = AlgorithmManager.create("CalculateMuonAsymmetry")
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
+            run_CalculateMuonAsymmetry(parameters, alg)
+
+        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
+        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, parameter_table, output_workspace,
+                                                        covariance_matrix)
+        return function, fit_status, chi_squared
+
+    def _get_parameters_for_tf_asymmetry_single_fit(self):
+        params = dict()
+        params["InputFunction"] = self.current_tf_asymmetry_single_function.clone()
+        params["ReNormalizedWorkspaceList"] = self.current_dataset_name
+        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list()
+        params["StartX"] = self.current_start_x
+        params["EndX"] = self.current_end_x
+        params["Minimizer"] = self.minimizer
+
+        fit_workspace_name, _ = create_fitted_workspace_name(self.current_dataset_name, self.function_name)
+        params["OutputFitWorkspace"] = fit_workspace_name
+
+        if self._double_pulse_enabled():
+            params.update(self._get_common_double_pulse_parameters())
+
+        return params
+
+    def _get_common_double_pulse_parameters(self):
+        offset = self.context.gui_context['DoublePulseTime']
+        first_pulse_weighting, _ = self._get_pulse_weightings(offset, 2.2)
+
+        return {"PulseOffset": offset,
+                "EnableDoublePulse": True,
+                "FirstPulseWeight": first_pulse_weighting}
+
+    def _get_unnormalised_workspace_list(self):
+        return self.context.group_pair_context.get_unormalisised_workspace_list([self.current_dataset_name])[0]
