@@ -67,7 +67,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
-          nullptr, FittingMode::SIMULTANEOUS_SEQUENTIAL)) {
+          nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -145,7 +145,7 @@ void FitScriptGeneratorView::setFitBrowserOptions(
 }
 
 void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
-  if (fittingMode == FittingMode::SIMULTANEOUS_SEQUENTIAL)
+  if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
     throw std::invalid_argument(
         "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
 

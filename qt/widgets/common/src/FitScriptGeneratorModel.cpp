@@ -466,7 +466,7 @@ void FitScriptGeneratorModel::setGlobalParameters(
 }
 
 void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
-  if (fittingMode == FittingMode::SIMULTANEOUS_SEQUENTIAL)
+  if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
     throw std::invalid_argument(
         "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
 
