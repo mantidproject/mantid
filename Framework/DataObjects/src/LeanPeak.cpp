@@ -45,37 +45,10 @@ LeanPeak::LeanPeak()
  * No detector ID is set.
  *
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
- * @param detectorDistance :: Optional distance between the sample and the
- *detector. Calculated if not explicitly provided.
- *        Used to give a valid TOF. Default 1.0 meters.
+ * @param goniometer :: a 3x3 rotation matrix
  */
 LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
-                   boost::optional<double> detectorDistance)
-    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setQLabFrame(QLabFrame, std::move(detectorDistance));
-}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor that uses the Q position of the peak (in the sample frame)
- * and a goniometer rotation matrix.
- * No detector ID is set.
- *
- * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
- *the sample frame (goniometer rotation accounted for).
- * @param goniometer :: a 3x3 rotation matrix
- * @param detectorDistance :: Optional distance between the sample and the
- *detector. Calculated if not explicitly provided.
- *        Used to give a valid TOF. Default 1.0 meters.
- */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-                   const Mantid::Kernel::Matrix<double> &goniometer,
-                   boost::optional<double> detectorDistance)
+                   const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_absorptionWeightedPathLength(0),
       m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
@@ -86,28 +59,32 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
-  this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
+  this->setQLabFrame(QLabFrame);
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
+/** Constructor that uses the Q position of the peak (in the sample frame)
+ * and a goniometer rotation matrix.
+ * No detector ID is set.
  *
- * @param scattering :: fake detector position using scattering angle
- * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @return
+ * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
+ *the sample frame (goniometer rotation accounted for).
+ * @param goniometer :: optional, a 3x3 rotation matrix, to allow convertion to
+ *QLab
  */
-LeanPeak::LeanPeak(double scattering, double m_Wavelength)
+LeanPeak::LeanPeak(
+    const Mantid::Kernel::V3D &QSampleFrame,
+    boost::optional<const Mantid::Kernel::Matrix<double>> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_absorptionWeightedPathLength(0),
       m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setWavelength(m_Wavelength);
-  // get the approximate location of the detector
-  const auto detectorDir = V3D(sin(scattering), 0.0, cos(scattering));
-  detPos = detectorDir;
+  if (goniometer.is_initialized())
+    this->setGoniometerMatrix(goniometer.get());
+  this->setQSampleFrame(QSampleFrame);
 }
 
 /**
@@ -125,42 +102,9 @@ LeanPeak::LeanPeak(const LeanPeak &other)
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
-      m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
-      samplePos(other.samplePos), detPos(other.detPos),
-      m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL),
-      m_intMNP(other.m_intMNP), m_peakShape(other.m_peakShape->clone()),
-      convention(other.convention) {}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor making a LeanPeak from IPeak interface
- *
- * @param ipeak :: const reference to an IPeak object
- * @return
- */
-LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
-    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
-      m_intensity(ipeak.getIntensity()),
-      m_sigmaIntensity(ipeak.getSigmaIntensity()),
-      m_binCount(ipeak.getBinCount()),
-      m_initialEnergy(ipeak.getInitialEnergy()),
-      m_finalEnergy(ipeak.getFinalEnergy()),
-      m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
-      m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
-      m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
-      m_runNumber(ipeak.getRunNumber()),
-      m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
-      m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()),
-      m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
-    throw std::invalid_argument(
-        "LeanPeak::ctor(): Goniometer matrix must non-singular.");
-  detid_t id = ipeak.getDetectorID();
-  if (id >= 0) {
-    setDetectorID(id);
-  }
-}
+      m_row(other.m_row), m_col(other.m_col), m_peakNumber(other.m_peakNumber),
+      m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP),
+      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
@@ -187,13 +131,15 @@ void LeanPeak::setWavelength(double wavelength) {
  *  does NOT remove the old centre.
  * @param id :: ID of detector at the centre of the peak.
  */
-void LeanPeak::setDetectorID(int id) {
+void LeanPeak::setDetectorID([[maybe_unused]] int id) {
   throw std::runtime_error("LeanPeak::setDetectorID(): Has no detector ID");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int LeanPeak::getDetectorID() const { return -1; }
+int LeanPeak::getDetectorID() const {
+  throw std::runtime_error("LeanPeak::getDetectorID(): Has no detector ID");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Set the instrument (and save the source/sample pos).
@@ -201,7 +147,8 @@ int LeanPeak::getDetectorID() const { return -1; }
  *
  * @param inst :: Instrument sptr to use
  */
-void LeanPeak::setInstrument(const Geometry::Instrument_const_sptr &inst) {
+void LeanPeak::setInstrument([
+    [maybe_unused]] const Geometry::Instrument_const_sptr &inst) {
   throw std::runtime_error("LeanPeak::setInstrument(): Has no instrument");
 }
 
@@ -236,61 +183,24 @@ double LeanPeak::getWavelength() const {
 /** Calculate the time of flight (in microseconds) of the neutrons for this
  * peak,
  * using the geometry of the detector  */
-double LeanPeak::getTOF() const {
-  // First, get the neutron traveling distances
-  double L1 = this->getL1();
-  double L2 = this->getL2();
-  // Energy in J of the neutron
-  double Ei = PhysicalConstants::meV * m_initialEnergy;
-  double Ef = PhysicalConstants::meV * m_finalEnergy;
-  // v = sqrt(2 * E / m)
-  double vi = sqrt(2.0 * Ei / PhysicalConstants::NeutronMass);
-  double vf = sqrt(2.0 * Ef / PhysicalConstants::NeutronMass);
-  // Time of flight in seconds = distance / speed
-  double tof = L1 / vi + L2 / vf;
-  // Return in microsecond units
-  return tof * 1e6;
-}
+double LeanPeak::getTOF() const { throw std::runtime_error("not implemented"); }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the scattering angle of the peak  */
 double LeanPeak::getScattering() const {
-  // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
-
-  return detDir.angle(beamDir);
+  throw std::runtime_error("not implemented");
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the azimuthal angle of the peak  */
 double LeanPeak::getAzimuthal() const {
-  // The detector is at 2 theta scattering angle
-  V3D detDir = detPos - samplePos;
-
-  return atan2(detDir.Y(), detDir.X());
+  throw std::runtime_error("not implemented");
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double LeanPeak::getDSpacing() const {
-  // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
-
-  double two_theta;
-  try {
-    two_theta = detDir.angle(beamDir);
-  } catch (std::runtime_error &) {
-    two_theta = 0.;
-  }
-
-  // In general case (2*pi/d)^2=k_i^2+k_f^2-2*k_i*k_f*cos(two_theta)
-  // E_i,f=k_i,f^2*hbar^2/(2 m)
-  return 1e10 * PhysicalConstants::h /
-         sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) /
-         sqrt(m_initialEnergy + m_finalEnergy -
-              2.0 * sqrt(m_initialEnergy * m_finalEnergy) * cos(two_theta));
+  throw std::runtime_error("not implemented");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -300,42 +210,13 @@ double LeanPeak::getDSpacing() const {
  * Note: There is a 2*pi factor used, so |Q| = 2*pi/wavelength.
  * */
 Mantid::Kernel::V3D LeanPeak::getQLabFrame() const {
-  // Normalized beam direction
-  V3D beamDir = samplePos - sourcePos;
-  beamDir /= beamDir.norm();
-  // Normalized detector direction
-  V3D detDir = (detPos - samplePos);
-  detDir /= detDir.norm();
-
-  // Energy in J of the neutron
-  double ei = PhysicalConstants::meV * m_initialEnergy;
-  // v = sqrt(2.0 * E / m)
-  double vi = sqrt(2.0 * ei / PhysicalConstants::NeutronMass);
-  // wavenumber = h_bar / mv
-  double wi = PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
-  // in angstroms
-  wi *= 1e10;
-  // wavevector=1/wavenumber = 2pi/wavelength
-  double wvi = 1.0 / wi;
-  // Now calculate the wavevector of the scattered neutron
-  double wvf = (2.0 * M_PI) / this->getWavelength();
-  // And Q in the lab frame
-  // Default for ki-kf is positive
-  double qSign = 1.0;
-  if (convention == "Crystallography")
-    qSign = -1.0;
-  return (beamDir * wvi - detDir * wvf) * qSign;
+  return m_GoniometerMatrix * m_Qsample;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Return the Q change (of the lattice, k_i - k_f) for this peak.
  * The Q is in the Sample frame: the goniometer rotation WAS taken out. */
-Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const {
-  V3D Qlab = this->getQLabFrame();
-  // Multiply by the inverse of the goniometer matrix to get the sample frame
-  V3D Qsample = m_InverseGoniometerMatrix * Qlab;
-  return Qsample;
-}
+Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const { return m_Qsample; }
 
 //----------------------------------------------------------------------------------------------
 /** Set the peak using the peak's position in reciprocal space, in the sample
@@ -347,13 +228,11 @@ Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const {
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
- * @param detectorDistance :: distance between the sample and the detector.
- *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
-void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                               boost::optional<double> detectorDistance) {
-  V3D Qlab = m_GoniometerMatrix * QSampleFrame;
-  this->setQLabFrame(Qlab, detectorDistance);
+void LeanPeak::setQSampleFrame(
+    const Mantid::Kernel::V3D &QSampleFrame,
+    [[maybe_unused]] boost::optional<double> detectorDistance) {
+  m_Qsample = QSampleFrame;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -372,10 +251,10 @@ void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
-void LeanPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
-                            boost::optional<double> detectorDistance) {
-  throw std::invalid_argument("Setting QLab without an instrument would lead "
-                              "to an inconsistent state for the LeanPeak");
+void LeanPeak::setQLabFrame(
+    const Mantid::Kernel::V3D &qLab,
+    [[maybe_unused]] boost::optional<double> detectorDistance) {
+  this->setQSampleFrame(m_InverseGoniometerMatrix * qLab);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -491,22 +370,18 @@ void LeanPeak::setIntMNP(const V3D &MNP) {
  *
  * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
  */
-void LeanPeak::setSamplePos(double samX, double samY, double samZ) {
-
-  this->samplePos[0] = samX;
-  this->samplePos[1] = samY;
-  this->samplePos[2] = samZ;
+void LeanPeak::setSamplePos([[maybe_unused]] double samX,
+                            [[maybe_unused]] double samY,
+                            [[maybe_unused]] double samZ) {
+  throw std::runtime_error("not implemented");
 }
 
 /** Set sample position
  *
  * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
  */
-void LeanPeak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
-
-  this->samplePos[0] = XYZ[0];
-  this->samplePos[1] = XYZ[1];
-  this->samplePos[2] = XYZ[2];
+void LeanPeak::setSamplePos([[maybe_unused]] const Mantid::Kernel::V3D &XYZ) {
+  throw std::runtime_error("not implemented");
 }
 //----------------------------------------------------------------------------------------------
 /** Return the # of counts in the bin at its peak*/
@@ -620,19 +495,23 @@ void LeanPeak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
-Mantid::Kernel::V3D LeanPeak::getDetPos() const { return detPos; }
+Mantid::Kernel::V3D LeanPeak::getDetPos() const {
+  throw std::runtime_error("not implemented");
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the sample position vector */
-Mantid::Kernel::V3D LeanPeak::getSamplePos() const { return samplePos; }
+Mantid::Kernel::V3D LeanPeak::getSamplePos() const {
+  throw std::runtime_error("not implemented");
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
-double LeanPeak::getL1() const { return (samplePos - sourcePos).norm(); }
+double LeanPeak::getL1() const { throw std::runtime_error("not implemented"); }
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
-double LeanPeak::getL2() const { return (detPos - samplePos).norm(); }
+double LeanPeak::getL2() const { throw std::runtime_error("not implemented"); }
 
 // -------------------------------------------------------------------------------------
 /** Helper function for displaying/sorting peaks
@@ -729,9 +608,6 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
     m_monitorCount = other.m_monitorCount;
     m_row = other.m_row;
     m_col = other.m_col;
-    sourcePos = other.sourcePos;
-    samplePos = other.samplePos;
-    detPos = other.detPos;
     m_intHKL = other.m_intHKL;
     m_intMNP = other.m_intMNP;
     convention = other.convention;

@@ -37,11 +37,9 @@ public:
 
   LeanPeak();
   LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
-           boost::optional<double> detectorDistance = boost::none);
+           const Mantid::Kernel::Matrix<double> &goniometer);
   LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer,
-           boost::optional<double> detectorDistance = boost::none);
-  LeanPeak(double scattering, double m_Wavelength);
+           boost::optional<const Mantid::Kernel::Matrix<double>> &goniometer);
 
   /// Copy constructor
   LeanPeak(const LeanPeak &other);
@@ -65,10 +63,6 @@ public:
   LeanPeak(LeanPeak &&) noexcept = default;
   LeanPeak &operator=(LeanPeak &&) noexcept = default;
 #endif
-
-  // Construct a peak from a reference to the interface
-
-  explicit LeanPeak(const Geometry::IPeak &ipeak);
 
   void setDetectorID(int id) override;
   int getDetectorID() const override;
@@ -223,12 +217,8 @@ private:
   /// Cached column in the detector
   int m_col;
 
-  /// Cached source position
-  Mantid::Kernel::V3D sourcePos;
-  /// Cached sample position
-  Mantid::Kernel::V3D samplePos;
-  /// Cached detector position
-  Mantid::Kernel::V3D detPos;
+  /// Q_sample vector
+  Mantid::Kernel::V3D m_Qsample;
 
   int m_peakNumber;
   Mantid::Kernel::V3D m_intHKL;
