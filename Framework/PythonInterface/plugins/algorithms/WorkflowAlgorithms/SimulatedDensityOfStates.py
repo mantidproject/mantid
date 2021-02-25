@@ -115,6 +115,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         phonon_filename = self.getPropertyValue('PHONONFile')
         euphonic_filename = self.getPropertyValue('ForceConstantsFile')
 
+        pdos_available = bool(phonon_filename or euphonic_filename)
+
         if not any((castep_filename, phonon_filename, euphonic_filename)):
             msg = 'Must have at least one input file'
             issues['CASTEPFile'] = msg
@@ -128,8 +130,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         ions = self.getProperty('Ions').value
         calc_partial = len(ions) > 0
 
-        if spec_type == 'IonTable' and phonon_filename == '':
-            issues['SpectrumType'] = 'Require a .phonon file for ion table output'
+        if spec_type == 'IonTable' and not pdos_available:
+            issues['SpectrumType'] = 'Cannot produce ion table when only .castep file is provided'
 
         if spec_type == 'BondAnalysis' and phonon_filename == '' and castep_filename == '':
             issues['SpectrumType'] = 'Require both a .phonon and .castep file for bond analysis'
@@ -143,8 +145,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         if spec_type != 'DOS' and scale_by_cross_section:
             issues['ScaleByCrossSection'] = 'Cannot scale contributions by cross sections when using %s' % spec_type
 
-        if phonon_filename == '' and scale_by_cross_section:
-            issues['ScaleByCrossSection'] = 'Must supply a PHONON file when scaling by cross sections'
+        if scale_by_cross_section and not pdos_available:
+            issues['ScaleByCrossSection'] = 'Cannot scale by cross sections when only .castep file is provided'
 
         if not calc_partial and sum_contributions:
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
@@ -774,6 +776,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 in enumerate(zip(fc.crystal.atom_type,
                                  fc.crystal.atom_r,
                                  fc.crystal.atom_mass.magnitude))]
+
         file_data['ions'] = ions
 
         # Store some redundant information as a side-effect for compatibility
@@ -781,6 +784,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._element_isotope = {ion['species']: ion['isotope_number']
                                  for ion in ions}
         self._num_ions = file_data['num_ions']
+
+        # Generate index per element
+        ion_counts = {element: 0 for element in self._element_isotope}
+        for ion in ions:
+            species = ion['species']
+            ion_counts[species] += 1
+            ion['bond_number'] = ion_counts[species]
 
         return file_data
 

@@ -44,16 +44,19 @@ void DensityOfStates::setup() {}
 bool DensityOfStates::validate() {
   UserInputValidator uiv;
 
-  // Ensure there are ions selected when using DensityOfStates sectrum with
-  // .phonon file
+  // Ensure there are ions selected when using DensityOfStates spectrum with
+  // .phonon, .castep_bin or .yaml file
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo fileInfo(filename);
-  bool isPhononFile = fileInfo.suffix() == "phonon";
+
+  std::unordered_set<std::string> pdosExtensions
+    = {"phonon", "yaml", "castep_bin" };
+  bool isPdosFile = pdosExtensions.count(fileInfo.suffix().toStdString());
 
   QString specType = m_uiForm.cbSpectrumType->currentText();
   auto items = m_uiForm.lwIons->selectedItems();
 
-  if (specType == "DensityOfStates" && isPhononFile && items.size() < 1)
+  if (specType == "DensityOfStates" && isPdosFile && items.size() < 1)
     uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
 
   // Give error message when there are errors
@@ -75,11 +78,23 @@ void DensityOfStates::run() {
   const auto filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(filename);
   const auto specType = m_uiForm.cbSpectrumType->currentText();
-  const auto isPhononFile = inputFileInfo.suffix() == "phonon";
 
-  std::string filePropName("CASTEPFile");
+  // Check file type from extension
+  QFileInfo fileInfo(filename);
+  const bool isPhononFile = inputFileInfo.suffix() == "phonon";
+
+  std::unordered_set<std::string> euphonicExtensions
+    = {"yaml", "castep_bin"};
+  const bool isEuphonicFile = euphonicExtensions.count(fileInfo.suffix().toStdString());
+  // const bool isPdosFile = isPhononFile || isEuphonicFile;
+
+  std::string filePropName;
   if (isPhononFile)
     filePropName = "PHONONFile";
+  else if (isEuphonicFile)
+    filePropName = "ForceConstantsFile";
+  else
+    filePropName = "CASTEPFile";
 
   m_outputWsName = inputFileInfo.baseName() + "_" + specType;
 
@@ -163,13 +178,24 @@ void DensityOfStates::dosAlgoComplete(bool error) {
 void DensityOfStates::handleFileChange() {
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
 
-  // Check if we have a .phonon file
+  // Check file type from extension
   QFileInfo fileInfo(filename);
   bool isPhononFile = fileInfo.suffix() == "phonon";
 
-  std::string filePropName("CASTEPFile");
-  if (isPhononFile) {
+  std::unordered_set<std::string> euphonicExtensions
+    = {"yaml", "castep_bin"};
+  bool isEuphonicFile = euphonicExtensions.count(fileInfo.suffix().toStdString());
+  bool isPdosFile = isPhononFile || isEuphonicFile;
+
+  std::string filePropName;
+  if (isPhononFile)
     filePropName = "PHONONFile";
+  else if (isEuphonicFile)
+    filePropName = "ForceConstantsFile";
+  else
+    filePropName = "CASTEPFile";
+  
+  if (isPdosFile) {
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
@@ -187,10 +213,10 @@ void DensityOfStates::handleFileChange() {
   }
 
   // Enable partial DOS related optons when they can be used
-  m_uiForm.lwIons->setEnabled(isPhononFile);
-  m_uiForm.pbSelectAllIons->setEnabled(isPhononFile);
-  m_uiForm.pbDeselectAllIons->setEnabled(isPhononFile);
-  m_uiForm.ckCrossSectionScale->setEnabled(isPhononFile);
+  m_uiForm.lwIons->setEnabled(isPdosFile);
+  m_uiForm.pbSelectAllIons->setEnabled(isPdosFile);
+  m_uiForm.pbDeselectAllIons->setEnabled(isPdosFile);
+  m_uiForm.ckCrossSectionScale->setEnabled(isPdosFile);
 }
 
 /**
