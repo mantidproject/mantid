@@ -7,17 +7,14 @@
 from mantid.api import AnalysisDataService, FunctionFactory, IFunction, MultiDomainFunction
 from mantid.simpleapi import RenameWorkspace, CopyLogs
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
+from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
                                                          create_parameter_table_name, get_group_or_pair_from_name,
-                                                         get_diff_asymmetry_name, get_group_asymmetry_name,
-                                                         get_pair_asymmetry_name, get_pair_phasequad_name,
-                                                         get_run_number_from_workspace_name,
+                                                         get_diff_asymmetry_name, get_run_number_from_workspace_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from Muon.GUI.Common.utilities.algorithm_utils import run_simultaneous_Fit
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
 class GeneralFittingModel(BasicFittingModel):
@@ -380,67 +377,3 @@ class GeneralFittingModel(BasicFittingModel):
         new_name += '; Simultaneous'
         RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
         return new_name
-
-    """
-    Methods used by the Sequential Fitting Tab
-    """
-
-    def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
-        """Updates the function parameter values for the given dataset names."""
-        if self.simultaneous_fitting_mode:
-            self._update_fit_function_parameters_for_simultaneous_fit(dataset_names, parameter_values)
-        else:
-            self._update_fit_function_parameters_for_single_fit(dataset_names, parameter_values)
-
-    def _update_fit_function_parameters_for_single_fit(self, dataset_names: list, parameter_values: list) -> None:
-        """Updates the function parameters for the given dataset names if in single fit mode."""
-        for name in dataset_names:
-            fit_function = self.get_single_fit_function_for(name)
-            if fit_function is not None:
-                self._set_fit_function_parameter_values(fit_function, parameter_values)
-
-    def _update_fit_function_parameters_for_simultaneous_fit(self, dataset_names: list, parameter_values: list) -> None:
-        """Updates the function parameters for the given dataset names if in simultaneous fit mode."""
-        for name in dataset_names:
-            if name in self.dataset_names:
-                if isinstance(self.simultaneous_fit_function, MultiDomainFunction):
-                    function_index = self.dataset_names.index(name)
-                    self._set_fit_function_parameter_values(self.simultaneous_fit_function.getFunction(function_index),
-                                                            parameter_values)
-                else:
-                    self._set_fit_function_parameter_values(self.simultaneous_fit_function, parameter_values)
-
-    @staticmethod
-    def _set_fit_function_parameter_values(fit_function: IFunction, parameter_values: list) -> None:
-        """Set the parameter values within a fit function."""
-        for i in range(fit_function.nParams()):
-            fit_function.setParameter(i, parameter_values[i])
-
-    @staticmethod
-    def get_fit_function_parameter_values(fit_function: IFunction) -> list:
-        """Get all the parameter values within a given fit function."""
-        if fit_function is not None:
-            return [fit_function.getParameterValue(i) for i in range(fit_function.nParams())]
-        return []
-
-    def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:
-        """Returns the workspace names to use for the given runs and groups/pairs."""
-        workspace_names = []
-        for run in runs:
-            for group_or_pair in groups_and_pairs:
-                workspace_names += self._get_workspace_name_from_run_and_group_or_pair(run, group_or_pair)
-        return workspace_names
-
-    def _get_workspace_name_from_run_and_group_or_pair(self, run: str, group_or_pair: str) -> list:
-        """Returns the workspace name to use for the given run and group/pair."""
-        if check_phasequad_name(group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
-            return [get_pair_phasequad_name(self.context, group_or_pair, run, not self.fit_to_raw)]
-        elif group_or_pair in self.context.group_pair_context.selected_pairs:
-            return [get_pair_asymmetry_name(self.context, group_or_pair, run, not self.fit_to_raw)]
-        elif group_or_pair in self.context.group_pair_context.selected_diffs:
-            return [get_diff_asymmetry_name(self.context, group_or_pair, run, not self.fit_to_raw)]
-        elif group_or_pair in self.context.group_pair_context.selected_groups:
-            period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
-            return [get_group_asymmetry_name(self.context, group_or_pair, run, period_string, not self.fit_to_raw)]
-        else:
-            return []
