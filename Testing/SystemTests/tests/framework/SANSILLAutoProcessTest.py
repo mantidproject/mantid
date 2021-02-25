@@ -444,10 +444,8 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D22/')
 
         MaskBTP(Instrument='D22', Pixel='0-12,245-255')
-        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='top_bottom')
-        MaskBTP(Instrument='D22', Tube='54-75', Pixel='108-150')
-        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP',
-             OutputWorkspace='D22_mask_central')
+        MaskBTP(Workspace='D22MaskBTP', Tube='54-75', Pixel='108-150')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='D22_mask_central')
 
     def cleanup(self):
         mtd.clear()
