@@ -172,10 +172,13 @@ class DrillPresenter:
 
             if re.match("^-{,1}\d+$", value):
                 return str(int(value) + i)
-            suffix = re.search("-{,1}\d+$", value)
+            suffix = re.search("\d+$", value)
             if suffix:
                 n = suffix.group(0)
-                return value[0:-len(n)] + str(int(n) + i)
+                ni = int(n) + i
+                if ni < 0:
+                    ni = 0
+                return value[0:-len(n)] + str(ni)
 
             return value
 
