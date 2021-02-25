@@ -351,7 +351,7 @@ class DrillPresenter:
         """
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
                                                './*.mrd',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
