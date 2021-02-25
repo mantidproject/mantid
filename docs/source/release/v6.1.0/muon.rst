@@ -9,9 +9,6 @@ MuSR Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 	
-Algorithms
-----------
-- Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to crop workspace.
 
 Muon Analysis 2 and Frequency Domain Analysis
 ---------------------------------------------
@@ -47,6 +44,7 @@ New Features
 
 Bug fixes
 #########
+- Updated :ref:`LoadElementalAnalysisData <algm-LoadElementalAnalysisData>` algorithm to crop workspace.
 
 Algorithms
 ----------

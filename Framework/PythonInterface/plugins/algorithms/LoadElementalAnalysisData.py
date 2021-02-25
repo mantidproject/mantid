@@ -126,7 +126,10 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                 for i in range(ws.getNumberHistograms()):
                     xdata = ws.readX(i)
                     minX.append(xdata[0])
-                    maxX.append(xdata[-1] - 1)
+                    if i == 2:
+                        maxX.append(xdata[-1])
+                    else:
+                        maxX.append(xdata[-1] - 1)
                 CropWorkspaceRagged(InputWorkspace=detector, OutputWorkspace=detector, xmin = minX, xmax = maxX)
                 overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
