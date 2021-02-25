@@ -483,10 +483,10 @@ class BasicFittingModel:
     def _do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
         """Does a single fit and returns the fit function, status and chi squared."""
         alg = self._create_fit_algorithm()
-        workspace, parameters, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters, alg)
-
-        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=workspace, StoreInADS=False)
-        return workspace, parameters, function, fit_status, chi_squared, covariance_matrix
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_Fit(parameters,
+                                                                                                          alg)
+        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
+        return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
     def _get_parameters_for_single_fit(self) -> dict:
         """Returns the parameters used for a single fit."""

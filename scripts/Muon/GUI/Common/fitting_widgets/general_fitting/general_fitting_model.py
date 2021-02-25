@@ -290,12 +290,9 @@ class GeneralFittingModel(BasicFittingModel):
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
         if self.simultaneous_fitting_mode:
-            function, fit_status, chi_squared = self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(),
-                                                                          self.global_parameters)
+            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(), self.global_parameters)
         else:
-            function, fit_status, chi_squared = super().perform_fit()
-
-        return function, fit_status, chi_squared
+            return super().perform_fit()
 
     def _do_simultaneous_fit(self, parameters: dict, global_parameters: list) -> tuple:
         """Performs a simultaneous fit and returns the resulting function, status and chi squared."""
@@ -309,11 +306,11 @@ class GeneralFittingModel(BasicFittingModel):
     def _do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters: dict) -> tuple:
         """Performs a simultaneous fit and returns the resulting function, status and chi squared."""
         alg = self._create_fit_algorithm()
-        workspace, parameters, function, fit_status, chi_squared, covariance_matrix = run_simultaneous_Fit(
+        output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = run_simultaneous_Fit(
             parameters, alg)
 
-        self._copy_logs(workspace)
-        return workspace, parameters, function, fit_status, chi_squared, covariance_matrix
+        self._copy_logs(output_workspace)
+        return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
     def _copy_logs(self, output_workspace: str) -> None:
         """Copy the logs from the input workspace(s) to the output workspaces."""
