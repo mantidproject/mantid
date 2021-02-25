@@ -31,13 +31,12 @@ namespace DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 LeanPeak::LeanPeak()
-    : m_detectorID(-1), m_H(0), m_K(0), m_L(0), m_intensity(0),
-      m_sigmaIntensity(0), m_binCount(0), m_initialEnergy(0.),
-      m_finalEnergy(0.), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
+      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -45,14 +44,12 @@ LeanPeak::LeanPeak()
 /** Constructor that uses the Q position of the peak (in the lab frame).
  * No detector ID is set.
  *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
  * @param detectorDistance :: Optional distance between the sample and the
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   const Mantid::Kernel::V3D &QLabFrame,
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
                    boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_absorptionWeightedPathLength(0),
@@ -61,7 +58,6 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
 
@@ -70,7 +66,6 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
  * and a goniometer rotation matrix.
  * No detector ID is set.
  *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
  * @param goniometer :: a 3x3 rotation matrix
@@ -78,8 +73,7 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   const Mantid::Kernel::V3D &QSampleFrame,
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
                    const Mantid::Kernel::Matrix<double> &goniometer,
                    boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
@@ -92,94 +86,17 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
-  this->setInstrument(m_inst);
   this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_detectorID :: ID to the detector of the center of the peak
- * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @return
- */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   int m_detectorID, double m_Wavelength)
-    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setInstrument(m_inst);
-  this->setDetectorID(m_detectorID);
-  this->setWavelength(m_Wavelength);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_detectorID :: ID to the detector of the center of the peak
- * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @param HKL :: vector with H,K,L position of the peak
- * @return
- */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   int m_detectorID, double m_Wavelength,
-                   const Mantid::Kernel::V3D &HKL)
-    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
-      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setInstrument(m_inst);
-  this->setDetectorID(m_detectorID);
-  this->setWavelength(m_Wavelength);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_detectorID :: ID to the detector of the center of the peak
- * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @param HKL :: vector with H,K,L position of the peak
- * @param goniometer :: a 3x3 rotation matrix
- * @return
- */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   int m_detectorID, double m_Wavelength,
-                   const Mantid::Kernel::V3D &HKL,
-                   const Mantid::Kernel::Matrix<double> &goniometer)
-    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
-      m_sigmaIntensity(0), m_binCount(0), m_absorptionWeightedPathLength(0),
-      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
-      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
-      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
-    throw std::invalid_argument(
-        "Peak::ctor(): Goniometer matrix must non-singular.");
-  this->setInstrument(m_inst);
-  this->setDetectorID(m_detectorID);
-  this->setWavelength(m_Wavelength);
-}
-//----------------------------------------------------------------------------------------------
-/** Constructor
- *
- * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param scattering :: fake detector position using scattering angle
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-                   double scattering, double m_Wavelength)
+LeanPeak::LeanPeak(double scattering, double m_Wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_absorptionWeightedPathLength(0),
       m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
@@ -187,12 +104,10 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
-  m_detectorID = -1;
   // get the approximate location of the detector
   const auto detectorDir = V3D(sin(scattering), 0.0, cos(scattering));
-  detPos = getVirtualDetectorPosition(detectorDir);
+  detPos = detectorDir;
 }
 
 /**
@@ -201,8 +116,7 @@ LeanPeak::LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
  * @return
  */
 LeanPeak::LeanPeak(const LeanPeak &other)
-    : m_inst(other.m_inst), m_det(other.m_det), m_bankName(other.m_bankName),
-      m_detectorID(other.m_detectorID), m_H(other.m_H), m_K(other.m_K),
+    : m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
       m_L(other.m_L), m_intensity(other.m_intensity),
       m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_initialEnergy(other.m_initialEnergy),
@@ -214,8 +128,8 @@ LeanPeak::LeanPeak(const LeanPeak &other)
       m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
       m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL),
-      m_intMNP(other.m_intMNP), m_detIDs(other.m_detIDs),
-      m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
+      m_intMNP(other.m_intMNP), m_peakShape(other.m_peakShape->clone()),
+      convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanPeak from IPeak interface
@@ -224,8 +138,8 @@ LeanPeak::LeanPeak(const LeanPeak &other)
  * @return
  */
 LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
-    : IPeak(ipeak), m_detectorID(ipeak.getDetectorID()), m_H(ipeak.getH()),
-      m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
+    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
+      m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()),
       m_binCount(ipeak.getBinCount()),
       m_initialEnergy(ipeak.getInitialEnergy()),
@@ -241,14 +155,10 @@ LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
-        "Peak::ctor(): Goniometer matrix must non-singular.");
-  setInstrument(ipeak.getInstrument());
+        "LeanPeak::ctor(): Goniometer matrix must non-singular.");
   detid_t id = ipeak.getDetectorID();
   if (id >= 0) {
     setDetectorID(id);
-  }
-  if (const auto *peak = dynamic_cast<const LeanPeak *>(&ipeak)) {
-    this->m_detIDs = peak->m_detIDs;
   }
 }
 
@@ -278,92 +188,12 @@ void LeanPeak::setWavelength(double wavelength) {
  * @param id :: ID of detector at the centre of the peak.
  */
 void LeanPeak::setDetectorID(int id) {
-  if (!m_inst)
-    throw std::runtime_error(
-        "LeanPeak::setInstrument(): No instrument is set!");
-  this->m_det = m_inst->getDetector(id);
-  if (!m_det)
-    throw std::runtime_error(
-        "LeanPeak::setInstrument(): No detector was found!");
-
-  this->m_detectorID = id;
-  addContributingDetID(id);
-
-  detPos = m_det->getPos();
-
-  // We now look for the row/column. -1 if not found.
-  m_row = -1;
-  m_col = -1;
-
-  // Go up 2 parents to find the bank/rectangular detector
-  IComponent_const_sptr parent = m_det->getParent();
-
-  // Find the ROW by looking at the string name of the pixel. E.g. "pixel12"
-  // gives row 12.
-  m_row = Strings::endsWithInt(m_det->getName());
-
-  if (!parent)
-    return;
-  m_bankName = parent->getName();
-
-  // Find the COLUMN by looking at the string name of the parent. E.g. "tube003"
-  // gives column 3.
-  m_col = Strings::endsWithInt(parent->getName());
-
-  parent = parent->getParent();
-  // Use the parent if there is no grandparent.
-  if (!parent)
-    return;
-
-  // Use the parent if the grandparent is the instrument
-  Instrument_const_sptr instrument =
-      std::dynamic_pointer_cast<const Instrument>(parent);
-  if (instrument)
-    return;
-  // Use the grand-parent whenever possible
-  m_bankName = parent->getName();
-  // For CORELLI, one level above sixteenpack
-  if (m_bankName == "sixteenpack") {
-    parent = parent->getParent();
-    m_bankName = parent->getName();
-  }
-
-  // Special for rectangular detectors: find the row and column.
-  RectangularDetector_const_sptr retDet =
-      std::dynamic_pointer_cast<const RectangularDetector>(parent);
-  if (!retDet)
-    return;
-  std::pair<int, int> xy = retDet->getXYForDetectorID(m_detectorID);
-  m_row = xy.second;
-  m_col = xy.first;
+  throw std::runtime_error("LeanPeak::setDetectorID(): Has no detector ID");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int LeanPeak::getDetectorID() const { return m_detectorID; }
-
-//----------------------------------------------------------------------------------------------
-/**
- * Add a detector ID that contributed to this peak
- * @param id :: The ID of a detector that contributed to this peak
- */
-void LeanPeak::addContributingDetID(const int id) { m_detIDs.insert(id); }
-
-//-------------------------------------------------------------------------------------
-/**
- * Removes an ID from the list of contributing detectors
- * @param id :: This ID is removed from the list.
- */
-void LeanPeak::removeContributingDetector(const int id) { m_detIDs.erase(id); }
-
-//----------------------------------------------------------------------------------------------
-/**
- * Return the set of detector IDs that contribute to this peak
- * @returns A set of unique detector IDs that form this peak
- */
-const std::set<int> &LeanPeak::getContributingDetIDs() const {
-  return m_detIDs;
-}
+int LeanPeak::getDetectorID() const { return -1; }
 
 //----------------------------------------------------------------------------------------------
 /** Set the instrument (and save the source/sample pos).
@@ -372,36 +202,18 @@ const std::set<int> &LeanPeak::getContributingDetIDs() const {
  * @param inst :: Instrument sptr to use
  */
 void LeanPeak::setInstrument(const Geometry::Instrument_const_sptr &inst) {
-  m_inst = inst;
-  if (!inst)
-    throw std::runtime_error(
-        "LeanPeak::setInstrument(): No instrument is set!");
-
-  // Cache some positions
-  const Geometry::IComponent_const_sptr sourceObj = m_inst->getSource();
-  if (sourceObj == nullptr)
-    throw Exception::InstrumentDefinitionError(
-        "LeanPeak::setInstrument(): Failed "
-        "to get source component from "
-        "instrument");
-  const Geometry::IComponent_const_sptr sampleObj = m_inst->getSample();
-  if (sampleObj == nullptr)
-    throw Exception::InstrumentDefinitionError(
-        "LeanPeak::setInstrument(): Failed "
-        "to get sample component from "
-        "instrument");
-
-  sourcePos = sourceObj->getPos();
-  samplePos = sampleObj->getPos();
+  throw std::runtime_error("LeanPeak::setInstrument(): Has no instrument");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Return a shared ptr to the detector at center of peak. */
-Geometry::IDetector_const_sptr LeanPeak::getDetector() const { return m_det; }
+Geometry::IDetector_const_sptr LeanPeak::getDetector() const {
+  throw std::runtime_error("LeanPeak::getDetector(): Has no detector ID");
+}
 
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr LeanPeak::getInstrument() const {
-  return m_inst;
+  throw std::runtime_error("LeanPeak::setInstrument(): Has no instrument");
 }
 
 // -------------------------------------------------------------------------------------
@@ -562,168 +374,8 @@ void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  */
 void LeanPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
                             boost::optional<double> detectorDistance) {
-  if (!this->m_inst) {
-    throw std::invalid_argument("Setting QLab without an instrument would lead "
-                                "to an inconsistent state for the LeanPeak");
-  }
-  // Clear out the detector = we can't know them
-  m_detectorID = -1;
-  detPos = V3D();
-  m_det = IDetector_sptr();
-  m_row = -1;
-  m_col = -1;
-  m_bankName = "None";
-
-  /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
-   * The incident neutron wavevector is along the beam direction, ki = 1/wl
-   * (usually z, but referenceframe is definitive).
-   * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
-   * in beam direction.
-   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
-   */
-  const double norm_q = qLab.norm();
-  if (norm_q == 0.0)
-    throw std::invalid_argument("LeanPeak::setQLabFrame(): Q cannot be 0,0,0.");
-
-  std::shared_ptr<const ReferenceFrame> refFrame =
-      this->m_inst->getReferenceFrame();
-  const V3D refBeamDir = refFrame->vecPointingAlongBeam();
-  // Default for ki-kf has -q
-  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
-  const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
-
-  if (qBeam == 0.0)
-    throw std::invalid_argument(
-        "LeanPeak::setQLabFrame(): Q cannot be 0 in the beam direction.");
-
-  const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
-  const double wl = (2.0 * M_PI) / one_over_wl;
-  if (wl < 0.0) {
-    std::ostringstream mess;
-    mess << "LeanPeak::setQLabFrame(): Wavelength found was negative (" << wl
-         << " Ang)! This Q is not physical.";
-    throw std::invalid_argument(mess.str());
-  }
-
-  // Save the wavelength
-  this->setWavelength(wl);
-
-  V3D detectorDir = -qLab * qSign;
-  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
-  detectorDir.normalize();
-
-  // Use the given detector distance to find the detector position.
-  if (detectorDistance.is_initialized()) {
-    detPos = samplePos + detectorDir * detectorDistance.get();
-    // We do not-update the detector as by manually setting the distance the
-    // client seems to know better.
-  } else {
-    // Find the detector
-    InstrumentRayTracer tracer(m_inst);
-    const bool found = findDetector(detectorDir, tracer);
-    if (!found) {
-      // This is important, so we ought to log when this fails to happen.
-      g_log.debug("Could not find detector after setting qLab via setQLab with "
-                  "QLab : " +
-                  qLab.toString());
-
-      detPos = getVirtualDetectorPosition(detectorDir);
-    }
-  }
-}
-
-V3D LeanPeak::getVirtualDetectorPosition(const V3D &detectorDir) const {
-  const auto component =
-      getInstrument()->getComponentByName("extended-detector-space");
-  if (!component) {
-    return detectorDir; // the best idea we have is just the direction
-  }
-  const auto object = std::dynamic_pointer_cast<const ObjComponent>(component);
-  const auto distance =
-      object->shape()->distance(Geometry::Track(samplePos, detectorDir));
-  return detectorDir * distance;
-}
-
-/** After creating a peak using the Q in the lab frame,
- * the detPos is set to the direction of the detector (but the detector is
- *unknown)
- *
- * Using the instrument set in the peak, perform ray tracing
- * to find the exact detector.
- *
- * @return true if the detector ID was found.
- */
-bool LeanPeak::findDetector() {
-  InstrumentRayTracer tracer(m_inst);
-  return findDetector(tracer);
-}
-
-/**
- * Performs the same algorithm as findDetector() but uses a pre-existing
- * InstrumentRayTracer object to be able to take adavtange of its caches.
- * This method should be preferred if findDetector is to be called many times
- * over the same instrument.
- * @param tracer A reference to an existing InstrumentRayTracer object.
- * @return true if the detector ID was found.
- */
-bool LeanPeak::findDetector(const InstrumentRayTracer &tracer) {
-  // Scattered beam direction
-  const V3D beam = normalize(detPos - samplePos);
-
-  return findDetector(beam, tracer);
-}
-
-/**
- * @brief LeanPeak::findDetector : Find the detector along the beam location.
- * sets the detector, and detector position if found
- * @param beam : Detector direction from the sample as V3D
- * @param tracer : Ray tracer to use for detector finding
- * @return True if a detector has been found
- */
-bool LeanPeak::findDetector(const Mantid::Kernel::V3D &beam,
-                            const InstrumentRayTracer &tracer) {
-  bool found = false;
-  // Create a ray tracer
-  tracer.traceFromSample(beam);
-  IDetector_const_sptr det = tracer.getDetectorResult();
-  if (det) {
-    // Set the detector ID, the row, col, etc.
-    this->setDetectorID(det->getID());
-    // The old detector position is not more precise if it comes from
-    // FindPeaksMD
-    detPos = det->getPos();
-    found = true;
-  }
-  // Use tube-gap parameter in instrument parameter file  to find peaks with
-  // center in gaps between tubes
-  else if (m_inst->hasParameter("tube-gap")) {
-    std::vector<double> gaps = m_inst->getNumberParameter("tube-gap", true);
-    if (!gaps.empty()) {
-      const auto gap = static_cast<double>(gaps.front());
-      // try adding and subtracting tube-gap in 3 q dimensions to see if you can
-      // find detectors on each side of tube gap
-      for (int i = 0; i < 3; i++) {
-        V3D gapDir;
-        gapDir[i] = gap;
-        V3D beam1 = beam + gapDir;
-        tracer.traceFromSample(normalize(beam1));
-        IDetector_const_sptr det1 = tracer.getDetectorResult();
-        V3D beam2 = beam - gapDir;
-        tracer.traceFromSample(normalize(beam2));
-        IDetector_const_sptr det2 = tracer.getDetectorResult();
-        if (det1 && det2) {
-          // Set the detector ID to one of the neighboring pixels
-          this->setDetectorID(static_cast<int>(det1->getID()));
-          detPos = det1->getPos();
-          found = true;
-          break;
-        }
-      }
-    }
-  }
-  return found;
+  throw std::invalid_argument("Setting QLab without an instrument would lead "
+                              "to an inconsistent state for the LeanPeak");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1062,10 +714,7 @@ void LeanPeak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) {
  */
 LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
   if (&other != this) {
-    m_inst = other.m_inst;
-    m_det = other.m_det;
     m_bankName = other.m_bankName;
-    m_detectorID = other.m_detectorID;
     m_H = other.m_H;
     m_K = other.m_K;
     m_L = other.m_L;
@@ -1083,7 +732,6 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
     sourcePos = other.sourcePos;
     samplePos = other.samplePos;
     detPos = other.detPos;
-    m_detIDs = other.m_detIDs;
     m_intHKL = other.m_intHKL;
     m_intMNP = other.m_intMNP;
     convention = other.convention;

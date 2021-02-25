@@ -36,22 +36,12 @@ public:
   friend class PeakColumn;
 
   LeanPeak();
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-           const Mantid::Kernel::V3D &QLabFrame,
+  LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
            boost::optional<double> detectorDistance = boost::none);
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst,
-           const Mantid::Kernel::V3D &QSampleFrame,
+  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
            const Mantid::Kernel::Matrix<double> &goniometer,
            boost::optional<double> detectorDistance = boost::none);
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength);
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength, const Mantid::Kernel::V3D &HKL);
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
-           double m_Wavelength, const Mantid::Kernel::V3D &HKL,
-           const Mantid::Kernel::Matrix<double> &goniometer);
-  LeanPeak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
-           double m_Wavelength);
+  LeanPeak(double scattering, double m_Wavelength);
 
   /// Copy constructor
   LeanPeak(const LeanPeak &other);
@@ -82,9 +72,6 @@ public:
 
   void setDetectorID(int id) override;
   int getDetectorID() const override;
-  void addContributingDetID(const int id);
-  void removeContributingDetector(const int id);
-  const std::set<int> &getContributingDetIDs() const;
 
   void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
   Geometry::IDetector_const_sptr getDetector() const override;
@@ -183,27 +170,12 @@ public:
   /// Assignment
   LeanPeak &operator=(const LeanPeak &other);
 
-  /// Get the approximate position of a peak that falls off the detectors
-  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
-
   void setAbsorptionWeightedPathLength(double pathLength) override;
   double getAbsorptionWeightedPathLength() const override;
 
 private:
-  bool findDetector(const Mantid::Kernel::V3D &beam,
-                    const Geometry::InstrumentRayTracer &tracer);
-
-  /// Shared pointer to the instrument (for calculating some values )
-  Geometry::Instrument_const_sptr m_inst;
-
-  /// Detector pointed to
-  Geometry::IDetector_const_sptr m_det;
-
   /// Name of the parent bank
   std::string m_bankName;
-
-  /// ID of the detector
-  int m_detectorID;
 
   /// H of the peak
   double m_H;
@@ -261,9 +233,6 @@ private:
   int m_peakNumber;
   Mantid::Kernel::V3D m_intHKL;
   Mantid::Kernel::V3D m_intMNP;
-
-  /// List of contributing detectors IDs
-  std::set<int> m_detIDs;
 
   /// Peak shape
   Mantid::Geometry::PeakShape_const_sptr m_peakShape;
