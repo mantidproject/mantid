@@ -4,13 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid import logger
+from mantid.api import IFunction
 from mantid.simpleapi import ConvertFitFunctionForMuonTFAsymmetry
 
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
-
-from mantid import logger
 
 DEFAULT_NORMALISATION = 0.0
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
@@ -87,6 +87,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 self._recalculate_tf_asymmetry_functions()
             except RuntimeError:
                 self.reset_tf_asymmetry_functions()
+                logger.error("The input function was not of the form N*(1+f)+A*exp(-lambda*t)).")
                 return False
         else:
             self.reset_tf_asymmetry_functions()
@@ -209,5 +210,20 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION
 
-    # def update_plot_guess(self):
-    #     pass
+    def _get_plot_guess_fit_function(self) -> IFunction:
+        """Returns the fit function to evaluate when plotting a guess."""
+        fit_function = self._get_active_tf_asymmetry_fit_function()
+        if fit_function is not None and self.simultaneous_fitting_mode:
+            return fit_function.createEquivalentFunctions()[self.current_dataset_index]
+        else:
+            return fit_function
+
+    def _get_active_tf_asymmetry_fit_function(self) -> IFunction:
+        """Returns the fit function that is active and will be used for a fit."""
+        if self.tf_asymmetry_mode:
+            if self.simultaneous_fitting_mode:
+                return self.tf_asymmetry_simultaneous_function
+            else:
+                return self.current_tf_asymmetry_single_function
+        else:
+            return super().get_active_fit_function()

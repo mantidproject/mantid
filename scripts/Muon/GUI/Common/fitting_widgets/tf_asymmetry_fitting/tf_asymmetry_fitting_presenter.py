@@ -33,6 +33,13 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         super().initialize_model_options()
         self.model.tf_asymmetry_mode = self.view.tf_asymmetry_mode
 
+    def handle_selected_group_pair_changed(self) -> None:
+        self.model.tf_asymmetry_mode = False
+        self.view.tf_asymmetry_mode = self.model.tf_asymmetry_mode
+        self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
+
+        super().handle_selected_group_pair_changed()
+
     def handle_function_structure_changed(self) -> None:
         super().handle_function_structure_changed()
         self.update_normalisations_in_model_and_view()
@@ -56,13 +63,14 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.automatically_update_function_name()
 
-        self.model.update_plot_guess(self.view.plot_guess)
-
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
 
+        self.model.update_plot_guess(self.view.plot_guess)
+
     def handle_normalisation_changed(self):
         self.model.set_current_normalisation(self.view.normalisation)
+        self.model.update_plot_guess(self.view.plot_guess)
 
     def update_and_reset_all_data(self):
         super().update_and_reset_all_data()
