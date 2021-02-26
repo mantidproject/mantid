@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
-from typing import Dict, List, Optional, overload, Union
+from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
 import numpy as np
 from numbers import Real
 
@@ -21,12 +21,13 @@ class SData(collections.abc.Sequence):
     """
     Class for storing S(Q, omega) with relevant metadata
 
-    indexing will return dict(s) of S by quantum order for atom(s)
+    Indexing will return dict(s) of S by quantum order for atom(s)
     corresponding to index/slice.
     """
 
     def __init__(self, *,
-                 data: dict, frequencies: np.ndarray,
+                 data: dict,
+                 frequencies: np.ndarray,
                  temperature: Optional[float] = None,
                  sample_form: str = '',
                  ) -> None:
@@ -73,6 +74,15 @@ class SData(collections.abc.Sequence):
         else:
             return None
 
+    def get_total_intensity(self) -> np.ndarray:
+        """Sum over all atoms and quantum orders to a single spectrum"""
+
+        total = np.zeros_like(self._frequencies)
+        for atom_data in self:
+            for order_key, data in atom_data.items():
+                total += data
+        return total
+
     def check_finite_temperature(self):
         """Raise an error if Temperature is not greater than zero"""
         temperature = self.get_temperature()
@@ -108,6 +118,9 @@ class SData(collections.abc.Sequence):
                 for order in item[S_LABEL]:
                     if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
+
+            elif item == "frequencies":
+                raise Exception("The Abins SData format is changed, do not put frequencies in this dict")
 
             else:
                 raise ValueError("Invalid keyword " + item)
@@ -186,9 +199,263 @@ class SData(collections.abc.Sequence):
 
     def __getitem__(self, item):  # noqa F811
         if isinstance(item, int):
-            return self._data[f"atom_{item}"]['s']
+            try:
+                return self._data[f"atom_{item}"]['s']
+            except KeyError:
+                raise IndexError(item)
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]
         else:
             raise TypeError(
                 "Indices must be integers or slices, not {}.".format(type(item)))
+
+
+SDBA = TypeVar('SDBA', bound='SDataByAngle')
+
+
+class SDataByAngle(collections.abc.Sequence):
+    def __init__(self, *,
+                 data: Dict[str, OneAtomSData],
+                 angles: Sequence[float],
+                 frequencies: np.ndarray,
+                 temperature: Optional[float] = None,
+                 sample_form: str = '',
+                 ) -> None:
+        """Container for scattering spectra resolved by angle and atom
+
+        Args:
+
+            data:
+                Scattering data as 2-d arrays arranged by atom and order::
+
+                    {'atom_0': {'s': {'order_1': array([[s11, s12, s13, ...]
+                                                  [s21, s22, s23, ...], ...])
+                                                  'order_2': ...}},
+                     'atom_1': ...}
+
+                where array rows correspond to angles and columns correspond to
+                frequencies.
+
+            angles:
+                scattering angles in degrees, corresponding to data
+
+            frequencies:
+                Inelastic scattering energies in cm^-1, corresponding to data
+
+            temperature:
+                Simulated scattering temperature
+
+            sample_form:
+                Sample form (used to track calculation method)
+            """
+
+        super().__init__()
+        n_angles = len(angles)
+        n_frequencies = len(frequencies)
+
+        for atom_key, atom_data in data.items():
+            for order, order_data in atom_data['s'].items():
+                if order_data.shape != (n_angles, n_frequencies):
+                    raise IndexError("SDataByAngle input should have 2D array "
+                                     "in (angles, frequencies)")
+
+        self.angles = list(angles)
+        self._data = data
+        self._metadata = {'frequencies': frequencies,
+                          'temperature': temperature,
+                          'sample_form': sample_form}
+
+        self.frequencies = self._metadata['frequencies']
+        self.temperature = self._metadata['temperature']
+        self.sample_form = self._metadata['sample_form']
+
+    def __len__(self) -> int:
+        return len(self.angles)
+
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> SData:
+        ...
+
+    @overload  # noqa F811
+    def __getitem__(self: SDBA, item: slice) -> SDBA:
+        ...
+
+    def __getitem__(self, item):  # noqa F811
+        if isinstance(item, (int, slice)):
+            data = {atom_index: {'s': {order_index:
+                                       self._data[atom_index]['s'][order_index][item, :]
+                                       for order_index in self._data[atom_index]['s']}}
+                    for atom_index in self._data}
+        else:
+            raise TypeError(
+                "Indices must be integers or slices, not {}.".format(type(item)))
+
+        if isinstance(item, int):
+            return SData(data=data, **self._metadata)
+
+        else:  # Must be a slice, return angle-resolved data
+            return type(self)(data=data,
+                              angles=self.angles[item],
+                              **self._metadata)
+
+    @classmethod
+    def get_empty(cls: SDBA, *,
+                  angles: Sequence[float],
+                  frequencies: np.ndarray,
+                  atom_keys: Sequence[str],
+                  order_keys: Sequence[str],
+                  **kwargs) -> SDBA:
+        """Construct data container with zeroed arrays of appropriate dimensions
+
+        This is useful as a starting point for accumulating data in a loop.
+
+        Args:
+
+            angles: inelastic scattering angles
+
+            frequencies: inelastic scattering energies
+
+            atom_keys:
+                keys for atom data sets, corresponding to keys of ``data=``
+                init argument of SData() of SDataByAngle(). Usually this is
+                ['atom_0', 'atom_1', ...]
+
+            order_keys:
+                keys for quantum order
+
+            **kwargs:
+                remaining keyword arguments will be passed to class constructor
+                (Usually these would be ``temperature=`` and ``sample_form=``.)
+
+        Returns:
+            Empty data collection with appropriate dimensions and metadata
+        """
+
+        n_angles, n_frequencies = len(angles), len(frequencies)
+
+        data = {atom_key: {'s': {order_key: np.zeros((n_angles, n_frequencies))
+                                 for order_key in order_keys}}
+                for atom_key in atom_keys}
+
+        return cls(data=data, angles=angles, frequencies=frequencies, **kwargs)
+
+    def set_angle_data(self, angle_index: int, sdata: SData,
+                       add_to_existing: bool = False) -> None:
+        """Set data for one angle from SData object
+
+        Args:
+            angle_index:
+                Index (in self.angles) of angle corresponding to data
+
+            sdata:
+                New S values to replace current content at given angle
+
+            add_to_existing:
+                Instead of replacing existing data, values are summed together
+
+        """
+
+        data = sdata.extract()
+
+        if 'frequencies' in data:
+            del data['frequencies']
+
+        self.set_angle_data_from_dict(angle_index, data,
+                                      add_to_existing=add_to_existing)
+
+    def set_angle_data_from_dict(self, angle_index: int,
+                                 data: Dict[str, OneAtomSData],
+                                 add_to_existing: bool = False) -> None:
+
+        for atom_key, atom_data in data.items():
+            for order_key, order_data in atom_data['s'].items():
+                if add_to_existing:
+                    self._data[atom_key]['s'][order_key][angle_index, :] += order_data
+                else:
+                    self._data[atom_key]['s'][order_key][angle_index, :] = order_data
+
+    @classmethod
+    def from_sdata_series(cls: SDBA, data: Sequence[SData], *, angles: Sequence[float]) -> SDBA:
+        metadata = {}
+
+        if len(data) != len(angles):
+            raise IndexError("Number of angles is not consistent with length of SData series")
+
+        def near_enough(item, other):
+            from math import isclose
+            if isinstance(item, np.ndarray):
+                return np.allclose(item, other)
+            elif isinstance(item, float):
+                return isclose(item, other)
+            else:
+                return item == other
+
+        # First loop over data: collect and check metadata
+        for sdata in data:
+            if not isinstance(sdata, SData):
+                raise TypeError("data must be a sequence of SData")
+
+            for key in ('frequencies', 'temperature', 'sample_form'):
+                if key not in metadata:
+                    metadata[key] = getattr(sdata, f'get_{key}')()
+                else:
+                    if not near_enough(metadata[key],
+                                       getattr(sdata, f'get_{key}')()):
+                        raise ValueError(f"Property '{key}' must agree for all "
+                                         "SData being collected.")
+
+        atom_keys = list(data[0]._data.keys())
+        sdata_collection = cls.get_empty(angles=angles,
+                                         atom_keys=atom_keys,
+                                         order_keys=list(data[0]._data[atom_keys[0]]['s'].keys()),
+                                         **metadata)
+
+        # Second loop over data: collect scattering data
+        for angle_index, sdata in enumerate(data):
+            sdata_collection.set_angle_data(angle_index, sdata)
+
+        return sdata_collection
+
+    def sum_over_angles(self,
+                        average: bool = False,
+                        weights: Sequence[float] = None) -> SData:
+        """Combine S values over all angles
+
+        :param average:
+            Weight all angle contributions by 1/N, where N is number of angles
+
+        :param weights:
+            Weights corresponding to angles; total S is obtained by multiplying
+            each angle by its weight and summing.
+
+        :returns SData:
+
+        """
+        n_angles = len(self.angles)
+        n_frequencies = len(self.frequencies)
+        atom_keys = list(self._data.keys())
+        order_keys = list(self._data[atom_keys[0]]['s'])
+
+        if average:
+            if weights is not None:
+                raise ValueError("Cannot set weights while average=True")
+            weights = np.full(n_angles, 1. / n_angles)
+        elif weights:
+            if len(weights) != n_angles:
+                raise IndexError("Length of weights must match sampled angles")
+        else:
+            weights = np.ones(n_angles)
+
+        assert isinstance(weights, (Sequence, np.ndarray))
+
+        flattened_data = {atom_key: {'s': {order_key: np.zeros(n_frequencies)
+                                           for order_key in order_keys}}
+                          for atom_key in atom_keys}
+
+        for angle_index, weight in enumerate(weights):
+            for atom_key in atom_keys:
+                for order_key in order_keys:
+                    flattened_data[atom_key]['s'][order_key] += (
+                        weight * self._data[atom_key]['s'][order_key][angle_index, :])
+
+        return SData(data=flattened_data, **self._metadata)

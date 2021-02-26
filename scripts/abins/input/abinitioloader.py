@@ -171,7 +171,9 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         self._clerk.save()
 
     def get_formatted_data(self):
-
+        """
+        Check for HD5 cache before reading from ab initio outputs if cache unavailable
+        """
         # try to load ab initio data from *.hdf5 file
         try:
             self._clerk.check_previous_data()
