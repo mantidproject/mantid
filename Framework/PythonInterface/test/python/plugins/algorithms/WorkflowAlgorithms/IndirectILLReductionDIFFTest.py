@@ -27,8 +27,6 @@ class IndirectILLReductionDIFF(unittest.TestCase):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
 
-        self.tolerance = 1e-2
-
     def tearDown(self):
         # set cached facility and datasearch directory
         config['default.facility'] = self.facility
