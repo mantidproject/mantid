@@ -25,19 +25,11 @@ class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
         self.normalisation_validator = LineEditDoubleValidator(self.normalisation_line_edit, 0.0)
         self.normalisation_line_edit.setValidator(self.normalisation_validator)
 
-        self.tf_asymmetry_mode = False
-
     def set_slot_for_normalisation_changed(self, slot) -> None:
         """Sets the slot for handling when a normalisation value is changed by the user."""
         self.normalisation_line_edit.editingFinished.connect(slot)
 
-    @property
-    def tf_asymmetry_mode(self) -> bool:
-        """Returns true if TF Asymmetry fitting mode is currently active."""
-        return not self.normalisation_line_edit.isHidden()
-
-    @tf_asymmetry_mode.setter
-    def tf_asymmetry_mode(self, tf_asymmetry_on: bool) -> None:
+    def set_tf_asymmetry_mode(self, tf_asymmetry_on: bool) -> None:
         """Hides or shows the normalisation options depending on if TF Asymmetry fitting mode is on or off."""
         if tf_asymmetry_on:
             self.show_normalisation_options()

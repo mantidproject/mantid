@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
@@ -22,9 +21,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Initialize the TFAsymmetryFittingPresenter. Sets up the slots and event observers."""
         super(TFAsymmetryFittingPresenter, self).__init__(view, model)
 
-        self.tf_asymmetry_mode_changed_notifier = GenericObservable()
-        self.tf_asymmetry_mode_changed_observer = GenericObserverWithArgPassing(self.handle_tf_asymmetry_mode_changed)
-
+        self.view.set_slot_for_fitting_type_changed(self.handle_tf_asymmetry_mode_changed)
         self.view.set_slot_for_normalisation_changed(self.handle_normalisation_changed)
 
     def initialize_model_options(self) -> None:
@@ -32,12 +29,32 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         super().initialize_model_options()
         self.model.tf_asymmetry_mode = self.view.tf_asymmetry_mode
 
+    def handle_instrument_changed(self) -> None:
+        """Handles when an instrument is changed and switches to normal fitting mode."""
+        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+
+    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
+        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
+        if "DoublePulseEnabled" in updated_variables:
+            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+
+    def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
+        """Handle when there is a clear or remove workspace event in the ADS."""
+        super().handle_ads_clear_or_remove_workspace_event()
+
+        if self.model.number_of_datasets == 0:
+            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+
+    def handle_new_data_loaded(self) -> None:
+        """Handle when new data has been loaded into the interface."""
+        super().handle_new_data_loaded()
+
+        if self.model.number_of_datasets == 0:
+            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+
     def handle_selected_group_pair_changed(self) -> None:
         """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
-        self.model.tf_asymmetry_mode = False
-        self.view.tf_asymmetry_mode = self.model.tf_asymmetry_mode
-        self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
-
+        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
         super().handle_selected_group_pair_changed()
 
     def handle_function_structure_changed(self) -> None:
@@ -101,6 +118,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
         if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
             self.view.warning_popup("Only Groups can be fitted in TF Asymmetry mode.")
-            self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
+            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
             return False
         return True

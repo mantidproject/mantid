@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
-from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable, GenericObserverWithArgPassing
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
@@ -28,6 +28,11 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
 
+        self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
+        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
         self.view.set_slot_for_simultaneous_fit_by_changed(self.handle_simultaneous_fit_by_changed)
@@ -41,6 +46,14 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.model.simultaneous_fit_by = self.view.simultaneous_fit_by
         self.model.simultaneous_fit_by_specifier = self.view.simultaneous_fit_by_specifier
         self.model.global_parameters = self.view.global_parameters
+
+    def handle_instrument_changed(self) -> None:
+        """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
+        pass
+
+    def handle_pulse_type_changed(self, _) -> None:
+        """Handles when double pulse mode is switched on and switches to normal fitting mode. Overridden by child."""
+        pass
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
