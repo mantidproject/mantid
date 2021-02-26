@@ -652,21 +652,19 @@ public:
 class RealCaseTest : public CxxTest::TestSuite {
 
 private:
-  //Mantid::API::MatrixWorkspace_sptr m_eventWS;
+  // Mantid::API::MatrixWorkspace_sptr m_eventWS;
   Mantid::API::IEventWorkspace_sptr m_eventWS;
   Mantid::API::MatrixWorkspace_sptr m_peaksWS;
-  //Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+  // Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
 
 public:
   static void destroySuite(RealCaseTest *suite) { delete suite; }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RealCaseTest *createSuite() {
-    return new RealCaseTest();
-  }
+  static RealCaseTest *createSuite() { return new RealCaseTest(); }
 
-  RealCaseTest(){
+  RealCaseTest() {
     // Need to get and run algorithms from elsewhere in the framework.
     Mantid::API::FrameworkManager::Instance();
 
@@ -677,7 +675,8 @@ public:
     loadEventsAlg->setProperty("Filename", "/tmp/TOPAZ_39037_bank29.nxs");
     loadEventsAlg->setPropertyValue("OutputWorkspace", "events");
     loadEventsAlg->execute();
-    Mantid::API::IEventWorkspace_sptr p = loadEventsAlg->getProperty("OutputWorkspace");
+    Mantid::API::IEventWorkspace_sptr p =
+        loadEventsAlg->getProperty("OutputWorkspace");
     auto v = loadEventsAlg->getPropertyValue("OutputWorkspace");
 
     auto loadPeaksAlg =

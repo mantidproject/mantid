@@ -559,9 +559,8 @@ Integrate3DEvents::ellipseIntegrateModEvents(
 }
 
 std::pair<double, double> Integrate3DEvents::numInEllipsoid(
-    std::vector<SlimEvent> const &events,
-    std::vector<V3D> const &directions, std::vector<double> const &sizes,
-    const V3D &center) {
+    std::vector<SlimEvent> const &events, std::vector<V3D> const &directions,
+    std::vector<double> const &sizes, const V3D &center) {
 
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
@@ -581,11 +580,9 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoid(
 }
 
 std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
-    std::vector<SlimEvent> const &events,
-    std::vector<V3D> const &directions, std::vector<double> const &sizes,
-    std::vector<double> const &sizesIn,
-    const bool useOnePercentBackgroundCorrection,
-    const V3D &center) {
+    std::vector<SlimEvent> const &events, std::vector<V3D> const &directions,
+    std::vector<double> const &sizes, std::vector<double> const &sizesIn,
+    const bool useOnePercentBackgroundCorrection, const V3D &center) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
   for (const auto &event : events) {
@@ -621,8 +618,8 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
 }
 
 void Integrate3DEvents::makeCovarianceMatrix(
-    std::vector<SlimEvent> const &events,
-    DblMatrix &matrix, double radius, const V3D &center) {
+    std::vector<SlimEvent> const &events, DblMatrix &matrix, double radius,
+    const V3D &center) {
   double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {

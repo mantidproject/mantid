@@ -61,7 +61,7 @@ using EventListMap = std::unordered_map<
 using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
 // default Q-vector for the ellipsoids center
-const V3D ELLIPSOIDCENTER(V3D(0,0,0));
+const V3D ELLIPSOIDCENTER(V3D(0, 0, 0));
 
 class DLLExport Integrate3DEvents {
 public:
@@ -133,40 +133,49 @@ private:
                                const std::vector<double> &bkgOuterRadii);
 
   /**
-  * @brief  Calculate the number of events in an ellipsoid centered at 0,0,0
-  *
-  * @details Calculate the number of events in an ellipsoid with
-  * the three specified axes and the three specified sizes in the direction
-  * of those axes.  NOTE: The three axes must be mutually orthogonal unit vectors.
-  *
-  * @param events : list of [(weight, error), Q-vector] objects, one per event
-  * @param directions : List of 3 orthonormal directions for the axes of the ellipsoid.
-  * @param sizes : List of three values a,b,c giving half the length of the three axes of the ellisoid.
-  * @param center : Q-vector for the ellipsoid center
-  *
-  * @return The number of events (and associated error) that are in or on the specified ellipsoid.
-  */
-  static std::pair<double, double>
-  numInEllipsoid(std::vector<SlimEvent> const &events,
-                 std::vector<V3D> const &directions,
-                 std::vector<double> const &sizes,
-                 const V3D &center = ELLIPSOIDCENTER);
+   * @brief  Calculate the number of events in an ellipsoid centered at 0,0,0
+   *
+   * @details Calculate the number of events in an ellipsoid with
+   * the three specified axes and the three specified sizes in the direction
+   * of those axes.  NOTE: The three axes must be mutually orthogonal unit
+   * vectors.
+   *
+   * @param events : list of [(weight, error), Q-vector] objects, one per event
+   * @param directions : List of 3 orthonormal directions for the axes of the
+   * ellipsoid.
+   * @param sizes : List of three values a,b,c giving half the length of the
+   * three axes of the ellisoid.
+   * @param center : Q-vector for the ellipsoid center
+   *
+   * @return The number of events (and associated error) that are in or on the
+   * specified ellipsoid.
+   */
+  static std::pair<double, double> numInEllipsoid(
+      std::vector<SlimEvent> const &events, std::vector<V3D> const &directions,
+      std::vector<double> const &sizes, const V3D &center = ELLIPSOIDCENTER);
 
   /**
-  * @brief Calculate the number of events in an ellipsoid with background correction
-  *
-  * @details Calculate the number of events in an ellipsoid with
-  * the three specified axes and the three specified sizes in the direction
-  * of those axes.  NOTE: The three axes must be mutually orthogonal unit vectors.
-  *
-  * @param events : list of [(weight, error), Q-vector] objects, one per event
-  * @param directions : List of 3 orthonormal directions for the axes of the ellipsoid.
-  * @param sizes : List of three values a,b,c giving half the length of the three axes of the ellisoid.
-  * @param sizesIn : List of three values a,b,c giving half the length of the three inner axes of the ellisoid.
-  * @param useOnePercentBackgroundCorrection : flag if one percent background correction should be used.
-  *
-  * @return The number of events (and associated error) that are in or on the specified ellipsoid
-  */
+   * @brief Calculate the number of events in an ellipsoid with background
+   * correction
+   *
+   * @details Calculate the number of events in an ellipsoid with
+   * the three specified axes and the three specified sizes in the direction
+   * of those axes.  NOTE: The three axes must be mutually orthogonal unit
+   * vectors.
+   *
+   * @param events : list of [(weight, error), Q-vector] objects, one per event
+   * @param directions : List of 3 orthonormal directions for the axes of the
+   * ellipsoid.
+   * @param sizes : List of three values a,b,c giving half the length of the
+   * three axes of the ellisoid.
+   * @param sizesIn : List of three values a,b,c giving half the length of the
+   * three inner axes of the ellisoid.
+   * @param useOnePercentBackgroundCorrection : flag if one percent background
+   * correction should be used.
+   *
+   * @return The number of events (and associated error) that are in or on the
+   * specified ellipsoid
+   */
   static std::pair<double, double>
   numInEllipsoidBkg(std::vector<SlimEvent> const &events,
                     std::vector<Mantid::Kernel::V3D> const &directions,
@@ -176,30 +185,32 @@ private:
                     const V3D &center = ELLIPSOIDCENTER);
 
   /**
-  * @brief Calculate the 3x3 covariance matrix of a list of Q-vectors
-  *
-  * @details Given a list of events, calculate the 3x3
-  * covariance matrix for finding the principal axes of that
-  * local event data.  Only events within the specified radius
-  * of the ellipsoid center will be used. A peak is assumed to lie
-  * at the center.
-  * The covariance matrix can be easily constructed. X, Y, Z of each peak
-  * position are the variables we wish to determine
-  * the covariance. The expected values of each correlation test X,X
-  * X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
-  * probabilities are equal, we can remove them from the sums of the expected
-  * values, and simply divide by the number of events for each matrix element.
-  * Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
-  *
-  * @param events : list of [(weight, error), Q-vector] objects, one per event
-  * @param matrix : A 3x3 matrix that will be filled out with the covariance matrix for the list of events.
-  * @param radius : Only events within this radius of the peak center will be used for calculating the covariance matrix.
-  * @param center : assumed average for the positions (in Q-space) of the events. Should be the Q-vector of the peak.
-  */
-  static void makeCovarianceMatrix(
-      std::vector<SlimEvent> const &events,
-      Kernel::DblMatrix &matrix, double radius,
-      const V3D &center = ELLIPSOIDCENTER);
+   * @brief Calculate the 3x3 covariance matrix of a list of Q-vectors
+   *
+   * @details Given a list of events, calculate the 3x3
+   * covariance matrix for finding the principal axes of that
+   * local event data.  Only events within the specified radius
+   * of the ellipsoid center will be used. A peak is assumed to lie
+   * at the center.
+   * The covariance matrix can be easily constructed. X, Y, Z of each peak
+   * position are the variables we wish to determine
+   * the covariance. The expected values of each correlation test X,X
+   * X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
+   * probabilities are equal, we can remove them from the sums of the expected
+   * values, and simply divide by the number of events for each matrix element.
+   * Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
+   *
+   * @param events : list of [(weight, error), Q-vector] objects, one per event
+   * @param matrix : A 3x3 matrix that will be filled out with the covariance
+   * matrix for the list of events.
+   * @param radius : Only events within this radius of the peak center will be
+   * used for calculating the covariance matrix.
+   * @param center : assumed average for the positions (in Q-space) of the
+   * events. Should be the Q-vector of the peak.
+   */
+  static void makeCovarianceMatrix(std::vector<SlimEvent> const &events,
+                                   Kernel::DblMatrix &matrix, double radius,
+                                   const V3D &center = ELLIPSOIDCENTER);
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
   static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,

@@ -405,7 +405,7 @@ void IntegrateEllipsoids::exec() {
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
     V3D hkl(peaks[i].getIntHKL());
-    V3D mnp(peaks[i].getIntMNP());  // modulated peak structure number
+    V3D mnp(peaks[i].getIntMNP()); // modulated peak structure number
 
     if (mnp[0] != 0 && ModDim == 0)
       ModDim = 1;
