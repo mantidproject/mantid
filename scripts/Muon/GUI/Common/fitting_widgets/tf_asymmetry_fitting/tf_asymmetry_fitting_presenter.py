@@ -11,8 +11,6 @@ from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter i
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_view import TFAsymmetryFittingView
 
-from mantid import logger
-
 
 class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
     """
@@ -35,6 +33,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self.model.tf_asymmetry_mode = self.view.tf_asymmetry_mode
 
     def handle_selected_group_pair_changed(self) -> None:
+        """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
         self.model.tf_asymmetry_mode = False
         self.view.tf_asymmetry_mode = self.model.tf_asymmetry_mode
         self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
@@ -42,14 +41,17 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         super().handle_selected_group_pair_changed()
 
     def handle_function_structure_changed(self) -> None:
+        """Handles when the function structure has been changed."""
         super().handle_function_structure_changed()
         self.update_tf_asymmetry_functions_in_model_and_view()
 
     def handle_dataset_name_changed(self) -> None:
+        """Handles when the selected dataset has been changed."""
         super().handle_dataset_name_changed()
         self.view.normalisation = self.model.current_normalisation()
 
-    def handle_tf_asymmetry_mode_changed(self, tf_asymmetry_on):
+    def handle_tf_asymmetry_mode_changed(self, tf_asymmetry_on: bool) -> None:
+        """Handles when TF Asymmetry fitting mode has been turned off or on."""
         if not self._check_tf_asymmetry_compliance(tf_asymmetry_on):
             return
 
@@ -69,15 +71,18 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.model.update_plot_guess(self.view.plot_guess)
 
-    def handle_normalisation_changed(self):
+    def handle_normalisation_changed(self) -> None:
+        """Handles when the normalisation line edit has been changed by the user."""
         self.model.set_current_normalisation(self.view.normalisation)
         self.model.update_plot_guess(self.view.plot_guess)
 
-    def update_and_reset_all_data(self):
+    def update_and_reset_all_data(self) -> None:
+        """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
         super().update_and_reset_all_data()
         self.update_tf_asymmetry_functions_in_model_and_view()
 
-    def update_tf_asymmetry_functions_in_model_and_view(self):
+    def update_tf_asymmetry_functions_in_model_and_view(self) -> None:
+        """Recalculates the current TF Asymmetry functions based on the ordinary fit functions."""
         if not self.model.recalculate_tf_asymmetry_functions():
             self.view.warning_popup("Failed to convert fit function to a TF Asymmetry function.")
         self.view.normalisation = self.model.current_normalisation()
@@ -92,7 +97,8 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         else:
             super().update_fit_function_in_model(fit_function)
 
-    def _check_tf_asymmetry_compliance(self, tf_asymmetry_on):
+    def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
+        """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
         if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
             self.view.warning_popup("Only Groups can be fitted in TF Asymmetry mode.")
             self.tf_asymmetry_mode_changed_notifier.notify_subscribers(False)
