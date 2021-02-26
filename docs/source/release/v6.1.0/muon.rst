@@ -21,6 +21,7 @@ Improvements
 Bug fixes
 #########
 - Fixed a bug where removing a pair in use would cause a crash.
+- Fixed a bug where an error message would appear in workbench after loading a run in both MA and FDA.
 
 ALC
 ---
