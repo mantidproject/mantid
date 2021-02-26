@@ -141,4 +141,66 @@ public:
     TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
   }
+
+  void test_HKL() {
+    LeanPeak p;
+    p.setHKL(1.0, 2.0, 3.0);
+    TS_ASSERT_EQUALS(p.getH(), 1.0);
+    TS_ASSERT_EQUALS(p.getK(), 2.0);
+    TS_ASSERT_EQUALS(p.getL(), 3.0);
+    p.setH(5);
+    p.setK(6);
+    p.setL(7);
+    TS_ASSERT_EQUALS(p.getH(), 5.0);
+    TS_ASSERT_EQUALS(p.getK(), 6.0);
+    TS_ASSERT_EQUALS(p.getL(), 7.0);
+    p.setHKL(V3D(1.0, 2.0, 3.0));
+    TS_ASSERT_EQUALS(p.getH(), 1.0);
+    TS_ASSERT_EQUALS(p.getK(), 2.0);
+    TS_ASSERT_EQUALS(p.getL(), 3.0);
+    TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
+  }
+
+  void test_isIndexed() {
+    LeanPeak p;
+    TS_ASSERT_EQUALS(false, p.isIndexed());
+    p.setHKL(1, 2, 3);
+    TS_ASSERT_EQUALS(true, p.isIndexed());
+  }
+
+  void test_get_intensity_over_sigma() {
+    const double intensity{100};
+    const double sigma{10};
+    LeanPeak p;
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    TS_ASSERT_EQUALS(p.getIntensityOverSigma(), intensity / sigma);
+  }
+
+  void test_get_intensity_over_sigma_empty_sigma() {
+    const double intensity{10};
+    const double sigma{0};
+    LeanPeak p;
+
+    p.setIntensity(intensity);
+    p.setSigmaIntensity(sigma);
+
+    const double expectedResult{0.0};
+    const double tolerance{1e-10};
+    TS_ASSERT_DELTA(p.getIntensityOverSigma(), expectedResult, tolerance);
+  }
+
+  void test_get_energy() {
+    const double initialEnergy{100};
+    const double finalEnergy{110};
+    LeanPeak p;
+
+    p.setInitialEnergy(initialEnergy);
+    p.setFinalEnergy(finalEnergy);
+
+    TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
+  }
+
 };

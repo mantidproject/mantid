@@ -679,6 +679,7 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
     m_monitorCount = other.m_monitorCount;
     m_row = other.m_row;
     m_col = other.m_col;
+    m_Qsample = other.m_Qsample;
     m_intHKL = other.m_intHKL;
     m_intMNP = other.m_intMNP;
     convention = other.convention;
