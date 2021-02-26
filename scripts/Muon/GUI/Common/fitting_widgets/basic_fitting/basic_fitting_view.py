@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction
+from mantidqt.utils.observer_pattern import GenericObserver
 from mantidqt.utils.qt import load_ui
 
 from Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
@@ -31,6 +32,11 @@ class BasicFittingView(QWidget, ui_fitting_layout):
 
         self.fit_controls_layout.addWidget(self.fit_controls)
         self.fit_function_options_layout.addWidget(self.fit_function_options)
+
+        self.disable_tab_observer = GenericObserver(self.disable_view)
+        self.enable_tab_observer = GenericObserver(self.enable_view)
+
+        self.disable_view()
 
     def set_slot_for_fit_generator_clicked(self, slot) -> None:
         """Connect the slot for the Fit Generator button."""
@@ -197,3 +203,11 @@ class BasicFittingView(QWidget, ui_fitting_layout):
     def switch_to_single(self) -> None:
         """Switches the view to single fit mode."""
         self.fit_function_options.switch_to_single()
+
+    def disable_view(self) -> None:
+        """Disable all widgets in this fitting widget."""
+        self.setEnabled(False)
+
+    def enable_view(self) -> None:
+        """Enable all widgets in this fitting widget."""
+        self.setEnabled(True)

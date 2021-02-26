@@ -30,7 +30,7 @@ class BasicFittingPresenter:
         self.thread_success = True
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
-        self.reset_tab_notifier = GenericObservable()
+        self.disable_fitting_notifier = GenericObservable()
         self.fitting_calculation_model = None
 
         self.fit_function_changed_notifier = GenericObservable()
@@ -71,7 +71,7 @@ class BasicFittingPresenter:
         self.update_and_reset_all_data()
 
         if self.model.number_of_datasets == 0:
-            self.reset_tab_notifier.notify_subscribers()
+            self.disable_fitting_notifier.notify_subscribers()
         else:
             self.enable_editing_notifier.notify_subscribers()
 
@@ -89,7 +89,7 @@ class BasicFittingPresenter:
         self.clear_cached_fit_functions()
 
         if self.model.number_of_datasets == 0:
-            self.reset_tab_notifier.notify_subscribers()
+            self.disable_fitting_notifier.notify_subscribers()
         else:
             self.enable_editing_notifier.notify_subscribers()
 
