@@ -13,6 +13,7 @@ from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+from mantidqt.widgets.workspacedisplay.table.table_model import BATCH_SIZE
 
 
 @start_qapplication
@@ -56,7 +57,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         current_rows = presenter.view.rowCount()
         ws.addRow({'test_col': 1.0})
 
-        self.assertEqual(current_rows + 1, presenter.view.rowCount())
+        self.assertEqual(current_rows + 1, presenter.view.model().max_rows())
 
     def test_gui_updated_when_row_added_from_sequence(self):
         ws = CreateEmptyTableWorkspace()
@@ -66,7 +67,31 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         current_rows = presenter.view.rowCount()
         ws.addRow([1.0])
 
-        self.assertEqual(current_rows + 1, presenter.view.rowCount())
+        self.assertEqual(current_rows + 1, presenter.view.model().max_rows())
+
+    def test_correct_number_of_rows_fetched_initially(self):
+        ws = CreateEmptyTableWorkspace()
+        ws.addColumn("double", "l")
+        presenter = TableWorkspaceDisplay(ws)
+        list(map(ws.addRow, ([i] for i in range(5*BATCH_SIZE))))
+        # fetch more starting at index 0,0
+        index = presenter.view.model().index(0, 0)
+        presenter.view.model().fetchMore(index)
+        self.assertEqual(5*BATCH_SIZE, presenter.view.model().max_rows())
+        self.assertEqual(BATCH_SIZE, presenter.view.model().rowCount())
+
+    def test_scrolling_updates_number_of_rows_fetched(self):
+        ws = CreateEmptyTableWorkspace()
+        ws.addColumn("double", "l")
+        presenter = TableWorkspaceDisplay(ws)
+        list(map(ws.addRow, ([i] for i in range(5*BATCH_SIZE))))
+        # fetch more starting at index 0,0
+        index = presenter.view.model().index(0, 0)
+        presenter.view.model().fetchMore(index)
+        self.assertEqual(BATCH_SIZE, presenter.view.model().rowCount())
+        # scrolling should update our batch size to 2*BATCH_SIZE
+        presenter.view.scrollToBottom()
+        self.assertEqual(2 * BATCH_SIZE, presenter.view.model().rowCount())
 
     def test_gui_updated_when_column_removed(self):
         ws = CreateEmptyTableWorkspace()
