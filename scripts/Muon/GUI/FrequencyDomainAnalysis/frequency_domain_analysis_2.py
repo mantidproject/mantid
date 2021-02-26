@@ -93,7 +93,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         # create the dockable widget
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.plot_widget = PlotWidget(self.context, self.fitting_tab.tf_asymmetry_fitting_model.get_active_fit_results,
+        self.plot_widget = PlotWidget(self.context, self.fitting_tab.fitting_model.get_active_fit_results,
                                       parent=self)
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.plot_widget.view)
@@ -206,8 +206,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
 
     def handle_transform_performed(self, new_data_workspace_name):
-        self.fitting_tab.tf_asymmetry_fitting_presenter.handle_new_data_loaded()
-        self.fitting_tab.tf_asymmetry_fitting_presenter.set_selected_dataset(new_data_workspace_name)
+        self.fitting_tab.fitting_presenter.handle_new_data_loaded()
+        self.fitting_tab.fitting_presenter.set_selected_dataset(new_data_workspace_name)
         self.plot_widget.presenter.update_plot(autoscale=True)
 
     def setup_disable_notifier(self):
@@ -266,19 +266,19 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.fitting_tab.tf_asymmetry_fitting_presenter.gui_context_observer)
+            self.fitting_tab.fitting_presenter.gui_context_observer)
 
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
-            self.fitting_tab.tf_asymmetry_fitting_presenter.gui_context_observer)
+            self.fitting_tab.fitting_presenter.gui_context_observer)
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.plot_widget.presenter.rebin_options_set_observer)
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
-            self.fitting_tab.tf_asymmetry_fitting_presenter.selected_group_pair_observer)
+            self.fitting_tab.fitting_presenter.selected_group_pair_observer)
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.fitting_tab.tf_asymmetry_fitting_presenter.selected_group_pair_observer)
+            self.fitting_tab.fitting_presenter.selected_group_pair_observer)
 
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)
@@ -297,7 +297,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             [self.transform.GroupPairObserver,
              self.plot_widget.presenter.added_group_or_pair_observer])
 
-        self.fitting_tab.tf_asymmetry_fitting_presenter.selected_fit_results_changed.add_subscriber(
+        self.fitting_tab.fitting_presenter.selected_fit_results_changed.add_subscriber(
             self.plot_widget.presenter.plot_selected_fit_observer)
 
         self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
@@ -339,7 +339,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
-        self.fitting_tab.tf_asymmetry_fitting_presenter.enable_editing_notifier.add_subscriber(
+        self.fitting_tab.fitting_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
@@ -349,7 +349,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
-        self.fitting_tab.tf_asymmetry_fitting_presenter.disable_editing_notifier.add_subscriber(
+        self.fitting_tab.fitting_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(
@@ -377,7 +377,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_on_recalculation_finished_notifier(self):
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
-            self.fitting_tab.tf_asymmetry_fitting_presenter.input_workspace_observer)
+            self.fitting_tab.fitting_presenter.input_workspace_observer)
 
         self.grouping_tab_widget.group_tab_presenter.calculation_finished_notifier.add_subscriber(
             self.update_plot_observer)
