@@ -1,6 +1,6 @@
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
-from mantid.simpleapi import CalculateDIFC, mtd
+from mantid.simpleapi import CalculateDIFC, LoadEmptyInstrument, mtd
 import matplotlib.pyplot as plt
 import six
 from matplotlib.patches import Circle
@@ -83,11 +83,29 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(calws_a, calws_b):
+def difc_plot2d(wksp_a='', wksp_b=''):
+    group_a = str(wksp_a) + "_group"
+    cal_a = str(wksp_a) + "_cal"
+    group_b = str(wksp_b) + "_group"
+    cal_b = str(wksp_b) + "_cal"
 
-    # TODO: add WS name check for group and cal
-    difc_a = CalculateDIFC(str(calws_a) + "_group", CalibrationWorkspace=str(calws_a) + "_cal")
-    difc_b = CalculateDIFC(str(calws_b) + "_group", CalibrationWorkspace=str(calws_b) + "_cal")
+    # Check that input workspaces exist
+    if not mtd.doesExist(group_a) or not mtd.doesExist(cal_a):
+        raise RuntimeError(
+            "Expected workspaces '{}' and '{}' to exist".format(group_a, cal_a))
+
+    if wksp_b == '':
+        # If no second workspace is given, then load default instrument to compare against
+        instr_name = mtd[ group_a ].getInstrument().getName()
+        instr_ws = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__{}_difc_b".format(instr_name))
+        difc_b = CalculateDIFC(instr_ws)
+    else:
+        if not mtd.doesExist(group_b) or not mtd.doesExist(cal_b):
+            raise RuntimeError(
+                "Expected workspaces '{}' and '{}' to exist".format(group_b, cal_b))
+        difc_b = CalculateDIFC(group_b, CalibrationWorkspace=cal_b)
+
+    difc_a = CalculateDIFC(group_a, CalibrationWorkspace=cal_a)
 
     delta = difc_b - difc_a
 
