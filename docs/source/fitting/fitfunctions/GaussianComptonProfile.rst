@@ -14,7 +14,7 @@ Gaussian approximation convoluted with an instrument resolution function,
 that is approximated by a Voigt function. The function approximates the Count rate, :math:`C(t)` as [1],
 
 .. math::
-    C(t) = \left[\frac{E_0I(E_0)}{q}\right](t) A_m J_M(y_M)\otimes R_M(t)  \label{a}  \tag{1}
+    C(t) = \left[\frac{E_0I(E_0)}{q}\right](t) A_m J_M(y_M)\otimes R_M(t)  \label{a}
 
 for the given mass, M, :math:`J_M` is approximated using a Gaussian and :math:`R_M` is the resolution function.
 In Equation :math:`\ref{a}`, the term :math:`A_M` is proportional to the scattering intensity and :math:`\left[\frac{E_0I(E_0)}{q}\right](t)`
