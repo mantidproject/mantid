@@ -33,19 +33,19 @@ public:
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(0, 0, 0))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D())
 
-    TS_ASSERT_THROWS(p.getDetectorID(), const std::runtime_error &)
+    TS_ASSERT_EQUALS(p.getDetectorID(), -1)
     TS_ASSERT_THROWS(p.getDetector(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.getInstrument(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.findDetector(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.getDetectorPosition(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getScattering(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getAzimuthal(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getTOF(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.getDetPos(), const std::runtime_error &)
     TS_ASSERT_THROWS(p.getSamplePos(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getL1(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getL2(), const std::runtime_error &)
+    TS_ASSERT(std::isnan(p.getTOF()))
+    TS_ASSERT(std::isnan(p.getScattering()))
+    TS_ASSERT(std::isnan(p.getAzimuthal()))
+    TS_ASSERT(std::isnan(p.getL1()))
+    TS_ASSERT(std::isnan(p.getL2()))
   }
 
   void test_Qsample_constructor() {
@@ -90,6 +90,8 @@ public:
     TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-5)
     TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-5)
     TS_ASSERT_DELTA(p.getWavelength(), 1., 1e-9)
+    TS_ASSERT_DELTA(p.getDSpacing(), 1.679251908362714, 1e-9)
+    TS_ASSERT_DELTA(p.getScattering(), 0.6046731932, 1e-9)
   }
 
   void test_Qsample_gon_wavelength_constructor() {
@@ -107,5 +109,20 @@ public:
     TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-5)
     TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-5)
     TS_ASSERT_DELTA(p.getWavelength(), 1., 1e-9)
+  }
+
+  void test_copyConstructor() {
+    // This goniometer should just swap x and y of q
+    Mantid::Kernel::Matrix<double> gon(3, 3);
+    gon[0][1] = 1;
+    gon[1][0] = 1;
+    gon[2][2] = 1;
+
+    LeanPeak p(V3D(1, 2, 3), gon, 1.);
+    // Default (not-explicit) copy constructor
+    LeanPeak p2(p);
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), p2.getQSampleFrame());
+    TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
+    TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
   }
 };

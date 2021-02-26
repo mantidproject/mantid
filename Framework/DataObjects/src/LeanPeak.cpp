@@ -177,9 +177,7 @@ void LeanPeak::setDetectorID([[maybe_unused]] int id) {
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int LeanPeak::getDetectorID() const {
-  throw std::runtime_error("LeanPeak::getDetectorID(): Has no detector ID");
-}
+int LeanPeak::getDetectorID() const { return -1; }
 
 //----------------------------------------------------------------------------------------------
 /** Set the instrument (and save the source/sample pos).
@@ -224,25 +222,25 @@ double LeanPeak::getWavelength() const {
 /** Calculate the time of flight (in microseconds) of the neutrons for this
  * peak,
  * using the geometry of the detector  */
-double LeanPeak::getTOF() const { throw std::runtime_error("not implemented"); }
+double LeanPeak::getTOF() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
 // -------------------------------------------------------------------------------------
 /** Calculate the scattering angle of the peak  */
 double LeanPeak::getScattering() const {
-  throw std::runtime_error("not implemented");
+  return asin(getWavelength() / (2 * getDSpacing())) * 2;
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the azimuthal angle of the peak  */
 double LeanPeak::getAzimuthal() const {
-  throw std::runtime_error("not implemented");
+  return std::numeric_limits<double>::quiet_NaN();
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
-double LeanPeak::getDSpacing() const {
-  throw std::runtime_error("not implemented");
-}
+double LeanPeak::getDSpacing() const { return 2 * M_PI / m_Qsample.norm(); }
 
 //----------------------------------------------------------------------------------------------
 /** Return the Q change (of the lattice, k_i - k_f) for this peak.
@@ -548,11 +546,15 @@ Mantid::Kernel::V3D LeanPeak::getSamplePos() const {
 
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
-double LeanPeak::getL1() const { throw std::runtime_error("not implemented"); }
+double LeanPeak::getL1() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
-double LeanPeak::getL2() const { throw std::runtime_error("not implemented"); }
+double LeanPeak::getL2() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
 // -------------------------------------------------------------------------------------
 /** Helper function for displaying/sorting peaks
