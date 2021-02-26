@@ -39,7 +39,7 @@ Bugfixes
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
-
+- Fix segmentation violation issues for ILL instruments D1B, D2B, and D20, caused by change of scanned data type
 
 Engineering Diffraction
 -----------------------
