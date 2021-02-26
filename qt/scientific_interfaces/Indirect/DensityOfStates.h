@@ -39,6 +39,11 @@ private:
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
+  enum class InputFormat : int;
+  InputFormat filenameToFormat(QString filename);
+  std::string formatToFilePropName(InputFormat format);
+  bool isPdosFile(InputFormat dosFileFormat);
+
   /// The ui form
   Ui::DensityOfStates m_uiForm;
   /// Name of output workspace
