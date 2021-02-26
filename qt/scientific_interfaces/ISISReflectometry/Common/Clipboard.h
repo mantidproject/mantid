@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IClipboard.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "Reduction/Group.h"
@@ -15,7 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard : public IClipboard {
 public:
   struct Item {
     Item(MantidQt::MantidWidgets::Batch::RowLocation location,
@@ -32,20 +33,22 @@ public:
       boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
           subtreeRoots);
 
-  bool isInitialized() const;
-  int numberOfRoots() const;
-  bool isGroupLocation(int rootIndex) const;
-  std::string groupName(int rootIndex) const;
-  void setGroupName(int rootIndex, std::string const &groupName);
-  Group createGroupForRoot(int rootIndex) const;
-  std::vector<boost::optional<Row>> createRowsForAllRoots() const;
+  bool isInitialized() const override;
+  int numberOfRoots() const override;
+  bool isGroupLocation(int rootIndex) const override;
+  std::string groupName(int rootIndex) const override;
+  void setGroupName(int rootIndex, std::string const &groupName) override;
+  Group createGroupForRoot(int rootIndex) const override;
+  std::vector<boost::optional<Row>> createRowsForAllRoots() const override;
 
-  std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &subtrees() const;
-  std::vector<MantidQt::MantidWidgets::Batch::Subtree> &mutableSubtrees();
+  std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &
+  subtrees() const override;
+  std::vector<MantidQt::MantidWidgets::Batch::Subtree> &
+  mutableSubtrees() override;
   std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-  subtreeRoots() const;
+  subtreeRoots() const override;
   std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &
-  mutableSubtreeRoots();
+  mutableSubtreeRoots() override;
 
 private:
   // The subtrees for each of the roots. Note that the Rows here contain
@@ -65,8 +68,7 @@ private:
   std::vector<boost::optional<Row>> createRowsForSubtree(
       MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
-
-bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);
+bool containsGroups(IClipboard const &clipboard);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -13,9 +13,12 @@ set(
 set(
   COMMON_INC_FILES
   Clipboard.h
+  ClipboardFactory.h
   DllConfig.h
   First.h
   GetInstrumentParameter.h
+  IClipboard.h
+  IClipboardFactory.h
   IndexOf.h
   InstrumentParameters.h
   Map.h

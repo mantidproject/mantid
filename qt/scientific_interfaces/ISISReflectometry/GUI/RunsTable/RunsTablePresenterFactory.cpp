@@ -13,14 +13,14 @@ namespace ISISReflectometry {
 
 RunsTablePresenterFactory::RunsTablePresenterFactory(
     std::vector<std::string> const &instruments, double thetaTolerance,
-    Plotter plotter)
-    : m_instruments(instruments), m_thetaTolerance(thetaTolerance),
+    IClipboardFactory *cbf, Plotter plotter)
+    : m_instruments(instruments), m_thetaTolerance(thetaTolerance), m_cbf(cbf),
       m_plotter(std::move(plotter)) {}
 
 std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::
 operator()(IRunsTableView *view) const {
   return std::make_unique<RunsTablePresenter>(
-      view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
+      view, m_instruments, m_thetaTolerance, ReductionJobs(), m_cbf, m_plotter);
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

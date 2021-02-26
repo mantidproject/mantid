@@ -238,6 +238,79 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyCellTextChangedGroup() {
+    auto presenter = makePresenter(m_view, oneGroupWithTwoRowsModel());
+    auto groupIndex = location(0);
+    auto const column = 0;
+    const std::string oldValueGrp = "Test Group 1";
+    const std::string newValueGrp = "Group Name Changed";
+
+    presenter.notifyCellTextChanged(groupIndex, column, oldValueGrp,
+                                    newValueGrp);
+
+    TS_ASSERT_EQUALS(presenter.runsTable().reductionJobs()[0].name(),
+                     newValueGrp);
+
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyCellTextChangedCell() {
+    auto presenter = makePresenter(m_view, oneGroupWithTwoRowsModel());
+    auto rowIndex = location(0, 1);
+    auto const column = 0;
+    const std::string runNo = "12345";
+
+    auto const srcValue = 0.6;
+    auto const srcStr = std::to_string(srcValue);
+    auto srcCell = Cell(srcStr);
+
+    expectCellThenDefault(rowIndex, column, srcCell, srcCell);
+    updatedCellsAre(rowIndex, cellsArray("12345", srcStr));
+
+    presenter.notifyCellTextChanged(rowIndex, column, runNo, srcStr);
+    TS_ASSERT_EQUALS(getRow(presenter, 0, 1)->theta(), srcValue);
+
+    verifyAndClearExpectations();
+  }
+
+  void testNotifySelectionChanged() {
+    auto presenter = makePresenter(m_view, oneGroupWithTwoRowsModel());
+
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const locations = {
+        location(0, 0), location(0, 1), location(0, 2), location(1, 1)};
+
+    selectedRowLocationsAre(m_jobs, locations);
+    presenter.notifySelectionChanged();
+
+    TS_ASSERT_EQUALS(presenter.runsTable().selectedRowLocations(), locations);
+
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyCopyRowsRequestedInvalid() {
+    auto presenter = makePresenter(m_view, twoGroupsWithTwoRowsModel());
+
+    ON_CALL(m_clipboard, isInitialized()).WillByDefault(Return(false));
+    EXPECT_CALL(m_view, invalidSelectionForCopy());
+    presenter.notifyCopyRowsRequested();
+
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyCopyRowsRequestedValid() {
+    auto presenter = makePresenter(m_view, twoGroupsWithTwoRowsModel());
+
+    ON_CALL(m_clipboard, isInitialized()).WillByDefault(Return(true));
+    EXPECT_CALL(m_jobs, clearSelection());
+    presenter.notifyCopyRowsRequested();
+
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyCutRowsRequested() {
+    // presenter
+  }
+
   void testNotifyRowOutputsChangedRounding() {
     auto presenter = makePresenter(
         m_view, oneGroupWithARowWithInputQRangeModelMixedPrecision());

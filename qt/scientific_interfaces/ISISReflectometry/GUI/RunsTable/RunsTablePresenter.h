@@ -7,7 +7,10 @@
 #pragma once
 #include "../Runs/IRunsPresenter.h"
 #include "Common/Clipboard.h"
+#include "Common/ClipboardFactory.h"
 #include "Common/DllConfig.h"
+#include "Common/IClipboard.h"
+#include "Common/IClipboardFactory.h"
 #include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
@@ -27,6 +30,7 @@ public:
   RunsTablePresenter(IRunsTableView *view,
                      std::vector<std::string> const &instruments,
                      double thetaTolerance, ReductionJobs reductionJobs,
+                     IClipboardFactory *clipboardFactory,
                      const IPlotter &plotter);
 
   void notifyRemoveAllRowsAndGroupsRequested() override;
@@ -167,7 +171,9 @@ private:
 
   IRunsTableView *m_view;
   RunsTable m_model;
-  Clipboard m_clipboard;
+  ClipboardFactory m_defaultCBF = ClipboardFactory();
+  IClipboard *m_clipboard;
+  IClipboardFactory *m_clipboardFactory;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
