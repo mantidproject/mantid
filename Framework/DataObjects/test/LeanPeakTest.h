@@ -202,5 +202,4 @@ public:
 
     TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
   }
-
 };

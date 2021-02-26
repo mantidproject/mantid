@@ -29,6 +29,7 @@ set(SRC_FILES
     src/OffsetsWorkspace.cpp
     src/Peak.cpp
     src/LeanPeak.cpp
+    src/BasePeak.cpp
     src/PeakColumn.cpp
     src/PeakNoShapeFactory.cpp
     src/PeakShapeBase.cpp
@@ -110,6 +111,7 @@ set(INC_FILES
     inc/MantidDataObjects/OffsetsWorkspace.h
     inc/MantidDataObjects/Peak.h
     inc/MantidDataObjects/LeanPeak.h
+    inc/MantidDataObjects/BasePeak.h
     inc/MantidDataObjects/PeakColumn.h
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
