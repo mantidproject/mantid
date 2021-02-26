@@ -25,10 +25,10 @@ def set_matplotlib_backend():
             backend = 'Qt5Agg'
     else:
         from qtpy import PYQT4, PYQT5  # noqa
-        if PYQT4:
-            backend = 'Qt4Agg'
-        elif PYQT5:
+        if PYQT5:
             backend = 'Qt5Agg'
+        elif PYQT4:
+            backend = 'Qt4Agg'
         else:
             raise RuntimeError('Do not know which matplotlib backend to set')
         matplotlib.use(backend)
