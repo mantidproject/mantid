@@ -552,21 +552,28 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
+  int monitorIndex = 0;
+  int startIndex = NUMBER_MONITORS;
+  if (m_instName == "IN5" || m_instName == "PANTHER") {
+    startIndex = 0;
+    monitorIndex = m_numberDetectorsActual;
+  }
+
   // Assign monitor counts
-  m_outWorkspace->mutableX(0) = axis;
-  m_outWorkspace->mutableY(0) = monitor;
+  m_outWorkspace->mutableX(monitorIndex) = axis;
+  m_outWorkspace->mutableY(monitorIndex) = monitor;
   std::transform(monitor.begin(), monitor.end(),
-                 m_outWorkspace->mutableE(0).begin(),
+                 m_outWorkspace->mutableE(monitorIndex).begin(),
                  [](double e) { return sqrt(e); });
 
   // Assign detector counts
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = NUMBER_MONITORS;
-       i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
+  for (int i = startIndex;
+       i < static_cast<int>(m_numberDetectorsActual + startIndex); ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-    auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    const auto tubeNumber = (i - startIndex) / m_sizeDim2;
+    auto pixelInTubeNumber = (i - startIndex) % m_sizeDim2;
     if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
       pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
     }
@@ -578,6 +585,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     }
     m_outWorkspace->mutableX(i) = axis;
   }
+
   // Link the instrument
   loadStaticInstrument();
   if (m_instName != "IN5" && m_instName != "PANTHER") {
