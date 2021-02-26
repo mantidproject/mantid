@@ -184,6 +184,9 @@ class BasicFittingPresenter:
 
         self.fit_function_changed_notifier.notify_subscribers()
 
+        # Required to update the function browser to display the errors when first adding a function.
+        self.view.set_current_dataset_index(self.model.current_dataset_index)
+
     def handle_function_parameter_changed(self, function_index, parameter) -> None:
         """Handle when the value of a parameter in a function is changed."""
         full_parameter = f"{function_index}{parameter}"
