@@ -111,10 +111,13 @@ public:
     // Set up calculation so that it collapses down to 2*M_PI/wavelength by
     // setting initial theta to M_PI/2 and final theta to zero
     CalculateReflectometryQxQz calculator;
-    calculator.setThetaIncident(90);
+    const double theta_i = 90.0;
+    const double theta_f = 0.0;
+    calculator.setThetaIncident(theta_i);
     double qx;
     const double wavelength = 0.1;
-    TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(0));
+    const double twoTheta = theta_f + theta_i;
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(twoTheta));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim0(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
@@ -122,12 +125,12 @@ public:
   void test_recalculate_Qx() {
     CalculateReflectometryQxQz calculator;
     calculator.setThetaIncident(0);
-    calculator.setThetaFinal(0);
+    calculator.setTwoTheta(0);
     const double wavelength = 0.1;
     TS_ASSERT_DELTA(0, calculator.calculateDim0(wavelength), 0.0001);
 
     // Now reset the final theta and should be able to re-execute
-    calculator.setThetaFinal(90);
+    calculator.setTwoTheta(90);
     TS_ASSERT_DELTA(-2 * M_PI / wavelength,
                     calculator.calculateDim0(wavelength), 0.0001);
   }
@@ -142,7 +145,7 @@ public:
     calculator.setThetaIncident(0);
     double qx;
     const double wavelength = 0.1;
-    TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(90));
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(90));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim1(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
@@ -150,13 +153,13 @@ public:
   void test_recalculate_Qz() {
     CalculateReflectometryQxQz calculator;
     calculator.setThetaIncident(90);
-    calculator.setThetaFinal(90);
+    calculator.setTwoTheta(180);
     const double wavelength = 0.1;
     TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength),
                     calculator.calculateDim1(wavelength), 0.001);
 
     // Now reset the final theta and should be able to re-execute
-    calculator.setThetaFinal(0);
+    calculator.setTwoTheta(90);
     TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength),
                     0.001);
   }

@@ -28,7 +28,6 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         workspace_nexus_file = workspace_name + ".nxs"
 
         PIX=1.1E-3 #m
-        SC=75
         avgDB=29
         Load(Filename=workspace_nexus_file,OutputWorkspace=workspace_name)
         X=mtd[workspace_name]
@@ -46,7 +45,7 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         I=mtd['I'][0]
 
         # Move the detector so that the detector channel matching the reflected beam is at 0,0
-        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*( (SC-avgDB)/2.0 +avgDB) )
+        MoveInstrumentComponent(Workspace=I,ComponentName="lineardetector",X=0,Y=0,Z=-PIX*avgDB)
 
         # Should now have signed theta vs Lambda
         ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
@@ -87,9 +86,9 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         pipf_comparison = CompareMDWorkspaces(Workspace1='PiPf_rebinned',Workspace2='PiPf_benchmark', Tolerance=0.01, CheckEvents=False)
 
         # Assert against the outputs
-        self.assertEqual(int(qxqy_comparison[0]),  1)
-        self.assertEqual(int(kikf_comparison[0]),  1)
-        self.assertEqual(int(pipf_comparison[0]),  1)
+        self.assertEqual(qxqy_comparison[0],  True, qxqy_comparison[1])
+        self.assertEqual(kikf_comparison[0],  True, kikf_comparison[1])
+        self.assertEqual(pipf_comparison[0],  True, pipf_comparison[1])
 
         return True
 

@@ -106,23 +106,23 @@ public:
 
     CalculateReflectometryP A;
     A.setThetaIncident(0);
-    A.setThetaFinal(0);
+    A.setTwoTheta(0);
     TS_ASSERT_EQUALS(0, A.calculateDim1(wavelength));
 
     CalculateReflectometryP B;
     B.setThetaIncident(90);
-    B.setThetaFinal(0);
+    B.setTwoTheta(90);
     TS_ASSERT_DELTA(2 * M_PI / wavelength, B.calculateDim1(wavelength), 0.0001);
 
     CalculateReflectometryP C;
     C.setThetaIncident(0);
-    C.setThetaFinal(90);
+    C.setTwoTheta(90);
     TS_ASSERT_DELTA(-2 * M_PI / wavelength, C.calculateDim1(wavelength),
                     0.0001);
 
     CalculateReflectometryP D;
     D.setThetaIncident(90);
-    D.setThetaFinal(90);
+    D.setTwoTheta(180);
     TS_ASSERT_EQUALS(0, A.calculateDim1(wavelength));
   }
 
@@ -131,22 +131,22 @@ public:
 
     CalculateReflectometryP A;
     A.setThetaIncident(0);
-    A.setThetaFinal(0);
+    A.setTwoTheta(0);
     TS_ASSERT_EQUALS(0, A.calculateDim0(wavelength));
 
     CalculateReflectometryP B;
     B.setThetaIncident(90);
-    B.setThetaFinal(0);
+    B.setTwoTheta(90);
     TS_ASSERT_DELTA(2 * M_PI / wavelength, B.calculateDim0(wavelength), 0.0001);
 
     CalculateReflectometryP C;
     C.setThetaIncident(0);
-    C.setThetaFinal(90);
+    C.setTwoTheta(90);
     TS_ASSERT_DELTA(2 * M_PI / wavelength, C.calculateDim0(wavelength), 0.0001);
 
     CalculateReflectometryP D;
     D.setThetaIncident(90);
-    D.setThetaFinal(90);
+    D.setTwoTheta(180);
     TS_ASSERT_DELTA(4 * M_PI / wavelength, D.calculateDim0(wavelength), 0.0001);
   }
 };

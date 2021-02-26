@@ -29,16 +29,17 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) override {
+  void updateThetaIncident(double thetaIncident) override {
     m_sin_theta_i = sin(to_radians_factor * thetaIncident);
   }
 
   /**
-   Setter for the final theta value require for the calculation. Internally
+   Set the final theta value from the detector twoTheta angle. Internally
    pre-calculates and caches to cos theta for speed.
-   @param thetaFinal: final theta value in degrees
+   @param twoTheta: detector twoTheta value in degrees
    */
-  void setThetaFinal(double thetaFinal) override {
+  void setTwoTheta(double twoTheta) override {
+    const double thetaFinal = twoTheta - m_theta_i;
     m_sin_theta_f = sin(to_radians_factor * thetaFinal);
   }
 
@@ -66,7 +67,7 @@ public:
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
                                              double thetaUpper,
                                              double thetaLower) override {
-    setThetaFinal(thetaLower);
+    setTwoTheta(thetaLower);
     auto dim1UpperRightVertex = calculateDim1(lamLower);
     auto dim0LowerLeftVertex = calculateDim0(lamUpper);
     // UPPER LEFT VERTEX
@@ -74,7 +75,7 @@ public:
         calculateDim0(lamUpper), // highest qx
         calculateDim1(lamLower));
 
-    setThetaFinal(thetaUpper);
+    setTwoTheta(thetaUpper);
     const Mantid::Kernel::V2D firstVertex(dim0LowerLeftVertex,
                                           calculateDim1(lamUpper)); // lowest qz
 
