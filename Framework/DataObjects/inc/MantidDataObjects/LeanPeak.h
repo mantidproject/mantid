@@ -36,9 +36,12 @@ public:
   friend class PeakColumn;
 
   LeanPeak();
-  LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer);
   LeanPeak(const Mantid::Kernel::V3D &QSampleFrame);
+  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
+           const Mantid::Kernel::Matrix<double> &goniometer);
+  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
+  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
+           const Mantid::Kernel::Matrix<double> &goniometer, double wavelength);
 
   /// Copy constructor
   LeanPeak(const LeanPeak &other);

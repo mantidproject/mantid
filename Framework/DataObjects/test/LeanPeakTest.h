@@ -50,7 +50,8 @@ public:
 
   void test_Qsample_constructor() {
     LeanPeak p(V3D(1, 2, 3));
-    p.setWavelength(1.);
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(1, 2, 3))
 
     // This goniometer should just swap x and y of q
     Mantid::Kernel::Matrix<double> gon(3, 3);
@@ -58,6 +59,48 @@ public:
     gon[1][0] = 1;
     gon[2][2] = 1;
     p.setGoniometerMatrix(gon);
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
+
+    p.setWavelength(1.);
+    TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-5)
+    TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-5)
+    TS_ASSERT_DELTA(p.getWavelength(), 1., 1e-9)
+  }
+
+  void test_Qsample_gon_constructor() {
+
+    // This goniometer should just swap x and y of q
+    Mantid::Kernel::Matrix<double> gon(3, 3);
+    gon[0][1] = 1;
+    gon[1][0] = 1;
+    gon[2][2] = 1;
+
+    LeanPeak p(V3D(1, 2, 3), gon);
+
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
+  }
+
+  void test_Qsample_wavelength_constructor() {
+    LeanPeak p(V3D(1, 2, 3), 1.);
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(1, 2, 3))
+
+    TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-5)
+    TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-5)
+    TS_ASSERT_DELTA(p.getWavelength(), 1., 1e-9)
+  }
+
+  void test_Qsample_gon_wavelength_constructor() {
+
+    // This goniometer should just swap x and y of q
+    Mantid::Kernel::Matrix<double> gon(3, 3);
+    gon[0][1] = 1;
+    gon[1][0] = 1;
+    gon[2][2] = 1;
+
+    LeanPeak p(V3D(1, 2, 3), gon, 1.);
 
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))

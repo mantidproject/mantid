@@ -42,13 +42,32 @@ LeanPeak::LeanPeak()
 }
 
 //----------------------------------------------------------------------------------------------
+/** Constructor that uses the Q position of the peak (in the sample frame)
+ * and a goniometer rotation matrix.
+ * No detector ID is set.
+ *
+ * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
+ *the sample frame (goniometer rotation accounted for).
+ */
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame)
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_initialEnergy(0.0), m_finalEnergy(0.0),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  this->setQSampleFrame(QSampleFrame);
+}
+
+//----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
  * No detector ID is set.
  *
- * @param QLabFrame :: Q of the center of the peak, in reciprocal space
+ * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  * @param goniometer :: a 3x3 rotation matrix
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
                    const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
@@ -60,7 +79,7 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
-  this->setQLabFrame(QLabFrame);
+  this->setQSampleFrame(QSampleFrame);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -70,18 +89,41 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QLabFrame,
  *
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
- * @param goniometer :: optional, a 3x3 rotation matrix, to allow convertion to
- *QLab
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame)
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_initialEnergy(0.0), m_finalEnergy(0.0),
-      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_peakNumber(0), m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setQSampleFrame(QSampleFrame);
+  this->setWavelength(wavelength);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor that uses the Q position of the peak (in the lab frame).
+ * No detector ID is set.
+ *
+ * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
+ * @param goniometer :: a 3x3 rotation matrix
+ */
+LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
+                   const Mantid::Kernel::Matrix<double> &goniometer,
+                   double wavelength)
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
+      m_runNumber(0), m_monitorCount(0), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
+    throw std::invalid_argument(
+        "Peak::ctor(): Goniometer matrix must non-singular.");
+  this->setQSampleFrame(QSampleFrame);
+  this->setWavelength(wavelength);
 }
 
 /**
@@ -129,7 +171,8 @@ void LeanPeak::setWavelength(double wavelength) {
  * @param id :: ID of detector at the centre of the peak.
  */
 void LeanPeak::setDetectorID([[maybe_unused]] int id) {
-  throw std::runtime_error("LeanPeak::setDetectorID(): Has no detector ID");
+  throw std::runtime_error(
+      "LeanPeak::setDetectorID(): Can't set detectorID on LeanPeak");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,7 +189,8 @@ int LeanPeak::getDetectorID() const {
  */
 void LeanPeak::setInstrument([
     [maybe_unused]] const Geometry::Instrument_const_sptr &inst) {
-  throw std::runtime_error("LeanPeak::setInstrument(): Has no instrument");
+  throw std::runtime_error(
+      "LeanPeak::setInstrument(): Can't set instrument on LeanPeak");
 }
 
 //----------------------------------------------------------------------------------------------
