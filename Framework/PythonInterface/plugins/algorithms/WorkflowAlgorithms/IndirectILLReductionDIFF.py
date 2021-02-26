@@ -85,7 +85,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         """
         run = None
         if len(self.runs) > 1:
-            run = mtd[mtd[ws].getNames()[0]].getRun()
+            run = mtd[ws][0].getRun()
         else:
             run = mtd[ws].getRun()
 
@@ -126,7 +126,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
                      LoaderOptions={"LoadDetectors": "Diffractometer"}, startProgress=0, endProgress=0.9)
 
         if len(self.runs) > 1:
-            run = mtd[mtd[self.output].getNames()[0]].getRun()
+            run = mtd[self.output][0].getRun()
         else:
             run = mtd[self.output].getRun()
 
