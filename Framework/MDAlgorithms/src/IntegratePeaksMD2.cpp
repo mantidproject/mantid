@@ -1027,6 +1027,9 @@ void IntegratePeaksMD2::calcCovar(
 
   size_t nd = peak_events[0].first.size();
 
+  // put this inside big loop below so don't loop over it twice
+  // if all stdevs larger than sphere shrink it
+  // if volume larger han sphere shirink by ratio volsphere/(3*stdevs)
   std::vector<bool> useEvent(peak_events.size(), true);
   Matrix<double> invCov;
   double prev_cov_det = DBL_MAX;
@@ -1045,13 +1048,15 @@ void IntegratePeaksMD2::calcCovar(
           V3D(event.first[0], event.first[1], event.first[2]) - mean;
       const auto tmp = invCov * displ;
       auto mdsq = tmp.scalar_prod(displ);
-      if (mdsq > boost::math::quantile(chisq, 0.99)) {
-        // exclude if outside 3 stdevs
+      if (mdsq > boost::math::quantile(chisq, 0.997)) {
+        // exclude points outside 3 stdevs
         useEvent[ievent] = false;
         masked += 1;
       }
     }
   }
+
+  // if masked == 0 then return
 
   // initialise matrices etc. to hold running totals
   mean = pos;  // clear whatever was passed
@@ -1060,48 +1065,42 @@ void IntegratePeaksMD2::calcCovar(
   Matrix<double> cov_mat(nd, nd);
   Matrix<double> Pinv(nd, nd);
   if (qAxisIsFixed) {
-    mean = Pinv * mean;
-    // 2D covar in plane perp to Q (uhat,vhat basis)
-    cov_mat = Matrix<double>(nd - 1, nd - 1);
     // transformation from Qlab to Qhat, vhat and uhat,
     getPinv(pos, Pinv);
-  } else {
-    cov_mat = Matrix<double>(nd, nd);
+    mean = Pinv * mean;
   }
 
+  cov_mat = Matrix<double>(nd, nd);
   for (size_t ievent = 0; ievent < peak_events.size(); ievent++) {
     if (useEvent[ievent]) {
       const auto event = peak_events[ievent];
       auto center = event.first;
-      const auto signal = event.second;
-
-      w_sum += signal;
-
       if (qAxisIsFixed) {
         // transform coords to Q, uhat, vhat basis
         center = Pinv * center;
       }
+      const auto signal = event.second;
+      w_sum += signal;
+
       // update mean - this needs to depend on whther using Centroid!
       for (size_t d = 0; d < nd; ++d) {
         mean[d] += (signal / w_sum) * (center[d] - mean[d]);
       }
+
+      // weight for variance
       auto wi = signal * (w_sum - signal) / w_sum;
+      size_t istart = 0;
       if (qAxisIsFixed) {
-        // get variance along Q
-        var_Qhat += wi* pow((center[0] - mean[0]), 2);
+        // component along Q (skipped in next nested loops below)
+        cov_mat[0][0] += wi* pow((center[0] - mean[0]), 2);
+        istart = 1;
       }
-      for (size_t row = 0; row < cov_mat.numRows(); ++row) {
-        for (size_t col = 0; col < cov_mat.numRows(); ++col) {
+      for (size_t row = istart; row < cov_mat.numRows(); ++row) {
+        for (size_t col = istart; col < cov_mat.numRows(); ++col) {
           // symmeteric matrix
           if (row <= col) {
-            double cov = 0.0;
-            if (!qAxisIsFixed) {
-              cov = wi * (center[row] - mean[row]) *
+            auto cov = wi * (center[row] - mean[row]) *
                     (center[col] - mean[col]);
-            } else {
-              cov = wi * (center[row + 1] - mean[row + 1]) *
-                    (center[col + 1] - mean[col + 1]);
-            }
             if (row == col) {
               cov_mat[row][col] += cov;
             } else {
