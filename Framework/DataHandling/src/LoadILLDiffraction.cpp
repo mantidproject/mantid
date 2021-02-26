@@ -65,8 +65,11 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B
+  // the third one is to recognize IN5/PANTHER scan mode
   if (descriptor.pathExists("/entry0/instrument/2theta") ||
-      descriptor.pathExists("/entry0/instrument/Canne")) {
+      descriptor.pathExists("/entry0/instrument/Canne") ||
+      (descriptor.pathExists("/entry0/data_scan") &&
+       descriptor.pathExists("/entry0/experiment_identifier"))) {
     return 80;
   } else {
     return 0;
@@ -95,7 +98,8 @@ const std::string LoadILLDiffraction::summary() const {
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B"}) {}
+    : IFileLoader<NexusDescriptor>(),
+      m_instNames({"D20", "D2B", "D1B", "IN5", "PANTHER"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -205,7 +209,7 @@ void LoadILLDiffraction::loadDataScan() {
   axis.load();
 
   // read the starting two theta
-  double twoThetaValue;
+  double twoThetaValue = 0;
   if (m_instName == "D1B") {
     if (getPointerToProperty("TwoThetaOffset")->isDefault()) {
       g_log.notice("A 2theta offset angle is necessary for D1B data.");
@@ -213,7 +217,7 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else {
+  } else if (m_instName != "IN5" && m_instName != "PANTHER") {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -574,12 +578,12 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     }
     m_outWorkspace->mutableX(i) = axis;
   }
-
   // Link the instrument
   loadStaticInstrument();
-
-  // Move to the starting 2theta
-  moveTwoThetaZero(twoTheta0);
+  if (m_instName != "IN5" && m_instName != "PANTHER") {
+    // Move to the starting 2theta
+    moveTwoThetaZero(twoTheta0);
+  }
 }
 
 /**
@@ -669,15 +673,16 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
  * Returns the monitor spectrum
  * @param scan : scan data
  * @return monitor spectrum
- * @throw std::runtime_error If there are no entries named Monitor1 or Monitor_1
- * in the NeXus file
+ * @throw std::runtime_error If there are no entries named Monitor1 or
+ * Monitor_1, or monitor1 in the NeXus file
  */
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
   std::vector<double> monitor = {0.};
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if ((m_scanVar[i].name == "Monitor1") ||
-        (m_scanVar[i].name == "Monitor_1")) {
+        (m_scanVar[i].name == "Monitor_1") ||
+        (m_scanVar[i].name == "monitor1")) {
       monitor.assign(scan() + m_numberScanPoints * i,
                      scan() + m_numberScanPoints * (i + 1));
       return monitor;
