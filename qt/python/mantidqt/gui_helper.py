@@ -58,20 +58,20 @@ def get_qapplication():
         return QApplication(sys.argv), False
 
 
-def __to_external_url(interface_name: str, external_url: str) -> QtCore.QUrl:
+def __to_external_url(interface_name: str, section: str, external_url: str) -> QtCore.QUrl:
     if not external_url:
-        template = 'http://docs.mantidproject.org/nightly/interfaces/framework/{}.html'
-        external_url = template.format(interface_name)
+        template = 'http://docs.mantidproject.org/nightly/interfaces/{}/{}.html'
+        external_url = template.format(section, interface_name)
 
     return QtCore.QUrl(external_url)
 
 
-def __to_qthelp_url(interface_name: str, qt_url: str) -> str:
+def __to_qthelp_url(interface_name: str, section: str, qt_url: str) -> str:
     if qt_url:
         return qt_url
     else:
-        template = 'qthelp://org.sphinx.mantidproject.{}/doc/interfaces/{}.html'
-        return template.format(__mtd_version, interface_name)
+        template = 'qthelp://org.sphinx.mantidproject.{}/doc/interfaces/{}/{}.html'
+        return template.format(__mtd_version, section, interface_name)
 
 
 def __get_collection_file(collection_file: str) -> str:
@@ -84,7 +84,7 @@ def __get_collection_file(collection_file: str) -> str:
     return os.path.abspath(collection_file)
 
 
-def show_interface_help(mantidplot_name, assistant_process,
+def show_interface_help(mantidplot_name, assistant_process, section: str='',
                         collection_file: str='',
                         qt_url: str='', external_url: str=""):
     ''' Shows the help page for a custom interface
@@ -117,7 +117,7 @@ def show_interface_help(mantidplot_name, assistant_process,
     try:
         # try using built-in help in mantid
         import mantidqt
-        mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name)
+        mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name, section)
     except: #(ImportError, ModuleNotFoundError) raises the wrong type of error
         # built-in help failed, try external qtassistant then give up and launch a browser
 
@@ -134,7 +134,7 @@ def show_interface_help(mantidplot_name, assistant_process,
             # try to find the collection file and launch qtassistant
             args = ['-enableRemoteControl',
                     '-collectionFile', collection_file,
-                    '-showUrl', __to_qthelp_url(mantidplot_name, qt_url)]
+                    '-showUrl', __to_qthelp_url(mantidplot_name, section, qt_url)]
 
             assistant_process.close()
             assistant_process.waitForFinished()
@@ -148,7 +148,7 @@ def show_interface_help(mantidplot_name, assistant_process,
                 del os.environ['LD_PRELOAD']
 
             # create a url to the help in the default location
-            openUrl(__to_external_url(mantidplot_name, external_url))
+            openUrl(__to_external_url(mantidplot_name, section, external_url))
 
             if ldp:
                 os.environ['LD_PRELOAD']=ldp

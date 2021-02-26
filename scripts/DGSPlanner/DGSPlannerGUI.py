@@ -154,8 +154,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        show_interface_help(self.mantidplot_name,
-                            self.assistant_process)
+        show_interface_help(self.mantidplot_name, self.assistant_process, section='direct')
 
     def closeEvent(self, event):
         self.assistant_process.close()
