@@ -52,6 +52,8 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
       && !descriptor.pathExists(
              "/entry0/instrument/VirtualChopper") // This one is for
                                                   // LoadILLReflectometry
+      && !descriptor.pathExists(
+                 "/entry0/data_scan") // This one is handled by LoadILLDiffraction
   ) {
     return 80;
   } else {
