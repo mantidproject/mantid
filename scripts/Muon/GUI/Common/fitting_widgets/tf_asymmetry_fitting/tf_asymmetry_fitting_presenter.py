@@ -43,7 +43,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def handle_function_structure_changed(self) -> None:
         super().handle_function_structure_changed()
-        self.update_normalisations_in_model_and_view()
+        self.update_tf_asymmetry_functions_in_model_and_view()
 
     def handle_dataset_name_changed(self) -> None:
         super().handle_dataset_name_changed()
@@ -56,7 +56,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self.model.tf_asymmetry_mode = tf_asymmetry_on
         self.view.tf_asymmetry_mode = self.model.tf_asymmetry_mode
 
-        self.update_normalisations_in_model_and_view()
+        self.update_tf_asymmetry_functions_in_model_and_view()
 
         self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
@@ -75,9 +75,9 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def update_and_reset_all_data(self):
         super().update_and_reset_all_data()
-        self.update_normalisations_in_model_and_view()
+        self.update_tf_asymmetry_functions_in_model_and_view()
 
-    def update_normalisations_in_model_and_view(self):
+    def update_tf_asymmetry_functions_in_model_and_view(self):
         if not self.model.recalculate_tf_asymmetry_functions():
             self.view.warning_popup("Failed to convert fit function to a TF Asymmetry function.")
         self.view.normalisation = self.model.current_normalisation()

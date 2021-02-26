@@ -185,24 +185,6 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return tf_asymmetry_function
 
-    # def perform_fit_or_plot_guess(self):
-    #     if self._tf_asymmetry_mode:
-    #         new_global_parameters = [str("f0.f1.f1." + item) for item in self.global_parameters]
-    #     else:
-    #         new_global_parameters = [item[9:] for item in self.global_parameters]
-    #
-    #     if not self.view.is_simul_fit:
-    #         for index, fit_function in enumerate(self.single_fit_functions):
-    #             fit_function = fit_function if fit_function else self.view.fit_object.clone()
-    #             new_function = self._calculate_tf_asymmetry_fit_function(fit_function)
-    #             self._fit_function[index] = new_function.clone()
-    #
-    #         func_str = str(self._fit_function[self.view.get_index_for_start_end_times()])
-    #     else:
-    #         new_function = self._calculate_tf_asymmetry_fit_function(self.simultaneous_fit_function)
-    #         self._fit_function = [new_function.clone()]
-    #         func_str = str(self._fit_function[0])
-
     def _update_tf_asymmetry_parameter_value(self, full_parameter: str, value: float):
         if self.simultaneous_fitting_mode:
             current_domain_function = self.current_domain_tf_asymmetry_fit_function()
@@ -322,7 +304,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def _get_parameters_for_tf_asymmetry_simultaneous_fit(self):
         params = self._get_common_tf_asymmetry_parameters()
-        params["InputFunction"] = self.tf_asymmetry_simultaneous_function.clone()
+        params["InputFunction"] = str(self.tf_asymmetry_simultaneous_function) + self._construct_global_tie_appendage()
         params["ReNormalizedWorkspaceList"] = self.dataset_names
         params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list(self.dataset_names)
 
@@ -346,6 +328,20 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         return {"PulseOffset": offset,
                 "EnableDoublePulse": True,
                 "FirstPulseWeight": first_pulse_weighting}
+
+    def _construct_global_tie_appendage(self):
+        if len(self.global_parameters) != 0 and self.number_of_datasets > 1:
+            global_ties = [self._construct_tie_for_global_parameter(global_parameter)
+                           for global_parameter in self.global_parameters]
+            return f";ties=({','.join(global_ties)})"
+        else:
+            return ""
+
+    def _construct_tie_for_global_parameter(self, global_parameter):
+        global_tie = f"f0.{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}{global_parameter}"
+        for domain_index in range(1, self.tf_asymmetry_simultaneous_function.nFunctions()):
+            global_tie += f"=f{domain_index}.{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}{global_parameter}"
+        return global_tie
 
     def _get_global_parameters_for_tf_asymmetry_fit(self):
         return [str(TF_ASYMMETRY_PREFIX_FUNCTION_INDEX + global_param) for global_param in self.global_parameters]
