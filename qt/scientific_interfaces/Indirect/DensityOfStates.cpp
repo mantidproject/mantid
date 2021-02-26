@@ -258,43 +258,58 @@ void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled
  */
 
 enum class DensityOfStates::InputFormat : int {
-  Unsupported = 0, Phonon, Castep, ForceConstants};
+  Unsupported = 0,
+  Phonon,
+  Castep,
+  ForceConstants
+};
 
-DensityOfStates::InputFormat DensityOfStates::filenameToFormat(QString filename) {
+DensityOfStates::InputFormat
+DensityOfStates::filenameToFormat(QString filename) {
   QFileInfo inputFileInfo(filename);
   const auto suffix = inputFileInfo.suffix().toStdString();
 
   InputFormat format;
 
-  if (suffix == "phonon") {format = InputFormat::Phonon;
-  } else if (suffix == "castep") {format = InputFormat::Castep;
-  } else if (suffix == "castep_bin") {format = InputFormat::ForceConstants;
-  } else if (suffix == "yaml") {format = InputFormat::ForceConstants;
-  } else {format = InputFormat::Unsupported;}
+  if (suffix == "phonon") {
+    format = InputFormat::Phonon;
+  } else if (suffix == "castep") {
+    format = InputFormat::Castep;
+  } else if (suffix == "castep_bin") {
+    format = InputFormat::ForceConstants;
+  } else if (suffix == "yaml") {
+    format = InputFormat::ForceConstants;
+  } else {
+    format = InputFormat::Unsupported;
+  }
 
   return format;
-  }
+}
 
 std::string DensityOfStates::formatToFilePropName(InputFormat format) {
   std::string filePropName;
 
-  switch(format) {
-  case InputFormat::Phonon:          filePropName = "PHONONFile";
+  switch (format) {
+  case InputFormat::Phonon:
+    filePropName = "PHONONFile";
     break;
-  case InputFormat::Castep:          filePropName = "CASTEPFile";
+  case InputFormat::Castep:
+    filePropName = "CASTEPFile";
     break;
-  case InputFormat::ForceConstants:  filePropName = "ForceConstantsFile";
+  case InputFormat::ForceConstants:
+    filePropName = "ForceConstantsFile";
     break;
-  default: g_log.error("Could not determine appropriate input field for this file type. ");
+  default:
+    g_log.error(
+        "Could not determine appropriate input field for this file type. ");
   }
 
   return filePropName;
 }
 
 bool DensityOfStates::isPdosFile(InputFormat dosFileFormat) {
-  return {
-    (dosFileFormat == InputFormat::Phonon)
-    || (dosFileFormat == InputFormat::ForceConstants)};
-  }
+  return {(dosFileFormat == InputFormat::Phonon) ||
+          (dosFileFormat == InputFormat::ForceConstants)};
+}
 
 } // namespace MantidQt::CustomInterfaces
