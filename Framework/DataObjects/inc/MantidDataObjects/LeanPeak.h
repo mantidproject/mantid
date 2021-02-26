@@ -66,6 +66,9 @@ public:
   LeanPeak &operator=(LeanPeak &&) noexcept = default;
 #endif
 
+  // Construct a peak from a reference to the interface
+  explicit LeanPeak(const Geometry::IPeak &ipeak);
+
   void setDetectorID(int id) override;
   int getDetectorID() const override;
 

@@ -125,4 +125,20 @@ public:
     TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
   }
+
+  void test_ConstructorFromIPeakInterface() {
+    // This goniometer should just swap x and y of q
+    Mantid::Kernel::Matrix<double> gon(3, 3);
+    gon[0][1] = 1;
+    gon[1][0] = 1;
+    gon[2][2] = 1;
+
+    LeanPeak p(V3D(1, 2, 3), gon, 1.);
+
+    const Mantid::Geometry::IPeak &ipeak = p;
+    LeanPeak p2(ipeak);
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), p2.getQSampleFrame());
+    TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
+    TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
+  }
 };

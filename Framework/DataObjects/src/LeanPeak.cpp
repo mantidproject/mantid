@@ -145,6 +145,34 @@ LeanPeak::LeanPeak(const LeanPeak &other)
       m_peakNumber(other.m_peakNumber), m_intHKL(other.m_intHKL),
       m_intMNP(other.m_intMNP), m_peakShape(other.m_peakShape->clone()),
       convention(other.convention) {}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor making a LeanPeak from IPeak interface
+ *
+ * @param ipeak :: const reference to an IPeak object
+ * @return
+ */
+LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
+    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
+      m_intensity(ipeak.getIntensity()),
+      m_sigmaIntensity(ipeak.getSigmaIntensity()),
+      m_binCount(ipeak.getBinCount()),
+      m_initialEnergy(ipeak.getInitialEnergy()),
+      m_finalEnergy(ipeak.getFinalEnergy()),
+      m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
+      m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
+      m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
+      m_runNumber(ipeak.getRunNumber()),
+      m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
+      m_col(ipeak.getCol()), m_Qsample(ipeak.getQSampleFrame()),
+      m_peakNumber(ipeak.getPeakNumber()), m_intHKL(ipeak.getIntHKL()),
+      m_intMNP(ipeak.getIntMNP()), m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
+    throw std::invalid_argument(
+        "Peak::ctor(): Goniometer matrix must non-singular.");
+}
+
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
