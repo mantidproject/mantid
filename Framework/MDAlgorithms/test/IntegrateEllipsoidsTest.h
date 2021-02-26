@@ -707,7 +707,7 @@ public:
     Peak peak1 = ws->getPeak(1);
     double i0 = peak0.getIntensity();
     double i1 = peak1.getIntensity();
-    TS_ASSERT_DELTA(i0, i1, i0*0.0001);
+    TS_ASSERT_DELTA(i0, i1, i0 * 0.0001);
     Mantid::Kernel::V3D hkl0 = peak0.getHKL();
     Mantid::Kernel::V3D hkl1 = peak1.getHKL();
     TS_ASSERT_EQUALS(hkl0[0], 0.1);
