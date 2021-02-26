@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is in charge of reducing data acquired using **IN16B** indirect geometry instrument at **ILL**, when used in diffractometer mode.
+This algorithm reduces data acquired by the diffraction detectors of **IN16B** indirect geometry instrument at **ILL**.
 
 Ultimately, it will handle both BATS and Doppler data, but the later is the only one implemented as of now.
 
