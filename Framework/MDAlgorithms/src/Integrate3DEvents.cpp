@@ -557,28 +557,18 @@ Integrate3DEvents::ellipseIntegrateModEvents(
                                 peak_radius, back_inner_radius,
                                 back_outer_radius, axes_radii, inti, sigi);
 }
-/**
- * Calculate the number of events in an ellipsoid centered at 0,0,0 with
- * the three specified axes and the three specified sizes in the direction
- * of those axes.  NOTE: The three axes must be mutually orthogonal unit
- *                       vectors.
- *
- * @param  events      List of 3D events centered at 0,0,0
- * @param  directions  List of 3 orthonormal directions for the axes of
- *                     the ellipsoid.
- * @param  sizes       List of three values a,b,c giving half the length
- *                     of the three axes of the ellisoid.
- * @return Then number of events that are in or on the specified ellipsoid.
- */
+
 std::pair<double, double> Integrate3DEvents::numInEllipsoid(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
-    std::vector<V3D> const &directions, std::vector<double> const &sizes) {
+    std::vector<SlimEvent> const &events,
+    std::vector<V3D> const &directions, std::vector<double> const &sizes,
+    const V3D &center) {
 
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
     double sum = 0;
     for (size_t k = 0; k < 3; k++) {
-      double comp = event.second.scalar_prod(directions[k]) / sizes[k];
+      V3D qRelative(event.second - center);
+      double comp = qRelative.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
     }
     if (sum <= 1) {
@@ -589,37 +579,23 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoid(
 
   return count;
 }
-/**
- * Calculate the number of events in an ellipsoid centered at 0,0,0 with
- * the three specified axes and the three specified sizes in the direction
- * of those axes.  NOTE: The three axes must be mutually orthogonal unit
- *                       vectors.
- *
- * @param  events      List of 3D events centered at 0,0,0
- * @param  directions  List of 3 orthonormal directions for the axes of
- *                     the ellipsoid.
- * @param  sizes       List of three values a,b,c giving half the length
- *                     of the three axes of the ellisoid.
- * @param  sizesIn       List of three values a,b,c giving half the length
- *                     of the three inner axes of the ellisoid.
- * @param  useOnePercentBackgroundCorrection  flag if one percent background
- correction should be used.
- * @return Then number of events that are in or on the specified ellipsoid.
- */
+
 std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
+    std::vector<SlimEvent> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes,
     std::vector<double> const &sizesIn,
-    const bool useOnePercentBackgroundCorrection) {
+    const bool useOnePercentBackgroundCorrection,
+    const V3D &center) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
   for (const auto &event : events) {
+    V3D qRelative(event.second - center);
     double sum = 0;
     double sumIn = 0;
     for (size_t k = 0; k < 3; k++) {
-      double comp = event.second.scalar_prod(directions[k]) / sizes[k];
+      double comp = qRelative.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
-      comp = event.second.scalar_prod(directions[k]) / sizesIn[k];
+      comp = qRelative.scalar_prod(directions[k]) / sizesIn[k];
       sumIn += comp * comp;
     }
     if (sum <= 1 && sumIn >= 1)
@@ -637,52 +613,26 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
   }
 
   for (size_t k = 0; k < endIndex; ++k) {
-    count.first += eventVec[k].first;
-    count.second += eventVec[k].second;
+    count.first += eventVec[k].first;   // count
+    count.second += eventVec[k].second; // error squared (add in quadrature)
   }
 
   return count;
 }
-/**
- *  Given a list of events, associated with a particular peak
- *  and already SHIFTED to be centered at (0,0,0), calculate the 3x3
- *  covariance matrix for finding the principal axes of that
- *  local event data.  Only events within the specified radius
- *  of (0,0,0) will be used.
- *
- *  The covariance matrix can be easily constructed. X, Y, Z of each peak
- *position are the variables we wish to determine
- *  the covariance. The mean position in each dimension has already been
- *calculated on subtracted, since this corresponds to the centre position of
- *each
- *  peak, which we knew aprori. The expected values of each correlation test X,X
- *X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
- *  probabilities are equal, we can remove them from the sums of the expected
- *values, and simply divide by the number of events for each matrix element.
- *  Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
- *
- *  @param events    Vector of V3D objects containing the
- *                   Q vectors for a peak, with mean at (0,0,0).
- *  @param matrix    A 3x3 matrix that will be filled out with
- *                   the covariance matrix for the list of
- *                   events.
- *  @param radius    Only events within this radius of the
- *                   peak center (0,0,0) will be used for
- *                   calculating the covariance matrix.
- */
 
 void Integrate3DEvents::makeCovarianceMatrix(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
-    DblMatrix &matrix, double radius) {
+    std::vector<SlimEvent> const &events,
+    DblMatrix &matrix, double radius, const V3D &center) {
   double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
       totalCounts = 0;
       double sum = 0;
       for (const auto &event : events) {
-        if (event.second.norm() <= radius) {
+        V3D qRelative(event.second - center);
+        if (qRelative.norm() <= radius) {
           totalCounts += event.first.first;
-          sum += event.first.first * event.second[row] * event.second[col];
+          sum += event.first.first * qRelative[row] * qRelative[col];
         }
       }
       if (totalCounts > 1)

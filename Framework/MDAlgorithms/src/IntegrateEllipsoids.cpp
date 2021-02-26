@@ -405,7 +405,7 @@ void IntegrateEllipsoids::exec() {
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
     V3D hkl(peaks[i].getIntHKL());
-    V3D mnp(peaks[i].getIntMNP());
+    V3D mnp(peaks[i].getIntMNP());  // modulated peak structure number
 
     if (mnp[0] != 0 && ModDim == 0)
       ModDim = 1;
@@ -447,6 +447,8 @@ void IntegrateEllipsoids::exec() {
     if (indexed_count < 3)
       throw std::runtime_error(
           "At least three linearly independent indexed peaks are needed.");
+    // Obtain UB and modUB that most nearly maps the specified hkl_vectors
+    // and mnp_vectors to the specified q_vectors
     Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
                                            ModDim, peak_q_list);
     if (peak_ws->sample().hasOrientedLattice()) {
