@@ -155,7 +155,7 @@ void LoadILLSANS::exec() {
     // we move the parent "detector" component, but since it is at (0,0,0), we
     // need to find the distance it has to move and move it to this position
     double finalDistance =
-        firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
+        firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
     V3D pos = getComponentPosition("detector_center");
     double currentDistance = pos.Z();
 
@@ -185,7 +185,7 @@ void LoadILLSANS::exec() {
 
     // mm to meter
     offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector_front");
+    moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
     double angle =
         firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
     rotateInstrument(-angle, "detector_front");
@@ -324,11 +324,11 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
   NXInt dataCenter = data1.openIntData();
   dataCenter.load();
   NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataRight = data2.openIntData();
-  dataRight.load();
-  NXData data3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = data3.openIntData();
+  NXInt dataLeft = data2.openIntData();
   dataLeft.load();
+  NXData data3 = firstEntry.openNXData("data3");
+  NXInt dataRight = data3.openIntData();
+  dataRight.load();
 
   size_t numberOfHistograms =
       static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
