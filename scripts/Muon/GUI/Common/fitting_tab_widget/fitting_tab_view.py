@@ -4,10 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 
-from qtpy.QtWidgets import QStackedWidget, QWidget
+from qtpy.QtWidgets import QWidget
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
 
@@ -16,16 +17,15 @@ TF_ASYMMETRY_FITTING_COMBO_INDEX = 1
 
 
 class FittingTabView(QWidget, ui_fitting_tab):
-    def __init__(self, parent=None, context=None, general_fitting_view=None):
+    def __init__(self, parent: QWidget = None, context: MuonContext = None, fitting_view: QWidget = None,
+                 is_frequency_domain: bool = False):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
 
         self.context = context
 
-        self.fit_type_stacked_widget = QStackedWidget()
-        self.fit_type_stacked_widget.addWidget(general_fitting_view)
-
-        self.layout().addWidget(self.fit_type_stacked_widget)
+        self.fitting_view = fitting_view
+        self.layout().addWidget(self.fitting_view)
 
         self.tf_asymmetry_mode_changed_notifier = GenericObservable()
 
@@ -33,12 +33,17 @@ class FittingTabView(QWidget, ui_fitting_tab):
         self.disable_tab_observer = GenericObserver(self.disable_view)
         self.enable_tab_observer = GenericObserver(self.enable_view)
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
-        self.tf_asymmetry_mode_changed_observer = GenericObserverWithArgPassing(self.handle_tf_asymmetry_mode_changed)
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
 
-        self.fitting_type_combo_box.currentIndexChanged.connect(self.handle_fitting_type_changed)
+        if not is_frequency_domain:
+            self.tf_asymmetry_mode_changed_observer = GenericObserverWithArgPassing(
+                self.handle_tf_asymmetry_mode_changed)
+            self.fitting_type_combo_box.currentIndexChanged.connect(self.handle_fitting_type_changed)
+        else:
+            self.fitting_type_label.setHidden(True)
+            self.fitting_type_combo_box.setHidden(True)
 
         self.disable_view()
 
