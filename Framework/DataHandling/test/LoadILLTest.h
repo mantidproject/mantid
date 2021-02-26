@@ -46,8 +46,16 @@ public:
 
   void test_LoadSANS_D16() { checkLoader("ILL/D16/218356", "LoadILLSANS"); }
 
+  void test_LoadDiffraction_D1B() {
+    checkLoader("ILL/D1B/473432", "LoadILLDiffraction");
+  }
+
   void test_LoadDiffraction_D2B() {
     checkLoader("ILL/D2B/535401", "LoadILLDiffraction");
+  }
+
+  void test_LoadDiffraction_D7() {
+    checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction");
   }
 
   void test_LoadDiffraction_D20() {
@@ -70,6 +78,7 @@ public:
   void test_loadTOF_IN5() {
     checkLoader("ILL/IN5/104007", "LoadILLTOF");
     checkLoader("ILL/IN5/189171", "LoadILLTOF");
+    checkLoader("ILL/IN5/199857", "LoadILLDiffraction");
   }
 
   void test_loadTOF_IN6() {
