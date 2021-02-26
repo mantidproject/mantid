@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObserver
-
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_options_view \
     import TFAsymmetryFittingOptionsView
@@ -26,21 +24,26 @@ class TFAsymmetryFittingView(GeneralFittingView):
         self.tf_asymmetry_fitting_options = TFAsymmetryFittingOptionsView(self)
         self.tf_asymmetry_fitting_options_layout.addWidget(self.tf_asymmetry_fitting_options)
 
-    def set_slot_for_normalisation_changed(self, slot):
+    def set_slot_for_normalisation_changed(self, slot) -> None:
+        """Sets the slot for handling when a normalisation value is changed by the user."""
         self.tf_asymmetry_fitting_options.set_slot_for_normalisation_changed(slot)
 
     @property
-    def tf_asymmetry_mode(self):
+    def tf_asymmetry_mode(self) -> bool:
+        """Returns true if TF Asymmetry fitting mode is currently active."""
         return self.tf_asymmetry_fitting_options.tf_asymmetry_mode
 
     @tf_asymmetry_mode.setter
-    def tf_asymmetry_mode(self, tf_asymmetry_on):
+    def tf_asymmetry_mode(self, tf_asymmetry_on: bool) -> None:
+        """Hides or shows the normalisation options depending on if TF Asymmetry fitting mode is on or off."""
         self.tf_asymmetry_fitting_options.tf_asymmetry_mode = tf_asymmetry_on
 
     @property
-    def normalisation(self):
+    def normalisation(self) -> float:
+        """Returns the normalisation value currently displayed in the normalisation line edit."""
         return self.tf_asymmetry_fitting_options.normalisation
 
     @normalisation.setter
-    def normalisation(self, value):
+    def normalisation(self, value: float) -> None:
+        """Sets the normalisation value currently displayed in the normalisation line edit."""
         self.tf_asymmetry_fitting_options.normalisation = value
