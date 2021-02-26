@@ -15,6 +15,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
@@ -56,6 +57,15 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(
     IPeaksWorkspace_sptr &pws, const std::string componentName) {
   m_pws = pws->clone();
   m_cmpt = componentName;
+
+  // Special adjustment for CORELLI
+  Instrument_sptr inst =
+      std::const_pointer_cast<Instrument>(m_pws->getInstrument());
+  if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
+    // the second check is just to ensure that no accidental passing in
+    // a bank name with sixteenpack already appended
+    if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
+      m_cmpt.append("/sixteenpack");
 }
 
 /**
@@ -93,18 +103,14 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   UNUSED_ARG(xValues);
   UNUSED_ARG(order);
 
-  // Special adjustment for CORELLI
-  Instrument_sptr inst =
-      std::const_pointer_cast<Instrument>(m_pws->getInstrument());
-  if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
-    m_cmpt.append("/sixteenpack");
+  // our reference
+  auto pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
   if (m_cmpt != "none/sixteenpack") {
     // rotation
-    // NOTE: moderator should not be reoriented
     m_pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, m_pws);
-
+    
     // translation
     m_pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, m_pws);
   }
@@ -112,19 +118,25 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   // TODO:
   // need to do something with dT0
 
-  // Now when we query qSample, it should be updated with the perturbed
-  // detector positions
+  // NOTE:
+  //    getQSampleFrame does not consider the updated instrument, which is why
+  //    the calibration will always fail
   for (int i = 0; i < m_pws->getNumberPeaks(); ++i) {
-    // NOTE: we will skip over non-indexed peaks
-    // V3D hkl = V3D(boost::math::iround(m_pws->getPeak(i).getH()),
-    //               boost::math::iround(m_pws->getPeak(i).getK()),
-    //               boost::math::iround(m_pws->getPeak(i).getL()));
+    Units::Wavelength wl;
+    wl.initialize(m_pws->getPeak(i).getL1(), m_pws->getPeak(i).getL2(),
+                  m_pws->getPeak(i).getScattering(), 0,
+                  m_pws->getPeak(i).getInitialEnergy(), 0.0);
 
-    // if (hkl != UNSET_HKL) {
+    // Force updating the detector position by set the instrument,
+    // then set the detector ID
+    m_pws->getPeak(i).setInstrument(m_pws->getInstrument());
+    m_pws->getPeak(i).setDetectorID(m_pws->getPeak(i).getDetectorID());
+    m_pws->getPeak(i).setWavelength(
+        wl.singleFromTOF(m_pws->getPeak(i).getTOF()));
+
     V3D qv = m_pws->getPeak(i).getQSampleFrame();
     for (int j = 0; j < 3; ++j)
       out[i * 3 + j] = qv[j];
-    // }
   }
 }
 
@@ -160,21 +172,12 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
   mv_alg->setProperty("RelativePosition", true);
   mv_alg->execute();
 
-  g_log.notice() << "done move\n";
-
   return pws;
-
-  // Workspace_sptr outws = mv_alg->getProperty("Workspace");
-  // IPeaksWorkspace_sptr outpws =
-  //     std::dynamic_pointer_cast<IPeaksWorkspace>(outws);
-  // return outpws;
 }
 
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
     double rotVx, double rotVy, double rotVz, double rotAng,
     std::string componentName, IPeaksWorkspace_sptr &pws) const {
-  // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
-
   // rotate
   IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
       "RotateInstrumentComponent", -1);
@@ -190,13 +193,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->execute();
 
-  g_log.notice() << "done rot\n";
   return pws;
-
-  // Workspace_sptr outws = rot_alg->getProperty("Workspace");
-  // IPeaksWorkspace_sptr outpws =
-  //     std::dynamic_pointer_cast<IPeaksWorkspace>(outws);
-  // return outpws;
 }
 
 } // namespace Crystal

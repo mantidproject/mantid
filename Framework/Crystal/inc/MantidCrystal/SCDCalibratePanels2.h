@@ -71,6 +71,10 @@ private:
   /// Update the UB matrix
   void updateUBMatrix(Mantid::API::IPeaksWorkspace_sptr pws);
 
+  /// Remove unindexed peaks from workspace
+  Mantid::API::IPeaksWorkspace_sptr
+  removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws);
+
   /// Private function for getting names of banks to be calibrated
   void getBankNames(Mantid::API::IPeaksWorkspace_sptr pws);
 
@@ -133,6 +137,7 @@ private:
   double m_source_translation_bounds = 0.1; // meter
   bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
+  const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {

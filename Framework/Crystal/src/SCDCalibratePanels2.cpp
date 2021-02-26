@@ -227,6 +227,9 @@ void SCDCalibratePanels2::exec() {
     updateUBMatrix(m_pws);
   }
 
+  // remove unindexed peaks
+  m_pws = removeUnindexedPeaks(m_pws);
+
   bool calibrateT0 = getProperty("CalibrateT0");
   bool calibrateL1 = getProperty("CalibrateL1");
   bool calibrateBanks = getProperty("CalibrateBanks");
@@ -250,10 +253,6 @@ void SCDCalibratePanels2::exec() {
   // STEP_1: preparation
   // get names of banks that can be calibrated
   getBankNames(m_pws);
-
-  for (auto bn : m_BankNames) {
-    g_log.notice() << bn << "\n";
-  }
 
   // STEP_2: optimize T0,L1,L2,etc.
   if (calibrateT0) {
@@ -418,9 +417,12 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
     // be under-determined
     int nBankPeaks = pwsBanki->getNumberPeaks();
     if (nBankPeaks < MINIMUM_PEAKS_PER_BANK) {
-      g_log.notice() << "-- Bank " << bankname << " have only " << nBankPeaks
-                     << " (<" << MINIMUM_PEAKS_PER_BANK
-                     << ") Peaks, skipping\n";
+      // use ostringstream to prevent OPENMP breaks log info
+      std::ostringstream msg_npeakCheckFail;
+      msg_npeakCheckFail << "-- Bank " << bankname << " have only "
+                         << nBankPeaks << " (<" << MINIMUM_PEAKS_PER_BANK
+                         << ") Peaks, skipping\n";
+      g_log.notice() << msg_npeakCheckFail.str();
       continue;
     }
 
@@ -468,6 +470,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
     //-- step 4: update the instrument with optimization results
     //           if the fit results are above the tolerance/threshold
     std::string bn = bankname;
+    std::ostringstream calilog;
     if (pws->getInstrument()->getName().compare("CORELLI") == 0)
       bn.append("/sixteenpack");
     if ((std::abs(dx) < m_tolerance_translation) &&
@@ -475,21 +478,20 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
         (std::abs(dz) < m_tolerance_translation) &&
         (std::abs(rotang) < m_tolerance_rotation)) {
       // skip the adjustment of the component as it is juat noise
-      g_log.notice() << "-- Fit " << bn
-                     << " results below tolerance, skippping\n";
+      calilog << "-- Fit " << bn << " results below tolerance, skippping\n";
     } else {
       double rvx = sin(theta) * cos(phi);
       double rvy = sin(theta) * sin(phi);
       double rvz = cos(theta);
       adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
-      g_log.notice() << "-- Fit " << bn << " results using " << nBankPeaks
-                     << " peaks:\n "
-                     << "    d(x,y,z) = (" << dx << "," << dy << "," << dz
-                     << ")\n"
-                     << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << ","
-                     << rvy << "," << rvz << ")\n"
-                     << "    chi2/DOF = " << chi2OverDOF << "\n";
+      calilog << "-- Fit " << bn << " results using " << nBankPeaks
+              << " peaks:\n "
+              << "    d(x,y,z) = (" << dx << "," << dy << "," << dz << ")\n"
+              << "    rotang(rx,ry,rz) =" << rotang << "(" << rvx << "," << rvy
+              << "," << rvz << ")\n"
+              << "    chi2/DOF = " << chi2OverDOF << "\n";
     }
+    g_log.notice() << calilog.str();
 
     // -- cleanup
     PARALLEL_END_INTERUPT_REGION
@@ -563,6 +565,28 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
 }
 
 /**
+ * @brief
+ *
+ * @param pws
+ * @return IPeaksWorkspace_sptr
+ */
+IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(
+    Mantid::API::IPeaksWorkspace_sptr pws) {
+  IAlgorithm_sptr fltpk_alg = createChildAlgorithm("FilterPeaks");
+  fltpk_alg->setLogging(LOGCHILDALG);
+  fltpk_alg->setProperty("InputWorkspace", pws);
+  fltpk_alg->setProperty("FilterVariable", "h^2+k^2+l^2");
+  fltpk_alg->setProperty("Operator", ">");
+  fltpk_alg->setProperty("FilterValue", 0.0);
+  fltpk_alg->setProperty("OutputWorkspace", "pws_filtered");
+  fltpk_alg->executeAsChildAlg();
+
+  PeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
+  return outWS;
+}
+
+/**
  * @brief Gather names for bank for calibration
  *
  * @param pws
@@ -627,15 +651,32 @@ SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
   // directly compute qsample from UBmatrix and HKL
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < npeaks; ++i) {
-    // if (!pws->getPeak(i).isIndexed())
-    //   continue; // skip over non-indexed peaks
 
     V3D qv = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv *= 2 * PI;
+    // qv = qv / qv.norm();
     for (int j = 0; j < 3; ++j) {
       xvector[i * 3 + j] = i * 3 + j;
       yvector[i * 3 + j] = qv[j];
       evector[i * 3 + j] = 1;
     }
+
+    // -- Why we need the 2PI here --
+    // debug output to show case the hist1D for fitting
+    // g_log.notice() << "@peak" << i << "\n"
+    //                << "getIntHKL() = " << pws->getPeak(i).getIntHKL() << "\n"
+    //                << "-- original qv:" << pws->getPeak(i).getQSampleFrame()
+    //                << "\n"
+    //                << "-- inthkl-> qv:" << qv << "\n";
+    //
+    // SCDCalibratePanels-[Notice] @peak0
+    // SCDCalibratePanels-[Notice] getIntHKL() = [1,-5,1]
+    // SCDCalibratePanels-[Notice] -- original qv:[-5.58787,1.1569,1.89309]
+    // SCDCalibratePanels-[Notice] -- inthkl-> qv:[-5.59053,1.15834,1.88903]
+    // SCDCalibratePanels-[Notice] @peak1
+    // SCDCalibratePanels-[Notice] getIntHKL() = [1,-3,1]
+    // SCDCalibratePanels-[Notice] -- original qv:[-3.58063,1.15724,0.728382]
+    // SCDCalibratePanels-[Notice] -- inthkl-> qv:[-3.58662,1.15804,0.732834]
   }
 
   return mws;
