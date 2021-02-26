@@ -116,6 +116,11 @@ def difc_plot2d(calws_a, calws_b):
     for idx in six.moves.xrange(info.size()):
         maximum_solid_angle = max(maximum_solid_angle, delta.getDetector(idx).solidAngle(sample_position))
 
+    # Convert to degrees for plotting
+    theta_array = np.rad2deg(theta_array)
+    phi_array = np.rad2deg(phi_array)
+    maximum_solid_angle = np.rad2deg(maximum_solid_angle)
+
     # Radius also includes a fudge factor to improve plotting.
     # May need to add finer adjustments on a per-instrument basis.
     # Small circles seem to alias less than rectangles.
@@ -144,8 +149,11 @@ def difc_plot2d(calws_a, calws_b):
     mp.set_edgecolor('face')
     ax.add_collection(mp)
     fig.colorbar(p, ax=ax)
-    ax.set_xlabel(r'$\phi$')
-    ax.set_xlim(0.0, np.pi)
-    ax.set_ylabel(r'$\theta$')
-    ax.set_ylim(-np.pi, np.pi)
+    ax.set_xlabel(r'polar ($\phi$)')
+    ax.set_xlim(0.0, 180)
+    ax.set_ylabel(r'azimuthal ($\theta$)')
+    ax.set_ylim(-180, 180)
+
+    fig.show()
+
     return fig, ax
