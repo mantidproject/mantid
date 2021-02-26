@@ -77,4 +77,3 @@ class SampleMaterialDialogView(QDialog):
 
     def close_request(self):
         self.presenter.close_view()
-

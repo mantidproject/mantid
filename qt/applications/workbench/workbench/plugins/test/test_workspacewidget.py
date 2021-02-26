@@ -32,6 +32,7 @@ MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
 SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE
 
+
 @start_qapplication
 class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 

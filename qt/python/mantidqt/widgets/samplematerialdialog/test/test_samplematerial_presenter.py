@@ -8,14 +8,12 @@
 #
 #
 import unittest
-from unittest import mock
 
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, SetSampleMaterial
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import SampleMaterialDialogPresenter
-from mantidqt.widgets.samplematerialdialog.samplematerial_view import SampleMaterialDialogView
 
 
 @start_qapplication

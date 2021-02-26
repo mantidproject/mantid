@@ -290,7 +290,7 @@ class WorkspaceWidget(PluginWidget):
         # if there's only one workspace selected.
         if len(names) == 1:
             try:
-                workspace = self._ads.retrieve(names[0]);
+                workspace = self._ads.retrieve(names[0])
                 presenter = SampleMaterialDialogPresenter(workspace, parent=self)
                 presenter.show_view()
             except Exception as exception:
