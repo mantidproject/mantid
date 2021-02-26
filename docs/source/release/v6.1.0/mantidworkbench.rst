@@ -10,6 +10,7 @@ New and Improved
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 
 - It is now possible to overplot bin data from the matrix workspace view.
+- Added a sample material dialog that is accessed via the context menu in the workspace widget.
 
 Bugfixes
 --------
