@@ -115,7 +115,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
                                                    raw_event.m_errorSquared),
                          qVec);
     } // end of loop over events in list
-    PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
+    PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList); }
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -184,8 +184,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
         }
         V3D qVec(buffer[0], buffer[1], buffer[2]);
         if (hkl_integ)
-          qVec = UBinv * qVec;
-
+          qVec = UBinv * qVec;  // events coordinates in HKL space
         if (std::isnan(qVec[0]) || std::isnan(qVec[1]) || std::isnan(qVec[2]))
           continue;
         // Account for counts in histograms by increasing the qList with the
@@ -193,7 +192,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
         qList.emplace_back(std::pair<double, double>(yVal, esqVal), qVec);
       }
     }
-    PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
+    PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList); }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
@@ -486,9 +485,9 @@ void IntegrateEllipsoids::exec() {
   Integrate3DEvents integrator(qList, hkl_vectors, mnp_vectors, UBinv, modHKL,
                                radius_m, radius_s, maxOrder, CT,
                                useOnePercentBackgroundCorrection);
+  integrator.setIntegrationSpace(hkl_integ ? "HKL" : "Q3D");
 
-  // get the events and add
-  // them to the inegrator
+  // get the events and add them to the integrator
   // set up a descripter of where we are going
   this->initTargetWSDescr(wksp);
 

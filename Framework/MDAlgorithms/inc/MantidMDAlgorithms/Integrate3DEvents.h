@@ -67,14 +67,12 @@ class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
+      const std::vector<SlimEvent> &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius,
       const bool useOnePercentBackgroundCorrection = true);
 
   Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
+      const std::vector<SlimEvent> &peak_q_list,
       std::vector<Mantid::Kernel::V3D> const &hkl_list,
       std::vector<Mantid::Kernel::V3D> const &mnp_list,
       Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
@@ -82,9 +80,7 @@ public:
       const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
-  void addEvents(std::vector<std::pair<std::pair<double, double>,
-                                       Mantid::Kernel::V3D>> const &event_qs,
-                 bool hkl_integ);
+  void addEvents(std::vector<SlimEvent> const &event_qs);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
   std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
@@ -119,6 +115,9 @@ public:
                                     const Mantid::Kernel::V3D &center,
                                     bool forceSpherical = false,
                                     double sphericityTol = 0.02);
+
+  /// Set the integration space to either Q3D or HKL
+  void setIntegrationSpace(const std::string spaceType);
 
 private:
   /// Get a list of events for a given Q
@@ -178,7 +177,7 @@ private:
    */
   static std::pair<double, double>
   numInEllipsoidBkg(std::vector<SlimEvent> const &events,
-                    std::vector<Mantid::Kernel::V3D> const &directions,
+                    std::vector<V3D> const &directions,
                     std::vector<double> const &sizes,
                     std::vector<double> const &sizesIn,
                     const bool useOnePercentBackgroundCorrection,
@@ -229,20 +228,15 @@ private:
   int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
-  void
-  addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
-           bool hkl_integ);
-  void
-  addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
-              bool hkl_integ);
+  void addEvent(SlimEvent event_Q);
+  void addModEvent(SlimEvent event_Q);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
   ellipseIntegrateEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
-      std::vector<std::pair<std::pair<double, double>,
-                            Mantid::Kernel::V3D>> const &ev_list,
-      std::vector<Mantid::Kernel::V3D> const &directions,
+      const std::vector<V3D> &E1Vec, V3D const &peak_q,
+      std::vector<SlimEvent> const &ev_list,
+      std::vector<V3D> const &directions,
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
@@ -256,6 +250,11 @@ private:
   calculateRadiusFactors(const IntegrationParameters &params,
                          double max_sigma) const;
 
+  /** Center of the integration ellipsoid in the underlying integration space
+  * @param peakCenter : peak coordinates in Q3D-space
+  * @return ellipsoid center in either Q3D-space or HKL-space */
+  V3D ellipsoidCenter(const V3D &peakCenter) const;
+
   // Private data members
 
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
@@ -268,6 +267,10 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+  enum class IntegrationSpace : size_t {
+    Q3D = 0,
+    HKL = 1
+  } m_integrationSpace;
 };
 
 } // namespace MDAlgorithms

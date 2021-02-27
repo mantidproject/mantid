@@ -47,12 +47,12 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
-        &peak_q_list,
+    const std::vector<SlimEvent> &peak_q_list,
     Kernel::DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection),
+      m_integrationSpace(IntegrationSpace::Q3D){
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
@@ -81,17 +81,18 @@ Integrate3DEvents::Integrate3DEvents(
  * @param   CrossT       Switch for cross terms of satellites.
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
+ * of these spaces
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
-        &peak_q_list,
+    const std::vector<SlimEvent> &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
     double radius_m, double radius_s, int MaxO, const bool CrossT,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_ModHKL(ModHKL), m_radius(radius_m), s_radius(radius_s),
       maxOrder(MaxO), crossterm(CrossT),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection),
+      m_integrationSpace(IntegrationSpace::Q3D){
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hklmnp_key =
         getHklMnpKey(boost::math::iround<double>(hkl_list[it][0]),
@@ -113,24 +114,18 @@ Integrate3DEvents::Integrate3DEvents(
  * peak is less than the radius that was specified at construction time,
  * then the event Q vector is added to the list of event Q vectors for that
  * peak.
- * NOTE: The Q-vectors passed in to this method will be shifted by the center
- *       Q for it's associated peak, so that the list of Q-vectors for a peak
- *       are centered around 0,0,0 and represent offsets in Q from the peak
- *       center.
  *
  * @param event_qs   List of event Q vectors to add to lists of Q's associated
  *                   with peaks.
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvents(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &event_qs,
-    bool hkl_integ) {
+void Integrate3DEvents::addEvents(std::vector<SlimEvent> const &event_qs) {
   if (!maxOrder)
     for (const auto &event_q : event_qs)
-      addEvent(event_q, hkl_integ);
+      addEvent(event_q);
   else
     for (const auto &event_q : event_qs)
-      addModEvent(event_q, hkl_integ);
+      addModEvent(event_q);
 }
 
 std::pair<std::shared_ptr<const Geometry::PeakShape>,
@@ -352,6 +347,14 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   return inti / sigi;
 }
 
+void Integrate3DEvents::setIntegrationSpace(const std::string spaceType){
+  std::unordered_map<std::string, IntegrationSpace> strToSpace = {
+      {"Q3D", IntegrationSpace::Q3D},
+      {"HKL", IntegrationSpace::HKL}
+  };
+  m_integrationSpace = strToSpace[spaceType];
+}
+
 const std::vector<std::pair<std::pair<double, double>, V3D>> *
 Integrate3DEvents::getEvents(const V3D &peak_q) {
   auto hkl_key = getHklKey(peak_q);
@@ -470,7 +473,8 @@ Integrate3DEvents::ellipseIntegrateEvents(
   }
 
   DblMatrix cov_matrix(3, 3);
-  makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+  makeCovarianceMatrix(some_events, cov_matrix, m_radius,
+                       ellipsoidCenter(peak_q));
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
@@ -530,9 +534,11 @@ Integrate3DEvents::ellipseIntegrateModEvents(
 
   DblMatrix cov_matrix(3, 3);
   if (hkl_key % 1000 == 0)
-    makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+    makeCovarianceMatrix(some_events, cov_matrix, m_radius,
+                         ellipsoidCenter(peak_q));
   else
-    makeCovarianceMatrix(some_events, cov_matrix, s_radius);
+    makeCovarianceMatrix(some_events, cov_matrix, s_radius,
+                         ellipsoidCenter(peak_q));
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
@@ -933,24 +939,22 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
 /**
  * Add an event to the appropriate vector of events for the closest h,k,l,
  * if it is within the required radius of the corresponding peak in the
- * PeakQMap.
- *
- * NOTE: The event passed in may be modified by this method.  In particular,
- * if it corresponds to one of the specified peak_qs, the corresponding peak q
- * will be subtracted from the event and the event will be added to that
- * peak's vector in the event_lists map.
+ * PeakQMap. The event will be added to that peak's vector in the event_lists map.
  *
  * @param event_Q      The Q-vector for the event that may be added to the
  *                     event_lists map, if it is close enough to some peak
- * @param hkl_integ
  */
-void Integrate3DEvents::addEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
+void Integrate3DEvents::addEvent(SlimEvent event_Q) {
+
   int64_t hkl_key;
-  if (hkl_integ)
+  switch (m_integrationSpace) {
+  case(IntegrationSpace::HKL) :
     hkl_key = getHklKey2(event_Q.second);
-  else
+    break;
+  case(IntegrationSpace::Q3D) :
     hkl_key = getHklKey(event_Q.second);
+    break;
+  }
 
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;
@@ -958,11 +962,16 @@ void Integrate3DEvents::addEvent(
   auto peak_it = m_peak_qs.find(hkl_key);
   if (peak_it != m_peak_qs.end()) {
     if (!peak_it->second.nullVector()) {
-      if (hkl_integ)
-        event_Q.second = event_Q.second - m_UBinv * peak_it->second;
-      else
-        event_Q.second = event_Q.second - peak_it->second;
-      if (event_Q.second.norm() < m_radius) {
+      V3D qRelative;
+      switch (m_integrationSpace) {
+      case(IntegrationSpace::HKL) :
+        qRelative = event_Q.second - m_UBinv * peak_it->second;
+        break;
+      case(IntegrationSpace::Q3D) :
+        qRelative = event_Q.second - peak_it->second;
+        break;
+      }
+      if (qRelative.norm() < m_radius) {
         m_event_lists[hkl_key].emplace_back(event_Q);
       }
     }
@@ -972,25 +981,22 @@ void Integrate3DEvents::addEvent(
 /**
  * Add an event to the appropriate vector of events for the closest h,k,l,
  * if it is within the required radius of the corresponding peak in the
- * PeakQMap.
- *
- * NOTE: The event passed in may be modified by this method.  In particular,
- * if it corresponds to one of the specified peak_qs, the corresponding peak q
- * will be subtracted from the event and the event will be added to that
- * peak's vector in the event_lists map.
+ * PeakQMap. The event will be added to that peak's vector in the event_lists map.
  *
  * @param event_Q      The Q-vector for the event that may be added to the
  *                     event_lists map, if it is close enough to some peak
- * @param hkl_integ
  */
-void Integrate3DEvents::addModEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
-  int64_t hklmnp_key;
+void Integrate3DEvents::addModEvent(SlimEvent event_Q) {
 
-  if (hkl_integ)
+  int64_t hklmnp_key;
+  switch (m_integrationSpace) {
+  case(IntegrationSpace::HKL) :
     hklmnp_key = getHklMnpKey2(event_Q.second);
-  else
+    break;
+  case(IntegrationSpace::Q3D) :
     hklmnp_key = getHklMnpKey(event_Q.second);
+    break;
+  }
 
   if (hklmnp_key == 0) // don't keep events associated with 0,0,0
     return;
@@ -998,15 +1004,21 @@ void Integrate3DEvents::addModEvent(
   auto peak_it = m_peak_qs.find(hklmnp_key);
   if (peak_it != m_peak_qs.end()) {
     if (!peak_it->second.nullVector()) {
-      if (hkl_integ)
-        event_Q.second = event_Q.second - m_UBinv * peak_it->second;
-      else
-        event_Q.second = event_Q.second - peak_it->second;
+
+      V3D qRelative;
+      switch (m_integrationSpace) {
+      case(IntegrationSpace::HKL) :
+        qRelative = event_Q.second - m_UBinv * peak_it->second;
+        break;
+      case(IntegrationSpace::Q3D) :
+        qRelative = event_Q.second - peak_it->second;
+        break;
+      }
 
       if (hklmnp_key % 10000 == 0) {
-        if (event_Q.second.norm() < m_radius)
+        if (qRelative.norm() < m_radius)
           m_event_lists[hklmnp_key].emplace_back(event_Q);
-      } else if (event_Q.second.norm() < s_radius) {
+      } else if (qRelative.norm() < s_radius) {
         m_event_lists[hklmnp_key].emplace_back(event_Q);
       }
     }
@@ -1020,8 +1032,7 @@ void Integrate3DEvents::addModEvent(
  *
  * @param E1Vec             Vector of values for calculating edge of detectors
  * @param peak_q            The Q-vector for the peak center.
- * @param ev_list             List of events centered at (0,0,0) for a
- *                            particular peak.
+ * @param ev_list             List of events for a particular peak.
  * @param directions          The three principal axes of the list of events
  * @param sigmas              The standard deviations of the events in the
  *                            directions of the three principal axes.
@@ -1051,12 +1062,16 @@ void Integrate3DEvents::addModEvent(
  *
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q,
-    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
-        &ev_list,
-    std::vector<V3D> const &directions, std::vector<double> const &sigmas,
-    bool specify_size, double peak_radius, double back_inner_radius,
-    double back_outer_radius, std::vector<double> &axes_radii, double &inti,
+    const std::vector<V3D> &E1Vec,
+    V3D const &peak_q,
+    std::vector<SlimEvent> const &ev_list,
+    std::vector<V3D> const &directions,
+    std::vector<double> const &sigmas,
+    bool specify_size,
+    double peak_radius,
+    double back_inner_radius,
+    double back_outer_radius,
+    std::vector<double> &axes_radii, double &inti,
     double &sigi) {
   // r1, r2 and r3 will give the sizes of the major axis of
   // the peak ellipsoid, and of the inner and outer surface
@@ -1130,10 +1145,10 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
 
   std::pair<double, double> backgrd = numInEllipsoidBkg(
       ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
-      m_useOnePercentBackgroundCorrection);
+      m_useOnePercentBackgroundCorrection, ellipsoidCenter(peak_q));
 
   std::pair<double, double> peak_w_back =
-      numInEllipsoid(ev_list, directions, axes_radii);
+      numInEllipsoid(ev_list, directions, axes_radii, ellipsoidCenter(peak_q));
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
@@ -1208,6 +1223,17 @@ Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params,
   }
 
   return std::make_tuple(r1, r2, r3);
+}
+
+V3D Integrate3DEvents::ellipsoidCenter(const V3D &peakCenter) const {
+  switch (m_integrationSpace) {
+  case (IntegrationSpace::Q3D):
+    return peakCenter;
+  case (IntegrationSpace::HKL):
+    return m_UBinv * peakCenter;  // convert to HKL
+  default:
+     throw std::invalid_argument("Invalid integration space");
+  }
 }
 
 } // namespace MDAlgorithms

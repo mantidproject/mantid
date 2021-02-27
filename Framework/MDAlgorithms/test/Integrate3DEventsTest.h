@@ -93,8 +93,8 @@ public:
 
     double radius = 1.3;
     Integrate3DEvents integrator(peak_q_list, UBinv, radius);
-
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     // With fixed size ellipsoids, all the
     // events are counted.
@@ -212,8 +212,8 @@ public:
     bool crossTerm = false;
     Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL,
                                  radius, radius_s, maxOrder, crossTerm);
-
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     // With fixed size ellipsoids, all the
     // events are counted.
@@ -290,7 +290,8 @@ public:
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     double strong_inti = 0, strong_sigi = 0;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
@@ -365,7 +366,8 @@ public:
 
     // Create integraton regions + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     double strong_inti, strong_sigi;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
@@ -420,7 +422,8 @@ public:
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     IntegrationParameters params;
     params.peakRadius = 0.5;
@@ -500,7 +503,8 @@ private:
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
                                  useOnePercentBackgroundCorrection);
-    integrator.addEvents(event_Qs, false);
+    integrator.setIntegrationSpace("Q3D");
+    integrator.addEvents(event_Qs);
 
     // calculate signal-noise ratio
     std::vector<double> fractionalDiff(peak_q_list.size());
