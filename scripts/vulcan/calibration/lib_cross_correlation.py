@@ -477,14 +477,11 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
     if cc_fit_time == 2:
         raise RuntimeError(f'Current GetDetectorOffsets cannot support cc_fit_time = {cc_fit_time}')
 
-    # peakpos1 = 1.2614
-    # peakpos2 = 1.2614
-    # peakpos3 = 1.07577
-
+    # Set up input
     offset_ws_dict = dict()
     mask_ws_dict = dict()
 
-    # Bank 1
+    # Loop over
     for bank_name in calib_flag:
         # skip disabled bank
         if not calib_flag[bank_name]:
@@ -511,50 +508,6 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
             offset_ws_dict[bank_name] = bank_i_offset
             mask_ws_dict[bank_name] = bank_i_mask
     # END-IF
-
-    # # East bank
-    # if calib_flag['Bank2']:
-    #     bank_name = 'Bank2'
-    #     start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-    #     ref_ws_index = 40704  # 4854 ends with an even right-shift spectrum
-    #     peak_width = 0.04
-    #     cc_number_bank2 = 80
-    #     bank2_offset, bank2_mask = cross_correlate_calibrate(diamond_ws_name, peakpos2,
-    #                                                          peakpos2 - peak_width, peakpos2 + peak_width,
-    #                                                          (start_ws_index, end_ws_index - 1),
-    #                                                          ref_ws_index, cc_number_bank2,
-    #                                                          1, -0.0003, f'{bank_name}_{prefix}',
-    #                                                          peak_fit_time=cc_fit_time)
-    #     if bank2_offset is None:
-    #         err_msg = bank2_mask
-    #         print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
-    #     else:
-    #         offset_ws_dict[bank_name] = bank2_offset
-    #         mask_ws_dict[bank_name] = bank2_mask
-    # # END-IF
-    #
-    # # High angle
-    # if calib_flag['Bank5']:
-    #     # High angle bank
-    #     bank_name = 'Bank5'
-    #     start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
-    #     ref_ws_index = 182528
-    #     peak_width = 0.01
-    #     cc_number = 20
-    #     bank5_offset, bank5_mask = cross_correlate_calibrate(diamond_ws_name, peakpos3,
-    #                                                          peakpos3 - peak_width, peakpos3 + peak_width,
-    #                                                          (start_ws_index, end_ws_index - 1),
-    #                                                          ref_ws_index, cc_number=cc_number,
-    #                                                          max_offset=1, binning=-0.0003,
-    #                                                          ws_name_posfix=f'{bank_name}_{prefix}',
-    #                                                          peak_fit_time=cc_fit_time)
-    #     if bank5_offset is None:
-    #         err_msg = bank5_mask
-    #         print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
-    #     else:
-    #         offset_ws_dict[bank_name] = bank5_offset
-    #         mask_ws_dict[bank_name] = bank5_mask
-    # # END-IF
 
     if len(offset_ws_dict) == 0:
         raise RuntimeError('No bank is calibrated.  Either none of them is flagged Or all of them failed')

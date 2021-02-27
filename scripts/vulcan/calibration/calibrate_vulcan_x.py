@@ -81,6 +81,12 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
 
     # Set up default
     if cross_correlate_param_dict is None:
+
+        # TODO TODO -1. Add workspace index range to CrossCorrelateParameter such that
+        #               the user can have the flexibility to set up cross correlation plan
+        #            2. Enable the white/black list for the calibration flag
+        #            3. Move the set of default to an individual method
+
         # peak position in d-Spacing
         bank1_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
         bank2_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
@@ -91,7 +97,9 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
                                       'Bank2': bank2_cc_param,
                                       'Bank5': bank5_cc_param}
     if bank_calibration_flag is None:
-        bank_calibration_flag = {'Bank1': True, 'Bank2': True, 'Bank5': True}
+        bank_calibration_flag = {'Bank1': False,
+                                 'Bank2': False,
+                                 'Bank5': True}
 
     cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_ws_name,
                                                       cross_correlate_param_dict,
@@ -212,7 +220,7 @@ def peak_position_calibrate(focused_diamond_ws_name,
     return target_diff_cal_h5
 
 
-def main():
+def main(step=1):
     # --------------------------------------------------------------------------
     # User setup
     # 
@@ -225,7 +233,7 @@ def main():
 
     # day 1: diamond_runs = [192227, 192228]
     # latest
-    diamond_runs = [192245, 192246, 192247, 192248][:]
+    diamond_runs = [192245, 192246, 192247, 192248][0:1]
 
     # Optional user specified Mantid IDF
     # vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition_pete02.xml'
@@ -242,6 +250,9 @@ def main():
 
     # Step 1: do cross correlation calibration
     cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
+
+    if step == 1:
+        print(f'Returned after cross correlation')
 
     # Define group plan as a check for step 1 and a plan for step 3
     tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
@@ -402,7 +413,8 @@ def test_single_spectrum_peak_fitting():
 
 
 if __name__ == '__main__':
-    # main()
+    main(step=1)
     # test_bank_wise_calibration()
     # test_single_spectrum_peak_fitting()
-    test_bank_wise_calibration()
+    # test_bank_wise_calibration()
+    # main_check_calibration_quality()
