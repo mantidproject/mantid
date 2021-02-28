@@ -457,6 +457,43 @@ def test_single_spectrum_peak_fitting():
     plt.savefig('raw_positions_vs_tube.png')
 
 
+def cross_correlation_in_tubes():
+    # peak position in d-Spacing
+    # Tube 1
+    tube1_cc_param = CrossCorrelateParameter('Tube1', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=256,
+                                             cross_correlate_number=80,
+                                             bin_step=-0.0003, start_ws_index=0, end_ws_index=512)
+    boundary_index = 512
+    # Rest of 8-Pack 1:center = 2 * 512 + 256
+    pack1_cc_param = CrossCorrelateParameter('Bank1', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=2 * 512 + 256,
+                                             cross_correlate_number=80,
+                                             bin_step=-0.0003, start_ws_index=boundary_index, end_ws_index=512 * 4)
+    boundary_index = 512 * 4
+    # Rest of bank 1
+    bank1_cc_param = CrossCorrelateParameter('Bank1', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=40704, cross_correlate_number=80,
+                                             bin_step=-0.0003, start_ws_index=boundary_index, end_ws_index=512 * 160)
+    # Bank 2
+    bank2_cc_param = CrossCorrelateParameter('Bank2', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=40704, cross_correlate_number=80,
+                                             bin_step=-0.0003, start_ws_index=512 * 160, end_ws_index=512 * 320)
+    # Bank 5
+    bank5_cc_param = CrossCorrelateParameter('Bank3', reference_peak_position=1.07577, reference_peak_width=0.01,
+                                             reference_ws_index=182528, cross_correlate_number=20,
+                                             bin_step=-0.0003, start_ws_index=512 * 320, end_ws_index=512 * (320 + 72))
+
+    # do cross correlation
+    cross_correlate_param_dict = {'Tube1': tube1_cc_param,
+                                  'Pack1': pack1_cc_param,
+                                  'Bank1': bank1_cc_param,
+                                  'Bank2': bank2_cc_param,
+                                  'Bank5': bank5_cc_param}
+
+    return cross_correlate_param_dict
+
+
 if __name__ == '__main__':
     main(step=1)
     # test_bank_wise_calibration()
