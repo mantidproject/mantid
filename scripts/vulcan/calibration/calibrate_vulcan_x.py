@@ -10,6 +10,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
+__all__ = ['load_diamond_runs', 'cross_correlate_calibrate', 'align_vulcan_data']
+
+
 def load_diamond_runs(diamond_runs: List[Union[str, int]],
                       user_idf: Union[None,  str],
                       output_dir: Union[str, None]) -> Tuple[str, str]:
@@ -52,7 +55,7 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
                               cross_correlate_param_dict: Union[None, Dict[str, CrossCorrelateParameter]] = None,
                               bank_calibration_flag: Union[None, Dict[str, bool]] = None,
                               output_dir: str = os.getcwd(),
-                              vulcan_x_idf: Union[str, None] = None):
+                              vulcan_x_idf: Union[str, None] = None) -> Tuple[str, str]:
     """
 
     Default VULCAN-X: when auto reducing, time focus data to pixel 48840 for bank 1 and 2, and 422304 for bank 5.
@@ -60,14 +63,19 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
 
     Parameters
     ----------
-    diamond_runs
-    cross_correlate_param_dict
-    bank_calibration_flag
+    diamond_runs: str, ~list
+        2 possible inputs: (1) name of diamond MatrixWorkspace (2) list of diamond run numbers or nexus file paths
+    cross_correlate_param_dict: ~dict
+        cross correlation parameters
+    bank_calibration_flag: ~dict, None
+        flag to calibrate components
     output_dir
     vulcan_x_idf
 
     Returns
     -------
+    ~tuple
+        name of calibration file (generated), name of raw diamond EventWorkspace
 
     """
     # Check input diamond runs or diamond workspace
@@ -81,32 +89,69 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
 
     # Set up default
     if cross_correlate_param_dict is None:
+        cross_correlate_param_dict = default_cross_correlation_setup()
 
-        # TODO TODO -1. Add workspace index range to CrossCorrelateParameter such that
-        #               the user can have the flexibility to set up cross correlation plan
-        #            2. Enable the white/black list for the calibration flag
-        #            3. Move the set of default to an individual method
+    # Set up process calibration
+    bank_calibration_flag = process_calibration_flag(cross_correlate_param_dict, bank_calibration_flag)
 
-        # peak position in d-Spacing
-        bank1_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
-        bank2_cc_param = CrossCorrelateParameter(1.2614, 0.04, 40704, 80, -0.0003)
-        bank5_cc_param = CrossCorrelateParameter(1.07577, 0.01, 182528, 20, -0.0003)
-
-        # do cross correlation
-        cross_correlate_param_dict = {'Bank1': bank1_cc_param,
-                                      'Bank2': bank2_cc_param,
-                                      'Bank5': bank5_cc_param}
-    if bank_calibration_flag is None:
-        bank_calibration_flag = {'Bank1': False,
-                                 'Bank2': False,
-                                 'Bank5': True}
-
+    # Do cross correlation calibration
     cal_file_name, diamond_ws_name = calibrate_vulcan(diamond_ws_name,
                                                       cross_correlate_param_dict,
                                                       bank_calibration_flag,
                                                       output_dir=output_dir)
 
     return cal_file_name, diamond_ws_name
+
+
+def default_cross_correlation_setup() -> Dict[str, CrossCorrelateParameter]:
+    # peak position in d-Spacing
+    bank1_cc_param = CrossCorrelateParameter('Bank1', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=40704, cross_correlation_number=80,
+                                             bin_step=-0.0003, start_ws_index=0, end_ws_index=512 * 160)
+    bank2_cc_param = CrossCorrelateParameter('Bank2', reference_peak_position=1.2614, reference_peak_width=0.04,
+                                             reference_ws_index=40704, cross_correlation_number=80,
+                                             bin_step=-0.0003, start_ws_index=512 * 160, end_ws_index=512 * 320)
+    bank5_cc_param = CrossCorrelateParameter('Bank3', reference_peak_position=1.07577, reference_peak_width=0.01,
+                                             reference_ws_index=182528, cross_correlation_number=20,
+                                             bin_step=-0.0003, start_ws_index=512 * 320, end_ws_index=512 * (320 + 72))
+
+    # do cross correlation
+    cross_correlate_param_dict = {'Bank1': bank1_cc_param,
+                                  'Bank2': bank2_cc_param,
+                                  'Bank5': bank5_cc_param}
+
+    return cross_correlate_param_dict
+
+
+def process_calibration_flag(cross_correlate_param_dict: Dict[str, CrossCorrelateParameter],
+                             bank_calibration_flag: Union[Dict[str, bool], None]) -> Dict[str, bool]:
+
+    if bank_calibration_flag is None:
+        # default: all True
+        bank_calibration_flag = dict()
+        for module_name in cross_correlate_param_dict:
+            bank_calibration_flag[module_name] = True
+
+    elif len(bank_calibration_flag) < len(cross_correlate_param_dict):
+        # fill in blanks
+        flags = bank_calibration_flag.values()
+        flag_sum = np.sum(np.array(flags))
+        if flag_sum == 0:
+            # user specifies False
+            default_flag = True
+        elif flag_sum != len(flags):
+            # user specifies both True and False
+            raise RuntimeError(f'User specifies both True and False but not all the components.'
+                               f'It causes confusion')
+        else:
+            default_flag = False
+
+        # fill in the default values
+        for component_name in cross_correlate_param_dict:
+            if component_name not in bank_calibration_flag:
+                bank_calibration_flag[component_name] = default_flag
+
+    return bank_calibration_flag
 
 
 def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],

@@ -143,11 +143,15 @@ def calibrate_vulcan(diamond_ws_name: str,
     Parameters
     ----------
     diamond_ws_name:
+    cross_correlate_param_dict: ~dict
+        cross correlation parameters
+    calibration_flag: ~dict
+        flag to calibrate components
     output_dir:
 
     Returns
     -------
-    tuple
+    ~tuple
         calibration file name, diamond event workspace
 
     """

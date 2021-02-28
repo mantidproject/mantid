@@ -32,11 +32,33 @@ VULCAN_X_PIXEL_RANGE = {'Bank1': (0, 81920),  # 160 tubes
 VULCAN_X_PIXEL_NUMBER = 200704
 
 
-CrossCorrelateParameter = namedtuple('CrossCorrelateParameter', ['reference_peak_position',
-                                                                 'reference_peak_width',
-                                                                 'reference_ws_index',
-                                                                 'cross_correlate_number',
-                                                                 'bin_step'])
+class CrossCorrelateParameter(object):
+    """
+    A data class for cross correlation parameters
+    """
+    PARAM_NAMES = ['reference_peak_position', 'reference_peak_width', 'reference_ws_index',
+                   'cross_correlate_number', 'bin_step', 'start_ws_index', 'end_ws_index']
+    PARAM_DEFAULTS = [1.07577, 0.01, 40704, 80, -0.0003, -1, -1]
+
+    def __init__(self, name: str, **kwargs):
+        """Init
+        """
+        self._schedule_name = name
+
+        # Set class variables dynamically
+        for i_par, par_name in enumerate(CrossCorrelateParameter.PARAM_NAMES):
+            setattr(self, par_name, CrossCorrelateParameter.PARAM_DEFAULTS[i_par])
+
+        # Check inputs
+        self.set(**kwargs)
+
+    def set(self, **kwargs):
+        # Check inputs
+        for par_name, par_value in kwargs.items():
+            if par_name not in CrossCorrelateParameter.PARAM_NAMES:
+                raise RuntimeError(f'Parameter {par_name} is not a supported {self.__class__.__name__} parameter.')
+            else:
+                self.__dict__[par_name] = par_value
 
 
 # TODO - all the hardcoded pixel numbers will be replaced!
@@ -487,18 +509,23 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
         if not calib_flag[bank_name]:
             continue
         # retrieve parameter to set up cross correlation
-        start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
+        # start_ws_index, end_ws_index = VULCAN_X_PIXEL_RANGE[bank_name]
 
         bank_i_cc_param = cross_correlate_param_dict[bank_name]
+        start_ws_index = bank_i_cc_param.start_ws_index
+        end_ws_index = bank_i_cc_param.end_ws_index
         peak_pos_i = bank_i_cc_param.reference_peak_position
-        ref_ws_index = bank_i_cc_param.reference_ws_index
+        # ref_ws_index = bank_i_cc_param.reference_ws_index
         peak_width = bank_i_cc_param.reference_peak_width
-        cc_number_i = bank_i_cc_param.cross_correlate_number
-        bank_i_offset, bank_i_mask = cross_correlate_calibrate(diamond_ws_name, peak_pos_i,
+        # cc_number_i = bank_i_cc_param.cross_correlate_number
+        bank_i_offset, bank_i_mask = cross_correlate_calibrate(diamond_ws_name,
+                                                               peak_pos_i,
                                                                peak_pos_i - peak_width, peak_pos_i + peak_width,
                                                                (start_ws_index, end_ws_index - 1),  # Note: inclusive
-                                                               ref_ws_index, cc_number_i,
-                                                               1, bank_i_cc_param.bin_step,
+                                                               bank_i_cc_param.reference_ws_index,
+                                                               bank_i_cc_param.cross_correlate_number,
+                                                               1,
+                                                               bank_i_cc_param.bin_step,
                                                                f'{bank_name}_{prefix}',
                                                                peak_fit_time=cc_fit_time)
         if bank_i_offset is None:
