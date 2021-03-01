@@ -94,6 +94,9 @@ class TableWorkspaceDisplayModel:
     def get_column(self, index):
         return self.ws.column(index)
 
+    def get_cell(self, row, column):
+        return self.ws.cell(row, column)
+
     def get_number_of_rows(self):
         return self.ws_num_rows
 
