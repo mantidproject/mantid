@@ -328,7 +328,7 @@ public:
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
-  void showCustomInterfaceHelp(const QString &name);
+  void showCustomInterfaceHelp(const QString &name, const QString &area=QString(), const QString &section=QString());
   void showWebPage(const QString &url);
   void closeHelpWindow();
 };

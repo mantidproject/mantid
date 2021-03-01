@@ -117,12 +117,15 @@ void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
 }
 
 void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name,
+                                     const std::string &area,
                                      const std::string &section) {
   showCustomInterface(parent, QString::fromStdString(name),
+                      QString::fromStdString(area),
                       QString::fromStdString(section));
 }
 
 void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
+                                     const QString &area,
                                      const QString &section) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
@@ -132,6 +135,9 @@ void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
   } else {
     // Open online help
     QString baseUrl = "https://docs.mantidproject.org/interfaces/";
+    if (!area.toStdString().empty()) {
+      baseUrl += area + "/";
+    }
     QString url = baseUrl + name + ".html";
     MantidDesktopServices::openUrl(QUrl(url));
     g_log.debug("Opening online help page:\n" + url.toStdString());

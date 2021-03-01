@@ -394,7 +394,8 @@ void MuonAnalysis::muonAnalysisHelpClicked() {
  */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString("grouping-options"));
+      nullptr, QString("Muon Analysis"), QString(""),
+      QString("grouping-options"));
 }
 
 /**
