@@ -27,7 +27,7 @@ def main_calibration(load_full=False, bin_step=-.001):
             Plus(LHSWorkspace=dia_wksp,
                  RHSWorkspace=dia_wksp_i,
                  OutputWorkspace=dia_wksp, ClearRHSWorkspace=True)
-        # Reload insturment (do not trust the old one)
+        # Reload instrument
         LoadInstrument(Workspace=dia_wksp, InstrumentName='VULCAN', RewriteSpectraMap=True)
 
         # TODO - make this back!    MaxChunkSize=16, FilterBadPulses=bad_pulse_threshold)
