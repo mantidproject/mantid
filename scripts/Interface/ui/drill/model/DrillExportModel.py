@@ -55,6 +55,8 @@ class DrillExportModel:
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportExtensions = dict()
         for a in self._exportAlgorithms.keys():
+            if a not in RundexSettings.EXPORT_ALGO_EXTENSION:
+                continue
             self._exportExtensions[a] = RundexSettings.EXPORT_ALGO_EXTENSION[a]
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)

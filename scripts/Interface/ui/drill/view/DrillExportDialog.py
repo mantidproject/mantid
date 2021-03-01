@@ -66,7 +66,10 @@ class DrillExportDialog(QDialog):
         """
         for i in range(len(algorithms)):
             algo = algorithms[i]
-            text = algo + " (" + extensions[algo] + ")"
+            if algo in extensions:
+                text = algo + " (" + extensions[algo] + ")"
+            else:
+                text = algo
             widget = QCheckBox(text, self)
             self._widgets[algorithms[i]] = widget
             self.algoList.addWidget(widget, i, 0, Qt.AlignLeft)
