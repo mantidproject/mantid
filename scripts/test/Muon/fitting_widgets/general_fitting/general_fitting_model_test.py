@@ -10,8 +10,6 @@ from unittest import mock
 from mantid.api import CompositeFunction, FrameworkManager, FunctionFactory
 
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
-from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_base_pair import MuonBasePair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
