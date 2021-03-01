@@ -29,8 +29,8 @@ class TableModel(QAbstractTableModel):
         self._row_count = 0
         self._headers = []
 
-    def set_table_headers(self, headers):
-        self._headers = headers
+    def setHorizontalHeaderLabels(self, labels):
+        self._headers = labels
 
     def canFetchMore(self, index):
         if index.isValid():

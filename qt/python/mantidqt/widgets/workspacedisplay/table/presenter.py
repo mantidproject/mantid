@@ -56,7 +56,7 @@ class TableWorkspaceDataPresenter(object):
             for index, label in extra_labels:
                 column_headers[index] += str(label)
 
-        table_item_model.set_table_headers(column_headers)
+        table_item_model.setHorizontalHeaderLabels(column_headers)
 
     def load_data(self, table):
         table.model().load_data(self.model)
