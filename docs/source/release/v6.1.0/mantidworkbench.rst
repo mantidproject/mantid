@@ -9,6 +9,7 @@ New and Improved
 ----------------
 
 - It is now possible to overplot bin data from the matrix workspace view.
+- Improved the performance of the table workspace display for large datasets
 
 Bugfixes
 --------
