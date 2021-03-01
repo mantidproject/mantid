@@ -338,6 +338,8 @@ def cross_correlate_calibrate(ws_name: str,
     # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
     offset_ws_name = 'offset_' + ws_name + '_' + ws_name_posfix
     mask_ws_name = 'mask_' + ws_name + '_' + ws_name_posfix
+    if debug_mode or True:
+        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=os.path.join(os.getcwd(), f'step1_ref{reference_ws_index}_{cc_ws_name}.nxs'))
 
     # TODO - THIS IS AN IMPORTANT PARAMETER TO SET THE MASK
     # min_peak_height = 1.0
@@ -358,7 +360,7 @@ def cross_correlate_calibrate(ws_name: str,
                            # FitEachPeakTwice=fit_twice,
                            # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
                            )
-        if debug_mode:
+        if debug_mode and False:
             SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
         # failed to do cross correlation

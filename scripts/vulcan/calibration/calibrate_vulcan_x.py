@@ -106,13 +106,13 @@ def cross_correlate_calibrate(diamond_runs: Union[str, List[Union[int, str]]],
 def default_cross_correlation_setup() -> Dict[str, CrossCorrelateParameter]:
     # peak position in d-Spacing
     bank1_cc_param = CrossCorrelateParameter('Bank1', reference_peak_position=1.2614, reference_peak_width=0.04,
-                                             reference_ws_index=40704, cross_correlation_number=80,
+                                             reference_ws_index=40704, cross_correlate_number=80,
                                              bin_step=-0.0003, start_ws_index=0, end_ws_index=512 * 160)
     bank2_cc_param = CrossCorrelateParameter('Bank2', reference_peak_position=1.2614, reference_peak_width=0.04,
-                                             reference_ws_index=40704, cross_correlation_number=80,
+                                             reference_ws_index=40704, cross_correlate_number=80,
                                              bin_step=-0.0003, start_ws_index=512 * 160, end_ws_index=512 * 320)
     bank5_cc_param = CrossCorrelateParameter('Bank3', reference_peak_position=1.07577, reference_peak_width=0.01,
-                                             reference_ws_index=182528, cross_correlation_number=20,
+                                             reference_ws_index=182528, cross_correlate_number=20,
                                              bin_step=-0.0003, start_ws_index=512 * 320, end_ws_index=512 * (320 + 72))
 
     # do cross correlation
@@ -285,19 +285,28 @@ def main(step=1):
     vulcan_x_idf = '/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/data/VULCAN_Definition.xml'
 
     # Output path
-    output_dir = '/SNS/VULCAN/shared/wzz/calibrtion_6hour_192245/'
+    output_dir = os.path.join(os.getcwd(), 'temp')
     final_calib_file = 'VULCAN_Calibration_Hybrid.h5'
     #
     # ---------------------------------------------------------------------------
 
     # Load data (set)
     diamond_ws_name, _ = load_diamond_runs(diamond_runs, vulcan_x_idf, output_dir)
+                              
 
     # Step 1: do cross correlation calibration
-    cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name, output_dir=output_dir)
+
+    # set up a test cross  correlation plan
+    tube_cc_plan = cross_correlation_in_tubes()
+
+    # cross correlation
+    cc_calib_file, diamond_ws_name = cross_correlate_calibrate(diamond_ws_name,
+                                                               cross_correlate_param_dict = tube_cc_plan,
+                                                               output_dir=output_dir)
 
     if step == 1:
         print(f'Returned after cross correlation')
+        return
 
     # Define group plan as a check for step 1 and a plan for step 3
     tube_grouping_plan = [(0, 512, 81920), (81920, 1024, 81920 * 2), (81920 * 2, 256, 200704)]
@@ -307,6 +316,9 @@ def main(step=1):
                                                          diff_cal_file_name=cc_calib_file,
                                                          output_dir=output_dir,
                                                          tube_grouping_plan=tube_grouping_plan)
+    if step == 2:
+        print(f'Returned after aligning detector with CC-calibrated')
+        return
 
     # Step 3: do peak position calibration
     peak_position_calibrate(cc_focus_ws_name, tube_grouping_plan, cc_calib_file, final_calib_file, output_dir)
@@ -321,7 +333,7 @@ def main_check_calibration_quality():
     diff_cal_file = os.path.join(os.getcwd(), 'TestHybrid210222X.h5')
 
     # Output
-    output_dir = '/tmp/'
+    output_dir = os.path.join(os.getcwd(), 'temp')
 
     # latest
     diamond_runs = [192245, 192246, 192247, 192248][0:1]
@@ -382,6 +394,7 @@ def test_single_spectrum_peak_fitting():
     LoadNexusProcessed(Filename=cc_focus_nexus, OutputWorkspace=cc_focus_ws_name)
 
     output_dir = os.path.join(os.getcwd(), 'temp')
+    print(f'Output directory = {output_dir}')
 
     # Fit west bank
     bank_1_num_tubes = 160
@@ -495,7 +508,7 @@ def cross_correlation_in_tubes():
 
 
 if __name__ == '__main__':
-    main(step=1)
+    main(step=2)
     # test_bank_wise_calibration()
     # test_single_spectrum_peak_fitting()
     # test_bank_wise_calibration()
