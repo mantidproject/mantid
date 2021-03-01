@@ -1087,4 +1087,31 @@ public:
       AnalysisDataService::Instance().remove(outWSName);
     }
   }
+
+  void test_simple_file() {
+    return; // uncomment for debugging
+    std::string filename("/tmp/LoadMDTest1.nxs");
+    std::string outWSName("outWS");
+    bool fileBackEnd(false);
+    double memory(0.0); // don't allocate in-cache memory for the file backend
+    LoadMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileBackEnd", fileBackEnd));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Memory", memory));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BoxStructureOnly", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDEventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
+            outWSName));
+    TS_ASSERT(iws);
+  }
 };

@@ -710,6 +710,9 @@ void LoadSQW2::warnIfMemoryInsufficient(int64_t npixtot) {
  * @return 1 if the event was added, 0 otherwise
  */
 size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
+  // TODO can goniometerIndex be read from the buffer?
+  // TODO Was the produced with SaveMD?
+  uint16_t goniometerIndex(0);
   using DataObjects::MDEvent;
   // Is the pixel field valid? Older versions of Horace produced files with
   // an invalid field and we can't use this. It should be between 1 && nfiles
@@ -722,7 +725,7 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   auto error = pixel[8];
   auto added = m_outputWS->addEvent(
       MDEvent<4>(pixel[7], error * error, static_cast<uint16_t>(irun - 1),
-                 static_cast<detid_t>(pixel[5]), centers));
+                 goniometerIndex, static_cast<detid_t>(pixel[5]), centers));
   // At this point the workspace should be setup so that we always add the
   // event so only do a runtime check in debug mode
   assert(added == 1);

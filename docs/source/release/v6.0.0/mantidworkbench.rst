@@ -78,7 +78,12 @@ Interfaces
 - Add a Python function to replace the workspace being shown by InstrumentViewer
 
 - A system to group samples and avoid repetition in DrILL has been added. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
+- In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
+- Support for D16 sample scan mode in DrILL.
 - Automatic data export in DrILL. See the :ref:`DrILL documentation <DrILL-ref>` for more information.
+- A bug has been fixed in SliceViewer where attempting to plot a workspace with a text axis would cause a crash when zoomed out.
+- Improved plot generated scripts to better support major and minor tick settings at time of generation.
+- Allowed the use of greater precision and scientific notation when changing the colorbar limits on a colorfill plot from the Figure Options.
 
 Miscellaneous
 -------------

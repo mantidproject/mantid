@@ -33,11 +33,13 @@ private:
     ws->getPeak(0).setHKL(h, k, l); // First peak is already indexed now.
     ws->getPeak(0).setIntensity(intensity);
     ws->getPeak(0).setSigmaIntensity(sigIntensity);
+    ws->getPeak(0).setBankName("bank1");
     return ws;
   }
 
   /*
    * Helper method to run the algorithm and return the output workspace.
+   * -- filter value
    */
   IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
                                     const std::string &filterVariable,
@@ -53,6 +55,31 @@ private:
     alg.setProperty("FilterVariable", filterVariable);
     alg.setProperty("FilterValue", filterValue);
     alg.setProperty("Operator", filterOperator);
+    alg.execute();
+
+    IPeaksWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
+            outputWorkspace);
+
+    return outWS;
+  }
+
+  /*
+   * Helper method to run the algorithm and return the output workspace.
+   * -- bank selection
+   */
+  IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
+                                    const std::string &bankname,
+                                    const std::string &criterion) {
+    const std::string outputWorkspace = "FilteredPeaks";
+
+    FilterPeaks alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", outputWorkspace);
+    alg.setProperty("BankName", bankname);
+    alg.setProperty("Criterion", criterion);
     alg.execute();
 
     IPeaksWorkspace_sptr outWS =
@@ -318,6 +345,22 @@ public:
 
     AnalysisDataService::Instance().remove(outWS->getName());
     AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_bank() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+    const double intensity = 1;
+    const double sigIntensity = 0.5;
+    const std::string bankname = "bank1";
+
+    auto inWS = createInputWorkspace(h, k, l, intensity, sigIntensity);
+    auto outWS = runAlgorithm(inWS, "bank1", "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "bank1", "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
   }
 };
 

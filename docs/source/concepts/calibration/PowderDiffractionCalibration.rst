@@ -236,5 +236,33 @@ Here is an example to calibrate VULCAN-X.
     peak_position_calibrate(cc_focus_ws_name, tube_grouping_plan, cc_calib_file, final_calib_file, output_dir)
 
 
+Calibration Diagnostics
+-----------------------
+
+Pixel-by-pixel results
+######################
+
+.. figure:: /images/VULCAN_192227_pixel_calibration.png
+  :width: 400px
+
+There are some common ways of diagnosing the calibration results.
+One of the more common is to plot the aligned data in d-spacing.
+While this can be done via the "colorfill" plot or sliceviewer,
+a function has been created to annotate the plot with additional information.
+This can be done using the following code
+
+.. code::
+
+   from mantid.simpleapi import (AlignDetectors, LoadDiffCal, LoadEventNexus, LoadInstrument, Rebin)
+   from Calibration.tofpd import diagnostics
+
+   LoadEventNexus(Filename='VULCAN_192227.nxs.h5', OutputWorkspace='ws')
+   Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000,-.002,70000))
+   LoadDiffCal(Filename='VULCAN_Calibration_CC_4runs_hybrid.h5', InputWorkspace='ws', WorkspaceName='VULCAN')
+   AlignDetectors(InputWorkspace='ws', OutputWorkspace='ws', CalibrationWorkspace='VULCAN_cal')
+   diagnostics.plot2d(mtd['ws'], horiz_markers=[8*512*20, 2*8*512*20], xmax=1.3)
+
+Here the expected peak positions are vertical lines, the horizontal lines are boundaries between banks.
+When run interactively, the zoom/pan tools are available.
 
 .. categories:: Calibration

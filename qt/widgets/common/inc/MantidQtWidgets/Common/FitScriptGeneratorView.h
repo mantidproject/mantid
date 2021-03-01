@@ -9,10 +9,12 @@
 #include "DllOption.h"
 #include "ui_FitScriptGenerator.h"
 
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -30,6 +32,8 @@ namespace MantidWidgets {
 
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
+struct GlobalParameter;
+struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
     : public IFitScriptGeneratorView {
@@ -38,6 +42,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
 public:
   FitScriptGeneratorView(
       QWidget *parent = nullptr,
+      FittingMode fittingMode = FittingMode::SEQUENTIAL,
       QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
   ~FitScriptGeneratorView() override;
 
@@ -49,7 +54,13 @@ public:
   [[nodiscard]] double startX(FitDomainIndex index) const override;
   [[nodiscard]] double endX(FitDomainIndex index) const override;
 
+  [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
+
+  [[nodiscard]] double
+  parameterValue(std::string const &parameter) const override;
+  [[nodiscard]] Mantid::API::IFunction::Attribute
+  attributeValue(std::string const &attribute) const override;
 
   void removeWorkspaceDomain(std::string const &workspaceName,
                              WorkspaceIndex workspaceIndex) override;
@@ -64,6 +75,17 @@ public:
   getDialogWorkspaceIndices() const override;
 
   void resetSelection() override;
+
+  bool isAddRemoveFunctionForAllChecked() const override;
+
+  void clearFunction() override;
+  void setFunction(Mantid::API::IFunction_sptr const &function) const override;
+
+  void setSimultaneousMode(bool simultaneousMode) override;
+
+  void setGlobalTies(std::vector<GlobalTie> const &globalTies) override;
+  void setGlobalParameters(
+      std::vector<GlobalParameter> const &globalParameter) override;
 
   void displayWarning(std::string const &message) override;
 
@@ -84,18 +106,32 @@ private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
+  void onItemSelected();
+  void onFunctionRemoved(QString const &function);
+  void onFunctionAdded(QString const &function);
+  void onFunctionReplaced(QString const &function);
+  void onParameterChanged(QString const &parameter);
+  void onAttributeChanged(QString const &attribute);
+  void onParameterTieChanged(QString const &parameter, QString const &tie);
+  void onParameterConstraintRemoved(QString const &parameter);
+  void onParameterConstraintChanged(QString const &functionIndex,
+                                    QString const &constraint);
+  void onGlobalParametersChanged(QStringList const &globalParameters);
+  void onCopyFunctionToClipboard();
+  void onFunctionHelpRequested();
+  void onChangeToSequentialFitting();
+  void onChangeToSimultaneousFitting();
 
 private:
   void connectUiSignals();
 
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
-  void setFitBrowserOption(QString const &name, QString const &value);
-  void setFittingType(QString const &fitType);
+  void setFittingMode(FittingMode fittingMode);
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
-  std::unique_ptr<FunctionBrowser> m_functionBrowser;
+  std::unique_ptr<FunctionTreeView> m_functionTreeView;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
   Ui::FitScriptGenerator m_ui;
 };

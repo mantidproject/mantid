@@ -109,7 +109,7 @@ public:
       }
     }
 
-    // accamulate points in the nodes of level 2 if
+    // accumulate points in the nodes of level 2 if
     // number of events <= threshold
     for (uint16_t i = 9; i < 73; ++i) {
       size_t count{0};
@@ -123,7 +123,7 @@ public:
         }
     }
 
-    // accamulate points in the nodes of level 1 if
+    // accumulate points in the nodes of level 1 if
     // number of events <= threshold
     for (uint16_t i = 1; i < 9; ++i) {
       size_t count{0};
@@ -137,7 +137,7 @@ public:
         }
     }
 
-    // accamulate points in the node of level 0 if
+    // accumulate points in the node of level 0 if
     // number of events <= threshold
     size_t i = 0;
     size_t count{0};

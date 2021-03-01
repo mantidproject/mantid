@@ -107,7 +107,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
     // Insert
     inserter.insertMDEvent(
         static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), detid, millerindex.data());
+        static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
   }
 
   // Set up run information

@@ -121,7 +121,7 @@ public:
     std::vector<coord_t> coord(2, 2.);
     coord[1] = 3;
 
-    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0);
+    b.buildAndAddEvent(1.2, 3.4, coord, 0, 0, 0);
     TS_ASSERT_EQUALS(b.getNPoints(), 1)
 
     b.refreshCache();
@@ -179,11 +179,12 @@ public:
     std::vector<signal_t> SigErrSq(3 * 2, 1.2);
     std::vector<coord_t> Coord(3 * 2, 2);
     std::vector<uint16_t> ind;
-    std::vector<uint32_t> RunID;
+    std::vector<uint16_t> goniometerIndex;
+    std::vector<uint32_t> detID;
     SigErrSq[1] = SigErrSq[3] = SigErrSq[5] = 3.4;
     Coord[1] = Coord[3] = Coord[5] = 3.0;
 
-    b.buildAndAddEvents(SigErrSq, Coord, ind, RunID);
+    b.buildAndAddEvents(SigErrSq, Coord, ind, goniometerIndex, detID);
 
     b.refreshCache();
 
@@ -201,11 +202,12 @@ public:
     std::vector<signal_t> SigErrSq(3 * 2, 1.2);
     std::vector<coord_t> Coord(3 * 2, 2);
     std::vector<uint16_t> ind(3, 10);
-    std::vector<uint32_t> RunID(3, 20);
+    std::vector<uint16_t> goniometerIndex(3, 42);
+    std::vector<uint32_t> detID(3, 20);
     SigErrSq[1] = SigErrSq[3] = SigErrSq[5] = 3.4;
     Coord[1] = Coord[3] = Coord[5] = 3.0;
 
-    b.buildAndAddEvents(SigErrSq, Coord, ind, RunID);
+    b.buildAndAddEvents(SigErrSq, Coord, ind, goniometerIndex, detID);
 
     b.refreshCache();
 
@@ -216,6 +218,7 @@ public:
     TS_ASSERT_DELTA(b.getErrorSquared(), 3.4 * 3, 1e-5);
 
     TS_ASSERT_EQUALS(b.getEvents()[2].getRunIndex(), 10);
+    TS_ASSERT_EQUALS(b.getEvents()[2].getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getEvents()[2].getDetectorID(), 20);
   }
 
@@ -277,7 +280,7 @@ public:
     int num = 500000;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < num; i++) {
-      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 10);
+      b.buildAndAddEvent(1.2, 3.4, Coord, 1, 0, 10);
     }
 
     b.refreshCache();
