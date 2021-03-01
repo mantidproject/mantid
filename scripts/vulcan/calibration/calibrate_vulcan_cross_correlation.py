@@ -1,17 +1,16 @@
-from mantid_helper import mtd_convert_units, load_nexus
-from lib_cross_correlation import (CrossCorrelateParameter, cross_correlate_vulcan_data,
-                                   verify_vulcan_difc,
-                                   save_calibration, merge_detector_calibration)
-import os
+from vulcan.calibration.mantid_helper import (mtd_convert_units, load_nexus)
+from vulcan.calibration.lib_cross_correlation import (CrossCorrelateParameter, cross_correlate_vulcan_data,
+                                                      verify_vulcan_difc,
+                                                      save_calibration, merge_detector_calibration)
 from mantid.simpleapi import (CreateGroupingWorkspace, LoadEventNexus, Plus,
                               ConvertToMatrixWorkspace,
                               SaveNexusProcessed, LoadNexusProcessed, mtd,
                               DeleteWorkspace, LoadInstrument)
+import os
 from typing import Union, List, Tuple, Dict
 
 
 # Cross correlation algorithm setup
-# TODO FIXME - this can be 2
 CROSS_CORRELATE_PEAK_FIT_NUMBER = 1
 
 
@@ -64,10 +63,10 @@ def load_event_data(nexus_paths: List[Union[str, int]],
         if isinstance(nexus_paths[0], int):
             raise RuntimeError(f'Single run with cutoff time does not support run-number-only input.')
         # determine diamone workspace name
-        diamond_ws_name = os.path.basename(nexus_paths[0]).split('.')[0] + '_diamond'
+        diamond_ws_name = f'{os.path.basename(nexus_paths[0]).split(".")[0]}_diamond'
         print(f'[INFO] Loading {nexus_paths} to {diamond_ws_name}')
         # and allow test mode?
-        test_arg = {}
+        test_arg = dict()
         test_arg['max_time'] = cutoff_time
         # load
         load_nexus(data_file_name=nexus_paths[0],
@@ -115,16 +114,9 @@ def create_groups(vulcan_ws_name=None) -> str:
     group_ws_name = 'VULCAN_3Bank_Groups'
 
     # 3 group mode
-    if vulcan_ws_name is None:
-        #
-        raise RuntimeError('This is for VULCAN-NOT-X.')
-        group_ws = CreateGroupingWorkspace(InstrumentName='vulcan',
-                                           GroupDetectorsBy='Group',
-                                           OutputWorkspace=group_ws_name)
-    else:
-        group_ws = CreateGroupingWorkspace(InputWorkspace=vulcan_ws_name,
-                                           GroupDetectorsBy='bank', 
-                                           OutputWorkspace=group_ws_name)
+    group_ws = CreateGroupingWorkspace(InputWorkspace=vulcan_ws_name,
+                                       GroupDetectorsBy='bank',
+                                       OutputWorkspace=group_ws_name)
 
     # sanity check
     assert group_ws
@@ -198,15 +190,5 @@ def calibrate_vulcan(diamond_ws_name: str,
                                        group_ws_name=grouping_ws_name,
                                        calib_file_prefix=output_calib_file_name,
                                        output_dir=output_dir)
-
-    # Align the diamond workspace 
-    # very diamond workspace
-    # TODO FIXME - remove this if-else-block afterwards
-    if mtd.doesExist(diamond_ws_name):
-        diamond_ws = mtd[diamond_ws_name]
-        print(f'Workspace: {diamond_ws_name} type = {type(diamond_ws)} Histograms = {diamond_ws.getNumberHistograms()}')
-    else:
-        print(f'Workspace: {diamond_ws_name} is deleted')
-    # END-IF-ELSE
 
     return calib_file_name, diamond_ws_name

@@ -1,6 +1,4 @@
 # script to do cross-correlation
-import os
-import math
 from mantid.api import AnalysisDataService as mtd
 from mantid.simpleapi import CrossCorrelate, GetDetectorOffsets, ConvertDiffCal, SaveDiffCal
 from mantid.simpleapi import Plus, CreateWorkspace
@@ -8,12 +6,12 @@ from mantid.simpleapi import CloneWorkspace
 from mantid.simpleapi import Rebin
 from mantid.simpleapi import GeneratePythonScript, SaveNexusProcessed
 import bisect
+import os
+import math
 import numpy as np
 import mantid_helper
-from lib_analysis import report_masked_pixels
 from typing import Dict, Tuple, Any, Union
 import h5py
-from collections import namedtuple
 
 
 __all__ = ['cross_correlate_vulcan_data', 'CrossCorrelateParameter']
@@ -322,7 +320,6 @@ def cross_correlate_calibrate(ws_name: str,
     print(f'[INFO] Reference spectra = {reference_ws_index}  position @ {det_pos}   2-theta = {twotheta}  '
           f'Workspace Index range: {ws_index_range[0]}, {ws_index_range[1]}; Binning = {binning}')
 
-    # TODO - NIGHT - shall change from bank to bank
     Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params='0.5, -{}, 1.5'.format(abs(binning)))
 
     # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
@@ -335,14 +332,16 @@ def cross_correlate_calibrate(ws_name: str,
                    XMin=peak_min,
                    XMax=peak_max)
 
-    # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-    offset_ws_name = 'offset_' + ws_name + '_' + ws_name_posfix
-    mask_ws_name = 'mask_' + ws_name + '_' + ws_name_posfix
-    if debug_mode or True:
-        SaveNexusProcessed(InputWorkspace=cc_ws_name, Filename=os.path.join(os.getcwd(), f'step1_ref{reference_ws_index}_{cc_ws_name}.nxs'))
+    # optionally save
+    if debug_mode:
+        SaveNexusProcessed(InputWorkspace=cc_ws_name,
+                           Filename=os.path.join(os.getcwd(),f'step1_ref{reference_ws_index}_{cc_ws_name}.nxs'))
 
     # TODO - THIS IS AN IMPORTANT PARAMETER TO SET THE MASK
     # min_peak_height = 1.0
+    # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
+    offset_ws_name = 'offset_' + ws_name + '_' + ws_name_posfix
+    mask_ws_name = 'mask_' + ws_name + '_' + ws_name_posfix
 
     print('[INFO] ref peak pos = {}, xrange = {}, {}'.format(peak_position, -cc_number, cc_number))
     try:
@@ -619,58 +618,6 @@ def merge_detector_calibration(offset_ws_dict: Dict,
     return calib_ws_name, out_offset_ws_name, out_mask_ws_name
 
 
-# TODO FIXME - this method is still in progress of prototyping
-#            - COMPARE TO REGULAR pixel-wise setup
-# TODO - XMin and XMax are empirical values
-def instrument_wide_cross_correlation_prototye(focused_ws_name, reference_ws_index: int = 1,
-                                               min_d: float = 1.0649999999999999,
-                                               max_d: float = 1.083):
-    """Main algorithm to do cross-correlation among different banks of VULCAN.
-
-    This is the second round calibration using the data file
-    1. calibrated by previous calibration file based on inner bank cross correlation
-    2. diffraction focused
-    For the instrument with bank 1/2/5, the input file shall be a 3 bank
-
-    Parameters
-    ----------
-    focused_ws_name
-    reference_ws_index: int
-        Reference spectrum for algorithm CrossCorrelate
-    min_d
-    max_d
-
-    Returns
-    -------
-
-    """
-    # Example: focused_ws_name = 'vulcan_diamond_3bank'
-    num_spec = mtd[focused_ws_name].getNumbetHistograms()
-
-    # Cross correlate an already-focused workspace, for example, with 3 spectra for 3 focused banks
-    focused_ws_name_cced = f'{focused_ws_name}_cced'  # example: 'cc_vulcan_diamond_3bank'
-    CrossCorrelate(InputWorkspace=focused_ws_name, OutputWorkspace=focused_ws_name_cced,
-                   ReferenceSpectra=reference_ws_index,
-                   WorkspaceIndexMax=num_spec - 1,
-                   XMin=min_d,
-                   XMax=max_d)
-
-    # Get detector offsets
-    offset_ws_name = f'{focused_ws_name}_offset'
-    GetDetectorOffsets(InputWorkspace=focused_ws_name_cced,
-                       Step=0.00029999999999999997,
-                       DReference=1.0757699999999999,  # FIXME - is this peak position?
-                       XMin=-20,
-                       XMax=20,
-                       OutputWorkspace=offset_ws_name,
-                       # FIXME - the followings are new features of an in-progress enhancing version
-                       # FitEachPeakTwice=True, PeakFitResultTableWorkspace='ddd', OutputFitResult=True,
-                       # MinimumPeakHeight=1
-                       )
-
-    return offset_ws_name
-
-
 def apply_masks(mask_ws):
     """
     apply masked Y to detector
@@ -792,7 +739,7 @@ def save_calibration(calib_ws_name: str,
                      mask_ws_name: str,
                      group_ws_name: str,
                      calib_file_prefix: str,
-                     output_dir:str) -> str:
+                     output_dir: str) -> str:
     """Export calibrated result to calibration file
 
     Save calibration (calibration table, mask and grouping) to legacy .cal and current .h5 file
@@ -804,6 +751,8 @@ def save_calibration(calib_ws_name: str,
     mask_ws_name
     group_ws_name
     calib_file_prefix
+    output_dir: str
+        path to output directory
 
     Returns
     -------
@@ -811,9 +760,7 @@ def save_calibration(calib_ws_name: str,
         calibration file name
 
     """
-    # save
-    #  get file name and unlink existing one
-    # TODO/FIXME - output directory shall be specified by users
+    # save:  get file name and unlink existing one
     out_file_name = os.path.join(output_dir, calib_file_prefix + '.h5')
     if os.path.exists(out_file_name):
         os.unlink(out_file_name)
@@ -925,7 +872,7 @@ def evaluate_bank_cross_correlate_quality(data_ws_name, fit_param_table_name):
 
         vec_x = vec_x[i_min:i_max]
         obs_y = data_ws.readY(ws_index)[i_min:i_max]
-        model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
+        model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1)
         cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
 
         cost_list.append([ws_index, cost])

@@ -28,9 +28,7 @@ def main_calibration(load_full=False, bin_step=-.001):
                  RHSWorkspace=dia_wksp_i,
                  OutputWorkspace=dia_wksp, ClearRHSWorkspace=True)
         # Reload insturment (do not trust the old one)
-        LoadInstrument(Workspace=dia_wksp,
-                       Filename='/SNS/users/wzz/Mantid_Project/mantid/scripts/vulcan/calibration/vulcan-x-alpha/VULCAN_Definition_pete02.xml',
-                       MonitorList='-3--2', InstrumentName='VULCAN', RewriteSpectraMap=True)
+        LoadInstrument(Workspace=dia_wksp, InstrumentName='VULCAN', RewriteSpectraMap=True)
 
         # TODO - make this back!    MaxChunkSize=16, FilterBadPulses=bad_pulse_threshold)
     else:
@@ -38,16 +36,6 @@ def main_calibration(load_full=False, bin_step=-.001):
         LoadEventAndCompress(Filename=dia_wksp, OutputWorkspace=dia_wksp,
                              MaxChunkSize=16, FilterBadPulses=bad_pulse_threshold)
         CropWorkspace(InputWorkspace=dia_wksp, OutputWorkspace=dia_wksp, XMin=300, XMax=16666.7)
-
-    # generates a workspace of delta-d/d which could be used to estimate uncertainties
-    # EstimateResolutionDiffraction(InputWorkspace=dia_wksp, OutputWorkspace='resolution', DeltaTOF=5)
-
-    # start from a previous calibration
-    # oldCal='/SNS/PG3/shared/CALIBRATION/2017_1_2_11A_CAL/PG3_PAC_d37861_2017_07_28-ALL.h5'
-
-    # POWGEN uses tabulated reflections for diamond
-    # dvalues = (0.3117, 0.3257, 0.3499, 0.4205, 0.4645, 0.4768, 0.4996, 0.5150, 0.5441, 0.5642, 0.5947,
-    #            0.6307, .6866, .7283, .8185, .8920, 1.0758, 1.2615, 2.0599)
 
     dvalues = [0.31173, 0.32571, 0.34987, 0.42049, 0.46451, 0.47679, 0.49961, 0.51499, 0.54411, 0.56414,
                0.60309, 0.63073, 0.68665, 0.72830, 0.81854, 0.89198, 1.07577, 1.26146, 2.05995]
@@ -71,14 +59,11 @@ def main_calibration(load_full=False, bin_step=-.001):
 
     # 3 group mode
     group_ws_name = 'VULCAN_3Banks_Group'
-    group_ws = CreateGroupingWorkspace(InputWorkspace=dia_wksp_name,
-                                       GroupDetectorsBy='bank',
-                                       OutputWorkspace=group_ws_name)
+    CreateGroupingWorkspace(InputWorkspace=dia_wksp_name,
+                            GroupDetectorsBy='bank',
+                            OutputWorkspace=group_ws_name)
 
     SaveNexusProcessed(InputWorkspace=instrument, Filename=f'cal_table.nxs')
-    # FIXME - group workspace cannot be saved SaveNexusProcessed(InputWorkspace=group_ws_name, Filename=f'group_table.nxs')
-
-    assert group_ws
 
     SaveDiffCal(CalibrationWorkspace=instrument,
                 MaskWorkspace=mask_ws_name,
@@ -98,8 +83,6 @@ def verify_calibration(dia_wksp):
 
     SaveNexusProcessed(InputWorkspace='%s_diag' % dia_wksp,
                        Filename="%s_pdcalibration_diagnostics.h5" % instrument)
-
-    return
 
 
 if __name__ == '__main__':
