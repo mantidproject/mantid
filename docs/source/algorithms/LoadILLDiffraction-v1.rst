@@ -123,15 +123,15 @@ Output:
 
 .. testcode:: LoadILLDiffractionIN5Example
 
-  ws = LoadILLDiffraction(Filename='ILL/D1B/473432.nxs')
+  ws = LoadILLDiffraction(Filename='ILL/IN5/199857.nxs')
 
-  print('The output has {0} bin (detector scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+  print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
 
 Output:
 
 .. testoutput:: LoadILLDiffractionIN5Example
 
-  The output has 16 bin (detector scan) and 98305 spectra
+  The output has 17 bin (omega scan) and 98305 spectra
 
 .. categories::
 
