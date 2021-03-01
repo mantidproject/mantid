@@ -83,7 +83,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(wksp_a='', wksp_b=''):
+def difc_plot2d(wksp_a='', wksp_b='', use_masks=False):
     group_a = str(wksp_a) + "_group"
     cal_a = str(wksp_a) + "_cal"
     group_b = str(wksp_b) + "_group"
@@ -109,6 +109,13 @@ def difc_plot2d(wksp_a='', wksp_b=''):
 
     delta = difc_b - difc_a
 
+    masks = []
+    if use_masks:
+        if mtd.doesExist(str(wksp_a) + "_mask"):
+            masks.append(mtd[str(wksp_a) + "_mask"])
+        if mtd.doesExist(str(wksp_b) + "_mask"):
+            masks.append(mtd[str(wksp_b) + "_mask"])
+
     # Plotting below taken from addie/calibration/CalibrationDiagnostics.py
     theta_array = [ ]
     phi_array = [ ]
@@ -120,13 +127,17 @@ def difc_plot2d(wksp_a='', wksp_b=''):
         pos = x.position
         theta = np.arccos(pos[ 2 ] / pos.norm())
         phi = np.arctan2(pos[ 1 ], pos[ 0 ])
-        #if mask.dataY(idx):
-        #    masked_theta_array.append(theta)
-        #    masked_phi_array.append(phi)
-        #else:
-        theta_array.append(theta)
-        phi_array.append(phi)
-        value_array.append(np.sum(delta.dataY(idx)))
+        found_mask = False
+        for mask in masks:
+            if mask.dataY(idx):
+                masked_theta_array.append(theta)
+                masked_phi_array.append(phi)
+                found_mask = True
+                break
+        if not found_mask:
+            theta_array.append(theta)
+            phi_array.append(phi)
+            value_array.append(np.sum(delta.dataY(idx)))
 
     # Use the largest solid angle for circle radius
     sample_position = info.samplePosition()
@@ -138,6 +149,9 @@ def difc_plot2d(wksp_a='', wksp_b=''):
     theta_array = np.rad2deg(theta_array)
     phi_array = np.rad2deg(phi_array)
     maximum_solid_angle = np.rad2deg(maximum_solid_angle)
+    if use_masks:
+        masked_phi_array = np.rad2deg(masked_phi_array)
+        masked_theta_array = np.rad2deg(masked_theta_array)
 
     # Radius also includes a fudge factor to improve plotting.
     # May need to add finer adjustments on a per-instrument basis.
