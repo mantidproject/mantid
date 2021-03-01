@@ -70,7 +70,7 @@ public:
   using IPropertyManager::declareProperty;
   void declareOrReplaceProperty(std::unique_ptr<Property> p,
                                 const std::string &doc = "") override;
-
+  void resetProperties() override;
   // Sets all the declare properties
   void setProperties(const std::string &propertiesJson,
                      const std::unordered_set<std::string> &ignoreProperties =

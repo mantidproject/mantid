@@ -441,7 +441,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
-            GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
+            if len(sensitivity_outputs) > 1:
+                GroupWorkspaces(InputWorkspaces=sensitivity_outputs, OutputWorkspace=self.output_sens)
             if self.getProperty('SensitivityWithOffsets').value:
                 tmp_group_name = self.output_sens + '_group'
                 RenameWorkspace(InputWorkspace=self.output_sens, OutputWorkspace=tmp_group_name)

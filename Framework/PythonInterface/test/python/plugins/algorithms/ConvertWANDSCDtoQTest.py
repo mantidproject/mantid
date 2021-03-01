@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import ConvertWANDSCDtoQ, CreateMDHistoWorkspace, CreateSingleValuedWorkspace, SetUB, mtd
+from mantid.simpleapi import ConvertWANDSCDtoQ, CreateMDHistoWorkspace, CreateSingleValuedWorkspace, SetUB, mtd, SetGoniometer
+from mantid.kernel import FloatTimeSeriesProperty
 import unittest
 import numpy as np
 
@@ -30,7 +31,10 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         ConvertWANDSCDtoQTest_data.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
 
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('s1', list(np.arange(0, 50, 0.5)), True)
+        log = FloatTimeSeriesProperty('s1')
+        for t, v in zip(range(100), np.arange(0, 50, 0.5)):
+            log.addValue(t, v)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run()['s1'] = log
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('duration', [60.] * 100, True)
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('monitor_count', [120000.] * 100, True)
         ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('twotheta', list(
@@ -39,6 +43,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             np.tile(np.linspace(-0.15, 0.15, 32), 240)), True)
 
         SetUB(ConvertWANDSCDtoQTest_data, 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer(ConvertWANDSCDtoQTest_data, Axis0='s1,0,1,0,1', Average=False)
 
         # Create Normalisation workspace
         S = np.ones((32, 240, 1))

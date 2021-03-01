@@ -368,7 +368,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
     // Insert
     inserter.insertMDEvent(
         static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), detid, millerindex.data());
+        static_cast<uint16_t>(runnumber), 0, detid, millerindex.data());
   }
 
   return mdws;

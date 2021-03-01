@@ -760,6 +760,22 @@ public:
 
   void test_flat_plate_holder() {}
 
+  void test_Explicit_Blanks_Accepted_For_Dictionary_Parameters() {
+    // when run from algorithm dialog in UI with some dictionary parameters
+    // blank
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto sampleShape = ComponentCreationHelper::createSphere(0.5);
+    sampleShape->setID("mysample");
+    inputWS->mutableSample().setShape(sampleShape);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", "");
+    alg->setProperty("Material", createMaterialProps());
+    alg->setProperty("Environment", "");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -790,6 +806,9 @@ public:
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
 
     auto alg = createAlgorithm(inputWS);
 
@@ -797,7 +816,7 @@ public:
     args->declareProperty(std::make_unique<StringProperty>("Name", m_envName),
                           "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_Environment_Args_With_Empty_Strings_Invalid() {
@@ -925,6 +944,19 @@ public:
     alg->setProperty("Geometry", createOverrideGeometryProps());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     config.setString("instrumentDefinition.directory", defaultDirs);
+  }
+
+  void test_All_Dictionaries_Empty_Gives_Error() {
+    using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    testInst->setName(m_instName);
+    inputWS->setInstrument(testInst);
+
+    auto alg = createAlgorithm(inputWS);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------------

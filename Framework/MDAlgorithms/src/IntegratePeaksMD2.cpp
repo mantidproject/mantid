@@ -271,6 +271,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool manualEllip = false;
   if (PeakRadius.size() > 1) {
     manualEllip = true;
+    // make sure the background radii are 3 values (they default to 1)
+    if (BackgroundInnerRadius.size() == 1)
+      BackgroundInnerRadius.resize(3, BackgroundInnerRadius[0]);
+    if (BackgroundOuterRadius.size() == 1)
+      BackgroundOuterRadius.resize(3, BackgroundOuterRadius[0]);
   }
 
   double minInnerRadius = PeakRadius[0];
@@ -516,39 +521,131 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
                                    eigenvects, eigenvals);
         // Integrate ellipsoid background shell if specified
-        if (BackgroundOuterRadius[0] > PeakRadius[0]) {
-          // Get the total signal inside "BackgroundOuterRadius"
-          bgSignal = 0;
-          bgErrorSquared = 0;
-          ws->getBox()->integrateSphere(
-              getRadiusSq,
-              static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
-              bgSignal, bgErrorSquared,
-              static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
-              useOnePercentBackgroundCorrection);
-          // correct bg signal by Vpeak/Vshell (same as previously
-          // calculated for sphere)
-          bgSignal *= scaleFactor;
-          bgErrorSquared *= scaleFactor * scaleFactor;
-        }
-        // set peak shape
-        if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-          // get radii in same proprtion as eigenvalues
-          auto max_stdev =
-              pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-          std::vector<double> peakRadii(3, 0.0);
-          std::vector<double> backgroundInnerRadii(3, 0.0);
-          std::vector<double> backgroundOuterRadii(3, 0.0);
-          for (size_t irad = 0; irad < peakRadii.size(); irad++) {
-            auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
-            peakRadii[irad] = PeakRadiusVector[i] * scale;
-            backgroundInnerRadii[irad] = BackgroundInnerRadiusVector[i] * scale;
-            backgroundOuterRadii[irad] = BackgroundOuterRadiusVector[i] * scale;
+        if (PeakRadius.size() == 1) {
+          if (BackgroundOuterRadius[0] > PeakRadius[0]) {
+            // Get the total signal inside "BackgroundOuterRadius"
+            bgSignal = 0;
+            bgErrorSquared = 0;
+            ws->getBox()->integrateSphere(
+                getRadiusSq,
+                static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
+                bgSignal, bgErrorSquared,
+                static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
+                useOnePercentBackgroundCorrection);
+            // correct bg signal by Vpeak/Vshell (same as previously
+            // calculated for sphere)
+            bgSignal *= scaleFactor;
+            bgErrorSquared *= scaleFactor * scaleFactor;
           }
-          PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
-              eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
-              CoordinatesToUse, this->name(), this->version());
-          shapeablePeak->setPeakShape(ellipsoidShape);
+          // set peak shape
+          if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
+            // get radii in same proprtion as eigenvalues
+            auto max_stdev =
+                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
+            std::vector<double> peakRadii(3, 0.0);
+            std::vector<double> backgroundInnerRadii(3, 0.0);
+            std::vector<double> backgroundOuterRadii(3, 0.0);
+            for (size_t irad = 0; irad < peakRadii.size(); irad++) {
+              auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
+              peakRadii[irad] = PeakRadiusVector[i] * scale;
+              backgroundInnerRadii[irad] =
+                  BackgroundInnerRadiusVector[i] * scale;
+              backgroundOuterRadii[irad] =
+                  BackgroundOuterRadiusVector[i] * scale;
+            }
+            PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
+                eigenvects, peakRadii, backgroundInnerRadii,
+                backgroundOuterRadii, CoordinatesToUse, this->name(),
+                this->version());
+            shapeablePeak->setPeakShape(ellipsoidShape);
+          }
+        } else {
+          // Use the manually specified radii instead of finding them via
+          // findEllipsoid
+          std::vector<double> eigenvals_background_inner;
+          std::vector<double> eigenvals_background_outer;
+          std::transform(BackgroundInnerRadius.begin(),
+                         BackgroundInnerRadius.end(),
+                         std::back_inserter(eigenvals_background_inner),
+                         [](double &r) { return std::pow(r, 2.0); });
+          std::transform(BackgroundOuterRadius.begin(),
+                         BackgroundOuterRadius.end(),
+                         std::back_inserter(eigenvals_background_outer),
+                         [](double &r) { return std::pow(r, 2.0); });
+
+          if (BackgroundOuterRadiusVector[0] > PeakRadiusVector[0]) {
+            // transform ellispoid onto sphere of radius = R
+            auto getRadiusSqInner =
+                CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
+                                       eigenvects, eigenvals_background_inner);
+            auto getRadiusSqOuter =
+                CoordTransformDistance(nd, center, dimensionsUsed, 1, /* outD */
+                                       eigenvects, eigenvals_background_outer);
+            // Get the total signal inside "BackgroundOuterRadius"
+            bgSignal = 0;
+            bgErrorSquared = 0;
+            signal_t bgSignalInner = 0;
+            signal_t bgSignalOuter = 0;
+            signal_t bgErrorSquaredInner = 0;
+            signal_t bgErrorSquaredOuter = 0;
+            ws->getBox()->integrateSphere(
+                getRadiusSqInner,
+                static_cast<coord_t>(pow(BackgroundInnerRadiusVector[i], 2)),
+                bgSignalInner, bgErrorSquaredInner, 0.0,
+                useOnePercentBackgroundCorrection);
+            ws->getBox()->integrateSphere(
+                getRadiusSqOuter,
+                static_cast<coord_t>(pow(BackgroundOuterRadiusVector[i], 2)),
+                bgSignalOuter, bgErrorSquaredOuter, 0.0,
+                useOnePercentBackgroundCorrection);
+            // correct bg signal by Vpeak/Vshell (same as previously
+            // calculated for sphere)
+            bgSignal = bgSignalOuter - bgSignalInner;
+            bgErrorSquared = bgErrorSquaredInner + bgErrorSquaredOuter;
+            g_log.debug()
+                << "unscaled background signal from ellipsoid integration = "
+                << bgSignal << '\n';
+            const double scaleFactor =
+                (PeakRadius[0] * PeakRadius[1] * PeakRadius[2]) /
+                (BackgroundOuterRadius[0] * BackgroundOuterRadius[1] *
+                     BackgroundOuterRadius[2] -
+                 BackgroundInnerRadius[0] * BackgroundInnerRadius[1] *
+                     BackgroundInnerRadius[2]);
+            bgSignal *= scaleFactor;
+            bgErrorSquared *= scaleFactor * scaleFactor;
+          }
+          // set peak shape
+          if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
+            // get radii in same proprtion as eigenvalues
+            auto max_stdev =
+                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
+            auto max_stdev_inner =
+                pow(*std::max_element(eigenvals_background_inner.begin(),
+                                      eigenvals_background_inner.end()),
+                    0.5);
+            auto max_stdev_outer =
+                pow(*std::max_element(eigenvals_background_outer.begin(),
+                                      eigenvals_background_outer.end()),
+                    0.5);
+            std::vector<double> peakRadii(3, 0.0);
+            std::vector<double> backgroundInnerRadii(3, 0.0);
+            std::vector<double> backgroundOuterRadii(3, 0.0);
+            for (size_t irad = 0; irad < peakRadii.size(); irad++) {
+              peakRadii[irad] =
+                  PeakRadiusVector[i] * pow(eigenvals[irad], 0.5) / max_stdev;
+              backgroundInnerRadii[irad] =
+                  BackgroundInnerRadiusVector[i] *
+                  pow(eigenvals_background_inner[irad], 0.5) / max_stdev_inner;
+              backgroundOuterRadii[irad] =
+                  BackgroundOuterRadiusVector[i] *
+                  pow(eigenvals_background_outer[irad], 0.5) / max_stdev_outer;
+            }
+            PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
+                eigenvects, peakRadii, backgroundInnerRadii,
+                backgroundOuterRadii, CoordinatesToUse, this->name(),
+                this->version());
+            shapeablePeak->setPeakShape(ellipsoidShape);
+          }
         }
       }
       // spherical integration of signal

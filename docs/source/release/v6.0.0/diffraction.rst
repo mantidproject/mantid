@@ -14,9 +14,8 @@ New Algorithms
 - :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the d-Spacing of the Lead (111) peak and the sample temperature
 - :ref:`PEARLTransfit <algm-PEARLTransfit>` for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 - :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalman Pings terms
-- :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save CORELLI geometry calibration to database
-- :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
-- :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of CORELLI banks in order to optimize the comparison of observed peaks to reference data
+- :ref:`CorelliCalibrationDatabase <algm-CorelliCalibrationDatabase>` to save CORELLI geometry calibration to database
+- :ref:`CorelliCalibrationApply <algm-CorelliCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace
 - :ref:`ClipPeaks <algm-ClipPeaks>` to clip peaks, providing a background estimation.
 - :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument
 - :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard
@@ -50,16 +49,7 @@ Improvements
 - The vanadium absorption correction in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` is now calculated using numerical integration rather than Carpenter method
 - In the creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` automatically gets information from sample logs
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
-- New algorithm :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` to convert DEMAND data to Q-space and allow the detector position to be adjusted by offsets.
-- Files from ILL's instrument D1B can now be loaded.
-- New algorithm :ref:`CorelliCalibrationDatabase <algm-CorelliCalibrationDatabase>` to save Corelli geometry calibration to database
-- New algorithm :ref:`CorelliCalibrationApply <algm-CorelliCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
-- New algorithm :ref:`CorelliCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
-- Modified creation of absorption input in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to automatically get information from sample logs.
 - :ref:`PDCalibration <algm-PDCalibration>` now supports workspaces with grouped detectors (i.e. more than one detector per spectrum)
-- Added refined back to back exponential coeficients (from standard sample) to WISH Parameters.xml so A, B and S are guessed automatically.
-- New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
-- New algorithm :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
 
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` copies the sample from the absorption workspace to the output workspace
 - Scripts for pixel calibration of CORELLI 16-packs produce a calibration table, a masking table, and a goodness of fit workspace

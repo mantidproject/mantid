@@ -66,6 +66,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # Add workspace info which is currently not plotted
         workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
                                  not in self._view.plotted_workspace_information]
+
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         # check if to force autoscale
         if self._options_presenter.autoscale:

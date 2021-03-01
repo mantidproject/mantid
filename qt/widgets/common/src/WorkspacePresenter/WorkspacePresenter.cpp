@@ -123,9 +123,6 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::ShowBoxDataTable:
     showBoxDataTable();
     break;
-  case ViewNotifiable::Flag::ShowVatesGUI:
-    showVatesGUI();
-    break;
   case ViewNotifiable::Flag::ShowMDPlot:
     showMDPlot();
     break;
@@ -312,8 +309,6 @@ void WorkspacePresenter::showColourFillPlot() { m_view->showColourFillPlot(); }
 void WorkspacePresenter::showDetectorsTable() { m_view->showDetectorsTable(); }
 
 void WorkspacePresenter::showBoxDataTable() { m_view->showBoxDataTable(); }
-
-void WorkspacePresenter::showVatesGUI() { m_view->showVatesGUI(); }
 
 void WorkspacePresenter::showMDPlot() { m_view->showMDPlot(); }
 

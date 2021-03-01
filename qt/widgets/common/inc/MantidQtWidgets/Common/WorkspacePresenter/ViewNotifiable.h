@@ -41,7 +41,6 @@ public:
     ShowColourFillPlot,
     ShowDetectorsTable,
     ShowBoxDataTable,
-    ShowVatesGUI,
     ShowMDPlot,
     ShowListData,
     ShowSpectrumViewer,
