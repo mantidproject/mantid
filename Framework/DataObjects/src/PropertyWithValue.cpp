@@ -8,6 +8,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/LeanPeaksWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -81,6 +82,8 @@ template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<std::shared_ptr<DataObjects::OffsetsWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<std::shared_ptr<DataObjects::PeaksWorkspace>>;
+template class MANTID_DATAOBJECTS_DLL
+    PropertyWithValue<std::shared_ptr<DataObjects::LeanPeaksWorkspace>>;
 template class MANTID_DATAOBJECTS_DLL
     PropertyWithValue<std::shared_ptr<DataObjects::RebinnedOutput>>;
 template class MANTID_DATAOBJECTS_DLL
