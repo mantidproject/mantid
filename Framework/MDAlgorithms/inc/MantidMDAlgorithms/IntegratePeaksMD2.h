@@ -67,7 +67,7 @@ private:
                      const Mantid::API::CoordTransform &getRadiusSq,
                      const Mantid::Kernel::V3D &pos,
                      const coord_t &radiusSquared, const bool &qAxisBool,
-                     const double &bgDensity,
+                     const bool &useCentroid, const double &bgDensity,
                      std::vector<Mantid::Kernel::V3D> &eigenvects,
                      std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean,
                      int maxIter = 1);
@@ -75,7 +75,8 @@ private:
   void calcCovar(
       const std::vector<std::pair<std::vector<double>, double>> &peak_events,
       const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
-      const bool &qAxisIsFixed, Mantid::Kernel::Matrix<double> &evecs,
+      const bool &qAxisIsFixed, const bool &useCentroid,
+      Mantid::Kernel::Matrix<double> &evecs,
       Mantid::Kernel::Matrix<double> &evals, Mantid::Kernel::V3D &mean,
       const int &maxIter, const int &nIter = 1,
       const Mantid::Kernel::Matrix<double> &prev_cov_mat =

@@ -523,7 +523,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           findEllipsoid<MDE, nd>(
               ws, getRadiusSq, pos,
               static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
-              bgDensity, eigenvects, eigenvals, mean, maxCovarIter);
+              useCentroid, bgDensity, eigenvects, eigenvals, mean,
+              maxCovarIter);
           if (!majorAxisLengthFixed) {
             // replace radius for this peak with 3*stdev along major axis
             auto max_stdev =
@@ -538,9 +539,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           }
           if (useCentroid) {
             // calculate translation to apply when drawing
+            translation = mean - pos;
             // update integration center with mean
             for (size_t d = 0; d < 3; ++d) {
-              translation[d] = mean[d] - pos[d];
               center[d] = static_cast<coord_t>(mean[d]);
             }
           }
@@ -959,8 +960,9 @@ void IntegratePeaksMD2::findEllipsoid(
     typename MDEventWorkspace<MDE, nd>::sptr ws,
     const CoordTransform &getRadiusSq, const V3D &pos,
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
-    const double &bgDensity, std::vector<V3D> &eigenvects,
-    std::vector<double> &eigenvals, V3D &mean, int max_depth) {
+    const bool &useCentroid, const double &bgDensity,
+    std::vector<V3D> &eigenvects, std::vector<double> &eigenvals, V3D &mean,
+    int max_depth) {
 
   // get leaf-only iterators over all boxes in ws
   auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
@@ -968,7 +970,7 @@ void IntegratePeaksMD2::findEllipsoid(
   MDBoxBase<MDE, nd> *baseBox = ws->getBox();
   MDBoxIterator<MDE, nd> MDiter(baseBox, 1000, true, function.get());
 
-  // get initial vector of events inside sphere (parrallise?)
+  // get initial vector of events inside sphere
   std::vector<std::pair<std::vector<double>, double>> peak_events;
 
   do {
@@ -1016,8 +1018,8 @@ void IntegratePeaksMD2::findEllipsoid(
 
   Matrix<double> evecs; // hold eigenvectors
   Matrix<double> evals; // hold eigenvals in diag
-  calcCovar(peak_events, pos, radiusSquared, qAxisIsFixed, evecs, evals, mean,
-            max_depth);
+  calcCovar(peak_events, pos, radiusSquared, qAxisIsFixed, useCentroid, evecs,
+            evals, mean, max_depth);
 
   // put output in vectors
   eigenvals = evals.Diagonal();
@@ -1037,10 +1039,10 @@ void IntegratePeaksMD2::findEllipsoid(
 void IntegratePeaksMD2::calcCovar(
     const std::vector<std::pair<std::vector<double>, double>> &peak_events,
     const V3D &pos, const coord_t &radiusSquared, const bool &qAxisIsFixed,
-    Matrix<double> &evecs, Matrix<double> &evals, V3D &mean, const int &maxIter,
-    const int &nIter, const Matrix<double> &prev_cov_mat) {
+    const bool &useCentroid, Matrix<double> &evecs, Matrix<double> &evals,
+    V3D &mean, const int &maxIter, const int &nIter,
+    const Matrix<double> &prev_cov_mat) {
 
-  bool useCentroid = true;
   size_t nd = peak_events[0].first.size();
 
   Matrix<double> invCov;
@@ -1153,8 +1155,8 @@ void IntegratePeaksMD2::calcCovar(
 
   if ((nIter < maxIter) && anyMasked && isPartiallyInSphere && !isConverged) {
     // calculate again (note mean = pos if useCentroid is false)
-    calcCovar(peak_events, V3D(mean), radiusSquared, qAxisIsFixed, evecs, evals,
-              mean, maxIter, nIter + 1, cov_mat);
+    calcCovar(peak_events, V3D(mean), radiusSquared, qAxisIsFixed, useCentroid,
+              evecs, evals, mean, maxIter, nIter + 1, cov_mat);
   } else if (!isPartiallyInSphere) {
     // haven't found good covar - set to spherical region
     evals.identityMatrix();
