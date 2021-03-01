@@ -1199,6 +1199,8 @@ class MantidFrameworkConfig:
         # Make sure we only save these keys here
         config.reset()
 
+        # With the default facility changed from ISIS to nothing (EMPTY),
+        # the following setting is put in place to avoid failure of tests,
         ConfigService.Instance().setString("default.facility", "ISIS")
 
         # Up the log level so that failures can give useful information
