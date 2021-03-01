@@ -156,7 +156,6 @@ def calibrate_vulcan(diamond_ws_name: str,
                                     calibration_flag,
                                     cc_fit_time=CROSS_CORRELATE_PEAK_FIT_NUMBER,
                                     prefix='1fit')
-    print(f'Type of returned value from cross_correlate_vulcan_data: {type(r)}')
     offset_ws_dict, mask_ws_dict = r
 
     # About output

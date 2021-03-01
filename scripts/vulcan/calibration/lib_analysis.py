@@ -1,7 +1,6 @@
 # Zoo of methods that are develooped for analyze the calibration
 from mantid.simpleapi import (AlignDetectors, FitPeaks, FindPeakBackground, DiffractionFocussing, Rebin,
-                              ConvertToMatrixWorkspace, EditInstrumentGeometry, SaveNexusProcessed,
-                              MaskDetectors, ConvertUnits)
+                              ConvertToMatrixWorkspace, SaveNexusProcessed, MaskDetectors, ConvertUnits)
 from mantid.simpleapi import mtd
 import numpy as np
 import os
@@ -81,11 +80,9 @@ class FindDiamondPeaks(object):
 
         bad_fit_pixels = np.where(np.abs(peak_center_vec - (-3)) < 1E-5)[0]
         print(f'Type 1 bad counts = {len(bad_fit_pixels)}')
-        # print(f'  they are ... {bad_fit_pixels + 6468}')
 
         bad_fit_pixels = np.where(np.abs(peak_center_vec - (-4)) < 1E-5)[0]
         print(f'Type 2 bad counts = {len(bad_fit_pixels)}')
-        # print(f'  they are ... {bad_fit_pixels + 6468}')
 
         # Check again with counts
         diamond_ws = mtd[self._diamond_ws_name]
@@ -192,7 +189,6 @@ def align_focus_event_ws(event_ws_name,
     file_tag = ''
 
     # Align detector or not
-    print(f'Event workspace: {event_ws_name}.  X unit = {mtd[event_ws_name].getAxis(0).getUnit().unitID()}')
     unit = mtd[event_ws_name].getAxis(0).getUnit().unitID()
     if unit != 'TOF':
         ConvertUnits(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Target='TOF')
@@ -212,7 +208,6 @@ def align_focus_event_ws(event_ws_name,
     Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,1.5')
     # Convert to matrix workspace
     matrix_ws_name = f'{event_ws_name}_matrix'
-    print(f'[PROGRESS] Converting EventWorkspace {event_ws_name} to Workspace2D {matrix_ws_name}')
     ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
     # Save nexus for 2D alignment view

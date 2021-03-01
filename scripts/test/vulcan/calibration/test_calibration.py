@@ -56,7 +56,6 @@ class TestUtils(unittest.TestCase):
     # ------------------ #
     def test_calibration(self):
         diamond_run = ["VULCAN_192226.nxs.h5"]
-        vulcan_x_idf = "VULCAN_Definition.xml"  # Should be in Mantid instrument folder
         calibration_rst = os.path.join(tempfile.gettempdir(), "VULCAN_Calibration_Hybrid.h5")
         tube_grouping_plan = None
         # FIXME - output directory shall be set by tempfile

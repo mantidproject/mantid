@@ -1,5 +1,5 @@
 # High angle bank TOF fitting result
-from mantid.simpleapi import FitPeaks, mtd, CloneWorkspace, LoadNexusProcessed
+from mantid.simpleapi import FitPeaks, mtd, LoadNexusProcessed
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -72,7 +72,7 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
     # Bank 5 has 1 less peak
     if bank_index in [0, 1]:
         exp_fit_d_centers = exp_d_centers[:]
-    else:        
+    else:
         exp_fit_d_centers = exp_d_centers[:-1]
 
     fit_window_list = ''
@@ -215,16 +215,13 @@ def fit_fwhm(plot_linear):
 
 def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
                        output_dir):
-
-    print(f'Bank on workspace {bank_index}')
-
     vec_d = vec_exp_d
 
     # Fit Alpha
     # A(d) = alph0 + alpha1 x (1/d)
     model_a = np.poly1d(np.polyfit(1./vec_d, vec_a, 1))
-    alpha0 = model_a.coefficients[1]
-    alpha1 = model_a.coefficients[0]
+    # alpha0 = model_a.coefficients[1]
+    # alpha1 = model_a.coefficients[0]
     fitted_a_vec = model_a(1./vec_d)
 
     plt.cla()
@@ -237,8 +234,8 @@ def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
     # Fit Beta
     # B(d) = beta0 + beta1 x (1/d**4)
     model_b = np.poly1d(np.polyfit(1./vec_d**4, vec_b, 1))
-    beta0 = model_b.coefficients[1]
-    beta1 = model_b.coefficients[0]
+    # beta0 = model_b.coefficients[1]
+    # beta1 = model_b.coefficients[0]
     fitted_b_vec = model_b(1./vec_d**4)
 
     plt.cla()
@@ -251,9 +248,9 @@ def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
     # Fit Sigma
     # S**2 = sig0 + sig1 x d**2 + sig2 x d**4
     model_s = np.poly1d(np.polyfit(vec_d**2, vec_s**2, 2))
-    sig0 = model_s.coefficients[2]
-    sig1 = model_s.coefficients[1]
-    sig2 = model_s.coefficients[0]
+    # sig0 = model_s.coefficients[2]
+    # sig1 = model_s.coefficients[1]
+    # sig2 = model_s.coefficients[0]
     fitted_sq_s_vec = model_s(vec_d**2)
 
     plt.cla()

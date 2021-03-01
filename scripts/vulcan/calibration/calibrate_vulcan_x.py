@@ -189,7 +189,6 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
     else:
         tube_group = None
 
-    print(f'Reduce data with calibration file {diff_cal_file_name}')
     focused_ws_name, focused_nexus = reduce_calibration(diamond_ws_name,
                                                         calibration_file=diff_cal_file_name,
                                                         idf_file=None,  # 'data/VULCAN_Definition_pete02.xml',
@@ -206,11 +205,6 @@ def peak_position_calibrate(focused_diamond_ws_name,
                             src_diff_cal_h5,
                             target_diff_cal_h5,
                             output_dir):
-
-    #
-    print(f'Peak position calibration: input workspace {focused_diamond_ws_name}: '
-          f'number of spectra = {mtd[focused_diamond_ws_name].getNumberHistograms()}')
-
     # Fit peaks
     tube_res_list = list()
     pixel_range_left_list = list()
@@ -274,7 +268,7 @@ def main(step=1):
     # User setup
     #
     # Testing files
-    # 
+    #
     # day 1: diamond_runs = [192227, 192228]
     # latest
     diamond_runs = [192245, 192246, 192247, 192248][0:1]
@@ -291,7 +285,6 @@ def main(step=1):
 
     # Load data (set)
     diamond_ws_name, _ = load_diamond_runs(diamond_runs, vulcan_x_idf, output_dir)
-                              
 
     # Step 1: do cross correlation calibration
 
@@ -393,7 +386,6 @@ def test_single_spectrum_peak_fitting():
     LoadNexusProcessed(Filename=cc_focus_nexus, OutputWorkspace=cc_focus_ws_name)
 
     output_dir = os.path.join(os.getcwd(), 'temp')
-    print(f'Output directory = {output_dir}')
 
     # Fit west bank
     bank_1_num_tubes = 160
@@ -411,7 +403,6 @@ def test_single_spectrum_peak_fitting():
         start_group_index, end_group_index = bank_group_index_ranges[bank_name]
         # fit
         tube_i_res = fit_diamond_peaks(cc_focus_ws_name, start_group_index, end_group_index, output_dir)
-        print(f'{bank_name}: Tube number: {len(tube_i_res)}')
         # append
         tube_res_list.extend(tube_i_res)
     # END-FOR

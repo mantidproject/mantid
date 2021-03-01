@@ -353,12 +353,7 @@ def cross_correlate_calibrate(ws_name: str,
                            XMin=-cc_number,
                            XMax=cc_number,
                            MaxOffset=max_offset,
-                           PeakFunction='Gaussian',  # 'PseudoVoigt', # Gaussian
-                           # FIXME - Following are new features belonged to an in-progress enhancement
-                           # MinimumPeakHeight=min_peak_height,  # any peak is lower than 1 shall be masked!
-                           # FitEachPeakTwice=fit_twice,
-                           # PeakFitResultTableWorkspace=cc_ws_name + '_fit'
-                           )
+                           PeakFunction='Gaussian')
         if debug_mode and False:
             SaveNexusProcessed(InputWorkspace=offset_ws_name, Filename=f'Step2_Offset_{offset_ws_name}.nxs')
     except RuntimeError as run_err:
@@ -372,10 +367,7 @@ def cross_correlate_calibrate(ws_name: str,
         return None, run_err
 
     # Do analysis to the calibration result
-    # TODO - NIGHT - Make it better
     # it returns full set of spectra
-    # print('[INFO] OffsetsWorkspace {}: spectra number = {}'
-    #       ''.format(offset_ws_name, mtd[offset_ws_name].getNumberHistograms()))
     # report_masked_pixels(diamond_event_ws, mtd[mask_ws_name], ws_index_range[0], ws_index_range[1])
 
     # check result and remove interval result
@@ -419,10 +411,6 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
     """
     # difference between IDF and calibrated DIFC
     difc_diff_vec = idf_difc_vec - cal_difc_vec
-
-    print(f'[INFO] DIFC tolerance = {difc_tol}:'
-          f'Calibrated DIFC with difference to engineered DIFC with beyond tolerance will be reset.')
-    print(f'[INFO] DIFC number = {cal_difc_vec.shape}')
 
     # go over all the DIFCs
     num_wild_difc = 0
@@ -571,7 +559,6 @@ def merge_detector_calibration(offset_ws_dict: Dict,
     # Get banks recorded in the calibrated offsets and masks
     bank_names = list(offset_ws_dict.keys())
     bank_names.sort()
-    print(f'[DEBUG] Bank names: {bank_names}')
 
     # Merge offsets and masks
     out_offset_ws_name = f'{output_ws_name}_offset'
@@ -582,11 +569,8 @@ def merge_detector_calibration(offset_ws_dict: Dict,
             # Clone first bank's mask and offsets for output
             CloneWorkspace(InputWorkspace=offset_ws_dict[bank_name], OutputWorkspace=out_offset_ws_name)
             CloneWorkspace(InputWorkspace=mask_ws_dict[bank_name], OutputWorkspace=out_mask_ws_name)
-            print('Offsets and Mask of {} is cloned for output'.format(bank_name))
         else:
             # merge
-            # print(f'Target output offset: {out_offset_ws}, output mask: {out_mask_ws}')
-            # print(f'Merging bank {bank_name}: {out_mask_ws} <--  {mask_ws_dict[bank_name]}')
             _merge_partial_offset_mask_workspaces(out_offset_ws_name, offset_ws_dict[bank_name],
                                                   out_mask_ws_name, mask_ws_dict[bank_name])
     # END-FOR
@@ -630,9 +614,6 @@ def apply_masks(mask_ws):
         if mask_ws.readY(iws)[0] > 0.5:
             mask_wsindex_list.append(iws)
 
-    mask_bits = mask_ws.extractY().flatten()
-    print(f'[DEBUG MASK] {mask_ws}: {len(np.where(mask_bits > 0.1)[0])}')
-
     # mask all detectors explicitly
     mask_ws_name = mask_ws.name()
     mask_ws.maskDetectors(WorkspaceIndexList=mask_wsindex_list)
@@ -663,12 +644,8 @@ def _merge_mask_workspaces(target_mask_ws_name: str,
     print('[MERGING MASK] {} + {} = {}'.format(target_mask_ws_name, source_mask_ws_name, target_mask_ws_name))
 
     # Get the non-zero spectra from LHS and RHS (as masks)
-    # lhs_index_list = list(np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0])
-    # rhs_index_list = list(np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0])
     lhs_index_list = np.where(mtd[target_mask_ws_name].extractY().flatten() > 0.1)[0].tolist()
     rhs_index_list = np.where(mtd[source_mask_ws_name].extractY().flatten() > 0.1)[0].tolist()
-    print(f'[MERGING MASK] LHS: masked spectrum = {len(lhs_index_list)}, '
-          f'RHS: masked spectrum = {len(rhs_index_list)}')
 
     # Set the masked spectra from source MaskWorkspace to target MaskWorkspace
     target_mask_ws = mtd[target_mask_ws_name]
@@ -684,7 +661,6 @@ def _merge_mask_workspaces(target_mask_ws_name: str,
     # remove redundant pixels
     merged_masked_pixels = list(set(lhs_index_list))
     # mask all detectors explicitly
-    print(f'{type(merged_masked_pixels)}')
     target_mask_ws.maskDetectors(WorkspaceIndexList=merged_masked_pixels)
 
     # verify output
@@ -718,19 +694,11 @@ def _merge_partial_offset_mask_workspaces(offset_ws_name: str,
          OutputWorkspace=offset_ws_name)
 
     # Merge masks
-    print('[MERGING MASK] Partial: Number of masked spectra = {0} in {1} ... Sum(Y) = {2}'
-          ''.format(mtd[partial_mask_ws_name].getNumberMasked(), partial_mask_ws_name,
-                    np.sum(mtd[partial_mask_ws_name].extractY().flatten())))
-    # Mask:
     # Make sure mask_ws_name is a string for workspace name
     mask_ws_name = str(mask_ws_name)
 
     # merge masks workspace
     _merge_mask_workspaces(mask_ws_name, partial_mask_ws_name)
-
-    print('[MERGING MASK] Summed:  Number of masked spectra = {0} in {1} ... sum[Y] = {2}'
-          ''.format(mtd[mask_ws_name].getNumberMasked(), mask_ws_name,
-                    np.sum(mtd[mask_ws_name].extractY().flatten())))
 
     return offset_ws_name, mask_ws_name
 
@@ -933,8 +901,6 @@ def calculate_model(data_ws_name, ws_index, fit_param_table_name) -> str:
         obs_y = data_ws.readY(ws_index)[i_min:i_max]
         model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
         cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
-
-        print('[INFO] Cost x = {0}'.format(cost))
 
         out_ws_name = 'model_{0}'.format(ws_index)
         CreateWorkspace(vec_x, model_y, NSpec=1, OutputWorkspace=out_ws_name)
