@@ -7,8 +7,6 @@
 #  This file is part of mantidqt package.
 from functools import partial
 
-from qtpy.QtCore import Qt
-
 from mantid.kernel import logger
 from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
@@ -18,12 +16,10 @@ from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
+from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (
-    QStandardItem,
-    create_table_item,
-    RevertibleItem,
-)
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (QStandardItem, create_table_item,  # noqa: F401
+                                                                         RevertibleItem)  # noqa: F401
 
 
 class TableWorkspaceDataPresenter(object):
@@ -54,37 +50,16 @@ class TableWorkspaceDataPresenter(object):
         """
         # deep copy the original headers so that they are not changed by the appending of the label
         column_headers = self.model.original_column_headers()
-        num_headers = len(column_headers)
-        data_model = self.view.model()
-        data_model.setColumnCount(num_headers)
-
+        table_item_model = self.view.model()
         extra_labels = self.model.build_current_labels()
         if len(extra_labels) > 0:
             for index, label in extra_labels:
                 column_headers[index] += str(label)
 
-        data_model.setHorizontalHeaderLabels(column_headers)
+        table_item_model.set_table_headers(column_headers)
 
     def load_data(self, table):
-        num_rows = self.model.get_number_of_rows()
-        data_model = table.model()
-        data_model.setRowCount(num_rows)
-
-        num_cols = self.model.get_number_of_columns()
-        data_model.setColumnCount(num_cols)
-
-        for col in range(num_cols):
-            column_data = self.model.get_column(col)
-            editable = self.model.is_editable_column(col)
-            for row in range(num_rows):
-                data_model.setItem(row, col, self.create_item(column_data[row], editable))
-
-    def create_item(self, data, editable):
-        """Create a QStandardItemModel for the data
-        :param data: The typed data to store
-        :param editable: True if it should be editable in the view
-        """
-        return create_table_item(data, editable)
+        table.model().load_data(self.model)
 
 
 class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, DataCopier):
@@ -134,12 +109,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
                              one is used. Mainly intended for testing.
         """
         model = model if model is not None else TableWorkspaceDisplayModel(ws)
-        view = view if view else TableWorkspaceDisplayView(self, parent)
+        table_model = TableModel(parent=parent, data_model=model)
+        view = view if view else TableWorkspaceDisplayView(self, parent, table_model=table_model)
         TableWorkspaceDataPresenter.__init__(self, model, view)
-
-        # from mantid.api import IPeaksWorkspace
-
-        # self.is_peaks_worksapce = isinstance(ws, IPeaksWorkspace)
 
         self.name = name if name else self.model.get_name()
         self.container = (container if container else StatusBarView(
@@ -160,9 +132,6 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         self.ads_observer = (ads_observer if ads_observer else WorkspaceDisplayADSObserver(self))
 
         self.refresh()
-
-        # connect to cellChanged signal after the data has been loaded
-        self.view.model().itemChanged.connect(self.handleItemChanged)
 
     def show_view(self):
         self.container.show()
@@ -186,25 +155,6 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             self.view.blockSignals(False)
 
             self.view.emit_repaint()
-
-    def handleItemChanged(self, item: QStandardItem):
-        """
-        :type item: A reference to the item that has been edited
-        """
-        if not isinstance(item, RevertibleItem):
-            # Do not perform any additional task for standard QStandardItem
-            return
-        try:
-            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
-                                     item.is_v3d)
-        except ValueError:
-            item.reset()
-            self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
-        except Exception as x:
-            item.reset()
-            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
-        else:
-            item.sync()
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
