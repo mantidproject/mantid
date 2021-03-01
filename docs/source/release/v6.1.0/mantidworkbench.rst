@@ -11,7 +11,7 @@ New and Improved
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
 - Improved the performance of the table workspace display for large datasets
-- A new facility named "NONE" is the default facility now, and
+- A new empty facility with empty instrument is made default facility now, and
   user has to select their choice of facility and instrument for the first time, including ISIS
 
 Bugfixes
