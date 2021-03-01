@@ -72,8 +72,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         if not self._check_tf_asymmetry_compliance(tf_asymmetry_on):
             return
 
-        self.model.tf_asymmetry_mode = tf_asymmetry_on
-        self.view.tf_asymmetry_mode = self.model.tf_asymmetry_mode
+        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = tf_asymmetry_on, tf_asymmetry_on
 
         self.update_tf_asymmetry_functions_in_model_and_view()
 

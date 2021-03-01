@@ -41,6 +41,11 @@ set ( TEST_PY_FILES
    fitting_widgets/general_fitting/general_fitting_model_test.py
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_model_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_options_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_presenter_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_fitting_view_test.py
+   fitting_widgets/tf_asymmetry_fitting/tf_asymmetry_mode_switcher_view_test.py
    frequency_domain_context_test.py
    grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/difference_table_presenter_test.py
