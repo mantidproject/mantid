@@ -1114,36 +1114,18 @@ void IntegratePeaksMD2::calcCovar(
   }
   // normalise the covariance matrix
   cov_mat /= w_sum;    // normalise by sum of weights
+  if (qAxisIsFixed) {
+    // transform back to Qlab
+    Matrix<double> P(Pinv);
+    P.Transpose();
+    cov_mat = P * cov_mat * Pinv;
+    mean = P * mean;
+  }
   Matrix<double> Evec; // hold eigenvectors
   Matrix<double> Eval; // hold eigenvals in diag
   cov_mat.Diagonalise(Evec, Eval);
   eigenvals = Eval.Diagonal();
-  // transform results back into MD frame
-  if (qAxisIsFixed) {
-    // insert variance along Q (first eigenvector)
-    eigenvals.insert(eigenvals.begin(), var_Qhat / w_sum);
-    // convert results back to Qlab - don't need this!
-    Eval = Matrix<double>(nd, nd, true); // identity
-    for (size_t d = 0; d < nd; ++d) {
-      Eval[d][d] = eigenvals[d];
-    }
-    // get eigenvectors in transformed basis (Qhat,uhat,vhat)
-    std::vector<double> tmp = {1.0, 0.0,         0.0,
-                               0.0, *Evec[0, 0], *Evec[0, 1],
-                               0.0, *Evec[1, 0], *Evec[1, 1]};
-    Evec = Matrix<double>(tmp);
-    // transform back to Qlab
-    Matrix<double> P(Pinv);
-    P.Transpose();
-    Evec = P * Evec;
-    // make 3 x 3 covar mat = Evect * Eval * Evect.T
-    Matrix<double> Evec_T(Evec);
-    Evec_T.Transpose();
-    cov_mat = Evec * Eval * Evec_T; // now a 3 x 3 matrix in Qlab
-    // transfrom translation back to QLab
-    mean = P * mean;
-  }
-
+  
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
   std::replace_if(
