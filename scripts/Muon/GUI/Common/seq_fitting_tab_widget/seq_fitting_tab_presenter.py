@@ -68,11 +68,9 @@ class SeqFittingTabPresenter(object):
         #     self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
-        pass
-        # runs, groups_and_pairs = self.model.get_selected_runs_groups_and_pairs()
-        # self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
-        # self.model.create_ws_fit_function_map()
-        # self.handle_fit_function_updated()
+        runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
+        self.view.fit_table.set_fit_workspaces(runs, groups_and_pairs)
+        self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):
         self.selected_rows = self.view.fit_table.get_selected_rows()
@@ -135,11 +133,12 @@ class SeqFittingTabPresenter(object):
             self.handle_fit_selected_in_table()
 
     def handle_updated_fit_parameter_in_table(self, index):
-        pass
-        # row = index.row()
-        # workspaces = self.get_workspaces_for_row_in_fit_table(row)
-        # parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
-        # self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
+        from mantid import logger
+        logger.warning("HERE")
+        row = index.row()
+        workspaces = self.get_workspaces_for_row_in_fit_table(row)
+        parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
+        self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
 
     def handle_fit_selected_in_table(self):
         rows = self.view.fit_table.get_selected_rows()

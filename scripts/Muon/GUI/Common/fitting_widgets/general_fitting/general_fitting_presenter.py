@@ -25,6 +25,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self._update_plot = True
 
         self.fitting_mode_changed_notifier = GenericObservable()
+        self.simultaneous_fit_by_specifier_changed = GenericObservable()
 
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
 
@@ -110,6 +111,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
+
+        self.simultaneous_fit_by_specifier_changed.notify_subscribers()
 
     def handle_dataset_name_changed(self) -> None:
         """Handle when the display workspace combo box is changed."""
