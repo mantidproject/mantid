@@ -69,7 +69,8 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/instrument/2theta") ||
       descriptor.pathExists("/entry0/instrument/Canne") ||
       (descriptor.pathExists("/entry0/data_scan") &&
-       descriptor.pathExists("/entry0/experiment_identifier"))) {
+       descriptor.pathExists("/entry0/experiment_identifier") &&
+       descriptor.pathExists("/entry0/instrument/Detector"))) {
     return 80;
   } else {
     return 0;

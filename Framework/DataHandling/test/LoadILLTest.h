@@ -44,7 +44,10 @@ public:
 
   void test_LoadSANS_D22() { checkLoader("ILL/D22/192068", "LoadILLSANS"); }
 
-  void test_LoadSANS_D16() { checkLoader("ILL/D16/218356", "LoadILLSANS"); }
+  void test_LoadSANS_D16() {
+    checkLoader("ILL/D16/023583", "LoadILLSANS");
+    checkLoader("ILL/D16/218356", "LoadILLSANS");
+  }
 
   void test_LoadDiffraction_D1B() {
     checkLoader("ILL/D1B/473432", "LoadILLDiffraction");
