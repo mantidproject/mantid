@@ -4,7 +4,7 @@ from vulcan.calibration.lib_cross_correlation import (CrossCorrelateParameter, c
                                                       save_calibration, merge_detector_calibration)
 from mantid.simpleapi import (CreateGroupingWorkspace, LoadEventNexus, Plus,
                               ConvertToMatrixWorkspace,
-                              SaveNexusProcessed, LoadNexusProcessed, mtd,
+                              SaveNexusProcessed, mtd,
                               DeleteWorkspace, LoadInstrument)
 import os
 from typing import Union, List, Tuple, Dict

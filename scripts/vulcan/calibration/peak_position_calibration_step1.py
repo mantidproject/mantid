@@ -6,7 +6,7 @@
 # 4. Predict the 2nd-round calibration result
 import os
 import numpy as np
-from mantid.simpleapi import LoadNexusProcessed, mtd, FitPeaks, LoadDiffCal, SaveDiffCal
+from mantid.simpleapi import mtd, FitPeaks
 from matplotlib import pyplot as plt
 import time
 from typing import Union, List, Tuple

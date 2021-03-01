@@ -39,7 +39,7 @@ def peak_width(d):
     width_sq = w0 + w1 * d ** 2 + w2 * d ** 4
     width = np.sqrt(width_sq)
     return width, width_sq
-    
+
 
 def fit_diamond_peaks(diamond_ws_name, bank_index):
     """Fit diamond peaks on a single bank
@@ -74,13 +74,13 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
         exp_fit_d_centers = exp_d_centers[:]
     else:        
         exp_fit_d_centers = exp_d_centers[:-1]
-    
+
     fit_window_list = ''
     for i_peak, d_center in enumerate(exp_fit_d_centers):
         left = d_center - 6 * width_vec[i_peak] * width_factor
         right = d_center + 8 * width_vec[i_peak] * width_factor
         print('Proposed window:', left, d_center, right)
-    
+
         if len(fit_window_list) > 0:
             fit_window_list += ', '
         fit_window_list += f'{left}, {right}'
@@ -88,7 +88,7 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
     # Set up for peak fitting
     rightmost_peak_param_values = f'{A}, {B}, {S}'
     peak_param_names = 'A, B, S'
-    
+
     peakpos_ws_name = f'{diamond_ws_name}_position_bank{bank_index}_{len(exp_fit_d_centers)}Peaks'
     param_ws_name = f'{diamond_ws_name}_param_value_bank{bank_index}_{len(exp_fit_d_centers)}Peaks'
     error_ws_name = f'{diamond_ws_name}_param_error_bank{bank_index}_{len(exp_fit_d_centers)}Peaks'
@@ -150,11 +150,11 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
         err_s = mtd[error_ws_name].cell(i_peak, 6)
         width = mtd[eff_value_ws_name].cell(i_peak, 3)
         height = mtd[eff_value_ws_name].cell(i_peak, 4)
-    
+
         op1 = f'd = {d_center:5f}: {f_a:5f} +/- {err_a:5f},  {f_b:5f} +/- {err_b:5f}, ' \
               f'{f_s:5f} +/- {err_s:5f},  chi^2 = {chi2:5f}'
         op2 = f'd = {d_center:5f}: X = {peak_pos:.8f} +/- {peak_pos_err:.8f}, FWHM = {width}, H = {height:5f}'
-    
+
         output1 += op1 + '\n'
         output2 += op2 + '\n'
 
@@ -164,7 +164,7 @@ def fit_diamond_peaks(diamond_ws_name, bank_index):
             vec_b.append(f_b)
             vec_s.append(f_s)
             vec_width.append(width)
-    
+
     print(output1)
     print()
     print(output2)
@@ -219,15 +219,13 @@ def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
     print(f'Bank on workspace {bank_index}')
 
     vec_d = vec_exp_d
-    
+
     # Fit Alpha
     # A(d) = alph0 + alpha1 x (1/d)
     model_a = np.poly1d(np.polyfit(1./vec_d, vec_a, 1))
     alpha0 = model_a.coefficients[1]
     alpha1 = model_a.coefficients[0]
     fitted_a_vec = model_a(1./vec_d)
-    
-    print(f'alpha0 = {alpha0}, alpha1 = {alpha1}')
 
     plt.cla()
     time.sleep(1)
@@ -242,8 +240,6 @@ def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
     beta0 = model_b.coefficients[1]
     beta1 = model_b.coefficients[0]
     fitted_b_vec = model_b(1./vec_d**4)
-    
-    print(f'beta0 = {beta0}, beta1 = {beta1}')
 
     plt.cla()
     time.sleep(1)
@@ -259,9 +255,7 @@ def fit_vulcan_profile(bank_index, vec_exp_d, vec_a, vec_b, vec_s, vec_width,
     sig1 = model_s.coefficients[1]
     sig2 = model_s.coefficients[0]
     fitted_sq_s_vec = model_s(vec_d**2)
-    
-    print(f'sig0 = {sig0}, sig1 = {sig1}, sig2 = {sig2}')
-    
+
     plt.cla()
     time.sleep(1)
     plt.plot(vec_d**2, vec_s**2, linestyle='None', marker='o', color='black',

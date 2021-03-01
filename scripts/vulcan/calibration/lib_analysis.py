@@ -228,7 +228,6 @@ def align_focus_event_ws(event_ws_name,
     else:
         file_tag += '_Nomask'
 
-
     # Diffraction focus to standard group
     if customized_grouping_ws_name is not None:
         # focus to matrix workspace and save

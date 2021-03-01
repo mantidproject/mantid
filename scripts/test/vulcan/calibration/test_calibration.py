@@ -20,7 +20,7 @@ class TestUtils(unittest.TestCase):
     def setUpClass(cls) -> None:
         r"""
         Load the testing file(s) for Vulcan calibration
-        
+
         NOTE: called once before the test begin
         """
         # load the testing data (diamond run)

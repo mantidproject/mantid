@@ -272,14 +272,9 @@ def peak_position_calibrate(focused_diamond_ws_name,
 def main(step=1):
     # --------------------------------------------------------------------------
     # User setup
-    # 
     #
     # Testing files
-    # diamond_run = ['/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192227.nxs.h5',
-    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192228.nxs.h5',
-    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192229.nxs.h5',
-    #                '/SNS/VULCAN/IPTS-26807/nexus/VULCAN_192230.nxs.h5'][:]
-
+    # 
     # day 1: diamond_runs = [192227, 192228]
     # latest
     diamond_runs = [192245, 192246, 192247, 192248][0:1]
