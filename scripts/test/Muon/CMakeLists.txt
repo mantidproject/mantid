@@ -6,8 +6,14 @@ set ( TEST_PY_FILES
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
+   fitting_widgets/basic_fitting/basic_fitting_model_test.py
+   fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
+   fitting_widgets/basic_fitting/basic_fitting_view_test.py
+   fitting_widgets/basic_fitting/fit_controls_view_test.py
+   fitting_widgets/basic_fitting/fit_function_options_view_test.py
+   fitting_widgets/general_fitting/general_fitting_model_test.py
+   fitting_widgets/general_fitting/general_fitting_presenter_test.py
+   fitting_widgets/general_fitting/general_fitting_options_view_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
    fit_information_test.py
