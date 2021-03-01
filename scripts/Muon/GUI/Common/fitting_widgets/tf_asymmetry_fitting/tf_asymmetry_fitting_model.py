@@ -10,8 +10,8 @@ from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
-                                                         get_diff_asymmetry_name, get_group_asymmetry_name,
-                                                         get_pair_asymmetry_name, get_pair_phasequad_name)
+                                                         get_diff_asymmetry_name, get_group_asymmetry_name, get_group_or_pair_from_name,
+                                                         get_pair_asymmetry_name, get_pair_phasequad_name, get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import DEFAULT_SINGLE_FIT_FUNCTION
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
@@ -537,3 +537,38 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
             return [get_group_asymmetry_name(self.context, group_or_pair, run, period_string, not self.fit_to_raw)]
         else:
             return []
+
+    def get_runs_groups_and_pairs_for_fits(self):
+        """Returns the runs and group/pairs corresponding to the selected dataset names."""
+        if not self.simultaneous_fitting_mode:
+            return self._get_runs_groups_and_pairs_for_single_fit()
+        else:
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit()
+
+    def _get_runs_groups_and_pairs_for_single_fit(self) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names in single fitting mode."""
+        runs, groups_and_pairs = [], []
+        for name in self.dataset_names:
+            runs.append(get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument))
+            groups_and_pairs.append(get_group_or_pair_from_name(name))
+        return runs, groups_and_pairs
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit(self) -> tuple:
+        """Returns the runs and group/pairs corresponding to the selected dataset names in simultaneous fitting mode."""
+        if self.simultaneous_fit_by == "Run":
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_runs()
+        elif self.simultaneous_fit_by == "Group/Pair":
+            return self._get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs()
+        else:
+            return [], []
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_runs(self):
+        """Returns the runs and group/pairs for the selected data in simultaneous fit by runs mode."""
+        groups_and_pairs = [get_group_or_pair_from_name(name) for name in self.dataset_names]
+        return [self.simultaneous_fit_by_specifier], [";".join(groups_and_pairs)]
+
+    def _get_runs_groups_and_pairs_for_simultaneous_fit_by_groups_and_pairs(self):
+        """Returns the runs and group/pairs for the selected data in simultaneous fit by group/pairs mode."""
+        runs = [get_run_numbers_as_string_from_workspace_name(name, self.context.data_context.instrument)
+                for name in self.dataset_names]
+        return [";".join(runs)], [self.simultaneous_fit_by_specifier]
