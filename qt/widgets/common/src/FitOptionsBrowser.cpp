@@ -41,6 +41,24 @@
 #include <QVBoxLayout>
 #include <limits>
 
+namespace {
+using namespace MantidQt::MantidWidgets;
+
+int getFittingModeInt(FittingMode fitMode) {
+  switch (fitMode) {
+  case FittingMode::SIMULTANEOUS:
+    return 0;
+  case FittingMode::SEQUENTIAL:
+    return 1;
+  case FittingMode::SEQUENTIAL_AND_SIMULTANEOUS:
+    return 2;
+  default:
+    return 1;
+  }
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -118,7 +136,7 @@ void FitOptionsBrowser::initFittingTypeProp() {
   types << "Simultaneous"
         << "Sequential";
   m_enumManager->setEnumNames(m_fittingTypeProp, types);
-  if (m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+  if (m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     m_browser->addProperty(m_fittingTypeProp);
   } else if (m_fittingType == FittingMode::SIMULTANEOUS ||
              m_fittingType == FittingMode::SEQUENTIAL) {
@@ -133,11 +151,11 @@ void FitOptionsBrowser::createProperties() {
   initFittingTypeProp();
   createCommonProperties();
   if (m_fittingType == FittingMode::SIMULTANEOUS ||
-      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSimultaneousFitProperties();
   }
   if (m_fittingType == FittingMode::SEQUENTIAL ||
-      m_fittingType == FittingMode::SIMULTANEOUS_SEQUENTIAL) {
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSequentialFitProperties();
   }
 }
@@ -726,7 +744,7 @@ FittingMode FitOptionsBrowser::getCurrentFittingType() const {
  *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
  */
 void FitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+  m_enumManager->setValue(m_fittingTypeProp, getFittingModeInt(fitType));
 }
 
 /**
@@ -735,7 +753,7 @@ void FitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
  * @param fitType :: Fitting type to lock the browser in.
  */
 void FitOptionsBrowser::lockCurrentFittingType(FittingMode fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+  m_enumManager->setValue(m_fittingTypeProp, getFittingModeInt(fitType));
   m_fittingTypeProp->setEnabled(false);
 }
 

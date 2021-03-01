@@ -15,13 +15,13 @@ The Gram-Charlier expansion of the Neutron Compton profile, :math:`J(y)` is give
 expansion of Hermite polynomials,
 
 .. math::
-    J(y) = \frac{e^{-y^2/2\sigma^2}}{\sqrt{2\pi}\sigma}\left[ 1+ \sum_{n=2}^{\infty}\frac{a_n}{2^{2n}n!}H_{2n}\left(\frac{y}{\sqrt{2}\sigma}\right)\right]\label{a}  \tag{1}
+    J(y) = \frac{e^{-y^2/2\sigma^2}}{\sqrt{2\pi}\sigma}\left[ 1+ \sum_{n=2}^{\infty}\frac{a_n}{2^{2n}n!}H_{2n}\left(\frac{y}{\sqrt{2}\sigma}\right)\right]\label{a}
 
 where, :math:`\sigma` is the standard deviation (Gaussian width parameter), :math:`a_n` the hermite coefficients and :math:`H_n` the Hermite polynomial terms.
 As well as the even polynomial terms, a third order factor is included of the form,
 
 .. math::
-    \frac{A}{\sqrt{2\pi} \sigma} \times FSE \times \exp(-z^2) \times H_3 (z) \label{b}  \tag{2}
+    \frac{A}{\sqrt{2\pi} \sigma} \times FSE \times \exp(-z^2) \times H_3 (z) \label{b}
 
 where :math:`z=y/\sqrt{2\pi\sigma^2}` and :math:`FSE` is an input ampltiude scaling parameter. The Hermite coefficients, :math:`a_n`,
 are supplied to the function in the parameters :math:`C_0`, :math:`C_2` and :math:`C_4`. The attribute HermiteCoeffs may be used

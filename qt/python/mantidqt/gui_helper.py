@@ -83,8 +83,8 @@ def show_interface_help(mantidplot_name, assistant_process, collection_file, qt_
         event.accept()
     '''
     try:
-        import pymantidplot
-        pymantidplot.proxies.showCustomInterfaceHelp(mantidplot_name)
+        import mantidqt
+        mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name)
     except: #(ImportError, ModuleNotFoundError) raises the wrong type of error
         assistant_process.close()
         assistant_process.waitForFinished()
