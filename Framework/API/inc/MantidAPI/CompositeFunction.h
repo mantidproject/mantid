@@ -86,6 +86,8 @@ public:
   // Set an attribute value
   void setAttribute(const std::string &name,
                     const API::IFunction::Attribute &value) override;
+  // Register the functions usage
+  void registerFunctionUsage() override;
   /// Total number of parameters
   [[nodiscard]] size_t nParams() const override;
   // Total number of attributes, which includes global and local function
