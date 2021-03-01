@@ -212,7 +212,7 @@ class BasicFittingModel:
         if dataset_name in self.dataset_names:
             return self.single_fit_functions[self.dataset_names.index(dataset_name)]
         else:
-            return None
+            return DEFAULT_SINGLE_FIT_FUNCTION
 
     @property
     def single_fit_functions_cache(self) -> list:
