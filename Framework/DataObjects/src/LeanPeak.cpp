@@ -112,7 +112,7 @@ LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
  * @param id :: ID of detector at the centre of the peak.
  */
 void LeanPeak::setDetectorID([[maybe_unused]] int id) {
-  throw std::runtime_error(
+  throw Exception::NotImplementedError(
       "LeanPeak::setDetectorID(): Can't set detectorID on LeanPeak");
 }
 
@@ -128,19 +128,21 @@ int LeanPeak::getDetectorID() const { return -1; }
  */
 void LeanPeak::setInstrument([
     [maybe_unused]] const Geometry::Instrument_const_sptr &inst) {
-  throw std::runtime_error(
+  throw Exception::NotImplementedError(
       "LeanPeak::setInstrument(): Can't set instrument on LeanPeak");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Return a shared ptr to the detector at center of peak. */
 Geometry::IDetector_const_sptr LeanPeak::getDetector() const {
-  throw std::runtime_error("LeanPeak::getDetector(): Has no detector ID");
+  throw Exception::NotImplementedError(
+      "LeanPeak::getDetector(): Has no detector ID");
 }
 
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr LeanPeak::getInstrument() const {
-  throw std::runtime_error("LeanPeak::setInstrument(): Has no instrument");
+  throw Exception::NotImplementedError(
+      "LeanPeak::setInstrument(): Has no instrument");
 }
 
 // -------------------------------------------------------------------------------------
@@ -230,7 +232,7 @@ void LeanPeak::setQLabFrame(
 void LeanPeak::setSamplePos([[maybe_unused]] double samX,
                             [[maybe_unused]] double samY,
                             [[maybe_unused]] double samZ) {
-  throw std::runtime_error("not implemented");
+  throw Exception::NotImplementedError("LeanPeak has no sample information");
 }
 
 /** Set sample position
@@ -238,19 +240,19 @@ void LeanPeak::setSamplePos([[maybe_unused]] double samX,
  * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
  */
 void LeanPeak::setSamplePos([[maybe_unused]] const Mantid::Kernel::V3D &XYZ) {
-  throw std::runtime_error("not implemented");
+  throw Exception::NotImplementedError("LeanPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
 Mantid::Kernel::V3D LeanPeak::getDetPos() const {
-  throw std::runtime_error("not implemented");
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the sample position vector */
 Mantid::Kernel::V3D LeanPeak::getSamplePos() const {
-  throw std::runtime_error("not implemented");
+  throw Exception::NotImplementedError("LeanPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------
@@ -287,7 +289,9 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
  *
  * @return true if the detector ID was found.
  */
-bool LeanPeak::findDetector() { throw std::runtime_error("not implemented"); }
+bool LeanPeak::findDetector() {
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
+}
 
 /**
  * Performs the same algorithm as findDetector() but uses a pre-existing
@@ -299,7 +303,7 @@ bool LeanPeak::findDetector() { throw std::runtime_error("not implemented"); }
  */
 bool LeanPeak::findDetector([
     [maybe_unused]] const InstrumentRayTracer &tracer) {
-  throw std::runtime_error("not implemented");
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 /**

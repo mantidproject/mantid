@@ -34,13 +34,15 @@ public:
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D())
 
     TS_ASSERT_EQUALS(p.getDetectorID(), -1)
-    TS_ASSERT_THROWS(p.getDetector(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getInstrument(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.findDetector(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getDetectorPosition(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getDetPos(), const std::runtime_error &)
-    TS_ASSERT_THROWS(p.getSamplePos(), const std::runtime_error &)
+    TS_ASSERT_THROWS(p.getDetector(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getInstrument(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.findDetector(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getDetectorPosition(),
+                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(),
+                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getDetPos(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getSamplePos(), const Exception::NotImplementedError &)
     TS_ASSERT(std::isnan(p.getTOF()))
     TS_ASSERT(std::isnan(p.getScattering()))
     TS_ASSERT(std::isnan(p.getAzimuthal()))
