@@ -361,6 +361,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
                                                              self.fit_function, self.start_x, self.fit_status,
                                                              self.chi_squared)
+        # Mock the context
+        self.model.context = mock.Mock()
 
         # Mock the properties of the model
         self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
@@ -426,7 +428,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         # Mock unimplemented methods and notifiers
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
         self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-        self.presenter.reset_tab_notifier.notify_subscribers = mock.Mock()
+        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
         self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
         self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

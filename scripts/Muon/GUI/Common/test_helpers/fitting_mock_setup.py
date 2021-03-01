@@ -66,7 +66,7 @@ def add_mock_methods_to_basic_fitting_presenter(presenter):
     presenter.update_and_reset_all_data = mock.Mock()
     presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
     presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
-    presenter.reset_tab_notifier.notify_subscribers = mock.Mock()
+    presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
     presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
     presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
     presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()

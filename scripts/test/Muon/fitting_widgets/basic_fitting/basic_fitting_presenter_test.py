@@ -82,7 +82,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_ads_clear_or_remove_workspace_event()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.presenter.reset_tab_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_gui_changes_made_will_reset_the_start_and_end_x_in_the_model_and_view(self):
         self.presenter.handle_gui_changes_made({"FirstGoodDataFromFile": True})
@@ -113,7 +113,7 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.update_and_reset_all_data.assert_called_with()
         self.mock_view_plot_guess.assert_called_once_with(False)
         self.presenter.clear_cached_fit_functions.assert_called_with()
-        self.presenter.reset_tab_notifier.notify_subscribers.assert_called_once_with()
+        self.presenter.disable_fitting_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
         self.presenter.handle_plot_guess_changed()
@@ -258,11 +258,20 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_function_parameter_changed_will_update_the_fit_functions_and_notify_they_are_updated(self):
-        self.presenter.update_fit_functions_in_model_from_view = mock.Mock()
+        function_index = ""
+        parameter = "A0"
+        parameter_value = 5.0
+        full_parameter = f"{function_index}{parameter}"
 
-        self.presenter.handle_function_parameter_changed()
+        self.view.parameter_value = mock.Mock(return_value=parameter_value)
+        self.model.update_parameter_value = mock.Mock()
+        self.model.update_fit_functions_in_model_from_view = mock.Mock()
 
-        self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
+        self.presenter.handle_function_parameter_changed(function_index, parameter)
+
+        self.view.parameter_value.assert_called_once_with(full_parameter)
+        self.model.update_parameter_value.assert_called_once_with(full_parameter, parameter_value)
+
         self.mock_view_plot_guess.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
         self.presenter.fit_parameter_changed_notifier.notify_subscribers.assert_called_once_with()
@@ -458,6 +467,16 @@ class BasicFittingPresenterTest(unittest.TestCase):
         self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
                                                                               self.chi_squared))
         type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results
+
+        # Mock unimplemented methods and notifiers
+        self.presenter.handle_fitting_finished = mock.Mock()
+        self.presenter.update_and_reset_all_data = mock.Mock()
+        self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
+        self.presenter.enable_editing_notifier.notify_subscribers = mock.Mock()
+        self.presenter.disable_fitting_notifier.notify_subscribers = mock.Mock()
+        self.presenter.selected_fit_results_changed.notify_subscribers = mock.Mock()
+        self.presenter.fit_function_changed_notifier.notify_subscribers = mock.Mock()
+        self.presenter.fit_parameter_changed_notifier.notify_subscribers = mock.Mock()
 
 
 if __name__ == '__main__':
