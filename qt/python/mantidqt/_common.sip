@@ -868,6 +868,7 @@ using namespace MantidQt::API;
 public:
     FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
     FunctionTreeView *view() const;
+    void setStretchLastColumn(bool stretch);
     void setFunction(const QString &funStr);
     QString getFunctionString();
     QString getFitFunctionString() const;

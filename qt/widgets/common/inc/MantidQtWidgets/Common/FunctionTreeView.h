@@ -129,6 +129,8 @@ public:
                                           bool attributesOnly = false);
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
+  /// Set the last column to stretch.
+  void setStretchLastColumn(bool stretch);
 
   // Hide global boxes
   void hideGlobals();
