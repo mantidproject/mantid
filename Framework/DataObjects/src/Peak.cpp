@@ -172,9 +172,6 @@ Peak::Peak(const Peak &other)
 Peak::Peak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
-    throw std::invalid_argument(
-        "Peak::ctor(): Goniometer matrix must non-singular.");
   setInstrument(ipeak.getInstrument());
   detid_t id = ipeak.getDetectorID();
   if (id >= 0) {
@@ -413,7 +410,7 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
 Mantid::Kernel::V3D Peak::getQSampleFrame() const {
   V3D Qlab = this->getQLabFrame();
   // Multiply by the inverse of the goniometer matrix to get the sample frame
-  V3D Qsample = m_InverseGoniometerMatrix * Qlab;
+  V3D Qsample = getInverseGoniometerMatrix() * Qlab;
   return Qsample;
 }
 
@@ -432,7 +429,7 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  */
 void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                            boost::optional<double> detectorDistance) {
-  V3D Qlab = m_GoniometerMatrix * QSampleFrame;
+  V3D Qlab = getGoniometerMatrix() * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
 

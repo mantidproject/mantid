@@ -64,6 +64,7 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
  *
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
+ * @param wavelength :: wavelength in Angstroms.
  */
 LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength)
     : BasePeak() {
@@ -77,6 +78,7 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength)
  *
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  * @param goniometer :: a 3x3 rotation matrix
+ * @param wavelength :: wavelength in Angstroms.
  */
 LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
                    const Mantid::Kernel::Matrix<double> &goniometer,
@@ -89,7 +91,6 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
 /**
  * @brief Copy constructor
  * @param other : Source
- * @return
  */
 LeanPeak::LeanPeak(const LeanPeak &other)
     : BasePeak(other), m_Qsample(other.m_Qsample) {}
@@ -98,7 +99,6 @@ LeanPeak::LeanPeak(const LeanPeak &other)
 /** Constructor making a LeanPeak from IPeak interface
  *
  * @param ipeak :: const reference to an IPeak object
- * @return
  */
 LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_Qsample(ipeak.getQSampleFrame()) {}
@@ -174,7 +174,7 @@ double LeanPeak::getDSpacing() const { return 2 * M_PI / m_Qsample.norm(); }
  * Note: There is a 2*pi factor used, so |Q| = 2*pi/wavelength.
  * */
 Mantid::Kernel::V3D LeanPeak::getQLabFrame() const {
-  return m_GoniometerMatrix * m_Qsample;
+  return getGoniometerMatrix() * m_Qsample;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -192,6 +192,7 @@ Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const { return m_Qsample; }
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
+ * @param detectorDistance :: unused
  */
 void LeanPeak::setQSampleFrame(
     const Mantid::Kernel::V3D &QSampleFrame,
@@ -210,15 +211,16 @@ void LeanPeak::setQSampleFrame(
  * @param qLab :: Q of the center of the peak, in reciprocal space.
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
- *Angstroms).
+ *        Angstroms).
  * @param detectorDistance :: distance between the sample and the detector. If
- *this is provided. Then we do not
- * ray trace to find the intersecing detector.
+ *        this is provided. Then we do not ray trace to find the intersecing
+ *detector.
+ * @param detectorDistance :: unused
  */
 void LeanPeak::setQLabFrame(
     const Mantid::Kernel::V3D &qLab,
     [[maybe_unused]] boost::optional<double> detectorDistance) {
-  this->setQSampleFrame(m_InverseGoniometerMatrix * qLab);
+  this->setQSampleFrame(getInverseGoniometerMatrix() * qLab);
 }
 
 /** Set sample position

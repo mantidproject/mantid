@@ -103,6 +103,7 @@ public:
   void setBinCount(double m_binCount) override;
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
+  Mantid::Kernel::Matrix<double> getInverseGoniometerMatrix() const;
   void setGoniometerMatrix(
       const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
@@ -130,14 +131,6 @@ public:
 
   void setAbsorptionWeightedPathLength(double pathLength) override;
   double getAbsorptionWeightedPathLength() const override;
-
-protected:
-  /// Orientation matrix of the goniometer angles.
-  Mantid::Kernel::Matrix<double> m_GoniometerMatrix;
-
-  /// Inverse of the goniometer rotation matrix; used to go from Q in lab frame
-  /// to Q in sample frame
-  Mantid::Kernel::Matrix<double> m_InverseGoniometerMatrix;
 
 private:
   /// Name of the parent bank
@@ -169,6 +162,13 @@ private:
 
   /// absorption weighted path length (aka t bar)
   double m_absorptionWeightedPathLength;
+
+  /// Orientation matrix of the goniometer angles.
+  Mantid::Kernel::Matrix<double> m_GoniometerMatrix;
+
+  /// Inverse of the goniometer rotation matrix; used to go from Q in lab frame
+  /// to Q in sample frame
+  Mantid::Kernel::Matrix<double> m_InverseGoniometerMatrix;
 
   /// Originating run number for this peak
   int m_runNumber;

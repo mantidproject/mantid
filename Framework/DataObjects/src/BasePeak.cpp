@@ -31,10 +31,10 @@ namespace DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 BasePeak::BasePeak()
-    : m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
-      m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
-      m_absorptionWeightedPathLength(0), m_runNumber(0), m_monitorCount(0),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
       m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {}
 
@@ -45,10 +45,10 @@ BasePeak::BasePeak()
  */
 
 BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
-    : m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
-      m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
-      m_absorptionWeightedPathLength(0), m_runNumber(0), m_monitorCount(0),
+      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(goniometer),
+      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
       m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -57,14 +57,14 @@ BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
 }
 
 BasePeak::BasePeak(const BasePeak &other)
-    : m_GoniometerMatrix(other.m_GoniometerMatrix),
-      m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
-      m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
+    : m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
       m_L(other.m_L), m_intensity(other.m_intensity),
       m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
       m_initialEnergy(other.m_initialEnergy),
       m_finalEnergy(other.m_finalEnergy),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
+      m_GoniometerMatrix(other.m_GoniometerMatrix),
+      m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
       m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
       m_row(other.m_row), m_col(other.m_col), m_peakNumber(other.m_peakNumber),
       m_intHKL(other.m_intHKL), m_intMNP(other.m_intMNP),
@@ -74,17 +74,17 @@ BasePeak::BasePeak(const BasePeak &other)
 /** Constructor making a LeanPeak from IPeak interface
  *
  * @param ipeak :: const reference to an IPeak object
- * @return
  */
 BasePeak::BasePeak(const Geometry::IPeak &ipeak)
-    : IPeak(ipeak), m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
-      m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()), m_H(ipeak.getH()),
-      m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
+    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
+      m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()),
       m_binCount(ipeak.getBinCount()),
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()),
       m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
+      m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
+      m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()),
@@ -285,6 +285,12 @@ void BasePeak::setInitialEnergy(double m_initialEnergy) {
 /** Get the goniometer rotation matrix at which this peak was measured. */
 Mantid::Kernel::Matrix<double> BasePeak::getGoniometerMatrix() const {
   return this->m_GoniometerMatrix;
+}
+
+// -------------------------------------------------------------------------------------
+/** Get the goniometer rotation matrix at which this peak was measured. */
+Mantid::Kernel::Matrix<double> BasePeak::getInverseGoniometerMatrix() const {
+  return this->m_InverseGoniometerMatrix;
 }
 
 /** Set the goniometer rotation matrix at which this peak was measured.
