@@ -434,6 +434,12 @@ class FittingContext(object):
         fits_to_remove = self.fit_list.copy()
         self.remove_fits_from_stored_fit_list(fits_to_remove)
 
+    def remove_all_fits(self):
+        removed_fits = self.fit_list
+        self.fit_list = []
+        self._number_of_fits = 0
+        self.fit_removed_notifier.notify_subscribers(removed_fits)
+
     def remove_latest_fit(self):
         if self.fit_list:
             removed_fit = self.fit_list[-1]
