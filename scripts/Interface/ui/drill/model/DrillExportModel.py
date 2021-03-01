@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, AlgorithmManager
 from mantid.kernel import config, logger
 from mantid.api import WorkspaceGroup
 
@@ -27,6 +27,11 @@ class DrillExportModel:
     Dictionnary of export file extensions.
     """
     _exportExtensions = None
+
+    """
+    Dictionnary of export algorithm short doc.
+    """
+    _exportDocs = None
 
     """
     ThreadPool to run export algorithms asynchronously.
@@ -54,10 +59,16 @@ class DrillExportModel:
                 for k,v
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportExtensions = dict()
+        self._exportDocs = dict()
         for a in self._exportAlgorithms.keys():
-            if a not in RundexSettings.EXPORT_ALGO_EXTENSION:
-                continue
-            self._exportExtensions[a] = RundexSettings.EXPORT_ALGO_EXTENSION[a]
+            if a in RundexSettings.EXPORT_ALGO_EXTENSION:
+                self._exportExtensions[a] = \
+                    RundexSettings.EXPORT_ALGO_EXTENSION[a]
+            try:
+                alg = AlgorithmManager.createUnmanaged(a)
+                self._exportDocs[a] = alg.getWikiSummary()
+            except:
+                pass
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)
         self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -81,6 +92,15 @@ class DrillExportModel:
             dict(str:str): dictionnary algo:extension
         """
         return {k:v for k,v in self._exportExtensions.items()}
+
+    def getAlgorithmDocs(self):
+        """
+        Get the short documentation of each export algorithm.
+
+        Return:
+            dict(str:str): dictionnary algo:doc
+        """
+        return {k:v for k,v in self._exportDocs.items()}
 
     def isAlgorithmActivated(self, algorithm):
         """
