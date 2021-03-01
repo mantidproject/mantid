@@ -336,7 +336,7 @@ public:
 
   /** Registers the usage of the algorithm with the UsageService
    */
-  virtual void registerFunctionUsage();
+  virtual void registerFunctionUsage(bool internal);
   /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   virtual void setWorkspace(std::shared_ptr<const Workspace> ws) {

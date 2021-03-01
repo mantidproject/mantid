@@ -78,7 +78,7 @@ IFunction::~IFunction() { m_attrs.clear(); }
 /**
 Registers the usage of the function with the UsageService
  */
-void IFunction::registerFunctionUsage() {
+void IFunction::registerFunctionUsage(bool internal) {
   if (!Kernel::UsageService::Instance().isEnabled()) {
     return;
   }
@@ -87,7 +87,7 @@ void IFunction::registerFunctionUsage() {
       !m_isRegistered) {
     m_isRegistered = true;
     Kernel::UsageService::Instance().registerFeatureUsage(
-        Kernel::FeatureType::Function, name(), true);
+        Kernel::FeatureType::Function, name(), internal);
   }
 }
 /**
