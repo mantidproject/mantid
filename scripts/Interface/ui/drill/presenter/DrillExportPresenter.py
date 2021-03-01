@@ -30,7 +30,8 @@ class DrillExportPresenter:
         self._model = model
         self._view.setPresenter(self)
         algorithms = self._model.getAlgorithms()
-        self._view.setAlgorithms(algorithms)
+        extensions = self._model.getAlgorithmExtentions()
+        self._view.setAlgorithms(algorithms, extensions)
         states = dict()
         for a in algorithms:
             states[a] = self._model.isAlgorithmActivated(a)

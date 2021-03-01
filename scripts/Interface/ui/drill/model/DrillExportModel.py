@@ -24,6 +24,11 @@ class DrillExportModel:
     _exportAlgorithms = None
 
     """
+    Dictionnary of export file extensions.
+    """
+    _exportExtensions = None
+
+    """
     ThreadPool to run export algorithms asynchronously.
     """
     _pool = None
@@ -48,6 +53,9 @@ class DrillExportModel:
         self._exportAlgorithms = {k:v
                 for k,v
                 in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
+        self._exportExtensions = dict()
+        for a in self._exportAlgorithms.keys():
+            self._exportExtensions[a] = RundexSettings.EXPORT_ALGO_EXTENSION[a]
         self._pool = DrillAlgorithmPool()
         self._pool.signals.taskError.connect(self._onTaskError)
         self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -62,6 +70,15 @@ class DrillExportModel:
             list(str): names of algorithms
         """
         return [algo for algo in self._exportAlgorithms.keys()]
+
+    def getAlgorithmExtentions(self):
+        """
+        Get the extension used for the output file of each export algorithm.
+
+        Returns:
+            dict(str:str): dictionnary algo:extension
+        """
+        return {k:v for k,v in self._exportExtensions.items()}
 
     def isAlgorithmActivated(self, algorithm):
         """

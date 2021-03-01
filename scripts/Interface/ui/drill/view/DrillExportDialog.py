@@ -56,15 +56,18 @@ class DrillExportDialog(QDialog):
         """
         self._presenter = presenter
 
-    def setAlgorithms(self, algorithms):
+    def setAlgorithms(self, algorithms, extensions):
         """
         Set the algorithms displayed on the dialog.
 
         Args:
             algorithms (list(str)): list of algorithms
+            extensions (dict(str:str)): extension used by each algorithm
         """
         for i in range(len(algorithms)):
-            widget = QCheckBox(algorithms[i], self)
+            algo = algorithms[i]
+            text = algo + " (" + extensions[algo] + ")"
+            widget = QCheckBox(text, self)
             self._widgets[algorithms[i]] = widget
             self.algoList.addWidget(widget, i, 0, Qt.AlignLeft)
             helpButton = QToolButton(self)
