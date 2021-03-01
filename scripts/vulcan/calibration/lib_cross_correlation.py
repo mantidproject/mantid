@@ -900,7 +900,7 @@ def calculate_model(data_ws_name, ws_index, fit_param_table_name) -> str:
         vec_x = vec_x[i_min:i_max]
         obs_y = data_ws.readY(ws_index)[i_min:i_max]
         model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
-        cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
+        # cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
 
         out_ws_name = 'model_{0}'.format(ws_index)
         CreateWorkspace(vec_x, model_y, NSpec=1, OutputWorkspace=out_ws_name)
