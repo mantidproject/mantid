@@ -29,6 +29,7 @@ from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from workbench.utils.io import input_qinputdialog
 
+
 class InProcessJupyterConsole(RichJupyterWidget):
 
     def __init__(self, *args, **kwargs):
