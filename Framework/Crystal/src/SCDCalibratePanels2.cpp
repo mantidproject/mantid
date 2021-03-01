@@ -376,6 +376,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws) {
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("InputWorkspace", l1ws);
   fitL1_alg->setProperty("CreateOutput", true);
+  fitL1_alg->setProperty("Minimizer", "Levenberg-MarquardtMD");
   fitL1_alg->setProperty("Output", "fit");
   fitL1_alg->executeAsChildAlg();
 

@@ -66,6 +66,9 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(
     // a bank name with sixteenpack already appended
     if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
       m_cmpt.append("/sixteenpack");
+
+  // Set the iteration count
+  n_iter = 0;
 }
 
 /**
@@ -103,16 +106,21 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   UNUSED_ARG(xValues);
   UNUSED_ARG(order);
 
-  // our reference
+  // -- always working on a copy only
+  IPeaksWorkspace_sptr pws = m_pws->clone();
+
+  // Debugging related
   auto pws_ref = m_pws->clone();
+  double diff_calc_ref = 0;
+  double diff_calc_target = 0;
 
   // NOTE: when optimizing T0, a none component will be passed in.
   if (m_cmpt != "none/sixteenpack") {
     // rotation
-    m_pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, m_pws);
-    
+    pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, pws);
+
     // translation
-    m_pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, m_pws);
+    pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
   }
 
   // TODO:
@@ -121,23 +129,40 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   // NOTE:
   //    getQSampleFrame does not consider the updated instrument, which is why
   //    the calibration will always fail
-  for (int i = 0; i < m_pws->getNumberPeaks(); ++i) {
+  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     Units::Wavelength wl;
-    wl.initialize(m_pws->getPeak(i).getL1(), m_pws->getPeak(i).getL2(),
-                  m_pws->getPeak(i).getScattering(), 0,
-                  m_pws->getPeak(i).getInitialEnergy(), 0.0);
+    wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
+                  pws->getPeak(i).getScattering(), 0,
+                  pws->getPeak(i).getInitialEnergy(), 0.0);
 
     // Force updating the detector position by set the instrument,
     // then set the detector ID
-    m_pws->getPeak(i).setInstrument(m_pws->getInstrument());
-    m_pws->getPeak(i).setDetectorID(m_pws->getPeak(i).getDetectorID());
-    m_pws->getPeak(i).setWavelength(
-        wl.singleFromTOF(m_pws->getPeak(i).getTOF()));
+    pws->getPeak(i).setInstrument(pws->getInstrument());
+    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
+    pws->getPeak(i).setWavelength(wl.singleFromTOF(pws->getPeak(i).getTOF()));
 
-    V3D qv = m_pws->getPeak(i).getQSampleFrame();
+    V3D qv = pws->getPeak(i).getQSampleFrame();
     for (int j = 0; j < 3; ++j)
       out[i * 3 + j] = qv[j];
+
+    // check the difference between n and 0
+    V3D dq_calc_ref = qv - pws_ref->getPeak(i).getQSampleFrame();
+    diff_calc_ref += dq_calc_ref.norm2();
+
+    // check the difference between n and target
+    auto ubm = pws->sample().getOrientedLattice().getUB();
+    V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
+    qv_target *= 2 * PI;
+    V3D dq_calc_target = qv - qv_target;
+    diff_calc_target += dq_calc_target.norm2();
   }
+
+  n_iter += 1;
+  std::ostringstream msgiter;
+  msgiter << "@iter_" << n_iter << "\n"
+          << "-- sum_i((qv_n - qv_0)^2) = " << diff_calc_ref << "\n"
+          << "-- sum_i((qv_n - qv_target)^2) = " << diff_calc_target << "\n\n";
+  g_log.notice() << msgiter.str();
 }
 
 // -------///
@@ -163,6 +188,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
       "MoveInstrumentComponent", -1);
   //
   mv_alg->initialize();
+  mv_alg->setChild(true);
   mv_alg->setLogging(LOGCHILDALG);
   mv_alg->setProperty("Workspace", pws);
   mv_alg->setProperty("ComponentName", componentName);
@@ -170,7 +196,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
   mv_alg->setProperty("Y", deltaY);
   mv_alg->setProperty("Z", deltaZ);
   mv_alg->setProperty("RelativePosition", true);
-  mv_alg->execute();
+  mv_alg->executeAsChildAlg();
 
   return pws;
 }
@@ -183,6 +209,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
       "RotateInstrumentComponent", -1);
   //
   rot_alg->initialize();
+  rot_alg->setChild(true);
   rot_alg->setLogging(LOGCHILDALG);
   rot_alg->setProperty("Workspace", pws);
   rot_alg->setProperty("ComponentName", componentName);
@@ -191,7 +218,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
   rot_alg->setProperty("Z", rotVz);
   rot_alg->setProperty("Angle", rotAng);
   rot_alg->setProperty("RelativeRotation", true);
-  rot_alg->execute();
+  rot_alg->executeAsChildAlg();
 
   return pws;
 }

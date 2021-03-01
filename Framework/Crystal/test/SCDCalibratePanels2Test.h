@@ -308,7 +308,7 @@ public:
    * @brief Moving (rotation and translation) single panel
    *
    */
-  void run_bank_moved() {
+  void test_bank_moved() {
     g_log.notice() << "test: !single bank moved!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
@@ -384,7 +384,7 @@ public:
    * NOTE: not enough peaks on the y_panels, so we have to work with only the
    *       x_panels
    */
-  void test_Exec() {
+  void run_Exec() {
     g_log.notice() << "test: !calibrate L1 and two panels at the same time!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
