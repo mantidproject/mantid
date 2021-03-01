@@ -37,6 +37,7 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.plot_guess)
 
     def test_that_the_undo_fit_button_can_be_enabled_as_expected(self):
+        self.view.enable_view()
         self.view.enable_undo_fit(True)
         self.assertTrue(self.view.fit_controls.undo_fit_button.isEnabled())
 
