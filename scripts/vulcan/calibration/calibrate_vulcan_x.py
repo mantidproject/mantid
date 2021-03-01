@@ -202,7 +202,7 @@ def align_vulcan_data(diamond_runs: Union[str, List[Union[int, str]]],
 
 
 def peak_position_calibrate(focused_diamond_ws_name,
-                            grouping_plan: List[Tuple[int, int, int]],
+                            grouping_plan: List[Tuple[int, Union[int, None], int]],
                             src_diff_cal_h5,
                             target_diff_cal_h5,
                             output_dir):
@@ -219,7 +219,11 @@ def peak_position_calibrate(focused_diamond_ws_name,
     for start_ws_index, step, end_ws_index in grouping_plan:
         # calculate new workspace index range in the focused workspace
         # NOTE that whatever in the grouping plan is for raw workspace!
-        num_groups = (end_ws_index - start_ws_index) // step
+        if step:
+            num_groups = (end_ws_index - start_ws_index) // step
+        else:
+            num_groups = 1
+            step = end_ws_index - start_ws_index
         start_group_index = last_focused_group_index
         end_group_index = start_group_index + num_groups
 

@@ -5,11 +5,11 @@ from mantid.simpleapi import Plus, CreateWorkspace
 from mantid.simpleapi import CloneWorkspace
 from mantid.simpleapi import Rebin
 from mantid.simpleapi import GeneratePythonScript, SaveNexusProcessed
+from vulcan.calibration.mantid_helper import retrieve_workspace
 import bisect
 import os
 import math
 import numpy as np
-import mantid_helper
 from typing import Dict, Tuple, Any, Union
 import h5py
 
@@ -187,9 +187,9 @@ def copy_bank_wise_offset_values(target_calib_ws, ref_calib_ws, bank_name):
 
     # Get the workspaces handlers
     if isinstance(target_calib_ws, str):
-        target_calib_ws = mantid_helper.retrieve_workspace(target_calib_ws, True)
+        target_calib_ws = retrieve_workspace(target_calib_ws, True)
     if isinstance(ref_calib_ws, str):
-        ref_calib_ws = mantid_helper.retrieve_workspace(ref_calib_ws, True)
+        ref_calib_ws = retrieve_workspace(ref_calib_ws, True)
 
     # Copy over values
     num_cols = target_calib_ws.columnCount()
@@ -219,11 +219,11 @@ def copy_bank_wise_masks(target_mask_ws, ref_mask_ws: Union[str, Any], bank_name
 
     # apply
     if isinstance(target_mask_ws, str):
-        mask_ws = mantid_helper.retrieve_workspace(target_mask_ws, True)
+        mask_ws = retrieve_workspace(target_mask_ws, True)
     else:
         mask_ws = target_mask_ws
     if isinstance(ref_mask_ws, str):
-        ref_mask_ws = mantid_helper.retrieve_workspace(ref_mask_ws, True)
+        ref_mask_ws = retrieve_workspace(ref_mask_ws, True)
 
     # static
     num_masked = 0
@@ -306,7 +306,7 @@ def cross_correlate_calibrate(ws_name: str,
 
     """
     # Process inputs: reference of input workspace
-    diamond_event_ws = mantid_helper.retrieve_workspace(ws_name, True)
+    diamond_event_ws = retrieve_workspace(ws_name, True)
     if peak_fit_time == 1:
         fit_twice = False
     else:
@@ -794,7 +794,7 @@ def export_difc(calib_ws_name, out_file_name):
     :param out_file_name:
     :return:
     """
-    calib_ws = mantid_helper.retrieve_workspace(calib_ws_name)
+    calib_ws = retrieve_workspace(calib_ws_name)
 
     wbuf = '{}\n'.format(calib_ws.getColumnNames())
     for ir in range(calib_ws.rowCount()):

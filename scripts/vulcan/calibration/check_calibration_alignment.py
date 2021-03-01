@@ -6,8 +6,8 @@
 # 4. Diffraction focus and export
 import os
 from mantid.simpleapi import (LoadEventNexus, Plus, LoadInstrument, CreateGroupingWorkspace)
-from lib_analysis import (align_focus_event_ws)
-from mantid_helper import load_calibration_file
+from .lib_analysis import (align_focus_event_ws)
+from .mantid_helper import load_calibration_file
 from typing import List, Tuple, Union
 
 
