@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.kernel import config
+from mantid.kernel import ConfigService
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
@@ -120,8 +120,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         self.assertAlmostEqual(numpy.rad2deg(two_theta_fg), 0., delta=0.1)
 
     def testTwoInputFiles(self):
-        config.setString("default.facility", "ILL")
-        config.setString("default.instrument", "D17")
+        ConfigService.Instance().setString("default.facility",   "ILL")
+        ConfigService.Instance().setString("default.instrument", "D17")
         outWSName = 'outWS'
         args = {
             'Run': 'ILL/D17/317369, ILL/D17/317370.nxs',
@@ -134,8 +134,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEqual(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
         self.assertEqual(mtd.getObjectNames(), [])
-        config.setString("default.facility", "NONE")
-        config.setString("default.instrument", "NONE")
+        ConfigService.Instance().setString("default.facility",   " ")
+        ConfigService.Instance().setString("default.instrument", " ")
 
 
 if __name__ == "__main__":

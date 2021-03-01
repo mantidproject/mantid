@@ -32,6 +32,7 @@ using namespace std;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
+using Mantid::Kernel::ConfigService;
 
 class FindPeaksTest : public CxxTest::TestSuite {
 public:

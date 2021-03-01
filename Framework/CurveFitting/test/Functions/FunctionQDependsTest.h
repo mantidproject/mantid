@@ -162,7 +162,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(loader.isExecuted());
     Mantid::Kernel::ConfigService::Instance().setString("default.facility",
-                                                        "NONE");
+                                                        " ");
     return Mantid::API::AnalysisDataService::Instance()
         .retrieveWS<Mantid::API::MatrixWorkspace>("irs26173");
   }

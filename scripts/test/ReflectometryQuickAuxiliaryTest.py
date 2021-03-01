@@ -9,7 +9,7 @@ import unittest
 from isis_reflectometry import quick
 
 from mantid.simpleapi import *
-from mantid.kernel import config
+from mantid.kernel import ConfigService
 
 
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
@@ -20,9 +20,9 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         super(ReflectometryQuickAuxiliaryTest, self).__init__(methodName)
 
     def setUp(self):
-        config.setString("default.facility", "ISIS")
+        ConfigService.Instance().setString("default.facility", "ISIS")
         LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=self.__wsName)
-        config.setString("default.facility", "NONE")
+        ConfigService.Instance().setString("default.facility", " ")
 
     def tearDown(self):
         DeleteWorkspace(mtd[self.__wsName])

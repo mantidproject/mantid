@@ -2,10 +2,10 @@
 <facilities>
 
 <!--  EMPTY  -->
-<facility name="NONE" FileExtensions=" ">
+<facility name=" " FileExtensions=" ">
   <timezone></timezone>
 
-  <instrument name="NONE">
+  <instrument name=" ">
     <technique> </technique>
   </instrument>
 

@@ -32,7 +32,7 @@ public:
 
   void tearDown() override {
 
-    ConfigService::Instance().setString("default.facility", "NONE");
+    ConfigService::Instance().setString("default.facility", " ");
 
     AnalysisDataService::Instance().clear();
   }

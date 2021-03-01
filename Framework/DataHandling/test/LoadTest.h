@@ -42,7 +42,7 @@ public:
 
     ConfigService::Instance().setDataSearchDirs(m_dataSearchDirs);
 
-    ConfigService::Instance().setString("default.facility", "NONE");
+    ConfigService::Instance().setString("default.facility", " ");
 
     ConfigService::Instance().setString("default.instrument", m_instName);
 

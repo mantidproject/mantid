@@ -187,7 +187,7 @@ public:
     TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName(
                                           "EFG2H123", instrument));
 
-    ConfigService::Instance().setString("default.facility", "NONE");
+    ConfigService::Instance().setString("default.facility", " ");
   }
 
   void testMakeFileNameForSNS() {
@@ -219,7 +219,7 @@ public:
     TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName(
                                       "REF_L666", instrument));
 
-    ConfigService::Instance().setString("default.facility", "NONE");
+    ConfigService::Instance().setString("default.facility", " ");
   }
 
   void testGetInstrument() {
