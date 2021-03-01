@@ -95,12 +95,14 @@ class PeakMatching(PythonAlgorithm):
         input_peaks = self.get_input_peaks(table,peak_column,sigma_column)
 
         all_data , primary_data, secondary_data = self.get_matches(peak_data, input_peaks)
-        names = [self.getPropertyValue("PrimaryPeaks"),
-                 self.getPropertyValue("SecondaryPeaks"),
-                 self.getPropertyValue("AllPeaks"),
-                 self.getPropertyValue("SortedByEnergy"),
-                 self.getPropertyValue("ElementLikelihood")]
-        self.output_data(primary_data, secondary_data, all_data,names)
+
+        output_table_names = [self.getPropertyValue("PrimaryPeaks"),
+                              self.getPropertyValue("SecondaryPeaks"),
+                              self.getPropertyValue("AllPeaks"),
+                              self.getPropertyValue("SortedByEnergy"),
+                              self.getPropertyValue("ElementLikelihood")]
+
+        self.output_data(primary_data, secondary_data, all_data,output_table_names)
 
     def process_peak_data(self,path):
         '''
@@ -204,73 +206,41 @@ class PeakMatching(PythonAlgorithm):
             for peak, sigma in input_peaks:
                 for element in raw_data:
                     for transition, energy in raw_data[element].items():
-
-                        if peak == energy:
-                            data = {}
-                            data['element'] = element
-                            data['energy'] = energy
-                            data['error'] = 0
-                            data['peak_centre'] = peak
-                            data['transition'] = transition
-                            data['diff'] = 0
-                            data['Rating'] = 4
-                            matches.append(data)
-
-                        elif peak >= (energy - sigma) and peak <= (energy + sigma):
-                            data = {}
-                            data['element'] = element
-                            data['energy'] = energy
-                            data['error'] = sigma
-                            data['peak_centre'] = peak
-                            data['transition'] = transition
-                            data['diff'] = abs(peak - energy)
-                            data['Rating'] = 3
-                            matches.append(data)
-
-                        elif peak >= (energy - (2 * sigma)) and peak <= (energy + (2 * sigma)):
-                            data = {}
-                            data['element'] = element
-                            data['energy'] = energy
-                            data['error'] = 2 * sigma
-                            data['peak_centre'] = peak
-                            data['transition'] = transition
-                            data['diff'] = abs(peak - energy)
-                            data['Rating'] = 2
-                            matches.append(data)
-
-                        elif peak >= (energy - (3 * sigma)) and peak <= (energy + (3 * sigma)):
-                            data['element'] = element
-                            data['energy'] = energy
-                            data['error'] = 3 * sigma
-                            data['peak_centre'] = peak
-                            data['transition'] = transition
-                            data['diff'] = abs(peak - energy)
-                            data['Rating'] = 1
-                            matches.append(data)
-
+                        for num_sigma in range(0, 4):
+                            if peak >= (energy - (num_sigma * sigma)) and peak <= (energy + (sigma * num_sigma)):
+                                data = {}
+                                data['element'] = element
+                                data['energy'] = energy
+                                data['error'] = sigma * num_sigma
+                                data['peak_centre'] = peak
+                                data['transition'] = transition
+                                data['diff'] = abs(peak - energy)
+                                data['Rating'] = 4 - num_sigma
+                                matches.append(data)
+                                break
             matches = sorted(matches, key=lambda data: data['diff'])
             all_matches.append(matches)
         return all_matches
 
-    def output_data(self,primary_data, secondary_data, all_data,names):
-        prim_table = self.make_peak_table(names[0], primary_data)
-        self.setPropertyValue('PrimaryPeaks', names[0])
+    def output_data(self,primary_data, secondary_data, all_data,output_table_names):
+        prim_table = self.make_peak_table(output_table_names[0], primary_data)
+        self.setPropertyValue('PrimaryPeaks', output_table_names[0])
         self.setProperty('PrimaryPeaks', prim_table)
 
-        secon_table = self.make_peak_table(names[1], secondary_data)
-        self.setPropertyValue('SecondaryPeaks', names[1])
+        secon_table = self.make_peak_table(output_table_names[1], secondary_data)
+        self.setPropertyValue('SecondaryPeaks', output_table_names[1])
         self.setProperty('SecondaryPeaks', secon_table)
 
-        all_table = self.make_peak_table(names[2], all_data)
-        self.setPropertyValue('AllPeaks', names[2])
+        all_table = self.make_peak_table(output_table_names[2], all_data)
+        self.setPropertyValue('AllPeaks', output_table_names[2])
         self.setProperty('AllPeaks', all_table)
 
-        sorted_table = self.make_peak_table(names[3],all_data,True,"energy")
-        self.setPropertyValue('SortedByEnergy', names[3])
+        sorted_table = self.make_peak_table(output_table_names[3],all_data,True,"energy")
+        self.setPropertyValue('SortedByEnergy', output_table_names[3])
         self.setProperty('SortedByEnergy', sorted_table)
 
-        count_table = self.make_count_table(names[4],all_data)
-        self.setPropertyValue('ElementLikelihood', names[4])
+        count_table = self.make_count_table(output_table_names[4],all_data)
+        self.setPropertyValue('ElementLikelihood', output_table_names[4])
         self.setProperty('ElementLikelihood', count_table)
 
     def make_peak_table(self,name, data,sortBy = False,valueToSortBy = "energy"):

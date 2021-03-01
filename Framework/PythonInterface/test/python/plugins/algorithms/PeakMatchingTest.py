@@ -74,6 +74,12 @@ class PeakMatchingTest(unittest.TestCase):
 
     @mock.patch('plugins.algorithms.PeakMatching.PeakMatching.get_default_peak_data')
     def test_process_peak_data(self,mock_get_default_peak_data):
+        """
+        This test checks if process_peak_data method returns the correct dictionary which is self.peak_data,
+        the process_peak_data calls the get_default_peak_data method when an empty string is passed to it ,
+        the method is mocked as it needs to open a file and has been mocked to return a snippet of
+        the data in the default json file.
+        """
         mock_get_default_peak_data.return_value = dict({
             "Ag": {
                 "Z": 47,
@@ -123,7 +129,6 @@ class PeakMatchingTest(unittest.TestCase):
                               'element': 'Ag', 'diff': 0, 'transition': 'M(10->3)','Rating' : 4}]
 
         all_matches = [primary_matches, secondary_matches, all_matches]
-        print([len(x) for x in all_data])
         for i, data in enumerate(all_data):
             matches = all_matches[i]
             if len(data) != len(matches):

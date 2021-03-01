@@ -15,7 +15,7 @@ to find probable energy transitions for peaks.
 Input Table and datafile requirement
 ####################################
 
-- input table must have atleast 2 tables in which one column is the peak centre and the other is the standard deviation,the names of the columns must be given if they differ from the default values: centre and sigma respectively.
+- input table must have atleast 2 column in which one column is the peak centre and the other is the standard deviation,the names of the columns must be given if they differ from the default values: centre and sigma respectively.
 - json file can be loaded to override the default but must follow structure below:
 
 .. code-block:: json
@@ -51,155 +51,167 @@ Usage
 
 .. testcode:: OnlyPeaktable
 
-	from mantid.simpleapi import *
-	import matplotlib.pyplot as plt
-	import numpy
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy
 
-	table = CreateEmptyTableWorkspace(OutputWorkspace="input")
-	rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
+    def formatdict(row):
+        row = dict([(column, "{:.2f}".format(value)) if type(value) == float else (column, value)  for column , value in row.items()])
+        return row
 
-	table.addColumn("double","centre")
-	table.addColumn("double","sigma")
+    table = CreateEmptyTableWorkspace(OutputWorkspace="input")
+    rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
 
-	for row in rows:
-		table.addRow(row)
+    table.addColumn("double","centre")
+    table.addColumn("double","sigma")
+
+    for row in rows:
+        table.addRow(row)
     
-	PeakMatching(table)
+    PeakMatching(table)
 
-	primary_matches = mtd['primary_matches'] 
-	secondary_matches = mtd['secondary_matches'] 
-	all_matches = mtd['all_matches'] 
-	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_likelihood = mtd[ 'element_likelihood'] 
+    primary_matches = mtd['primary_matches']
+    secondary_matches = mtd['secondary_matches']
+    all_matches = mtd['all_matches']
+    sorted_by_energy = mtd['all_matches_sorted_by_energy']
+    element_likelihood = mtd[ 'element_likelihood']
 
-	print("--"*25)
-	print(primary_matches.row(0))
-	print("--"*25)
-	print(secondary_matches.row(0))
-	print("--"*25)
-	print(all_matches.row(0))
-	print("--"*25)
-	print(sorted_by_energy.row(0))
-	print("--"*25)
-	print(element_likelihood.row(0))
-		
+    print("--"*25)
+    print(formatdict(primary_matches.row(0)))
+    print("--"*25)
+    print(formatdict(secondary_matches.row(0)))
+    print("--"*25)
+    print(formatdict(all_matches.row(0)))
+    print("--"*25)
+    print(formatdict(sorted_by_energy.row(0)))
+    print("--"*25)
+    print(formatdict(element_likelihood.row(0)))
+
 Output:
 
 .. testoutput:: OnlyPeaktable
 
-	--------------------------------------------------
-	{'Peak centre': 900.0, 'Database Energy': 898.0, 'Element': 'Dy', 'Transition': 'M(5f->3d) ', 'Error': 2.4000000000000004, 'Difference': 2.0}
-	--------------------------------------------------
-	{'Peak centre': 567.0, 'Database Energy': 567.0, 'Element': 'Ag', 'Transition': 'M(7f->3d)', 'Error': 0.0, 'Difference': 0.0}
-	--------------------------------------------------
-	{'Peak centre': 567.0, 'Database Energy': 567.0, 'Element': 'Ag', 'Transition': 'M(7f->3d)', 'Error': 0.0, 'Difference': 0.0}
-	--------------------------------------------------
-	{'Peak centre': 3.0, 'Database Energy': 3.4, 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': 0.8, 'Difference': 0.3999999999999999}
-	--------------------------------------------------
-	{'Element': 'Ag', 'Likelihood(au)': 13}
-	
+    --------------------------------------------------
+    {'Peak centre': '3.00', 'Database Energy': '3.40', 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': '0.80', 'Difference': '0.40'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '567.00', 'Element': 'Ag', 'Transition': 'M(7f->3d)', 'Error': '0.00', 'Difference': '0.00'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '567.00', 'Element': 'Ag', 'Transition': 'M(7f->3d)', 'Error': '0.00', 'Difference': '0.00'}
+    --------------------------------------------------
+    {'Peak centre': '3.00', 'Database Energy': '3.40', 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': '0.80', 'Difference': '0.40'}
+    --------------------------------------------------
+    {'Element': 'Ag', 'Likelihood(au)': '14.00'}
+
 *Example: Renaming tables**
 
 .. testcode:: renametables
 
-	from mantid.simpleapi import *
-	import matplotlib.pyplot as plt
-	import numpy
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy
 
-	table = CreateEmptyTableWorkspace(OutputWorkspace="input")
-	rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
+    def formatdict(row):
+        row = dict([(column, "{:.2f}".format(value)) if type(value) == float else (column, value)  for column , value in row.items()])
+        return row
 
-	table.addColumn("double","centre")
-	table.addColumn("double","sigma")
+    table = CreateEmptyTableWorkspace(OutputWorkspace="input")
+    rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
 
-	for row in rows:
-		table.addRow(row)
+    table.addColumn("double","centre")
+    table.addColumn("double","sigma")
+
+    for row in rows:
+        table.addRow(row)
     
-	PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelihood="count")
+    PeakMatching(table,PrimaryPeaks="primary",SecondaryPeaks="secondary",AllPeaks="all",SortedByEnergy="sort",ElementLikelihood="count")
 
-	primary_matches = mtd['primary'] 
-	secondary_matches = mtd['secondary'] 
-	all_matches = mtd['all'] 
-	sorted_by_energy = mtd['sort'] 
-	element_likelihood = mtd[ 'count'] 
+    primary_matches = mtd['primary']
+    secondary_matches = mtd['secondary']
+    all_matches = mtd['all']
+    sorted_by_energy = mtd['sort']
+    element_likelihood = mtd[ 'count']
 
-	print("--"*25)
-	print(primary_matches.row(1))
-	print("--"*25)
-	print(secondary_matches.row(1))
-	print("--"*25)
-	print(all_matches.row(1))
-	print("--"*25)
-	print(sorted_by_energy.row(1))
-	print("--"*25)
-	print(element_likelihood.row(1))
-		
+    print("--"*25)
+    print(formatdict(primary_matches.row(1)))
+    print("--"*25)
+    print(formatdict(secondary_matches.row(1)))
+    print("--"*25)
+    print(formatdict(all_matches.row(1)))
+    print("--"*25)
+    print(formatdict(sorted_by_energy.row(1)))
+    print("--"*25)
+    print(formatdict(element_likelihood.row(1)))
+
 Output:
 
 .. testoutput:: renametables
 
-	--------------------------------------------------
-	{'Peak centre': 900.0, 'Database Energy': 900.7, 'Element': 'Ag', 'Transition': 'L(3d3/2->2p3/2)', 'Error': 0.8, 'Difference': 0.7000000000000455}
-	--------------------------------------------------
-	{'Peak centre': 567.0, 'Database Energy': 567.0, 'Element': 'In', 'Transition': 'M(6f->3d)', 'Error': 0.0, 'Difference': 0.0}
-	--------------------------------------------------
-	{'Peak centre': 567.0, 'Database Energy': 566.7, 'Element': 'I', 'Transition': 'M(5f->3d)', 'Error': 0.8, 'Difference': 0.2999999999999545}
-	--------------------------------------------------
-	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
-	--------------------------------------------------
-	{'Element': 'I', 'Likelihood(au)': 6}
+    --------------------------------------------------
+    {'Peak centre': '900.00', 'Database Energy': '900.70', 'Element': 'Ag', 'Transition': 'L(3d3/2->2p3/2)', 'Error': '0.80', 'Difference': '0.70'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '567.00', 'Element': 'In', 'Transition': 'M(6f->3d)', 'Error': '0.00', 'Difference': '0.00'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '567.00', 'Element': 'In', 'Transition': 'M(6f->3d)', 'Error': '0.00', 'Difference': '0.00'}
+    --------------------------------------------------
+    {'Peak centre': '306.00', 'Database Energy': '304.10', 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': '2.40', 'Difference': '1.90'}
+    --------------------------------------------------
+    {'Element': 'Tm', 'Likelihood(au)': '9.00'}
 
 
 *Example: Using non default column names**
 
 .. testcode:: non-defaultcolumns
 
-	from mantid.simpleapi import *
-	import matplotlib.pyplot as plt
-	import numpy
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy
 
-	table = CreateEmptyTableWorkspace(OutputWorkspace="input")
-	rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
+    def formatdict(row):
+        row = dict([(column, "{:.2f}".format(value)) if type(value) == float else (column, value)  for column , value in row.items()])
+        return row
 
-	table.addColumn("double","center")
-	table.addColumn("double","standard deviation")
+    table = CreateEmptyTableWorkspace(OutputWorkspace="input")
+    rows = [(900, 0.8), (306, 0.8), (567, 0.8), (3, 0.8)]
 
-	for row in rows:
-		table.addRow(row)
+    table.addColumn("double","center")
+    table.addColumn("double","standard deviation")
+
+    for row in rows:
+        table.addRow(row)
     
-	PeakMatching(table, PeakCentreColumn = "center",SigmaColumn = "standard deviation")
+    PeakMatching(table, PeakCentreColumn = "center",SigmaColumn = "standard deviation")
 
-	primary_matches = mtd['primary_matches'] 
-	secondary_matches = mtd['secondary_matches'] 
-	all_matches = mtd['all_matches'] 
-	sorted_by_energy = mtd['all_matches_sorted_by_energy'] 
-	element_likelihood = mtd[ 'element_likelihood'] 
+    primary_matches = mtd['primary_matches']
+    secondary_matches = mtd['secondary_matches']
+    all_matches = mtd['all_matches']
+    sorted_by_energy = mtd['all_matches_sorted_by_energy']
+    element_likelihood = mtd[ 'element_likelihood']
 
-	print("--"*25)
-	print(primary_matches.row(2))
-	print("--"*25)
-	print(secondary_matches.row(2))
-	print("--"*25)
-	print(all_matches.row(2))
-	print("--"*25)
-	print(sorted_by_energy.row(2))
-	print("--"*25)
-	print(element_likelihood.row(2))
-		
+    print("--"*25)
+    print(formatdict(primary_matches.row(2)))
+    print("--"*25)
+    print(formatdict(secondary_matches.row(2)))
+    print("--"*25)
+    print(formatdict(all_matches.row(2)))
+    print("--"*25)
+    print(formatdict(sorted_by_energy.row(2)))
+    print("--"*25)
+    print(formatdict(element_likelihood.row(2)))
+
 Output:
 
 .. testoutput:: non-defaultcolumns
 
-	--------------------------------------------------
-	{'Peak centre': 900.0, 'Database Energy': 899.2, 'Element': 'Au', 'Transition': 'M(4f5/2->3d3/2)', 'Error': 0.8, 'Difference': 0.7999999999999545}
-	--------------------------------------------------
-	{'Peak centre': 567.0, 'Database Energy': 566.7, 'Element': 'I', 'Transition': 'M(5f->3d)', 'Error': 0.8, 'Difference': 0.2999999999999545}
-	--------------------------------------------------
-	{'Peak centre': 3.0, 'Database Energy': 3.4, 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': 0.8, 'Difference': 0.3999999999999999}
-	--------------------------------------------------
-	{'Peak centre': 306.0, 'Database Energy': 304.1, 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': 2.4000000000000004, 'Difference': 1.8999999999999773}
-	--------------------------------------------------
-	{'Element': 'Li', 'Likelihood(au)': 6}
+    --------------------------------------------------
+    {'Peak centre': '900.00', 'Database Energy': '899.20', 'Element': 'Au', 'Transition': 'M(4f5/2->3d3/2)', 'Error': '0.80', 'Difference': '0.80'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '566.70', 'Element': 'I', 'Transition': 'M(5f->3d)', 'Error': '0.80', 'Difference': '0.30'}
+    --------------------------------------------------
+    {'Peak centre': '567.00', 'Database Energy': '566.70', 'Element': 'I', 'Transition': 'M(5f->3d)', 'Error': '0.80', 'Difference': '0.30'}
+    --------------------------------------------------
+    {'Peak centre': '306.00', 'Database Energy': '304.50', 'Element': 'Tm', 'Transition': 'N(5g->4f)', 'Error': '1.60', 'Difference': '1.50'}
+    --------------------------------------------------
+    {'Element': 'In', 'Likelihood(au)': '8.00'}
 
 
 .. categories::
