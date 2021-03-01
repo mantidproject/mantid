@@ -1,5 +1,5 @@
 # This is the workflow script to calibrate VULCAN-X
-from calibrate_vulcan_cross_correlation import calibrate_vulcan, load_event_data
+from vulcan.calibration.calibrate_vulcan_cross_correlation import calibrate_vulcan, load_event_data
 from check_calibration_alignment import reduce_calibration, make_group_workspace
 from peak_position_calibration_step1 import fit_diamond_peaks, apply_peaks_positions_calibration
 from mantid.simpleapi import LoadDiffCal, SaveDiffCal, mtd, LoadNexusProcessed
