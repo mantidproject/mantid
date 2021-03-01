@@ -10,7 +10,7 @@ from mantid.simpleapi import RenameWorkspace, CopyLogs
 from Muon.GUI.Common.ADSHandler.workspace_naming import (create_fitted_workspace_name,
                                                          create_multi_domain_fitted_workspace_name,
                                                          create_parameter_table_name, get_group_or_pair_from_name,
-                                                         get_diff_asymmetry_name, get_run_number_from_workspace_name,
+                                                         get_run_number_from_workspace_name,
                                                          get_run_numbers_as_string_from_workspace_name)
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel

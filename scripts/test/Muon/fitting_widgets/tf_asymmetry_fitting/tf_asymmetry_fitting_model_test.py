@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantid.api import CompositeFunction, FrameworkManager, FunctionFactory
+from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateSampleWorkspace
 
 from Muon.GUI.Common.fitting_widgets.tf_asymmetry_fitting.tf_asymmetry_fitting_model import TFAsymmetryFittingModel
