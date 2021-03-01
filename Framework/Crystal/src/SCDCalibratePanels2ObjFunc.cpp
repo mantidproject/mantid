@@ -162,7 +162,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   msgiter << "@iter_" << n_iter << "\n"
           << "-- sum_i((qv_n - qv_0)^2) = " << diff_calc_ref << "\n"
           << "-- sum_i((qv_n - qv_target)^2) = " << diff_calc_target << "\n\n";
-  g_log.notice() << msgiter.str();
+  g_log.information() << msgiter.str();
 }
 
 // -------///

@@ -87,6 +87,14 @@ private:
   /// Private function for calibrating banks
   void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws);
 
+  /// Twiddle search for getting L1
+  double twiddle_search(Mantid::API::IPeaksWorkspace_sptr pws, double deltaL1,
+                        double threshold);
+
+  /// objective function for tweaking the source position
+  double objfunc_source(Mantid::API::IPeaksWorkspace_sptr pws, double source_z,
+                        double init_z);
+
   /// Helper function for selecting peaks based on given bank name
   Mantid::API::IPeaksWorkspace_sptr
   selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,

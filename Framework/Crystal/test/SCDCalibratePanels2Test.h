@@ -251,14 +251,14 @@ public:
    * NOTE: change the name from run_L1_Shift to test_L1_Shift to run
    *       it within the ctest framework
    */
-  void run_L1_Shift() {
+  void test_L1_Shift() {
     g_log.notice() << "test: !Source Shift (L1 change)!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";
 
     // prescribed shift
     // NOTE: the common range for dL1 is +-10cm
-    const double dL1 = boost::math::constants::e<double>() / 100;
+    const double dL1 = boost::math::constants::e<double>() / 400;
 
     // Generate unique temp files
     // Generate unique temp files
@@ -308,7 +308,7 @@ public:
    * @brief Moving (rotation and translation) single panel
    *
    */
-  void test_bank_moved() {
+  void run_bank_moved() {
     g_log.notice() << "test: !single bank moved!\n";
 
     g_log.notice() << "Tolerance of Distance (meter) :" << TOLERANCE_L << "\n";

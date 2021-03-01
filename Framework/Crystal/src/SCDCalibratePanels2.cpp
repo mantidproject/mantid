@@ -29,6 +29,8 @@
 
 #include <boost/math/special_functions/round.hpp>
 
+#include <iostream>
+
 namespace Mantid {
 namespace Crystal {
 
@@ -224,7 +226,7 @@ void SCDCalibratePanels2::exec() {
     parseLatticeConstant(m_pws);
 
     // recalculate UB and index peaks
-    updateUBMatrix(m_pws);
+    // updateUBMatrix(m_pws);
   }
 
   // remove unindexed peaks
@@ -262,7 +264,24 @@ void SCDCalibratePanels2::exec() {
 
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
-    optimizeL1(m_pws);
+    // optimizeL1(m_pws);
+    double search_step_L1 = 1e-6; // 1um search step
+    double threshold = 1e-8;      // when to stop
+    double new_L1 = twiddle_search(m_pws, search_step_L1, threshold);
+
+    g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
+
+    // g_log.notice() << "Profiling objfunc sensitivity\n";
+    // double zs[15] = {-20 - 1e0,  -20 - 1e-1, -20 - 1e-2, -20 - 1e-3, -20 -
+    // 1e-4,
+    //                  -20 - 1e-5, -20 - 1e-6, -20,        -20 + 1e-6, -20 +
+    //                  1e-5, -20 + 1e-4, -20 + 1e-3, -20 + 1e-2, -20 + 1e-1,
+    //                  -20 + 1e0};
+    // std::cout.precision(17);
+    // for (auto z : zs) {
+    //   double err = objfunc_source(m_pws, z, -20);
+    //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
+    // }
   }
 
   if (calibrateBanks) {
@@ -500,6 +519,129 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+/**
+ * @brief
+ *
+ * @param pws
+ * @param initL1
+ * @param deltaL1
+ * @param threshold
+ * @return double
+ */
+double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
+                                           double deltaL1, double threshold) {
+  // calculate the error
+  // NOTE: use the current position as the starting point
+  double init_L1 = pws->getInstrument()->getSource()->getPos().Z();
+  double L1 = init_L1;
+  double best_err = objfunc_source(pws, L1, init_L1);
+  double err;
+  int niter = 0;
+
+  g_log.notice() << "-- twiddle search\n"
+                 << "  err_0 = " << best_err << "\n";
+  while (deltaL1 > threshold) {
+    L1 += deltaL1;
+    err = objfunc_source(pws, L1, init_L1);
+
+    if (err < best_err) {
+      // There was some improvement
+      best_err = err;
+      deltaL1 *= 1.1;
+    } else {
+      // There was no improvement
+      L1 -= 2.0 * deltaL1;
+      err = objfunc_source(pws, L1, init_L1);
+
+      if (err < best_err) {
+        // There was an improvement
+        best_err = err;
+        deltaL1 *= 1.05;
+      } else {
+        L1 += deltaL1;
+        // As there was no improvement, the step size in either
+        // direction, the step size might simply be too big.
+        deltaL1 *= 0.95;
+      }
+    }
+
+    niter += 1;
+    g_log.notice() << "  L1 = " << L1 << ", err_" << niter << " = " << best_err
+                   << "\n";
+  }
+
+  return pws->getInstrument()->getSource()->getPos().Z();
+}
+
+/**
+ * @brief
+ *
+ * @param pws
+ * @param source_z
+ * @param init_z
+ * @return double
+ */
+double SCDCalibratePanels2::objfunc_source(IPeaksWorkspace_sptr pws,
+                                           double source_z, double init_z) {
+  double err = 0.0;
+  double z_shift = source_z - init_z;
+  // double regularization = z_shift * z_shift * 100;
+
+  V3D qv_target;
+  V3D qv;
+  V3D delta_qv;
+  Units::Wavelength wl;
+
+  // move the source to new location
+  IAlgorithm_sptr mv_alg =
+      createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
+  mv_alg->setLogging(LOGCHILDALG);
+  mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  mv_alg->setProperty("ComponentName",
+                      pws->getInstrument()->getSource()->getName());
+  mv_alg->setProperty("X", 0.0);
+  mv_alg->setProperty("Y", 0.0);
+  mv_alg->setProperty("Z", z_shift);
+  mv_alg->setProperty("RelativePosition", true);
+  mv_alg->executeAsChildAlg();
+
+  // calculate the error
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    // get the reference
+
+    qv_target = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv_target *= 2.0 * PI;
+
+    // get the qv with updated source position embedded
+    wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
+                  pws->getPeak(i).getScattering(), 0,
+                  pws->getPeak(i).getInitialEnergy(), 0.0);
+
+    // Force updating the detector position by set the instrument,
+    // then set the detector ID
+    pws->getPeak(i).setInstrument(pws->getInstrument());
+    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
+    pws->getPeak(i).setWavelength(wl.singleFromTOF(pws->getPeak(i).getTOF()));
+
+    V3D qv = pws->getPeak(i).getQSampleFrame();
+
+    delta_qv = qv - qv_target;
+    err += delta_qv.norm2();
+
+    // g_log.notice() << "@peak_" << i << "\n"
+    //                << "  qv_target = " << qv_target << "\n"
+    //                << "  qv        = " << qv << "\n";
+  }
+
+  err /= pws->getNumberPeaks();
+  // g_log.notice() << "sum_dqv^2 = " << err << "\n";
+  // g_log.notice() << "regularizatoin = " << regularization << "\n";
+  // err += regularization; // regularization
+
+  return err;
+}
+
 /// ---------------- ///
 /// helper functions ///
 /// ---------------- ///
@@ -549,6 +691,7 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
   findUB_alg->setProperty("alpha", m_alpha);
   findUB_alg->setProperty("beta", m_beta);
   findUB_alg->setProperty("gamma", m_gamma);
+  findUB_alg->setProperty("FixParameters", true);
   findUB_alg->setProperty("NumInitial", 15);       // all four properties
   findUB_alg->setProperty("Tolerance", 0.15);      // are using their default
   findUB_alg->setProperty("FixParameters", false); // values
