@@ -185,6 +185,7 @@ set(TEST_FILES
     PeakTest.h
     LeanElasticPeakTest.h
     PeaksWorkspaceTest.h
+    LeanPeaksWorkspaceTest.h
     RebinnedOutputTest.h
     RefAxisTest.h
     ReflectometryTransformTest.h
