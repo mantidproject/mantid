@@ -6,11 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 import mantid  # noqa
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, MaskFile, SetDetectorOffsets, Gravity,
                                                          AssignSample, AssignCan, WavRangeReduction,
                                                          UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2DTest_TOML(systemtesting.MantidSystemTest):
 
     def runTest(self):

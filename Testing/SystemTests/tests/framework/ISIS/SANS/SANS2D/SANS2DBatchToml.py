@@ -8,12 +8,15 @@
 import os.path
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config, FileFinder
 from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector,
                                                          MaskFile, Gravity, BatchReduce, UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatchTest_TOML(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()

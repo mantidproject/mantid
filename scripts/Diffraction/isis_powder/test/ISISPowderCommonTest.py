@@ -392,14 +392,14 @@ class ISISPowderCommonTest(unittest.TestCase):
                                           Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
         new_bin_width = 0.5
         # Originally had bins at 1 unit each. So binning of 0.5 should give us 2n bins back
-        original_number_bins = ws.getNumberBins()
+        original_number_bins = ws.blocksize()
         original_first_x_val = ws.readX(0)[0]
         original_last_x_val = ws.readX(0)[-1]
 
         expected_bins = original_number_bins * 2
 
         ws = common.rebin_workspace(workspace=ws, new_bin_width=new_bin_width)
-        self.assertEqual(ws.getNumberBins(), expected_bins)
+        self.assertEqual(ws.blocksize(), expected_bins)
 
         # Check bin boundaries were preserved
         self.assertEqual(ws.readX(0)[0], original_first_x_val)
@@ -413,7 +413,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Originally we had 10 bins from 0, 10. Resize from 0, 0.5, 5 so we should have the same number of output
         # bins with different boundaries
         new_bin_width = 0.5
-        original_number_bins = ws.getNumberBins()
+        original_number_bins = ws.blocksize()
 
         expected_start_x = 1
         expected_end_x = 6
@@ -422,7 +422,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                                     start_x=expected_start_x, end_x=expected_end_x)
 
         # Check number of bins is the same as we halved the bin width and interval so we should have n bins
-        self.assertEqual(ws.getNumberBins(), original_number_bins)
+        self.assertEqual(ws.blocksize(), original_number_bins)
 
         # Check bin boundaries were changed
         self.assertEqual(ws.readX(0)[0], expected_start_x)

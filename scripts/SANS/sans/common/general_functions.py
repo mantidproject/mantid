@@ -499,12 +499,11 @@ class EventSliceParser(object):
             return False
 
         split_line = stripped_line.split(',')
-        for character in split_line:
-            if len(character) > 1 or len(character) == 0:
-                # We likely have something like 1,2- or 1,
+        for val in split_line:
+            try:
+                float(val)
+            except ValueError:
                 return False
-            elif not character.isdigit():
-                raise ValueError("The character {0} is not a digit.".format(character))
 
         # Forward on result
         self.user_input = split_line

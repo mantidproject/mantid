@@ -15,16 +15,9 @@ add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
 add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
-add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
 set(TEST_FILES
-    test/ALCBaselineModellingModelTest.h
-    test/ALCBaselineModellingPresenterTest.h
-    test/ALCDataLoadingPresenterTest.h
-    test/ALCLatestFileFinderTest.h
-    test/ALCPeakFittingModelTest.h
-    test/ALCPeakFittingPresenterTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h

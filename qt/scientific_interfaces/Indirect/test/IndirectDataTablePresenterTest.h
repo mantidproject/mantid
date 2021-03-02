@@ -55,7 +55,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IIndirectFitData {
+class MockIndirectDataTableModel : public IIndirectFitDataModel {
 public:
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
   MOCK_CONST_METHOD1(
@@ -110,6 +110,8 @@ public:
                     IDA::WorkspaceIndex spectrum));
   MOCK_METHOD2(setResolution,
                void(const std::string &name, TableDatasetIndex index));
+  MOCK_METHOD2(setExcludeRegion,
+               void(const std::string &exclude, FitDomainIndex index));
 
   MOCK_CONST_METHOD1(getWorkspace,
                      Mantid::API::MatrixWorkspace_sptr(FitDomainIndex index));

@@ -1,31 +1,30 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,attribute-defined-outside-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from mantid.simpleapi import *
+from mantid.simpleapi import mtd, RenameWorkspace, FileFinder
 import ISISCommandInterface as i
-
-MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
-BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMinimalBatchReductionSliced(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionSliced, self).__init__()
-        config['default.instrument']='SANS2D'
 
     def runTest(self):
         import SANSBatchMode as batch
         i.SANS2D()
-        i.MaskFile(MASKFILE)
+        i.MaskFile('MaskSANS2DReductionGUI.txt')
         i.SetEventSlices("0.0-451, 5-10")
-        batch.BatchReduce(BATCHFILE, '.nxs',saveAlgs={}, combineDet='rear')
+        batch_file = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+        batch.BatchReduce(batch_file, '.nxs',saveAlgs={}, combineDet='rear')
 
     def validate(self):
         self.tolerance = 0.02
@@ -37,7 +36,7 @@ class SANS2DMinimalBatchReductionSliced(systemtesting.MantidSystemTest):
 class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
     def runTest(self):
         i.SANS2D()
-        i.MaskFile(MASKFILE)
+        i.MaskFile('MaskSANS2DReductionGUI.txt')
         i.AssignSample('22048')
         i.AssignCan('22023')
         i.TransmissionSample('22041','22024')

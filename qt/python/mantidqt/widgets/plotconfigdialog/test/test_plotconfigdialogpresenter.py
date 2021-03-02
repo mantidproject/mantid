@@ -183,6 +183,25 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
             call.mock_axes_presenter.update_view
         ])
 
+    def test_forget_tab_from_presenter_sets_presenter_and_view_to_none(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        ax.plot([0], [0])
+        ax.legend()
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+
+        mock_curves_presenter = presenter.tab_widget_presenters[2]
+        mock_curves_view = mock_curves_presenter.view
+
+        self.assertTrue(mock_curves_presenter in presenter.tab_widget_presenters)
+        self.assertTrue((mock_curves_view, 'Curves') in presenter.tab_widget_views)
+
+        presenter.forget_tab_from_presenter(mock_curves_presenter)
+
+        self.assertTrue(mock_curves_presenter not in presenter.tab_widget_presenters)
+        self.assertTrue((mock_curves_view, 'Curves') not in presenter.tab_widget_views)
+
 
 if __name__ == '__main__':
     unittest.main()

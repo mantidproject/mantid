@@ -1,4 +1,5 @@
 set(RUNS_SRC_FILES
+    SearchCriteria.cpp
     RunsPresenter.cpp
     QtRunsView.cpp
     CatalogRunNotifier.cpp
@@ -16,6 +17,7 @@ set(RUNS_INC_FILES
     RunsPresenterFactory.h
     QtRunsView.h
     IRunNotifier.h
+    SearchCriteria.h
     ISearcher.h
     CatalogRunNotifier.h
     QtCatalogSearcher.h

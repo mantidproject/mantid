@@ -69,13 +69,11 @@ public:
     verifyAndClear();
   }
 
-  void testMainWindowPresenterSubscribesToOptionsDialogPresenter() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    EXPECT_CALL(*optionsDialogPresenterRaw, subscribe(_)).Times(1);
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
-    verifyAndClear(optionsDialogPresenterRaw);
+  void testMainWindowPresenterSubscribesToOptionsPresenter() {
+    auto optionsPresenter = makeOptionsPresenter();
+    EXPECT_CALL(*m_optionsPresenter, subscribe(_)).Times(1);
+    auto presenter = makePresenter(std::move(optionsPresenter));
+    verifyAndClear();
   }
 
   void testConstructorAddsBatchPresenterForAllBatchViews() {
@@ -163,63 +161,48 @@ public:
   }
 
   void testWarningGivenIfRemoveUnsavedBatchOptionChecked() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 0;
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testNoWarningGivenIfRemoveUnsavedBatchOptionUnchecked() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 0;
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, false);
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved()).Times(0);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectBatchSaved(batchIndex);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testNoWarningIfRemoveSavedBatchOptionChecked() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 0;
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
-  void testNoWarningIfRemoveSavedBatchOptionUnhecked() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+  void testNoWarningIfRemoveSavedBatchOptionUnchecked() {
+    auto presenter = makePresenter();
     auto const batchIndex = 0;
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, false);
-    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved()).Times(0);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectBatchSaved(batchIndex);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testReductionResumedNotifiesAllBatchPresenters() {
@@ -239,13 +222,10 @@ public:
   }
 
   void testShowOptionsOpensDialog() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    EXPECT_CALL(*optionsDialogPresenterRaw, showView()).Times(AtLeast(1));
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_optionsPresenter, showView()).Times(AtLeast(1));
     presenter.notifyShowOptionsRequested();
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testShowSlitCalculatorSetsInstrument() {
@@ -346,6 +326,32 @@ public:
     verifyAndClear();
   }
 
+  void testChangeInstrumentUpdatesInstrumentInSlitCalculator() {
+    auto presenter = makePresenter();
+    setupInstrument(presenter, "INTER");
+    auto const instrument = std::string("POLREF");
+    expectSlitCalculatorInstrumentUpdated(instrument);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void
+  testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentNotUpdated();
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotUpdateInstrumentInSlitCalculator() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentNotUpdated();
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
   void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
@@ -353,14 +359,6 @@ public:
         .Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
         .Times(0);
-    presenter.notifyUpdateInstrumentRequested();
-    verifyAndClear();
-  }
-
-  void testUpdateInstrumentUpdatesInstrumentInSlitCalculator() {
-    auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
-    expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
@@ -416,44 +414,32 @@ public:
   }
 
   void testWarningGivenIfLoadBatchOverUnsavedBatch() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 1;
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testNoWarningGivenIfLoadBatchOverSavedBatch() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 1;
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testLoadBatchDiscardChanges() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(true));
+    expectUserDiscardsChanges();
     EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
         .Times(1)
         .WillOnce(Return(filename));
@@ -462,50 +448,40 @@ public:
         .WillOnce(Return(map));
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testWarningGivenCloseGUIWithUnsavedChanges() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
     auto const batchIndex = 1;
-    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.isCloseEventPrevented();
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testBatchPresentersNotifySetRoundPrecisionOnOptionsChanged() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    auto presenter = makePresenter();
     auto prec = 2;
-    ON_CALL(*optionsDialogPresenter,
-            getIntOption(std::string("RoundPrecision")))
+    ON_CALL(*m_optionsPresenter, getIntOption(std::string("RoundPrecision")))
         .WillByDefault(ReturnRef(prec));
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
-    expectRoundChecked(optionsDialogPresenterRaw, true);
+    expectRoundChecked(true);
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
     }
     presenter.notifyOptionsChanged();
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
   void testBatchPresentersNotifyResetRoundPrecisionOnOptionsChanged() {
-    auto optionsDialogPresenter =
-        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
-    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
-    expectRoundChecked(optionsDialogPresenterRaw, false);
-    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto presenter = makePresenter();
+    expectRoundChecked(false);
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifyResetRoundPrecision());
     }
     presenter.notifyOptionsChanged();
-    verifyAndClear(optionsDialogPresenterRaw);
+    verifyAndClear();
   }
 
 private:
@@ -537,10 +513,19 @@ private:
                               std::move(makeBatchPresenter)) {}
   };
 
+  // Create an OptionsDialogPresenter and cache the raw pointer to it in
+  // m_optionsPresenter
+  std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> makeOptionsPresenter() {
+    auto optionsPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    m_optionsPresenter = optionsPresenter.get();
+    return optionsPresenter;
+  }
+
   MainWindowPresenterFriend makePresenter(
-      std::unique_ptr<NiceMock<MockOptionsDialogPresenter>>
-          optionsDialogPresenter =
-              std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
+      std::unique_ptr<NiceMock<MockOptionsDialogPresenter>> optionsPresenter =
+          std::make_unique<NiceMock<MockOptionsDialogPresenter>>()) {
+    m_optionsPresenter = optionsPresenter.get();
     auto encoder = std::make_unique<NiceMock<MockEncoder>>();
     m_encoder = encoder.get();
     auto decoder = std::make_unique<NiceMock<MockDecoder>>();
@@ -562,18 +547,18 @@ private:
     auto presenter = MainWindowPresenterFriend(
         &m_view, &m_messageHandler, &m_fileHandler, std::move(encoder),
         std::move(decoder), std::move(slitCalculator),
-        std::move(optionsDialogPresenter), std::move(makeBatchPresenter));
+        std::move(optionsPresenter), std::move(makeBatchPresenter));
     return presenter;
   }
 
-  void verifyAndClear(
-      NiceMock<MockOptionsDialogPresenter> *optionsDialogPresenter = nullptr) {
+  void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(optionsDialogPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_optionsPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_encoder));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_decoder));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_slitCalculator));
     for (auto batchPresenter : m_batchPresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(batchPresenter));
     m_batchPresenters.clear();
@@ -664,18 +649,15 @@ private:
         .Times(1);
   }
 
-  void
-  expectWarnDiscardChanges(MockOptionsDialogPresenter *optionsDialogPresenter,
-                           bool setting) {
-    EXPECT_CALL(*optionsDialogPresenter,
+  void expectWarnDiscardChanges(bool setting) {
+    EXPECT_CALL(*m_optionsPresenter,
                 getBoolOption(std::string("WarnDiscardChanges")))
         .Times(1)
         .WillOnce(Return(setting));
   }
 
-  void expectRoundChecked(MockOptionsDialogPresenter *optionsDialogPresenter,
-                          bool setting) {
-    EXPECT_CALL(*optionsDialogPresenter, getBoolOption(std::string("Round")))
+  void expectRoundChecked(bool setting) {
+    EXPECT_CALL(*m_optionsPresenter, getBoolOption(std::string("Round")))
         .Times(AtLeast(1))
         .WillRepeatedly(Return(setting));
   }
@@ -684,6 +666,11 @@ private:
     EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
         .Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
+  }
+
+  void expectSlitCalculatorInstrumentNotUpdated() {
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(_)).Times(0);
+    EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(0);
   }
 
   void expectBatchIsSavedToFile(int batchIndex) {
@@ -710,6 +697,30 @@ private:
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
   }
 
+  void expectAskDiscardChanges() {
+    EXPECT_CALL(
+        m_messageHandler,
+        askUserOkCancel("This will cause unsaved changes to be lost. Continue?",
+                        "Discard changes?"))
+        .Times(1);
+  }
+
+  void expectDoNotAskDiscardChanges() {
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(0);
+  }
+
+  void expectUserDiscardsChanges() {
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
+        .Times(1)
+        .WillOnce(Return(true));
+  }
+
+  void expectUserDoesNotDiscardChanges() {
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
+        .Times(1)
+        .WillOnce(Return(false));
+  }
+
   void assertFirstBatchWasRemovedFromModel(
       MainWindowPresenterFriend const &presenter) {
     TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(), 1);
@@ -732,4 +743,5 @@ private:
 private:
   std::string backup_facility;
   std::string backup_instrument;
+  NiceMock<MockOptionsDialogPresenter> *m_optionsPresenter;
 };

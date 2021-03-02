@@ -111,7 +111,13 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
 
+void WorkspaceTreeWidgetSimple::setOverplotDisabled(bool disabled) {
+  m_overplotSpectrum->setDisabled(disabled);
+  m_overplotSpectrumWithErrs->setDisabled(disabled);
+}
+
 void WorkspaceTreeWidgetSimple::popupContextMenu() {
+  emit contextMenuAboutToShow();
   QTreeWidgetItem *treeItem = m_tree->itemAt(m_menuPosition);
   selectedWsName = "";
   if (treeItem)

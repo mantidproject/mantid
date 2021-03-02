@@ -349,6 +349,7 @@ public slots:
   void executeSetupManageMenu(const QString & /*item*/);
   void workspaceDoubleClicked(QListWidgetItem *item);
   void executeCustomSetupRemove(const QString &name);
+  void executeClearCustomSetups();
 
 signals:
   void currentChanged() const;

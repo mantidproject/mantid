@@ -504,6 +504,12 @@ void QENSFitSequential::init() {
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
 
+  declareProperty(
+      std::make_unique<ArrayProperty<std::string>>("ExcludeMultiple", ""),
+      "A list of Exclusion ranges, defining the regions to "
+      "exclude from the fit for each spectra. Must have the "
+      "same number of sets as the number of the spectra.");
+
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
 
@@ -812,6 +818,8 @@ void QENSFitSequential::renameGroupWorkspace(
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
                                                    const std::string &output) {
   const std::vector<double> exclude = getProperty("Exclude");
+  const std::vector<std::string> excludeMultiple =
+      getProperty("ExcludeMultiple");
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
@@ -827,6 +835,7 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("Exclude", exclude);
+  plotPeaks->setProperty("ExcludeMultiple", excludeMultiple);
   plotPeaks->setProperty("IgnoreInvalidData", ignoreInvalidData);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);

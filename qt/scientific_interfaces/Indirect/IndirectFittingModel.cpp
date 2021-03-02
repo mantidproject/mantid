@@ -138,7 +138,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
 }
 
 void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
-                                   const IIndirectFitData *fittingData) {
+                                   const IIndirectFitDataModel *fittingData) {
   for (auto index = FitDomainIndex{0};
        index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix =
@@ -208,7 +208,7 @@ std::ostringstream &addInputString(const std::string &workspaceName,
         "Workspace name is empty. The sample workspace may not be loaded.");
 }
 
-std::string constructInputString(const IIndirectFitData *fittingData) {
+std::string constructInputString(const IIndirectFitDataModel *fittingData) {
   std::ostringstream input;
   for (auto index = FitDomainIndex{0};
        index < fittingData->getNumberOfDomains(); index++) {
@@ -688,11 +688,17 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("StartX", startX.str());
   fitAlgorithm->setProperty("EndX", endX.str());
 
-  auto excludeRegion =
-      m_fitDataModel->getExcludeRegionVector(FitDomainIndex{0});
-  if (!excludeRegion.empty()) {
-    fitAlgorithm->setProperty("Exclude", excludeRegion);
+  std::vector<std::string> excludeRegions;
+  excludeRegions.reserve(m_fitDataModel->getNumberOfDomains());
+  for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
+    if (!m_fitDataModel->getExcludeRegionVector(FitDomainIndex{i}).empty()) {
+      excludeRegions.emplace_back(
+          m_fitDataModel->getExcludeRegion(FitDomainIndex{i}));
+    } else {
+      excludeRegions.emplace_back("");
+    }
   }
+  fitAlgorithm->setProperty("ExcludeMultiple", excludeRegions);
 
   return fitAlgorithm;
 }

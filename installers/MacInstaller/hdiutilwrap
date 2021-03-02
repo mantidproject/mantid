@@ -1,0 +1,35 @@
+#!/bin/bash
+# Wraps hdiutil and retries the detach command if it fails
+# See https://gitlab.kitware.com/cmake/cmake/-/issues/19517
+# It is assumed to be called in the place of the standard
+# hdiutil command and forwards all arguments to the base
+# command.
+HDIUTIL=$(which hdiutil)
+
+# Run a command and try up to a maximum number
+# of times before exiting.
+# Parameters:
+#   1) ntries
+#   2) wait_seconds
+#   3+) remaining arguments executed as command+arguments
+function retry() {
+    local ntries=$1
+    local wait_seconds=$2
+    local counter=0
+    while [ $counter -lt $ntries ]; do
+      ${@:3}
+      retcode=$?
+      if [ $retcode -eq 0 ]; then
+        break
+      fi
+      let counter+=1
+      sleep $wait_seconds
+    done
+    exit $retcode
+}
+
+if [ "$1" != "detach" ]; then
+    $HDIUTIL "$@"
+else
+    retry 5 60 $HDIUTIL "$@"
+fi

@@ -26,14 +26,16 @@ class GroupingTabPresenter(object):
 
     def __init__(self, view, model,
                  grouping_table_widget=None,
-                 pairing_table_widget=None):
+                 pairing_table_widget=None,
+                 diff_table = None):
         self._view = view
         self._model = model
 
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
+        self.diff_table = diff_table
 
-        self._view.set_description_text(self.text_for_description())
+        self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
@@ -47,6 +49,7 @@ class GroupingTabPresenter(object):
         # notifiers
         self.groupingNotifier = GroupingTabPresenter.GroupingNotifier(self)
         self.grouping_table_widget.on_data_changed(self.group_table_changed)
+        self.diff_table.on_data_changed(self.diff_table_changed)
         self.pairing_table_widget.on_data_changed(self.pair_table_changed)
         self.enable_editing_notifier = GroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = GroupingTabPresenter.DisableEditingNotifier(self)
@@ -66,6 +69,7 @@ class GroupingTabPresenter(object):
 
     def update_view_from_model(self):
         self.grouping_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
     def show(self):
@@ -78,14 +82,19 @@ class GroupingTabPresenter(object):
         instrument = self._model.instrument
         n_detectors = self._model.num_detectors
         main_field = self._model.main_field_direction
-        text = "{} , {} detectors, main field : {} to muon polarization".format(
-            instrument, n_detectors, main_field)
+        text = "{}, {} detectors".format(
+            instrument, n_detectors)
+        if main_field:
+            text += ", main field : {} to muon polarization".format(main_field)
         return text
 
     def update_description_text(self, description_text=''):
         if not description_text:
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
+
+    def update_description_text_to_empty(self):
+        self._view.set_description_text('')
 
     def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
 
@@ -133,7 +142,7 @@ class GroupingTabPresenter(object):
         if filename == '':
             return
 
-        groups, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+        groups, pairs, diffs, description, default = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
         for group in groups:
@@ -148,6 +157,14 @@ class GroupingTabPresenter(object):
                     self._model.add_pair(pair)
             except ValueError as error:
                 self._view.display_warning_box(str(error))
+        for diff in diffs:
+            try:
+                if diff.forward_group in self._model.group_names and diff.backward_group in self._model.group_names:
+                    self._model.add_diff(diff)
+                elif diff.forward_group in self._model.pair_names and diff.backward_group in self._model.pair_names:
+                    self._model.add_diff(diff)
+            except ValueError as error:
+                self._view.display_warning_box(str(error))
         # Sets the default from file if it exists, if not selected groups/pairs are set on the logic
         # Select all pairs if there are any pairs otherwise select all groups.
         if default:
@@ -157,6 +174,7 @@ class GroupingTabPresenter(object):
                 self._model.add_pair_to_analysis(default)
 
         self.grouping_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
         self._model._context.group_pair_context.selected = default
@@ -168,23 +186,27 @@ class GroupingTabPresenter(object):
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
+        self.diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
         self.disable_editing_notifier.notify_subscribers()
 
     def enable_editing(self, result=None):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
+        self.diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
         self.enable_editing_notifier.notify_subscribers()
 
     def disable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
+        self.diff_table.disable_editing()
         self.pairing_table_widget.disable_editing()
 
     def enable_editing_without_notifying_subscribers(self):
         self._view.set_buttons_enabled(True)
         self.grouping_table_widget.enable_editing()
+        self.diff_table.enable_editing()
         self.pairing_table_widget.enable_editing()
 
     def calculate_all_data(self):
@@ -213,6 +235,7 @@ class GroupingTabPresenter(object):
             return
         self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
         self.groupingNotifier.notify_subscribers()
@@ -222,8 +245,9 @@ class GroupingTabPresenter(object):
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
-        self.update_description_text()
+        self.update_description_text_to_empty()
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
@@ -238,7 +262,7 @@ class GroupingTabPresenter(object):
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename,
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, self._model.diffs, filename,
                                            description=self._view.get_description_text())
 
     def create_update_thread(self):
@@ -247,7 +271,7 @@ class GroupingTabPresenter(object):
 
     def plot_default_groups_or_pairs(self):
         # if we have no pairs or groups selected, generate a default plot
-        if len(self._model.selected_pairs + self._model.selected_groups) == 0:
+        if len(self._model.selected_groups_and_pairs) == 0:
             if len(self._model.pairs) > 0:  # if we have pairs - then plot all pairs
                 self.pairing_table_widget.plot_default_case()
             else:  # else plot groups
@@ -259,10 +283,17 @@ class GroupingTabPresenter(object):
 
     def group_table_changed(self):
         self.pairing_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
         self.handle_update_all_clicked()
 
     def pair_table_changed(self):
         self.grouping_table_widget.update_view_from_model()
+        self.diff_table.update_view_from_model()
+        self.handle_update_all_clicked()
+
+    def diff_table_changed(self):
+        self.grouping_table_widget.update_view_from_model()
+        self.pairing_table_widget.update_view_from_model()
         self.handle_update_all_clicked()
 
     class LoadObserver(Observer):

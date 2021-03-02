@@ -239,15 +239,8 @@ IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) {
 
 void export_IPeaksWorkspaceIterator() {
   class_<IPeaksWorkspaceIterator>("IPeaksWorkspaceIterator", no_init)
-      .def(
-#if PY_VERSION_HEX >= 0x03000000
-          "__next__"
-#else
-          "next"
-#endif
-          ,
-          &IPeaksWorkspaceIterator::next,
-          return_value_policy<reference_existing_object>())
+      .def("__next__", &IPeaksWorkspaceIterator::next,
+           return_value_policy<reference_existing_object>())
       .def("__iter__", objects::identity_function());
 }
 

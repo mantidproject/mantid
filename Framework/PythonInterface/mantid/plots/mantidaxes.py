@@ -211,6 +211,15 @@ class MantidAxes(Axes):
                         return ads.retrieve(ws_name), ws_artists.spec_num
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
+    def get_artists_workspace_and_workspace_index(self, artist):
+        """Retrieve the workspace and spec num of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ads.retrieve(ws_name), ws_artists.workspace_index
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
+
     def get_artists_sample_log_plot_details(self, artist):
         """Retrieve the sample log plot details of the given artist"""
         for ws_name, ws_artists_list in self.tracked_workspaces.items():
@@ -648,7 +657,7 @@ class MantidAxes(Axes):
 
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.plot(self, normalize_by_bin_width = is_normalized,
+                                                     axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
                                                                         *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs),

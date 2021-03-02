@@ -120,7 +120,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         # NOTE:
         # still needs to check physics
         pd_out_multi = WANDPowderReduction(
-            InputWorkspace=[data, data], Target="Theta", NumberBins=1000
+            InputWorkspace=[data, data], Target="Theta", NumberBins=1000,
+            Sum=True,
         )
 
         x = pd_out_multi.extractX()
@@ -161,6 +162,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NumberBins=2000,
             XMin=10,
             XMax=40,
+            Sum=True,
         )
 
         x = pd_out2_multi.extractX()
@@ -201,6 +203,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="Time",
+            Sum=True
         )
 
         x = pd_out3_multi.extractX()
@@ -238,6 +241,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="ElasticDSpacing",
             EFixed=30,
             NumberBins=1000,
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()
@@ -279,6 +283,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             EFixed=30,
             NumberBins=2000,
             MaskAngle=60,
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()
@@ -318,6 +323,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="Time",
+            Sum=True
         )
 
         x = pd_out4_multi.extractX()

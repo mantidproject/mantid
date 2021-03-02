@@ -26,6 +26,7 @@ set(TEST_PY_FILES
     MemoryStatsTest.py
     NullValidatorTest.py
     OptionalBoolTest.py
+    PhysicalConstantsTest.py
     ProgressBaseTest.py
     PropertyHistoryTest.py
     PropertyWithValueTest.py

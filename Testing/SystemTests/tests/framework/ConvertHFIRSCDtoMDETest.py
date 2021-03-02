@@ -15,6 +15,7 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertHFIRSCDtoMDETest_data')
+        SetGoniometer('ConvertHFIRSCDtoMDETest_data', Axis0='s1,0,1,0,1', Average=False)
 
         ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDETest_data', Wavelength=1.488)
 
@@ -30,7 +31,7 @@ class ConvertHFIRSCDtoMDETest(systemtesting.MantidSystemTest):
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         peak = ConvertHFIRSCDtoMDETest_peaks.getPeak(13)
-        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.001306865, 1.918834], rtol=1e-05)
+        np.testing.assert_allclose(peak.getQSampleFrame(), [6.754011, 0.003572579, 1.918834], rtol=1e-05)
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
 
@@ -44,7 +45,8 @@ class ConvertHFIRSCDtoMDE_HB3A_Test(systemtesting.MantidSystemTest):
         SetGoniometer('ConvertHFIRSCDtoMDE_HB3ATest_data',
                       Axis0='omega,0,1,0,-1',
                       Axis1='chi,0,0,1,-1',
-                      Axis2='phi,0,1,0,-1')
+                      Axis2='phi,0,1,0,-1',
+                      Average=False)
 
         ConvertHFIRSCDtoMDETest_Q = ConvertHFIRSCDtoMDE(InputWorkspace='ConvertHFIRSCDtoMDE_HB3ATest_data',
                                                         Wavelength=1.008)

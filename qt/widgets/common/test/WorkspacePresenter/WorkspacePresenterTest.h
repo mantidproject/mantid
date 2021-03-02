@@ -606,12 +606,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testShowVatesGUI() {
-    EXPECT_CALL(*mockView.get(), showVatesGUI()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void testShowMDPlot() {
     EXPECT_CALL(*mockView.get(), showMDPlot()).Times(Exactly(1));
     presenter->notifyFromView(ViewNotifiable::Flag::ShowMDPlot);

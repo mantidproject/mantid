@@ -27,10 +27,11 @@ public:
   MOCK_METHOD0(isCloseEventPrevented, bool());
   MOCK_CONST_METHOD1(isCloseBatchPrevented, bool(int));
   MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(int));
+  MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(IBatchPresenter const *));
   MOCK_CONST_METHOD0(isProcessAllPrevented, bool());
   MOCK_CONST_METHOD0(isProcessPartialGroupPrevented, bool());
   MOCK_CONST_METHOD1(isBatchUnsaved, bool(int));
-  MOCK_METHOD0(isAnyBatchUnsaved, bool());
+  MOCK_CONST_METHOD0(isAnyBatchUnsaved, bool());
   MOCK_CONST_METHOD0(notifyOptionsChanged, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
@@ -40,6 +41,7 @@ public:
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
+  MOCK_CONST_METHOD1(discardChanges, bool(std::string const &));
 
   ~MockMainWindowPresenter() override{};
 };

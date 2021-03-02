@@ -14,8 +14,11 @@ class LoadCIFDataWithTwoSectionsTest(systemtesting.MantidSystemTest):
     Tests that the LoadCIF algorithm embedded in the PointCharge class will load cif data which contains two sections,
     and calculates the correct parameters from this data.
     """
-    expected_parameter_values = [-1.004456, -0.488169, 0.579923, 0.000888, -0.001776, 0.000195, 0.001026, 0.000512,
-                                 -5.418847e-7, -4.066401e-7, -1.459750e-7, 2.347822e-7, -3.138693e-7, -1.384160e-6]
+    expected_parameter_values = [
+        -1.324107e+00, -4.179778e-01, 7.644744e-01, 8.222560e-04, -1.914738e-03, 1.713388e-04,
+        1.105470e-03, 4.747298e-04, -3.211547e-07, -4.522218e-07, -1.456358e-07, 2.610988e-07,
+        -1.854308e-07, -1.315970e-06
+    ]
 
     def __init__(self):
         super(LoadCIFDataWithTwoSectionsTest, self).__init__()
@@ -32,4 +35,6 @@ class LoadCIFDataWithTwoSectionsTest(systemtesting.MantidSystemTest):
         cif_pc_model.Neighbour = 4
         cif_blm = cif_pc_model.calculate()
 
-        np.testing.assert_allclose(list(cif_blm.values()), self.expected_parameter_values, atol=0.00001)
+        np.testing.assert_allclose(list(cif_blm.values()),
+                                   self.expected_parameter_values,
+                                   atol=0.00001)

@@ -31,6 +31,7 @@ set(PYTHON_PLUGINS
     algorithms/ConjoinFiles.py
     algorithms/ConjoinSpectra.py
     algorithms/ConvertSnsRoiFileToMask.py
+    algorithms/ConvertQtoHKLMDHisto.py
     algorithms/ConvertWANDSCDtoQ.py
     algorithms/CorrectLogTimes.py
     algorithms/CorrectTOF.py
@@ -79,6 +80,7 @@ set(PYTHON_PLUGINS
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
     algorithms/HB3AIntegratePeaks.py
+    algorithms/HB3APredictPeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -142,6 +144,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
+    algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
@@ -153,6 +156,7 @@ set(PYTHON_PLUGINS
     algorithms/SNSPowderReduction.py
     algorithms/SaveGEMMAUDParamFile.py
     algorithms/SaveGSSCW.py
+    algorithms/SaveHKLCW.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -192,6 +196,8 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
+    algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
+    algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
@@ -244,6 +250,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/PoldiDataAnalysis.py
+    algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
     algorithms/WorkflowAlgorithms/PowderILLDetectorScan.py
     algorithms/WorkflowAlgorithms/PowderILLEfficiency.py
     algorithms/WorkflowAlgorithms/PowderILLParameterScan.py
@@ -354,6 +361,7 @@ set(PYTHON_PLUGINS
     functions/ZFprotonDipole.py
     functions/Examples/Example1DFunction.py
     functions/Examples/ExamplePeakFunction.py
+
 )
 
 # Generate an absolute path for each relative one.

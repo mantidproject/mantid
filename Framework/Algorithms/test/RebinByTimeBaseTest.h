@@ -102,6 +102,8 @@ public:
   MOCK_CONST_METHOD0(clearMRU, void());
   MOCK_CONST_METHOD0(isRaggedWorkspace, bool());
   MOCK_CONST_METHOD0(blocksize, std::size_t());
+  MOCK_CONST_METHOD1(getNumberBins, std::size_t(const std::size_t &));
+  MOCK_CONST_METHOD0(getMaxNumberBins, std::size_t());
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
   MOCK_METHOD1(getSpectrum, Mantid::API::IEventList &(const std::size_t));

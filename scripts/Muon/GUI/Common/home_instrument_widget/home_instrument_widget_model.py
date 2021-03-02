@@ -63,10 +63,16 @@ class InstrumentWidgetModel(object):
             first_good_data = self._context.gui_context["FirstGoodData"]
         return first_good_data
 
-    def get_last_good_data(self):
+    def get_file_last_good_data(self):
         if self._data.current_runs:
             run = self._data.current_runs[0]
             return self._context.last_good_data(run)
+        else:
+            return 0.0
+
+    def get_last_good_data(self):
+        if "LastGoodData" in self._context.gui_context.keys():
+            return self._context.gui_context["LastGoodData"]
         else:
             return 0.0
 

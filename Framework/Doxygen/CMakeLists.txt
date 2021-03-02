@@ -89,4 +89,5 @@ if(DOXYGEN_FOUND)
       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
       ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
       ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html)
+
 endif(DOXYGEN_FOUND)

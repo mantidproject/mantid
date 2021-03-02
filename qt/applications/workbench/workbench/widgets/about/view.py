@@ -10,6 +10,7 @@ from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QPixmap, QIcon, QGuiApplication, QPainter
 from qtpy.QtWidgets import QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QLabel, QDialog, \
     QGroupBox, QFormLayout, QComboBox, QPushButton, QCheckBox
+from mantidqt.widgets import instrumentselector
 
 REFERENCE_HEIGHT = 642
 REFERENCE_WIDTH = 745
@@ -30,7 +31,7 @@ class AboutView(QDialog):
         self.clb_python_in_mantid = QCommandLinkButton()
         self.clb_extending_mantid = QCommandLinkButton()
         self.cb_facility = QComboBox()
-        self.cb_instrument = QComboBox()
+        self.cb_instrument = instrumentselector.InstrumentSelector()
         self.pb_manage_user_directories = QPushButton()
         self.chk_allow_usage_data = QCheckBox()
         self.lbl_privacy_policy = QLabel()

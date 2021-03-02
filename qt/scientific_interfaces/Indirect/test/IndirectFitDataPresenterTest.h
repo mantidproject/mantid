@@ -12,6 +12,7 @@
 #include "IIndirectFitDataView.h"
 #include "IndirectDataTablePresenter.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"

@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import config, mtd, CloneWorkspace, D7YIGPositionCalibration, Load, LoadILLPolarizedDiffraction
+from mantid.simpleapi import config, mtd, CloneWorkspace, D7YIGPositionCalibration, Load
 from mantid.api import ITableWorkspace, WorkspaceGroup
 import os.path
 from os import path
 import tempfile
+
 
 class D7YIGPositionCalibrationTest(unittest.TestCase):
 
@@ -46,7 +47,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         output_filename = os.path.join(tempfile.gettempdir(), 'test_shortWavelength.xml')
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=output_filename,
-                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[3, 3, -1],
                                  FitOutputWorkspace='test_shortWavelength', FittingMethod='Individual')
         self.assertTrue(path.exists(output_filename))
         self.assertTrue(mtd['test_shortWavelength'])
@@ -63,17 +64,18 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         wavelength = float(mtd[fitTableName].column(1)[1])
         self.assertAlmostEqual(wavelength, 1.0,  delta=5e-2) # +/- 5 %
         bank2_slope = 1.0 / float(mtd[fitTableName].column(1)[0])
-        self.assertAlmostEqual(bank2_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank2_slope, 1.0, delta=2e-2) # +/- 2 %
         bank3_slope = 1.0 / float(mtd[fitTableName].column(1)[4*pixels_per_bank])
-        self.assertAlmostEqual(bank3_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank3_slope, 1.0, delta=2e-2) # +/- 2%
         bank4_slope = 1.0 / float(mtd[fitTableName].column(1)[8*pixels_per_bank])
-        self.assertAlmostEqual(bank4_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank4_slope, 1.0, delta=2e-2) # +/- 2 %
 
         for row_no in range(mtd[fitTableName].rowCount()):
             row_data = mtd[fitTableName].row(row_no)
             if '.offset' in row_data['Name']:
                 offset = row_data['Value']
                 self.assertAlmostEqual(offset, 0.0, delta=24.0) # +- 24 degrees
+
 
 if __name__ == '__main__':
     unittest.main()

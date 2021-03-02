@@ -211,4 +211,4 @@ To fix this situation we use the ``rebase`` command, providing the
 .. code-block:: bash
 
     git fetch
-    git rebase --onto origin/release-next origin/master topic
+    git rebase --onto origin/release-next $(git merge-base origin/master origin/topic) topic

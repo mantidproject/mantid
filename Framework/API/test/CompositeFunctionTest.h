@@ -50,6 +50,13 @@ public:
   std::size_t size() const override { return m_spectra.size() * m_blocksize; }
   /// Returns the size of each block of data returned by the dataY accessors
   std::size_t blocksize() const override { return m_blocksize; }
+  /// Returns the number of bins for a given histogram index.
+  std::size_t getNumberBins(const std::size_t &index) const override {
+    UNUSED_ARG(index);
+    return m_blocksize;
+  }
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  std::size_t getMaxNumberBins() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
   std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
@@ -1437,5 +1444,47 @@ public:
     TS_ASSERT_EQUALS(mfun->getError(0), 1.0);
     mfun->setError("f1.s", 5.0);
     TS_ASSERT_EQUALS(mfun->getError("f1.s"), 5.0);
+  }
+
+  void
+  test_hasFunction_returns_true_if_the_composite_contains_a_function_with_the_given_name() {
+    auto composite = std::make_unique<CompositeFunction>();
+    auto const gauss = std::make_shared<Gauss<true>>();
+
+    composite->addFunction(gauss);
+
+    TS_ASSERT(composite->hasFunction("Gauss"));
+  }
+
+  void
+  test_hasFunction_returns_false_if_the_composite_does_not_contain_a_function_with_the_given_name() {
+    auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
+    TS_ASSERT(!composite->hasFunction("Gauss"));
+  }
+
+  void
+  test_functionIndex_returns_the_correct_index_of_a_function_in_the_composite() {
+    auto composite = std::make_unique<CompositeFunction>();
+    auto const gauss = std::make_shared<Gauss<true>>();
+    auto const background = std::make_shared<Linear<true>>();
+
+    composite->addFunction(gauss);
+    composite->addFunction(background);
+
+    TS_ASSERT_EQUALS(composite->functionIndex("Gauss"), 0);
+    TS_ASSERT_EQUALS(composite->functionIndex("Linear"), 1);
+  }
+
+  void
+  test_functionIndex_throws_if_the_function_name_provided_does_not_exist_in_the_composite() {
+    auto const composite = std::make_unique<CompositeFunction>();
+    auto const background = std::make_shared<Linear<true>>();
+    composite->addFunction(background);
+
+    TS_ASSERT_THROWS(composite->functionIndex("Gauss"),
+                     const std::invalid_argument &);
   }
 };

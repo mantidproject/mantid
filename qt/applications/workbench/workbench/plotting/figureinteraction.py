@@ -30,7 +30,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 # mantid imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes, axesfunctions
-from mantid.plots.utility import zoom, MantidAxType
+from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
@@ -258,13 +258,13 @@ class FigureInteraction(object):
             elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
                 # We have to set the legend as non draggable else we hold onto the legend
                 # until the mouse button is clicked again
-                ax.get_legend().set_draggable(False)
+                legend_set_draggable(ax.get_legend(), False)
                 legend_texts = ax.get_legend().get_texts()
                 active_lines = datafunctions.get_legend_handles(ax)
                 for legend_text, curve in zip(legend_texts, active_lines):
                     if legend_text.contains(event)[0]:
                         move_and_show(LegendEditor(canvas, legend_text, curve))
-                ax.get_legend().set_draggable(True)
+                legend_set_draggable(ax.get_legend(), True)
 
     def _show_markers_menu(self, markers, event):
         """

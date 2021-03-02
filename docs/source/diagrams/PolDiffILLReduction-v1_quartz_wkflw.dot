@@ -1,0 +1,35 @@
+digraph Quartz {
+  $global_style
+
+  subgraph params {
+    $param_style
+    Run
+    D7YIGPositionCalibration
+    AbsorberInputWorkspace
+    ContainerInputWorkspace
+    TransmissionInputWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    Divide [label="Normalize to monitor"]
+    Minus [label="Subtract background"]
+    Divide2 [label="Calculate polarising efficiencies"]
+  }
+
+  Run -> Load
+  D7YIGPositionCalibration -> Load
+  Load -> Divide
+  Divide -> Minus
+  AbsorberInputWorkspace -> Minus
+  ContainerInputWorkspace -> Minus
+  TransmissionInputWorkspace -> Minus
+  Minus -> Divide2
+  Divide2 -> OutputWorkspace
+}

@@ -82,7 +82,7 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  *
  * @return  The input workspace to be used in data analysis.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
+MatrixWorkspace_sptr IndirectDataAnalysisTab::getInputWorkspace() const {
   return m_inputWorkspace;
 }
 
@@ -103,7 +103,7 @@ void IndirectDataAnalysisTab::setInputWorkspace(
  * @return  The workspace containing the data to be displayed in
  *          the preview plot.
  */
-MatrixWorkspace_sptr IndirectDataAnalysisTab::previewPlotWorkspace() {
+MatrixWorkspace_sptr IndirectDataAnalysisTab::getPreviewPlotWorkspace() {
   return m_previewPlotWorkspace.lock();
 }
 
@@ -123,7 +123,7 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() const {
+int IndirectDataAnalysisTab::getSelectedSpectrum() const {
   return m_selectedSpectrum;
 }
 
@@ -141,7 +141,9 @@ void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
  *
  * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTab::minimumSpectrum() const { return m_minSpectrum; }
+int IndirectDataAnalysisTab::getMinimumSpectrum() const {
+  return m_minSpectrum;
+}
 
 /**
  * Sets the selected spectrum.
@@ -157,7 +159,9 @@ void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
  *
  * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTab::maximumSpectrum() const { return m_maxSpectrum; }
+int IndirectDataAnalysisTab::getMaximumSpectrum() const {
+  return m_maxSpectrum;
+}
 
 /**
  * Sets the selected maximum spectrum.
@@ -173,8 +177,8 @@ void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
  * the selected spectrum of the current input workspace.
  */
 void IndirectDataAnalysisTab::plotCurrentPreview() {
-  auto previewWs = previewPlotWorkspace();
-  auto inputWs = inputWorkspace();
+  auto previewWs = getPreviewPlotWorkspace();
+  auto inputWs = getInputWorkspace();
   auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
 
   // Check a workspace has been selected
@@ -201,11 +205,11 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 void IndirectDataAnalysisTab::plotInput(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
   previewPlot->clear();
-  auto inputWS = inputWorkspace();
-  auto spectrum = selectedSpectrum();
+  auto inputWS = getInputWorkspace();
+  auto spectrum = getSelectedSpectrum();
 
   if (inputWS && inputWS->x(spectrum).size() > 1)
-    previewPlot->addSpectrum("Sample", inputWorkspace(), spectrum);
+    previewPlot->addSpectrum("Sample", getInputWorkspace(), spectrum);
 }
 
 /**
@@ -322,10 +326,10 @@ void IndirectDataAnalysisTab::updatePlot(
     const WorkspaceGroup_sptr &outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
-  if (outputWS && selectedSpectrum() >= minimumSpectrum() &&
-      selectedSpectrum() <= maximumSpectrum())
-    updatePlot(outputWS, selectedSpectrum() - minimumSpectrum(), fitPreviewPlot,
-               diffPreviewPlot);
+  if (outputWS && getSelectedSpectrum() >= getMinimumSpectrum() &&
+      getSelectedSpectrum() <= getMaximumSpectrum())
+    updatePlot(outputWS, getSelectedSpectrum() - getMinimumSpectrum(),
+               fitPreviewPlot, diffPreviewPlot);
   else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }

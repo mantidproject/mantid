@@ -45,6 +45,7 @@ from workbench.plotting.plothelppages import PlotHelpPages
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -136,11 +137,13 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
+
         for ax in self.canvas.figure.axes:
             if isinstance(ax, MantidAxes):
                 ws = AnalysisDataService.retrieve(newName)
                 if isinstance(ws, MatrixWorkspace):
-                    for ws_name, artists in ax.tracked_workspaces.items():
+                    for ws_name in list(ax.tracked_workspaces.keys()):
+                        # loop over list as items is iterable of object that is changed (throws error)
                         if ws_name == oldName:
                             ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
                 elif isinstance(ws, ITableWorkspace):
@@ -161,6 +164,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         assert QAppThreadCall.is_qapp_thread(
         ), "FigureManagerWorkbench cannot be created outside of the QApplication thread"
@@ -495,6 +499,7 @@ def new_figure_manager(num, *args, **kwargs):
 
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
+
     def _new_figure_manager_given_figure_impl(num, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.

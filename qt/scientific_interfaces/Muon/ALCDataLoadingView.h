@@ -80,6 +80,11 @@ public:
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
+  void enableAlpha(const bool alpha) override;
+  bool isAlphaEnabled() const override;
+  void setAlphaValue(const std::string &alpha) override;
+  std::string getAlphaValue() const override;
+  void showAlphaMessage(const bool alpha) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
@@ -89,11 +94,15 @@ private:
   void setAvailableItems(QComboBox *comboBox,
                          const std::vector<std::string> &items);
 
+  bool setCurrentLog(const QString &log);
+
   /// UI form
   Ui::ALCDataLoadingView m_ui;
 
   /// The widget used
   QWidget *const m_widget;
+
+  QString m_selectedLog;
 };
 
 } // namespace CustomInterfaces

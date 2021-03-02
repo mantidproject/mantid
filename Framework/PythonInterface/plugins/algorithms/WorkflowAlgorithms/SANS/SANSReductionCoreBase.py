@@ -138,7 +138,6 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
     def _convert_to_wavelength(self, state, workspace):
         wavelength_state = state.wavelength
-
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "OutputWorkspace": EMPTY_NAME,

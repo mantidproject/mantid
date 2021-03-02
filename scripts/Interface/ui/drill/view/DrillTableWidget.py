@@ -6,11 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
-                           QStyle, QAbstractItemView, QMenu, QMessageBox
+                           QStyle, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
-
-from mantidqt import icons
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
@@ -27,7 +25,6 @@ class DrillTableWidget(QTableWidget):
         self._disabled = False
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
-        header.setHighlightSections(True)
         header.setSectionResizeMode(QHeaderView.Interactive)
         self.setHorizontalHeader(header)
 
@@ -39,6 +36,9 @@ class DrillTableWidget(QTableWidget):
                                           None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
+
+        self.horizontalHeader().setHighlightSections(False)
+        self.verticalHeader().setHighlightSections(False)
 
     def setHorizontalHeaderLabels(self, labels):
         """
@@ -166,9 +166,12 @@ class DrillTableWidget(QTableWidget):
                 selected cells
         """
         selected_indexes = self.selectionModel().selectedIndexes()
+        header = self.horizontalHeader()
         cellsLi = []
         cellsVi = []
         for i in selected_indexes:
+            if (header.isSectionHidden(i.column())):
+                continue
             cellsLi.append((i.row(), i.column()))
             cellsVi.append((self.visualRow(i.row()),
                           self.visualColumn(i.column())))
@@ -183,12 +186,17 @@ class DrillTableWidget(QTableWidget):
         tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
                          selection is empty or discontinuous
         """
+        header = self.horizontalHeader()
         selection = self.getSelectedCells()
         if not selection:
             return (0, 0)
         for i in range(len(selection)):
-            selection[i] = (self.visualRow(selection[i][0]),
-                            self.visualColumn(selection[i][1]))
+            row = self.visualRow(selection[i][0])
+            col = self.visualColumn(selection[i][1])
+            for j in range(col):
+                if header.isSectionHidden(header.logicalIndex(j)):
+                    col -= 1
+            selection[i] = (row, col)
         rmin = selection[0][0]
         rmax = rmin
         cmin = selection[0][1]
@@ -389,6 +397,52 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
+    def setRowLabel(self, row, label, bold=False, tooltip=None):
+        """
+        Set the label of a specific row.
+
+        Args:
+            row (int): row index
+            label (str): row label
+        """
+        item = self.verticalHeaderItem(row)
+        if item:
+            item.setText(label)
+        else:
+            self.setVerticalHeaderItem(row, QTableWidgetItem(label))
+
+        font = self.verticalHeaderItem(row).font()
+        font.setBold(bold)
+        self.verticalHeaderItem(row).setFont(font)
+        if tooltip:
+            self.verticalHeaderItem(row).setToolTip(tooltip)
+
+    def getRowLabel(self, row):
+        """
+        Get the label of a specific row.
+
+        Args:
+            row (int): row index
+
+        Returns:
+            str: row label
+        """
+        item = self.verticalHeaderItem(row)
+        if item:
+            return item.text()
+        else:
+            return str(row + 1)
+
+    def delRowLabel(self, row):
+        """
+        Delete the row label.
+
+        Args:
+            ros (int): row index
+        """
+        self.setVerticalHeaderItem(row, None)
+        self.verticalHeader().headerDataChanged(Qt.Vertical, row, row)
+
     def setFoldedColumns(self, columns):
         """
         Fold specific columns.
@@ -529,26 +583,3 @@ class DrillTableWidget(QTableWidget):
                     else:
                         item.setFlags(item.flags() | flags)
         self.blockSignals(False)
-
-    def contextMenuEvent(self, event):
-        """
-        Context menu. It contains:
-        * add/delete menu with a list of visible and hidden columns
-
-        Args:
-            event (QContextMenuEvent): event that triggered the function
-        """
-        position = event.globalPos()
-        header = self.horizontalHeader()
-        rightClickMenu = QMenu(self)
-
-        colMenu = rightClickMenu.addMenu("Add/Delete column")
-        for li in range(len(self.columns)):
-            if header.isSectionHidden(li):
-                colMenu.addAction(icons.get_icon("mdi.close"), self.columns[li])
-            else:
-                colMenu.addAction(icons.get_icon("mdi.check"), self.columns[li])
-
-        selectedItem = rightClickMenu.exec(position)
-        if selectedItem:
-            self.toggleColumnVisibility(selectedItem.text())

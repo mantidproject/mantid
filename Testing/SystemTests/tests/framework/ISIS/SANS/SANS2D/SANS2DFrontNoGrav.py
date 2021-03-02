@@ -1,16 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 import systemtesting
-from mantid.simpleapi import *
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -32,6 +34,7 @@ class SANS2DFrontNoGrav(systemtesting.MantidSystemTest):
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWithExtraLengthGravity(systemtesting.MantidSystemTest):
     def runTest(self):
         SANS2D()

@@ -70,7 +70,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         observer.update.assert_called_once_with(self.data_context.instrumentNotifier, 'CHRONUS')
 
-    def test_that_changeing_time_zero_updates_model(self):
+    def test_that_changing_time_zero_updates_model(self):
         time_zero = 1.23456
         self.view.time_zero_checkbox.setChecked(False)
         self.view.set_time_zero(time_zero)
@@ -79,7 +79,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.get_user_time_zero(), round(time_zero, 3))
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
-    def test_that_changeing_time_zero_does_nothing_if_checkbox_is_checked(self):
+    def test_that_changing_time_zero_does_nothing_if_checkbox_is_checked(self):
         time_zero = 1.23456
         self.view.time_zero_checkbox.setChecked(True)
         self.view.set_time_zero(time_zero)
@@ -88,7 +88,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.get_user_time_zero(), 0.0)
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
-    def test_that_changeing_time_zero_checkbox_toggles_between_user_and_file_time_zero_displayed(self):
+    def test_that_changing_time_zero_checkbox_toggles_between_user_and_file_time_zero_displayed(self):
         user_time_zero = 1.234
         self.model.set_user_time_zero(user_time_zero)
 
@@ -100,7 +100,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.get_time_zero(), user_time_zero)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
-    def test_that_changeing_first_good_data_updates_model(self):
+    def test_that_changing_first_good_data_updates_model(self):
         time_zero = 1.23456
         self.view.first_good_data_checkbox.setChecked(False)
         self.view.set_first_good_data(time_zero)
@@ -109,7 +109,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.get_user_first_good_data(), round(time_zero, 3))
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
-    def test_that_changeing_first_good_data_does_nothing_if_checkbox_is_checked(self):
+    def test_that_changing_first_good_data_does_nothing_if_checkbox_is_checked(self):
         time_zero = 1.23456
         self.view.first_good_data_checkbox.setChecked(True)
         self.view.set_first_good_data(time_zero)
@@ -118,7 +118,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.get_user_time_zero(), 0.0)
         self.assertEqual(self.gui_variable_observer.update.call_count, 0)
 
-    def test_that_changeing_first_good_data_checkbox_toggles_between_user_and_file_time_zero_displayed(self):
+    def test_that_changing_first_good_data_checkbox_toggles_between_user_and_file_time_zero_displayed(self):
         user_time_zero = 1.234
         self.model.set_user_first_good_data(user_time_zero)
 
@@ -130,14 +130,14 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.get_first_good_data(), user_time_zero)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
-    def test_that_changeing_steps_rebin_updates_fixed_binning_in_model(self):
+    def test_that_changing_steps_rebin_updates_fixed_binning_in_model(self):
         self.view.rebin_steps_edit.setText('50')
         self.view.rebin_steps_edit.editingFinished.emit()
 
         self.assertEqual(self.model._context.gui_context['RebinFixed'], '50')
         self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, {'RebinFixed': '50'})
 
-    def test_that_changeing_variable_rebin_updates_variable_binning_in_model(self):
+    def test_that_changing_variable_rebin_updates_variable_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,21')
         self.view.rebin_variable_edit.editingFinished.emit()
 
@@ -348,6 +348,23 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertTrue(CompareWorkspaces(self.model._context.dead_time_table(62260),
                                           AnalysisDataService.retrieve('dead_time_table')))
+
+    def test_last_good_data_from_file(self):
+        self.view.last_good_data_state = mock.Mock(return_value=True)
+        self.view.set_last_good_data = mock.MagicMock()
+        self.presenter.update_view_from_model()
+
+        self.assertEqual(0.0, self.model.get_file_last_good_data())
+        self.view.set_last_good_data.assert_called_once_with(0.0)
+
+    def test_last_good_data_from_gui(self):
+        self.view.last_good_data_state = mock.Mock(return_value=False)
+        self.view.set_last_good_data = mock.MagicMock()
+        self.context.gui_context["LastGoodData"] = 2.0
+        self.presenter.update_view_from_model()
+
+        self.assertEqual(2.0, self.model.get_last_good_data())
+        self.view.set_last_good_data.assert_called_once_with(2.0)
 
 
 if __name__ == '__main__':

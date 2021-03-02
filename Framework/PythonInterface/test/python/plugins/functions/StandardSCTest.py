@@ -19,7 +19,7 @@ class StandardSCTest(unittest.TestCase):
 
 	def test_function_output(self):
 		input = [0.0, 4.0, 8.0, 12.0]
-		expected = [0.6, -0.22100145265607946, 0.16330356267457757, 0.07366277261260491]
+		expected = [0.6, -0.43265208, 0.15521027, 0.0046213]
 		tolerance = 1.0e-05
 		status, output = check_output("StandardSC", input, expected, tolerance, A0 = 0.5, FieldSC = 10, FieldBG = 11, Phi = 0.0, Sigma = 0.2, Abg = 0.1)
 		if not status:
