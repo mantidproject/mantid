@@ -37,7 +37,7 @@ def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
     return xmin, xmax
 
 
-def _get_difc_ws(wksp):
+def _get_difc_ws(wksp, instr_ws=None):
     if wksp is None:
         return None
     # Check if given a workspace
@@ -46,7 +46,6 @@ def _get_difc_ws(wksp):
     if not mtd.doesExist(ws_str):
         # Check if it was a file instead
         if ws_str.endswith(tuple([".h5", ".hd5", ".hdf", ".cal"])):
-            print("Got filename")
             try:
                 LoadDiffCal(Filename=ws_str, WorkspaceName="__cal_{}".format(ws_str))
                 difc_ws = CalculateDIFC(InputWorkspace="__cal_{}_group".format(ws_str),
@@ -60,11 +59,18 @@ def _get_difc_ws(wksp):
         # If workspace exists, check if it is a SpecialWorkspace2D (result from CalculateDIFC)
         if mtd[ws_str].id() == "SpecialWorkspace2D":
             return mtd[ws_str]
-        elif mtd[ws_str].id() == "GroupingWorkspace":
-            # Calculate DIFC on this workspace
-            difc_ws = CalculateDIFC(InputWorkspace=mtd[ws_str], OutputWorkspace="__difc_{}".format(ws_str))
+        elif mtd[ws_str].id() == "TableWorkspace":
+            if not mtd.doesExist(str(instr_ws)):
+                raise RuntimeError("Expected instrument workspace instr_ws to use with calibration tables")
+            # Check if the workspace looks like a calibration workspace
+            col_names = mtd[ws_str].getColumnNames()
+            # Only need the first two columns for the CalculateDIFC algorithm to work
+            if len(col_names) >= 2 and col_names[0] == "detid" and col_names[1] == "difc":
+                # Calculate DIFC on this workspace
+                difc_ws = CalculateDIFC(InputWorkspace=mtd[str(instr_ws)], CalibrationWorkspace=mtd[ws_str],
+                                        OutputWorkspace="__difc_{}".format(ws_str))
         else:
-            raise TypeError("Wrong workspace type. Expects SpecialWorkspace2D, GroupingWorkspace, or a filename")
+            raise TypeError("Wrong workspace type. Expects SpecialWorkspace2D, TableWorkspace, or a filename")
     return difc_ws
 
 
@@ -117,18 +123,18 @@ def plot2d(workspace,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, mask=None):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
 
-    ws_new = _get_difc_ws(calib_new)
+    ws_new = _get_difc_ws(calib_new, instr_ws)
     if ws_new is None:
         raise TypeError("Expected to receive a workspace or filename, got None.")
 
-    ws_old = _get_difc_ws(calib_old)
+    ws_old = _get_difc_ws(calib_old, instr_ws)
     if ws_old is None:
         # If no second workspace is given, then load default instrument to compare against
         instr_name = ws_new.getInstrument().getName()
-        instr_ws = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__def_{}".format(instr_name))
-        ws_old = CalculateDIFC(InputWorkspace=instr_ws, OutputWorkspace="__difc_{}".format(instr_name))
+        empty_instr = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__def_{}".format(instr_name))
+        ws_old = CalculateDIFC(InputWorkspace=empty_instr, OutputWorkspace="__difc_{}".format(instr_name))
 
     delta = ws_old - ws_new
 
