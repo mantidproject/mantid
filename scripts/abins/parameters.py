@@ -42,7 +42,7 @@ instruments = {
         'final_neutron_energy': 4.5 * MILLI_EV_TO_WAVENUMBER,  # Final energy on the crystal analyser in cm-1 (converted from eV)
         'scattering_angle_range': [10, 90],
         'angles_per_detector': 5,
-        'settings_default': 'Cu(220)',
+        'settings_default': 'Cu(220) (Lagrange)',
         'settings': {'Cu(220) (Lagrange)': {'Ei_range_meV': [26, 500],
                                             'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
                                             'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
