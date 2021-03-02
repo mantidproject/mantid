@@ -104,7 +104,6 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         self.assertEqual(BATCH_SIZE, presenter.view.model().rowCount())
         presenter.force_close()
 
-
     def test_scrolling_updates_number_of_rows_fetched_batch(self):
         ws = CreateEmptyTableWorkspace()
         ws.addColumn("double", "l")
