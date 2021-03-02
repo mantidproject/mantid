@@ -1,16 +1,15 @@
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
-from mantid.simpleapi import CalculateDIFC, LoadEmptyInstrument, mtd
+from mantid.simpleapi import CalculateDIFC, LoadDiffCal, LoadEmptyInstrument, mtd
 import matplotlib.pyplot as plt
 import six
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import numpy as np
 
-
 # Diamond peak positions in d-space which may differ from actual sample
-DIAMOND = np.asarray((2.06,1.2615,1.0758,0.892,0.8186,0.7283,0.6867,0.6307,0.5642,0.5441,0.515,0.4996,0.4768,
-                      0.4645,0.4205,0.3916,0.3499,0.3257,0.3117))
+DIAMOND = np.asarray((2.06, 1.2615, 1.0758, 0.892, 0.8186, 0.7283, 0.6867, 0.6307, 0.5642, 0.5441, 0.515, 0.4996, 0.4768, 0.4645, 0.4205,
+                      0.3916, 0.3499, 0.3257, 0.3117))
 
 
 def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
@@ -38,8 +37,43 @@ def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
     return xmin, xmax
 
 
-def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
-           xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
+def _get_difc_ws(wksp):
+    if wksp is None:
+        return None
+    # Check if given a workspace
+    ws_str = str(wksp)
+    difc_ws = None
+    if not mtd.doesExist(ws_str):
+        # Check if it was a file instead
+        if ws_str.endswith(tuple([".h5", ".hd5", ".hdf", ".cal"])):
+            print("Got filename")
+            try:
+                LoadDiffCal(Filename=ws_str, WorkspaceName="__cal_{}".format(ws_str))
+                difc_ws = CalculateDIFC(InputWorkspace="__cal_{}_group".format(ws_str),
+                                        CalibrationWorkspace="__cal_{}_cal".format(ws_str),
+                                        OutputWorkspace="__difc_{}".format(ws_str))
+            except:
+                raise RuntimeError("Could not load calibration file {}".format(ws_str))
+        else:
+            raise RuntimeError("Could not find workspace {} in ADS and it was not a file".format(ws_str))
+    else:
+        # If workspace exists, check if it is a SpecialWorkspace2D (result from CalculateDIFC)
+        if mtd[ws_str].id() == "SpecialWorkspace2D":
+            return mtd[ws_str]
+        elif mtd[ws_str].id() == "GroupingWorkspace":
+            # Calculate DIFC on this workspace
+            difc_ws = CalculateDIFC(InputWorkspace=mtd[ws_str], OutputWorkspace="__difc_{}".format(ws_str))
+        else:
+            raise TypeError("Wrong workspace type. Expects SpecialWorkspace2D, GroupingWorkspace, or a filename")
+    return difc_ws
+
+
+def plot2d(workspace,
+           tolerance: float = 0.001,
+           peakpositions: np.ndarray = DIAMOND,
+           xmin: float = np.nan,
+           xmax: float = np.nan,
+           horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
     MARKER_COLOR = 'b'  # color for peak markers and horizontal (between bank) markers
 
@@ -63,7 +97,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     # annotate expected peak positions and tolerances
     for peak in peakpositions:
         if peak > 0.4 and peak < 1.5:
-            shade = ((1-tolerance) * peak, (1+tolerance) * peak)
+            shade = ((1 - tolerance) * peak, (1 + tolerance) * peak)
             ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=.2)
             ax.axvline(x=peak, color=MARKER_COLOR, alpha=0.4)
 
@@ -83,58 +117,40 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(wksp_a='', wksp_b='', use_masks=False):
-    group_a = str(wksp_a) + "_group"
-    cal_a = str(wksp_a) + "_cal"
-    group_b = str(wksp_b) + "_group"
-    cal_b = str(wksp_b) + "_cal"
+def difc_plot2d(calib_new, calib_old=None, mask=None):
 
-    # Check that input workspaces exist
-    if not mtd.doesExist(group_a) or not mtd.doesExist(cal_a):
-        raise RuntimeError(
-            "Expected workspaces '{}' and '{}' to exist".format(group_a, cal_a))
+    ws_new = _get_difc_ws(calib_new)
+    if ws_new is None:
+        raise TypeError("Expected to receive a workspace or filename, got None.")
 
-    if wksp_b == '':
+    ws_old = _get_difc_ws(calib_old)
+    if ws_old is None:
         # If no second workspace is given, then load default instrument to compare against
-        instr_name = mtd[ group_a ].getInstrument().getName()
-        instr_ws = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__{}_difc_b".format(instr_name))
-        difc_b = CalculateDIFC(instr_ws)
-    else:
-        if not mtd.doesExist(group_b) or not mtd.doesExist(cal_b):
-            raise RuntimeError(
-                "Expected workspaces '{}' and '{}' to exist".format(group_b, cal_b))
-        difc_b = CalculateDIFC(group_b, CalibrationWorkspace=cal_b)
+        instr_name = ws_new.getInstrument().getName()
+        instr_ws = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__def_{}".format(instr_name))
+        ws_old = CalculateDIFC(InputWorkspace=instr_ws, OutputWorkspace="__difc_{}".format(instr_name))
 
-    difc_a = CalculateDIFC(group_a, CalibrationWorkspace=cal_a)
+    delta = ws_old - ws_new
 
-    delta = difc_b - difc_a
-
-    masks = []
-    if use_masks:
-        if mtd.doesExist(str(wksp_a) + "_mask"):
-            masks.append(mtd[str(wksp_a) + "_mask"])
-        if mtd.doesExist(str(wksp_b) + "_mask"):
-            masks.append(mtd[str(wksp_b) + "_mask"])
+    use_mask = False
+    if mask is not None and mtd.doesExist(str[mask]):
+        use_mask = True
 
     # Plotting below taken from addie/calibration/CalibrationDiagnostics.py
-    theta_array = [ ]
-    phi_array = [ ]
-    value_array = [ ]
-    masked_theta_array = [ ]
-    masked_phi_array = [ ]
+    theta_array = []
+    phi_array = []
+    value_array = []
+    masked_theta_array = []
+    masked_phi_array = []
     info = delta.spectrumInfo()
     for idx, x in enumerate(info):
         pos = x.position
-        theta = np.arccos(pos[ 2 ] / pos.norm())
-        phi = np.arctan2(pos[ 1 ], pos[ 0 ])
-        found_mask = False
-        for mask in masks:
-            if mask.dataY(idx):
-                masked_theta_array.append(theta)
-                masked_phi_array.append(phi)
-                found_mask = True
-                break
-        if not found_mask:
+        theta = np.arccos(pos[2] / pos.norm())
+        phi = np.arctan2(pos[1], pos[0])
+        if use_mask and mask.dataY(idx):
+            masked_theta_array.append(theta)
+            masked_phi_array.append(phi)
+        else:
             theta_array.append(theta)
             phi_array.append(phi)
             value_array.append(np.sum(delta.dataY(idx)))
@@ -149,7 +165,7 @@ def difc_plot2d(wksp_a='', wksp_b='', use_masks=False):
     theta_array = np.rad2deg(theta_array)
     phi_array = np.rad2deg(phi_array)
     maximum_solid_angle = np.rad2deg(maximum_solid_angle)
-    if use_masks:
+    if use_mask:
         masked_phi_array = np.rad2deg(masked_phi_array)
         masked_theta_array = np.rad2deg(masked_theta_array)
 
@@ -157,12 +173,12 @@ def difc_plot2d(wksp_a='', wksp_b='', use_masks=False):
     # May need to add finer adjustments on a per-instrument basis.
     # Small circles seem to alias less than rectangles.
     radius = maximum_solid_angle * 8.0
-    patches = [ ]
+    patches = []
     for x1, y1 in six.moves.zip(theta_array, phi_array):
         circle = Circle((x1, y1), radius)
         patches.append(circle)
 
-    masked_patches = [ ]
+    masked_patches = []
     for x1, y1 in six.moves.zip(masked_theta_array, masked_phi_array):
         circle = Circle((x1, y1), radius)
         masked_patches.append(circle)
@@ -180,7 +196,8 @@ def difc_plot2d(wksp_a='', wksp_b='', use_masks=False):
     mp.set_facecolor('gray')
     mp.set_edgecolor('face')
     ax.add_collection(mp)
-    fig.colorbar(p, ax=ax)
+    cb = fig.colorbar(p, ax=ax)
+    cb.set_label('delta DIFC')
     ax.set_xlabel(r'polar ($\phi$)')
     ax.set_xlim(0.0, 180)
     ax.set_ylabel(r'azimuthal ($\theta$)')
