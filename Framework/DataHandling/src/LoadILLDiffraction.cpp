@@ -911,7 +911,9 @@ void LoadILLDiffraction::setSampleLogs() {
   }
   double lambda = run.getLogAsSingleValue("wavelength");
   double eFixed = WAVE_TO_E / (lambda * lambda);
-  run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
+  run.addLogData(std::make_unique<Kernel::PropertyWithValue<double> >(
+                     PropertyWithValue<double>("Ei", eFixed)),
+                 true);
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors",
                                                m_numberDetectorsActual));
 
