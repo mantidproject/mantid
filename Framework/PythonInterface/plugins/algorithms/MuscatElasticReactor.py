@@ -29,11 +29,11 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
     _save = False
     _sigc = None
     _sigi = None
-    _sigs = None
+    _sigt = None
     _siga_in = None
     _siga = None
     _sigss = None
-    _sigt = None
+    _sigs = None
     _sofq = None
     _vector = None
     _vkinc = None
@@ -95,9 +95,6 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              doc='Switch Save result to nxs file Off/On')
  
     def PyExec(self):
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
-        random.seed(1234)
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
         self._setup()
@@ -301,6 +298,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         else:
             logger.information('Number of scatterings : %i ' % (self._numb_scat))
         self._thickness = self.getProperty('Thickness').value
+        # define _width as array in case expand to supporting multiple widths eg cylinder + can
         self._width = [self.getProperty('Width').value]
         self._height = self.getProperty('Height').value
         self._wave = self.getProperty('Wavelength').value
@@ -352,9 +350,6 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              f"It must be less than {maxWavelength}")
         theta_r = np.arcsin(self._q_values/Qmax)
         theta_d = 2.0*np.rad2deg(theta_r)
-        print(theta_d)
-        with np.printoptions(threshold=np.inf):
-            print(theta_d)
         ang_inc = (theta_d[len(theta_d) - 1] - theta_d[0])/(self._number_angles-1)
         self._angles = np.zeros(self._number_angles)
         for idx_ang in range(self._number_angles):
@@ -386,6 +381,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._ireg = self._nreg
         if self._geom == 'Flat':
             X = 0.0
+            # vary Y across full width rather than just half-width
             Y = (random.random() - 0.5) * self._width[0]       #random width
             Z = (random.random() - 0.5) * self._height         #random height
             self._position = [X, Y, Z]                      #entry flat face
@@ -514,7 +510,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             self._surface_b = [0, 0, 0, 0, 1.0, 1.0]
             self._surface_a = [0, 0, 0, 0, 0, 0]
             # assume additional containers share the top and bottom surface
-            self._nsurf = 4+2*self._nreg
+            self._nsurf = 4+2*self._nreg            #is 6
             # igeom specifies which surfaces are part of the region and further which side of each surface is inside
             # or outside the region
             self._igeom = [-1, 1, -1, 1, 1, -1]
@@ -524,7 +520,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
 #  IF NREG>1 ,REG1 IS INNERMOST CYLINDER(SAMPLE) & REG2 NEXT RING(CONT)
 #   REG3 WOULD BE OUTSIDE REG2 & SO ON
             # assume additional containers share top and bottom surface
-            self._nsurf = self._nreg+2
+            self._nsurf = self._nreg+2            #is 3
             self._surface_g = [-half_height, half_height, -half_width[0]*half_width[0]]
             self._surface_f = [1.0, 1.0, 0]
             self._surface_e = [0, 0, 0]
