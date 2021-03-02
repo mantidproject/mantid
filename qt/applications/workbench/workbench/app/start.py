@@ -15,7 +15,6 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
@@ -29,7 +28,6 @@ from workbench.app.resources import qCleanupResources  # noqa
 from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plugins.exception_handler import exception_logger  # noqa
 from workbench.widgets.about.presenter import AboutPresenter  # noqa
-from workbench.utils.io import input_qinputdialog
 
 # Constants
 SYSCHECK_INTERVAL = 50

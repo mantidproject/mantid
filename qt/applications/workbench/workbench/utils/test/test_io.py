@@ -40,4 +40,3 @@ class IOTest(TestCase):
         mock_QInputDialog.exec_.return_value = False
 
         self.assertRaises(RuntimeError, input_qinputdialog)
-
