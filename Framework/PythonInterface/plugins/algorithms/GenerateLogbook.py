@@ -43,11 +43,14 @@ class GenerateLogbook(PythonAlgorithm):
         if self.getProperty('Instrument').isDefault:
             issues['Instrument'] = 'The instrument has to be defined.'
         else:
-            facility = self.getPropertyValue('Facility')
-            instruments = str(config.getFacility(facility).instruments())
             instrument = self.getPropertyValue('Instrument')
-            if instrument not in instruments:
-                issues['Instrument'] = 'The instrument {} does not belong to {} facility.'.format(instrument, facility)
+            ws_tmp = CreateSingleValuedWorkspace()
+            try:
+                LoadParameterFile(Workspace=ws_tmp, Filename=instrument + '_Parameters.xml')
+            except Exception as e:
+                self.log().error(str(e))
+                issues['Instrument'] = 'There is no parameter file for {} instrument.'.format(instrument)
+            DeleteWorkspace(Workspace=ws_tmp)
 
         if not self.getProperty('CustomEntries').isDefault:
             custom_entries = self.getPropertyValue('CustomEntries')
@@ -125,7 +128,7 @@ class GenerateLogbook(PythonAlgorithm):
         self._metadata_headers = ['run_number']
         tmp_instr = self._instrument + '_tmp'
         # Load empty instrument to access parameters defining metadata entries to be searched
-        LoadEmptyInstrument(InstrumentName=self._instrument, OutputWorkspace=tmp_instr)
+        LoadEmptyInstrument(Filename=self._instrument + "_Definition.xml", OutputWorkspace=tmp_instr)
         parameters = mtd[tmp_instr].getInstrument()
         try:
             logbook_default_parameters = (parameters.getStringParameter('logbook_default_parameters')[0]).split(',')

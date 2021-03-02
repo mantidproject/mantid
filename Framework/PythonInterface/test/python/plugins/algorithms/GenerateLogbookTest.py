@@ -31,11 +31,11 @@ class GenerateLogbookTest(unittest.TestCase):
         if os.path.exists(os.path.join(gettempdir(), 'logbook.csv')):
             os.remove(os.path.join(gettempdir(), 'logbook.csv'))
 
-    def test_instrument_facility_mismatch(self):
+    def test_instrument_does_not_exist(self):
         self.assertTrue(os.path.exists(self._data_directory))
         with self.assertRaises(RuntimeError):
             GenerateLogbook(Directory=self._data_directory,
-                            OutputWorkspace='__unused', Facility='ISIS', Instrument='D7')
+                            OutputWorkspace='__unused', Facility='ISIS', Instrument='nonexistent')
 
     def test_d7_default(self):
         self.assertTrue(os.path.exists(self._data_directory))
