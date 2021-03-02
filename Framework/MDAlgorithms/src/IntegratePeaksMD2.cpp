@@ -130,9 +130,12 @@ void IntegratePeaksMD2::init() {
   declareProperty("UseCentroid", false,
                   "Perform integration on estimated centroid not peak position "
                   "(ignored if all three peak radii are specified).");
-  declareProperty("MaxIterations", 1,
-                  "Iterations is covariance estimation (ignored if all three "
-                  "peak radii are specified).");
+  auto maxIterValidator = std::make_shared<BoundedValidator<int>>();
+  maxIterValidator->setLower(1);
+  declareProperty(
+      "MaxIterations", 1, maxIterValidator,
+      "Number of iterations in covariance estimation (ignored if all "
+      "peak radii are specified). 2-3 should be sufficient.");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -1027,7 +1030,7 @@ void IntegratePeaksMD2::findEllipsoid(
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
   std::replace_if(eigenvals.begin(), eigenvals.end(),
-                  [&](auto x) { return x < 1e-6; },  1e-6);
+                  [&](auto x) { return x < 1e-6; }, 1e-6);
 
   // populate V3D vector of eigenvects (needed for ellipsoid shape)
   eigenvects = std::vector<V3D>(nd);
