@@ -48,7 +48,7 @@ Output:
    from mantid.simpleapi import *
    
    CreateSampleWorkspace(OutputWorkspace='ws')
-   CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=7828.1622909999996, XMax=11980.906921)
+   CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=7828.162291, XMax=11980.906921)
    Power(InputWorkspace='ws', OutputWorkspace='ws', Exponent=1.5)
    RenameWorkspace(InputWorkspace='ws', OutputWorkspace='MyTestWorkspace')
 
@@ -145,7 +145,7 @@ Output:
    from mantid.simpleapi import *
 
    CreateSampleWorkspace(OutputWorkspace='ws')
-   CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=7828.1622909999996, XMax=11980.906921)
+   CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=7828.162291, XMax=11980.906921)
    Power(InputWorkspace='ws', OutputWorkspace='ws', Exponent=1.5)
    RenameWorkspace(InputWorkspace='ws', OutputWorkspace='MyTestWorkspace')
 
