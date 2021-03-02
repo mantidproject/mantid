@@ -9,10 +9,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-enum FittingMode {
-  SIMULTANEOUS = 0,
-  SEQUENTIAL = 1,
-  SIMULTANEOUS_SEQUENTIAL = 2
+enum class FittingMode {
+  SEQUENTIAL,
+  SIMULTANEOUS,
+  SEQUENTIAL_AND_SIMULTANEOUS
 };
 
 } // namespace MantidWidgets

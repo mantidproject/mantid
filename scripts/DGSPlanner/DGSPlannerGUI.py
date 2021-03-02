@@ -133,7 +133,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
         self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
-        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
+        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/framework/DGS Planner.html'
         # control for cancel button
         self.iterations = 0
         self.progress_canceled = False
