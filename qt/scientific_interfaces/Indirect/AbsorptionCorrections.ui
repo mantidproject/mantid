@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>AbsorptionCorrections</class>
  <widget class="QWidget" name="AbsorptionCorrections">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Absoprtion Corrections</string>
+   <string>Absorption Corrections</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -36,55 +39,14 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
           <item row="1" column="0">
-           <widget class="QCheckBox" name="ckUseCan">
-            <property name="text">
-             <string>Use Container:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="autoLoad" stdset="0">
-             <bool>true</bool>
-            </property>
-            <property name="workspaceSuffixes" stdset="0">
-             <stringlist>
-              <string>_red</string>
-              <string>_sqw</string>
-             </stringlist>
-            </property>
-            <property name="fileBrowserSuffixes" stdset="0">
-             <stringlist>
-              <string>_red.nxs</string>
-              <string>_sqw.nxs</string>
-             </stringlist>
-            </property>
-            <property name="showLoad" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="ShowGroups" stdset="0">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
            <widget class="QLabel" name="lbSampleInput">
             <property name="text">
-             <string>Sample Input:</string>
+             <string>Input Workspace:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCanInput" native="true">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+           <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -283,6 +245,17 @@
             </item>
             <item>
              <widget class="QComboBox" name="cbShape">
+              <property name="currentText">
+               <string>Flat Plate</string>
+              </property>
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Preset</string>
+               </property>
+              </item>
               <item>
                <property name="text">
                 <string>Flat Plate</string>
@@ -303,6 +276,25 @@
            </layout>
           </item>
           <item>
+           <widget class="QCheckBox" name="cbUseCan">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777208</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Use Container</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QStackedWidget" name="swShapeDetails">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -311,8 +303,9 @@
              </sizepolicy>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
+            <widget class="QWidget" name="pgAbsCorPreset"/>
             <widget class="QWidget" name="pgAbsCorFlatPlate">
              <layout class="QGridLayout" name="loFlatPlate">
               <property name="leftMargin">
@@ -390,7 +383,7 @@
               <item row="3" column="0">
                <widget class="QLabel" name="lbFlatCanFrontThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Container Front Thickness:</string>
@@ -400,7 +393,7 @@
               <item row="3" column="1">
                <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -436,7 +429,7 @@
               <item row="3" column="2">
                <widget class="QLabel" name="lbFlatCanBackThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Container Back Thickness:</string>
@@ -446,7 +439,7 @@
               <item row="3" column="3">
                <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -478,7 +471,7 @@
               <item row="6" column="3">
                <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -494,7 +487,7 @@
               <item row="6" column="1">
                <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="suffix">
                  <string> cm</string>
@@ -543,7 +536,7 @@
               <item row="6" column="0">
                <widget class="QLabel" name="lbAnnCanInnerRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Inner Container Inner Radius:</string>
@@ -553,7 +546,7 @@
               <item row="6" column="2">
                <widget class="QLabel" name="lbAnnCanOuterRadius">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Outer Container Outer Radius:</string>
@@ -629,10 +622,29 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="lbCylSampleRadius">
+              <item row="2" column="2">
+               <widget class="QLabel" name="lbCylCanOuterRadius">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <property name="text">
-                 <string>Sample Radius:</string>
+                 <string>Container Outer Radius</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="suffix">
+                 <string> cm</string>
+                </property>
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
                 </property>
                </widget>
               </item>
@@ -643,29 +655,10 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="2">
-               <widget class="QLabel" name="lbCylCanOuterRadius">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lbCylSampleRadius">
                 <property name="text">
-                 <string>Container Outer Radius</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="3">
-               <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="suffix">
-                 <string> cm</string>
-                </property>
-                <property name="decimals">
-                 <number>3</number>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
+                 <string>Sample Radius:</string>
                 </property>
                </widget>
               </item>
@@ -949,7 +942,7 @@
        <item>
         <widget class="QGroupBox" name="gbContainerDetails">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="title">
           <string>Container Details</string>
@@ -1334,7 +1327,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>ckUseCan</tabstop>
   <tabstop>spNumberEvents</tabstop>
   <tabstop>spBeamHeight</tabstop>
   <tabstop>spBeamWidth</tabstop>
@@ -1374,38 +1366,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>dsCanInput</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>194</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>784</x>
-     <y>67</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>gbContainerDetails</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>194</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>305</x>
-     <y>571</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>spFlatCanFrontThickness</sender>
    <signal>valueChanged(double)</signal>
    <receiver>spFlatCanBackThickness</receiver>
@@ -1422,162 +1382,178 @@
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbFlatCanFrontThickness</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>140</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>175</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spFlatCanFrontThickness</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>241</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>402</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbFlatCanBackThickness</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>255</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>593</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
    <receiver>spFlatCanBackThickness</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>229</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>784</x>
-     <y>424</y>
+     <x>832</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lbAnnCanInnerRadius</receiver>
+   <receiver>spFlatCanFrontThickness</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>169</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>65</x>
-     <y>424</y>
+     <x>371</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
    <receiver>spAnnCanInnerRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>282</x>
-     <y>424</y>
+     <x>371</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbAnnCanOuterRadius</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>308</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>501</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
+   <sender>cbUseCan</sender>
    <signal>toggled(bool)</signal>
    <receiver>spAnnCanOuterRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
+     <x>256</x>
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>718</x>
-     <y>424</y>
+     <x>832</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCan</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lbCylCanOuterRadius</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>57</x>
-     <y>67</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>532</x>
-     <y>408</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCan</sender>
-   <signal>clicked(bool)</signal>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
    <receiver>spCylCanOuterRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>38</x>
-     <y>66</y>
+     <x>256</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>646</x>
-     <y>411</y>
+     <x>832</x>
+     <y>340</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>gbContainerDetails</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>486</x>
+     <y>589</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanInnerRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>141</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>340</y>
     </hint>
    </hints>
   </connection>

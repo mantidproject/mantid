@@ -4,11 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import platform
-import sys
 import unittest
 
-from qtpy import PYQT_VERSION
 from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
@@ -17,13 +14,6 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
-def on_ubuntu_or_darwin():
-    return ('Ubuntu' in platform.platform() and sys.version[0] == '2'
-            or sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
-
-
-@unittest.skipIf(on_ubuntu_or_darwin(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb."
-                                        "Qt4 has a bug on macs which is fixed in Qt5.")
 @start_qapplication
 class TestFitPropertyBrowser(unittest.TestCase):
 

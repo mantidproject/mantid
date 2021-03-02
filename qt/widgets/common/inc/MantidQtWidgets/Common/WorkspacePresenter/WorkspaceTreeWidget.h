@@ -116,7 +116,6 @@ public:
   void showColourFillPlot() override;
   void showDetectorsTable() override;
   void showBoxDataTable() override;
-  void showVatesGUI() override;
   void showMDPlot() override;
   void showListData() override;
   void showSpectrumViewer() override;
@@ -201,7 +200,6 @@ private slots:
   void onClickShowData();
   void onClickShowInstrument();
   void onClickShowBoxData();
-  void onClickShowVates();
   void onClickShowMDPlot();
   void onClickShowListData();
   void onClickShowSpectrumViewer();
@@ -252,11 +250,11 @@ private:
   QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
   QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr,
-      *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showVatesGui,
-      *m_showSpectrumViewer, *m_showSliceViewer, *m_colorFill, *m_showLogs,
-      *m_showSampleMaterial, *m_showHist, *m_showMDPlot, *m_showListData,
-      *m_ascendingSortAction, *m_descendingSortAction, *m_byNameChoice,
-      *m_byLastModifiedChoice, *m_showTransposed, *m_convertToMatrixWorkspace,
+      *m_plotAdvanced, *m_showDetectors, *m_showBoxData, *m_showSpectrumViewer,
+      *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
+      *m_showHist, *m_showMDPlot, *m_showListData, *m_ascendingSortAction,
+      *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice,
+      *m_showTransposed, *m_convertToMatrixWorkspace,
       *m_convertMDHistoToMatrixWorkspace, *m_clearUB;
 
   QAtomicInt m_updateCount;

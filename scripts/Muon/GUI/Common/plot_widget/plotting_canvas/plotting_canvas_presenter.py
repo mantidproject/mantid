@@ -39,7 +39,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _setup_autoscale_observer(self):
         self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
+        self.enable_yaxis_changer_observer = GenericObserver(self._options_presenter.enable_yaxis_changer)
         self._view.add_uncheck_autoscale_subscriber(self.uncheck_autoscale_observer)
+        self._view.add_uncheck_autoscale_subscriber(self.enable_yaxis_changer_observer)
 
         self.enable_autoscale_observer = GenericObserver(self._options_presenter.enable_autoscale)
         self._view.add_enable_autoscale_subscriber(self.enable_autoscale_observer)
@@ -64,6 +66,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # Add workspace info which is currently not plotted
         workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
                                  not in self._view.plotted_workspace_information]
+
         self._view.add_workspaces_to_plot(workspace_info_to_add)
         # check if to force autoscale
         if self._options_presenter.autoscale:
@@ -234,9 +237,13 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             self._view.autoscale_y_axes()
         else:
             self._view.set_axes_limits(xlims, ylims)
-            # override y values
-            if autoscale:
-                self._view.autoscale_y_axes()
+
+        if autoscale:
+            self._options_presenter.disable_yaxis_changer()
+            self._view.autoscale_y_axes()
+        else:
+            self._options_presenter.enable_yaxis_changer()
+
         titles = self._model.create_axes_titles()
         for axis_number, title in enumerate(titles):
             self._view.set_title(axis_number, title)

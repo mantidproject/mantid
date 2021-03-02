@@ -20,12 +20,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
@@ -97,7 +99,6 @@ set(
   src/UserInputValidator.cpp
   src/UserSubWindow.cpp
   src/UserSubWindowFactory.cpp
-  src/VatesViewerInterface.cpp
   src/WidgetScrollbarDecorator.cpp
   src/WorkspaceIcons.cpp
   src/WorkspaceObserver.cpp
@@ -217,7 +218,6 @@ set(
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
-  inc/MantidQtWidgets/Common/VatesViewerInterface.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
@@ -259,8 +259,12 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
+    inc/MantidQtWidgets/Common/FitDomain.h
+    inc/MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+    inc/MantidQtWidgets/Common/FittingGlobals.h
+    inc/MantidQtWidgets/Common/FittingMode.h
     inc/MantidQtWidgets/Common/FlowLayout.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
@@ -273,6 +277,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
+    inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -368,8 +373,6 @@ set(
   src/MantidDialog.cpp
   src/MantidHelpInterface.cpp
   src/MantidWidget.cpp
-  src/MdConstants.cpp
-  src/MdSettings.cpp
   src/Message.cpp
   src/NonOrthogonal.cpp
   src/FileFinderWidget.cpp
@@ -393,7 +396,6 @@ set(
   src/UserInputValidator.cpp
   src/UserSubWindow.cpp
   src/UserSubWindowFactory.cpp
-  src/VatesViewerInterface.cpp
   src/WidgetScrollbarDecorator.cpp
   src/WindowIcons.cpp
   src/WorkspaceObserver.cpp
@@ -452,12 +454,14 @@ set(
   src/FindFilesThreadPoolManager.cpp
   src/FindFilesWorker.cpp
   src/FindReplaceDialog.cpp
+  src/FitDomain.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
+  src/FittingGlobals.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
@@ -553,7 +557,6 @@ set(
   inc/MantidQtWidgets/Common/SyncedCheckboxes.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
-  inc/MantidQtWidgets/Common/VatesViewerInterface.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
@@ -657,8 +660,11 @@ set(
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/GraphOptions.h
   inc/MantidQtWidgets/Common/DistributionOptions.h
+  inc/MantidQtWidgets/Common/FitDomain.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
+  inc/MantidQtWidgets/Common/FittingGlobals.h
+  inc/MantidQtWidgets/Common/FittingMode.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
@@ -673,8 +679,6 @@ set(
   inc/MantidQtWidgets/Common/LogValueFinder.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
-  inc/MantidQtWidgets/Common/MdConstants.h
-  inc/MantidQtWidgets/Common/MdSettings.h
   inc/MantidQtWidgets/Common/NonOrthogonal.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PlotAxis.h
@@ -842,7 +846,6 @@ set(
   OLD_UI_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
-  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_MWView.h
   ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
 )
 foreach(
@@ -917,6 +920,7 @@ mtd_add_qt_library(
     QSCINTILLA_DLL
     QT5_DEFS
     ${_webengine_def}
+  PRECOMPILED inc/MantidQtWidgets/Common/PrecompiledHeader.h
   INCLUDE_DIRS
     inc
   SYSTEM_INCLUDE_DIRS
@@ -1026,9 +1030,11 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitDomainTest.h
   test/FitOptionsBrowserTest.h
   test/FitPropertyBrowserTest.h
   test/FitScriptGeneratorDataTableTest.h
+  test/FitScriptGeneratorModelTest.h
   test/FitScriptGeneratorPresenterTest.h
   test/FitScriptGeneratorViewTest.h
   test/FunctionTreeViewTest.h

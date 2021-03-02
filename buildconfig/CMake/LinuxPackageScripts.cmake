@@ -23,11 +23,6 @@ set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
 set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
-# Separate directory of plugins to be discovered by the ParaView framework
-# These cannot be mixed with our other plugins. Further sub-directories
-# based on the Qt version will also be created by the installation targets
-set ( PVPLUGINS_DIR "plugins/paraview/qt4/" )
-
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
@@ -206,7 +201,6 @@ set ( ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?" )
 
 ##### Local dev version
 set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
-set ( PARAVIEW_PYTHON_PATHS "" )
 
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin" )
 
@@ -232,7 +226,6 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPyt
 
 ##### Package version
 unset ( PYTHON_ARGS )
-set ( PARAVIEW_PYTHON_PATHS "" )
 
 # used by mantidplot and mantidworkbench
 set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )

@@ -200,8 +200,9 @@ void PredictPeaks::exec() {
   if (matrixWS) {
     // Retrieve the goniometer rotation matrix
     try {
-      DblMatrix goniometerMatrix = matrixWS->run().getGoniometerMatrix();
-      gonioVec.emplace_back(goniometerMatrix);
+      auto goniometerMatrix = matrixWS->run().getGoniometerMatrices();
+      std::move(goniometerMatrix.begin(), goniometerMatrix.end(),
+                back_inserter(gonioVec));
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
@@ -240,9 +241,10 @@ void PredictPeaks::exec() {
     // Retrieve the goniometer rotation matrices for each experiment info
     for (uint16_t i = 0; i < mdWS->getNumExperimentInfo(); ++i) {
       try {
-        DblMatrix goniometerMatrix =
-            mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
-        gonioVec.emplace_back(goniometerMatrix);
+        auto goniometerMatrix =
+            mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrices();
+        std::move(goniometerMatrix.begin(), goniometerMatrix.end(),
+                  back_inserter(gonioVec));
       } catch (std::runtime_error &e) {
         // If there is no goniometer matrix, use identity matrix instead.
         gonioVec.emplace_back(DblMatrix(3, 3, true));

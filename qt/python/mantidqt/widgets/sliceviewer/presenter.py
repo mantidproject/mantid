@@ -9,6 +9,7 @@
 # 3rdparty imports
 import mantid.api
 import mantid.kernel
+import sip
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
@@ -69,6 +70,8 @@ class SliceViewer(ObservingPresenter):
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
 
+        self.view.destroyed.connect(self._on_view_destroyed)
+
     def new_plot_MDH(self):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
@@ -120,7 +123,8 @@ class SliceViewer(ObservingPresenter):
         """
         self.view.data_view.update_plot_data(
             self.model.get_data(self.get_slicepoint(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_MDE(self):
         """
@@ -131,7 +135,8 @@ class SliceViewer(ObservingPresenter):
             self.model.get_data(self.get_slicepoint(),
                                 bin_params=data_view.dimensions.get_bin_params(),
                                 limits=data_view.get_axes_limits(),
-                                transpose=self.view.data_view.dimensions.transpose))
+                                transpose=self.view.data_view.dimensions.transpose),
+            self.view.data_view.dimensions.transpose)
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -378,6 +383,11 @@ class SliceViewer(ObservingPresenter):
         """
         Updates the view to enable/disable certain options depending on the model.
         """
+        # The view currently introduces a delay before calling this function, which
+        # causes a race condition where it's possible the view could be closed in
+        # the meantime, so check it still exists. See github issue #30406 for detail.
+        if sip.isdeleted(self.view):
+            return
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
@@ -396,6 +406,8 @@ class SliceViewer(ObservingPresenter):
 
     def clear_observer(self):
         self.ads_observer = None
+        if self._peaks_presenter is not None:
+            self._peaks_presenter.clear_observer()
 
     # private api
     def _create_peaks_presenter_if_necessary(self):
@@ -447,3 +459,6 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def _on_view_destroyed(self):
+        self.clear_observer()

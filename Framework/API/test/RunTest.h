@@ -427,6 +427,48 @@ public:
     TS_ASSERT_EQUALS(runCopy.getGoniometer().getNumberAxes(), 3);
   }
 
+  void test_multiple_goniometers() {
+    Run runInfo;
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 1);
+
+    DblMatrix rotation(3, 3, true);
+    rotation[0][0] = cos(0.5);
+    rotation[0][2] = sin(0.5);
+    rotation[2][0] = -sin(0.5);
+    rotation[2][2] = cos(0.5);
+    Goniometer goniometer(rotation);
+
+    auto index = runInfo.addGoniometer(goniometer);
+
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 2);
+    TS_ASSERT_EQUALS(index, 1);
+
+    TS_ASSERT_EQUALS(runInfo.getGoniometer(0), Goniometer());
+    TS_ASSERT_EQUALS(runInfo.getGoniometer(1), goniometer);
+    TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(0), DblMatrix(3, 3, true));
+    TS_ASSERT_EQUALS(runInfo.getGoniometerMatrix(1), rotation);
+
+    std::vector<DblMatrix> matrices = runInfo.getGoniometerMatrices();
+    TS_ASSERT_EQUALS(matrices.size(), 2);
+    TS_ASSERT_EQUALS(matrices[0], DblMatrix(3, 3, true));
+    TS_ASSERT_EQUALS(matrices[1], rotation);
+
+    Run runInfo2;
+    TS_ASSERT_DIFFERS(runInfo, runInfo2);
+    runInfo2.addGoniometer(Goniometer());
+    TS_ASSERT_DIFFERS(runInfo, runInfo2);
+    runInfo2.clearGoniometers();
+    runInfo2.addGoniometer(Goniometer());
+    runInfo2.addGoniometer(goniometer);
+    TS_ASSERT_EQUALS(runInfo, runInfo2);
+
+    runInfo.clearGoniometers();
+    TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 0);
+
+    TS_ASSERT_THROWS(runInfo.getGoniometer(0), const std::out_of_range &);
+    TS_ASSERT_THROWS(runInfo.getGoniometerMatrix(0), const std::out_of_range &);
+  }
+
   void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
     TimeSeriesProperty<double> *tsp;
     tsp = new TimeSeriesProperty<double>(name);
@@ -572,6 +614,33 @@ public:
     TS_ASSERT(run3.hasProperty("double_val"));
   }
 
+  /** Save and load to NXS file */
+  void test_nexus_multiple_goniometer() {
+    NexusTestHelper th(true);
+    th.createFile("RunTest2.nxs");
+
+    Run run1;
+    addTimeSeriesEntry(run1, "phi", 12.3);
+    addTimeSeriesEntry(run1, "chi", 45.6);
+    addTimeSeriesEntry(run1, "omega", 78.9);
+    addTimeSeriesEntry(run1, "proton_charge", 78.9);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    run1.setGoniometer(gm, true);
+    run1.addGoniometer(run1.getGoniometer(0));
+    run1.addGoniometer(Goniometer());
+
+    run1.saveNexus(th.file.get(), "logs");
+    th.file->openGroup("logs", "NXgroup");
+
+    // ---- Now re-load the same and compare ------
+    th.reopenFile();
+    Run run2;
+    run2.loadNexus(th.file.get(), "logs");
+    TS_ASSERT_EQUALS(run2, run1);
+  }
+
   void test_setGoniometerWithLogsUsesTimeSeriesAverage() {
     Run run;
 
@@ -593,6 +662,53 @@ public:
     TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-2);
     TS_ASSERT_EQUALS(gm.getAxis(1).angle, 12.3);
     TS_ASSERT_EQUALS(gm.getAxis(2).angle, 45.6);
+  }
+
+  void test_setGoniometersWithLogsUsesTimeSeries() {
+    Run run;
+
+    auto omega = std::make_unique<TimeSeriesProperty<double>>("omega");
+    omega->addValue("2018-01-01T00:00:00", 0.0);
+    omega->addValue("2018-01-01T01:00:00", 90.0);
+    omega->addValue("2018-01-01T02:00:00", 0.0);
+    run.addProperty(omega.release());
+
+    auto chi = std::make_unique<TimeSeriesProperty<double>>("chi");
+    chi->addValue("2018-01-01T00:00:00", 0.0);
+    chi->addValue("2018-01-01T01:00:00", 0.0);
+    chi->addValue("2018-01-01T02:00:00", 0.0);
+    run.addProperty(chi.release());
+
+    addTimeSeriesEntry(run, "phi", 0.0);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    TS_ASSERT_THROWS(run.setGoniometers(gm), const std::runtime_error &);
+
+    auto phi = std::make_unique<TimeSeriesProperty<double>>("phi");
+    phi->addValue("2018-01-01T00:00:00", 0.0);
+    phi->addValue("2018-01-01T01:00:00", 0.0);
+    phi->addValue("2018-01-01T02:00:00", 90.0);
+    run.addProperty(phi.release(), true);
+
+    run.setGoniometers(gm);
+
+    TS_ASSERT_EQUALS(run.getNumGoniometers(), 3);
+
+    gm = run.getGoniometer(0);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 0.0, 1e-7);
+
+    gm = run.getGoniometer(1);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 90.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 0.0, 1e-7);
+
+    gm = run.getGoniometer(2);
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(1).angle, 0.0, 1e-7);
+    TS_ASSERT_DELTA(gm.getAxis(2).angle, 90.0, 1e-7);
   }
 
   /** Check for loading the old way of saving proton_charge */

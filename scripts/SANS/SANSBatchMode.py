@@ -42,22 +42,10 @@ from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
 import copy
-import sys
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
 sanslog = Logger("SANS")
-################################################################################
-# Avoid a bug with deepcopy in python 2.6, details and workaround here:
-# http://bugs.python.org/issue1515
-if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-    import types
-
-    def _deepcopy_method(x, memo):
-        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
-    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
-################################################################################
-
 # The allowed number of entries per row.
 # The minimum is 4:  sample_sans, sample_sans_VALUE,
 #                    output_as, output_as_VALUE

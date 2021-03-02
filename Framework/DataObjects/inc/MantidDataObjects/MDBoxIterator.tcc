@@ -299,6 +299,12 @@ TMDE(uint16_t MDBoxIterator)::getInnerRunIndex(size_t index) const {
   return (*m_events)[index].getRunIndex();
 }
 
+/// For a given event/point in this box, return the goniometer index
+TMDE(uint16_t MDBoxIterator)::getInnerGoniometerIndex(size_t index) const {
+  getEvents();
+  return (*m_events)[index].getGoniometerIndex();
+}
+
 /// For a given event/point in this box, return the detector ID
 TMDE(int32_t MDBoxIterator)::getInnerDetectorID(size_t index) const {
   getEvents();

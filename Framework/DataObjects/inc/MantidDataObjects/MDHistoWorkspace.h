@@ -29,7 +29,7 @@ namespace DataObjects {
  * MDEventWorkspace. Typically it has 3 or 4 dimensions, but there is no
  * real limit to it.
  *
- * This will be used by ParaView e.g. for visualization.
+ * This will be used by Sliceviewer e.g. for visualization.
  *
  * @author Janik Zikovsky
  * @date 2011-03-24 11:21:06.280523

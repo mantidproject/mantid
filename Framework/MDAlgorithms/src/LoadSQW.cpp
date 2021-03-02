@@ -231,6 +231,8 @@ void LoadSQW::readEvents(
   const size_t column_size_4 = column_size * 4; // offset, gives idet
   // const size_t column_size_5 = column_size * 5; //offset, gives ien
   const size_t column_size_6 = column_size * 6; // offset, gives irun
+  // TODO can this be read from the file? Was the file produced with SaveMD?
+  uint16_t goniometerIndex(0);
   const size_t column_size_7 = column_size * 7; // offset, gives signal
   const size_t column_size_8 = column_size * 8; // offset, gives error
 
@@ -288,6 +290,7 @@ void LoadSQW::readEvents(
           errorSQ,                                                 // Error sq
           static_cast<uint16_t>(interpretAs<float>(
               Buffer, current_pix + column_size_6)), // run Index
+          goniometerIndex,
           static_cast<int32_t>(interpretAs<float>(
               Buffer, current_pix + column_size_4)), // Detector Id
           centers));
