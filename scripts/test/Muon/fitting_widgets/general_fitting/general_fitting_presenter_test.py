@@ -12,6 +12,9 @@ from mantid.api import FrameworkManager, FunctionFactory
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model import GeneralFittingModel
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
+from Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_basic_fitting_model,
+                                                             add_mock_methods_to_basic_fitting_presenter,
+                                                             add_mock_methods_to_general_fitting_view)
 
 
 class GeneralFittingPresenterTest(unittest.TestCase):
@@ -321,6 +324,7 @@ class GeneralFittingPresenterTest(unittest.TestCase):
 
     def _setup_mock_view(self):
         self.view = mock.Mock(spec=GeneralFittingView)
+        self.view = add_mock_methods_to_general_fitting_view(self.view)
 
         # Mock the properties of the view
         self.mock_view_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
@@ -354,38 +358,11 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.mock_view_simultaneous_fitting_mode = mock.PropertyMock(return_value=self.simultaneous_fitting_mode)
         type(self.view).simultaneous_fitting_mode = self.mock_view_simultaneous_fitting_mode
 
-        # Mock the methods of the view
-        self.view.set_slot_for_fit_generator_clicked = mock.Mock()
-        self.view.set_slot_for_fit_button_clicked = mock.Mock()
-        self.view.set_slot_for_undo_fit_clicked = mock.Mock()
-        self.view.set_slot_for_plot_guess_changed = mock.Mock()
-        self.view.set_slot_for_fit_name_changed = mock.Mock()
-        self.view.set_slot_for_function_structure_changed = mock.Mock()
-        self.view.set_slot_for_function_parameter_changed = mock.Mock()
-        self.view.set_slot_for_start_x_updated = mock.Mock()
-        self.view.set_slot_for_end_x_updated = mock.Mock()
-        self.view.set_slot_for_minimizer_changed = mock.Mock()
-        self.view.set_slot_for_evaluation_type_changed = mock.Mock()
-        self.view.set_slot_for_use_raw_changed = mock.Mock()
-        self.view.set_slot_for_dataset_changed = mock.Mock()
-        self.view.set_slot_for_fitting_mode_changed = mock.Mock()
-        self.view.set_slot_for_simultaneous_fit_by_changed = mock.Mock()
-        self.view.set_slot_for_simultaneous_fit_by_specifier_changed = mock.Mock()
-
-        self.view.set_datasets_in_function_browser = mock.Mock()
-        self.view.set_current_dataset_index = mock.Mock()
-        self.view.update_local_fit_status_and_chi_squared = mock.Mock()
-        self.view.update_global_fit_status = mock.Mock()
-        self.view.update_fit_function = mock.Mock()
-        self.view.enable_undo_fit = mock.Mock()
-        self.view.number_of_datasets = mock.Mock(return_value=len(self.dataset_names))
-        self.view.warning_popup = mock.Mock()
-        self.view.get_global_parameters = mock.Mock(return_value=[])
-        self.view.switch_to_simultaneous = mock.Mock()
-        self.view.switch_to_single = mock.Mock()
-
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=GeneralFittingModel)
+        self.model = add_mock_methods_to_basic_fitting_model(self.model, self.dataset_names, self.current_dataset_index,
+                                                             self.fit_function, self.start_x, self.fit_status,
+                                                             self.chi_squared)
 
         # Mock the properties of the model
         self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)
@@ -445,34 +422,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.mock_model_do_rebin = mock.PropertyMock(return_value=False)
         type(self.model).do_rebin = self.mock_model_do_rebin
 
-        # Mock the methods of the model
-        self.model.clear_single_fit_functions = mock.Mock()
-        self.model.get_single_fit_function_for = mock.Mock(return_value=self.fit_function)
-        self.model.cache_the_current_fit_functions = mock.Mock()
-        self.model.clear_cached_fit_functions = mock.Mock()
-        self.model.automatically_update_function_name = mock.Mock()
-        self.model.use_cached_function = mock.Mock()
-        self.model.update_plot_guess = mock.Mock()
-        self.model.remove_all_fits_from_context = mock.Mock()
-        self.model.reset_current_dataset_index = mock.Mock()
-        self.model.reset_start_xs_and_end_xs = mock.Mock()
-        self.model.reset_fit_statuses_and_chi_squared = mock.Mock()
-        self.model.reset_fit_functions = mock.Mock()
-        self.model.retrieve_first_good_data_from_run = mock.Mock(return_value=self.start_x)
-        self.model.get_active_fit_function = mock.Mock(return_value=self.fit_function)
-        self.model.get_active_workspace_names = mock.Mock(return_value=[self.dataset_names[self.current_dataset_index]])
-        self.model.get_active_fit_results = mock.Mock(return_value=[])
-        self.model.get_workspace_names_to_display_from_context = mock.Mock(return_value=self.dataset_names)
-        self.model.perform_fit = mock.Mock(return_value=(self.fit_function, self.fit_status, self.chi_squared))
-
     def _setup_presenter(self):
         self.presenter = GeneralFittingPresenter(self.view, self.model)
-
-        # Mock the fit result property
-        #self.presenter.fitting_calculation_model = mock.Mock(spec=ThreadModel)
-        #self.mock_presenter_get_fit_results = mock.PropertyMock(return_value=(self.fit_function, self.fit_status,
-        #                                                                      self.chi_squared))
-        #type(self.presenter.fitting_calculation_model).result = self.mock_presenter_get_fit_results
 
         # Mock unimplemented methods and notifiers
         self.presenter.disable_editing_notifier.notify_subscribers = mock.Mock()
