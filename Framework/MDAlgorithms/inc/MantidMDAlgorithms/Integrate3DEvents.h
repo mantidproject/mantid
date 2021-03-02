@@ -50,46 +50,57 @@ struct IntegrationParameters {
 
  */
 
-using EventListMap = std::unordered_map<
-    int64_t,
-    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
-using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
+using Mantid::Kernel::V3D;
+using Mantid::Geometry::PeakShape_const_sptr;
+using Mantid::DataObjects::PeakShapeEllipsoid_const_sptr;
+
+/// [(weight, error), Q3D or HKL vector] object for an event
+using SlimEvent = std::pair<std::pair<double, double>, V3D>;
+using SlimEventList = std::vector<SlimEvent>;
+
+using EventListMap = std::unordered_map<int64_t, SlimEventList>;
+using PeakQMap = std::unordered_map<int64_t, V3D>;
 
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
+      const SlimEventList &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius,
       const bool useOnePercentBackgroundCorrection = true);
 
   Integrate3DEvents(
-      const std::vector<std::pair<std::pair<double, double>,
-                                  Mantid::Kernel::V3D>> &peak_q_list,
-      std::vector<Mantid::Kernel::V3D> const &hkl_list,
-      std::vector<Mantid::Kernel::V3D> const &mnp_list,
+      const SlimEventList &peak_q_list,
+      std::vector<V3D> const &hkl_list,
+      std::vector<V3D> const &mnp_list,
       Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
       double radius_m, double radius_s, int MaxO, const bool CrossT,
       const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
-  void addEvents(std::vector<std::pair<std::pair<double, double>,
-                                       Mantid::Kernel::V3D>> const &event_qs,
-                 bool hkl_integ);
+  void addEvents(SlimEventList const &event_qs, bool hkl_integ);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
+  PeakShape_const_sptr ellipseIntegrateEvents(
+      const std::vector<V3D> &E1Vec, V3D const &peak_q,
       bool specify_size, double peak_radius, double back_inner_radius,
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
 
   /// Find the net integrated intensity of a modulated peak, using ellipsoidal
   /// volumes
-  std::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateModEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
-      Mantid::Kernel::V3D const &hkl, Mantid::Kernel::V3D const &mnp,
+  PeakShape_const_sptr ellipseIntegrateModEvents(
+      const std::vector<V3D> &E1Vec, V3D const &peak_q,
+      V3D const &hkl, V3D const &mnp,
+      bool specify_size, double peak_radius, double back_inner_radius,
+      double back_outer_radius, std::vector<double> &axes_radii, double &inti,
+      double &sigi);
+
+  /// Find the net integrated intensity of a modulated peak, using ellipsoidal
+  /// volumes
+  PeakShape_const_sptr ellipseIntegrateModEvents(
+      const std::vector<V3D> &E1Vec, size_t const &peakIndex,
+      V3D const &hkl, V3D const &mnp,
       bool specify_size, double peak_radius, double back_inner_radius,
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
@@ -171,12 +182,11 @@ private:
               bool hkl_integ);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
-  std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
+  PeakShapeEllipsoid_const_sptr
   ellipseIntegrateEvents(
-      const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
-      std::vector<std::pair<std::pair<double, double>,
-                            Mantid::Kernel::V3D>> const &ev_list,
-      std::vector<Mantid::Kernel::V3D> const &directions,
+      const std::vector<V3D> &E1Vec, V3D const &peak_q,
+      SlimEventList const &ev_list,
+      std::vector<V3D> const &directions,
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
@@ -192,7 +202,7 @@ private:
 
   // Private data members
 
-  PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
+  PeakQMap m_peak_qs;         // hashtable with peak Q-vectors in the lab frame
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   Kernel::DblMatrix m_ModHKL; // matrix mapping from Q to m,n,p
@@ -202,6 +212,10 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+  /// Peak Q-vectors in the lab frame
+  std::vector<V3D> m_peakQLabList;
+  /// neighbor events for each peak (to substitute m_event_lists)
+  std::vector<SlimEventList> m_eventLists;
 };
 
 } // namespace MDAlgorithms

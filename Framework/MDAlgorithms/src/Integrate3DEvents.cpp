@@ -103,6 +103,11 @@ Integrate3DEvents::Integrate3DEvents(
     if (hklmnp_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hklmnp_key] = peak_q_list[it].second;
   }
+
+  for (size_t it = 0; it != peak_q_list.size(); ++it) {
+    m_peakQLabList.emplace_back(peak_q_list[it].second);
+  }
+  m_eventLists.resize(peak_q_list.size());
 }
 
 /**
@@ -122,8 +127,7 @@ Integrate3DEvents::Integrate3DEvents(
  *                   with peaks.
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvents(
-    std::vector<std::pair<std::pair<double, double>, V3D>> const &event_qs,
+void Integrate3DEvents::addEvents(std::vector<SlimEvent> const &event_qs,
     bool hkl_integ) {
   if (!maxOrder)
     for (const auto &event_q : event_qs)
@@ -497,7 +501,7 @@ Integrate3DEvents::ellipseIntegrateEvents(
                                 back_outer_radius, axes_radii, inti, sigi);
 }
 
-Mantid::Geometry::PeakShape_const_sptr
+PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateModEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q, V3D const &hkl,
     V3D const &mnp, bool specify_size, double peak_radius,
@@ -518,10 +522,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
     return std::make_shared<NoShape>();
-  ;
-
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
-      pos->second;
+  SlimEventList &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -557,6 +558,61 @@ Integrate3DEvents::ellipseIntegrateModEvents(
                                 peak_radius, back_inner_radius,
                                 back_outer_radius, axes_radii, inti, sigi);
 }
+
+PeakShape_const_sptr
+Integrate3DEvents::ellipseIntegrateModEvents(
+    const std::vector<V3D> &E1Vec, size_t const &peakIndex, V3D const &hkl,
+    V3D const &mnp, bool specify_size, double peak_radius,
+    double back_inner_radius, double back_outer_radius,
+    std::vector<double> &axes_radii, double &inti, double &sigi) {
+  inti = 0.0; // default values, in case something
+  sigi = 0.0; // is wrong with the peak.
+
+  int64_t hkl_key = getHklMnpKey(
+      boost::math::iround<double>(hkl[0]), boost::math::iround<double>(hkl[1]),
+      boost::math::iround<double>(hkl[2]), boost::math::iround<double>(mnp[0]),
+      boost::math::iround<double>(mnp[1]), boost::math::iround<double>(mnp[2]));
+
+  if (hkl_key == 0) {
+    return std::make_shared<NoShape>();
+  }
+
+  SlimEventList &some_events = m_eventLists[peakIndex];
+  // if not enough events to find covariance matrix, return
+  if (some_events.size() < 3)
+    return std::make_shared<NoShape>();
+
+  DblMatrix cov_matrix(3, 3);
+  if (hkl_key % 1000 == 0)
+    makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+  else
+    makeCovarianceMatrix(some_events, cov_matrix, s_radius);
+
+  std::vector<V3D> eigen_vectors;
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
+
+  std::vector<double> sigmas(3);
+  for (int i = 0; i < 3; i++)
+    sigmas[i] = sqrt(eigen_values[i]);
+
+  bool invalid_peak =
+      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
+        return std::isnan(sigma) || sigma <= 0;
+      });
+
+  if (invalid_peak)                     // if data collapses to a line or
+  {                                     // to a plane, the volume of the
+    return std::make_shared<NoShape>(); // ellipsoids will be zero.
+  }
+
+  return ellipseIntegrateEvents(std::move(E1Vec), m_peakQLabList[peakIndex],
+                                some_events,
+                                eigen_vectors, sigmas, specify_size,
+                                peak_radius, back_inner_radius,
+                                back_outer_radius, axes_radii, inti, sigi);
+}
+
 /**
  * Calculate the number of events in an ellipsoid centered at 0,0,0 with
  * the three specified axes and the three specified sizes in the direction
@@ -997,8 +1053,24 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
+void Integrate3DEvents::addEvent(SlimEvent event_Q, bool hkl_integ) {
+
+  V3D v(event_Q.second); // Q3D or HKL vector
+  double thresholdDistanceSquare(m_radius * m_radius);
+  for(size_t peakIndex = 0; peakIndex < m_peakQLabList.size(); peakIndex++){
+    V3D vRelative;
+    if (hkl_integ)
+      vRelative = v - m_UBinv * m_peakQLabList[peakIndex];
+    else
+      vRelative = v - m_peakQLabList[peakIndex];
+    double distanceSquare(vRelative.norm2());
+    if (distanceSquare < thresholdDistanceSquare){
+      event_Q.second = vRelative;
+      m_eventLists[peakIndex].emplace_back(event_Q);
+      break;
+    }
+  }
+
   int64_t hkl_key;
   if (hkl_integ)
     hkl_key = getHklKey2(event_Q.second);
@@ -1036,14 +1108,36 @@ void Integrate3DEvents::addEvent(
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addModEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
+void Integrate3DEvents::addModEvent(SlimEvent event_Q, bool hkl_integ) {
+
   int64_t hklmnp_key;
 
   if (hkl_integ)
     hklmnp_key = getHklMnpKey2(event_Q.second);
   else
     hklmnp_key = getHklMnpKey(event_Q.second);
+
+  bool isMainPeak(hklmnp_key % 10000 == 0);
+  double thresholdDistanceSquare;
+  if (isMainPeak)
+    thresholdDistanceSquare = m_radius * m_radius;
+  else
+    thresholdDistanceSquare = s_radius * s_radius;
+
+  V3D v(event_Q.second); // Q3D or HKL vector
+  for(size_t peakIndex = 0; peakIndex < m_peakQLabList.size(); peakIndex++){
+    V3D vRelative;
+    if (hkl_integ)
+      vRelative = v - m_UBinv * m_peakQLabList[peakIndex];
+    else
+      vRelative = v - m_peakQLabList[peakIndex];
+    double distanceSquare(vRelative.norm2());
+    if (distanceSquare < thresholdDistanceSquare){
+      event_Q.second = vRelative;
+      m_eventLists[peakIndex].emplace_back(event_Q);
+      break;
+    }
+  }
 
   if (hklmnp_key == 0) // don't keep events associated with 0,0,0
     return;
@@ -1105,8 +1199,7 @@ void Integrate3DEvents::addModEvent(
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q,
-    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
-        &ev_list,
+    SlimEventList const &ev_list,
     std::vector<V3D> const &directions, std::vector<double> const &sigmas,
     bool specify_size, double peak_radius, double back_inner_radius,
     double back_outer_radius, std::vector<double> &axes_radii, double &inti,

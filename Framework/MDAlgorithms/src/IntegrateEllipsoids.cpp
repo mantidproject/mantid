@@ -552,7 +552,7 @@ void IntegrateEllipsoids::exec() {
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateModEvents(
-              E1Vec, peak_q, hkl, mnp, specify_size, adaptiveRadius,
+              E1Vec, i, hkl, mnp, specify_size, adaptiveRadius,
               adaptiveBack_inner_radius, adaptiveBack_outer_radius, axes_radii,
               inti, sigi);
       peaks[i].setIntensity(inti);
@@ -655,7 +655,7 @@ void IntegrateEllipsoids::exec() {
           const V3D peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
           integrator.ellipseIntegrateModEvents(
-              E1Vec, peak_q, hkl, mnp, specify_size, peak_radius,
+              E1Vec, i, hkl, mnp, specify_size, peak_radius,
               back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
