@@ -898,8 +898,8 @@ def calculate_model(data_ws_name, ws_index, fit_param_table_name) -> str:
         i_max = bisect.bisect(vec_x, x_max)
 
         vec_x = vec_x[i_min:i_max]
-        obs_y = data_ws.readY(ws_index)[i_min:i_max]
-        model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1, 'guassian')
+        model_y = gaussian(vec_x, peak_height, peak_pos, peak_sigma, bkgd_a0, bkgd_a1)
+        # obs_y = data_ws.readY(ws_index)[i_min:i_max]
         # cost = np.sqrt(np.sum((model_y - obs_y)**2))/len(obs_y)
 
         out_ws_name = 'model_{0}'.format(ws_index)
