@@ -68,7 +68,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         # Triggers handle_dataset_name_changed
         self.update_dataset_names_in_view_and_model()
 
-        self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
 
