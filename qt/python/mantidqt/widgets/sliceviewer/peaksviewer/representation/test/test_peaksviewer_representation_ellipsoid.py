@@ -142,7 +142,7 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         def slice_transform(x):
             return x
 
-        peak_center = (3, 1, 3)
+        peak_center = [3, 1, 3]
         ellipsoid = create_ellipsoid_info(
             radii=(0.5, 0.5, 0.5),
             axes=("1 0 0", "0 1 0", "0 0 1"),
@@ -222,8 +222,8 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
         painter.ellipse.assert_called_once_with(
             x,
             y,
-            FuzzyMatch(signal_width, atol=1e-2),
-            FuzzyMatch(signal_height, atol=1e-2),
+            FuzzyMatch(signal_width, atol=2e-2),
+            FuzzyMatch(signal_height, atol=2e-2),
             FuzzyMatch(angle, atol=1e-2),
             alpha=alpha,
             edgecolor=fg_color,
@@ -236,9 +236,9 @@ class EllipsoidalIntergratedPeakRepresentationTest(unittest.TestCase):
             painter.elliptical_shell.assert_called_once_with(
                 x,
                 y,
-                FuzzyMatch(bkgd_width, atol=1e-2),
-                FuzzyMatch(bkgd_height, atol=1e-2),
-                FuzzyMatch(thickness, atol=1e-2),
+                FuzzyMatch(bkgd_width, atol=2e-2),
+                FuzzyMatch(bkgd_height, atol=2e-2),
+                FuzzyMatch(thickness, atol=2e-2),
                 FuzzyMatch(angle, atol=1e-2),
                 alpha=alpha,
                 edgecolor="none",
