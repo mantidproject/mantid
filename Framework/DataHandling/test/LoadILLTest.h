@@ -57,13 +57,21 @@ public:
     checkLoader("ILL/D2B/535401", "LoadILLDiffraction");
   }
 
-  void test_LoadDiffraction_D7() {
-    checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction");
-  }
-
   void test_LoadDiffraction_D20() {
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
+  }
+
+  void test_loadDiffraction_IN5() {
+    checkLoader("ILL/IN5/199857", "LoadILLDiffraction");
+  }
+
+  void test_loadDiffraction_PANTHER() {
+    checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction");
+  }
+
+  void test_LoadPolarizedDiffraction_D7() {
+    checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction");
   }
 
   void test_loadIndirect_IN16B() {
@@ -81,7 +89,6 @@ public:
   void test_loadTOF_IN5() {
     checkLoader("ILL/IN5/104007", "LoadILLTOF");
     checkLoader("ILL/IN5/189171", "LoadILLTOF");
-    checkLoader("ILL/IN5/199857", "LoadILLDiffraction");
   }
 
   void test_loadTOF_IN6() {
