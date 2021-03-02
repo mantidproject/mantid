@@ -26,10 +26,12 @@ set ( TEST_PY_FILES
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_tab_presenter_test.py
    elemental_analysis_2/EA_grouping_tab/elemental_analysis_grouping_table_presenter_test.py
    external_plotting_model_test.py
-   fft_presenter_context_interaction_test.py
    FFTModel_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fit_information_test.py
+   fit_parameters_test.py
+   fitting_context_test.py
    fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    fitting_widgets/basic_fitting/basic_fitting_model_test.py
    fitting_widgets/basic_fitting/basic_fitting_presenter_test.py
@@ -39,14 +41,6 @@ set ( TEST_PY_FILES
    fitting_widgets/general_fitting/general_fitting_model_test.py
    fitting_widgets/general_fitting/general_fitting_presenter_test.py
    fitting_widgets/general_fitting/general_fitting_options_view_test.py
-   # seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
-   seq_fitting_tab_widget/sequential_table_test.py
-   fit_information_test.py
-   fit_parameters_test.py
-   fitting_context_test.py
-   fitting_tab_widget/fitting_tab_model_test.py
-   fitting_tab_widget/fitting_tab_presenter_test.py
-   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
    frequency_domain_context_test.py
    grouping_tab/calculate_pair_and_group_test.py
    grouping_tab/difference_table_presenter_test.py
@@ -94,7 +88,7 @@ set ( TEST_PY_FILES
    plotting_canvas/plotting_canvas_presenter_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
-   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
+   # seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
    transform_widget_new_test.py
    transformWidget_test.py
