@@ -377,13 +377,13 @@ def cross_correlate_calibrate(ws_name: str,
     return offset_ws_name, mask_ws_name
 
 
-# FIXME - this method needs a better name
 def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
                             start_row_number: int,
                             mask_ws,
                             mask_erroneous_pixels: bool,
-                            cal_table: Union[Any, None]=None,
-                            difc_col_index: Union[int, None]=None):
+                            cal_table: Union[Any, None] = None,
+                            difc_col_index: Union[int, None] = None,
+                            verbose: bool = False):
     """Process DIFC if calbirated value is out of tolerance
 
     Parameters
@@ -404,6 +404,8 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
         mask workspace
     mask_erroneous_pixels: bool
         if True, mask the pixels with DIFC out of tolerance
+    verbose: bool
+        If True, print out detailed correction information
 
     Returns
     -------
@@ -439,7 +441,9 @@ def correct_difc_to_default(idf_difc_vec, cal_difc_vec, difc_tol,
                        ''.format(index, index + start_row_number, difc_diff_vec[index], mask_sig)
         # END-IF
     # END-FOR
-    print(f'[INFO] Number of DIFC incorrect = {num_wild_difc} out of {cal_difc_vec.shape}\n{message}')
+    print(f'[INFO] Number of DIFC incorrect = {num_wild_difc} out of {cal_difc_vec.shape}')
+    if verbose:
+        print(f'{message}')
 
     # Mask detectors
     if mask_erroneous_pixels and num_wild_difc > 0:
