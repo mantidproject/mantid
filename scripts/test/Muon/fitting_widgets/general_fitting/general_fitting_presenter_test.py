@@ -13,7 +13,6 @@ from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_model impor
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_presenter import GeneralFittingPresenter
 from Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_view import GeneralFittingView
 from Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_basic_fitting_model,
-                                                             add_mock_methods_to_basic_fitting_presenter,
                                                              add_mock_methods_to_general_fitting_view)
 
 
