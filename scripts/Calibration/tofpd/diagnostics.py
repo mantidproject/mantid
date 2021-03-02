@@ -205,9 +205,15 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
     cb = fig.colorbar(p, ax=ax)
     cb.set_label('delta DIFC')
     ax.set_xlabel(r'polar ($\phi$)')
-    ax.set_xlim(0.0, 180)
     ax.set_ylabel(r'azimuthal ($\theta$)')
-    ax.set_ylim(-180, 180)
+
+    # Find bounds based on detector pos
+    xmin = np.min(theta_array)
+    xmax = np.max(theta_array)
+    ymin = np.min(phi_array)
+    ymax = np.max(phi_array)
+    ax.set_xlim(np.floor(xmin), np.ceil(xmax))
+    ax.set_ylim(np.floor(ymin), np.ceil(ymax))
 
     fig.show()
 
