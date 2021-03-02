@@ -121,7 +121,6 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.switch_fitting_mode_in_view.assert_called_once_with()
         self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
         self.presenter.update_dataset_names_in_view_and_model.assert_called_once_with()
-        self.presenter.reset_start_xs_and_end_xs.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
         self.presenter.fitting_mode_changed_notifier.notify_subscribers.assert_called_once_with()
