@@ -56,10 +56,9 @@ class TestUtils(unittest.TestCase):
     # ------------------ #
     def test_calibration(self):
         diamond_run = ["VULCAN_192226.nxs.h5"]
-        calibration_rst = os.path.join(tempfile.gettempdir(), "VULCAN_Calibration_Hybrid.h5")
+        test_output_dir = tempfile.gettempdir()
+        calibration_rst = os.path.join(test_output_dir, "VULCAN_Calibration_Hybrid.h5")
         tube_grouping_plan = None
-        # FIXME - output directory shall be set by tempfile
-        test_output_dir = '/tmp'
 
         # perform calibration
         # step_1:
