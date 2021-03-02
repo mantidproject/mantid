@@ -53,93 +53,37 @@ class AbsorptionCorrUtilsTest(unittest.TestCase):
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
 
-        # with caching
         sample_ws, container_ws = absorptioncorrutils.calculate_absorption_correction(
-            '', "None", None, "V", 1.0, cache_dir=tempfile.gettempdir())
+            '', "None", None, "V", 1.0, cache_dirs=[tempfile.gettempdir()])
 
         self.assertIsNone(sample_ws)
         self.assertIsNone(container_ws)
 
-    def test_instr_name_helper(self):
-        fname = "PG3_46577.nxs.h5"
-
-        # Test if name retrieved from filename
-        instr_name = absorptioncorrutils._getInstrName(fname)
-        self.assertEqual("PG3", instr_name)
-
-        # Use dummy file name but make sure it is retrieved from workspace
-        instr_name = absorptioncorrutils._getInstrName("fakeinstrument", mtd["data"])
-        self.assertEqual("PG3", instr_name)
-
-    def test_cache_filename_prefix(self):
+    def test_cache(self):
         fname = "PG3_46577.nxs.h5"
         props = PropertyManagerDataService.retrieve("props")
 
-        cachedir = tempfile.gettempdir()
-        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
-                                                                           "SampleOnly",
-                                                                           props,
-                                                                           "Si",
-                                                                           1.165,
-                                                                           element_size=2,
-                                                                           cache_dir=cachedir,
-                                                                           prefix="FILENAME")
+        cachedirs = [tempfile.gettempdir()] * 3
+        abs_s, _ = absorptioncorrutils.calculate_absorption_correction(
+            fname,
+            "SampleOnly",
+            props,
+            "Si",
+            1.165,
+            element_size=2,
+            cache_dirs=cachedirs,
+        )
         self.assertIsNotNone(abs_s)
 
-        # Compare against expected name using FILENAME prefix
-        cached_wsname = absorptioncorrutils._getBasename(fname) + "_abs_correction_ass"
-        self.assertEqual(mtd.doesExist(cached_wsname), True)
-
-        # Remove the workspace from ADS and verify it can be found from disk
-        DeleteWorkspaces(cached_wsname)
-
-        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
-                                                                           "SampleOnly",
-                                                                           props,
-                                                                           "Si",
-                                                                           1.165,
-                                                                           element_size=2,
-                                                                           cache_dir=cachedir,
-                                                                           prefix="FILENAME")
-        self.assertIsNotNone(abs_s)
-
-    def test_cache_sha_prefix(self):
-        fname = "PG3_46577.nxs.h5"
-        props = PropertyManagerDataService.retrieve("props")
-
-        cachedir = tempfile.gettempdir()
-        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
-                                                                           "SampleOnly",
-                                                                           props,
-                                                                           "Si",
-                                                                           1.165,
-                                                                           element_size=2,
-                                                                           cache_dir=cachedir,
-                                                                           prefix="SHA")
-        self.assertIsNotNone(abs_s)
-
-        # Get what the cache SHA should be - verify the donor WS exists since that is used to make cache SHA
-        donorws = "__{}_abs".format(absorptioncorrutils._getBasename(fname))
-        self.assertEqual(mtd.doesExist(donorws), True)
-        cache_prefix = absorptioncorrutils._getInstrName(fname, mtd[donorws])
-        cachefile, sha = absorptioncorrutils._getCacheName(donorws, cache_prefix, cachedir,
-                                                           "SampleOnly")
-
-        # Compare against expected name using SHA prefix
-        cached_wsname = cache_prefix + "_" + sha + "_abs_correction_ass"
-        self.assertEqual(mtd.doesExist(cached_wsname), True)
-
-        # Remove the workspace from ADS and verify it can be found from disk
-        DeleteWorkspaces(cached_wsname)
-
-        abs_s, abs_c = absorptioncorrutils.calculate_absorption_correction(fname,
-                                                                           "SampleOnly",
-                                                                           props,
-                                                                           "Si",
-                                                                           1.165,
-                                                                           element_size=2,
-                                                                           cache_dir=cachedir,
-                                                                           prefix="SHA")
+        abs_s, _ = absorptioncorrutils.calculate_absorption_correction(
+            fname,
+            "SampleOnly",
+            props,
+            "Si",
+            1.165,
+            element_size=2,
+            cache_dirs=cachedirs,
+            )
         self.assertIsNotNone(abs_s)
 
 

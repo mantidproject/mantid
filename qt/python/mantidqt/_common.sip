@@ -1,4 +1,5 @@
 %ModuleCode
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
@@ -1071,6 +1072,12 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+// FittingMode
+// ----------------------------------------------------------------------------
+
+enum class FittingMode {SEQUENTIAL, SIMULTANEOUS, SEQUENTIAL_AND_SIMULTANEOUS};
+
+// ----------------------------------------------------------------------------
 // FitScriptGeneratorView
 // ----------------------------------------------------------------------------
 
@@ -1081,6 +1088,7 @@ class FitScriptGeneratorView : QWidget {
 public:
     FitScriptGeneratorView(
         QWidget *parent = nullptr,
+        FittingMode fittingMode = FittingMode::SEQUENTIAL,
         const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
 };
 
@@ -1094,6 +1102,9 @@ class FitScriptGeneratorModel {
 %End
 public:
     FitScriptGeneratorModel();
+
+private:
+    FitScriptGeneratorModel(const FitScriptGeneratorModel &model);
 };
 
 // ----------------------------------------------------------------------------

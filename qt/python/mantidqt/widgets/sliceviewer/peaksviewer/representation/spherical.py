@@ -67,10 +67,11 @@ class SphericallyIntergratedPeakRepresentation():
         # yapf: enable
 
         # add background if we have one
-        bkgd_radius_thick = _bkgd_radius_info(shape_info)
-        if bkgd_radius_thick is not None:
-            bkgd_outer_radius, thickness = bkgd_radius_thick
+        bkgd_inner_radius, bkgd_outer_radius = _bkgd_radius_info(shape_info)
+        if bkgd_outer_radius is not None and bkgd_outer_radius > 0:
             _, bkgd_circle_radius = slice_sphere(peak_origin, bkgd_outer_radius, slice_info.z_value)
+            _, bkgd_circle_radius_inner = slice_sphere(peak_origin, bkgd_inner_radius, slice_info.z_value)
+            thickness = bkgd_circle_radius - bkgd_circle_radius_inner
             # yapf: disable
             artists.append(
                 painter.shell(
@@ -104,13 +105,7 @@ def _bkgd_radius_info(shape_info):
     :param shape_info: A reference to a a dictionary of parameters from a PeakShape object
     :return: 2-tuple of (outer_radius, thickness) or None if no background region is defined
     """
-    bg_inner_radius = shape_info.get("background_inner_radius", None)
-    bg_outer_radius = shape_info.get("background_outer_radius", None)
-    radius_thickness = None
-    if bg_inner_radius and bg_outer_radius:
-        radius_thickness = (bg_outer_radius, bg_outer_radius - bg_inner_radius)
-
-    return radius_thickness
+    return shape_info.get("background_inner_radius", None), shape_info.get("background_outer_radius", None)
 
 
 def slice_sphere(peak_origin, radius, zp):
@@ -120,8 +115,8 @@ def slice_sphere(peak_origin, radius, zp):
     :param zp: Slice point in slice dimension
     """
     # Sphere is just a special case of an ellipse
-    slice_origin, circle_radius, _, __ = slice_ellipsoid_matrix(peak_origin, zp,
-                                                                calculate_spherical_matrix(radius))
+    slice_origin, circle_radius, _, __, _ = slice_ellipsoid_matrix(peak_origin, zp,
+                                                                   calculate_spherical_matrix(radius))
     return slice_origin, circle_radius
 
 

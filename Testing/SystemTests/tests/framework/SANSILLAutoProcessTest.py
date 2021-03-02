@@ -428,6 +428,51 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            ReferenceFiles=",".join(water_dir))
 
 
+class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
+    """
+    Tests auto process with D22 data with one sensitivity measurement.
+    """
+
+    def __init__(self):
+        super(D22_AutoProcess_Single_Sensitivity, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+        MaskBTP(Instrument='D22', Pixel='0-12,245-255')
+        MaskBTP(Workspace='D22MaskBTP', Tube='54-75', Pixel='108-150')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='D22_mask_central')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
+
+    def runTest(self):
+
+        samples = '344411'
+        masks = 'D22_mask_central'
+        thick = 0.1
+
+        # reduce samples
+        SANSILLAutoProcess(
+            SampleRuns=samples,
+            MaskFiles=masks,
+            SensitivityOutputWorkspace='sens',
+            SampleThickness=thick,
+            OutputWorkspace='ref',
+            SensitivityWithOffsets=False
+        )
+        GroupWorkspaces(InputWorkspaces=['ref', 'sens'], OutputWorkspace='d22_single_sens')
+
+
 class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
     """
     Tests auto process with D22 data with two sensitivity measurements

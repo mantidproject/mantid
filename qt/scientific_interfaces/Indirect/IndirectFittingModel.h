@@ -17,6 +17,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -28,7 +29,6 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
 class IndirectFittingModel;

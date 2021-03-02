@@ -222,6 +222,10 @@ Usage
 
 **Example - Preset Shape**
 
+.. testsetup:: Preset
+   # Currently an issue with multithreading in this test 
+   FrameworkManager.Instance().setNumOMPThreads(1)
+
 .. testcode:: Preset
 
     sample_ws = CreateSampleWorkspace(Function="Quasielastic",
@@ -271,7 +275,7 @@ Usage
     print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Preset
-
+    FrameworkManager.Instance().setNumOMPThreadsToConfigValue()
     mtd.clear()
 
 .. testoutput:: Preset

@@ -6,8 +6,8 @@
 #
 # WORKSPACE, JOB_NAME, NODE_LABEL, PACKAGE_SUFFIX, GIT_COMMIT are
 # environment variables that are set by Jenkins. The last one
-# corresponds to any labels set on a slave.  BUILD_THREADS &
-# PARAVIEW_DIR should be set in the configuration of each slave.
+# corresponds to any labels set on a slave.  BUILD_THREADS should
+# be set in the configuration of each slave.
 ###############################################################################
 # Set all string comparisons to case insensitive (i.e. Release == release)
 shopt -s nocasematch
@@ -78,11 +78,6 @@ fi
 trap onexit INT TERM EXIT
 
 ###############################################################################
-# All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
-###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_DIR}
-
-###############################################################################
 # Some preprocessing steps on the workspace
 ###############################################################################
 BUILD_DIR_REL=build
@@ -133,9 +128,6 @@ if [[ $ON_RHEL7 ]]; then
 else
     SCL_ENABLE="eval"
 fi
-
-# Use Python 3 build of ParaView
-PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
 
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
@@ -283,7 +275,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         if [[ ${JOB_NAME} == release* ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
-        elif [[ ${JOB_NAME} == ornl ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
+        elif [[ ${JOB_NAME} == ornl-stable ]] && [[ -z "${PACKAGE_SUFFIX}" ]]; then
             # Traditional install path for release build
             PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
         else
@@ -292,7 +284,7 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
         fi
 
         if [[ ${ON_RHEL7} == true ]]; then
-            if [[ -n "${RELEASE_NUMBER}" ]]; then
+            if [[ -z "${RELEASE_NUMBER}" ]]; then
                 RELEASE_NUMBER="1"
             fi
             PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
@@ -350,17 +342,10 @@ cd $BUILD_DIR
 ###############################################################################
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
-# if the last build had vates enabled then remove a problematic moc artifact
-# that is not regenerated. Temporary fix while we transition MantidPlot/Vates out
-if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    VATES_FLAG=$(grep 'MAKE_VATES:BOOL' $BUILD_DIR/CMakeCache.txt)
-    find $BUILD_DIR/qt/widgets/common -name moc_MantidTreeModel.cpp -delete
-fi
-
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DParaView_DIR= -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early

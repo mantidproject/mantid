@@ -8,7 +8,9 @@
 
 #include "DllOption.h"
 
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -25,13 +27,31 @@ namespace MantidWidgets {
 class AddWorkspaceDialog;
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
+struct GlobalParameter;
+struct GlobalTie;
 
 class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView
     : public API::MantidWidget {
   Q_OBJECT
 
 public:
-  enum class Event { AddClicked, RemoveClicked, StartXChanged, EndXChanged };
+  enum class Event {
+    RemoveClicked,
+    AddClicked,
+    StartXChanged,
+    EndXChanged,
+    SelectionChanged,
+    FunctionRemoved,
+    FunctionAdded,
+    FunctionReplaced,
+    ParameterChanged,
+    AttributeChanged,
+    ParameterTieChanged,
+    ParameterConstraintRemoved,
+    ParameterConstraintChanged,
+    GlobalParametersChanged,
+    FittingModeChanged
+  };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)
       : API::MantidWidget(parent) {}
@@ -46,7 +66,13 @@ public:
   [[nodiscard]] virtual double startX(FitDomainIndex index) const = 0;
   [[nodiscard]] virtual double endX(FitDomainIndex index) const = 0;
 
+  [[nodiscard]] virtual std::vector<FitDomainIndex> allRows() const = 0;
   [[nodiscard]] virtual std::vector<FitDomainIndex> selectedRows() const = 0;
+
+  [[nodiscard]] virtual double
+  parameterValue(std::string const &parameter) const = 0;
+  [[nodiscard]] virtual Mantid::API::IFunction::Attribute
+  attributeValue(std::string const &attribute) const = 0;
 
   virtual void removeWorkspaceDomain(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) = 0;
@@ -61,6 +87,18 @@ public:
   getDialogWorkspaceIndices() const = 0;
 
   virtual void resetSelection() = 0;
+
+  virtual bool isAddRemoveFunctionForAllChecked() const = 0;
+
+  virtual void clearFunction() = 0;
+  virtual void
+  setFunction(Mantid::API::IFunction_sptr const &function) const = 0;
+
+  virtual void setSimultaneousMode(bool simultaneousMode) = 0;
+
+  virtual void setGlobalTies(std::vector<GlobalTie> const &globalTies) = 0;
+  virtual void
+  setGlobalParameters(std::vector<GlobalParameter> const &globalParameter) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

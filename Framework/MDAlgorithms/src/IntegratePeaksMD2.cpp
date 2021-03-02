@@ -578,12 +578,13 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           }
           // set peak shape
           if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
+            // get radii in same proprtion as eigenvalues
+            auto max_stdev =
+                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
             std::vector<double> peakRadii(3, 0.0);
             std::vector<double> backgroundInnerRadii(3, 0.0);
             std::vector<double> backgroundOuterRadii(3, 0.0);
             for (size_t irad = 0; irad < peakRadii.size(); irad++) {
-              auto max_stdev =
-                  sqrt(*std::max_element(eigenvals.begin(), eigenvals.end()));
               auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
               peakRadii[irad] = PeakRadiusVector[i] * scale;
               backgroundInnerRadii[irad] =

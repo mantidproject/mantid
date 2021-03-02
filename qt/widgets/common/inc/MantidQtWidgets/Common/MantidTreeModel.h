@@ -123,7 +123,6 @@ public slots:
 
   // Inteface methods
   // ONLY REQUIRED TO STATIFY MantidDisplayBase INTERFACE
-  void showVatesSimpleInterface() override;
   void showSpectrumViewer() override;
   void showSliceViewer() override;
   void showLogFileWindow() override;
@@ -136,10 +135,6 @@ public slots:
 
   void updateProject() override;
   void showCritical(const QString & /*unused*/) override;
-
-#ifdef MAKE_VATES
-  bool doesVatesSupportOpenGL() override;
-#endif
 
 private:
   // overide copy operations
