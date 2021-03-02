@@ -99,7 +99,7 @@ class HB3APredictPeaks(PythonAlgorithm):
                     min_angle = -exp_info.run().getLogData('phi').value.max()
                     max_angle = -exp_info.run().getLogData('phi').value.min()
                     # Sometimes you get the 180 degrees off what is expected from the log
-                    phi_log = -exp_info.run().getPropertyAsSingleValueWithTimeAveragedMean('phi')
+                    phi_log = -exp_info.run().getLogData('phi').value[0]
                     if np.isclose(phi_log + 180, gon[2]):
                         min_angle += 180
                         max_angle += 180
@@ -111,7 +111,7 @@ class HB3APredictPeaks(PythonAlgorithm):
                     min_angle = -exp_info.run().getLogData('omega').value.max()
                     max_angle = -exp_info.run().getLogData('omega').value.min()
                     # Sometimes you get the 180 degrees off what is expected from the log
-                    omega_log = -exp_info.run().getPropertyAsSingleValueWithTimeAveragedMean('omega')
+                    omega_log = -exp_info.run().getLogData('omega').value[0]
                     if np.isclose(omega_log + 180, gon[0]):
                         min_angle += 180
                         max_angle += 180

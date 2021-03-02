@@ -246,6 +246,12 @@ uint16_t MatrixWorkspaceMDIterator::getInnerRunIndex(size_t /*index*/) const {
   return 0;
 }
 
+/// For a given event/point in this box, return the run index
+uint16_t
+MatrixWorkspaceMDIterator::getInnerGoniometerIndex(size_t /*index*/) const {
+  return 0;
+}
+
 /// For a given event/point in this box, return the detector ID
 int32_t MatrixWorkspaceMDIterator::getInnerDetectorID(size_t /*index*/) const {
   return 0;

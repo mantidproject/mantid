@@ -640,16 +640,6 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
   m_showBoxData = new QAction(tr("Show Box Data Table"), this);
   connect(m_showBoxData, SIGNAL(triggered()), this, SLOT(onClickShowBoxData()));
 
-  m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
-  {
-    QIcon icon;
-    icon.addFile(
-        QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"),
-        QSize(), QIcon::Normal, QIcon::Off);
-    m_showVatesGui->setIcon(icon);
-  }
-  connect(m_showVatesGui, SIGNAL(triggered()), this, SLOT(onClickShowVates()));
-
   m_showMDPlot = new QAction(tr("Plot MD"), this);
   connect(m_showMDPlot, SIGNAL(triggered()), this, SLOT(onClickShowMDPlot()));
 
@@ -1020,17 +1010,6 @@ void WorkspaceTreeWidget::addMDEventWorkspaceMenuItems(
   Q_UNUSED(WS);
 
   // menu->addAction(m_showBoxData); // Show MD Box data (for debugging only)
-  menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
-    m_showVatesGui->setEnabled(false);
-#ifdef MAKE_VATES
-  } else if (!m_mantidDisplayModel->doesVatesSupportOpenGL()) {
-    m_showVatesGui->setEnabled(false);
-#endif
-  } else {
-    std::size_t nDim = WS->getNumNonIntegratedDims();
-    m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
-  }
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showHist);        // Algorithm history
   menu->addAction(m_showListData);    // Show data in table
@@ -1040,18 +1019,7 @@ void WorkspaceTreeWidget::addMDEventWorkspaceMenuItems(
 void WorkspaceTreeWidget::addMDHistoWorkspaceMenuItems(
     QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const {
   Q_UNUSED(WS);
-  menu->addAction(m_showHist);     // Algorithm history
-  menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
-    m_showVatesGui->setEnabled(false);
-#ifdef MAKE_VATES
-  } else if (!m_mantidDisplayModel->doesVatesSupportOpenGL()) {
-    m_showVatesGui->setEnabled(false);
-#endif
-  } else {
-    std::size_t nDim = WS->getNonIntegratedDimensions().size();
-    m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
-  }
+  menu->addAction(m_showHist);        // Algorithm history
   menu->addAction(m_showSliceViewer); // The 2D slice viewer
   menu->addAction(m_showMDPlot);      // A plot of intensity vs bins
   menu->addAction(m_showListData);    // Show data in table
@@ -1679,14 +1647,6 @@ void WorkspaceTreeWidget::onClickShowBoxData() {
 
 void WorkspaceTreeWidget::showBoxDataTable() {
   m_mantidDisplayModel->importBoxDataTable();
-}
-
-void WorkspaceTreeWidget::onClickShowVates() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
-}
-
-void WorkspaceTreeWidget::showVatesGUI() {
-  m_mantidDisplayModel->showVatesSimpleInterface();
 }
 
 void WorkspaceTreeWidget::onClickShowMDPlot() {

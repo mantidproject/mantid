@@ -327,6 +327,12 @@ public:
   uint16_t getRunIndex() const { return 0; }
 
   //---------------------------------------------------------------------------------------------
+  /** @return the goniometer index of this event in the containing
+   * MDEventWorkspace. Always 0: this information is not present in a
+   * MDLeanEvent. */
+  uint16_t getGoniometerIndex() const { return 0; }
+
+  //---------------------------------------------------------------------------------------------
   /** @return the detectorId of this event.
    *           Always 0: this information is not present in a MDLeanEvent. */
   int32_t getDetectorID() const { return 0; }

@@ -139,12 +139,7 @@ void LoadIDFFromNexus::exec() {
       g_log.notice() << "Using correction parameter file: "
                      << corrParamFile.toString() << " to replace parameters.\n";
     }
-    bool ok = loadParameterFile(corrParamFile.toString(), localWorkspace);
-    if (!ok) {
-      g_log.error() << "Unable to load parameter file "
-                    << corrParamFile.toString() << " specified in "
-                    << corrFilePath.toString() << ".\n";
-    }
+    loadParameterFile(corrParamFile.toString(), localWorkspace);
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
                       "correction file.\n";
@@ -326,11 +321,16 @@ bool LoadIDFFromNexus::loadParameterFile(
     g_log.notice() << "Instrument parameter file: " << fullPathName
                    << " has been loaded.\n\n";
     return true; // Success
-  } catch (std::runtime_error &) {
-    g_log.debug() << "Instrument parameter file: " << fullPathName
-                  << " not found or un-parsable.\n";
-    return false; // Failure
+  } catch (std::invalid_argument &e) {
+    g_log.information(
+        "LoadParameterFile: No parameter file found for this instrument");
+    g_log.information(e.what());
+  } catch (std::runtime_error &e) {
+    g_log.information(
+        "Unable to successfully run LoadParameterFile Child Algorithm");
+    g_log.information(e.what());
   }
+  return false;
 }
 
 } // namespace DataHandling

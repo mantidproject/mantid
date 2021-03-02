@@ -168,6 +168,7 @@ void ALCBaselineModellingView::addSectionSelector(
 
   // Set initial values
   newSelector->setRange(values.first, values.second);
+  newSelector->setBounds(values.first, values.second);
   setSelectorValues(newSelector, values);
 
   m_ui.dataPlot->replot();

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, MultipleFileProperty, FileAction, mtd
-from mantid.kernel import Direction, Property, IntArrayProperty, StringListValidator
+from mantid.kernel import Direction, Property, IntArrayProperty, StringListValidator, FloatTimeSeriesProperty
 from mantid.simpleapi import LoadEventNexus, RemoveLogs, DeleteWorkspace, ConvertToMD, Rebin, CreateGroupingWorkspace, GroupDetectors, SetUB
 import numpy as np
 import h5py
@@ -116,6 +116,8 @@ class LoadWANDSCD(PythonAlgorithm):
                    'run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix',
                    EnableLogging=False)
 
+        time_ns_array = _tmp_ws.run().startTime().totalNanoseconds() + np.append(0, np.cumsum(duration_array)*1e9)[:-1]
+
         try:
             ub = np.array(re.findall(r'-?\d+\.*\d*', _tmp_ws.run().getProperty('HB2C:CS:CrystalAlign:UBMatrix').value[0]),
                           dtype=np.float).reshape(3,3)
@@ -162,16 +164,29 @@ class LoadWANDSCD(PythonAlgorithm):
         DeleteWorkspace('__PreprocessedDetectorsWS', EnableLogging=False)
         # end Hack
 
-        outWS.getExperimentInfo(0).run().addProperty('s1', s1_array, True)
+        add_time_series_property('s1', outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
         outWS.getExperimentInfo(0).run().getProperty('s1').units = 'deg'
-        outWS.getExperimentInfo(0).run().addProperty('duration', duration_array, True)
+        add_time_series_property('duration', outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
         outWS.getExperimentInfo(0).run().getProperty('duration').units = 'second'
         outWS.getExperimentInfo(0).run().addProperty('run_number', run_number_array, True)
-        outWS.getExperimentInfo(0).run().addProperty('monitor_count', monitor_count_array, True)
+        add_time_series_property('monitor_count', outWS.getExperimentInfo(0).run(), time_ns_array, monitor_count_array)
         outWS.getExperimentInfo(0).run().addProperty('twotheta', twotheta, True)
         outWS.getExperimentInfo(0).run().addProperty('azimuthal', azimuthal, True)
 
+        setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
+        setGoniometer_alg.setProperty("Workspace", outWS)
+        setGoniometer_alg.setProperty("Axis0", 's1,0,1,0,1')
+        setGoniometer_alg.setProperty("Average", False)
+        setGoniometer_alg.execute()
+
         self.setProperty("OutputWorkspace", outWS)
+
+
+def add_time_series_property(name, run, times, values):
+    log = FloatTimeSeriesProperty(name)
+    for t, v in zip(times, values):
+        log.addValue(t, v)
+    run[name] = log
 
 
 AlgorithmFactory.subscribe(LoadWANDSCD)

@@ -13,7 +13,7 @@ from unittest import mock
 import matplotlib as mpl
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, CreateSingleValuedWorkspace,
-                              CreateMDHistoWorkspace, CreateWorkspace, ConjoinWorkspaces, GroupWorkspaces)
+                              CreateMDHistoWorkspace, CreateWorkspace, ConjoinWorkspaces, GroupWorkspaces, LoadNexus)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from qtpy.QtWidgets import QMainWindow
@@ -96,6 +96,14 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     def test_detector_table_shows_with_workspace(self):
         with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
             self.ws_widget._do_show_detectors([self.ws_names[0]])
+        self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
+
+    def test_detector_table_shows_with_a_workspace_missing_an_efixed(self):
+        workspace_name = "TOSCA26911_show_detectors"
+        LoadNexus(Filename=workspace_name + '.nxs', OutputWorkspace=workspace_name)
+
+        with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
+            self.ws_widget._do_show_detectors([workspace_name])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
 
     @mock.patch('workbench.plugins.workspacewidget.plot', autospec=True)

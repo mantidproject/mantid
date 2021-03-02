@@ -47,7 +47,9 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)),
           SLOT(handleInstrumentChanged(std::string)));
-  connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
+  connect(m_view, SIGNAL(runsEditingSignal()), SLOT(handleRunsEditing()));
+  connect(m_view, SIGNAL(runsEditingFinishedSignal()),
+          SLOT(handleRunsEditingFinished()));
   connect(m_view, SIGNAL(manageDirectoriesClicked()),
           SLOT(handleManageDirectories()));
   connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
@@ -57,10 +59,13 @@ void ALCDataLoadingPresenter::initialize() {
           SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
-void ALCDataLoadingPresenter::handleRunsChanged() {
-  // Make sure everything is reset
+void ALCDataLoadingPresenter::handleRunsEditing() {
   m_view->enableLoad(false);
   m_view->setPath(std::string{});
+}
+
+void ALCDataLoadingPresenter::handleRunsEditingFinished() {
+  // Make sure everything is reset
   m_view->enableRunsAutoAdd(false);
 
   if (m_previousFirstRun !=
@@ -191,7 +196,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   try {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
-    alg->setChild(true); // Don't want workspaces in the ADS
+    alg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
 
     // Change first last run to WorkspaceNames
     alg->setProperty("WorkspaceNames", files);
@@ -246,7 +251,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
     MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
     IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
-    sortAlg->setChild(true); // Don't want workspaces in the ADS
+    sortAlg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
     sortAlg->setProperty("InputWorkspace", tmp);
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");

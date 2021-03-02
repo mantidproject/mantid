@@ -1069,8 +1069,8 @@ class MainWindow(QMainWindow):
 
     def helpClicked(self):
         try:
-            from pymantidplot.proxies import showCustomInterfaceHelp
-            showCustomInterfaceHelp("Filter Events")
+            import mantidqt
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events")
         except ImportError:
             url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
                    "".format("Filter Events"))
