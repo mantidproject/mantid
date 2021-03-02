@@ -767,7 +767,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter()
     def test_replace_incorrect_workspace(self, ws, view, presenter):
         with patch(
-                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay.load_data'
+                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
         ) as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME + "123", ws)
             self.assertNotCalled(mock_load_data)
@@ -778,7 +778,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         # patch this out after the constructor of the presenter has finished,
         # so that we reset any calls it might have made
         with patch(
-                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDisplay.load_data'
+                'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
         ) as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)

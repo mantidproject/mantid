@@ -250,7 +250,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             if col != selected_column:
                 self.presenter.model.set_column_type(int(col), 0)
         self.presenter.model.set_column_type(selected_column, 5, related_y_column)
-        self.update_column_headers()
+        self.presenter.update_column_headers()
 
     def action_set_as_none(self):
         self._action_set_as(self.presenter.model.marked_columns.remove, 0)
