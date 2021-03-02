@@ -57,6 +57,7 @@ Single Crystal Diffraction
 - New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 - Modified some logs in output workspace from :ref:`LoadWANDSCD <algm-LoadWANDSCD>` to be TimeSeriesProperty so they work with :ref:`SetGoniometer <algm-SetGoniometer>`.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to integrate ellispoids around estimated centroid instead of nominal position.
+- :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to determine ellipsoid covariance iteratively and to use the estimated standard deviation rather than scale the major axis of the ellipsoid to the spherical radius.
 
 Improvements
 ############

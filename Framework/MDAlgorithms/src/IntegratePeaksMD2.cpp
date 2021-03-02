@@ -1026,9 +1026,8 @@ void IntegratePeaksMD2::findEllipsoid(
   eigenvals = evals.Diagonal();
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
-  std::replace_if(
-      eigenvals.begin(), eigenvals.end(), [&](auto x) { return x < 1e-6; },
-      1e-6);
+  std::replace_if(eigenvals.begin(), eigenvals.end(),
+                  [&](auto x) { return x < 1e-6; },  1e-6);
 
   // populate V3D vector of eigenvects (needed for ellipsoid shape)
   eigenvects = std::vector<V3D>(nd);
