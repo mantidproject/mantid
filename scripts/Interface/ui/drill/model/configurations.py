@@ -129,6 +129,9 @@ class RundexSettings(object):
                 ],
             }
 
+    VISUAL_SETTINGS = {
+            }
+
     # algo name for each acquisition mode
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
