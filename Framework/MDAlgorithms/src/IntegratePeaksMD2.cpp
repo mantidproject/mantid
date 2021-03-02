@@ -954,10 +954,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *  @param pos            V3D of peak centre
  *  @param radiusSquared  radius that defines spherical region for covarariance
  *  @param qAxisIsFixed      bool to fix an eigenvector along direction pos
+ *  @param useCentroid    bool to use estimated centroid in variance calc
  *  @param bgDensity      background counts per unit volume
  *  @param eigenvects     eigenvectors of covariance matrix of spherical region
  *  @param eigenvals      eigenvectors of covariance matrix of spherical region
- *  @param translation    container to hold translation of peak pos to centroid
+ *  @param mean           container to hold centroid (fixed at pos if not using)
+ *  @param maxIter        max number of iterations in covariance determination
  */
 template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(
@@ -966,7 +968,7 @@ void IntegratePeaksMD2::findEllipsoid(
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const bool &useCentroid, const double &bgDensity,
     std::vector<V3D> &eigenvects, std::vector<double> &eigenvals, V3D &mean,
-    int max_depth) {
+    int maxIter) {
 
   // get leaf-only iterators over all boxes in ws
   auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
@@ -1023,7 +1025,7 @@ void IntegratePeaksMD2::findEllipsoid(
   Matrix<double> evecs; // hold eigenvectors
   Matrix<double> evals; // hold eigenvals in diag
   calcCovar(peak_events, pos, radiusSquared, qAxisIsFixed, useCentroid, evecs,
-            evals, mean, max_depth);
+            evals, mean, maxIter);
 
   // put output in vectors
   eigenvals = evals.Diagonal();
@@ -1059,8 +1061,7 @@ void IntegratePeaksMD2::calcCovar(
   }
 
   mean = pos;
-  double w_sum = 0;      // sum of weights
-  double var_Qhat = 0.0; //  variance parallel to Q (used if fix Q axis)
+  double w_sum = 0; // sum of weights
   Matrix<double> cov_mat(nd, nd);
   Matrix<double> Pinv(nd, nd);
   if (qAxisIsFixed) {
@@ -1111,7 +1112,7 @@ void IntegratePeaksMD2::calcCovar(
       auto wi = signal * (w_sum - signal) / w_sum;
       size_t istart = 0;
       if (qAxisIsFixed) {
-        // component along Q (skipped in next nested loops below)
+        // variance along Q (skipped in next nested loops below)
         cov_mat[0][0] += wi * pow((center[0] - mean[0]), 2);
         istart = 1;
       }
