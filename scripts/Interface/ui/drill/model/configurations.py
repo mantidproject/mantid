@@ -130,6 +130,12 @@ class RundexSettings(object):
             }
 
     VISUAL_SETTINGS = {
+            SANS_ACQ: {
+                "HiddenColumns": [
+                    "FluxRuns",
+                    "TransmissionAbsorberRuns"
+                    ]
+                }
             }
 
     # algo name for each acquisition mode
