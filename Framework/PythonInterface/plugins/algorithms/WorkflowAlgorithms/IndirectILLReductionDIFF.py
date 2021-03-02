@@ -110,7 +110,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         ConjoinXRuns(InputWorkspaces=self.output,
                      SampleLogAsXAxis=self.scan_parameter,
-                     FailBehaviour="Stop",
+                     FailBehaviour="Skip",
                      OutputWorkspace=self.output)
 
         if self.transpose:
