@@ -79,8 +79,7 @@ set(DL_ORIGIN_TAG @loader_path)
 
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if(NOT TARGET mantidpython)
-  # TODO path needs to be removed from appropriate scripts
-  set(PARAVIEW_PYTHON_PATHS "")
+  # TODO path needs to be removed from appropriate script
   configure_file(
     ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY
@@ -95,8 +94,6 @@ if(NOT TARGET mantidpython)
   )
   # Configure install script at the same time. Doing it later causes a warning
   # from ninja.
-  set(PARAVIEW_PYTHON_PATHS "")
-
   set(PYTHONHOME
       "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
   )

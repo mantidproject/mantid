@@ -152,7 +152,6 @@ void PreviewPlot::addSpectrum(const QString &lineName,
   regenerateLegend();
   axes.relim();
 
-  emit resetSelectorBounds();
   replot();
 }
 

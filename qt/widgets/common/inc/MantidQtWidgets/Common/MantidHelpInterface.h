@@ -16,11 +16,8 @@ class QUrl;
 namespace MantidQt {
 namespace API {
 
-/**
- *
-  This class is an interface for the central widget for handling VATES
- visualization
-  operations. Its main use is for the plugin mode operation of the viewer.
+/*
+ * An interface for handling offline help
  */
 class EXPORT_OPT_MANTIDQT_COMMON MantidHelpInterface : public QWidget {
   Q_OBJECT

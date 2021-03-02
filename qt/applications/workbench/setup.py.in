@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 # The most basic setup possible to be able to use setup.py develop/install
 setup(
     name='MantidWorkbench', # probably the wrong name if someone wants to include it
-    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
+    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK_PY@',
     install_requires=['mantidqt'],
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui']},

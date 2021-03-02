@@ -17,6 +17,36 @@
 
 #include <Poco/File.h>
 
+namespace {
+// Create a histogram from a workspace and return it
+Mantid::API::MatrixWorkspace_sptr
+toHistogram(const Mantid::API::MatrixWorkspace_sptr &ws) {
+  auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "ConvertToHistogram");
+  toHistAlg->initialize();
+  toHistAlg->setChild(true);
+  toHistAlg->setProperty("InputWorkspace", ws);
+  toHistAlg->setProperty("OutputWorkspace", "unused");
+  toHistAlg->execute();
+  return toHistAlg->getProperty("OutputWorkspace");
+}
+
+// Create point data form a histogram
+Mantid::API::MatrixWorkspace_sptr
+toPointData(const Mantid::API::MatrixWorkspace_sptr &ws) {
+  // Convert to Point data
+  auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "ConvertToPointData");
+  toPointAlg->initialize();
+  toPointAlg->setChild(true);
+  toPointAlg->setProperty("InputWorkspace", ws);
+  toPointAlg->setProperty("OutputWorkspace", "unused");
+  toPointAlg->execute();
+  return toPointAlg->getProperty("OutputWorkspace");
+}
+
+} // namespace
+
 namespace NXcanSASTestHelper {
 
 std::string
@@ -38,16 +68,16 @@ getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   return Mantid::API::InstrumentFileFinder::getInstrumentFilename(name, date);
 }
 
-void setXValuesOn1DWorkspaceWithPointData(
-    const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin,
-    double xmax) {
+void setXValuesOn1DWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                             double xmin, double xmax) {
   auto &xValues = workspace->dataX(0);
-  auto size = xValues.size();
-  double binWidth = (xmax - xmin) / static_cast<double>(size - 1);
-  for (size_t index = 0; index < size; ++index) {
-    xValues[index] = xmin;
-    xmin += binWidth;
-  }
+  const double step = (xmax - xmin) / static_cast<double>(xValues.size() - 1);
+  double value(xmin);
+  std::generate(std::begin(xValues), std::end(xValues), [&value, &step]() {
+    const auto oldValue{value};
+    value += step;
+    return oldValue;
+  });
 }
 
 void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace,
@@ -96,6 +126,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
     ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
         parameters.size, parameters.value, parameters.error, false);
   }
+  setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
 
   ws->setTitle(parameters.workspaceTitle);
   ws->getAxis(0)->unit() =
@@ -110,15 +141,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
   // Set to point data or histogram data
   if (parameters.isHistogram) {
-    const std::string outName = "convert_to_histo_out_name";
-    auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "ConvertToHistogram");
-    toHistAlg->initialize();
-    toHistAlg->setChild(true);
-    toHistAlg->setProperty("InputWorkspace", ws);
-    toHistAlg->setProperty("OutputWorkspace", outName);
-    toHistAlg->execute();
-    ws = toHistAlg->getProperty("OutputWorkspace");
+    ws = toHistogram(ws);
   }
 
   return ws;
@@ -126,11 +149,15 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 
 Mantid::API::MatrixWorkspace_sptr
 getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters) {
-  auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
-      parameters.size, parameters.value, parameters.error, false);
+  Mantid::API::MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create1DWorkspaceConstant(
+          parameters.size, parameters.value, parameters.error, false);
   ws->setTitle(parameters.name);
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+  setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
+  if (parameters.isHistogram)
+    ws = toHistogram(ws);
   return ws;
 }
 
@@ -143,16 +170,7 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   std::string axis2Binning =
       std::to_string(parameters.ymin) + ",1," + std::to_string(parameters.ymax);
 
-  // Convert to Histogram data
-  auto toHistAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "ConvertToHistogram");
-  std::string toHistoOutputName("toHistOutput");
-  toHistAlg->initialize();
-  toHistAlg->setChild(true);
-  toHistAlg->setProperty("InputWorkspace", ws);
-  toHistAlg->setProperty("OutputWorkspace", toHistoOutputName);
-  toHistAlg->execute();
-  ws = toHistAlg->getProperty("OutputWorkspace");
+  ws = toHistogram(ws);
 
   // Convert Spectrum Axis
   auto axisAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -180,16 +198,7 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   ws = rebin2DAlg->getProperty("OutputWorkspace");
 
   if (!parameters.isHistogram) {
-    // Convert to Point data
-    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "ConvertToPointData");
-    std::string toPointOutputName("toPointOutput");
-    toPointAlg->initialize();
-    toPointAlg->setChild(true);
-    toPointAlg->setProperty("InputWorkspace", ws);
-    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
-    toPointAlg->execute();
-    ws = toPointAlg->getProperty("OutputWorkspace");
+    ws = toPointData(ws);
   }
 
   // At this point we have a mismatch between the Axis1 elements and the

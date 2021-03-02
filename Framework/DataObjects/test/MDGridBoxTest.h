@@ -202,6 +202,7 @@ public:
     std::vector<signal_t> sigErr(20);
     std::vector<coord_t> coord(10);
     std::vector<uint16_t> runIndex;
+    std::vector<uint16_t> goniometerIndex;
     std::vector<uint32_t> detID;
 
     for (size_t i = 0; i < 10; i++) {
@@ -210,7 +211,7 @@ public:
       coord[i] = events[i].getCenter(0);
     }
 
-    g->buildAndAddEvents(sigErr, coord, runIndex, detID);
+    g->buildAndAddEvents(sigErr, coord, runIndex, goniometerIndex, detID);
 
     for (size_t i = 0; i < 10; i++) {
       MDBox<MDLeanEvent<1>, 1> *box =
@@ -459,16 +460,16 @@ public:
 
     { // One event in 0th box of the 0th box.
       std::vector<coord_t> centers(2, 0.05f);
-      superbox->buildAndAddEvent(2., 2., centers, 0, 0);
+      superbox->buildAndAddEvent(2., 2., centers, 0, 0, 0);
     }
     { // One event in 1st box of the 0th box.
       std::vector<coord_t> centers(2, 0.05f);
       centers[0] = 0.15f;
-      superbox->buildAndAddEvent(2., 2., centers, 0, 0);
+      superbox->buildAndAddEvent(2., 2., centers, 0, 0, 0);
     }
     { // One event in 99th box.
       std::vector<coord_t> centers(2, 9.5);
-      superbox->buildAndAddEvent(2.0, 2.0, centers, 0, 0);
+      superbox->buildAndAddEvent(2.0, 2.0, centers, 0, 0, 0);
     }
     TS_ASSERT_EQUALS(superbox->getNPoints(), 3);
 

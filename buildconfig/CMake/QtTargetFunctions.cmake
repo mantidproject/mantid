@@ -123,6 +123,17 @@ function (mtd_add_qt_target)
   else ()
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
+
+  if (UI_HEADERS)
+    file(GLOB EXISTING_UI_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/ui_*.h)
+    foreach(_existing_hdr ${EXISTING_UI_HEADERS})
+      if (NOT _existing_hdr IN_LIST UI_HEADERS)
+        message("Deleting orphaned ui_*.h file: " ${_existing_hdr})
+        file(REMOVE ${_existing_hdr})
+      endif()
+    endforeach ()
+  endif()
+
   set (CMAKE_CURRENT_BINARY_DIR ${_binary_dir_on_entry})
 
   if (PARSED_NO_SUFFIX)

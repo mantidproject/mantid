@@ -47,7 +47,7 @@ private:
   void convertEventList(
       std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
       size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
-      uint16_t runIndex, int32_t detectorID);
+      uint16_t runIndex, uint16_t goniometerIndex, int32_t detectorID);
 
   /// The input event workspace
   Mantid::DataObjects::EventWorkspace_sptr in_ws;

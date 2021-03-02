@@ -220,7 +220,7 @@ const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
     static const double MinThickness = 0.001;
     double minX, maxX, minY, maxY, minZ, maxZ;
     minX = minY = minZ = std::numeric_limits<double>::max();
-    maxX = maxY = maxZ = std::numeric_limits<double>::min();
+    maxX = maxY = maxZ = std::numeric_limits<double>::lowest();
 
     // Loop over all vertices and determine minima and maxima on each axis
     for (const auto &vertex : vertices) {

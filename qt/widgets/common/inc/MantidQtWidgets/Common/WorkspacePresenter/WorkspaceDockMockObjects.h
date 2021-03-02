@@ -74,7 +74,6 @@ public:
   MOCK_METHOD0(showColourFillPlot, void());
   MOCK_METHOD0(showDetectorsTable, void());
   MOCK_METHOD0(showBoxDataTable, void());
-  MOCK_METHOD0(showVatesGUI, void());
   MOCK_METHOD0(showMDPlot, void());
   MOCK_METHOD0(showListData, void());
   MOCK_METHOD0(showSpectrumViewer, void());

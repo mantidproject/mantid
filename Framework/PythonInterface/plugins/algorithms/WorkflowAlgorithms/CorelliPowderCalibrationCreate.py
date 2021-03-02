@@ -94,8 +94,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return ['PDCalibration', 'AlignDetectors', 'AlignComponents',
-                'CORELLIPowderCalibrationDatabase', 'CORELLIPowderCalibrationLoad', 'CORELLIPowderCalibrationApply']
+        return ['PDCalibration', 'AlignDetectors', 'AlignComponents']
 
     def summary(self):
         return "Adjust bank positions and orientations to optimize peak determination in d-spacing"
@@ -342,7 +341,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # collect info on the source
         input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
         source = mtd[self.getPropertyValue('InputWorkspace')].getInstrument().getSource()
-        source_name, source_full_name = source.getFullName(), source.getName()
+        source_name, source_full_name = source.getName(), source.getFullName()
 
         # Update the position of the source
         z_position = -abs(self.getProperty('SourceToSampleDistance').value)
