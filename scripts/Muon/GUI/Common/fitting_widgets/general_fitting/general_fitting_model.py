@@ -184,6 +184,23 @@ class GeneralFittingModel(BasicFittingModel):
 
         return self._sort_workspace_names(display_workspaces)
 
+    def get_fit_function_parameters(self) -> list:
+        """Returns the names of the fit parameters in the fit functions."""
+        if self.simultaneous_fitting_mode:
+            if self.simultaneous_fit_function is not None:
+                return [self.simultaneous_fit_function.parameterName(i)
+                        for i in range(self.simultaneous_fit_function.nParams())]
+            return []
+        else:
+            return super().get_fit_function_parameters()
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        if self.simultaneous_fitting_mode:
+            return [self.simultaneous_fit_function]
+        else:
+            return super().get_all_fit_functions()
+
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         if self.simultaneous_fitting_mode:

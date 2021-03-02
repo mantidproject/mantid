@@ -28,8 +28,8 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.simultaneous_fit_by_specifier_changed = GenericObservable()
 
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
-
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
+        self.fit_parameter_updated_observer = GenericObserver(self.update_fit_function_in_view_from_model)
 
         self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
         self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
@@ -93,6 +93,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         self.clear_cached_fit_functions()
 
         self.fitting_mode_changed_notifier.notify_subscribers()
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_simultaneous_fit_by_changed(self) -> None:
         """Handle when the simultaneous fit by combo box is changed."""
@@ -181,8 +182,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         else:
             self.model.clear_simultaneous_fit_function()
             self.update_single_fit_functions_in_model()
-
-        self.fit_function_changed_notifier.notify_subscribers()
 
     def update_simultaneous_fit_function_in_model(self) -> None:
         """Updates the simultaneous fit function in the model using the view."""

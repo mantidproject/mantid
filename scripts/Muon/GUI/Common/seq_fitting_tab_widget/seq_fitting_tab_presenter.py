@@ -24,6 +24,8 @@ class SeqFittingTabPresenter(object):
         self.calculation_thread = None
         self.fitting_calculation_model = None
 
+        self.fit_parameter_changed_notifier = GenericObservable()
+
         # Observers
         self.selected_workspaces_observer = GenericObserver(self.handle_selected_workspaces_changed)
         self.fit_type_changed_observer = GenericObserver(self.handle_selected_workspaces_changed)
@@ -41,31 +43,21 @@ class SeqFittingTabPresenter(object):
         return thread_model.ThreadModel(self.fitting_calculation_model)
 
     def handle_fit_function_updated(self):
-        pass
-        # if self.model.fit_function is None:
-        #     self.view.fit_table.clear_fit_parameters()
-        #     self.view.fit_table.reset_fit_quality()
-        #     self.model.clear_fit_information()
-        #     return
+        parameters = self.model.get_fit_function_parameters()
 
-        # parameter_values = []
-        # number_of_parameters = self.model.fit_function.nParams()
-        # parameters = [self.model.fit_function.parameterName(i) for i in range(number_of_parameters)]
-        # # get parameters for each fit
-        # for row in range(self.view.fit_table.get_number_of_fits()):
-        #     ws_names = self.get_workspaces_for_row_in_fit_table(row)
-        #     fit_function = self.model.get_ws_fit_function(ws_names)
-        #     parameter_values.append(self.model.get_fit_function_parameter_values(fit_function))
-        #
-        # self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
+        if len(parameters) == 0:
+            self.view.fit_table.clear_fit_parameters()
+            self.view.fit_table.reset_fit_quality()
+        else:
+            parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+                                for row, fit_function in enumerate(self.model.get_all_fit_functions())]
+            self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
 
     def handle_fit_function_parameter_changed(self):
-        pass
-        # self.view.fit_table.reset_fit_quality()
-        # fit_functions = self.model.get_active_fit_function()
-        # for row in range(self.view.fit_table.get_number_of_fits()):
-        #     parameter_values = self.model.get_fit_function_parameter_values(fit_functions[row])
-        #     self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
+        self.view.fit_table.reset_fit_quality()
+        for row, fit_function in enumerate(self.model.get_all_fit_functions()):
+            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+            self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
         runs, groups_and_pairs = self.model.get_runs_groups_and_pairs_for_fits()
@@ -133,12 +125,12 @@ class SeqFittingTabPresenter(object):
             self.handle_fit_selected_in_table()
 
     def handle_updated_fit_parameter_in_table(self, index):
-        from mantid import logger
-        logger.warning("HERE")
         row = index.row()
         workspaces = self.get_workspaces_for_row_in_fit_table(row)
         parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
         self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
+
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_fit_selected_in_table(self):
         rows = self.view.fit_table.get_selected_rows()

@@ -450,6 +450,18 @@ class BasicFittingModel:
         except AttributeError:
             return DEFAULT_START_X
 
+    def get_fit_function_parameters(self) -> list:
+        """Returns the names of the fit parameters in the fit functions."""
+        if len(self.single_fit_functions) > 0:
+            fit_function = self.single_fit_functions[0]
+            if fit_function is not None:
+                return [fit_function.parameterName(i) for i in range(fit_function.nParams())]
+        return []
+
+    def get_all_fit_functions(self) -> list:
+        """Returns all the fit functions for the current fitting mode."""
+        return self.single_fit_functions
+
     def get_active_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         return self.current_single_fit_function
