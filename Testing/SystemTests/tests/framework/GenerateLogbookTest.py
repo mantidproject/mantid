@@ -81,7 +81,7 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
     def runTest(self):
         GenerateLogbook(Directory=self._data_directory, OutputWorkspace='d11b_logbook',
-                        Facility='ILL', Instrument='D11B', NumorRange='000101,000102',
+                        Facility='ILL', Instrument='D11B', NumorRange='000361,000362',
                         OptionalHeaders='all')
 
 
