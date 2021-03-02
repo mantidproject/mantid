@@ -9,7 +9,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWith
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 
-# import functools
+import functools
 
 
 class SeqFittingTabPresenter(object):
@@ -85,23 +85,20 @@ class SeqFittingTabPresenter(object):
         self.view.fit_table.block_signals(False)
 
     def handle_sequential_fit_requested(self):
-        pass
-        # if self.model.fit_function is None or len(self.selected_rows) == 0:
-        #     return
-        #
-        # workspace_names = []
-        # for row in self.selected_rows:
-        #     workspace_names += [self.get_workspaces_for_row_in_fit_table(row)]
-        #
-        # calculation_function = functools.partial(
-        #     self.model.evaluate_sequential_fit, workspace_names, self.view.use_initial_values_for_fits())
-        # self.calculation_thread = self.create_thread(
-        #     calculation_function)
-        #
-        # self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_fit_started,
-        #                                            on_thread_end_callback=self.handle_seq_fit_finished,
-        #                                            on_thread_exception_callback=self.handle_fit_error)
-        # self.calculation_thread.start()
+        if self.model.get_active_fit_function() is None or len(self.selected_rows) == 0:
+            return
+
+        workspace_names = [self.get_workspaces_for_row_in_fit_table(row) for row in self.selected_rows]
+
+        calculation_function = functools.partial(
+            self.model.evaluate_sequential_fit, workspace_names, self.view.use_initial_values_for_fits())
+        self.calculation_thread = self.create_thread(
+            calculation_function)
+
+        self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_fit_started,
+                                                   on_thread_end_callback=self.handle_seq_fit_finished,
+                                                   on_thread_exception_callback=self.handle_fit_error)
+        self.calculation_thread.start()
 
     def handle_seq_fit_finished(self):
         if self.fitting_calculation_model.result is None:
