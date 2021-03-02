@@ -83,8 +83,8 @@ public:
         dspacing_min(1.0), dspacing_max(10.0),   //
         wavelength_min(0.1), wavelength_max(10), //
         omega_step(3.0),                         //
-        TOLERANCE_L(5e-4), // this calibration has intrinsic accuracy limit of
-                           // 1mm for translation
+        TOLERANCE_L(1e-6), // this calibration has intrinsic accuracy limit of
+                           // 5mm for translation
         TOLERANCE_R(1e-5), // this calibration has intrinsic accuracy limit of
                            // 0.1 deg for rotation
         LOGCHILDALG(false) {
@@ -258,7 +258,7 @@ public:
 
     // prescribed shift
     // NOTE: the common range for dL1 is +-10cm
-    const double dL1 = boost::math::constants::e<double>() / 400;
+    const double dL1 = boost::math::constants::e<double>() / 300;
 
     // Generate unique temp files
     // Generate unique temp files

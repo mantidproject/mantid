@@ -29,6 +29,7 @@
 
 #include <boost/math/special_functions/round.hpp>
 
+#include <fstream>
 #include <iostream>
 
 namespace Mantid {
@@ -265,23 +266,40 @@ void SCDCalibratePanels2::exec() {
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     // optimizeL1(m_pws);
-    double search_step_L1 = 1e-6; // 1um search step
-    double threshold = 1e-8;      // when to stop
-    double new_L1 = twiddle_search(m_pws, search_step_L1, threshold);
+    // double search_step_L1 = 1e-6; // 1um search step
+    // double threshold = 1e-8;      // when to stop
+    // double new_L1 = twiddle_search(m_pws, search_step_L1, threshold);
 
-    g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
+    // g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
 
-    // g_log.notice() << "Profiling objfunc sensitivity\n";
-    // double zs[15] = {-20 - 1e0,  -20 - 1e-1, -20 - 1e-2, -20 - 1e-3, -20 -
-    // 1e-4,
-    //                  -20 - 1e-5, -20 - 1e-6, -20,        -20 + 1e-6, -20 +
-    //                  1e-5, -20 + 1e-4, -20 + 1e-3, -20 + 1e-2, -20 + 1e-1,
-    //                  -20 + 1e0};
+    g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
+    std::ofstream proffile;
+    proffile.precision(17);
+    proffile.open(
+        "/home/8cz/Workbench/MANTID/"
+        "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_natrollite.csv");
+    proffile << "dz\terr\n";
+    std::cout.precision(17);
+    for (double z = -0.05; z <= 0.05; z = z + 1e-5) {
+      double err = objfunc_source(m_pws, -20 + z, -20);
+      std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
+      proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
+    }
+    proffile.close();
+
+    // g_log.notice() << "Profiling objfunc sensitivity (fine) \n";
+    // std::ofstream proffile;
+    // proffile.precision(17);
+    // proffile.open("/home/8cz/Workbench/MANTID/"
+    //               "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_fine.csv");
+    // proffile << "dz\terr\n";
     // std::cout.precision(17);
-    // for (auto z : zs) {
-    //   double err = objfunc_source(m_pws, z, -20);
+    // for (double z = -0.02; z <= 0.02; z = z + 1e-6) {
+    //   double err = objfunc_source(m_pws, -20 + z, -20);
     //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
+    //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
     // }
+    // proffile.close();
   }
 
   if (calibrateBanks) {
@@ -533,9 +551,10 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
   // calculate the error
   // NOTE: use the current position as the starting point
   double init_L1 = pws->getInstrument()->getSource()->getPos().Z();
-  double L1 = init_L1;
+  double L1 = init_L1 + deltaL1;
   double best_err = objfunc_source(pws, L1, init_L1);
   double err;
+
   int niter = 0;
 
   g_log.notice() << "-- twiddle search\n"
@@ -566,11 +585,29 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
     }
 
     niter += 1;
-    g_log.notice() << "  L1 = " << L1 << ", err_" << niter << " = " << best_err
-                   << "\n";
+    std::ostringstream msg;
+    msg.precision(17);
+    msg << "-----@iter_" << niter << "-----\n"
+        << "  deltaL1 = " << deltaL1 << "\n"
+        << "  L1 = " << L1 << "\n"
+        << "  besterr = " << best_err << "\n";
+    g_log.notice() << msg.str();
   }
 
-  return pws->getInstrument()->getSource()->getPos().Z();
+  // update the source position
+  IAlgorithm_sptr mv_alg =
+      createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
+  mv_alg->setLogging(LOGCHILDALG);
+  mv_alg->setProperty<Workspace_sptr>("Workspace", pws);
+  mv_alg->setProperty("ComponentName",
+                      pws->getInstrument()->getSource()->getName());
+  mv_alg->setProperty("X", 0.0);
+  mv_alg->setProperty("Y", 0.0);
+  mv_alg->setProperty("Z", L1 - init_L1);
+  mv_alg->setProperty("RelativePosition", true);
+  mv_alg->executeAsChildAlg();
+
+  return L1;
 }
 
 /**
@@ -581,16 +618,24 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
  * @param init_z
  * @return double
  */
-double SCDCalibratePanels2::objfunc_source(IPeaksWorkspace_sptr pws,
+double SCDCalibratePanels2::objfunc_source(IPeaksWorkspace_sptr pws_org,
                                            double source_z, double init_z) {
+  IPeaksWorkspace_sptr pws = pws_org->clone();
+
   double err = 0.0;
+  double err_overshoot = 0.0;
+  double err_undershoot = 0.0;
   double z_shift = source_z - init_z;
-  // double regularization = z_shift * z_shift * 100;
+
+  double tof_overshoot;
+  double tof_undershoot;
 
   V3D qv_target;
-  V3D qv;
+  V3D qv_overshoot;
+  V3D qv_undershoot;
   V3D delta_qv;
-  Units::Wavelength wl;
+  Units::Wavelength wl_overshoot;
+  Units::Wavelength wl_undershoot;
 
   // move the source to new location
   IAlgorithm_sptr mv_alg =
@@ -609,35 +654,48 @@ double SCDCalibratePanels2::objfunc_source(IPeaksWorkspace_sptr pws,
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     // get the reference
-
     qv_target = ubmatrix * pws->getPeak(i).getIntHKL();
     qv_target *= 2.0 * PI;
 
-    // get the qv with updated source position embedded
-    wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
-                  pws->getPeak(i).getScattering(), 0,
-                  pws->getPeak(i).getInitialEnergy(), 0.0);
+    // correct order (overshoot)
+    Peak pk_overshoot = Peak(pws->getPeak(i));
+    // cache the time-of-flight
+    tof_overshoot = pws->getPeak(i).getTOF();
+    // -- update instrument geometry
+    pk_overshoot.setInstrument(pws->getInstrument());
+    wl_overshoot.initialize(pk_overshoot.getL1(), pk_overshoot.getL2(),
+                            pk_overshoot.getScattering(), 0,
+                            pk_overshoot.getInitialEnergy(), 0.0);
+    pk_overshoot.setDetectorID(pws->getPeak(i).getDetectorID());
+    pk_overshoot.setWavelength(wl_overshoot.singleFromTOF(tof_overshoot));
+    qv_overshoot = pk_overshoot.getQSampleFrame();
+    delta_qv = qv_overshoot - qv_target;
+    err_overshoot += delta_qv.norm2();
 
-    // Force updating the detector position by set the instrument,
-    // then set the detector ID
-    pws->getPeak(i).setInstrument(pws->getInstrument());
-    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-    pws->getPeak(i).setWavelength(wl.singleFromTOF(pws->getPeak(i).getTOF()));
-
-    V3D qv = pws->getPeak(i).getQSampleFrame();
-
-    delta_qv = qv - qv_target;
-    err += delta_qv.norm2();
-
-    // g_log.notice() << "@peak_" << i << "\n"
-    //                << "  qv_target = " << qv_target << "\n"
-    //                << "  qv        = " << qv << "\n";
+    // incorrect order (undershoot)
+    Peak pk_undershoot = Peak(pws->getPeak(i));
+    // -- update geometry
+    wl_undershoot.initialize(pk_undershoot.getL1(), pk_undershoot.getL2(),
+                             pk_undershoot.getScattering(), 0,
+                             pk_undershoot.getInitialEnergy(), 0.0);
+    pk_undershoot.setInstrument(pws->getInstrument());
+    pk_undershoot.setDetectorID(pws->getPeak(i).getDetectorID());
+    tof_undershoot = pk_undershoot.getTOF();
+    pk_undershoot.setWavelength(wl_undershoot.singleFromTOF(tof_undershoot));
+    qv_undershoot = pk_undershoot.getQSampleFrame();
+    delta_qv = qv_undershoot - qv_target;
+    err_undershoot += delta_qv.norm2();
   }
 
-  err /= pws->getNumberPeaks();
-  // g_log.notice() << "sum_dqv^2 = " << err << "\n";
-  // g_log.notice() << "regularizatoin = " << regularization << "\n";
-  // err += regularization; // regularization
+  err_overshoot /= pws->getNumberPeaks();
+  err_undershoot /= pws->getNumberPeaks();
+  err = std::abs(err_overshoot - err_undershoot);
+
+  std::ostringstream msg;
+  msg.precision(17);
+  msg << "-- err_overshoot = " << err_overshoot << "\n"
+      << "-- err_undershoot = " << err_undershoot << "\n";
+  g_log.notice() << msg.str();
 
   return err;
 }

@@ -130,16 +130,22 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   //    getQSampleFrame does not consider the updated instrument, which is why
   //    the calibration will always fail
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+
+    // cache TOF
+    double tof = pws->getPeak(i).getTOF();
+
+    // update instrument
+    pws->getPeak(i).setInstrument(pws->getInstrument());
+
+    // update detector ID
+    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
+
+    // calculate&set wavelength based on new instrument
     Units::Wavelength wl;
     wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
                   pws->getPeak(i).getScattering(), 0,
                   pws->getPeak(i).getInitialEnergy(), 0.0);
-
-    // Force updating the detector position by set the instrument,
-    // then set the detector ID
-    pws->getPeak(i).setInstrument(pws->getInstrument());
-    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-    pws->getPeak(i).setWavelength(wl.singleFromTOF(pws->getPeak(i).getTOF()));
+    pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
 
     V3D qv = pws->getPeak(i).getQSampleFrame();
     for (int j = 0; j < 3; ++j)
