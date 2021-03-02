@@ -50,10 +50,12 @@ void MuscatElastic::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "The name of the input workspace.  The input workspace must "
-                  "have X units of wavelength.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
+      "The name of the input workspace.  The input workspace must "
+      "have X units of wavelength. This is used to supply the detector "
+      "positions and the x axis range to calculate corrections for");
 
   auto wsQValidator = std::make_shared<CompositeValidator>();
   wsQValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
@@ -61,7 +63,7 @@ void MuscatElastic::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SofqWorkspace", "", Direction::Input, wsQValidator),
-                  "The name of the workspace containing S(q).  The input "
+                  "The name of the workspace containing S'(q).  The input "
                   "workspace must contain a single spectrum and "
                   "have X units of momentum transfer.");
   declareProperty(
@@ -213,8 +215,8 @@ void MuscatElastic::exec() {
 
   auto &sample = inputWS->sample();
 
-  const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
-  const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
+  const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
+  const int nMultiScatterEvents = getProperty("NeutronPathsMultiple");
 
   const int seed = getProperty("SeedValue");
 
@@ -374,6 +376,7 @@ double MuscatElastic::interpolateLogQuadratic(
  * material. The average weight across all the simulated paths is returned
  * @param nPaths The number of paths to simulate
  * @param nScatters The number of scattering events to simulate along each path
+ * @param sample A sample object
  * @param instrument An instrument object used to obtain the source position
  * @param rng Random number generator
  * @param sigmaSSWS
@@ -390,7 +393,7 @@ double MuscatElastic::simulatePaths(const int nPaths, const size_t nScatters,
                                     const MatrixWorkspace_sptr SOfQ,
                                     const double kinc, Kernel::V3D detPos,
                                     bool specialSingleScatterCalc) {
-  double sumOfWeights = 0;
+  double sumOfWeights = 0, sumOfQSS = 0.;
   auto sourcePos = instrument.getSource()->getPos();
 
   double sigma_total;
@@ -399,18 +402,46 @@ double MuscatElastic::simulatePaths(const int nPaths, const size_t nScatters,
                            specialSingleScatterCalc);
 
   for (int ie = 0; ie < nPaths; ie++) {
-    auto [success, weight] = scatter(nScatters, sample, instrument, sourcePos,
-                                     rng, sigma_total, scatteringXSection, SOfQ,
-                                     kinc, detPos, specialSingleScatterCalc);
-    if (success)
+    auto [success, weight, QSS] = scatter(
+        nScatters, sample, instrument, sourcePos, rng, sigma_total,
+        scatteringXSection, SOfQ, kinc, detPos, specialSingleScatterCalc);
+    if (success) {
       sumOfWeights += weight;
-    else
+      sumOfQSS += QSS;
+    } else
       ie--;
   }
+
+  // divide by the mean of Q*S(Q) for each of the n-1 terms representing a
+  // multiple scatter
+  sumOfWeights =
+      sumOfWeights / pow(sumOfQSS / (nPaths * (nScatters - 1)), nScatters - 1);
+
   return sumOfWeights / nPaths;
 }
 
-std::tuple<bool, double> MuscatElastic::scatter(
+/**
+ * Simulates a single neutron path through the sample to a specific detector
+ * position containing the specified number of scattering events.
+ * Each path represents a group of neutrons and the proportion of neutrons
+ * making it to the destination without being scattered or absorbed is
+ * calculated as a weight using the cross section information from the sample
+ * material
+ * @param nScatters The number of scattering events to simulate along each path
+ * @param sample A sample object
+ * @param instrument An instrument object used to obtain the reference frame
+ * @param sourcePos The source xyz coordinates
+ * @param rng Random number generator
+ * @param sigma_total
+ * @param scatteringXSection
+ * @param SOfQ Pointer to workspace containing log(S(Q))
+ * @param kinc The incident wavevector
+ * @param detPos The detector position xyz coordinates
+ * @param specialSingleScatterCalc
+ * @return A tuple containing a success\fail boolean, the calculated weight and
+ * a sum of the QSS values across the n-1 multiple scatters
+ */
+std::tuple<bool, double, double> MuscatElastic::scatter(
     const size_t nScatters, const Sample &sample,
     const Geometry::Instrument &instrument, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
@@ -431,13 +462,10 @@ std::tuple<bool, double> MuscatElastic::scatter(
     int nlinks = sample.getShape().interceptSurface(track);
     m_callsToInterceptSurface++;
     if (nlinks == 0) {
-      return {false, 0};
+      return {false, 0, 0};
     }
     updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
   }
-  // divide by QSS here rather than outside scatter (as was done in original
-  // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
-  weight = weight / pow(QSS, nScatters - 1);
 
   Kernel::V3D directionToDetector = detPos - track.startPoint();
   Kernel::V3D prevDirection = track.direction();
@@ -449,7 +477,7 @@ std::tuple<bool, double> MuscatElastic::scatter(
   // of a CSGObject sample may not generate valid tracks. Start over again
   // for this event
   if (nlinks == 0) {
-    return {false, 0};
+    return {false, 0, 0};
   }
   double dl = track.front().distInsideObject;
   auto q = (directionToDetector - prevDirection) * kinc;
@@ -458,7 +486,7 @@ std::tuple<bool, double> MuscatElastic::scatter(
     vmu = 0;
   auto AT2 = exp(-dl * vmu);
   weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
-  return {true, weight};
+  return {true, weight, QSS};
 }
 
 // update track direction, QSS and weight
@@ -569,6 +597,9 @@ Geometry::Track MuscatElastic::generateInitialTrack(
     Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
+  // I'm not 100% sure this sampling is correct because for a sample with
+  // varying thickness (eg cylinder) you end up with more entry points in the
+  // thin part of the cylinder
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
              rng.nextValue() * sampleBox.width()[frame->pointingHorizontal()];
   auto pty = sampleBox.minPoint()[frame->pointingUp()] +

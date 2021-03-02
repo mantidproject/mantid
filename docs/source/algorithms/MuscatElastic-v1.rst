@@ -12,16 +12,58 @@ Description
 This algorithm calculates a Multiple Scattering correction using a Monte Carlo integration method.
 The method uses a structure function for the sample to determine the probability of a particular q value for each scattering event and it doesn't therefore rely on an assumption that the scattering is isotropic.
 
+The structure function that the algorithm takes as input is a linear combination of the coherent and incoherent structure factors:
+
+:math:`S'(Q) = \frac{1}{\sigma_b}(\sigma_{coh} S(Q) + \sigma_{inc} S_s(Q))`
+
+If the sample is a perfectly coherent scatterer then :math:`S'(Q) = S(Q)`
+
 The algorithm is based on code which was originally written in Fortran as part of the Discus program [#JOH]_. The code was subsequently developed by Spencer Howells under the Muscat name.
 These original programs calculated multiple scattering corrections for inelastic instruments. This algorithm so far only considers the elastic case.
 
-The algorithm performs the following integration:
+Theory
+######
 
-:math:`\prod_{i=1}^{N-1} \int_{0}^{l_{i}^{max}}dl_i e^{-\mu_T l_i}\int_{0}^{4 \pi}d \Omega_i^s(\frac{\mu_{coh}}{\mu_s} S(Q_i) + \frac{\mu_{inc}}{\mu_s}) \int_{0}^{l_{n}^{max}}dl_n e^{-\mu_T(l_n + l_{out})}(\frac{\mu_{coh}}{\mu_s} S(Q_i) + \frac{\mu_{inc}}{\mu_s})`
+The algorithm performs the following integration to calculate a weight for n scattering events:
 
-This is similar to the formulation described in [#MAN]_:
+:math:`(\frac{\sigma_s}{4 \pi})^n \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta d\theta_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n)`
 
-:math:`(\frac{\mu_s}{4 \pi})^n \prod_{i=1}^{N-1} \int_{0}^{l_{i}^{max}}dl_i e^{-\mu_T l_i}\int_{0}^{4 \pi}d \Omega_i^s(\frac{\mu_{coh}}{\mu_s} S(Q_i) + \frac{\mu_{inc}}{\mu_s}) \int_{0}^{l_{n}^{max}}dl_n e^{-\mu_T(l_n + l_{out})}(\frac{\mu_{coh}}{\mu_s} S(Q_i) + \frac{\mu_{inc}}{\mu_s})`
+:math:`(\frac{\sigma_s}{4 \pi})^n \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k^2} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n)`
+
+The variables :math:`l_i^{max}` represent the maximum path length before the next scatter given a particular phi and theta value (Q). Each :math:`l_i` is actually a function of all of the earlier values for the :math:`l_i`, :math:`\phi` and :math:`Q` variables ie :math:`l_i = l_i(l_1, l_2, ..., l_{i-1}, \phi_1, \phi_2, ..., \phi_i, Q_1, Q_2, ..., Q_i)`
+
+The following substitutions are then performed in order to make it more convenient to evaluate as a Monte Carlo integral:
+
+:math:`t_i = \frac{1-e^{-\mu_T l_i}}{1-e^{\mu_T l_i^{max}}}`
+
+:math:`p_i = \frac{\phi_i}{2 \pi}`
+
+:math:`\int_0^{2k} Q_i S(Q_i) dQ = k^2`
+
+Using the new variables the integral is:
+
+:math:`\int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{1} dp_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_0^{2k} Q_i S(Q_i) dQ_i} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}`
+
+This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`p_i` between 0 and 1 and values for :math:`Q_i` between 0 and 2k.
+A simulated path is traced through the sample to enable the :math:`l_i^{\ max}` values to be calculated. The path is traced by calculating the :math:`l_i`, :math:`\theta` and :math:`\phi` values as follows from the random variables. The code keeps a note of the start coordinates of the current path segment and updates it when moving to the next segment using these randomly selected lengths and directions:
+
+:math:`l_i = -\frac{1}{\mu_T}ln(1-(1-e^{\mu_T l_i^{\ max}})t_i)`
+
+:math:`\cos(\theta_i) = 1 - Q_i^2/k^2`
+
+:math:`\phi_i = 2 \pi p_i`
+
+The final Monte Carlo integration that is actually performed by the code is as follows:
+
+:math:`\frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{<Q S(Q)>} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}`
+
+The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q) dQ` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` when converting the integral to a Monte Carlo integration.
+This is useful in the inelastic version of this algorithm where the integration of the structure factor is over two dimensions :math:`Q` and :math:`\omega` and the area of :math:`Q\omega` space that has been integrated over is less obvious.
+
+This is similar to the formulation described in [#MAN]_ except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
+
+Outputs
+#######
 
 The algorithm outputs a workspace group. Each workspace in the group contains a weight for a specific number of scattering events. The number of scattering events ranges between 1 and the number specified in the NumberOfScatterings parameter.
 The workspace names are Scatter_n where n is the number of scattering events considered and following the convention in Discus these are referred to as :math:`J_n`.

@@ -42,7 +42,7 @@ public:
         UnitFactory::Instance().create("Wavelength");
     Mantid::API::MatrixWorkspace_sptr SofQWorkspace =
         WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    SofQWorkspace->mutableY(0)[0] = WAVELENGTH;
+    SofQWorkspace->mutableY(0)[0] = 1.;
     SofQWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     V3D samplePosition(0., 0., 0.);

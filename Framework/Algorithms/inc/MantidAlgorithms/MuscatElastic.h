@@ -47,7 +47,7 @@ public:
   }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Calculates multiple scattering correction using a Monte Carlo "
+    return "Calculates a multiple scattering correction using a Monte Carlo "
            "method";
   }
 
@@ -75,7 +75,7 @@ private:
                        const API::MatrixWorkspace_sptr sigmaSSWS,
                        const API::MatrixWorkspace_sptr SOfQ, const double kinc,
                        Kernel::V3D detPos, bool specialSingleScatterCalc);
-  std::tuple<bool, double>
+  std::tuple<bool, double, double>
   scatter(const size_t nScatters, const API::Sample &sample,
           const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
           Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
