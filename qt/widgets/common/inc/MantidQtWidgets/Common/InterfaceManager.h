@@ -101,10 +101,10 @@ public:
   void showFitFunctionHelp(const QString &name = QString());
 
   /**
-  * @param name of interface to show help for
-  * @param area - folder for documentation in the interfaces directory
-  * @param section - section in the html document
-  **/
+   * @param name of interface to show help for
+   * @param area - folder for documentation in the interfaces directory
+   * @param section - section in the html document
+   **/
   void showCustomInterfaceHelp(const QString &name,
                                const QString &area = QString(),
                                const QString &section = QString());
