@@ -101,7 +101,9 @@ public:
   void showFitFunctionHelp(const QString &name = QString());
 
   /// @param name of interface to show help for
-  void showCustomInterfaceHelp(const QString &name);
+  void showCustomInterfaceHelp(const QString &name,
+                               const QString &area = QString(),
+                               const QString &section = QString());
 
   /// @param url of web page to open in browser
   void showWebPage(const QString &url);

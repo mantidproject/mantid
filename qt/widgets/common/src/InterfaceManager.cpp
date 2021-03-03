@@ -283,9 +283,11 @@ void InterfaceManager::showFitFunctionHelp(const QString &name) {
   window->showFitFunction(name);
 }
 
-void InterfaceManager::showCustomInterfaceHelp(const QString &name) {
+void InterfaceManager::showCustomInterfaceHelp(const QString &name,
+                                               const QString &area,
+                                               const QString &section) {
   auto window = createHelpWindow();
-  window->showCustomInterface(name);
+  window->showCustomInterface(name, area, section);
 }
 
 void InterfaceManager::showWebPage(const QString &url) {

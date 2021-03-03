@@ -512,22 +512,22 @@ class AlignComponents(PythonAlgorithm):
 
         .. math::
 
-            \sum_i^{N_d}\sum_j^{N_p} (1 - m_{i,j}) \frac{|d_{i,j} - d_j^*|}{d_j^*}
+            \\sum_i^{N_d}\\sum_j^{N_p} (1 - m_{i,j}) \\frac{|d_{i,j} - d_j^*|}{d_j^*}
 
         where :math:`N_d` is the number of detectors in the bank, :math:`N_p` is the number of reference peaks, and
         :math:`m_{i,j}` is the mask for peak :math:`j` and detector :math:`i`. The mask evaluates to 1 if the
         detector is defective or the peak is missing in the detector, otherwise the mask evaluates to zero.
 
-        There's an implicit one-to-correspondence between array index of `difc` and workspace index of `wks_name`,
-        that is, between row index of the input TOFS table and workspace index of `wks_name`.
+        There's an implicit one-to-correspondence between array index of ``difc`` and workspace index of ``wks_name``,
+        that is, between row index of the input TOFS table and workspace index of ``wks_name``.
 
         @param x_0 :: list of length 3 (new XYZ coordinates of the component) or length 6 (XYZ and rotation coords)
         @param wks_name :: name of a workspace with an embedded instrument. The instrument will be adjusted according to
-            the new coordinates `x_0` for instrument component `component`. It's pixel spectra will contain the new DIFC
+            the new coordinates ``x_0`` for instrument component ``component``. It's pixel spectra will contain the new DIFC
         @param component :: name of the instrument component to be optimized
-        @param firstIndex :: workspace index of first index of `difc` array to be considered when comparing old
+        @param firstIndex :: workspace index of first index of ``difc`` array to be considered when comparing old
             and new DIFC values. When fitting the source or sample, this is the first spectrum index.
-        @param lastIndex ::  workspace index of last index of `difc` array to be considered when comparing old
+        @param lastIndex ::  workspace index of last index of ``difc`` array to be considered when comparing old
             and new DIFC values. When fitting the source or sample, this is the last row number of the input
             TOFS table.
 
@@ -557,7 +557,7 @@ class AlignComponents(PythonAlgorithm):
 
         @param component :: reference to a detector component object
 
-        @returns detector ID (`int`) of the first detector in the component
+        @returns detector ID (``int``) of the first detector in the component
         """
         if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
             return component.getID()

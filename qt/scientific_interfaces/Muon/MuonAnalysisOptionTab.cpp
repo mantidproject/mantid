@@ -151,7 +151,7 @@ void MuonAnalysisOptionTab::initLayout() {
  */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString("settings"));
+      nullptr, QString("Muon Analysis"), QString(""), QString("settings"));
 }
 
 /*
@@ -159,7 +159,7 @@ void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
  */
 void MuonAnalysisOptionTab::rebinHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString("data-binning"));
+      nullptr, QString("Muon Analysis"), QString(""), QString("data-binning"));
 }
 
 /**

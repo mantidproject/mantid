@@ -325,8 +325,10 @@ void MantidHelpWindow::showFitFunction(const QString &name) {
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const QString &name,
+                                           const QString &area,
                                            const QString &section) {
-  this->showCustomInterface(name.toStdString(), section.toStdString());
+  this->showCustomInterface(name.toStdString(), area.toStdString(),
+                            section.toStdString());
 }
 
 /**
@@ -336,10 +338,14 @@ void MantidHelpWindow::showCustomInterface(const QString &name,
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const std::string &name,
+                                           const std::string &area,
                                            const std::string &section) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
     url += "interfaces/";
+    if (!area.empty()) {
+      url += QString::fromStdString(area) + "/";
+    }
     if (name.empty()) {
       url += "index.html";
     } else {
