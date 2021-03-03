@@ -141,8 +141,7 @@ private:
     friend class OptionsDialogPresenterTest;
 
   public:
-    OptionsDialogPresenterFriend(IOptionsDialogView *view,
-                                 std::unique_ptr<IOptionsDialogModel> model)
+    OptionsDialogPresenterFriend(IOptionsDialogView *view, std::unique_ptr<IOptionsDialogModel> model)
         : OptionsDialogPresenter(view, std::move(model)) {}
   };
 
