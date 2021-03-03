@@ -444,10 +444,13 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _do_tf_asymmetry_fit(self) -> tuple:
         """Performs a TF Asymmetry fit in either the single fit mode or simultaneous fit mode."""
         if self.simultaneous_fitting_mode:
-            return self._do_tf_asymmetry_simultaneous_fit(self._get_parameters_for_tf_asymmetry_simultaneous_fit(),
-                                                          self._get_global_parameters_for_tf_asymmetry_fit())
+            params = self._get_parameters_for_tf_asymmetry_simultaneous_fit(self.dataset_names,
+                                                                            self.tf_asymmetry_simultaneous_function)
+            return self._do_tf_asymmetry_simultaneous_fit(params, self._get_global_parameters_for_tf_asymmetry_fit())
         else:
-            return self._do_tf_asymmetry_single_fit(self._get_parameters_for_tf_asymmetry_single_fit())
+            params = self._get_parameters_for_tf_asymmetry_single_fit(self.current_dataset_name,
+                                                                      self.current_tf_asymmetry_single_function)
+            return self._do_tf_asymmetry_single_fit(params)
 
     def _do_tf_asymmetry_single_fit(self, parameters: dict) -> tuple:
         """Performs a TF Asymmetry fit in single fit mode."""
@@ -474,29 +477,26 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         alg = AlgorithmManager.create("CalculateMuonAsymmetry")
         return run_CalculateMuonAsymmetry(parameters, alg)
 
-    def _get_parameters_for_tf_asymmetry_single_fit(self) -> dict:
+    def _get_parameters_for_tf_asymmetry_single_fit(self, dataset_name: str, tf_single_function: IFunction) -> dict:
         """Returns the parameters to use for a single TF Asymmetry fit."""
         params = self._get_common_tf_asymmetry_parameters()
-        params["InputFunction"] = self.current_tf_asymmetry_single_function.clone()
-        params["ReNormalizedWorkspaceList"] = self.current_dataset_name
-        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list([self.current_dataset_name])[0]
+        params["InputFunction"] = tf_single_function.clone()
+        params["ReNormalizedWorkspaceList"] = dataset_name
+        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list([dataset_name])[0]
 
-        fit_workspace_name, _ = create_fitted_workspace_name(self.current_dataset_name, self.function_name)
+        fit_workspace_name, _ = create_fitted_workspace_name(dataset_name, self.function_name)
         params["OutputFitWorkspace"] = fit_workspace_name
         return params
 
-    def _get_parameters_for_tf_asymmetry_simultaneous_fit(self, tf_simultaneous_function: IFunction = None) -> dict:
+    def _get_parameters_for_tf_asymmetry_simultaneous_fit(self, dataset_names: list,
+                                                          tf_simultaneous_function: IFunction) -> dict:
         """Returns the parameters to use for a simultaneous TF Asymmetry fit."""
         params = self._get_common_tf_asymmetry_parameters()
-        if tf_simultaneous_function is not None:
-            params["InputFunction"] = str(tf_simultaneous_function)
-        else:
-            params["InputFunction"] = str(self.tf_asymmetry_simultaneous_function)
-        params["InputFunction"] += self._construct_global_tie_appendage()
-        params["ReNormalizedWorkspaceList"] = self.dataset_names
-        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list(self.dataset_names)
+        params["InputFunction"] = str(tf_simultaneous_function) + self._construct_global_tie_appendage()
+        params["ReNormalizedWorkspaceList"] = dataset_names
+        params["UnNormalizedWorkspaceList"] = self._get_unnormalised_workspace_list(dataset_names)
 
-        fit_workspace_name, _ = create_multi_domain_fitted_workspace_name(self.dataset_names[0], self.function_name)
+        fit_workspace_name, _ = create_multi_domain_fitted_workspace_name(dataset_names[0], self.function_name)
         params["OutputFitWorkspace"] = fit_workspace_name
         return params
 
@@ -688,7 +688,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     #         # flatten the workspace list
     #         workspace_list = [workspace for fit_workspaces in workspaces for workspace in fit_workspaces]
     #         if self.fitting_options["tf_asymmetry_mode"]:
-    #             function_object, output_status, output_chi_squared = self.do_sequential_tf_fit(workspace_list,
+    #             function_object, output_status, output_chi_squared = self._do_sequential_tf_asymmetry_fit(workspace_list,
     #                                                                                            use_initial_values)
     #         else:
     #             function_object, output_status, output_chi_squared = self.do_sequential_fit(workspace_list,
@@ -697,10 +697,10 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     #         # in a simultaneous-sequential fit, each fit corresponds to a list of workspaces
     #         if self.fitting_options["tf_asymmetry_mode"]:
     #             function_object, output_status, output_chi_squared = \
-    #                 self.do_sequential_simultaneous_tf_fit(workspaces, use_initial_values)
+    #                 self._do_sequential_tf_asymmetry_simultaneous_fits(workspaces, use_initial_values)
     #         else:
     #             function_object, output_status, output_chi_squared = \
-    #                 self.do_sequential_simultaneous_fit(workspaces, use_initial_values)
+    #                 self._do_sequential_simultaneous_fits(workspaces, use_initial_values)
     #
     #     return function_object, output_status, output_chi_squared
     #
@@ -725,68 +725,64 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     #
     #     return function_object_list, output_status_list, output_chi_squared_list
     #
-    # def do_sequential_simultaneous_fit(self, workspaces, use_initial_values=False):
-    #     function_object_list = []
-    #     output_status_list = []
-    #     output_chi_squared_list = []
-    #
-    #     # workspaces defines a list of lists [[ws1,ws2],[ws1,ws2]...]
-    #     for i, workspace_list in enumerate(workspaces):
-    #         params = self.get_parameters_for_simultaneous_fit(workspace_list)
-    #
-    #         if not use_initial_values and i >= 1:
-    #             previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-    #             self.set_fit_function_parameter_values(params['Function'], previous_values)
-    #
-    #         function_object, output_status, output_chi_squared = \
-    #             self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
-    #         function_object_list.append(function_object)
-    #         output_status_list.append(output_status)
-    #         output_chi_squared_list.append(output_chi_squared)
-    #
-    #     return function_object_list, output_status_list, output_chi_squared_list
-    #
-    # def do_sequential_tf_fit(self, workspace_list, use_initial_values=False):
-    #     function_object_list = []
-    #     output_status_list = []
-    #     output_chi_squared_list = []
-    #
-    #     for i, input_workspace in enumerate(workspace_list):
-    #         params = self.get_parameters_for_single_tf_fit(input_workspace)
-    #
-    #         if not use_initial_values and i >= 1:
-    #             previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-    #             self.set_fit_function_parameter_values(params['InputFunction'],
-    #                                                    previous_values)
-    #
-    #         function_object, output_status, output_chi_squared = self.do_single_tf_fit(params)
-    #
-    #         function_object_list.append(function_object)
-    #         output_status_list.append(output_status)
-    #         output_chi_squared_list.append(output_chi_squared)
-    #
-    #     return function_object_list, output_status_list, output_chi_squared_list
-    #
-    # def do_sequential_simultaneous_tf_fit(self, workspaces, use_initial_values=False):
+
+    # def _do_sequential_simultaneous_fits(self, workspace_names: list, use_initial_values: bool = False):
     #     functions = []
     #     fit_statuses = []
     #     chi_squared_list = []
     #
-    #     for i, workspace_list in enumerate(workspaces):
-    #         if not use_initial_values and i >= 1:
-    #             params = self._get_parameters_for_tf_asymmetry_simultaneous_fit(workspace_list)
-    #         else:
-    #             params = self._get_parameters_for_tf_asymmetry_simultaneous_fit(workspace_list)
+    #     for row_index, row_workspace_names in enumerate(workspace_names):
+    #         simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+    #             self.simultaneous_fit_function
     #
-    #         if not use_initial_values and i >= 1:
-    #             previous_values = self._get_parameters_for_tf_asymmetry_simultaneous_fit(functions[i - 1])
-    #             self.set_fit_function_parameter_values(params["InputFunction"], previous_values)
+    #         params = self._get_parameters_for_simultaneous_fit(row_workspace_names, simultaneous_function)
     #
-    #         function, fit_status, chi_squared = self._do_tf_asymmetry_simultaneous_fit(
-    #             params, self._get_global_parameters_for_tf_asymmetry_fit())
+    #         function, fit_status, chi_squared = self._do_simultaneous_fit(params, self.global_parameters)
     #
     #         functions.append(function)
     #         fit_statuses.append(fit_status)
     #         chi_squared_list.append(chi_squared)
     #
     #     return functions, fit_statuses, chi_squared_list
+
+    def _do_sequential_tf_asymmetry_fit(self, workspace_names: list, use_initial_values: bool = False):
+        """Performs a sequential fit of the TF Asymmetry single fit data."""
+        functions = []
+        fit_statuses = []
+        chi_squared_list = []
+
+        for row_index, workspace_name in enumerate(workspace_names):
+            tf_single_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+                self.current_tf_asymmetry_single_function
+
+            params = self._get_parameters_for_tf_asymmetry_single_fit(workspace_name, tf_single_function)
+
+            function, fit_status, chi_squared = self._do_tf_asymmetry_single_fit(params)
+
+            functions.append(function)
+            fit_statuses.append(fit_status)
+            chi_squared_list.append(chi_squared)
+
+        return functions, fit_statuses, chi_squared_list
+
+    def _do_sequential_tf_asymmetry_simultaneous_fits(self, workspace_names: list, use_initial_values: bool = False):
+        """Performs a number of TF Asymmetry simultaneous fits, sequentially."""
+        functions = []
+        fit_statuses = []
+        chi_squared_list = []
+
+        for row_index, row_workspace_names in enumerate(workspace_names):
+            tf_simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
+                self.tf_asymmetry_simultaneous_function
+
+            params = self._get_parameters_for_tf_asymmetry_simultaneous_fit(row_workspace_names,
+                                                                            tf_simultaneous_function)
+
+            function, fit_status, chi_squared = self._do_tf_asymmetry_simultaneous_fit(
+                params, self._get_global_parameters_for_tf_asymmetry_fit())
+
+            functions.append(function)
+            fit_statuses.append(fit_status)
+            chi_squared_list.append(chi_squared)
+
+        return functions, fit_statuses, chi_squared_list
