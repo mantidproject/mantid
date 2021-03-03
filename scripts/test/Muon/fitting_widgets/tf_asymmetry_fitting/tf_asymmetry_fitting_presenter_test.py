@@ -215,7 +215,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter._check_tf_asymmetry_compliance.assert_called_once_with(self.tf_asymmetry_mode)
         self.presenter.update_tf_asymmetry_functions_in_model_and_view.assert_called_once_with()
 
-        self.presenter.reset_start_xs_and_end_xs.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.presenter.clear_cached_fit_functions.assert_called_once_with()
         self.presenter.automatically_update_function_name.assert_called_once_with()
