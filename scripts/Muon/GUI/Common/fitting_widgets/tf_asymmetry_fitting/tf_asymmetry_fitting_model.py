@@ -360,18 +360,26 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _construct_global_tie_appendage(self) -> str:
         """Constructs the string which details the global parameter ties within a simultaneous TF Asymmetry fit."""
         if len(self.global_parameters) != 0 and self.number_of_datasets > 1:
-            global_ties = [self._construct_tie_for_global_parameter(global_parameter)
-                           for global_parameter in self.global_parameters]
-            return f";ties=({','.join(global_ties)})"
-        else:
-            return ""
+            global_tie_appendage = str(self.simultaneous_fit_function).split(";")[-1]
+            if global_tie_appendage[:6] == "ties=(" or global_tie_appendage[-1] == ")":
+                tf_global_ties = self._convert_global_ties_for_tf_asymmetry_mode(global_tie_appendage[6:-1].split(","))
+                return f";ties=({','.join(tf_global_ties)})"
+        return ""
 
-    def _construct_tie_for_global_parameter(self, global_parameter: str) -> str:
-        """Returns the global tie representing a parameter being made global in a simultaneous fit."""
-        global_tie = f"f0.{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}{global_parameter}"
-        for domain_index in range(1, self.tf_asymmetry_simultaneous_function.nFunctions()):
-            global_tie += f"=f{domain_index}.{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}{global_parameter}"
-        return global_tie
+    def _convert_global_ties_for_tf_asymmetry_mode(self, global_ties: str) -> str:
+        """Converts the global ties to the equivalent global ties in the TF Asymmetry function."""
+        return [self._convert_global_tie_for_tf_asymmetry_mode(global_tie) for global_tie in global_ties]
+
+    def _convert_global_tie_for_tf_asymmetry_mode(self, global_tie: str) -> str:
+        """Converts a global tie to the equivalent global tie in the TF Asymmetry function."""
+        tf_parameters = [self._convert_parameter_to_tf_asymmetry_mode(parameter) for parameter in global_tie.split("=")]
+        return "=".join(tf_parameters)
+
+    @staticmethod
+    def _convert_parameter_to_tf_asymmetry_mode(parameter: str) -> str:
+        """Converts a normal parameter to the equivalent parameter in the TF Asymmetry function."""
+        split_parameter = parameter.split(".")
+        return split_parameter[0] + f".{TF_ASYMMETRY_PREFIX_FUNCTION_INDEX}" + split_parameter[1]
 
     def _get_global_parameters_for_tf_asymmetry_fit(self) -> list:
         """Returns a list of global parameters in TF Asymmetry format."""
