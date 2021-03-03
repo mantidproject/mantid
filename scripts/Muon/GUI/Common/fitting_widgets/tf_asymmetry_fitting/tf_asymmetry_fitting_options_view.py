@@ -41,19 +41,21 @@ class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
         """Returns the normalisation value currently displayed in the normalisation line edit."""
         return float(self.normalisation_line_edit.text())
 
-    @normalisation.setter
-    def normalisation(self, value: float) -> None:
+    def set_normalisation(self, value: float, error: float) -> None:
         """Sets the normalisation value currently displayed in the normalisation line edit."""
         self.normalisation_line_edit.blockSignals(True)
-        self.normalisation_line_edit.setText(str(value))
+        self.normalisation_line_edit.setText(f"{value:.6f}")
+        self.normalisation_error_line_edit.setText(f"({error:.6f})")
         self.normalisation_line_edit.blockSignals(False)
 
     def hide_normalisation_options(self) -> None:
         """Hides the normalisation options."""
-        self.normalisation_label.hide()
+        self.fix_normalisation_checkbox.hide()
         self.normalisation_line_edit.hide()
+        self.normalisation_error_line_edit.hide()
 
     def show_normalisation_options(self) -> None:
         """Shows the normalisation options."""
-        self.normalisation_label.show()
+        self.fix_normalisation_checkbox.show()
         self.normalisation_line_edit.show()
+        self.normalisation_error_line_edit.show()
