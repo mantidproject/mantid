@@ -227,7 +227,7 @@ void SCDCalibratePanels2::exec() {
     parseLatticeConstant(m_pws);
 
     // recalculate UB and index peaks
-    // updateUBMatrix(m_pws);
+    updateUBMatrix(m_pws);
   }
 
   // remove unindexed peaks
@@ -266,26 +266,26 @@ void SCDCalibratePanels2::exec() {
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     // optimizeL1(m_pws);
-    // double search_step_L1 = 1e-6; // 1um search step
-    // double threshold = 1e-8;      // when to stop
-    // double new_L1 = twiddle_search(m_pws, search_step_L1, threshold);
+    double search_step_L1 = 1e-6; // 1um search step
+    double threshold = 1e-8;      // when to stop
+    double new_L1 = twiddle_search_L1(m_pws, search_step_L1, threshold);
 
-    // g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
+    g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
 
-    g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
-    std::ofstream proffile;
-    proffile.precision(17);
-    proffile.open(
-        "/home/8cz/Workbench/MANTID/"
-        "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_natrollite.csv");
-    proffile << "dz\terr\n";
-    std::cout.precision(17);
-    for (double z = -0.05; z <= 0.05; z = z + 1e-5) {
-      double err = objfunc_source(m_pws, -20 + z, -20);
-      std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
-      proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
-    }
-    proffile.close();
+    // g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
+    // std::ofstream proffile;
+    // proffile.precision(17);
+    // proffile.open(
+    //     "/home/8cz/Workbench/MANTID/"
+    //     "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_natrollite.csv");
+    // proffile << "dz\terr\n";
+    // std::cout.precision(17);
+    // for (double z = -0.05; z <= 0.05; z = z + 1e-5) {
+    //   double err = objfunc_L1(m_pws, -20 + z, -20);
+    //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
+    //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
+    // }
+    // proffile.close();
 
     // g_log.notice() << "Profiling objfunc sensitivity (fine) \n";
     // std::ofstream proffile;
@@ -295,7 +295,7 @@ void SCDCalibratePanels2::exec() {
     // proffile << "dz\terr\n";
     // std::cout.precision(17);
     // for (double z = -0.02; z <= 0.02; z = z + 1e-6) {
-    //   double err = objfunc_source(m_pws, -20 + z, -20);
+    //   double err = objfunc_L1(m_pws, -20 + z, -20);
     //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
     //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
     // }
@@ -546,13 +546,14 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
  * @param threshold
  * @return double
  */
-double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
-                                           double deltaL1, double threshold) {
+double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
+                                              double deltaL1,
+                                              double threshold) {
   // calculate the error
   // NOTE: use the current position as the starting point
   double init_L1 = pws->getInstrument()->getSource()->getPos().Z();
   double L1 = init_L1 + deltaL1;
-  double best_err = objfunc_source(pws, L1, init_L1);
+  double best_err = objfunc_L1(pws, L1, init_L1);
   double err;
 
   int niter = 0;
@@ -561,7 +562,7 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
                  << "  err_0 = " << best_err << "\n";
   while (deltaL1 > threshold) {
     L1 += deltaL1;
-    err = objfunc_source(pws, L1, init_L1);
+    err = objfunc_L1(pws, L1, init_L1);
 
     if (err < best_err) {
       // There was some improvement
@@ -570,7 +571,7 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
     } else {
       // There was no improvement
       L1 -= 2.0 * deltaL1;
-      err = objfunc_source(pws, L1, init_L1);
+      err = objfunc_L1(pws, L1, init_L1);
 
       if (err < best_err) {
         // There was an improvement
@@ -618,8 +619,8 @@ double SCDCalibratePanels2::twiddle_search(IPeaksWorkspace_sptr pws,
  * @param init_z
  * @return double
  */
-double SCDCalibratePanels2::objfunc_source(IPeaksWorkspace_sptr pws_org,
-                                           double source_z, double init_z) {
+double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
+                                       double source_z, double init_z) {
   IPeaksWorkspace_sptr pws = pws_org->clone();
 
   double err = 0.0;
