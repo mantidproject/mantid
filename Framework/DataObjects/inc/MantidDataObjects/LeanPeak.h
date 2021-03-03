@@ -20,10 +20,11 @@ namespace Mantid {
 
 namespace DataObjects {
 
-/** Structure describing a single-crystal peak
+/** Structure describing a single-crystal peak. This is a version of
+ * Peak that doesn't require the instrument. The peak is described
+ * only by the Q-sample position. Optionally if the wavelength and
+ * goniometer is provided other properties can be calculated.
  *
- * @author Janik Zikovsky
- * @date 2011-04-15 13:24:07.963491
  */
 class DLLExport LeanPeak : public BasePeak {
 public:

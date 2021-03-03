@@ -25,10 +25,10 @@ class InstrumentRayTracer;
 
 namespace DataObjects {
 
-/** Structure describing a single-crystal peak
+/** Structure describing a single-crystal peak. This is a partial
+ * implementation of IPeak and should contain everything that is common
+ * to Peak and LeanPeak.
  *
- * @author Janik Zikovsky
- * @date 2011-04-15 13:24:07.963491
  */
 class DLLExport BasePeak : public Geometry::IPeak {
 public:

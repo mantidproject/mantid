@@ -26,10 +26,11 @@ class InstrumentRayTracer;
 
 namespace DataObjects {
 
-/** Structure describing a single-crystal peak
+/** Structure describing a single-crystal peak. The peak is described
+ * by the physical detector position (determined either from detector
+ * infomation or calculated from Q-lab) and inital/final energy
+ * (calculated from Q-lab or provided wavelength)
  *
- * @author Janik Zikovsky
- * @date 2011-04-15 13:24:07.963491
  */
 class DLLExport Peak : public BasePeak {
 public:
