@@ -30,18 +30,6 @@ class MuonGroupTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             MuonGroup()
 
-    def test_that_MuonGroup_name_is_set_correctly(self):
-        group = MuonGroup(group_name="group1")
-
-        self.assertEqual(group.name, "group1")
-
-    def test_that_cannot_set_new_name_on_group(self):
-        group = MuonGroup(group_name="group1")
-
-        with self.assertRaises(AttributeError):
-            group.name = "new_name"
-        self.assertEqual(group.name, "group1")
-
     def test_that_can_set_workspace_if_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
         dataX = [0, 1, 2, 3, 4, 5]

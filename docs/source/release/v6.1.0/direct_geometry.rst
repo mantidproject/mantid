@@ -8,10 +8,20 @@ Direct Geometry Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-
+  
 New
 ###
 
-- Loading of the wew data-scan mode is supported for ILL instruments IN5 and PANTHER via :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` loader
+- Loading of the omega-scan mode is supported for ILL instruments IN5 and PANTHER via :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` loader
+
+MSlice
+------
+
+BugFixes
+########
+- Fixed bug that overwrote selection of background workspace when subtracting workspaces.
+- Fixed runtime error when trying to delete workspace for the second time.
+- Fix for colorcycle problem for multiple curves on one plot.
+
 
 :ref:`Release 6.1.0 <v6.1.0>`
