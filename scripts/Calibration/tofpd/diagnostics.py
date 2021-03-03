@@ -1,6 +1,7 @@
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
 from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
+from mantid.api import WorkspaceFactory
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
@@ -223,3 +224,42 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1
     fig.show()
 
     return fig, ax
+
+
+def extract_peak_info(wksp, peak_position: float, outputname: str):
+    '''
+    Extract information about a single peak from a Workspace2D. The input workspace is expected to have
+    common x-axis of observed d-spacing. The y-values and errors are extracted.
+
+    The output workspace will be a single spectra with the x-axis being the detector-id. The y-values
+    and errors are extracted from the input workspace.
+    '''
+    # confirm that the input is a workspace pointer
+    wksp = mtd[str(wksp)]
+    numSpec = wksp.getNumberHistograms()
+
+    # get the index into the x/y arrays of the peak position
+    peak_index = wksp.readX(0).searchsorted(peak_position)
+
+    # create a workspace to put the result into
+    single = WorkspaceFactory.create('Workspace2D', NVectors=1,
+                                     XLength=wksp.getNumberHistograms(),
+                                     YLength=wksp.getNumberHistograms())
+    single.setTitle('d-spacing={}\\A'.format(wksp.readX(0)[peak_index]))
+
+    # get a handle to map the detector positions
+    detids = wksp.detectorInfo().detectorIDs()
+
+    # fill in the data values
+    x = single.dataX(0)
+    y = single.dataY(0)
+    e = single.dataE(0)
+    for wksp_index in range(numSpec):
+        x[wksp_index] = detids[wksp_index]
+        y[wksp_index] = wksp.readY(wksp_index)[peak_index]
+        e[wksp_index] = wksp.readE(wksp_index)[peak_index]
+
+    # add the workspace to the AnalysisDataService
+    mtd.addOrReplace(outputname, single)
+    return mtd[outputname]
+
