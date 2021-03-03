@@ -459,6 +459,7 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.disableChecking.append('Instrument')
         return ['d22_single_sens', 'D22_AutoProcess_Single_Sens_Reference.nxs']
 
     def runTest(self):
