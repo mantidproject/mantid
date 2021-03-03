@@ -86,10 +86,14 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.model.update_plot_guess(self.view.plot_guess)
 
+        self.fitting_mode_changed_notifier.notify_subscribers()
+
     def handle_normalisation_changed(self) -> None:
         """Handles when the normalisation line edit has been changed by the user."""
         self.model.set_current_normalisation(self.view.normalisation)
         self.model.update_plot_guess(self.view.plot_guess)
+
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def update_and_reset_all_data(self) -> None:
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
@@ -111,6 +115,11 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
                 self.model.update_current_single_fit_functions(fit_function)
         else:
             super().update_fit_function_in_model(fit_function)
+
+    def update_fit_function_in_view_from_model(self) -> None:
+        """Updates the parameters of a fit function shown in the view."""
+        super().update_fit_function_in_view_from_model()
+        self.view.normalisation = self.model.current_normalisation()
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
