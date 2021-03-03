@@ -10,7 +10,8 @@ from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from mantid.kernel import V3D
 
-BATCH_SIZE = 500
+BATCH_SIZE = 3000
+MINIMUM_BATCH_SIZE_ROWS = 100
 
 
 class TableModel(QAbstractTableModel):
@@ -28,6 +29,7 @@ class TableModel(QAbstractTableModel):
         self._data_model = data_model
         self._row_count = 0
         self._headers = []
+        self._row_batch_size = MINIMUM_BATCH_SIZE_ROWS
 
     def setHorizontalHeaderLabels(self, labels):
         self._headers = labels
@@ -42,7 +44,7 @@ class TableModel(QAbstractTableModel):
             return
 
         remainder = self._data_model.get_number_of_rows() - self._row_count
-        items_to_fetch = min(BATCH_SIZE, remainder)
+        items_to_fetch = min(self._row_batch_size, remainder)
 
         if items_to_fetch < 0:
             return
@@ -108,7 +110,16 @@ class TableModel(QAbstractTableModel):
         self.beginResetModel()
         self._data_model = data_model
         self._row_count = 0
+        self._update_row_batch_size()
         self.endResetModel()
+
+    def _update_row_batch_size(self):
+        num_data_columns = self._data_model.get_number_of_columns()
+        if num_data_columns > 0:
+            self._row_batch_size = max(int(BATCH_SIZE/num_data_columns),
+                                       MINIMUM_BATCH_SIZE_ROWS)
+        else:
+            self._row_batch_size = MINIMUM_BATCH_SIZE_ROWS
 
     def flags(self, index):
         col = index.column()

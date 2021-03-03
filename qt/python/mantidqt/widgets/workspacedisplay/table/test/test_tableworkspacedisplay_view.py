@@ -58,7 +58,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addRow({'test_col': 1.0})
 
         self.assertEqual(current_rows + 1, presenter.view.model().rowCount())
-        presenter.force_close()
+        presenter.close(ws.name())
 
     def test_gui_updated_when_row_added_from_sequence_standard(self):
         ws = CreateEmptyTableWorkspace()
@@ -69,7 +69,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addRow([1.0])
 
         self.assertEqual(current_rows + 1, presenter.view.model().rowCount())
-        presenter.force_close()
+        presenter.close(ws.name())
 
     def test_gui_updated_when_column_removed_batch(self):
         ws = CreateEmptyTableWorkspace()
@@ -79,7 +79,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.removeColumn('test_col')
 
         self.assertEqual(0, presenter.view.columnCount())
-        presenter.force_close()
+        presenter.close(ws.name())
 
     def test_gui_updated_when_row_added_from_dictionary_batch(self):
         ws = CreateEmptyTableWorkspace()
@@ -90,25 +90,25 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         ws.addRow({'test_col': 1.0})
 
         self.assertEqual(current_rows + 1, presenter.view.model().max_rows())
-        presenter.force_close()
+        presenter.close(ws.name())
 
     def test_correct_number_of_rows_fetched_initially_batch(self):
         ws = CreateEmptyTableWorkspace()
         ws.addColumn("double", "l")
-        presenter = TableWorkspaceDisplay(ws, batch=True)
         list(map(ws.addRow, ([i] for i in range(5 * BATCH_SIZE))))
+        presenter = TableWorkspaceDisplay(ws, batch=True)
         # fetch more starting at index 0,0
         index = presenter.view.model().index(0, 0)
         presenter.view.model().fetchMore(index)
         self.assertEqual(5 * BATCH_SIZE, presenter.view.model().max_rows())
         self.assertEqual(BATCH_SIZE, presenter.view.model().rowCount())
-        presenter.force_close()
+        presenter.close(ws.name())
 
     def test_scrolling_updates_number_of_rows_fetched_batch(self):
         ws = CreateEmptyTableWorkspace()
         ws.addColumn("double", "l")
-        presenter = TableWorkspaceDisplay(ws, batch=True)
         list(map(ws.addRow, ([i] for i in range(5 * BATCH_SIZE))))
+        presenter = TableWorkspaceDisplay(ws, batch=True)
         # fetch more starting at index 0,0
         index = presenter.view.model().index(0, 0)
         presenter.view.model().fetchMore(index)
@@ -116,7 +116,7 @@ class TableWorkspaceDisplayViewTest(unittest.TestCase):
         # scrolling should update our batch size to 2*BATCH_SIZE
         presenter.view.scrollToBottom()
         self.assertEqual(2 * BATCH_SIZE, presenter.view.model().rowCount())
-        presenter.force_close()
+        presenter.close(ws.name())
 
 
 if __name__ == '__main__':
