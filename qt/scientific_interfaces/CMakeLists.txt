@@ -18,12 +18,6 @@ add_subdirectory(Indirect)
 
 # Testing - These should be split out by library
 set(TEST_FILES
-    test/IO_MuonGroupingTest.h
-    test/MuonAnalysisDataLoaderTest.h
-    test/MuonAnalysisFitDataPresenterTest.h
-    test/MuonAnalysisFitFunctionPresenterTest.h
-    test/MuonAnalysisHelperTest.h
-    test/MuonAnalysisResultTableCreatorTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
@@ -89,7 +83,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  MTD_QT_LINK_LIBS
                    MantidScientificInterfacesGeneral
                    MantidScientificInterfacesDirect
-                   MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
