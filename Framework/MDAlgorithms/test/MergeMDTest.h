@@ -177,16 +177,16 @@ public:
     size_t ncols;
     box->getEventsData(events, ncols);
     // 7 columns: I, err^2, run_num, det_id, x, y, z
-    TS_ASSERT_EQUALS(ncols, 7);
-    // 7*3 = 21
-    TS_ASSERT_EQUALS(events.size(), 21);
+    TS_ASSERT_EQUALS(ncols, 8);
+    // 8*3 = 24
+    TS_ASSERT_EQUALS(events.size(), 24);
 
     // reference vector, 3 identical events except for incremented run numbers
-    const std::vector<coord_t> ref = {1, 1, 0, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 1, 0, 6.25, 6.25, 6.25,
-                                      1, 1, 2, 0, 6.25, 6.25, 6.25};
+    const std::vector<coord_t> ref = {1, 1, 0, 0, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 2, 0, 0, 6.25, 6.25, 6.25};
 
-    for (auto i = 0; i < 21; i++) {
+    for (auto i = 0; i < 24; i++) {
       TS_ASSERT_EQUALS(events[i], ref[i]);
     }
 
@@ -213,18 +213,18 @@ public:
     API::IMDNode *box2 = boxes2[0];
     TS_ASSERT_EQUALS(box2->getNPoints(), 6);
     box2->getEventsData(events, ncols);
-    // 7 columns: I, err^2, run_num, det_id, x, y, z
-    TS_ASSERT_EQUALS(ncols, 7);
-    // 7*6 = 42
-    TS_ASSERT_EQUALS(events.size(), 42);
+    // 8 columns: I, err^2, run_num, goniometerIndex, det_id, x, y, z
+    TS_ASSERT_EQUALS(ncols, 8);
+    // 8*6 = 48
+    TS_ASSERT_EQUALS(events.size(), 48);
 
     // reference vector, 6 identical events except for incremented run numbers
     const std::vector<coord_t> ref2 = {
-        1, 1, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 6.25, 6.25, 6.25,
-        1, 1, 2, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 6.25, 6.25, 6.25,
-        1, 1, 4, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 6.25, 6.25, 6.25};
+        1, 1, 0, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 0, 6.25, 6.25, 6.25,
+        1, 1, 2, 0, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 0, 6.25, 6.25, 6.25,
+        1, 1, 4, 0, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 0, 6.25, 6.25, 6.25};
 
-    for (auto i = 0; i < 42; i++) {
+    for (auto i = 0; i < 48; i++) {
       TS_ASSERT_EQUALS(events[i], ref2[i]);
     }
 

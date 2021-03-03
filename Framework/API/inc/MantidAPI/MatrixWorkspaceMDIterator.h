@@ -57,6 +57,8 @@ public:
 
   uint16_t getInnerRunIndex(size_t index) const override;
 
+  uint16_t getInnerGoniometerIndex(size_t index) const override;
+
   int32_t getInnerDetectorID(size_t index) const override;
 
   coord_t getInnerPosition(size_t index, size_t dimension) const override;

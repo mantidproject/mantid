@@ -15,6 +15,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
+        SetGoniometer('ConvertWANDSCDtoQTest_data', Axis0='s1,0,1,0,1', Average=False)
         LoadMD('HB2C_WANDSCD_norm.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_norm')
         ConvertWANDSCDtoQTest_Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                                                     NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
@@ -76,7 +77,8 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
         SetGoniometer('ConvertWANDSCDtoQ_HB3ATest_data',
                       Axis0='omega,0,1,0,-1',
                       Axis1='chi,0,0,1,-1',
-                      Axis2='phi,0,1,0,-1')
+                      Axis2='phi,0,1,0,-1',
+                      Average=False)
 
         ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data',
                           Wavelength=1.008,

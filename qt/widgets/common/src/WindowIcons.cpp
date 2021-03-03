@@ -65,8 +65,6 @@ void WindowIcons::initInternalLookup() {
   m_idToPixmapName["Workspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["SliceViewer"] =
       ":/SliceViewer/icons/SliceViewerWindow_icon.png";
-  m_idToPixmapName["VSIWindow"] =
-      ":/VatesSimpleGuiViewWidgets/icons/pvIcon.png";
 }
 
 /**

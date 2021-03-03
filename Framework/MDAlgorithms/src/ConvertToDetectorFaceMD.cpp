@@ -76,13 +76,16 @@ void ConvertToDetectorFaceMD::init() {
  * @param y : y-coordinate for all output events
  * @param bankNum : coordinate for the 4th dimension (optional)
  * @param runIndex : index of the run, starting at 0
+ * @param goniometerIndex : 0-based index determines the goniometer
+ * settings when this event occurred
  * @param detectorID : detectorID for this event list
  */
 template <class T, class MDE, size_t nd>
 void ConvertToDetectorFaceMD::convertEventList(
     std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
-    uint16_t runIndex, int32_t detectorID) {
+    uint16_t runIndex, uint16_t goniometerIndex, int32_t detectorID) {
+
   EventList &el = in_ws->getSpectrum(workspaceIndex);
 
   // The 3/4D DataObjects that will be added into the MDEventWorkspce
@@ -104,12 +107,12 @@ void ConvertToDetectorFaceMD::convertEventList(
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
       out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
-                              runIndex, detectorID, center);
+                              runIndex, goniometerIndex, detectorID, center);
     } else if (nd == 4) {
       coord_t center[4] = {x, y, tof, bankNum};
       out_events.emplace_back(static_cast<float>(it->weight()),
                               static_cast<float>(it->errorSquared()), runIndex,
-                              detectorID, center);
+                              detectorID, goniometerIndex, center);
     }
   }
 
@@ -260,7 +263,7 @@ void ConvertToDetectorFaceMD::exec() {
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   ExperimentInfo_sptr ei(in_ws->cloneExperimentInfo());
   uint16_t runIndex = outWS->addExperimentInfo(ei);
-
+  uint16_t goniometerIndex(0);
   // ---------------- Convert each bank --------------------------------------
   for (auto &bank : banks) {
     int bankNum = bank.first;
@@ -287,26 +290,32 @@ void ConvertToDetectorFaceMD::exec() {
         case TOF:
           if (nd == 3)
             this->convertEventList<TofEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<TofEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         case WEIGHTED:
           if (nd == 3)
             this->convertEventList<WeightedEvent, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<WeightedEvent, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         case WEIGHTED_NOTIME:
           if (nd == 3)
             this->convertEventList<WeightedEventNoTime, MDEvent<3>, 3>(
-                outWS3, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS3, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           else if (nd == 4)
             this->convertEventList<WeightedEventNoTime, MDEvent<4>, 4>(
-                outWS4, wi, xPos, yPos, bankPos, runIndex, detID);
+                outWS4, wi, xPos, yPos, bankPos, runIndex, goniometerIndex,
+                detID);
           break;
         default:
           throw std::runtime_error("EventList had an unexpected data type!");

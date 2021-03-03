@@ -605,12 +605,33 @@ FileFinderImpl::findRuns(const std::string &hintstr,
       if (runEndNumber < runNumber) {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }
+      std::string previousPath, previousExt;
       for (int irun = runNumber; irun <= runEndNumber; ++irun) {
         run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
+
+        // Quick check if file can be created from previous successfully found
+        // path/extension
+        if (!previousPath.empty() && !previousExt.empty()) {
+          try {
+            const Poco::File file(previousPath + p1.first + run + previousExt);
+            if (file.exists()) {
+              res.emplace_back(file.path());
+              continue;
+            }
+          } catch (...) {
+            // Clear cached path and extension
+            previousPath = previousExt = "";
+          }
+        }
+
         std::string path = findRun(p1.first + run, exts, useExtsOnly);
         if (!path.empty()) {
+          // Cache successfully found path and extension
+          auto tempPath = Poco::Path(path);
+          previousExt = "." + tempPath.getExtension();
+          previousPath = tempPath.makeParent().toString();
           res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);

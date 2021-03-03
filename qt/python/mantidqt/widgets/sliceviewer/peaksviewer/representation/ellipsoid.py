@@ -121,12 +121,14 @@ def _bkgd_ellipsoid_info(shape_info):
     Retrieve background radii and width from the PeakShape in the slice frame
     :param shape_info: A dictionary of ellipsoid properties
     """
-    a, b, c = float(shape_info["background_outer_radius0"]), float(
-        shape_info["background_outer_radius1"]), float(shape_info["background_outer_radius2"])
-    inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
-        shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
-
-    return (a, b, c, inner_a, inner_b, inner_c)
+    try:
+        a, b, c = float(shape_info["background_outer_radius0"]), float(
+            shape_info["background_outer_radius1"]), float(shape_info["background_outer_radius2"])
+        inner_a, inner_b, inner_c = float(shape_info["background_inner_radius0"]), float(
+            shape_info["background_inner_radius1"]), float(shape_info["background_inner_radius2"])
+        return (a, b, c, inner_a, inner_b, inner_c)
+    except TypeError:
+        return (0, 0, 0, 0, 0, 0)
 
 
 def slice_ellipsoid(origin, axis_a, axis_b, axis_c, a, b, c, zp, transform, isort=None):

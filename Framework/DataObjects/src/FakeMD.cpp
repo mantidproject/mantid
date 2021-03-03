@@ -144,7 +144,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+    eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
                               centers); // 0 = run index
   }
 
@@ -258,7 +258,7 @@ void FakeMD::addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
 
     // add event (need to convert pos to coord_t)
-    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+    eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
                               eventCenter); // 0 = run index
   }
 
@@ -382,7 +382,7 @@ void FakeMD::addFakeRandomData(const std::vector<double> &params,
     }
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+    eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
                               centers); // 0 = run index
   }
 }
@@ -455,7 +455,7 @@ void FakeMD::addFakeRegularData(const std::vector<double> &params,
     float errorSquared = 1.0;
 
     // Create and add the event.
-    eventHelper.insertMDEvent(signal, errorSquared, 0, pickDetectorID(),
+    eventHelper.insertMDEvent(signal, errorSquared, 0, 0, pickDetectorID(),
                               centers); // 0 = run index
   }
 }

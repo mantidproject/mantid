@@ -156,6 +156,8 @@ void SaveDetectorsGrouping::printToXML(
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
   pRoot->setAttribute("instrument", name);
+  pRoot->setAttribute("idf-date",
+                      instrument->getValidFromDate().toISO8601String());
 
   // Set description if was specified by user
   if (mGroupWS->run().hasProperty("Description")) {

@@ -77,7 +77,6 @@ Instruction
       -DPYQT4_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/PyQt4 \ 
       -DSITEPACKAGES_PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages \
       -DOPENSSL_ROOT_DIR=/opt/local \
-      -DMAKE_VATES=FALSE \
       -DMACPORTS=TRUE \
       -DCMAKE_INSTALL_PREFIX=path_where_to_install_mantid  /path_to_repository/mantid/Code/Mantid
 
@@ -85,18 +84,6 @@ Instruction
 6. Build mantid running ``make`` or ``make -j number_of_threads``
 7. You may create the dmg package running the ``make package`` command
 8. You may also install Mantid using the ``make install`` command. *Warning*: if you do not want to install Mantid in /Applications, correct the CMAKE_INSTALL_PREFIX in the ``cmake_install.cmake`` file in your build directory.
-
-Building VATES
---------------
-Starting from Mantid 3.4, it is possible to build it with VATES support using macports. 
-
-1. Build Paraview using the following instruction: :ref:`BuildingVATES`.
-
-2. Set cmake option ``-DMAKE_VATES=TRUE``
-
-3. Set path to the paraview build directory: ``-DParaView_DIR=/put_your_path_here``
-
-4. Run steps 6-7(8) to build/install Mantid
 
 
 ##########################################
@@ -281,7 +268,7 @@ Troubleshooting
 2. If you have upgraded to Mavericks (OS X 10.9) from a previous version of OS X with homebrew already installed then you may encounter some issues related to the fact that the default std lib has changed.  The easiest way to avoid this is to remove and then re-install all your formulas.
 3. You may find that if you build the ``MantidPlot`` target then you will get errors when you run, such as *Can't start python* and *Cannot load Curve Fitting Plugins*, this is due to the fact that the MantidPlot target does not contain all the dependencies.  You are best, if you are unsure of the hierarchy, to just use the ALL_BUILD target and then just switch to the MantidPlot target in order to run.
 4. NOTE that you might need to run ``./MantidPlot.app/Contents/MacOS/MantidPlot`` from the ``BUILD-DIR/bin`` (instead of ``open MantidPlot.app`` OR ``./MantidPlot`` from ``BUILD-DIR/bin/MantidPlot.app/Contents/MacOS/``) to get the library paths correct. Otherwise the issues above might show up (at least on OS X 10.11 El Capitan).
-5. Upgrading HDF5 requires also rebuilding nexusformat, h5py, and ParaView.  
+5. Upgrading HDF5 requires also rebuilding nexusformat, and h5py.  
 
 
 ##########

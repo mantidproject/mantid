@@ -62,6 +62,7 @@ public:
   MOCK_CONST_METHOD0(getCenter, Mantid::Kernel::VMD());
   MOCK_CONST_METHOD0(getNumEvents, size_t());
   MOCK_CONST_METHOD1(getInnerRunIndex, uint16_t(size_t index));
+  MOCK_CONST_METHOD1(getInnerGoniometerIndex, uint16_t(size_t index));
   MOCK_CONST_METHOD1(getInnerDetectorID, int32_t(size_t index));
   MOCK_CONST_METHOD2(getInnerPosition, coord_t(size_t index, size_t dimension));
   MOCK_CONST_METHOD1(getInnerSignal, signal_t(size_t index));

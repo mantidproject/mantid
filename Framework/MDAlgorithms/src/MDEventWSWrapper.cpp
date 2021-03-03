@@ -80,6 +80,8 @@ workspace, so no checks are performed
 *@param sigErr   -- pointer to the beginning of 2*data_size array containing
 signal and squared error
 *@param runIndex -- pointer to the beginning of data_size  containing run index
+*@param goniometerIndex -- 0-based index determines the goniometer
+settings when this event occurred
 *@param detId    -- pointer to the beginning of dataSize array containing
 detector id-s
 *@param Coord    -- pointer to the beginning of dataSize*nd array containing the
@@ -89,8 +91,8 @@ coordinates of nd-dimensional events
 */
 template <size_t nd>
 void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
-                                   uint32_t *detId, coord_t *Coord,
-                                   size_t dataSize) const {
+                                   uint16_t *goniometerIndex, uint32_t *detId,
+                                   coord_t *Coord, size_t dataSize) const {
 
   auto *const pWs = dynamic_cast<
       DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
@@ -99,7 +101,7 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
     for (size_t i = 0; i < dataSize; i++) {
       pWs->addEvent(DataObjects::MDEvent<nd>(
           *(sigErr + 2 * i), *(sigErr + 2 * i + 1), *(runIndex + i),
-          *(detId + i), (Coord + i * nd)));
+          *(goniometerIndex + i), *(detId + i), (Coord + i * nd)));
     }
   } else {
     auto *const pLWs = dynamic_cast<
@@ -122,6 +124,7 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
 /// throw the error in attempt to add data to 0-dimension workspace
 template <>
 void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
+                                      uint16_t * /*unused*/,
                                       uint32_t * /*unused*/,
                                       coord_t * /*unused*/,
                                       size_t /*unused*/) const {
@@ -209,18 +212,20 @@ void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
 }
 
 /** method adds the data to the workspace which was initiated before;
- *@param sigErr   -- pointer to the beginning of 2*data_size array containing
+ *@param sigErr : pointer to the beginning of 2*data_size array containing
  *signal and squared error
- *@param runIndex -- pointer to the beginnign of data_size  containing run index
- *@param detId    -- pointer to the beginning of dataSize array containing
+ *@param runIndex : pointer to the beginnign of data_size  containing run index
+ *@param goniometerIndex : 0-based index determines the goniometer
+ * settings when this event occurred
+ *@param detId : pointer to the beginning of dataSize array containing
  *detector id-s
- *@param Coord    -- pointer to the beginning of dataSize*nd array containig the
+ *@param Coord : pointer to the beginning of dataSize*nd array containig the
  *coordinates od nd-dimensional events
- *
  *@param dataSize -- the length of the vector of MD events
  */
 void MDEventWSWrapper::addMDData(std::vector<float> &sigErr,
                                  std::vector<uint16_t> &runIndex,
+                                 std::vector<uint16_t> &goniometerIndex,
                                  std::vector<uint32_t> &detId,
                                  std::vector<coord_t> &Coord,
                                  size_t dataSize) const {
@@ -229,7 +234,8 @@ void MDEventWSWrapper::addMDData(std::vector<float> &sigErr,
     return;
   // perform the actual dimension-dependent addition
   (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0], &runIndex[0],
-                                             &detId[0], &Coord[0], dataSize);
+                                             &goniometerIndex[0], &detId[0],
+                                             &Coord[0], dataSize);
 }
 
 /** method should be called at the end of the algorithm, to let the workspace

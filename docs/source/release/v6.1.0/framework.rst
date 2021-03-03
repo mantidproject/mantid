@@ -24,6 +24,7 @@ Data Objects
 ------------
 
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
+- :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
 
 Python
 ------
@@ -53,5 +54,7 @@ Improvements
 
 Bugfixes
 ########
+
+- Fix problem with dictionary parameters on :ref:`SetSample <algm-SetSample>` algorithm when running from the algorithm dialog
 
 :ref:`Release 6.1.0 <v6.1.0>`
