@@ -92,8 +92,8 @@ public:
     }
 
     double radius = 1.3;
-    Integrate3DEvents integrator(peak_q_list, UBinv, radius);
-
+    Integrate3DEvents integrator(peak_q_list, UBinv, radius,
+                                 Kernel::SpecialCoordinateSystem::QLab);
     integrator.addEvents(event_Qs, false);
 
     // With fixed size ellipsoids, all the
@@ -211,7 +211,8 @@ public:
     int maxOrder = 1;
     bool crossTerm = false;
     Integrate3DEvents integrator(peak_q_list, hkl_list, mnp_list, UBinv, ModHKL,
-                                 radius, radius_s, maxOrder, crossTerm);
+                                 radius, radius_s, maxOrder, crossTerm,
+                                 Kernel::SpecialCoordinateSystem::QLab);
 
     integrator.addEvents(event_Qs, false);
 
@@ -289,7 +290,8 @@ public:
     params.specifySize = true;
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius,
+                                 Kernel::SpecialCoordinateSystem::QLab);
     integrator.addEvents(event_Qs, false);
 
     double strong_inti = 0, strong_sigi = 0;
@@ -364,7 +366,8 @@ public:
     params.regionRadius = 0.5;
 
     // Create integraton regions + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius,
+                                 Kernel::SpecialCoordinateSystem::QLab);
     integrator.addEvents(event_Qs, false);
 
     double strong_inti, strong_sigi;
@@ -419,7 +422,8 @@ public:
     generatePeak(event_Qs, peak_3, 0.1, numWeakEvents / 2, 1); // very weak peak
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
+                                 Kernel::SpecialCoordinateSystem::QLab);
     integrator.addEvents(event_Qs, false);
 
     IntegrationParameters params;
@@ -497,8 +501,9 @@ private:
           params.backgroundOuterRadius, ctsPerBgEvent);
     }
 
-    // Create integraton region + events & UB
+    // Create integration region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
+                                 Kernel::SpecialCoordinateSystem::QLab,
                                  useOnePercentBackgroundCorrection);
     integrator.addEvents(event_Qs, false);
 

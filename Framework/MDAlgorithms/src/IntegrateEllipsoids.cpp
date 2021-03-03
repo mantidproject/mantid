@@ -481,9 +481,11 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
+  auto coordSys = (hkl_integ) ? Kernel::SpecialCoordinateSystem::HKL : Kernel::SpecialCoordinateSystem::QLab;
   Integrate3DEvents integrator(qList, hkl_vectors, mnp_vectors, UBinv, modHKL,
-                               radius_m, radius_s, maxOrder, CT,
+                               radius_m, radius_s, maxOrder, CT, coordSys,
                                useOnePercentBackgroundCorrection);
+
 
   // get the events and add
   // them to the inegrator

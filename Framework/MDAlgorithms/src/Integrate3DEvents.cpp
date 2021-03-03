@@ -38,7 +38,7 @@ using Mantid::Kernel::V3D;
  * within the specified radius of the specified peak centers, and to
  * integrate the peaks.
  *
- * @param   peak_q_list  List of Q-vectors for peak centers.
+ * @param   peak_q_list  List of Q-vectors (Lab frame) for peak centers.
  * @param   UBinv        The matrix that maps Q-vectors to h,k,l
  * @param   radius       The maximum distance from a peak's Q-vector, for
  *                       an event to be stored in the list associated with
@@ -47,17 +47,22 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
-        &peak_q_list,
-    Kernel::DblMatrix const &UBinv, double radius,
+    const SlimEventList &peak_q_list,
+    Kernel::DblMatrix const &UBinv, double radius, CoordQ3D coordSystem,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection),
+      m_coordSystem(coordSystem){
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hkl_key] = peak_q_list[it].second;
   }
+  for (size_t it = 0; it != peak_q_list.size(); ++it) {
+    m_peakQLabList.emplace_back(peak_q_list[it].second);
+  }
+  m_eventLists.resize(peak_q_list.size());
+  initKDTree();
 }
 
 /**
@@ -66,7 +71,7 @@ Integrate3DEvents::Integrate3DEvents(
  * and to integrate the peaks.
  *
  * @overload
- * @param   peak_q_list  List of Q-vectors for peak centers.
+ * @param   peak_q_list  List of Q-vectors (Lab frame) for peak centers.
  * @param   hkl_list     The list of h,k,l
  * @param   mnp_list     The list of satellite m,n,p
  * @param   UBinv        The matrix that maps Q-vectors to h,k,l
@@ -83,15 +88,16 @@ Integrate3DEvents::Integrate3DEvents(
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
-        &peak_q_list,
+    const SlimEventList &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
     double radius_m, double radius_s, int MaxO, const bool CrossT,
+    CoordQ3D coordSystem,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_ModHKL(ModHKL), m_radius(radius_m), s_radius(radius_s),
       maxOrder(MaxO), crossterm(CrossT),
-      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection),
+      m_coordSystem(coordSystem){
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hklmnp_key =
         getHklMnpKey(boost::math::iround<double>(hkl_list[it][0]),
@@ -108,6 +114,7 @@ Integrate3DEvents::Integrate3DEvents(
     m_peakQLabList.emplace_back(peak_q_list[it].second);
   }
   m_eventLists.resize(peak_q_list.size());
+  initKDTree();
 }
 
 /**
@@ -354,6 +361,25 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   auto sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
 
   return inti / sigi;
+}
+
+void Integrate3DEvents::initKDTree(){
+  if (m_peakQLabList.empty())
+    throw std::runtime_error("Cannot build the KDTree");
+  std::vector<Eigen::Vector3d> points;
+  std::transform(m_peakQLabList.begin(), m_peakQLabList.end(), std::back_inserter(points),
+                 [&](const V3D &v) {
+                   switch (m_coordSystem) {
+                   case (CoordQ3D::QLab):
+                     return Eigen::Vector3d(v[0], v[1], v[2]);
+                   case (CoordQ3D::HKL): {
+                     V3D w = m_UBinv * v;
+                     return Eigen::Vector3d(w[0], w[1], w[2]);
+                   }
+                   default:
+                     throw std::invalid_argument("Unsupported SpecialCoordinateSystem");                   }
+                 });
+  m_kdTree = std::make_unique<KDTree>(points);
 }
 
 const std::vector<std::pair<std::pair<double, double>, V3D>> *
@@ -1049,26 +1075,16 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
  * will be subtracted from the event and the event will be added to that
  * peak's vector in the event_lists map.
  *
- * @param event_Q      The Q-vector for the event that may be added to the
+ * @param event_Q      The Q-vector (QLab or HKL) for the event that may be added to the
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
 void Integrate3DEvents::addEvent(SlimEvent event_Q, bool hkl_integ) {
-
   V3D v(event_Q.second); // Q3D or HKL vector
-  double thresholdDistanceSquare(m_radius * m_radius);
-  for(size_t peakIndex = 0; peakIndex < m_peakQLabList.size(); peakIndex++){
-    V3D vRelative;
-    if (hkl_integ)
-      vRelative = v - m_UBinv * m_peakQLabList[peakIndex];
-    else
-      vRelative = v - m_peakQLabList[peakIndex];
-    double distanceSquare(vRelative.norm2());
-    if (distanceSquare < thresholdDistanceSquare){
-      event_Q.second = vRelative;
-      m_eventLists[peakIndex].emplace_back(event_Q);
-      break;
-    }
+  auto neighbor = findNearestPeak(v); // q-vector, peak index, distance
+  if (neighbor.distance < m_radius){
+    event_Q.second = event_Q.second - neighbor.position;
+    m_eventLists[neighbor.peakIndex].emplace_back(event_Q);
   }
 
   int64_t hkl_key;
@@ -1110,33 +1126,25 @@ void Integrate3DEvents::addEvent(SlimEvent event_Q, bool hkl_integ) {
  */
 void Integrate3DEvents::addModEvent(SlimEvent event_Q, bool hkl_integ) {
 
+  V3D v(event_Q.second); // Q3D or HKL vector
   int64_t hklmnp_key;
-
-  if (hkl_integ)
-    hklmnp_key = getHklMnpKey2(event_Q.second);
-  else
-    hklmnp_key = getHklMnpKey(event_Q.second);
+  switch (m_coordSystem) {
+  case (CoordQ3D::HKL) :
+    hklmnp_key = getHklMnpKey2(v);
+    break;
+  case (CoordQ3D::QLab) :
+    hklmnp_key = getHklMnpKey(v);
+    break;
+  default:
+    throw std::invalid_argument("Unsupported SpecialCoordinateSystem");
+  }
 
   bool isMainPeak(hklmnp_key % 10000 == 0);
-  double thresholdDistanceSquare;
-  if (isMainPeak)
-    thresholdDistanceSquare = m_radius * m_radius;
-  else
-    thresholdDistanceSquare = s_radius * s_radius;
-
-  V3D v(event_Q.second); // Q3D or HKL vector
-  for(size_t peakIndex = 0; peakIndex < m_peakQLabList.size(); peakIndex++){
-    V3D vRelative;
-    if (hkl_integ)
-      vRelative = v - m_UBinv * m_peakQLabList[peakIndex];
-    else
-      vRelative = v - m_peakQLabList[peakIndex];
-    double distanceSquare(vRelative.norm2());
-    if (distanceSquare < thresholdDistanceSquare){
-      event_Q.second = vRelative;
-      m_eventLists[peakIndex].emplace_back(event_Q);
-      break;
-    }
+  double thresholdDistance = (isMainPeak) ? m_radius : s_radius;
+  auto neighbor = findNearestPeak(v); // q-vector, peak index, distance
+  if (neighbor.distance < thresholdDistance){
+    event_Q.second = event_Q.second - neighbor.position;
+    m_eventLists[neighbor.peakIndex].emplace_back(event_Q);
   }
 
   if (hklmnp_key == 0) // don't keep events associated with 0,0,0
@@ -1354,6 +1362,18 @@ Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params,
   }
 
   return std::make_tuple(r1, r2, r3);
+}
+
+Integrate3DEvents::NeighborPeak Integrate3DEvents::findNearestPeak(const V3D &q) const {
+  auto v = Eigen::Vector3d(q[0], q[1], q[2]);
+  auto result = m_kdTree->findNearest(v); // list of neighbors
+  auto firstNeighbor = result[0]; // (Q-vector, index, distance)
+  Eigen::Vector3d qV3d = std::get<0>(firstNeighbor);
+  V3D position(qV3d[0], qV3d[1], qV3d[2]);
+  size_t peakIndex(std::get<1>(firstNeighbor));
+  double distance(std::get<2>(firstNeighbor));
+  Integrate3DEvents::NeighborPeak peak = {position, peakIndex, distance};
+  return peak;
 }
 
 } // namespace MDAlgorithms

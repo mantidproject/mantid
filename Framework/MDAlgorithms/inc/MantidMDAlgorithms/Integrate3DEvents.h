@@ -10,6 +10,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/NearestNeighbours.h"
 
 #include <memory>
 
@@ -53,8 +54,10 @@ struct IntegrationParameters {
 using Mantid::Kernel::V3D;
 using Mantid::Geometry::PeakShape_const_sptr;
 using Mantid::DataObjects::PeakShapeEllipsoid_const_sptr;
+using KDTree = Mantid::Kernel::NearestNeighbours<3>;
+using CoordQ3D = Mantid::Kernel::SpecialCoordinateSystem;
 
-/// [(weight, error), Q3D or HKL vector] object for an event
+/// [(weight, error), QLab or HKL vector] trimmed-down object for an event
 using SlimEvent = std::pair<std::pair<double, double>, V3D>;
 using SlimEventList = std::vector<SlimEvent>;
 
@@ -62,11 +65,20 @@ using EventListMap = std::unordered_map<int64_t, SlimEventList>;
 using PeakQMap = std::unordered_map<int64_t, V3D>;
 
 class DLLExport Integrate3DEvents {
+
 public:
+
+  /// helper struct to collect the search for events near a peak
+  struct NeighborPeak {
+    V3D position;
+    size_t peakIndex;
+    double distance;
+  };
+
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(
       const SlimEventList &peak_q_list,
-      Kernel::DblMatrix const &UBinv, double radius,
+      Kernel::DblMatrix const &UBinv, double radius, CoordQ3D coordSystem,
       const bool useOnePercentBackgroundCorrection = true);
 
   Integrate3DEvents(
@@ -75,6 +87,7 @@ public:
       std::vector<V3D> const &mnp_list,
       Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
       double radius_m, double radius_s, int MaxO, const bool CrossT,
+      CoordQ3D coordSystem,
       const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
@@ -123,8 +136,13 @@ public:
                                     bool forceSpherical = false,
                                     double sphericityTol = 0.02);
 
+  void setCoordSystem(const CoordQ3D &cs){m_coordSystem = cs;}
+
+  void initKDTree();
+
 private:
-  /// Get a list of events for a given Q
+
+   /// Get a list of events for a given Q
   const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> *
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
@@ -200,6 +218,13 @@ private:
   calculateRadiusFactors(const IntegrationParameters &params,
                          double max_sigma) const;
 
+  /**
+   * @brief Find the peak whose Q-vector (QLab or HKL) is closest to a point
+   * @param q : query position in Qlab or HKL
+   * @return index of the peak and distance from the peak to the query point.
+   */
+  NeighborPeak findNearestPeak(const V3D &q) const;
+
   // Private data members
 
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors in the lab frame
@@ -212,8 +237,11 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+  CoordQ3D m_coordSystem;
   /// Peak Q-vectors in the lab frame
   std::vector<V3D> m_peakQLabList;
+  /// Construct a KD-Tree with the peak vectors in QLab or HKL coordinates
+  std::unique_ptr<KDTree> m_kdTree;
   /// neighbor events for each peak (to substitute m_event_lists)
   std::vector<SlimEventList> m_eventLists;
 };

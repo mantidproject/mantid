@@ -207,8 +207,9 @@ void IntegrateEllipsoidsTwoStep::exec() {
   const bool integrateInHKL = getProperty("IntegrateInHKL");
   bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
+  auto coordSys = (integrateInHKL) ? Kernel::SpecialCoordinateSystem::HKL : Kernel::SpecialCoordinateSystem::QLab;
   Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"),
-                               useOnePercentBackgroundCorrection);
+                               coordSys, useOnePercentBackgroundCorrection);
 
   if (eventWS) {
     // process as EventWorkspace
