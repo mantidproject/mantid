@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
             pass
 
     def helpClicked(self):
-        show_interface_help(self.mantidplot_name, self.assistant_process, section='utility')
+        show_interface_help(self.mantidplot_name, self.assistant_process, area='utility')
 
     def closeEvent(self, event):
         self.assistant_process.close()
