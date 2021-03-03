@@ -335,7 +335,7 @@ def cross_correlate_calibrate(ws_name: str,
     # optionally save
     if debug_mode:
         SaveNexusProcessed(InputWorkspace=cc_ws_name,
-                           Filename=os.path.join(os.getcwd(),f'step1_ref{reference_ws_index}_{cc_ws_name}.nxs'))
+                           Filename=os.path.join(os.getcwd(), f'step1_ref{reference_ws_index}_{cc_ws_name}.nxs'))
 
     # TODO - THIS IS AN IMPORTANT PARAMETER TO SET THE MASK
     # min_peak_height = 1.0
@@ -520,7 +520,8 @@ def cross_correlate_vulcan_data(diamond_ws_name: str,
                                                                1,
                                                                bank_i_cc_param.bin_step,
                                                                f'{bank_name}_{prefix}',
-                                                               peak_fit_time=cc_fit_time)
+                                                               peak_fit_time=cc_fit_time,
+                                                               debug_mode=False)
         if bank_i_offset is None:
             err_msg = bank_i_mask
             print('[ERROR] Unable to calibrate {} by cross correlation: {}'.format(bank_name, err_msg))
@@ -711,7 +712,8 @@ def save_calibration(calib_ws_name: str,
                      mask_ws_name: str,
                      group_ws_name: str,
                      calib_file_prefix: str,
-                     output_dir: str) -> str:
+                     output_dir: str,
+                     advanced_output: bool = False) -> str:
     """Export calibrated result to calibration file
 
     Save calibration (calibration table, mask and grouping) to legacy .cal and current .h5 file
@@ -741,7 +743,10 @@ def save_calibration(calib_ws_name: str,
           f'Masked = {mtd[mask_ws_name].getNumberMasked()}')
 
     # Save for Mantid diffraction calibration file
-    SaveNexusProcessed(InputWorkspace=calib_ws_name, Filename=f'{calib_ws_name}.nxs')
+    if advanced_output:
+        SaveNexusProcessed(InputWorkspace=calib_ws_name, Filename=f'{calib_ws_name}.nxs')
+
+    # Save diffraction calibration file
     SaveDiffCal(CalibrationWorkspace=calib_ws_name,
                 GroupingWorkspace=group_ws_name,
                 MaskWorkspace=mask_ws_name,

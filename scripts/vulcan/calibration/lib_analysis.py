@@ -181,7 +181,8 @@ def align_focus_event_ws(event_ws_name,
                          group_ws_name: str,
                          mask_ws_name: Union[str, None],
                          customized_grouping_ws_name: Union[str, None],
-                         output_dir: str) -> Tuple[str, str]:
+                         output_dir: str,
+                         save_workspace: bool = False) -> Tuple[str, str]:
     """
     overwrite the input
     """
@@ -206,15 +207,18 @@ def align_focus_event_ws(event_ws_name,
 
     # Rebin
     Rebin(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name, Params='0.3,-0.0003,1.5')
-    # Convert to matrix workspace
-    matrix_ws_name = f'{event_ws_name}_matrix'
-    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
 
-    # Save nexus for 2D alignment view
-    SaveNexusProcessed(InputWorkspace=matrix_ws_name,
-                       Filename=os.path.join(output_dir, f'{event_ws_name}{file_tag}.nxs'))
-    # remove matrix workspace after being saved
-    mtd.remove(matrix_ws_name)
+    if save_workspace:
+        # Save aligned but not focused workspace
+        # Convert to matrix workspace
+        matrix_ws_name = f'{event_ws_name}_matrix'
+        ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
+
+        # Save nexus for 2D alignment view
+        SaveNexusProcessed(InputWorkspace=matrix_ws_name,
+                           Filename=os.path.join(output_dir, f'{event_ws_name}{file_tag}.nxs'))
+        # remove matrix workspace after being saved
+        mtd.remove(matrix_ws_name)
 
     # Mask group workspace
     if mask_ws_name:
@@ -225,13 +229,18 @@ def align_focus_event_ws(event_ws_name,
 
     # Diffraction focus to standard group
     if customized_grouping_ws_name is not None:
-        # focus to matrix workspace and save
-        DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name,
-                             GroupingWorkspace=group_ws_name, PreserveEvents=False)
-        focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
-        SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
-        # clean memory
-        mtd.remove(matrix_ws_name)
+        if save_workspace:
+            # User requires to focus to customized groups:
+            # Do focus to the regular 3 banks and save
+            # Focus to matrix workspace and save
+            matrix_ws_name = f'{event_ws_name}_matrix'
+            DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name,
+                                 GroupingWorkspace=group_ws_name, PreserveEvents=False)
+            focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_3banks.nxs')
+
+            SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
+            # clean memory
+            mtd.remove(matrix_ws_name)
 
         # Diffraction focus: original EventWorkspace is then aligned and focused for next step
         DiffractionFocussing(InputWorkspace=event_ws_name, OutputWorkspace=event_ws_name,
@@ -243,11 +252,15 @@ def align_focus_event_ws(event_ws_name,
                              GroupingWorkspace=group_ws_name, PreserveEvents=True)
 
     # Convert from event workspace to workspace 2D
-    ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
-    num_hist = mtd[event_ws_name].getNumberHistograms()
-    focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_{num_hist}banks.nxs')
-    SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
-    mtd.remove(matrix_ws_name)
+    if save_workspace:
+        matrix_ws_name = f'{event_ws_name}_matrix'
+        ConvertToMatrixWorkspace(InputWorkspace=event_ws_name, OutputWorkspace=matrix_ws_name)
+        num_hist = mtd[event_ws_name].getNumberHistograms()
+        focused_run_nxs = os.path.join(output_dir, f'{event_ws_name}{file_tag}_{num_hist}banks.nxs')
+        SaveNexusProcessed(InputWorkspace=matrix_ws_name, Filename=focused_run_nxs)
+        mtd.remove(matrix_ws_name)
+    else:
+        focused_run_nxs = None
 
     # Edit instrument geometry
     # NOTE: Disable EditInstrumentGeometry as

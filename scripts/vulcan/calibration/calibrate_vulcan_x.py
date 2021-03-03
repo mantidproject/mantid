@@ -15,7 +15,8 @@ __all__ = ['load_diamond_runs', 'cross_correlate_calibrate', 'align_vulcan_data'
 
 def load_diamond_runs(diamond_runs: List[Union[str, int]],
                       user_idf: Union[None,  str],
-                      output_dir: Union[str, None]) -> Tuple[str, str]:
+                      output_dir: Union[str, None],
+                      write_count_file: bool = False) -> Tuple[str, str]:
     """Load diamond run(s)
 
     Parameters
@@ -24,6 +25,8 @@ def load_diamond_runs(diamond_runs: List[Union[str, int]],
     user_idf
     output_dir: str, None
         if None, then do not write count file
+    write_count_file: bool
+        Flag to write output count file
 
     Returns
     -------
@@ -32,7 +35,7 @@ def load_diamond_runs(diamond_runs: List[Union[str, int]],
 
     """
     # counts ws name
-    if output_dir:
+    if output_dir and write_count_file:
         # only
         counts_nexus_file_base = 'Counts_'
         if isinstance(diamond_runs[0], int):
