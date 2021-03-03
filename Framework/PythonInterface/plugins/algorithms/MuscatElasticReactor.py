@@ -340,7 +340,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
 
         self._sigss = self._sofq*self._sigc + self._sigi    #q_dependent total scatt X-sect
         self._sigss = np.log(self._sigss)                   #interpolation later on
-        self._sofq = np.log(self._sofq/self._sigs)          #S(Q) normalised
+        self._sofq = np.log(self._sofq)          #S(Q) normalised
 
     def _calc_angles(self):
         Qmax = 4.0*math.pi/self._wave
