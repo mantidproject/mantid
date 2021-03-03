@@ -386,7 +386,7 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
  */
 void MuonAnalysis::muonAnalysisHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Muon Analysis"));
+                                                 QString("Muon Analysis"), QString("muon"));
 }
 
 /**
@@ -394,7 +394,7 @@ void MuonAnalysis::muonAnalysisHelpClicked() {
  */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString(""),
+      nullptr, QString("Muon Analysis"), QString("muon"),
       QString("grouping-options"));
 }
 

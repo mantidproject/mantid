@@ -131,7 +131,7 @@ void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
     connectParent(gui, parent);
-    gui->showCustomInterface(name, section);
+    gui->showCustomInterface(name, area, section);
   } else {
     // Open online help
     QString baseUrl = "https://docs.mantidproject.org/interfaces/";

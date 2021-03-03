@@ -681,7 +681,7 @@ class PyChopGui(QMainWindow):
         """
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop")
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop", 'direct')
         except ImportError:
             helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
             helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"

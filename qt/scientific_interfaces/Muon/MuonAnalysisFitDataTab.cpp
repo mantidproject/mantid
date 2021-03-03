@@ -37,7 +37,7 @@ void MuonAnalysisFitDataTab::init() {
  */
 void MuonAnalysisFitDataTab::muonAnalysisHelpDataAnalysisClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon Analysis"), QString("data-analysis"));
+      nullptr, QString("Muon Analysis"), QString("muon"), QString("data-analysis"));
 }
 
 /**

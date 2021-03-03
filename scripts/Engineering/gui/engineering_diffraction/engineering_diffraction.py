@@ -142,7 +142,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.comboBox_instrument.currentIndexChanged.connect(slot)
 
     def open_help_window(self):
-        InterfaceManager().showCustomInterfaceHelp(self.doc)
+        InterfaceManager().showCustomInterfaceHelp(self.doc,'diffraction')
 
     def open_settings(self):
         self.settings_presenter.show()

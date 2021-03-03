@@ -84,7 +84,7 @@ def __get_collection_file(collection_file: str) -> str:
     return os.path.abspath(collection_file)
 
 
-def show_interface_help(mantidplot_name, assistant_process, section: str='',
+def show_interface_help(mantidplot_name, assistant_process, area: str='',
                         collection_file: str='',
                         qt_url: str='', external_url: str=""):
     ''' Shows the help page for a custom interface
@@ -117,7 +117,7 @@ def show_interface_help(mantidplot_name, assistant_process, section: str='',
     try:
         # try using built-in help in mantid
         import mantidqt
-        mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name, section)
+        mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp(mantidplot_name, area)
     except: #(ImportError, ModuleNotFoundError) raises the wrong type of error
         # built-in help failed, try external qtassistant then give up and launch a browser
 
