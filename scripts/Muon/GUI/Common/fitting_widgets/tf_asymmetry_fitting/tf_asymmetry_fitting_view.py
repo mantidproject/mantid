@@ -39,6 +39,10 @@ class TFAsymmetryFittingView(GeneralFittingView):
         """Sets the slot for handling when a normalisation value is changed by the user."""
         self.tf_asymmetry_fitting_options.set_slot_for_normalisation_changed(slot)
 
+    def set_slot_for_fix_normalisation_changed(self, slot) -> None:
+        """Sets the slot for handling when a fix normalisation is ticked or un-ticked by the user."""
+        self.tf_asymmetry_fitting_options.set_slot_for_fix_normalisation_changed(slot)
+
     @property
     def tf_asymmetry_mode(self) -> bool:
         """Returns true if TF Asymmetry fitting mode is currently active."""
@@ -58,3 +62,13 @@ class TFAsymmetryFittingView(GeneralFittingView):
     def set_normalisation(self, value: float, error: float = 0.0) -> None:
         """Sets the normalisation value currently displayed in the normalisation line edit."""
         self.tf_asymmetry_fitting_options.set_normalisation(value, error)
+
+    @property
+    def is_normalisation_fixed(self) -> bool:
+        """Returns true if the fix normalisation check box is ticked."""
+        return self.tf_asymmetry_fitting_options.is_normalisation_fixed()
+
+    @is_normalisation_fixed.setter
+    def is_normalisation_fixed(self, is_fixed: bool) -> None:
+        """Sets whether the fix normalisation checkbox is ticked or not."""
+        self.tf_asymmetry_fitting_options.is_normalisation_fixed = is_fixed
