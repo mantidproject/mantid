@@ -463,6 +463,7 @@ class DrillPresenter:
         generates automatically its fields on the basis of settings types. It
         also connects the differents signals to get validation of user inputs.
         """
+        self.view.setDisabled(True)
         sw = DrillSettingsDialog(self.view)
         types, values, doc = self.model.getSettingsTypes()
         sw.initWidgets(types, values, doc)
@@ -479,6 +480,9 @@ class DrillPresenter:
                 )
         sw.accepted.connect(
                 lambda : self.model.setSettings(sw.getSettings())
+                )
+        sw.finished.connect(
+                lambda : self.view.setDisabled(False)
                 )
         sw.show()
 
