@@ -47,6 +47,16 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.dataset_names = self.dataset_names
         self.assertEqual(self.model.dataset_names, self.dataset_names)
 
+    def test_that_setting_the_dataset_names_will_attempt_to_reuse_the_start_and_end_x_used_for_the_previous_datasets(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.start_xs = [2.0, 3.0]
+        self.model.end_xs = [4.0, 5.0]
+
+        self.model.dataset_names = ["NewName", "Name1"]
+
+        self.assertEqual(self.model.start_xs, [0.0, 2.0])
+        self.assertEqual(self.model.end_xs, [4.0, 4.0])
+
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
         with self.assertRaises(RuntimeError):
