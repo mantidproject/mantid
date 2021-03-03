@@ -120,7 +120,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-10,10)):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,1)):
     """
     Plots the percent change in DIFC between calib_new and calib_old
     :param calib_new: New calibration, can be filename, SpecialWorkspace2D, or calibration table (TableWorkspace)
@@ -145,7 +145,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-10
     delta = ws_new - ws_old
 
     use_mask = False
-    if mask is not None and mtd.doesExist(str[mask]):
+    if mask is not None and mtd.doesExist(str(mask)):
         use_mask = True
 
     # Plotting below taken from addie/calibration/CalibrationDiagnostics.py
@@ -159,7 +159,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-10
         pos = x.position
         theta = np.arccos(pos[2] / pos.norm())
         phi = np.arctan2(pos[1], pos[0])
-        if use_mask and mask.dataY(idx):
+        if use_mask and mtd[str(mask)].dataY(idx):
             masked_theta_array.append(theta)
             masked_phi_array.append(phi)
         else:
