@@ -226,7 +226,33 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1
     return fig, ax
 
 
-def extract_peak_info(wksp, peak_position: float, outputname: str):
+def collect_peaks(wksp, outputname: str, donor=None):
+    wksp = mtd[str(wksp)]
+
+    numSpec = int(wksp.rowCount())
+    peak_names = [item for item in wksp.getColumnNames()
+                  if item not in ['detid', 'chisq', 'normchisq']]
+    peaks = np.asarray([float(item[1:]) for item in peak_names])
+    numPeaks = len(peaks)
+
+    # convert the d-space table to a Workspace2d
+    if donor:
+        donor = mtd[str(donor)]
+    else:
+        donor = 'Workspace2D'
+    output = WorkspaceFactory.create(donor, NVectors=numSpec,
+                                     XLength=numPeaks, YLength=numPeaks)
+    output.getAxis(0).setUnit('dSpacing')
+    for i in range(numSpec):  # TODO get the detID correct
+        output.setX(i, peaks)
+        output.setY(i, list(wksp.row(i).values())[1:-2] / peaks)
+
+    # add the workspace to the AnalysisDataService
+    mtd.addOrReplace(outputname, output)
+    return mtd[outputname]
+
+
+def extract_peak_info(wksp, outputname: str, peak_position: float):
     '''
     Extract information about a single peak from a Workspace2D. The input workspace is expected to have
     common x-axis of observed d-spacing. The y-values and errors are extracted.
@@ -249,13 +275,17 @@ def extract_peak_info(wksp, peak_position: float, outputname: str):
 
     # get a handle to map the detector positions
     detids = wksp.detectorInfo().detectorIDs()
+    have_detids = bool(len(detids) > 0)
 
     # fill in the data values
     x = single.dataX(0)
     y = single.dataY(0)
     e = single.dataE(0)
     for wksp_index in range(numSpec):
-        x[wksp_index] = detids[wksp_index]
+        if have_detids:
+            x[wksp_index] = detids[wksp_index]
+        else:
+            x[wksp_index] = wksp_index
         y[wksp_index] = wksp.readY(wksp_index)[peak_index]
         e[wksp_index] = wksp.readE(wksp_index)[peak_index]
 
