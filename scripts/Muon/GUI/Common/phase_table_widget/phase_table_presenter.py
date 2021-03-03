@@ -44,6 +44,7 @@ class PhaseTablePresenter(object):
 
         self.view.on_first_good_data_changed(self.handle_first_good_data_changed)
         self.view.on_last_good_data_changed(self.handle_last_good_data_changed)
+        self.view.on_phase_quad_table_data_changed(self.handle_phasequad_table_data_changed)
 
     def update_view_from_model(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
@@ -128,11 +129,10 @@ class PhaseTablePresenter(object):
     def handle_phasequad_calculation_success(self):
         self.enable_editing_notifier.notify_subscribers()
         self.view.enable_widget()
-        self.view.disable_cancel()
 
         names = [self._phasequad_obj.Re.name, self._phasequad_obj.Im.name]
         self.current_alg = None
-        pair_added = True  # if state == 2 else False
+        pair_added = True
 
         for name in names:
             if pair_added:
@@ -145,20 +145,22 @@ class PhaseTablePresenter(object):
             group_info = {'is_added': pair_added, 'name': name}
             self.selected_phasequad_changed_notifier.notify_subscribers(
                 group_info)
+
+        # Add to table
+        self.view.add_phase_quad_to_table(self._phasequad_obj.name)
         self._phasequad_obj = None
 
     def handle_calculation_started(self):
         self.disable_editing_notifier.notify_subscribers()
-        self.view.enable_phasequad_cancel()
 
     def handle_phase_table_calculation_started(self):
         self.disable_editing_notifier.notify_subscribers()
-        self.view.enable_cancel()
+        self.view.enable_phase_table_cancel()
 
     def handle_calculation_error(self, error):
         self.enable_editing_notifier.notify_subscribers()
         self.view.warning_popup(error)
-        self.view.disable_cancel()
+        self.view.disable_phase_table_cancel()
         self.current_alg = None
 
     def handle_calculation_success(self):
@@ -166,7 +168,7 @@ class PhaseTablePresenter(object):
         self.enable_editing_notifier.notify_subscribers()
         self.update_current_phase_tables()
         self.view.enable_widget()
-        self.view.disable_cancel()
+        self.view.disable_phase_table_cancel()
         self.current_alg = None
 
     def calculate_phase_table(self):
@@ -258,3 +260,51 @@ class PhaseTablePresenter(object):
         elif data > last_good_time:
             self.view.last_good_time = last_good_time
             self.view.warning_popup(f"{string} cannot be greater than {last_good_time}")
+
+    # Phasequad Table Functionality
+    def to_analyse_data_checkbox_changed(self, state, row, phasequad_name):
+        pair_added = True if state == 2 else False
+        names = []
+        for phasequad in self.context.group_pair_context.phasequads:
+            if phasequad.name == phasequad_name:
+                names += [phasequad.Re.name, phasequad.Im.name]
+
+        for name in names:
+            if pair_added:
+                self.context.group_pair_context.add_pair_to_selected_pairs(
+                    name)
+            else:
+                self.context.group_pair_context.remove_pair_from_selected_pairs(
+                    name)
+
+            group_info = {'is_added': pair_added, 'name': name}
+            self.selected_phasequad_changed_notifier.notify_subscribers(
+                group_info)
+
+    def handle_phasequad_table_data_changed(self, row, col):
+        item = self.view.get_table_item(row, col)
+        name = self.view.get_table_item_text(row, 0)
+        if col == 1:
+            self.to_analyse_data_checkbox_changed(item.checkState(), row, name)
+
+    def handle_remove_phasequad_button_clicked(self):
+        self.remove_last_row()
+
+    def remove_last_row(self):
+        if self.view.num_rows() > 0:
+            name = self.view.get_table_item_text(self.view.num_rows()-1, 0)
+            self.view.remove_last_row()
+            for phasequad in self.context.group_pair_context.phasequads:
+                if phasequad.name == name:
+                    names = [phasequad.Re.name, phasequad.Im.name]
+                    for name in names:
+                        self.context.group_pair_context.remove_pair_from_selected_pairs(
+                            name)
+                        group_info = {'is_added': False, 'name': name}
+                        self.selected_phasequad_changed_notifier.notify_subscribers(
+                            group_info)
+                    self.context.group_pair_context.remove_phasequad(phasequad)
+
+    def handle_phase_table_changed(self):
+        # clear what is there currently and recalculate with new table
+        pass
