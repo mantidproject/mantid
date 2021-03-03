@@ -293,3 +293,79 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     mtd.addOrReplace(outputname, single)
     return mtd[outputname]
 
+
+def plot_peakd(wksp, peak_positions):
+    """
+    Plots peak d spacing value for each peak position in peaks
+    :param wksp: Workspace returned from collect_peaks
+    :param peak_positions: List of peak positions
+    :return: plot, plot axes
+    """
+
+    peaks = peak_positions
+    if isinstance(peak_positions, float):
+        peaks = [peak_positions]
+
+    if len(peaks) == 0:
+        raise ValueError("Expected one or more peak positions")
+
+    if not mtd.doesExist(str(wksp)):
+        raise ValueError("Could not find provided workspace in ADS")
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("det IDs")
+
+    # Hold the mean and stddev for each peak to compute total at end
+    means = []
+    stddevs = []
+
+    # Plot data for each peak position
+    for peak in peaks:
+        print("Processing peak position {}".format(peak))
+        single = extract_peak_info(wksp, 'single', peak)
+
+        # get x and y arrays from single peak ws
+        x = single.dataX(0)
+        y = single.dataY(0)
+
+        # filter out any nans
+        y_val = y[~np.isnan(y)]
+
+        # skip if y was entirely nans
+        if len(y_val) == 0:
+            continue
+
+        means.append(np.mean(y_val))
+        stddevs.append(np.std(y_val))
+
+        ax.plot(x, y, marker="x", color="black", linestyle="None")
+
+    # If every peak had nans, raise error
+    if len(means) == 0 or len(stddevs) == 0:
+        raise RuntimeError("No valid peak data was found for provided peak positions")
+
+    # Calculate total mean and stddev of all peaks
+    total_mean = np.mean(means)
+    total_stddev = np.std(stddevs)
+
+    # Draw solid line at mean
+    ax.axhline(total_mean, color="black", lw=2.5)  # default lw=1.5
+
+    # Upper and lower lines calibration lines (1 percent of mean)
+    band = total_mean * 0.01
+    ax.axhline(total_mean + band, color="black", ls="--")
+    ax.axhline(total_mean - band, color="black", ls="--")
+
+    # Add mean and stddev text annotations
+    stat_str = "Mean = {:0.6f} Stdev = {:0.6f}".format(total_mean, total_stddev)
+    plt_text = ax.text(0, 0, stat_str, transform=ax.transAxes)
+
+    # Center text in the figure
+    box = plt_text.get_window_extent(renderer=fig.canvas.get_renderer()).inverse_transformed(ax.transAxes)
+    text_x = 0.5 - box.width * 0.5
+    plt_text.set_position((text_x, 0.875))
+
+    plt.show()
+
+    return fig, ax
+
