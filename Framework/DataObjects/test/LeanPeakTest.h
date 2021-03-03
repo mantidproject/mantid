@@ -12,6 +12,9 @@
 
 #include "MantidDataObjects/LeanPeak.h"
 
+#include "MantidDataObjects/Peak.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -203,5 +206,79 @@ public:
     p.setFinalEnergy(finalEnergy);
 
     TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
+  }
+
+  void test_Peak_to_LeanPeak_through_IPeak() {
+    Instrument_sptr inst(
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 100));
+
+    // Peak 3 is phi,chi,omega of 90,0,0; giving this matrix:
+    Matrix<double> r(3, 3, false);
+    r[0][2] = 1;
+    r[1][1] = 1;
+    r[2][0] = -1;
+
+    Peak peak(inst, 19999, 2.0, V3D(1, 2, 3), r);
+    peak.setRunNumber(1234);
+    peak.setPeakNumber(42);
+    peak.setIntensity(900);
+    peak.setSigmaIntensity(30);
+    peak.setBinCount(90);
+
+    const IPeak &ipeak = peak;
+
+    LeanPeak leanpeak(ipeak);
+
+    TS_ASSERT_EQUALS(leanpeak.getQSampleFrame(), peak.getQSampleFrame());
+    V3D qsample = leanpeak.getQSampleFrame();
+    TS_ASSERT_DELTA(qsample[0], -0.0759765444, 1e-7);
+    TS_ASSERT_DELTA(qsample[1], -0.4855935910, 1e-7);
+    TS_ASSERT_DELTA(qsample[2], -0.4855935910, 1e-7);
+
+    TS_ASSERT_EQUALS(leanpeak.getQLabFrame(), peak.getQLabFrame());
+    V3D qlab = leanpeak.getQLabFrame();
+    TS_ASSERT_DELTA(qlab[0], -0.4855935910, 1e-7);
+    TS_ASSERT_DELTA(qlab[1], -0.4855935910, 1e-7);
+    TS_ASSERT_DELTA(qlab[2], 0.0759765444, 1e-7);
+
+    TS_ASSERT_EQUALS(leanpeak.getHKL(), peak.getHKL());
+    TS_ASSERT_EQUALS(leanpeak.getH(), 1);
+    TS_ASSERT_EQUALS(leanpeak.getK(), 2);
+    TS_ASSERT_EQUALS(leanpeak.getL(), 3);
+
+    TS_ASSERT_EQUALS(leanpeak.getGoniometerMatrix(),
+                     peak.getGoniometerMatrix());
+    TS_ASSERT_EQUALS(leanpeak.getGoniometerMatrix(), r);
+
+    TS_ASSERT_DELTA(leanpeak.getInitialEnergy(), peak.getInitialEnergy(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getInitialEnergy(), 20.4510506207, 1e-7);
+
+    TS_ASSERT_DELTA(leanpeak.getFinalEnergy(), peak.getFinalEnergy(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getFinalEnergy(), 20.4510506207, 1e-7);
+
+    TS_ASSERT_DELTA(leanpeak.getWavelength(), peak.getWavelength(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getWavelength(), 2.0, 1e-7);
+
+    TS_ASSERT_DELTA(leanpeak.getDSpacing(), peak.getDSpacing(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getDSpacing(), 9.0938998166, 1e-7);
+
+    TS_ASSERT_DELTA(leanpeak.getScattering(), peak.getScattering(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getScattering(), 0.2203733065, 1e-7);
+
+    TS_ASSERT_EQUALS(leanpeak.getRunNumber(), peak.getRunNumber());
+    TS_ASSERT_EQUALS(leanpeak.getRunNumber(), 1234);
+
+    TS_ASSERT_EQUALS(leanpeak.getPeakNumber(), peak.getPeakNumber());
+    TS_ASSERT_EQUALS(leanpeak.getPeakNumber(), 42);
+
+    TS_ASSERT_EQUALS(leanpeak.getIntensity(), peak.getIntensity());
+    TS_ASSERT_EQUALS(leanpeak.getIntensity(), 900);
+
+    TS_ASSERT_EQUALS(leanpeak.getSigmaIntensity(), peak.getSigmaIntensity());
+    TS_ASSERT_EQUALS(leanpeak.getSigmaIntensity(), 30);
+    TS_ASSERT_EQUALS(leanpeak.getIntensityOverSigma(), 30);
+
+    TS_ASSERT_EQUALS(leanpeak.getBinCount(), peak.getBinCount());
+    TS_ASSERT_EQUALS(leanpeak.getBinCount(), 90);
   }
 };
