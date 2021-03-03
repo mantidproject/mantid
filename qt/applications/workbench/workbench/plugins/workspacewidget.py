@@ -295,7 +295,7 @@ class WorkspaceWidget(PluginWidget):
                 presenter.show_view()
             except Exception as exception:
                 logger.warning("Could not show sample material for workspace "
-                               "'{}':\n{}\n".format(workspace.name(), exception))
+                               "'{}':\n{}\n".format(names[0], exception))
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
 

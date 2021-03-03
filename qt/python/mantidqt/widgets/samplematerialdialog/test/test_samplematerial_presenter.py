@@ -49,12 +49,12 @@ class SampleMaterialPresenterTest(unittest.TestCase):
         Check that the sample material values in the view are up to date.
         The view should have been updated when the presenter was created.
         """
-        assert(self.presenter.view.formula_item.text(1) == self.formula)
-        assert(self.presenter.view.number_density_item.text(1) == str(self.number_density))
-        assert(self.presenter.view.absorption_item.text(1) == str(self.absorption_xs))
-        assert(self.presenter.view.total_item.text(1) == str(self.scattering_xs))
-        assert(self.presenter.view.coherent_item.text(1) == str(self.coherent_xs))
-        assert(self.presenter.view.incoherent_item.text(1) == str(self.incoherent_xs))
+        self.assertEqual(self.presenter.view.formula_item.text(1), self.formula)
+        self.assertEqual(self.presenter.view.number_density_item.text(1), str(self.number_density))
+        self.assertEqual(self.presenter.view.absorption_item.text(1), str(self.absorption_xs))
+        self.assertEqual(self.presenter.view.total_item.text(1), str(self.scattering_xs))
+        self.assertEqual(self.presenter.view.coherent_item.text(1), str(self.coherent_xs))
+        self.assertEqual(self.presenter.view.incoherent_item.text(1), str(self.incoherent_xs))
 
 
 if __name__ == '__main__':
