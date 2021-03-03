@@ -55,7 +55,6 @@ class TFAsymmetryFittingView(GeneralFittingView):
         """Returns the normalisation value currently displayed in the normalisation line edit."""
         return self.tf_asymmetry_fitting_options.normalisation
 
-    @normalisation.setter
-    def normalisation(self, value: float) -> None:
+    def set_normalisation(self, value: float, error: float = 0.0) -> None:
         """Sets the normalisation value currently displayed in the normalisation line edit."""
-        self.tf_asymmetry_fitting_options.normalisation = value
+        self.tf_asymmetry_fitting_options.set_normalisation(value, error)

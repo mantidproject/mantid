@@ -19,6 +19,7 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_CalculateMuonAsymmetry
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 DEFAULT_NORMALISATION = 0.0
+DEFAULT_NORMALISATION_ERROR = 0.0
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
 TF_ASYMMETRY_PREFIX_FUNCTION_INDEX = "f0.f1.f1."
 TF_ASYMMETRY_FUNCTION_NAME_APPENDAGE = ",TFAsymmetry"
@@ -164,6 +165,16 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION
 
+    def current_normalisation_error(self) -> float:
+        """Returns the normalisation error of the current TF Asymmetry single function or simultaneous function."""
+        if self.current_dataset_index is not None:
+            if self.simultaneous_fitting_mode:
+                return self._current_normalisation_error_from_tf_asymmetry_simultaneous_function()
+            else:
+                return self._current_normalisation_error_from_tf_asymmetry_single_fit_function()
+        else:
+            return DEFAULT_NORMALISATION_ERROR
+
     def update_parameter_value(self, full_parameter: str, value: float) -> None:
         """Update the value of a parameter in the TF Asymmetry fit functions."""
         super().update_parameter_value(full_parameter, value)
@@ -255,6 +266,14 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION
 
+    def _current_normalisation_error_from_tf_asymmetry_single_fit_function(self) -> float:
+        """Returns the normalisation error in the currently selected TF Asymmetry single fit function."""
+        current_tf_single_fit_function = self.tf_asymmetry_single_functions[self.current_dataset_index]
+        if current_tf_single_fit_function is not None:
+            return current_tf_single_fit_function.getError(NORMALISATION_FUNCTION_INDEX)
+        else:
+            return DEFAULT_NORMALISATION_ERROR
+
     def _current_normalisation_from_tf_asymmetry_simultaneous_function(self) -> float:
         """Returns the normalisation in the current domain of the TF Asymmetry simultaneous fit function."""
         if self.tf_asymmetry_simultaneous_function is not None:
@@ -265,6 +284,17 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 return self.tf_asymmetry_simultaneous_function.getParameterValue(NORMALISATION_FUNCTION_INDEX)
         else:
             return DEFAULT_NORMALISATION
+
+    def _current_normalisation_error_from_tf_asymmetry_simultaneous_function(self) -> float:
+        """Returns the normalisation error in the current domain of the TF Asymmetry simultaneous fit function."""
+        if self.tf_asymmetry_simultaneous_function is not None:
+            if self.number_of_datasets > 1:
+                return self.tf_asymmetry_simultaneous_function.getError(
+                    f"f{self.current_dataset_index}.{NORMALISATION_FUNCTION_INDEX}")
+            else:
+                return self.tf_asymmetry_simultaneous_function.getError(NORMALISATION_FUNCTION_INDEX)
+        else:
+            return DEFAULT_NORMALISATION_ERROR
 
     def _get_active_tf_asymmetry_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
@@ -361,7 +391,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Constructs the string which details the global parameter ties within a simultaneous TF Asymmetry fit."""
         if len(self.global_parameters) != 0 and self.number_of_datasets > 1:
             global_tie_appendage = str(self.simultaneous_fit_function).split(";")[-1]
-            if global_tie_appendage[:6] == "ties=(" or global_tie_appendage[-1] == ")":
+            if global_tie_appendage[:6] == "ties=(" and global_tie_appendage[-1] == ")":
                 tf_global_ties = self._convert_global_ties_for_tf_asymmetry_mode(global_tie_appendage[6:-1].split(","))
                 return f";ties=({','.join(tf_global_ties)})"
         return ""
