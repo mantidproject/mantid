@@ -385,8 +385,8 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
  * Muon Analysis help (slot)
  */
 void MuonAnalysis::muonAnalysisHelpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Muon Analysis"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon Analysis"), QString("muon"));
 }
 
 /**
