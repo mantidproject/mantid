@@ -7,9 +7,10 @@ from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import numpy as np
 
+
 # Diamond peak positions in d-space which may differ from actual sample
-DIAMOND = np.asarray((2.06, 1.2615, 1.0758, 0.892, 0.8186, 0.7283, 0.6867, 0.6307, 0.5642, 0.5441, 0.515, 0.4996, 0.4768, 0.4645, 0.4205,
-                      0.3916, 0.3499, 0.3257, 0.3117))
+DIAMOND = np.asarray((2.06,1.2615,1.0758,0.892,0.8186,0.7283,0.6867,0.6307,0.5642,0.5441,0.515,0.4996,0.4768,
+                      0.4645,0.4205,0.3916,0.3499,0.3257,0.3117))
 
 
 def _get_xrange(wksp, xmarkers, tolerance, xmin, xmax):
@@ -74,12 +75,8 @@ def _get_difc_ws(wksp, instr_ws=None):
     return difc_ws
 
 
-def plot2d(workspace,
-           tolerance: float = 0.001,
-           peakpositions: np.ndarray = DIAMOND,
-           xmin: float = np.nan,
-           xmax: float = np.nan,
-           horiz_markers=[]):
+def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
+           xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
     MARKER_COLOR = 'b'  # color for peak markers and horizontal (between bank) markers
 
@@ -103,7 +100,7 @@ def plot2d(workspace,
     # annotate expected peak positions and tolerances
     for peak in peakpositions:
         if peak > 0.4 and peak < 1.5:
-            shade = ((1 - tolerance) * peak, (1 + tolerance) * peak)
+            shade = ((1-tolerance) * peak, (1+tolerance) * peak)
             ax.axvspan(shade[0], shade[1], color=TOLERANCE_COLOR, alpha=.2)
             ax.axvline(x=peak, color=MARKER_COLOR, alpha=0.4)
 
@@ -123,7 +120,16 @@ def plot2d(workspace,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-10,10)):
+    """
+    Plots the percent change in DIFC between calib_new and calib_old
+    :param calib_new: New calibration, can be filename, SpecialWorkspace2D, or calibration table (TableWorkspace)
+    :param calib_old: Optional old calibration, can be same as types as calib_new; if not specified, default instr used
+    :param instr_ws: Workspace used for instrument definition, only needed if calib_new and/or calib_old are tables
+    :param mask: MaskWorkspace used to hide detector pixels from plot
+    :param vrange: Tuple of (min,max) used for the plot color bar
+    :return: figure and figure axes
+    """
 
     ws_new = _get_difc_ws(calib_new, instr_ws)
     if ws_new is None:
@@ -194,7 +200,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
     colors = np.array(value_array)
     p = PatchCollection(patches)
     p.set_array(colors)
-    p.set_clim(np.min(value_array), np.max(value_array))
+    p.set_clim(vrange[0], vrange[1])
     p.set_edgecolor('face')
 
     fig, ax = plt.subplots()
