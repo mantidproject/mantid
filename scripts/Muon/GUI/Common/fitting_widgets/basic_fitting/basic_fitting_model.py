@@ -100,11 +100,15 @@ class BasicFittingModel:
     @dataset_names.setter
     def dataset_names(self, names: list) -> None:
         """Sets the dataset names stored by the model. Resets the other fitting data."""
+        start_xs, end_xs = self._get_new_start_xs_and_end_xs_using_existing_datasets(names)
+
         self._dataset_names = names
+
+        self.start_xs = start_xs
+        self.end_xs = end_xs
 
         self.reset_fit_functions()
         self.reset_current_dataset_index()
-        self.reset_start_xs_and_end_xs()
         self.reset_fit_statuses_and_chi_squared()
         self.clear_cached_fit_functions()
 
@@ -410,6 +414,26 @@ class BasicFittingModel:
         """Resets the end Xs stored by the model."""
         end_x = self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
         self.end_xs = [end_x] * self.number_of_datasets
+
+    def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
+        """Returns the start and end Xs to use for the new datasets. It tries to use existing ranges if possible."""
+        start_xs = [self._get_new_start_x_for(name) for name in new_dataset_names]
+        end_xs = [self._get_new_end_x_for(name) for name in new_dataset_names]
+        return start_xs, end_xs
+
+    def _get_new_start_x_for(self, new_dataset_name: str) -> float:
+        """Returns the start X to use for the new dataset. It tries to use an existing start X if possible."""
+        if new_dataset_name in self.dataset_names:
+            return self.start_xs[self.dataset_names.index(new_dataset_name)]
+        else:
+            return self.retrieve_first_good_data_from_run(new_dataset_name)
+
+    def _get_new_end_x_for(self, new_dataset_name: str) -> float:
+        """Returns the end X to use for the new dataset. It tries to use an existing end X if possible."""
+        if new_dataset_name in self.dataset_names:
+            return self.end_xs[self.dataset_names.index(new_dataset_name)]
+        else:
+            return self.current_end_x if len(self.end_xs) > 0 else self._default_end_x
 
     def retrieve_first_good_data_from_run(self, workspace_name: str) -> float:
         """Returns the first good data value from a run number within a workspace name."""
