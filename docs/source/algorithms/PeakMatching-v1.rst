@@ -100,7 +100,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '3.00', 'Database Energy': '3.40', 'Element': 'Li', 'Transition': 'L(3d->2p)', 'Error': '0.80', 'Difference': '0.40'}
     --------------------------------------------------
-    {'Element': 'Ag', 'Likelihood(au)': '14.00'}
+    {'Element': 'Ag', 'Likelihood(au)': 14}
 
 *Example: Renaming tables**
 
@@ -155,7 +155,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '306.00', 'Database Energy': '304.10', 'Element': 'W', 'Transition': 'O(7i->5g)', 'Error': '2.40', 'Difference': '1.90'}
     --------------------------------------------------
-    {'Element': 'Tm', 'Likelihood(au)': '9.00'}
+    {'Element': 'Tm', 'Likelihood(au)': 9}
 
 
 *Example: Using non default column names**
@@ -211,7 +211,7 @@ Output:
     --------------------------------------------------
     {'Peak centre': '306.00', 'Database Energy': '304.50', 'Element': 'Tm', 'Transition': 'N(5g->4f)', 'Error': '1.60', 'Difference': '1.50'}
     --------------------------------------------------
-    {'Element': 'In', 'Likelihood(au)': '8.00'}
+    {'Element': 'In', 'Likelihood(au)': 8}
 
 
 .. categories::
