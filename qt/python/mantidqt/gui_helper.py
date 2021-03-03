@@ -134,7 +134,7 @@ def show_interface_help(mantidplot_name, assistant_process, area: str='',
             # try to find the collection file and launch qtassistant
             args = ['-enableRemoteControl',
                     '-collectionFile', collection_file,
-                    '-showUrl', __to_qthelp_url(mantidplot_name, section, qt_url)]
+                    '-showUrl', __to_qthelp_url(mantidplot_name, area, qt_url)]
 
             assistant_process.close()
             assistant_process.waitForFinished()
@@ -148,7 +148,7 @@ def show_interface_help(mantidplot_name, assistant_process, area: str='',
                 del os.environ['LD_PRELOAD']
 
             # create a url to the help in the default location
-            openUrl(__to_external_url(mantidplot_name, section, external_url))
+            openUrl(__to_external_url(mantidplot_name, area, external_url))
 
             if ldp:
                 os.environ['LD_PRELOAD']=ldp
