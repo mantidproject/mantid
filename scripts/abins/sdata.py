@@ -8,6 +8,7 @@ import collections.abc
 from typing import Dict, List, Optional, overload, Sequence, TypeVar, Union
 import numpy as np
 from numbers import Real
+from scipy.signal import oaconvolve
 
 from mantid.kernel import logger as mantid_logger
 import abins
@@ -134,6 +135,38 @@ class SData(collections.abc.Sequence):
         full_data = self._data.copy()
         full_data.update({'frequencies': self._frequencies})
         return full_data
+
+    def add_autoconvolution_spectra(self, max_order: int = 10) -> None:
+        """
+        Atom-by-atom, add higher order spectra by convolution with fundamentals
+
+        Strictly this is only autoconvolution when forming order-2 from order-1;
+        higher orders are formed by repeated convolution with the fundamentals.
+
+        Data should not have been broadened before applying this operation,
+        or this will lead to repeated broadening of higher orders.
+
+        The process will begin with the highest existing order, and repeat until
+        a spectrum of MAX_ORDER is obtained.
+        """
+
+        for atom_key, atom_data in self._data.items():
+            for order_index in range(1, max_order + 1):
+                if f'order_{order_index}' in atom_data['s']:
+                    highest_existing_order = order_index
+                else:
+                    break
+            else:
+                # All orders are already full, do nothing
+                return None
+
+            fundamental_spectrum = atom_data['s']['order_1']
+            kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / np.sum(fundamental_spectrum)
+
+            for order_index in range(highest_existing_order, max_order):
+                # Overlap-addition convolution: fast implementation of direct convolution
+                spectrum = oaconvolve(kernel, atom_data['s'][f'order_{order_index}'])[:fundamental_spectrum.size]
+                self._data[atom_key]['s'][f'order_{order_index + 1}'] = spectrum
 
     def check_thresholds(self, return_cases=False, logger=None):
         """

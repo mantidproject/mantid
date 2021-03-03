@@ -34,7 +34,7 @@ class SPowderSemiEmpiricalCalculator:
                  abins_data: abins.AbinsData,
                  instrument: str,
                  quantum_order_num: int,
-                 autoconvolution_max_order: Optional[int] = None,
+                 autoconvolution: bool = False,
                  bin_width: float = 1.0) -> None:
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
@@ -43,7 +43,8 @@ class SPowderSemiEmpiricalCalculator:
         :param abins_data: object of type AbinsData with data from phonon file
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
-        :param autoconvolution_max_order: maximum order of quantum events to approximate using auto-convolution
+        :param autoconvolution:
+            approximate spectra up to abins.parameters.autoconvolution['max_order'] using auto-convolution
         :param bin_width: bin width in wavenumber for re-binned spectrum
         """
         if not isinstance(temperature, numbers.Real):
@@ -68,7 +69,8 @@ class SPowderSemiEmpiricalCalculator:
         else:
             raise ValueError("Invalid number of quantum order events.")
 
-        if autoconvolution_max_order and autoconvolution_max_order <= quantum_order_num:
+        self._autoconvolution = autoconvolution
+        if self._autoconvolution and abins.parameters.autoconvolution['max_order'] <= quantum_order_num:
             raise ValueError("Autoconvolution max order should be greater than max order of semi-analytic spectra")
 
         if isinstance(instrument, Instrument):
@@ -104,20 +106,23 @@ class SPowderSemiEmpiricalCalculator:
         # and _fine_bins which subdivides _bins to prevent accumulation of binning errors
         # during autoconvolution
         self._bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
-                               stop=abins.parameters.sampling['max_wavenumber'] + bin_width,
+                               stop=(abins.parameters.sampling['max_wavenumber'] + bin_width),
                                step=bin_width,
                                dtype=FLOAT_TYPE)
         self._bin_centres = self._bins[:-1] + (bin_width / 2)
-        self._freq_size = self._bins.size - 1
 
-        if autoconvolution_max_order:
-            self._fine_bins = np.arange(start=abins.parameter.sampling['min_wavenumber'],
-                                        stop=(abins.parameters.sampling['max_wavenumber']
-                                              + bin_width / autoconvolution_max_order),
-                                        step=bin_width / autoconvolution_max_order,
-                                        dtyp=FLOAT_TYPE)
+        if self._autoconvolution:
+            fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
+            self._fine_bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
+                                        stop=(abins.parameters.sampling['max_wavenumber'] + bin_width),
+                                        step=(bin_width / fine_bin_factor),
+                                        dtype=FLOAT_TYPE)
+            self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / fine_bin_factor / 2)
+            print(np.max(self._bins), np.max(self._bin_centres), np.max(self._fine_bins), np.max(self._fine_bin_centres))
+
         else:
             self._fine_bins = None
+            self._fine_bin_centres = None
 
         self._num_atoms = len(self._abins_data.get_atoms_data())
 
@@ -127,7 +132,6 @@ class SPowderSemiEmpiricalCalculator:
         self._fundamentals_freq = None
 
     def _calculate_s(self):
-
         # calculate powder data
         powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
         powder_calculator.get_formatted_data()
@@ -156,12 +160,19 @@ class SPowderSemiEmpiricalCalculator:
             self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
 
         s_data = self._calculate_s_powder_over_k().sum_over_angles(average=True)
+
+        if self._autoconvolution:
+            s_data.add_autoconvolution_spectra(
+                max_order=abins.parameters.autoconvolution['max_order'])
+
         broadening_scheme = abins.parameters.sampling['broadening_scheme']
-        s_data = self._broaden_sdata(s_data, broadening_scheme=broadening_scheme)
+        s_data = self._broaden_sdata(s_data,
+                                     broadening_scheme=broadening_scheme)
 
         return s_data
 
-    def _broaden_sdata(self, sdata: SData, broadening_scheme: str = 'auto') -> SData:
+    def _broaden_sdata(self, sdata: SData,
+                       broadening_scheme: str = 'auto') -> SData:
         """
         Apply instrumental broadening to scattering data
         """
@@ -173,8 +184,7 @@ class SPowderSemiEmpiricalCalculator:
             for order_key in sdata_dict[atom_key]['s']:
                 _, sdata_dict[atom_key]['s'][order_key] = (
                     self._instrument.convolve_with_resolution_function(
-                        frequencies=frequencies,
-                        bins=self._bins,
+                        frequencies=frequencies, bins=self._bins,
                         s_dft=sdata_dict[atom_key]['s'][order_key],
                         scheme=broadening_scheme))
         return SData(data=sdata_dict, frequencies=self._bin_centres,
@@ -220,12 +230,17 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
-    def _get_empty_data(self) -> SDataByAngle:
+    def _get_empty_data(self, use_fine_bins: bool = False) -> SDataByAngle:
         """
         Initialise an appropriate SDataByAngle object for this calculation
         """
+        if use_fine_bins:
+            bin_centres = self._fine_bin_centres
+        else:
+            bin_centres = self._bin_centres
+
         return SDataByAngle.get_empty(angles=self._instrument.get_angles(),
-                                      frequencies=self._bin_centres,
+                                      frequencies=bin_centres,
                                       atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
                                       order_keys=[f'order_{n}' for n in range(1, self._quantum_order_num + 1)],
                                       temperature=self._temperature, sample_form=self._sample_form)
@@ -238,12 +253,11 @@ class SPowderSemiEmpiricalCalculator:
 
         :returns: SDataByAngle
         """
-        angle_resolved_data = existing_data if existing_data else self._get_empty_data()
+        angle_resolved_data = existing_data if existing_data else self._get_empty_data(use_fine_bins=self._autoconvolution)
 
         for q_index in range(self._num_k):
             _ = self._calculate_s_powder_over_atoms(q_indx=q_index,
                                                     existing_data=angle_resolved_data)
-
         return angle_resolved_data
 
     def _calculate_s_powder_over_atoms(self, *, q_indx: int,
@@ -333,7 +347,7 @@ class SPowderSemiEmpiricalCalculator:
             logger.information(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None, q_index=None,
-                                     existing_data: Optional[SDataByAngle] = None
+                                     existing_data: Optional[SDataByAngle] = None,
                                      ) -> SDataByAngle:
         """
         :param atom: number of atom
@@ -343,6 +357,11 @@ class SPowderSemiEmpiricalCalculator:
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
         data = existing_data if existing_data else self._get_empty_data()
+
+        if self._autoconvolution:
+            bins = self._fine_bins
+        else:
+            bins = self._bins
 
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=INT_TYPE)
@@ -364,7 +383,7 @@ class SPowderSemiEmpiricalCalculator:
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + S_LAST_INDEX):
                         part_loc_freq, part_loc_coeff = self._helper_atom(
-                            atom=atom, local_freq=part_loc_freq, local_coeff=part_loc_coeff, bins=self._bins,
+                            atom=atom, local_freq=part_loc_freq, local_coeff=part_loc_coeff, bins=bins,
                             fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order,
                             existing_data=data)
 
@@ -374,7 +393,7 @@ class SPowderSemiEmpiricalCalculator:
             # if relatively small array of transitions then process it in one shot
             else:
                 local_freq, local_coeff = self._helper_atom(
-                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, bins=self._bins,
+                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, bins=bins,
                     fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order,
                     existing_data=data)
 
@@ -510,13 +529,6 @@ class SPowderSemiEmpiricalCalculator:
                                                               b_tensor=self._b_tensors[atom],
                                                               b_trace=self._b_traces[atom])
 
-        # convolve with instrumental resolution
-        # broadening_scheme = abins.parameters.sampling['broadening_scheme']
-        # _, rebinned_broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=local_freq,
-        #                                                                                 bins=self._bins,
-        #                                                                                 s_dft=value_dft,
-        #                                                                                 scheme=broadening_scheme)
-
         # rebin the data
         rebinned_spectrum, _ = np.histogram(local_freq, bins=bins, weights=scattering_intensities, density=False)
 
@@ -641,19 +653,6 @@ class SPowderSemiEmpiricalCalculator:
              * np.exp(-q2 * a_trace / 3.0 * coth * coth))
 
         return s
-
-    def _rebin_data_full(self, array_x=None, array_y=None):
-        """
-        Rebins S data so that all quantum events have the same x-axis. The size of rebinned data is equal to _bins.size.
-        :param array_x: numpy array with frequencies
-        :param array_y: numpy array with S
-        :returns: rebinned frequencies
-        """
-        indices = array_x != self._bins[-1]
-        array_x = array_x[indices]
-        array_y = array_y[indices]
-        maximum_index = min(len(array_x), len(array_y))
-        return np.histogram(array_x[:maximum_index], bins=self._bins, weights=array_y[:maximum_index])[0]
 
     def calculate_data(self):
         """

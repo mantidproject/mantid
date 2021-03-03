@@ -36,7 +36,9 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
+    _max_event_order = None
     _energy_units = None
+    _autoconvolution = None
 
     def category(self) -> str:
         return "Simulation"
@@ -50,6 +52,9 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self.declare_common_properties()
 
         # Declare properties specific to 1D
+        self.declareProperty(name="Autoconvolution", defaultValue=False,
+                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
+
         self.declareProperty(FileProperty("ExperimentalFile", "",
                                           action=FileAction.OptionalLoad,
                                           direction=Direction.Input,
@@ -111,6 +116,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                                                      abins_data=ab_initio_data,
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
+                                                     autoconvolution=self._autoconvolution,
                                                      bin_width=self._bin_width)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
@@ -130,10 +136,11 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         # 5) create workspaces for atoms in interest
         workspaces = []
+
         workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
+                                                 max_quantum_order=self._max_event_order))
         workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
+                                                 max_quantum_order=self._max_event_order))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
@@ -289,6 +296,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
+        self._autoconvolution = self.getProperty("Autoconvolution").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
         self._energy_units = self.getProperty("EnergyUnits").value
@@ -301,6 +309,12 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
+
+        # Increase max event order if using autoconvolution
+        if self._autoconvolution:
+            self._max_event_order = abins.parameters.autoconvolution['max_order']
+        else:
+            self._max_event_order = self._num_quantum_order_events
 
 
 AlgorithmFactory.subscribe(Abins)
