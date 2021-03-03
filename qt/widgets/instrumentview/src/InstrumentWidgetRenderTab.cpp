@@ -327,7 +327,10 @@ QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
 
   axisViewLayout->addWidget(new QLabel("Freeze rotation"));
   m_freezeRotation = new QCheckBox();
+  m_freezeRotation->setChecked(false);
+  m_freezeRotation->setToolTip("Freeze the screen rotation.");
   axisViewLayout->addWidget(m_freezeRotation);
+
   m_resetViewFrame->setLayout(axisViewLayout);
 
   connect(mAxisCombo, SIGNAL(currentIndexChanged(const QString &)),
