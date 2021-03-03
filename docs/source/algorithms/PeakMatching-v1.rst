@@ -8,7 +8,7 @@
 
 Description
 -----------
-This algorithm takes a table of peak centres and standard deviation and matches it to a database
+This algorithm takes a table of peak centres and standard deviations, then finds overlap with a database of known values```
 to find probable energy transitions for peaks.
 
 
