@@ -136,7 +136,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
         empty_instr = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__def_{}".format(instr_name))
         ws_old = CalculateDIFC(InputWorkspace=empty_instr, OutputWorkspace="__difc_{}".format(instr_name))
 
-    delta = ws_old - ws_new
+    delta = ws_new - ws_old
 
     use_mask = False
     if mask is not None and mtd.doesExist(str[mask]):
@@ -159,7 +159,8 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
         else:
             theta_array.append(theta)
             phi_array.append(phi)
-            value_array.append(np.sum(delta.dataY(idx)))
+            percent = 100.0 * np.sum(delta.dataY(idx)) / np.sum(ws_old.dataY(idx))
+            value_array.append(percent)
 
     # Use the largest solid angle for circle radius
     sample_position = info.samplePosition()
@@ -193,7 +194,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
     colors = np.array(value_array)
     p = PatchCollection(patches)
     p.set_array(colors)
-    p.set_clim(-0.1, 0.1)
+    p.set_clim(np.min(value_array), np.max(value_array))
     p.set_edgecolor('face')
 
     fig, ax = plt.subplots()
@@ -203,7 +204,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None):
     mp.set_edgecolor('face')
     ax.add_collection(mp)
     cb = fig.colorbar(p, ax=ax)
-    cb.set_label('delta DIFC')
+    cb.set_label('delta DIFC (%)')
     ax.set_xlabel(r'polar ($\phi$)')
     ax.set_ylabel(r'azimuthal ($\theta$)')
 
