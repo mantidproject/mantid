@@ -266,14 +266,6 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION
 
-    def _get_plot_guess_fit_function(self) -> IFunction:
-        """Returns the fit function to evaluate when plotting a guess."""
-        fit_function = self._get_active_tf_asymmetry_fit_function()
-        if fit_function is not None and self.simultaneous_fitting_mode:
-            return fit_function.createEquivalentFunctions()[self.current_dataset_index]
-        else:
-            return fit_function
-
     def _get_active_tf_asymmetry_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
         if self.tf_asymmetry_mode:
