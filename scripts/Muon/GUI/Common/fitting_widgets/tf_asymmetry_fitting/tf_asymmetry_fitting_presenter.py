@@ -76,7 +76,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.update_tf_asymmetry_functions_in_model_and_view()
 
-        self.reset_start_xs_and_end_xs()
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
 
