@@ -322,6 +322,7 @@ void MantidHelpWindow::showFitFunction(const QString &name) {
  * Show the help page for a given custom interface.
  *
  * @param name The name of the interface to show
+ * @param area :: the folder in the custom interface documentation directory
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const QString &name,
@@ -335,6 +336,7 @@ void MantidHelpWindow::showCustomInterface(const QString &name,
  * Show the help page for a given custom interface.
  *
  * @param name The name of the interface to show
+ * @param area :: the folder in the custom interface documentation directory
  * @param section :: the section of the interface to show
  */
 void MantidHelpWindow::showCustomInterface(const std::string &name,
