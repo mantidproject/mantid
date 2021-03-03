@@ -212,7 +212,7 @@ class PeakMatchingTest(unittest.TestCase):
                           'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                           'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Likelihood(au)': [13]}
+        correct_count = {'Element': ['Ag'], 'Likelihood(arbitrary units)': [13]}
 
         self.assertPeaksMatch(prim,correct_prim)
         self.assertPeaksMatch(secon, correct_secon)
@@ -295,7 +295,7 @@ class PeakMatchingTest(unittest.TestCase):
                         'Element': ['Ag', 'Ag', 'Ag'], 'Transition': ['M(4->3)', 'M(10->3)', 'L(4->2)'],
                         'Error': [1.6, 0.0, 0.8], 'Difference': [1.3, 0.0, 0.7]}
 
-        correct_count = {'Element': ['Ag'], 'Likelihood(au)': [13]}
+        correct_count = {'Element': ['Ag'], 'Likelihood(arbitrary units)': [13]}
 
         self.assertPeaksMatch(prim, correct_prim)
         self.assertPeaksMatch(secon, correct_secon)

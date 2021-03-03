@@ -155,7 +155,7 @@ class PeakMatching(PythonAlgorithm):
         table = CreateEmptyTableWorkspace(OutputWorkspace=name)
 
         table.addColumn("str", "Element")
-        table.addColumn("int", "Likelihood(au)")
+        table.addColumn("int", "Likelihood(arbitrary units)")
 
         counts = {}
 
