@@ -103,7 +103,7 @@ mantid_init_config_keys = ('datasearch.directories', 'defaultsave.directory', 'd
                            'default.instrument')
 
 # With the default facility changed from ISIS to nothing (EMPTY),
-# the following setting is put in place to avoid failure of tests,
+# the following setting is put in place to avoid failure of tests
 ConfigService.Instance().setString("default.facility", "ISIS")
 
 mantid_config_reset = [
