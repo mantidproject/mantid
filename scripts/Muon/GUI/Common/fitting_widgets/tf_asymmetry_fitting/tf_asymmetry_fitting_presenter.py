@@ -23,6 +23,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.view.set_slot_for_fitting_type_changed(self.handle_tf_asymmetry_mode_changed)
         self.view.set_slot_for_normalisation_changed(self.handle_normalisation_changed)
+        self.view.set_slot_for_fix_normalisation_changed(lambda fix: self.handle_fix_normalisation_changed(fix))
 
     def initialize_model_options(self) -> None:
         """Returns the fitting options to be used when initializing the model."""
@@ -66,6 +67,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Handles when the selected dataset has been changed."""
         super().handle_dataset_name_changed()
         self.view.set_normalisation(self.model.current_normalisation(), self.model.current_normalisation_error())
+        self.view.is_normalisation_fixed = self.model.is_current_normalisation_fixed()
 
     def handle_tf_asymmetry_mode_changed(self, tf_asymmetry_on: bool) -> None:
         """Handles when TF Asymmetry fitting mode has been turned off or on."""
@@ -95,6 +97,10 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.fit_parameter_changed_notifier.notify_subscribers()
 
+    def handle_fix_normalisation_changed(self, is_fixed) -> None:
+        """Handles when the value of the current normalisation has been fixed or unfixed."""
+        self.model.fix_current_normalisation(is_fixed)
+
     def update_and_reset_all_data(self) -> None:
         """Updates the various data displayed in the fitting widget. Resets and clears previous fit information."""
         super().update_and_reset_all_data()
@@ -105,6 +111,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         if not self.model.recalculate_tf_asymmetry_functions():
             self.view.warning_popup("Failed to convert fit function to a TF Asymmetry function.")
         self.view.set_normalisation(self.model.current_normalisation(), self.model.current_normalisation_error())
+        self.view.is_normalisation_fixed = self.model.is_current_normalisation_fixed()
 
     def update_fit_function_in_model(self, fit_function: IFunction) -> None:
         """Updates the fit function stored in the model. This is used after a fit."""
@@ -120,6 +127,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Updates the parameters of a fit function shown in the view."""
         super().update_fit_function_in_view_from_model()
         self.view.set_normalisation(self.model.current_normalisation(), self.model.current_normalisation_error())
+        self.view.is_normalisation_fixed = self.model.is_current_normalisation_fixed()
 
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""

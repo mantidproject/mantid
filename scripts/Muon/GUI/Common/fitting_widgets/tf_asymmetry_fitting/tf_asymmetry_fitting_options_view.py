@@ -29,6 +29,10 @@ class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
         """Sets the slot for handling when a normalisation value is changed by the user."""
         self.normalisation_line_edit.editingFinished.connect(slot)
 
+    def set_slot_for_fix_normalisation_changed(self, slot) -> None:
+        """Sets the slot for handling when a fix normalisation is ticked or un-ticked by the user."""
+        self.fix_normalisation_checkbox.stateChanged.connect(slot)
+
     def set_tf_asymmetry_mode(self, tf_asymmetry_on: bool) -> None:
         """Hides or shows the normalisation options depending on if TF Asymmetry fitting mode is on or off."""
         if tf_asymmetry_on:
@@ -44,9 +48,21 @@ class TFAsymmetryFittingOptionsView(QWidget, ui_tf_asymmetry_fitting_options):
     def set_normalisation(self, value: float, error: float) -> None:
         """Sets the normalisation value currently displayed in the normalisation line edit."""
         self.normalisation_line_edit.blockSignals(True)
-        self.normalisation_line_edit.setText(f"{value:.6f}")
-        self.normalisation_error_line_edit.setText(f"({error:.6f})")
+        self.normalisation_line_edit.setText(f"{value:.5f}")
+        self.normalisation_error_line_edit.setText(f"({error:.5f})")
         self.normalisation_line_edit.blockSignals(False)
+
+    @property
+    def is_normalisation_fixed(self) -> bool:
+        """Returns true if the fix normalisation check box is ticked."""
+        return self.fix_normalisation_checkbox.isChecked()
+
+    @is_normalisation_fixed.setter
+    def is_normalisation_fixed(self, is_fixed: bool) -> None:
+        """Sets whether the fix normalisation checkbox is ticked or not."""
+        self.fix_normalisation_checkbox.blockSignals(True)
+        self.fix_normalisation_checkbox.setChecked(is_fixed)
+        self.fix_normalisation_checkbox.blockSignals(False)
 
     def hide_normalisation_options(self) -> None:
         """Hides the normalisation options."""

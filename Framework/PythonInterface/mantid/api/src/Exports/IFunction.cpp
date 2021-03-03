@@ -251,6 +251,9 @@ void export_IFunction() {
            "Return whether the ith parameter needs to be explicitely set")
       .def("getParamValue", (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getParameterIndex", &IFunction::parameterIndex,
+           (arg("self"), arg("name")),
+           "Returns the index of the provided parameter.")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"), "Return a string representation of the function");

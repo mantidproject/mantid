@@ -20,6 +20,7 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 DEFAULT_NORMALISATION = 0.0
 DEFAULT_NORMALISATION_ERROR = 0.0
+DEFAULT_IS_NORMALISATION_FIXED = False
 NORMALISATION_FUNCTION_INDEX = "f0.f0.A0"
 TF_ASYMMETRY_PREFIX_FUNCTION_INDEX = "f0.f1.f1."
 TF_ASYMMETRY_FUNCTION_NAME_APPENDAGE = ",TFAsymmetry"
@@ -175,6 +176,24 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION_ERROR
 
+    def is_current_normalisation_fixed(self) -> bool:
+        """Returns true if the currently selected normalisation has its value fixed."""
+        if self.current_dataset_index is not None:
+            if self.simultaneous_fitting_mode:
+                return self._is_current_normalisation_fixed_in_tf_asymmetry_simultaneous_mode()
+            else:
+                return self._is_current_normalisation_fixed_in_tf_asymmetry_single_fit_mode()
+        else:
+            return DEFAULT_IS_NORMALISATION_FIXED
+
+    def fix_current_normalisation(self, is_fixed: bool) -> None:
+        """Fixes the current normalisation to its current value, or unfixes it."""
+        if self.current_dataset_index is not None:
+            if self.simultaneous_fitting_mode:
+                self._fix_current_normalisation_in_tf_asymmetry_simultaneous_mode(is_fixed)
+            else:
+                self._fix_current_normalisation_in_tf_asymmetry_single_fit_mode(is_fixed)
+
     def update_parameter_value(self, full_parameter: str, value: float) -> None:
         """Update the value of a parameter in the TF Asymmetry fit functions."""
         super().update_parameter_value(full_parameter, value)
@@ -274,6 +293,24 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_NORMALISATION_ERROR
 
+    def _is_current_normalisation_fixed_in_tf_asymmetry_single_fit_mode(self) -> bool:
+        """Returns true if the currently selected normalisation in single fit mode has its value fixed."""
+        current_tf_single_fit_function = self.tf_asymmetry_single_functions[self.current_dataset_index]
+        if current_tf_single_fit_function is not None:
+            parameter_index = current_tf_single_fit_function.getParameterIndex(NORMALISATION_FUNCTION_INDEX)
+            return current_tf_single_fit_function.isFixed(parameter_index)
+        else:
+            return DEFAULT_IS_NORMALISATION_FIXED
+
+    def _fix_current_normalisation_in_tf_asymmetry_single_fit_mode(self, is_fixed: bool) -> None:
+        """Fixes the current normalisation to its current value in single fit mode, or unfixes it."""
+        current_tf_single_fit_function = self.tf_asymmetry_single_functions[self.current_dataset_index]
+        if current_tf_single_fit_function is not None:
+            if is_fixed:
+                current_tf_single_fit_function.fixParameter(NORMALISATION_FUNCTION_INDEX)
+            else:
+                current_tf_single_fit_function.freeParameter(NORMALISATION_FUNCTION_INDEX)
+
     def _current_normalisation_from_tf_asymmetry_simultaneous_function(self) -> float:
         """Returns the normalisation in the current domain of the TF Asymmetry simultaneous fit function."""
         if self.tf_asymmetry_simultaneous_function is not None:
@@ -295,6 +332,31 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 return self.tf_asymmetry_simultaneous_function.getError(NORMALISATION_FUNCTION_INDEX)
         else:
             return DEFAULT_NORMALISATION_ERROR
+
+    def _is_current_normalisation_fixed_in_tf_asymmetry_simultaneous_mode(self) -> bool:
+        """Returns true if the currently selected normalisation in simultaneous fit mode has its value fixed."""
+        if self.tf_asymmetry_simultaneous_function is not None:
+            full_parameter = NORMALISATION_FUNCTION_INDEX
+            if self.number_of_datasets > 1:
+                full_parameter = f"f{self.current_dataset_index}." + full_parameter
+
+            parameter_index = self.tf_asymmetry_simultaneous_function.getParameterIndex(full_parameter)
+            return self.tf_asymmetry_simultaneous_function.isFixed(parameter_index)
+        else:
+            return DEFAULT_IS_NORMALISATION_FIXED
+
+    def _fix_current_normalisation_in_tf_asymmetry_simultaneous_mode(self, is_fixed: bool) -> None:
+        """Fixes the current normalisation to its current value in simultaneous mode, or unfixes it."""
+        if self.tf_asymmetry_simultaneous_function is not None:
+            if self.number_of_datasets > 1:
+                full_parameter = f"f{self.current_dataset_index}.{NORMALISATION_FUNCTION_INDEX}"
+            else:
+                full_parameter = NORMALISATION_FUNCTION_INDEX
+
+            if is_fixed:
+                self.tf_asymmetry_simultaneous_function.fixParameter(full_parameter)
+            else:
+                self.tf_asymmetry_simultaneous_function.freeParameter(full_parameter)
 
     def _get_active_tf_asymmetry_fit_function(self) -> IFunction:
         """Returns the fit function that is active and will be used for a fit."""
