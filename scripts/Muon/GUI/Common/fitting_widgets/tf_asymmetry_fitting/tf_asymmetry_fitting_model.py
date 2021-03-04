@@ -481,6 +481,12 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Returns a list of unnormalised workspaces to be used within a TF Asymmetry fit."""
         return self.context.group_pair_context.get_unormalisised_workspace_list(normalised_workspaces)
 
+    def _add_fit_to_context(self, parameter_workspace, input_workspaces, output_workspaces,
+                            global_parameters: list = None) -> None:
+        """Adds the results of a fit to the context. Overrides the method in BasicFittingModel."""
+        self.context.fitting_context.add_fit_from_values(parameter_workspace, self.function_name, input_workspaces,
+                                                         output_workspaces, global_parameters, self.tf_asymmetry_mode)
+
     """
     Methods used by the Sequential Fitting Tab
     """
