@@ -80,6 +80,13 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.model = None
         self.view = None
 
+    def test_that_handle_instrument_changed_will_update_and_reset_the_data(self):
+        self.presenter.update_and_reset_all_data = mock.Mock()
+
+        self.presenter.handle_instrument_changed()
+
+        self.presenter.update_and_reset_all_data.assert_called_with()
+
     def test_that_handle_pulse_type_changed_will_update_and_reset_the_data_if_it_contains_DoublePulseEnabled(self):
         updated_variables = {"DoublePulseEnabled": True, "OtherVariable": False}
         self.presenter.update_and_reset_all_data = mock.Mock()
