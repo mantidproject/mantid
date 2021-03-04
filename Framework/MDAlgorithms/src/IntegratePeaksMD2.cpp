@@ -990,7 +990,7 @@ void IntegratePeaksMD2::findEllipsoid(
       coord_t rboxSq = 0; // dist from center to vertex sq
       for (size_t d = 0; d < nd; ++d) {
         auto dim = box->getExtents(d);
-        rboxSq += 0.25 * dim.getSize() * dim.getSize();
+        rboxSq += static_cast<coord_t>(0.25 * dim.getSize() * dim.getSize());
         displacement[d] = pos[d] - static_cast<double>(boxCenter[d]);
       }
 
@@ -1051,7 +1051,7 @@ void IntegratePeaksMD2::calcCovar(
   size_t nd = peak_events[0].first.size();
 
   Matrix<double> invCov;
-  boost::math::chi_squared chisq(nd);
+  boost::math::chi_squared chisq(static_cast<double>(nd));
   double prev_cov_det = DBL_MAX;
   if (nIter > 1) {
     prev_cov_det = prev_cov_mat.determinant();
@@ -1154,7 +1154,7 @@ void IntegratePeaksMD2::calcCovar(
   bool isPartiallyInSphere =
       (9 * min_eval < static_cast<double>(radiusSquared));
   // check for convergence of variances
-  auto cov_det = cov_mat.determinant();
+
   bool isConverged = (cov_mat.determinant() > 0.95 * prev_cov_det);
 
   if ((nIter < maxIter) && anyMasked && isPartiallyInSphere && !isConverged) {
