@@ -408,9 +408,9 @@ public:
             this->m_outWSName);
     const auto &run = output->run();
     TS_ASSERT(output)
-    TS_ASSERT_EQUALS(run.getProperty("Distance.edelay_delay")->units(),
-                     "microsec") // a time in the distance field!
-    TS_ASSERT_EQUALS(run.getProperty("Distance.inter-slit_distance")->units(),
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(),
+                     "usec") // a time in the distance field!
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(),
                      "mm")
   }
 
