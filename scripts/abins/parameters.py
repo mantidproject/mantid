@@ -26,7 +26,7 @@ instruments = {
         # TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
-        # The forward detector angle israther specific as test-data was based on truncated value in radians
+        # The forward detector angle is rather specific as test-data was based on truncated value in radians
         'settings': {'Forward (TOSCA)': {'angles': [134.98885653282196]},
                      'Backward (TOSCA)': {'angles': [45.]},
                      'All detectors (TOSCA)': {'angles': [45., 134.98885653282196]}},

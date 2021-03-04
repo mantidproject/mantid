@@ -104,23 +104,23 @@ class IO(object):
                      for key, value in previous_advanced_parameters.items()
                      if key not in current_advanced_parameters})
 
-        sections = ('instruments', 'sampling', 'hdf_groups')
-
-        for section in sections:
-            if section in diff:
-                logger.information(f"Differences in Abins {section} parameters:")
-                new_group, old_group = diff[section]
-                for key in new_group:
-                    if key not in old_group:
-                        old_group[key] = '<key not present>'
-
-                    if new_group[key] != old_group[key]:
-                        logger.information(key)
-                        logger.information("New values:")
-                        logger.information(str(new_group[key]))
-                        logger.information("Previous values:")
-                        logger.information(str(old_group[key]))
         if diff:
+            sections = ('instruments', 'sampling', 'hdf_groups')
+
+            for section in sections:
+                if section in diff:
+                    logger.information(f"Differences in Abins {section} parameters:")
+                    new_group, old_group = diff[section]
+                    for key in new_group:
+                        if key not in old_group:
+                            old_group[key] = '<key not present>'
+
+                        if new_group[key] != old_group[key]:
+                            logger.information(key)
+                            logger.information("New values:")
+                            logger.information(str(new_group[key]))
+                            logger.information("Previous values:")
+                            logger.information(str(old_group[key]))
             return False
         else:
             return True

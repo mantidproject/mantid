@@ -37,7 +37,6 @@ class SPowderSemiEmpiricalCalculator:
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events taken into account during the simulation
         :param bin_width: bin width used in rebining in wavenumber
-        :param progress_reporter: Mantid progress reporter
         """
         if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -110,10 +109,6 @@ class SPowderSemiEmpiricalCalculator:
         powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
         powder_calculator.get_formatted_data()
 
-        # # free memory
-        # self._abins_data = None
-        # gc.collect()
-
         # calculate S
         calculate_s_powder = None
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
@@ -181,10 +176,7 @@ class SPowderSemiEmpiricalCalculator:
 
         :returns: SDataByAngle
         """
-        if existing_data:
-            angle_resolved_data = existing_data
-        else:
-            angle_resolved_data = self._get_empty_data()
+        angle_resolved_data = existing_data if existing_data else self._get_empty_data()
 
         for q_index in range(self._num_k):
             _ = self._calculate_s_powder_over_atoms(q_indx=q_index,
@@ -203,10 +195,7 @@ class SPowderSemiEmpiricalCalculator:
         """
         self._prepare_data(k_point=q_indx)
 
-        if existing_data:
-            s_by_atom = existing_data
-        else:
-            s_by_atom = self._get_empty_data()
+        s_by_atom = existing_data if existing_data else self._get_empty_data()
 
         for atom_index in range(self._num_atoms):
             self._calculate_s_powder_one_atom(atom=atom_index, q_index=q_indx,
@@ -290,10 +279,7 @@ class SPowderSemiEmpiricalCalculator:
 
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
-        if existing_data:
-            data = existing_data
-        else:
-            data = self._get_empty_data()
+        data = existing_data if existing_data else self._get_empty_data()
 
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=INT_TYPE)
@@ -443,9 +429,6 @@ class SPowderSemiEmpiricalCalculator:
                                                  a_trace=self._a_traces[atom],
                                                  b_tensor=self._b_tensors[atom],
                                                  b_trace=self._b_traces[atom])
-
-        # # rebin if necessary
-        # rebinned_freq, rebinned_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
 
         # convolve with instrumental resolution
         broadening_scheme = abins.parameters.sampling['broadening_scheme']

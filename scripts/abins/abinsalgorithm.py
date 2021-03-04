@@ -191,7 +191,6 @@ class AbinsAlgorithm:
         elif workspace_name == "":
             issues["OutputWorkspace"] = "Please specify name of workspace."
         for word in forbidden_keywords:
-
             if word in workspace_name:
                 issues["OutputWorkspace"] = "Keyword: " + word + " cannot be used in the name of workspace."
                 break
@@ -217,9 +216,6 @@ class AbinsAlgorithm:
             return {}
 
         parameters = abins.parameters.instruments.get(instrument_name)
-
-        if parameter not in parameters:
-            return {}
 
         if setting == '':
             if parameter + '_default' in parameters:
