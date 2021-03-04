@@ -64,30 +64,28 @@ public:
   // Construct a peak from a reference to the interface
   explicit LeanPeak(const Geometry::IPeak &ipeak);
 
-  void setDetectorID(int id) override;
+  void setDetectorID(int) override;
   int getDetectorID() const override;
 
-  void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
+  void setInstrument(const Geometry::Instrument_const_sptr &) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
 
   bool findDetector() override;
-  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
+  bool findDetector(const Geometry::InstrumentRayTracer &) override;
 
-  void setSamplePos(double samX, double samY, double samZ) override;
-  void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
+  void setSamplePos(double, double, double) override;
+  void setSamplePos(const Mantid::Kernel::V3D &) override;
 
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
   Mantid::Kernel::V3D getDetectorPosition() const override;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(
-      const Mantid::Kernel::V3D &QSampleFrame,
-      boost::optional<double> detectorDistance = boost::none) override;
-  void
-  setQLabFrame(const Mantid::Kernel::V3D &qLab,
-               boost::optional<double> detectorDistance = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                       boost::optional<double> = boost::none) override;
+  void setQLabFrame(const Mantid::Kernel::V3D &qLab,
+                    boost::optional<double> = boost::none) override;
 
   double getScattering() const override;
   double getAzimuthal() const override;

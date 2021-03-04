@@ -105,13 +105,10 @@ LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
 
 //----------------------------------------------------------------------------------------------
 /** Set the detector ID of the pixel at the centre of the peak and look up and
- * cache
- *  values related to it. It also adds it to the list of contributing detectors
- * for this peak but
- *  does NOT remove the old centre.
- * @param id :: ID of detector at the centre of the peak.
+ * cache values related to it. It also adds it to the list of contributing
+ * detectors for this peak but does NOT remove the old centre.
  */
-void LeanPeak::setDetectorID([[maybe_unused]] int id) {
+void LeanPeak::setDetectorID(int) {
   throw Exception::NotImplementedError(
       "LeanPeak::setDetectorID(): Can't set detectorID on LeanPeak");
 }
@@ -124,10 +121,8 @@ int LeanPeak::getDetectorID() const { return -1; }
 /** Set the instrument (and save the source/sample pos).
  * Call setDetectorID AFTER this call.
  *
- * @param inst :: Instrument sptr to use
  */
-void LeanPeak::setInstrument([
-    [maybe_unused]] const Geometry::Instrument_const_sptr &inst) {
+void LeanPeak::setInstrument(const Geometry::Instrument_const_sptr &) {
   throw Exception::NotImplementedError(
       "LeanPeak::setInstrument(): Can't set instrument on LeanPeak");
 }
@@ -194,11 +189,9 @@ Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const { return m_Qsample; }
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
- * @param detectorDistance :: unused
  */
-void LeanPeak::setQSampleFrame(
-    const Mantid::Kernel::V3D &QSampleFrame,
-    [[maybe_unused]] boost::optional<double> detectorDistance) {
+void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                               boost::optional<double>) {
   m_Qsample = QSampleFrame;
 }
 
@@ -214,32 +207,23 @@ void LeanPeak::setQSampleFrame(
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *        Angstroms).
- * @param detectorDistance :: distance between the sample and the detector. If
- *        this is provided. Then we do not ray trace to find the intersecing
- *detector.
- * @param detectorDistance :: unused
  */
-void LeanPeak::setQLabFrame(
-    const Mantid::Kernel::V3D &qLab,
-    [[maybe_unused]] boost::optional<double> detectorDistance) {
+void LeanPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
+                            boost::optional<double>) {
   this->setQSampleFrame(getInverseGoniometerMatrix() * qLab);
 }
 
 /** Set sample position
  *
- * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
  */
-void LeanPeak::setSamplePos([[maybe_unused]] double samX,
-                            [[maybe_unused]] double samY,
-                            [[maybe_unused]] double samZ) {
+void LeanPeak::setSamplePos(double, double, double) {
   throw Exception::NotImplementedError("LeanPeak has no sample information");
 }
 
 /** Set sample position
  *
- * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
  */
-void LeanPeak::setSamplePos([[maybe_unused]] const Mantid::Kernel::V3D &XYZ) {
+void LeanPeak::setSamplePos(const Mantid::Kernel::V3D &) {
   throw Exception::NotImplementedError("LeanPeak has no sample information");
 }
 
@@ -298,11 +282,9 @@ bool LeanPeak::findDetector() {
  * InstrumentRayTracer object to be able to take adavtange of its caches.
  * This method should be preferred if findDetector is to be called many times
  * over the same instrument.
- * @param tracer A reference to an existing InstrumentRayTracer object.
  * @return true if the detector ID was found.
  */
-bool LeanPeak::findDetector([
-    [maybe_unused]] const InstrumentRayTracer &tracer) {
+bool LeanPeak::findDetector(const InstrumentRayTracer &) {
   throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
