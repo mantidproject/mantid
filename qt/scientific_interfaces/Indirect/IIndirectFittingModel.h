@@ -10,13 +10,13 @@
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 /*
     IIndirectFitData - Specifies an interface for updating, querying and

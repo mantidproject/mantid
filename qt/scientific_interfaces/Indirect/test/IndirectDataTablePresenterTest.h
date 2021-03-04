@@ -170,6 +170,32 @@ public:
   /// Unit Tests that test the methods and slots of the presenter
   ///----------------------------------------------------------------------
 
+  void test_that_isTableEmpty_returns_correct_bool() {
+    TS_ASSERT(!m_presenter->isTableEmpty());
+
+    m_table->setRowCount(0);
+
+    TS_ASSERT(m_presenter->isTableEmpty());
+  }
+
+  void test_updateTableFromModel_sets_table_to_values_from_model() {
+    std::vector<std::string> labels = {"FWHM", "EISF"}; 
+    auto ws = createWorkspace(2);
+    ON_CALL(*m_model, getNumberOfDomains()).WillByDefault(Return(size_t{2}));
+    ON_CALL(*m_model, getWorkspace(FitDomainIndex{0}))
+        .WillByDefault(Return(ws));
+    ON_CALL(*m_model, getWorkspace(FitDomainIndex{1}))
+        .WillByDefault(Return(ws));
+    m_presenter->updateTableFromModel();
+    TS_ASSERT_EQUALS(m_table->rowCount(), 2);
+  }
+
+  void test_clearTable_sets_rows_to_zero() {
+    TS_ASSERT_EQUALS(m_table->rowCount(), 5);
+    m_presenter->clearTable();
+    TS_ASSERT_EQUALS(m_table->rowCount(), 0);
+  }
+
 private:
   void assertValueIsGlobal(int column, TableItem const &value) const {
     for (auto row = 0; row < m_table->rowCount(); ++row)

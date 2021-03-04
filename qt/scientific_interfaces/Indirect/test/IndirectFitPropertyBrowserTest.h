@@ -106,7 +106,7 @@ public:
   void setUp() override {
     m_browser = std::make_unique<IndirectFitPropertyBrowser>();
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(
-        nullptr, FitOptionsBrowser::SimultaneousAndSequential);
+        nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
     m_templateBrowser = std::make_unique<MockFunctionTemplateBrowser>();
     EXPECT_CALL(*m_templateBrowser, createBrowser());
