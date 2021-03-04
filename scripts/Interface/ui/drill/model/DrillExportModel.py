@@ -110,8 +110,8 @@ class DrillExportModel:
         if not criteria:
             return True
 
-        processingAlgo = mtd[ws].getHistory().lastAlgorithm()
         try:
+            processingAlgo = mtd[ws].getHistory().lastAlgorithm()
             params = re.findall("%[a-zA-Z]*%", criteria)
             for param in params:
                 value = processingAlgo.getPropertyValue(param[1:-1])
