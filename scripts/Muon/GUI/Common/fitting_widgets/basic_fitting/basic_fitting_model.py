@@ -630,7 +630,7 @@ class BasicFittingModel:
         alg.setProperty("EndX", self.current_end_x)
         alg.setProperty("Minimizer", self.minimizer)
         alg.setProperty("EvaluationType", self.evaluation_type)
-        alg.setProperty("MaxIterations", 1)
+        alg.setProperty("MaxIterations", 0)
         alg.setProperty("Output", "__double_pulse_guess")
         alg.execute()
 
