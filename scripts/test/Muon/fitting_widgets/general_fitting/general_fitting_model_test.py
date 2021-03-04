@@ -212,6 +212,26 @@ class GeneralFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.single_fit_functions[1], None)
         self.assertEqual(str(self.model.simultaneous_fit_function), str(self.simultaneous_fit_function))
 
+    def test_that_update_parameter_value_will_update_the_value_of_a_parameter_in_single_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = [self.fit_function, None]
+
+        self.model.update_parameter_value("A0", 5.0)
+
+        self.assertEqual(str(self.model.current_single_fit_function), "name=FlatBackground,A0=5")
+
+    def test_that_update_parameter_value_will_update_the_value_of_a_parameter_in_simultaneous_fit_mode(self):
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.current_dataset_index = 1
+
+        self.model.update_parameter_value("A0", 5.0)
+
+        self.assertEqual(str(self.model.simultaneous_fit_function), "composite=MultiDomainFunction,NumDeriv=true;"
+                                                                    "name=FlatBackground,A0=0,$domains=i;"
+                                                                    "name=FlatBackground,A0=5,$domains=i")
+
     def test_that_setting_new_dataset_names_will_reset_the_fit_functions_but_attempt_to_use_the_previous_function(self):
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
