@@ -11,7 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -42,10 +42,10 @@ private:
 
   void init() override;
   void exec() override;
-  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
+  void qListFromEventWS(IntegrateQLabEvents &integrator, API::Progress &prog,
                         DataObjects::EventWorkspace_sptr &wksp,
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
-  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
+  void qListFromHistoWS(IntegrateQLabEvents &integrator, API::Progress &prog,
                         DataObjects::Workspace2D_sptr &wksp,
                         Kernel::DblMatrix const &UBinv, bool hkl_integ);
 

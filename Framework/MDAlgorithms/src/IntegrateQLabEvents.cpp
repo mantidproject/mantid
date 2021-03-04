@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -46,7 +46,7 @@ using Mantid::Kernel::V3D;
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-Integrate3DEvents::Integrate3DEvents(
+IntegrateQLabEvents::IntegrateQLabEvents(
     const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
         &peak_q_list,
     Kernel::DblMatrix const &UBinv, double radius,
@@ -57,6 +57,20 @@ Integrate3DEvents::Integrate3DEvents(
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hkl_key] = peak_q_list[it].second;
+  }
+
+  m_cellSize = m_radius;
+  for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
+    const V3D q = peak_q_list[peakIndex].second;
+    m_peaksQLab.emplace_back(q);
+    CellCoords abc(q, m_cellSize);
+    // abc = [0, 0, 0] is no scattering
+    if (abc.a || abc.b || abc.b) {
+      SlimEvents events; // empty list
+      OccupiedCell c = {peakIndex, q, events};
+      std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
+      m_cellsWithPeaks.insert(newCell);
+    }
   }
 }
 
@@ -82,7 +96,7 @@ Integrate3DEvents::Integrate3DEvents(
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-Integrate3DEvents::Integrate3DEvents(
+IntegrateQLabEvents::IntegrateQLabEvents(
     const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
         &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
@@ -103,6 +117,22 @@ Integrate3DEvents::Integrate3DEvents(
     if (hklmnp_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hklmnp_key] = peak_q_list[it].second;
   }
+
+  // ToDo duplicated code
+  m_cellSize = m_radius;
+  for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
+    const V3D q = peak_q_list[peakIndex].second;
+    m_peaksQLab.emplace_back(q);
+    CellCoords abc(q, m_cellSize);
+    // abc = [0, 0, 0] is down the neutron stream, no scattering
+    if (abc.a || abc.b || abc.c) {
+      SlimEvents events; // empty list
+      OccupiedCell c = {peakIndex, q, events};
+      std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
+      m_cellsWithPeaks.insert(newCell);
+    }
+  }
+
 }
 
 /**
@@ -122,7 +152,7 @@ Integrate3DEvents::Integrate3DEvents(
  *                   with peaks.
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvents(
+void IntegrateQLabEvents::addEvents(
     std::vector<std::pair<std::pair<double, double>, V3D>> const &event_qs,
     bool hkl_integ) {
   if (!maxOrder)
@@ -135,7 +165,7 @@ void Integrate3DEvents::addEvents(
 
 std::pair<std::shared_ptr<const Geometry::PeakShape>,
           std::tuple<double, double, double>>
-Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
+IntegrateQLabEvents::integrateStrongPeak(const IntegrationParameters &params,
                                        const V3D &peak_q, double &inti,
                                        double &sigi) {
 
@@ -221,7 +251,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   return std::make_pair(shape, std::make_tuple(frac, fracError, max_sigma));
 }
 
-std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(
+std::shared_ptr<const Geometry::PeakShape> IntegrateQLabEvents::integrateWeakPeak(
     const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
     const std::tuple<double, double, double> &libPeak, const V3D &center,
     double &inti, double &sigi) {
@@ -286,7 +316,7 @@ std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(
       "IntegrateEllipsoidsTwoStep");
 }
 
-double Integrate3DEvents::estimateSignalToNoiseRatio(
+double IntegrateQLabEvents::estimateSignalToNoiseRatio(
     const IntegrationParameters &params, const V3D &center, bool forceSpherical,
     double sphericityTol) {
 
@@ -353,7 +383,7 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
 }
 
 const std::vector<std::pair<std::pair<double, double>, V3D>> *
-Integrate3DEvents::getEvents(const V3D &peak_q) {
+IntegrateQLabEvents::getEvents(const V3D &peak_q) {
   auto hkl_key = getHklKey(peak_q);
   if (maxOrder)
     hkl_key = getHklMnpKey(peak_q);
@@ -372,7 +402,7 @@ Integrate3DEvents::getEvents(const V3D &peak_q) {
   return &(pos->second);
 }
 
-bool Integrate3DEvents::correctForDetectorEdges(
+bool IntegrateQLabEvents::correctForDetectorEdges(
     std::tuple<double, double, double> &radii, const std::vector<V3D> &E1Vecs,
     const V3D &peak_q, const std::vector<double> &axesRadii,
     const std::vector<double> &bkgInnerRadii,
@@ -443,7 +473,7 @@ bool Integrate3DEvents::correctForDetectorEdges(
  *
  */
 Mantid::Geometry::PeakShape_const_sptr
-Integrate3DEvents::ellipseIntegrateEvents(
+IntegrateQLabEvents::ellipseIntegrateEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
     double peak_radius, double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
@@ -459,10 +489,8 @@ Integrate3DEvents::ellipseIntegrateEvents(
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
     return std::make_shared<NoShape>();
-  ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
-      pos->second;
+  SlimEvents &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -498,7 +526,7 @@ Integrate3DEvents::ellipseIntegrateEvents(
 }
 
 Mantid::Geometry::PeakShape_const_sptr
-Integrate3DEvents::ellipseIntegrateModEvents(
+IntegrateQLabEvents::ellipseIntegrateModEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q, V3D const &hkl,
     V3D const &mnp, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
@@ -506,6 +534,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
+  /*
   int64_t hkl_key = getHklMnpKey(
       boost::math::iround<double>(hkl[0]), boost::math::iround<double>(hkl[1]),
       boost::math::iround<double>(hkl[2]), boost::math::iround<double>(mnp[0]),
@@ -520,19 +549,32 @@ Integrate3DEvents::ellipseIntegrateModEvents(
     return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
-      pos->second;
+  SlimEvents &some_events =  pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
     return std::make_shared<NoShape>();
   }
+  */
+  int64_t hash = CellCoords(peak_q, m_cellSize).getHash();
+  auto cell_it = m_cellsWithPeaks.find(hash);
+  if (cell_it == m_cellsWithPeaks.end())
+    return std::make_shared<NoShape>(); // peak_q is [0, 0, 0]
+  OccupiedCell cell = cell_it->second;
+  SlimEvents &some_events = cell.events;
+  if (some_events.size() < 3)
+    return std::make_shared<NoShape>();
+
 
   DblMatrix cov_matrix(3, 3);
+  makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+
+  /*
   if (hkl_key % 1000 == 0)
     makeCovarianceMatrix(some_events, cov_matrix, m_radius);
   else
     makeCovarianceMatrix(some_events, cov_matrix, s_radius);
+  */
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
@@ -570,7 +612,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
  *                     of the three axes of the ellisoid.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-std::pair<double, double> Integrate3DEvents::numInEllipsoid(
+std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(
     std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes) {
 
@@ -606,7 +648,7 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoid(
  correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
+std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
     std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes,
     std::vector<double> const &sizesIn,
@@ -671,7 +713,7 @@ std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
  *                   calculating the covariance matrix.
  */
 
-void Integrate3DEvents::makeCovarianceMatrix(
+void IntegrateQLabEvents::makeCovarianceMatrix(
     std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     DblMatrix &matrix, double radius) {
   double totalCounts;
@@ -701,7 +743,7 @@ void Integrate3DEvents::makeCovarianceMatrix(
  *                        in this list.
  *  @param eigen_values   3 eigenvalues of matrix
  */
-void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
+void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix,
                                         std::vector<V3D> &eigen_vectors,
                                         std::vector<double> &eigen_values) {
   unsigned int size = 3;
@@ -741,7 +783,7 @@ void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
  *  @param  l        The third  Miller index
  */
 
-int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
+int64_t IntegrateQLabEvents::getHklKey(int h, int k, int l) {
   int64_t key(0);
 
   if (h != 0 || k != 0 || l != 0)
@@ -760,7 +802,7 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
  *  @param  p        The third  modulation index
  */
 
-int64_t Integrate3DEvents::getHklMnpKey(int h, int k, int l, int m, int n,
+int64_t IntegrateQLabEvents::getHklMnpKey(int h, int k, int l, int m, int n,
                                         int p) {
   int64_t key(0);
 
@@ -776,7 +818,7 @@ int64_t Integrate3DEvents::getHklMnpKey(int h, int k, int l, int m, int n,
  *
  *  @param hkl  The q_vector to be mapped to h,k,l
  */
-int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
+int64_t IntegrateQLabEvents::getHklKey2(V3D const &hkl) {
   int h = boost::math::iround<double>(hkl[0]);
   int k = boost::math::iround<double>(hkl[1]);
   int l = boost::math::iround<double>(hkl[2]);
@@ -789,7 +831,7 @@ int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
  *
  *  @param hkl  The q_vector to be mapped to h,k,l
  */
-int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
+int64_t IntegrateQLabEvents::getHklMnpKey2(V3D const &hkl) {
   V3D modvec1 = V3D(m_ModHKL[0][0], m_ModHKL[1][0], m_ModHKL[2][0]);
   V3D modvec2 = V3D(m_ModHKL[0][1], m_ModHKL[1][1], m_ModHKL[2][1]);
   V3D modvec3 = V3D(m_ModHKL[0][2], m_ModHKL[1][2], m_ModHKL[2][2]);
@@ -880,7 +922,7 @@ int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
  *
  *  @param q_vector  The q_vector to be mapped to h,k,l
  */
-int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
+int64_t IntegrateQLabEvents::getHklKey(V3D const &q_vector) {
   V3D hkl = m_UBinv * q_vector;
   int h = boost::math::iround<double>(hkl[0]);
   int k = boost::math::iround<double>(hkl[1]);
@@ -896,7 +938,7 @@ int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
  *
  *  @param q_vector  The q_vector to be mapped to h,k,l
  */
-int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
+int64_t IntegrateQLabEvents::getHklMnpKey(V3D const &q_vector) {
   V3D hkl = m_UBinv * q_vector;
 
   V3D modvec1 = V3D(m_ModHKL[0][0], m_ModHKL[1][0], m_ModHKL[2][0]);
@@ -997,8 +1039,37 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
+void IntegrateQLabEvents::addEvent(const SlimEvent &event, bool hkl_integ) {
+
+  V3D q(event.second);
+  CellCoords abc(q, m_cellSize);
+  int64_t hash = abc.getHash();
+  auto cell_it = m_cellsWithEvents.find(hash);
+  if (cell_it == m_cellsWithEvents.end()) {
+    SlimEvent eventInserted = event;
+    SlimEvents events = {eventInserted};
+    std::pair<size_t, SlimEvents> newCell(hash, events);
+    m_cellsWithEvents.insert(newCell);
+  }
+  else {
+    SlimEvent eventInserted = event;
+    cell_it->second.emplace_back(eventInserted);
+  }
+
+  /*
+  // iterate over the neighbor cells of abc, using their hashes
+  for(const int64_t& hash: abc.nearbyCellHashes()) {
+    auto cell_it = m_cellsWithPeaks.find(hash);
+    if (cell_it != m_cellsWithPeaks.end()) {
+      OccupiedCell &cell = cell_it->second; // cell occupied by a peak
+      SlimEvent neighborEvent = event; // copy
+      neighborEvent.second = q - cell.peakQ;
+      cell.events.emplace_back(neighborEvent);
+    }
+  }
+  */
+
+  SlimEvent event_Q = event;
   int64_t hkl_key;
   if (hkl_integ)
     hkl_key = getHklKey2(event_Q.second);
@@ -1036,7 +1107,7 @@ void Integrate3DEvents::addEvent(
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addModEvent(
+void IntegrateQLabEvents::addModEvent(
     std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
   int64_t hklmnp_key;
 
@@ -1103,7 +1174,7 @@ void Integrate3DEvents::addModEvent(
  *                            of the net integrated intensity
  *
  */
-PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
+PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
     const std::vector<V3D> &E1Vec, V3D const &peak_q,
     std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
         &ev_list,
@@ -1209,7 +1280,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec,
+double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec,
                                     const V3D QLabFrame,
                                     const std::vector<double> &r) {
   double quot = 1.0;
@@ -1233,7 +1304,7 @@ double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec,
  * @return tuple of values representing the radius for each axis.
  */
 std::tuple<double, double, double>
-Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params,
+IntegrateQLabEvents::calculateRadiusFactors(const IntegrationParameters &params,
                                           double max_sigma) const {
   double r1 = 0, r2 = 0, r3 = 0;
 
@@ -1261,6 +1332,23 @@ Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params,
   }
 
   return std::make_tuple(r1, r2, r3);
+}
+
+void IntegrateQLabEvents::populateCellsWithPeaks() {
+  for (auto& cell_it: m_cellsWithPeaks) {
+    OccupiedCell &cell = cell_it.second;
+    CellCoords abc(cell.peakQ, m_cellSize);
+    for(const int64_t& hash: abc.nearbyCellHashes()) {
+      auto cellE_it = m_cellsWithEvents.find(hash);
+      if (cellE_it != m_cellsWithEvents.end()) {
+        for (const SlimEvent& event : cellE_it->second){
+          SlimEvent neighborEvent = event; // copy
+          neighborEvent.second = event.second - cell.peakQ;
+          cell.events.emplace_back(neighborEvent);
+        }
+      }
+    }
+  }
 }
 
 } // namespace MDAlgorithms

@@ -24,7 +24,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -58,7 +58,7 @@ const std::size_t DIMS(3);
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
+void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
                                            Progress &prog,
                                            EventWorkspace_sptr &wksp,
                                            DblMatrix const &UBinv,
@@ -133,7 +133,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
  * @param UBinv : inverse of UB matrix
  * @param hkl_integ ; boolean for integrating in HKL space
  */
-void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
+void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator,
                                            Progress &prog,
                                            Workspace2D_sptr &wksp,
                                            DblMatrix const &UBinv,
@@ -482,7 +482,7 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
-  Integrate3DEvents integrator(qList, hkl_vectors, mnp_vectors, UBinv, modHKL,
+  IntegrateQLabEvents integrator(qList, hkl_vectors, mnp_vectors, UBinv, modHKL,
                                radius_m, radius_s, maxOrder, CT,
                                useOnePercentBackgroundCorrection);
 

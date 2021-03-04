@@ -609,7 +609,6 @@ public:
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
     rebinAlg->execute();
-
     m_histoWS = rebinAlg->getProperty("OutputWorkspace");
   }
 
@@ -646,5 +645,72 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
+  }
+};
+
+class RealCaseTest : public CxxTest::TestSuite {
+
+private:
+  Mantid::API::IEventWorkspace_sptr m_eventWS;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peaksWS;
+
+public:
+  static void destroySuite(RealCaseTest *suite) { delete suite; }
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RealCaseTest *createSuite() { return new RealCaseTest(); }
+
+  void test_inspect_real_case() {
+    // Need to get and run algorithms from elsewhere in the framework.
+    Mantid::API::FrameworkManager::Instance();
+    Mantid::API::AnalysisDataService::Instance();
+    auto loadEventsAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+    loadEventsAlg->setChild(false);
+    loadEventsAlg->initialize();
+    loadEventsAlg->setProperty("Filename", "/tmp/TOPAZ_39037_bank29.nxs");
+    loadEventsAlg->setPropertyValue("OutputWorkspace", "events");
+    loadEventsAlg->execute();
+
+    auto loadPeaksAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+    loadPeaksAlg->setChild(false);
+    loadPeaksAlg->initialize();
+    loadPeaksAlg->setProperty("Filename", "/tmp/TOPAZ_39037_peaks_short.nxs");
+    loadPeaksAlg->setPropertyValue("OutputWorkspace", "peaks_input");
+    loadPeaksAlg->execute();
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "events");
+    alg.setPropertyValue("PeaksWorkspace", "peaks_input");
+    alg.setPropertyValue("OutputWorkspace", "peaks_output");
+    alg.setProperty("RegionRadius", 0.14);
+    alg.setProperty("SpecifySize", true);
+    alg.setProperty("PeakSize", 0.07);
+    alg.setProperty("BackgroundInnerSize", 0.09);
+    alg.setProperty("BackgroundOuterSize", 0.11);
+    alg.setProperty("CutoffIsigI", 5.0);
+    alg.setProperty("AdaptiveQBackground", true);
+    alg.setProperty("AdaptiveQMultiplier", 0.001);
+    alg.setProperty("UseOnePercentBackgroundCorrection", false);
+    alg.setProperty("SatellitePeakSize", 0.07);
+    alg.setProperty("SatelliteBackgroundInnerSize", 0.09);
+    alg.setProperty("SatelliteBackgroundOuterSize", 0.11);
+    alg.execute();
+
+    PeaksWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    Peak peak0 = ws->getPeak(0);
+    Peak peak1 = ws->getPeak(1);
+    double i0 = peak0.getIntensity();
+    double i1 = peak1.getIntensity();
+    TS_ASSERT_DELTA(i0, i1, i0 * 0.0001);
+    Mantid::Kernel::V3D hkl0 = peak0.getHKL();
+    Mantid::Kernel::V3D hkl1 = peak1.getHKL();
+    TS_ASSERT_EQUALS(hkl0[0], 0.1);
+    TS_ASSERT_EQUALS(hkl1[0], 0.1);
   }
 };
