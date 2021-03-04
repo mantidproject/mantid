@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h"
 
@@ -79,10 +80,10 @@ private:
 
   API::ITableWorkspace_sptr
   createResultsTable(const std::string &logName,
-                     const API::IFunction_sptr &ifunSingle, bool &isDataName);
+                     const API::IFunction_sptr ifunSingle, bool &isDataName);
 
   void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result,
-                      const API::IFunction *const ifun,
+                      const API::IFunction_sptr ifun,
                       const InputSpectraToFit &data, double logValue,
                       double chi2) const;
 

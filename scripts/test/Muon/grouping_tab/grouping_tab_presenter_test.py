@@ -31,6 +31,13 @@ def pair_name():
     return name
 
 
+def diff_name():
+    name = []
+    for i in range(21):
+        name.append("diff_" + str(i + 1))
+    return name
+
+
 #
 def perform_musr_file_finder(self):
     ConfigService['default.instrument'] = 'MUSR'
@@ -66,6 +73,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.pairing_table_widget = PairingTablePresenter(self.pairing_table_view, self.model)
 
         self.diff_widget = DifferencePresenter(self.model)
+        self.diff_widget.group_view.enter_diff_name = mock.Mock(side_effect=diff_name())
+        self.diff_widget.pair_view.enter_diff_name = mock.Mock(side_effect=diff_name())
 
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
@@ -97,6 +106,12 @@ class GroupingTabPresenterTest(unittest.TestCase):
         testpair2 = MuonPair(pair_name="long2", forward_group_name="fwd", backward_group_name="top")
         self.pairing_table_widget.add_pair(testpair1)
         self.pairing_table_widget.add_pair(testpair2)
+
+    def add_group_diff(self):
+        self.diff_widget.group_widget.handle_add_diff_button_clicked('fwd', 'top')
+
+    def add_pair_diff(self):
+        self.diff_widget.pair_widget.handle_add_diff_button_clicked('long1', 'long2')
 
     def tearDown(self):
         self.obj = None
@@ -244,6 +259,53 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_update_description_to_empty_on_clear_all(self):
         self.presenter.on_clear_requested()
         self.assertEqual('', self.view.get_description_text())
+
+    def test_cannot_remove_last_row_group_table_if_used_by_pair(self):
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('top is used by: long2',
+                         self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_last_row_group_table_if_used_by_diff(self):
+        self.add_group_diff()
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('top is used by: long2, diff_1',
+                         self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_group_used_by_pair(self):
+        self.grouping_table_view.get_selected_group_names_and_indexes = mock.Mock(return_value=[['fwd',0]])
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('fwd is used by: long1, long2\n', self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_group_used_by_diff(self):
+        self.add_group_diff()
+        self.grouping_table_view.get_selected_group_names_and_indexes = mock.Mock(return_value=[['fwd', 0]])
+        self.grouping_table_widget.handle_remove_group_button_clicked()
+
+        self.assertEqual(1, self.grouping_table_view.warning_popup.call_count)
+        self.assertEqual('fwd is used by: long1, long2, diff_1\n', self.grouping_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_last_row_pair_table_if_used_by_diff(self):
+        self.add_pair_diff()
+        self.pairing_table_widget.handle_remove_pair_button_clicked()
+
+        self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
+        self.assertEqual('long2 is used by: diff_1',
+                         self.pairing_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_cannot_remove_a_selected_pair_used_by_diff(self):
+        self.add_pair_diff()
+        self.pairing_table_view.get_selected_pair_names_and_indexes = mock.Mock(return_value=[['long1', 0]])
+        self.pairing_table_widget.handle_remove_pair_button_clicked()
+
+        self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
+        self.assertEqual('long1 is used by: diff_1\n',
+                         self.pairing_table_view.warning_popup.call_args_list[0][0][0])
 
 
 if __name__ == '__main__':

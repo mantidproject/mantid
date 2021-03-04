@@ -519,13 +519,30 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       //  If no events from this experimental contribute to the box then skip
       if (nexp > 1) {
         auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
-        typename std::vector<MDE> &events = mdbox->getEvents();
+        const std::vector<MDE> &events = mdbox->getEvents();
         if (std::none_of(events.cbegin(), events.cend(),
                          [&iexp, &nexp](MDE event) {
                            return event.getRunIndex() == iexp ||
                                   event.getRunIndex() >= nexp;
                          }))
           continue;
+      }
+
+      // If multiple goniometers than use the average one from the
+      // events in the box, that matches this runIndex, this assumes
+      // the events are added in same order as the goniometers
+      if (ei->run().getNumGoniometers() > 1) {
+        const std::vector<MDE> &events =
+            dynamic_cast<MDBox<MDE, nd> *>(box)->getEvents();
+        double sum = 0;
+        double count = 0;
+        for (const auto &event : events) {
+          if (event.getRunIndex() == iexp) {
+            sum += event.getGoniometerIndex();
+            count++;
+          }
+        }
+        m_goniometer = ei->mutableRun().getGoniometerMatrix(lrint(sum / count));
       }
       // The center of the box = Q in the lab frame
 
