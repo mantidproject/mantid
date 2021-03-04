@@ -59,7 +59,7 @@ Integrate3DEvents::Integrate3DEvents(
       m_peak_qs[hkl_key] = peak_q_list[it].second;
   }
 
-  m_cellSize = 2 * m_radius;
+  m_cellSize = m_radius;
   for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
     const V3D q = peak_q_list[peakIndex].second;
     m_peaksQLab.emplace_back(q);
@@ -118,7 +118,7 @@ Integrate3DEvents::Integrate3DEvents(
   }
 
   // ToDo duplicated code
-  m_cellSize = 2 * m_radius;
+  m_cellSize = m_radius;
   for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
     const V3D q = peak_q_list[peakIndex].second;
     m_peaksQLab.emplace_back(q);
