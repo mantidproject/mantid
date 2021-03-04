@@ -242,7 +242,7 @@ class WorkspaceWidget(PluginWidget):
             except ValueError:
                 try:
                     TableWorkspaceDisplay.supports(ws)
-                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self, batch=True)
                     presenter.show_view()
                 except ValueError:
                     logger.error("Could not open workspace: {0} with neither "
