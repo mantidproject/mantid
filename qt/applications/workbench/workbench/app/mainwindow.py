@@ -351,9 +351,7 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        _interfaces_registers = self._discover_python_interfaces(interface_dir)
-        self.interface_list = _interfaces_registers[0]
-        registers_to_run = _interfaces_registers[1]
+        self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
 
@@ -397,7 +395,10 @@ class MainWindow(QMainWindow):
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-        register_items = ConfigService['mantidqt.python_interfaces_io_registry'].split()
+        try:
+            register_items = ConfigService['mantidqt.python_interfaces_io_registry'].split()
+        except KeyError:
+            register_items = []
         # detect the python interfaces
         interfaces = {}
         registers_to_run = {}
@@ -407,15 +408,14 @@ class MainWindow(QMainWindow):
             if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
                 registers_to_run.setdefault(key, []).append(reg_name)
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(
-                    scriptname, interface_dir))
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
             if scriptname in self.PYTHON_GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)
 
-        return [interfaces, registers_to_run]
+        return interfaces, registers_to_run
 
     def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
