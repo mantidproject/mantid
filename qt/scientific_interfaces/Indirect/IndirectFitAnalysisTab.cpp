@@ -247,14 +247,6 @@ IndirectFittingModel *IndirectFitAnalysisTab::getFittingModel() const {
 }
 
 /**
- * @return  The fit type selected in the custom functions combo box, in the fit
- *          property browser.
- */
-QString IndirectFitAnalysisTab::getSelectedFitType() const {
-  return m_fitPropertyBrowser->selectedFitType();
-}
-
-/**
  * @param functionName  The name of the function.
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
@@ -605,12 +597,7 @@ void IndirectFitAnalysisTab::run() {
   setRunIsRunning(true);
   enableFitButtons(false);
   enableOutputOptions(false);
-  auto const fitType = m_fitPropertyBrowser->selectedFitType();
-  if (fitType == "Simultaneous") {
-    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
-  } else {
-    m_fittingModel->setFittingMode(FittingMode::SEQUENTIAL);
-  }
+  m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

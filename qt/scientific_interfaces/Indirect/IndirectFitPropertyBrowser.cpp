@@ -312,13 +312,10 @@ void IndirectFitPropertyBrowser::updateFitStatus(const FitDomainIndex index) {
 }
 
 /**
- * @return  The selected fit type in the fit type combo box.
+ * @return  The currently active fitting mode (Sequential or Simultaneous).
  */
-QString IndirectFitPropertyBrowser::selectedFitType() const {
-  return m_fitOptionsBrowser->getCurrentFittingType() ==
-                 FittingMode::SIMULTANEOUS
-             ? "Simultaneous"
-             : "Sequential";
+FittingMode IndirectFitPropertyBrowser::getFittingMode() const {
+  return m_fitOptionsBrowser->getCurrentFittingType();
 }
 
 /**
