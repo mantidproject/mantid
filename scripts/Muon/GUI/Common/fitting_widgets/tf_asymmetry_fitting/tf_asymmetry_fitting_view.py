@@ -66,7 +66,7 @@ class TFAsymmetryFittingView(GeneralFittingView):
     @property
     def is_normalisation_fixed(self) -> bool:
         """Returns true if the fix normalisation check box is ticked."""
-        return self.tf_asymmetry_fitting_options.is_normalisation_fixed()
+        return self.tf_asymmetry_fitting_options.is_normalisation_fixed
 
     @is_normalisation_fixed.setter
     def is_normalisation_fixed(self, is_fixed: bool) -> None:

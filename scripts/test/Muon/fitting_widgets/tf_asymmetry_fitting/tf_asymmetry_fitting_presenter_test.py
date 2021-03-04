@@ -41,6 +41,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
         self.tf_asymmetry_mode = True
         self.normalisation = 3.0
+        self.normalisation_error = 0.3
 
         self._setup_mock_view()
         self._setup_mock_model()
@@ -87,16 +88,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_instrument_changed_will_turn_tf_asymmetry_mode_off(self):
         self.presenter.handle_instrument_changed()
-
-        self.mock_view_tf_asymmetry_mode.assert_called_with(False)
-        self.mock_model_tf_asymmetry_mode.assert_called_with(False)
-        self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 2)
-        self.assertEqual(self.mock_model_tf_asymmetry_mode.call_count, 2)
-
-    def test_that_handle_pulse_type_changed_will_turn_tf_asymmetry_mode_off_if_it_contains_DoublePulseEnabled(self):
-        updated_variables = {"DoublePulseEnabled": True, "OtherVariable": False}
-
-        self.presenter.handle_pulse_type_changed(updated_variables)
 
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
         self.mock_model_tf_asymmetry_mode.assert_called_with(False)
@@ -185,7 +176,8 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_dataset_name_changed()
 
         self.model.current_normalisation.assert_called_with()
-        self.mock_view_normalisation.assert_called_with(self.normalisation)
+        self.model.current_normalisation_error.assert_called_with()
+        self.view.set_normalisation.assert_called_with(self.normalisation, self.normalisation_error)
 
     def test_that_handle_tf_asymmetry_mode_changed_will_not_set_the_tf_asymmetry_mode_if_the_workspaces_do_not_comply(self):
         self.presenter._check_tf_asymmetry_compliance = mock.Mock(return_value=False)
@@ -247,7 +239,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.view.warning_popup.assert_called_once_with("Failed to convert fit function to a TF Asymmetry function.")
 
         self.model.current_normalisation.assert_called_with()
-        self.mock_view_normalisation.assert_called_with(self.normalisation)
+        self.view.set_normalisation.assert_called_with(self.normalisation, self.normalisation_error)
 
     def test_that_update_tf_asymmetry_functions_in_model_and_view_will_set_the_normalisation_in_the_view(self):
         self.model.recalculate_tf_asymmetry_functions = mock.Mock(return_value=True)
@@ -257,7 +249,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.model.recalculate_tf_asymmetry_functions.assert_called_once_with()
 
         self.model.current_normalisation.assert_called_with()
-        self.mock_view_normalisation.assert_called_with(self.normalisation)
+        self.view.set_normalisation.assert_called_with(self.normalisation, self.normalisation_error)
 
     def test_that_update_fit_function_in_model_will_update_the_simultaneous_fit_functions_when_in_simultaneous_mode(self):
         self.model.update_simultaneous_fit_functions = mock.Mock()
@@ -347,6 +339,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.view.get_global_parameters = mock.Mock(return_value=[])
         self.view.switch_to_simultaneous = mock.Mock()
         self.view.switch_to_single = mock.Mock()
+        self.view.set_normalisation = mock.Mock()
 
     def _setup_mock_model(self):
         self.model = mock.Mock(spec=TFAsymmetryFittingModel)
@@ -435,6 +428,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.model.perform_fit = mock.Mock(return_value=(self.fit_function, self.fit_status, self.chi_squared))
         self.model.current_normalisation = mock.Mock(return_value=self.normalisation)
         self.model.set_current_normalisation = mock.Mock()
+        self.model.current_normalisation_error = mock.Mock(return_value=self.normalisation_error)
 
     def _setup_presenter(self):
         self.presenter = TFAsymmetryFittingPresenter(self.view, self.model)
