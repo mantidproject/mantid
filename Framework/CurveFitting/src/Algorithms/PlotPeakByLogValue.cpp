@@ -316,7 +316,7 @@ void PlotPeakByLogValue::exec() {
     // Find the log value: it is either a log-file value or
     // simply the workspace number
     double logValue = calculateLogValue(logName, data);
-    appendTableRow(isDataName, result, ifun.get(), data, logValue, chi2);
+    appendTableRow(isDataName, result, ifun, data, logValue, chi2);
 
     Prog += dProg;
     std::string current = std::to_string(i);
@@ -403,7 +403,7 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(
 
 void PlotPeakByLogValue::appendTableRow(bool isDataName,
                                         ITableWorkspace_sptr &result,
-                                        const IFunction *const ifun,
+                                        const IFunction_sptr ifun,
                                         const InputSpectraToFit &data,
                                         double logValue, double chi2)
     const { // Extract the fitted parameters and put them into the result table
@@ -414,15 +414,44 @@ void PlotPeakByLogValue::appendTableRow(bool isDataName,
     row << logValue;
   }
 
-  for (size_t iPar = 0; iPar < ifun->nParams(); ++iPar) {
-    row << ifun->getParameter(iPar) << ifun->getError(iPar);
+  auto p = std::dynamic_pointer_cast<API::CompositeFunction>(ifun);
+  if (p) {
+    for (size_t i = 0; i < p->nFunctions(); ++i) {
+      auto f = ifun->getFunction(i);
+      for (size_t j = 0; j < f->nParams(); ++j) {
+        row << p->getParameter(i, j) << p->getError(i, j);
+      }
+
+      if (f->hasParameter("Intensity") == false) {
+        auto intensity_handle =
+            std::dynamic_pointer_cast<API::IPeakFunction>(f);
+        if (intensity_handle) {
+          row << intensity_handle->intensity();
+        }
+      }
+    }
   }
+
+  else {
+    for (size_t iPar = 0; iPar < ifun->nParams(); ++iPar) {
+      row << ifun->getParameter(iPar) << ifun->getError(iPar);
+    }
+
+    if (ifun->hasParameter("Intensity") == false) {
+      auto intensity_handle =
+          std::dynamic_pointer_cast<API::IPeakFunction>(ifun);
+      if (intensity_handle) {
+        row << intensity_handle->intensity();
+      }
+    }
+  }
+
   row << chi2;
 }
 
 ITableWorkspace_sptr
 PlotPeakByLogValue::createResultsTable(const std::string &logName,
-                                       const IFunction_sptr &ifunSingle,
+                                       const IFunction_sptr ifunSingle,
                                        bool &isDataName) {
   ITableWorkspace_sptr result =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -437,10 +466,40 @@ PlotPeakByLogValue::createResultsTable(const std::string &logName,
     col->setPlotType(1); // X-values inplots
   }
 
-  for (size_t iPar = 0; iPar < ifunSingle->nParams(); ++iPar) {
-    result->addColumn("double", ifunSingle->parameterName(iPar));
-    result->addColumn("double", ifunSingle->parameterName(iPar) + "_Err");
+  auto p = std::dynamic_pointer_cast<API::CompositeFunction>(ifunSingle);
+  if (p) {
+    for (size_t i = 0; i < p->nFunctions(); ++i) {
+      auto f = ifunSingle->getFunction(i);
+      for (size_t j = 0; j < f->nParams(); ++j) {
+        result->addColumn("double", p->parameterName(i, j));
+        result->addColumn("double", p->parameterName(i, j) + "_Err");
+      }
+
+      if (f->hasParameter("Intensity") == false) {
+        auto intensity_handle =
+            std::dynamic_pointer_cast<API::IPeakFunction>(f);
+        if (intensity_handle) {
+          result->addColumn("double", "f" + std::to_string(i) + ".Intensity");
+        }
+      }
+    }
   }
+
+  else {
+    for (size_t iPar = 0; iPar < ifunSingle->nParams(); ++iPar) {
+      result->addColumn("double", ifunSingle->parameterName(iPar));
+      result->addColumn("double", ifunSingle->parameterName(iPar) + "_Err");
+    }
+
+    if (ifunSingle->hasParameter("Intensity") == false) {
+      auto intensity_handle =
+          std::dynamic_pointer_cast<API::IPeakFunction>(ifunSingle);
+      if (intensity_handle) {
+        result->addColumn("double", "Intensity");
+      }
+    }
+  }
+
   result->addColumn("double", "Chi_squared");
 
   this->setProperty("OutputWorkspace", result);
