@@ -103,6 +103,7 @@ private:
   QWidget *const m_widget;
 
   QString m_selectedLog;
+  size_t m_numPeriods;
 };
 
 } // namespace CustomInterfaces
