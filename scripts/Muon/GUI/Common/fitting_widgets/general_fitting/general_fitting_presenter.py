@@ -30,9 +30,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
 
-        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
-        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
-
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
         self.view.set_slot_for_simultaneous_fit_by_changed(self.handle_simultaneous_fit_by_changed)
@@ -49,10 +46,6 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        pass
-
-    def handle_pulse_type_changed(self, _) -> None:
-        """Handles when double pulse mode is switched on and switches to normal fitting mode. Overridden by child."""
         pass
 
     def handle_selected_group_pair_changed(self) -> None:
