@@ -49,7 +49,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
-        pass
+        self._update_plot = False
+        self.update_and_reset_all_data()
+        self._update_plot = True
 
     def handle_pulse_type_changed(self, updated_variables: dict) -> None:
         """Handles when double pulse mode is switched on and switches to normal fitting mode."""

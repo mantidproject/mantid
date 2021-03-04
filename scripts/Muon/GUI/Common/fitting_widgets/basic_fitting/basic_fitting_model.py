@@ -115,7 +115,10 @@ class BasicFittingModel:
     @property
     def current_dataset_name(self) -> str:
         """Returns the currently selected dataset name"""
-        return self.dataset_names[self.current_dataset_index]
+        if self.current_dataset_index is not None:
+            return self.dataset_names[self.current_dataset_index]
+        else:
+            return None
 
     @current_dataset_name.setter
     def current_dataset_name(self, name: str) -> None:
