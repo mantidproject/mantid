@@ -727,9 +727,6 @@ void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
     NXFloat angle = entry.openNXFloat(entryName);
     angle.load();
     m_sampleAngle = angle[0];
-  } else {
-    g_log.warning(
-        "Unable to find sample angle. Consider providing BraggAngle.");
   }
 }
 
