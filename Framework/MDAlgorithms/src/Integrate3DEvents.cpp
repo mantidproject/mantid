@@ -69,7 +69,8 @@ Integrate3DEvents::Integrate3DEvents(
       SlimEvents events; // empty list
       OccupiedCell c = {peakIndex, q, events};
       std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
-      m_occupiedCells.insert(newCell);    }
+      m_cellsWithPeaks.insert(newCell);
+    }
   }
 }
 
@@ -128,7 +129,7 @@ Integrate3DEvents::Integrate3DEvents(
       SlimEvents events; // empty list
       OccupiedCell c = {peakIndex, q, events};
       std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
-      m_occupiedCells.insert(newCell);
+      m_cellsWithPeaks.insert(newCell);
     }
   }
 
@@ -556,8 +557,8 @@ Integrate3DEvents::ellipseIntegrateModEvents(
   }
   */
   int64_t hash = CellCoords(peak_q, m_cellSize).getHash();
-  auto cell_it = m_occupiedCells.find(hash);
-  if (cell_it == m_occupiedCells.end())
+  auto cell_it = m_cellsWithPeaks.find(hash);
+  if (cell_it == m_cellsWithPeaks.end())
     return std::make_shared<NoShape>(); // peak_q is [0, 0, 0]
   OccupiedCell cell = cell_it->second;
   SlimEvents &some_events = cell.events;
@@ -1042,16 +1043,31 @@ void Integrate3DEvents::addEvent(const SlimEvent &event, bool hkl_integ) {
 
   V3D q(event.second);
   CellCoords abc(q, m_cellSize);
+  int64_t hash = abc.getHash();
+  auto cell_it = m_cellsWithEvents.find(hash);
+  if (cell_it == m_cellsWithEvents.end()) {
+    SlimEvent eventInserted = event;
+    SlimEvents events = {eventInserted};
+    std::pair<size_t, SlimEvents> newCell(hash, events);
+    m_cellsWithEvents.insert(newCell);
+  }
+  else {
+    SlimEvent eventInserted = event;
+    cell_it->second.emplace_back(eventInserted);
+  }
+
+  /*
   // iterate over the neighbor cells of abc, using their hashes
   for(const int64_t& hash: abc.nearbyCellHashes()) {
-    auto cell_it = m_occupiedCells.find(hash);
-    if (cell_it != m_occupiedCells.end()) {
+    auto cell_it = m_cellsWithPeaks.find(hash);
+    if (cell_it != m_cellsWithPeaks.end()) {
       OccupiedCell &cell = cell_it->second; // cell occupied by a peak
       SlimEvent neighborEvent = event; // copy
       neighborEvent.second = q - cell.peakQ;
       cell.events.emplace_back(neighborEvent);
     }
   }
+  */
 
   SlimEvent event_Q = event;
   int64_t hkl_key;
@@ -1316,6 +1332,23 @@ Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params,
   }
 
   return std::make_tuple(r1, r2, r3);
+}
+
+void Integrate3DEvents::populateCellsWithPeaks() {
+  for (auto& cell_it: m_cellsWithPeaks) {
+    OccupiedCell &cell = cell_it.second;
+    CellCoords abc(cell.peakQ, m_cellSize);
+    for(const int64_t& hash: abc.nearbyCellHashes()) {
+      auto cellE_it = m_cellsWithEvents.find(hash);
+      if (cellE_it != m_cellsWithEvents.end()) {
+        for (const SlimEvent& event : cellE_it->second){
+          SlimEvent neighborEvent = event; // copy
+          neighborEvent.second = event.second - cell.peakQ;
+          cell.events.emplace_back(neighborEvent);
+        }
+      }
+    }
+  }
 }
 
 } // namespace MDAlgorithms

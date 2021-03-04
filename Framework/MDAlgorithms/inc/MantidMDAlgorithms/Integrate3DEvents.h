@@ -153,6 +153,7 @@ public:
                                     const Mantid::Kernel::V3D &center,
                                     bool forceSpherical = false,
                                     double sphericityTol = 0.02);
+  void populateCellsWithPeaks();
 
 private:
   /// Get a list of events for a given Q
@@ -247,7 +248,9 @@ private:
   /// size of the square cell unit, holding at most one single peak
   double m_cellSize;
   /// list the occupied cells in an unordered map for fast searching
-  std::unordered_map<size_t, OccupiedCell> m_occupiedCells;
+  std::unordered_map<size_t, OccupiedCell> m_cellsWithPeaks;
+  /// list of cells occupied with events
+  std::unordered_map<size_t, SlimEvents> m_cellsWithEvents;
   /// List of Q-vectors in the lab frame for each peak
   std::vector<V3D> m_peaksQLab;
 };

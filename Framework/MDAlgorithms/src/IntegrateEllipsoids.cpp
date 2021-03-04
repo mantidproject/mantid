@@ -121,6 +121,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
+  integrator.populateCellsWithPeaks();
 }
 
 /**
