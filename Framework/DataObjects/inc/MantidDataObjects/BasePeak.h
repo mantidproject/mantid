@@ -48,12 +48,6 @@ public:
 #if defined(_MSC_VER) && _MSC_VER <= 1910
   BasePeak(BasePeak &&) = default;
   BasePeak &operator=(BasePeak &&) = default;
-#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
-  // The noexcept default declaration was fixed in GCC 4.9.0
-  // so for versions 4.8.x and below use default only
-  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
-  BasePeak(BasePeak &&) = default;
-  BasePeak &operator=(BasePeak &&) = default;
 #else
   BasePeak(BasePeak &&) noexcept = default;
   BasePeak &operator=(BasePeak &&) noexcept = default;

@@ -49,8 +49,8 @@ public:
     TS_ASSERT(std::isnan(p.getTOF()))
     TS_ASSERT(std::isnan(p.getScattering()))
     TS_ASSERT(std::isnan(p.getAzimuthal()))
-    TS_ASSERT(std::isnan(p.getL1()))
-    TS_ASSERT(std::isnan(p.getL2()))
+    TS_ASSERT_THROWS(p.getL1(), const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(p.getL2(), const Exception::NotImplementedError &)
   }
 
   void test_Qsample_constructor() {
@@ -280,5 +280,10 @@ public:
 
     TS_ASSERT_EQUALS(leanpeak.getBinCount(), peak.getBinCount());
     TS_ASSERT_EQUALS(leanpeak.getBinCount(), 90);
+
+    TS_ASSERT_THROWS(leanpeak.getDetector(),
+                     const Exception::NotImplementedError &)
+    TS_ASSERT_THROWS(leanpeak.getInstrument(),
+                     const Exception::NotImplementedError &)
   }
 };

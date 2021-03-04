@@ -242,13 +242,13 @@ Mantid::Kernel::V3D LeanPeak::getSamplePos() const {
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
 double LeanPeak::getL1() const {
-  return std::numeric_limits<double>::quiet_NaN();
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
 double LeanPeak::getL2() const {
-  return std::numeric_limits<double>::quiet_NaN();
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 /**
@@ -292,7 +292,7 @@ bool LeanPeak::findDetector(const InstrumentRayTracer &) {
  Forwarding function. Exposes the detector position directly.
  */
 Mantid::Kernel::V3D LeanPeak::getDetectorPositionNoCheck() const {
-  return getDetector()->getPos();
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 /**
@@ -300,12 +300,7 @@ Mantid::Kernel::V3D LeanPeak::getDetectorPositionNoCheck() const {
  the detector is not null before accessing its position. Throws if null.
  */
 Mantid::Kernel::V3D LeanPeak::getDetectorPosition() const {
-  auto det = getDetector();
-  if (det == nullptr) {
-    throw Mantid::Kernel::Exception::NullPointerException("LeanPeak",
-                                                          "Detector");
-  }
-  return getDetector()->getPos();
+  throw Exception::NotImplementedError("LeanPeak has no detector information");
 }
 
 Mantid::Kernel::Logger LeanPeak::g_log("PeakLogger");

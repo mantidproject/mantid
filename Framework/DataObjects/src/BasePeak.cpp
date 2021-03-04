@@ -217,9 +217,7 @@ void BasePeak::setHKL(double H, double K, double L) {
  * @param HKL :: vector with x,y,z -> h,k,l
  */
 void BasePeak::setHKL(const Mantid::Kernel::V3D &HKL) {
-  m_H = HKL.X();
-  m_K = HKL.Y();
-  m_L = HKL.Z();
+  this->setHKL(HKL.X(), HKL.Y(), HKL.Z());
 }
 
 /** Set int HKL
@@ -250,7 +248,7 @@ double BasePeak::getSigmaIntensity() const { return m_sigmaIntensity; }
 /** Return the peak intensity divided by the error in the intensity */
 double BasePeak::getIntensityOverSigma() const {
   const auto result = m_intensity / m_sigmaIntensity;
-  return (std::isinf(result)) ? 0.0 : result;
+  return (std::isfinite(result)) ? result : 0.0;
 }
 
 /** Set the integrated peak intensity
