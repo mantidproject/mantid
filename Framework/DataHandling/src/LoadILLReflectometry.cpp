@@ -709,16 +709,27 @@ double LoadILLReflectometry::detectorRotation() {
  * BraggAngle is not manually specified.
  */
 void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
+  std::string entryName;
   if (m_instrument == Supported::D17) {
-    if (entry.isValid("entry0/instrument/SAN/value")) {
-      m_sampleAngle = entry.getDouble("entry0/instrument/SAN/value");
-    } else if (entry.isValid("entry0/instrument/san/value")) {
-      m_sampleAngle = entry.getDouble("entry0/instrument/san/value");
+    if (entry.isValid("instrument/SAN/value")) {
+      entryName = "instrument/SAN/value";
+      // m_sampleAngle = entry.getDouble("instrument/SAN/value");
+    } else if (entry.isValid("instrument/san/value")) {
+      entryName = "instrument/san/value";
+      // m_sampleAngle = entry.getDouble("instrument/san/value");
     }
   } else {
-    if (entry.isValid("entry0/instrument/Theta/wanted_theta")) {
-      m_sampleAngle = entry.getDouble("entry0/instrument/Theta/wanted_theta");
+    if (entry.isValid("instrument/Theta/wanted_theta")) {
+      entryName = "instrument/Theta/wanted_theta";
     }
+  }
+  if (!entryName.empty()) {
+    NXFloat angle = entry.openNXFloat(entryName);
+    angle.load();
+    m_sampleAngle = angle[0];
+  } else {
+    g_log.warning(
+        "Unable to find sample angle. Consider providing BraggAngle.");
   }
 }
 
