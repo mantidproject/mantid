@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction
+from mantid.simpleapi import CopyLogs, EvaluateFunction, RenameWorkspace
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import create_fitted_workspace_name, create_parameter_table_name
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
@@ -605,15 +605,39 @@ class BasicFittingModel:
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         try:
-            EvaluateFunction(InputWorkspace=self.current_dataset_name,
-                             Function=fit_function,
-                             StartX=self.current_start_x,
-                             EndX=self.current_end_x,
-                             OutputWorkspace=output_workspace)
+            if self._double_pulse_enabled():
+                self._evaluate_double_pulse_function(fit_function, output_workspace)
+            else:
+                EvaluateFunction(InputWorkspace=self.current_dataset_name,
+                                 Function=fit_function,
+                                 StartX=self.current_start_x,
+                                 EndX=self.current_end_x,
+                                 OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
             return None
         return output_workspace
+
+    def _evaluate_double_pulse_function(self, fit_function: IFunction, output_workspace: str) -> None:
+        """Evaluate the plot guess fit function for a double pulse fit. It does this by setting MaxIterations to 1."""
+        alg = self._create_double_pulse_alg()
+        alg.initialize()
+        alg.setAlwaysStoreInADS(True)
+        alg.setRethrows(True)
+        alg.setProperty("Function", fit_function)
+        alg.setProperty("InputWorkspace", self.current_dataset_name)
+        alg.setProperty("StartX", self.current_start_x)
+        alg.setProperty("EndX", self.current_end_x)
+        alg.setProperty("Minimizer", self.minimizer)
+        alg.setProperty("EvaluationType", self.evaluation_type)
+        alg.setProperty("MaxIterations", 1)
+        alg.setProperty("Output", "__double_pulse_guess")
+        alg.execute()
+
+        self.context.ads_observer.observeRename(False)
+        RenameWorkspace(InputWorkspace=alg.getPropertyValue("OutputWorkspace"),
+                        OutputWorkspace=output_workspace)
+        self.context.ads_observer.observeRename(True)
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""
