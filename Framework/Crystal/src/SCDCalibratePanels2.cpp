@@ -266,8 +266,8 @@ void SCDCalibratePanels2::exec() {
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     // optimizeL1(m_pws);
-    double search_step_L1 = 1e-6; // 1um search step
-    double threshold = 1e-8;      // when to stop
+    double search_step_L1 = 1e-4; // 100um search step
+    double threshold = 1e-6;      // when to stop
     double new_L1 = twiddle_search_L1(m_pws, search_step_L1, threshold);
 
     g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
@@ -275,12 +275,12 @@ void SCDCalibratePanels2::exec() {
     // g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
     // std::ofstream proffile;
     // proffile.precision(17);
-    // proffile.open(
-    //     "/home/8cz/Workbench/MANTID/"
-    //     "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_natrollite.csv");
+    // proffile.open("/home/8cz/Workbench/MANTID/"
+    //               "SCD218_newObjFuncSCDCalibratePanels_216/data/"
+    //               "prof_natrollite_FindPeaks_undershoot.csv");
     // proffile << "dz\terr\n";
     // std::cout.precision(17);
-    // for (double z = -0.05; z <= 0.05; z = z + 1e-5) {
+    // for (double z = -0.05; z <= 0.05; z = z + 1e-4) {
     //   double err = objfunc_L1(m_pws, -20 + z, -20);
     //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
     //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
@@ -538,12 +538,13 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws) {
 }
 
 /**
- * @brief
+ * @brief Use twiddle search optimizer to find the L1 position by minimizing
+ *        the qSample calculated from Miller-indices (int) and qSample from
+ *        purturbed instrument.
  *
- * @param pws
- * @param initL1
- * @param deltaL1
- * @param threshold
+ * @param pws        Input peak workspace
+ * @param deltaL1    Initial search step in meters
+ * @param threshold  Stop searching when deltaL1 is below this value
  * @return double
  */
 double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
@@ -552,7 +553,7 @@ double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
   // calculate the error
   // NOTE: use the current position as the starting point
   double init_L1 = pws->getInstrument()->getSource()->getPos().Z();
-  double L1 = init_L1 + deltaL1;
+  double L1 = init_L1;
   double best_err = objfunc_L1(pws, L1, init_L1);
   double err;
 
@@ -612,11 +613,13 @@ double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
 }
 
 /**
- * @brief
+ * @brief The objective function computes the difference between
+ *        two errors (one use tof@n-1 and one use tof@n). The intecept
+ *        of the two errors is the solution
  *
- * @param pws
- * @param source_z
- * @param init_z
+ * @param pws       Input peak workspace
+ * @param source_z  Current source position (L1)
+ * @param init_z    Initial source position (L1 engineering value)
  * @return double
  */
 double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
@@ -624,21 +627,14 @@ double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
   IPeaksWorkspace_sptr pws = pws_org->clone();
 
   double err = 0.0;
-  double err_overshoot = 0.0;
-  double err_undershoot = 0.0;
-  double z_shift = source_z - init_z;
-
-  double tof_overshoot;
-  double tof_undershoot;
-
+  double tof = 0.0;
   V3D qv_target;
-  V3D qv_overshoot;
-  V3D qv_undershoot;
+  V3D qv_calc;
   V3D delta_qv;
-  Units::Wavelength wl_overshoot;
-  Units::Wavelength wl_undershoot;
+  Units::Wavelength wl;
 
   // move the source to new location
+  double z_shift = source_z - init_z;
   IAlgorithm_sptr mv_alg =
       createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
@@ -651,54 +647,135 @@ double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
   mv_alg->setProperty("RelativePosition", true);
   mv_alg->executeAsChildAlg();
 
-  // calculate the error
+  // calculate the residual
   auto ubmatrix = pws->sample().getOrientedLattice().getUB();
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     // get the reference
-    qv_target = ubmatrix * pws->getPeak(i).getIntHKL();
+    qv_target = ubmatrix * pws_org->getPeak(i).getIntHKL();
     qv_target *= 2.0 * PI;
 
-    // correct order (overshoot)
-    Peak pk_overshoot = Peak(pws->getPeak(i));
-    // cache the time-of-flight
-    tof_overshoot = pws->getPeak(i).getTOF();
-    // -- update instrument geometry
-    pk_overshoot.setInstrument(pws->getInstrument());
-    wl_overshoot.initialize(pk_overshoot.getL1(), pk_overshoot.getL2(),
-                            pk_overshoot.getScattering(), 0,
-                            pk_overshoot.getInitialEnergy(), 0.0);
-    pk_overshoot.setDetectorID(pws->getPeak(i).getDetectorID());
-    pk_overshoot.setWavelength(wl_overshoot.singleFromTOF(tof_overshoot));
-    qv_overshoot = pk_overshoot.getQSampleFrame();
-    delta_qv = qv_overshoot - qv_target;
-    err_overshoot += delta_qv.norm2();
+    // cache time-of-flight
+    tof = pws->getPeak(i).getTOF();
 
-    // incorrect order (undershoot)
-    Peak pk_undershoot = Peak(pws->getPeak(i));
-    // -- update geometry
-    wl_undershoot.initialize(pk_undershoot.getL1(), pk_undershoot.getL2(),
-                             pk_undershoot.getScattering(), 0,
-                             pk_undershoot.getInitialEnergy(), 0.0);
-    pk_undershoot.setInstrument(pws->getInstrument());
-    pk_undershoot.setDetectorID(pws->getPeak(i).getDetectorID());
-    tof_undershoot = pk_undershoot.getTOF();
-    pk_undershoot.setWavelength(wl_undershoot.singleFromTOF(tof_undershoot));
-    qv_undershoot = pk_undershoot.getQSampleFrame();
-    delta_qv = qv_undershoot - qv_target;
-    err_undershoot += delta_qv.norm2();
+    // make a peak that has the new instrument
+    // NOTE:
+    //    Change the instrument in a peak workspace does not
+    //    trigger an auto update of all the peaks inside,
+    //    which is why we need to do it here explicitly
+    Peak pk = Peak(pws->getPeak(i));
+    pk.setInstrument(pws->getInstrument());
+    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                  pk.getInitialEnergy(), 0.0);
+    pk.setDetectorID(pws->getPeak(i).getDetectorID());
+    pk.setWavelength(wl.singleFromTOF(tof));
+
+    // calculate the residual
+    qv_calc = pk.getQSampleFrame();
+    delta_qv = qv_calc - qv_target;
+    err += delta_qv.norm2();
   }
 
-  err_overshoot /= pws->getNumberPeaks();
-  err_undershoot /= pws->getNumberPeaks();
-  err = std::abs(err_overshoot - err_undershoot);
-
-  std::ostringstream msg;
-  msg.precision(17);
-  msg << "-- err_overshoot = " << err_overshoot << "\n"
-      << "-- err_undershoot = " << err_undershoot << "\n";
-  g_log.notice() << msg.str();
+  err /= pws->getNumberPeaks();
 
   return err;
+}
+
+void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
+                                               double searchStep[6],
+                                               double threshold) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
+  for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const std::string bankname = *std::next(m_BankNames.begin(), i);
+    const std::string pwsBankiName = "_pws_" + bankname;
+
+    //-- step 0: extract peaks that lies on the current bank
+    IPeaksWorkspace_sptr pwsBanki =
+        selectPeaksByBankName(pws, bankname, pwsBankiName);
+
+    // Do not attempt correct panels with less than 6 peaks
+    int nBankPeaks = pwsBanki->getNumberPeaks();
+    if (nBankPeaks < MINIMUM_PEAKS_PER_BANK) {
+      // use ostringstream to prevent OPENMP breaks log info
+      std::ostringstream msg_npeakCheckFail;
+      msg_npeakCheckFail << "-- Bank " << bankname << " have only "
+                         << nBankPeaks << " (<" << MINIMUM_PEAKS_PER_BANK
+                         << ") Peaks, skipping\n";
+      g_log.notice() << msg_npeakCheckFail.str();
+      continue;
+    }
+
+    //-- step 1: twiddle search
+    double params[6] = {0.0, 0.0, 0.0,  // dx, dy, dz
+                        0.0, 0.0, 0.0}; // theta, phi, ang
+    double best_err = objfunc_bank(pwsBanki, params);
+    double err;
+    int niter = 0;
+
+    double stepsSum = 0.0;
+    for (int i = 0; i < 6; ++i)
+      stepsSum += searchStep[i];
+
+    // step size adjustment is fixed at 5%
+    while (stepsSum > threshold) {
+      // iterate through feature vector (params)
+      // assuming they are independent from each other
+      for (int i = 0; i < 6; ++i) {
+        // search positive direction +1
+        params[i] += searchStep[i];
+        err = objfunc_bank(pwsBanki, params);
+
+        if (err < best_err) {
+          // got a hit, increase step size
+          best_err = err;
+          searchStep[i] *= 1.1;
+        } else {
+          // search negative direction +1-2 => -1
+          params[i] -= 2 * searchStep[i];
+          err = objfunc_bank(pwsBanki, params);
+
+          if (err < best_err) {
+            // got a hit, increase step size
+            best_err = err;
+            searchStep[i] *= 1.05;
+          } else {
+            // no hit, step size might be too large,
+            // reset posiiton +1-2+1 => 0
+            params[i] += searchStep[i];
+
+            // reduce step size
+            searchStep[i] *= 0.95;
+          }
+        }
+      }
+
+      niter += 1;
+
+      stepsSum = 0.0;
+      for (int i = 0; i < 6; ++i)
+        stepsSum += searchStep[i];
+
+      // logging
+      std::ostringstream logmsg;
+      logmsg.precision(12);
+      logmsg << bankname << "@iter_" << niter << "\n"
+             << "-- best_err: " << best_err << "\n"
+             << "-- params: " << params << "\n";
+      g_log.information() << logmsg.str();
+    }
+
+    //-- step 2: move bank to corresponding location
+
+    //-- step 3: log
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+}
+
+double SCDCalibratePanels2::objfunc_bank(IPeaksWorkspace_sptr pwsBank,
+                                         double params[6]) {
+  return 0.0;
 }
 
 /// ---------------- ///

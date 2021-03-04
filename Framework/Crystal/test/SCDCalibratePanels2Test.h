@@ -101,6 +101,7 @@ public:
     TS_ASSERT(darkmagic->execute());
 
     m_ws = generateSimulatedWorkspace();
+    m_pws = generateSimulatedPeaksWorkspace(m_ws);
   }
 
   // ---------------------- //
@@ -208,32 +209,6 @@ public:
     pws->mutableRun().addProperty<double>(
         "T0", pwsref->mutableRun().getPropertyValueAsType<double>("T0"), true);
 
-    // NOTE: Toggle this back to see the per peak based impact due to dT0
-    // for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-    //   Peak pk_before = pwsref->getPeak(i);
-    //   Peak pk_after = pws->getPeak(i);
-    //   g_log.notice() << "--Peak_" << i << " with dT0=" << dT0 << "\n"
-    //                  << "  L1:" << pk_before.getL1() << "->" <<
-    //                  pk_after.getL1()
-    //                  << "\n"
-    //                  << "  L2:" << pk_before.getL2() << "->" <<
-    //                  pk_after.getL2()
-    //                  << "\n"
-    //                  << "  2theta:" << pk_before.getScattering() << "->"
-    //                  << pk_after.getScattering() << "\n"
-    //                  << "  initialEnergy:" << pk_before.getInitialEnergy()
-    //                  << "->" << pk_after.getInitialEnergy() << "\n"
-    //                  << "  TOF:" << pk_before.getTOF() << "->"
-    //                  << pk_after.getTOF() << "\n"
-    //                  << "  wavelength:" << pk_before.getWavelength() << "->"
-    //                  << pk_after.getWavelength() << "\n"
-    //                  << "  hkl:" << pk_before.getH() << pk_before.getK()
-    //                  << pk_before.getL() << "->" << pk_after.getH()
-    //                  << pk_after.getK() << pk_after.getL() << "\n"
-    //                  << "  q:" << pk_before.getQSampleFrame() << "->"
-    //                  << pk_after.getQSampleFrame() << "\n";
-    // }
-
     // T0 got absorbed into peak wavelength, therefore there is no need to reset
     // the instrument
     // Perform the calibration
@@ -281,7 +256,22 @@ public:
     g_log.notice() << "-- reset instrument positions&orientations\n";
     g_log.notice() << "    * before reset L1 = "
                    << pws->getInstrument()->getSource()->getPos().Z() << "\n";
+    // reset instrument
+    // NOTE: this has to be done for each peak as updating the peak workspace
+    //       does not automatically update the peak inside
     pws->setInstrument(wsraw->getInstrument());
+    double tof;
+    Units::Wavelength wl;
+    for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+      tof = m_pws->getPeak(i).getTOF();
+      pws->getPeak(i).setInstrument(m_pws->getInstrument());
+      wl.initialize(m_pws->getPeak(i).getL1(), m_pws->getPeak(i).getL2(),
+                    pws->getPeak(i).getScattering(), 0,
+                    pws->getPeak(i).getInitialEnergy(), 0.0);
+      pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
+      pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
+    }
+
     g_log.notice() << "    * after reset L1 = "
                    << pws->getInstrument()->getSource()->getPos().Z() << "\n";
 
@@ -837,6 +827,7 @@ private:
   const std::string tmppwsname;
 
   MatrixWorkspace_sptr m_ws;
+  PeaksWorkspace_sptr m_pws;
 
   // bank&panel names selected for testing
   // batch_1: high order zone selection
