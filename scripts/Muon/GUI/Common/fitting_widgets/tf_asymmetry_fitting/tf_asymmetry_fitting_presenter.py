@@ -34,11 +34,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         """Handles when an instrument is changed and switches to normal fitting mode."""
         self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
 
-    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
-        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
-        if "DoublePulseEnabled" in updated_variables:
-            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
-
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
         super().handle_ads_clear_or_remove_workspace_event()
