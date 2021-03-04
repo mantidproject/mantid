@@ -620,7 +620,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
+      inserter.insertMDEvent(signal, error * error, runnumber, 0, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
@@ -697,7 +697,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
       data[0] = static_cast<float>(detPos.X());
       data[1] = static_cast<float>(detPos.Y());
       data[2] = static_cast<float>(detPos.Z());
-      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
+      inserter.insertMDEvent(signal, error * error, runnumber, 0, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 

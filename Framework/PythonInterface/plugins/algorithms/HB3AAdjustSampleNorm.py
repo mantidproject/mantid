@@ -203,7 +203,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
 
-            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
+            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1', Average=False)
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
                 if load_files:

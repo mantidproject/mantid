@@ -323,7 +323,7 @@ class DrillPresenter:
         QDialog to get the file path from the user.
         """
         filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -351,7 +351,7 @@ class DrillPresenter:
         """
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
                                                './*.mrd',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])

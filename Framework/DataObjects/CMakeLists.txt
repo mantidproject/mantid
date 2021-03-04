@@ -238,11 +238,15 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
+target_include_directories(DataObjects SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+
 target_link_libraries(DataObjects
                       LINK_PRIVATE
                       ${MANTIDLIBS}
                       ${JSONCPP_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+                      ${NEXUS_LIBRARIES}
+                      ${HDF5_LIBRARIES}
+                      ${HDF5_HL_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)

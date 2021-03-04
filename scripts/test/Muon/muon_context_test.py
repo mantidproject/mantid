@@ -15,7 +15,7 @@ from mantid import ConfigService
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 
@@ -66,6 +66,18 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
+
+    def add_group_diff(self):
+        diff = MuonDiff('group_diff', 'fwd', 'bwd')
+        self.group_pair_context.add_diff(diff)
+        return diff
+
+    def add_pair_diff(self):
+        long2 = MuonPair('long2', 'bwd', 'fwd')
+        self.group_pair_context.add_pair(long2)
+        diff = MuonDiff('pair_diff', 'long', 'long2', 'pair')
+        self.group_pair_context.add_diff(diff)
+        return diff
 
     def _assert_list_in_ADS(self, workspace_name_list):
         ads_list = AnalysisDataService.getObjectNames()
@@ -129,6 +141,32 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEqual(pair_asymmetry, None)
 
+    def test_calculate_group_diff_calculates_diff_for_given_run(self):
+        self.context.show_all_groups()
+        diff = MuonDiff('diff', 'fwd', 'bwd')
+        diff_asymmetry = self.context.calculate_diff(diff, [19489], False)
+
+        self.assertEqual(diff_asymmetry, 'EMU19489; Diff; diff; Asymmetry; MA')
+
+    def test_calculate_pair_diff_calculates_diff_for_given_run(self):
+        diff = self.add_pair_diff()
+        self.populate_ADS()
+        diff_asymmetry = self.context.calculate_diff(diff, [19489], False)
+        self.assertEqual(diff_asymmetry, 'EMU19489; Diff; pair_diff; Asymmetry; MA')
+
+    def test_calculate_group_diff_returns_nothing_if_relevant_groups_do_not_exist(self):
+        self.context.show_all_groups()
+        diff = MuonDiff('diff', 'fwd', 'bwd')
+        diff_asymmetry = self.context.calculate_diff(diff, [19489], True)
+
+        self.assertEqual(diff_asymmetry, None)
+
+    def test_calculate_pair_diff_returns_nothing_if_relevant_pairs_do_not_exist(self):
+        diff = self.add_pair_diff()
+        self.populate_ADS()
+        diff_asymmetry = self.context.calculate_diff(diff, [19489], True)
+        self.assertEqual(diff_asymmetry, None)
+
     def test_show_all_groups_calculates_and_shows_all_groups(self):
         self.context.show_all_groups()
 
@@ -169,6 +207,31 @@ class MuonContextTest(unittest.TestCase):
 
         self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA',
                                   'EMU19489; Pair Asym; long; Rebin; MA'])
+
+    def test_that_show_all_calculates_and_shows_all_diffs(self):
+        self.add_group_diff()
+        self.add_pair_diff()
+        self.context.show_all_groups()
+        self.context.show_all_pairs()
+        self.context.show_all_diffs()
+
+        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Diff; group_diff; Asymmetry; MA',
+                                  'EMU19489; Diff; pair_diff; Asymmetry; MA'])
+
+    def test_that_show_all_calculates_and_shows_all_diffs_with_rebin(self):
+        self.gui_context['RebinType'] = 'Fixed'
+        self.gui_context['RebinFixed'] = 2
+
+        self.add_group_diff()
+        self.add_pair_diff()
+        self.context.show_all_groups()
+        self.context.show_all_pairs()
+        self.context.show_all_diffs()
+
+        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Diff; group_diff; Asymmetry; MA',
+                                  'EMU19489; Diff; group_diff; Asymmetry; Rebin; MA',
+                                  'EMU19489; Diff; pair_diff; Asymmetry; MA',
+                                  'EMU19489; Diff; pair_diff; Asymmetry; Rebin; MA'])
 
     def test_update_current_data_sets_current_run_in_data_context(self):
         self.context.update_current_data()
@@ -277,6 +340,14 @@ class MuonContextTest(unittest.TestCase):
         self.context._calculate_groups.assert_called_with(rebin=False)
         self.assertEqual(self.context._calculate_groups.call_count,1)
 
+    def test_calculate_all_diffs(self):
+        self.context._calculate_diffs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=False)
+
+        self.context.calculate_all_diffs()
+        self.context._calculate_diffs.assert_called_with(rebin=False)
+        self.assertEqual(self.context._calculate_diffs.call_count, 1)
+
     def test_calculate_all_pairs_rebin(self):
         self.context._calculate_pairs = mock.Mock()
         self.context._do_rebin = mock.Mock(return_value=True)
@@ -294,6 +365,15 @@ class MuonContextTest(unittest.TestCase):
         self.context._calculate_groups.assert_any_call(rebin=False)
         self.context._calculate_groups.assert_called_with(rebin=True)
         self.assertEqual(self.context._calculate_groups.call_count,2)
+
+    def test_calculate_all_diffs_rebin(self):
+        self.context._calculate_diffs = mock.Mock()
+        self.context._do_rebin = mock.Mock(return_value=True)
+
+        self.context.calculate_all_diffs()
+        self.context._calculate_diffs.assert_any_call(rebin=False)
+        self.context._calculate_diffs.assert_called_with(rebin=True)
+        self.assertEqual(self.context._calculate_diffs.call_count, 2)
 
     def test_update_phasequads(self):
         phasequad = MuonPhasequad("test", "table")

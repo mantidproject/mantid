@@ -92,6 +92,9 @@ public:
   /// For a given event/point in this box, return the run index
   virtual uint16_t getInnerRunIndex(size_t index) const = 0;
 
+  /// For a given event/point in this box, return the goniometer index
+  virtual uint16_t getInnerGoniometerIndex(size_t index) const = 0;
+
   /// For a given event/point in this box, return the detector ID
   virtual int32_t getInnerDetectorID(size_t index) const = 0;
 
