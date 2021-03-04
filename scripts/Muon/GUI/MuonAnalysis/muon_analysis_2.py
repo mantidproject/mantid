@@ -186,6 +186,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             return
 
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
+        self.fitting_tab.fitting_tab_presenter.handle_plot_mode_changed(plot_mode)
 
     def setup_disable_notifier(self):
 

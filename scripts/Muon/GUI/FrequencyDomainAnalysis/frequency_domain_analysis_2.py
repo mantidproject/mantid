@@ -202,6 +202,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             return
 
         self.plot_widget.presenter.handle_plot_mode_changed(plot_mode)
+        self.fitting_tab.fitting_tab_presenter.handle_plot_mode_changed(plot_mode)
 
     def handle_transform_performed(self, new_data_workspace_name):
         self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
