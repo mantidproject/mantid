@@ -59,7 +59,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_plotMDHisto1DWithErrs(
           new QAction("Plot 1D MDHistogram with errors...", this)),
       m_overplotMDHisto1DWithErrs(
-          new QAction("Overplot 1D MDHistogram with errors...", this)) {
+          new QAction("Overplot 1D MDHistogram with errors...", this)),
+      m_sampleMaterial(new QAction("Show Sample Material", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](const QString &wsName) {
@@ -107,6 +108,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           SLOT(onPlotWireframeClicked()));
   connect(m_plotContour, SIGNAL(triggered()), this,
           SLOT(onPlotContourClicked()));
+  connect(m_sampleMaterial, SIGNAL(triggered()), this,
+          SLOT(onSampleMaterialClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -278,6 +281,18 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       }
     }
 
+    // Only show sample material action if we have a single workspace
+    // selected.
+    if (m_tree->selectedItems().size() == 1) {
+      // SetSampleMaterial algorithm requires that the workspace
+      // inherits from ExperimentInfo, so check that it does
+      // before adding the action to the context menu.
+      if (auto experimentInfoWS =
+              std::dynamic_pointer_cast<ExperimentInfo>(workspace)) {
+        menu->addAction(m_sampleMaterial);
+      }
+    }
+
     menu->addSeparator();
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
@@ -369,6 +384,10 @@ void WorkspaceTreeWidgetSimple::onPlotMDHistoWorkspaceWithErrorsClicked() {
 
 void WorkspaceTreeWidgetSimple::onOverPlotMDHistoWorkspaceWithErrorsClicked() {
   emit overplotMDHistoWithErrorsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSampleMaterialClicked() {
+  emit sampleMaterialClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets
