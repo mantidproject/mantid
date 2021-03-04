@@ -80,8 +80,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-
-        self.model.update_plot_guess(self.view.plot_guess)
+            self.model.update_plot_guess(self.view.plot_guess)
 
         self.fitting_mode_changed_notifier.notify_subscribers()
 

@@ -30,6 +30,9 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         self.instrument_changed_observer = GenericObserver(self.handle_instrument_changed)
 
+        self.double_pulse_observer = GenericObserverWithArgPassing(self.handle_pulse_type_changed)
+        self.model.context.gui_context.add_non_calc_subscriber(self.double_pulse_observer)
+
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
         self.view.set_slot_for_fitting_mode_changed(self.handle_fitting_mode_changed)
         self.view.set_slot_for_simultaneous_fit_by_changed(self.handle_simultaneous_fit_by_changed)
@@ -47,6 +50,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
         pass
+
+    def handle_pulse_type_changed(self, updated_variables: dict) -> None:
+        """Handles when double pulse mode is switched on and switches to normal fitting mode."""
+        if "DoublePulseEnabled" in updated_variables:
+            self._update_plot = False
+            self.update_and_reset_all_data()
+            self._update_plot = True
 
     def handle_selected_group_pair_changed(self) -> None:
         """Update the displayed workspaces when the selected group/pairs change in grouping tab."""
@@ -110,8 +120,7 @@ class GeneralFittingPresenter(BasicFittingPresenter):
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
-
-        self.model.update_plot_guess(self.view.plot_guess)
+            self.model.update_plot_guess(self.view.plot_guess)
 
     def set_selected_dataset(self, dataset_name: str) -> None:
         """Sets the workspace to be displayed in the view programmatically."""
