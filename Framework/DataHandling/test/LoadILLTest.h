@@ -27,7 +27,7 @@ public:
 
   void setUp() override {
 
-    ConfigService::Instance().setString("default.facility", "ISIS");
+    ConfigService::Instance().setString("default.facility", "ILL");
   }
 
   void tearDown() override {
