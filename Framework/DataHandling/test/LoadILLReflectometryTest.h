@@ -224,7 +224,7 @@ public:
     const auto chopper2Phase = run.getPropertyValueAsType<double>("chopper2.phase");
     const auto pOffset = run.getPropertyValueAsType<double>("CollAngle.poff");
     const auto openOffset =
-        run.getPropertyValueAsType<double>("CollAngle.openOffset");
+        run.getPropertyValueAsType<double>("CollAngle.open_offset");
     const auto tof0 =
         tofDelay -
         60e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
@@ -244,7 +244,7 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("chopper1.rotation_speed")->units(), "rpm")
     TS_ASSERT_EQUALS(run.getProperty("chopper2.phase")->units(), "degree")
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "uu")
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.openOffset")->units(), "uu")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "degree")
   }
 
   void testSampleAndSourcePositionsD17() {
@@ -288,7 +288,7 @@ public:
     const auto incomingDeflectionAngle =
         run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle");
     const auto sampleZOffset =
-        run.getPropertyValueAsType<double>("Theta.sampleHorizontalOffset") *
+        run.getPropertyValueAsType<double>("Theta.sample_horizontal_offset") *
         1.e-3;
     const auto sourceSample =
         chopperCentre +
@@ -306,7 +306,7 @@ public:
     TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.actual_coll_angle")->units(),
                      "uu")
-    TS_ASSERT_EQUALS(run.getProperty("Theta.sampleHorizontalOffset")->units(),
+    TS_ASSERT_EQUALS(run.getProperty("Theta.sample_horizontal_offset")->units(),
                      "mm")
     TS_ASSERT_EQUALS(
         run.getProperty("ChopperSetting.chopperpair_sample_distance")->units(),
@@ -398,7 +398,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_figaroFile_2018))
+        loader.setPropertyValue("Filename", this->m_figaroDirectBeamFile))
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName))
     TS_ASSERT_THROWS_NOTHING(loader.execute())
@@ -422,7 +422,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("Filename", this->m_figaroFile_2018))
+        loader.setPropertyValue("Filename", this->m_figaroDirectBeamFile))
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", this->m_outWSName))
     TS_ASSERT_THROWS_NOTHING(loader.execute())
@@ -473,8 +473,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             this->m_outWSName);
     TS_ASSERT(output)
-    const auto v1 = loader.doubleFromRun("Theta.sampleHorizontalOffset");
-    const auto v2 = loader.doubleFromRun("Distance.sampleHorizontalOffset");
+    const auto v1 = loader.doubleFromRun("Theta.sample_horizontal_offset");
+    const auto v2 = loader.doubleFromRun("Distance.sample_changer_horizontal_offset");
     TS_ASSERT_EQUALS(v1, v2)
     // Unused variables -> if used in future they may simplify the loader
     TS_ASSERT_EQUALS(loader.doubleFromRun("Theta.actual_directDan"), 0.)
@@ -546,16 +546,16 @@ public:
         run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
         180. * M_PI;
     const double sampleOffset = output->run().getPropertyValueAsType<double>(
-                                    "Theta.sampleHorizontalOffset") *
+                                    "Theta.sample_horizontal_offset") *
                                 1e-3;
     const double slitZOffset = sampleOffset / std::cos(collimationAngle);
     const double S3z = -0.368 - slitZOffset;
     const double slitSeparation =
-        run.getPropertyValueAsType<double>("Theta.inter-slit_distance") * 1e-3;
+        run.getPropertyValueAsType<double>("Distance.S2_S3") * 1e-3;
     const double S2z = S3z - slitSeparation;
     TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
     TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
-    TS_ASSERT_EQUALS(run.getProperty("Theta.inter-slit_distance")->units(),
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(),
                      "mm")
   }
 };
