@@ -713,10 +713,8 @@ void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
   if (m_instrument == Supported::D17) {
     if (entry.isValid("instrument/SAN/value")) {
       entryName = "instrument/SAN/value";
-      // m_sampleAngle = entry.getDouble("instrument/SAN/value");
     } else if (entry.isValid("instrument/san/value")) {
       entryName = "instrument/san/value";
-      // m_sampleAngle = entry.getDouble("instrument/san/value");
     }
   } else {
     if (entry.isValid("instrument/Theta/wanted_theta")) {
