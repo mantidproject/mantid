@@ -34,35 +34,47 @@ class TFAsymmetryFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
     def test_that_set_tf_asymmetry_mode_will_show_the_tf_asymmetry_options_when_set_to_true(self):
         self.view.set_tf_asymmetry_mode(True)
 
-        self.assertTrue(not self.view.normalisation_label.isHidden())
+        self.assertTrue(not self.view.fix_normalisation_checkbox.isHidden())
         self.assertTrue(not self.view.normalisation_line_edit.isHidden())
+        self.assertTrue(not self.view.normalisation_error_line_edit.isHidden())
 
     def test_that_set_tf_asymmetry_mode_will_hide_the_tf_asymmetry_options_when_set_to_false(self):
         self.view.set_tf_asymmetry_mode(True)
         self.view.set_tf_asymmetry_mode(False)
 
-        self.assertTrue(self.view.normalisation_label.isHidden())
+        self.assertTrue(self.view.fix_normalisation_checkbox.isHidden())
         self.assertTrue(self.view.normalisation_line_edit.isHidden())
+        self.assertTrue(self.view.normalisation_error_line_edit.isHidden())
 
     def test_that_the_normalisation_can_be_set_as_expected(self):
-        normalisation = 5.0
+        normalisation, error = 5.0, 0.5
 
-        self.view.normalisation = normalisation
+        self.view.set_normalisation(normalisation, error)
 
         self.assertEqual(self.view.normalisation, normalisation)
+        self.assertEqual(self.view.normalisation_error_line_edit.text(), f"({error:.5f})")
 
     def test_that_show_normalisation_options_will_show_all_of_the_tf_asymmetry_options(self):
         self.view.show_normalisation_options()
 
-        self.assertTrue(not self.view.normalisation_label.isHidden())
+        self.assertTrue(not self.view.fix_normalisation_checkbox.isHidden())
         self.assertTrue(not self.view.normalisation_line_edit.isHidden())
+        self.assertTrue(not self.view.normalisation_error_line_edit.isHidden())
 
     def test_that_hide_normalisation_options_will_hide_all_of_the_tf_asymmetry_options(self):
         self.view.show_normalisation_options()
         self.view.hide_normalisation_options()
 
-        self.assertTrue(self.view.normalisation_label.isHidden())
+        self.assertTrue(self.view.fix_normalisation_checkbox.isHidden())
         self.assertTrue(self.view.normalisation_line_edit.isHidden())
+        self.assertTrue(self.view.normalisation_error_line_edit.isHidden())
+
+    def test_that_fix_normalisation_is_turned_off_by_default(self):
+        self.assertTrue(not self.view.is_normalisation_fixed)
+
+    def test_that_is_normalisation_fixed_can_be_set_to_true(self):
+        self.view.is_normalisation_fixed = True
+        self.assertTrue(self.view.is_normalisation_fixed)
 
 
 if __name__ == '__main__':

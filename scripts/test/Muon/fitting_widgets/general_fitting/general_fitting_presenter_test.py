@@ -80,6 +80,14 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.model = None
         self.view = None
 
+    def test_that_handle_pulse_type_changed_will_update_and_reset_the_data_if_it_contains_DoublePulseEnabled(self):
+        updated_variables = {"DoublePulseEnabled": True, "OtherVariable": False}
+        self.presenter.update_and_reset_all_data = mock.Mock()
+
+        self.presenter.handle_pulse_type_changed(updated_variables)
+
+        self.presenter.update_and_reset_all_data.assert_called_with()
+
     def test_that_handle_selected_group_pair_changed_will_set_the_list_of_fit_by_specifiers(self):
         self.model.get_simultaneous_fit_by_specifiers_to_display_from_context = mock.Mock(
             return_value=[self.simultaneous_fit_by_specifier])
@@ -191,8 +199,8 @@ class GeneralFittingPresenterTest(unittest.TestCase):
         self.presenter.update_fit_statuses_and_chi_squared_in_view_from_model.assert_called_once_with()
         self.presenter.update_fit_function_in_view_from_model.assert_called_once_with()
 
-        self.mock_view_plot_guess.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with(self.plot_guess)
+        self.assertTrue(not self.mock_view_plot_guess.called)
+        self.assertTrue(not self.model.update_plot_guess.called)
 
         self.assertTrue(not self.presenter.selected_fit_results_changed.notify_subscribers.called)
 
