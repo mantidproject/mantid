@@ -240,11 +240,11 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_0")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_1")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_2")->units(), "")
-    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(), "microsec")
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(), "usec")
     TS_ASSERT_EQUALS(run.getProperty("chopper1.rotation_speed")->units(), "rpm")
-    TS_ASSERT_EQUALS(run.getProperty("chopper2.phase")->units(), "degree")
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "uu")
-    TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "degree")
+    TS_ASSERT_EQUALS(run.getProperty("chopper2.phase")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "deg")
+    TS_ASSERT_EQUALS(run.getProperty("CollAngle.open_offset")->units(), "deg")
   }
 
   void testSampleAndSourcePositionsD17() {
