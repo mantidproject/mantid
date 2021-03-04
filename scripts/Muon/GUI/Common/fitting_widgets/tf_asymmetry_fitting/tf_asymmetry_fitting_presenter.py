@@ -32,25 +32,25 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode."""
-        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+        self._switch_to_normal_fitting()
 
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
         super().handle_ads_clear_or_remove_workspace_event()
 
         if self.model.number_of_datasets == 0:
-            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+            self._switch_to_normal_fitting()
 
     def handle_new_data_loaded(self) -> None:
         """Handle when new data has been loaded into the interface."""
         super().handle_new_data_loaded()
 
         if self.model.number_of_datasets == 0:
-            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+            self._switch_to_normal_fitting()
 
     def handle_selected_group_pair_changed(self) -> None:
         """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
-        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+        self._switch_to_normal_fitting()
         super().handle_selected_group_pair_changed()
 
     def handle_function_structure_changed(self) -> None:
@@ -123,10 +123,15 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self.view.set_normalisation(self.model.current_normalisation(), self.model.current_normalisation_error())
         self.view.is_normalisation_fixed = self.model.is_current_normalisation_fixed()
 
+    def _switch_to_normal_fitting(self):
+        """Activates normal fitting by turning off TF Asymmetry fitting."""
+        self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+        self.automatically_update_function_name()
+
     def _check_tf_asymmetry_compliance(self, tf_asymmetry_on: bool) -> None:
         """Check that the current datasets are compatible with TF Asymmetry fitting mode."""
         if tf_asymmetry_on and not self.model.check_datasets_are_tf_asymmetry_compliant():
             self.view.warning_popup("Only Groups can be fitted in TF Asymmetry mode.")
-            self.view.tf_asymmetry_mode, self.model.tf_asymmetry_mode = False, False
+            self._switch_to_normal_fitting()
             return False
         return True
