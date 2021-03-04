@@ -33,6 +33,12 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode."""
         self._switch_to_normal_fitting()
+        super().handle_instrument_changed()
+
+    def handle_selected_group_pair_changed(self) -> None:
+        """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
+        self._switch_to_normal_fitting()
+        super().handle_selected_group_pair_changed()
 
     def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
@@ -47,11 +53,6 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         if self.model.number_of_datasets == 0:
             self._switch_to_normal_fitting()
-
-    def handle_selected_group_pair_changed(self) -> None:
-        """Disable TF Asymmetry mode when the selected group/pairs change in the grouping tab."""
-        self._switch_to_normal_fitting()
-        super().handle_selected_group_pair_changed()
 
     def handle_function_structure_changed(self) -> None:
         """Handles when the function structure has been changed."""
