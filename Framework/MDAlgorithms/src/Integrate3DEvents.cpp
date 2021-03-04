@@ -58,6 +58,19 @@ Integrate3DEvents::Integrate3DEvents(
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hkl_key] = peak_q_list[it].second;
   }
+
+  m_cellSize = 2 * m_radius;
+  for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
+    const V3D q = peak_q_list[peakIndex].second;
+    m_peaksQLab.emplace_back(q);
+    CellCoords abc(q, m_cellSize);
+    // abc = [0, 0, 0] is no scattering
+    if (abc.a || abc.b || abc.b) {
+      SlimEvents events; // empty list
+      OccupiedCell c = {peakIndex, q, events};
+      std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
+      m_occupiedCells.insert(newCell);    }
+  }
 }
 
 /**
@@ -103,6 +116,22 @@ Integrate3DEvents::Integrate3DEvents(
     if (hklmnp_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hklmnp_key] = peak_q_list[it].second;
   }
+
+  // ToDo duplicated code
+  m_cellSize = 2 * m_radius;
+  for (size_t peakIndex = 0; peakIndex != peak_q_list.size(); ++peakIndex) {
+    const V3D q = peak_q_list[peakIndex].second;
+    m_peaksQLab.emplace_back(q);
+    CellCoords abc(q, m_cellSize);
+    // abc = [0, 0, 0] is down the neutron stream, no scattering
+    if (abc.a || abc.b || abc.c) {
+      SlimEvents events; // empty list
+      OccupiedCell c = {peakIndex, q, events};
+      std::pair<size_t, OccupiedCell> newCell(abc.getHash(), c);
+      m_occupiedCells.insert(newCell);
+    }
+  }
+
 }
 
 /**
@@ -459,10 +488,8 @@ Integrate3DEvents::ellipseIntegrateEvents(
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
     return std::make_shared<NoShape>();
-  ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
-      pos->second;
+  SlimEvents &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -506,6 +533,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
+  /*
   int64_t hkl_key = getHklMnpKey(
       boost::math::iround<double>(hkl[0]), boost::math::iround<double>(hkl[1]),
       boost::math::iround<double>(hkl[2]), boost::math::iround<double>(mnp[0]),
@@ -520,19 +548,32 @@ Integrate3DEvents::ellipseIntegrateModEvents(
     return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
-      pos->second;
+  SlimEvents &some_events =  pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
     return std::make_shared<NoShape>();
   }
+  */
+  int64_t hash = CellCoords(peak_q, m_cellSize).getHash();
+  auto cell_it = m_occupiedCells.find(hash);
+  if (cell_it == m_occupiedCells.end())
+    return std::make_shared<NoShape>(); // peak_q is [0, 0, 0]
+  OccupiedCell cell = cell_it->second;
+  SlimEvents &some_events = cell.events;
+  if (some_events.size() < 3)
+    return std::make_shared<NoShape>();
+
 
   DblMatrix cov_matrix(3, 3);
+  makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+
+  /*
   if (hkl_key % 1000 == 0)
     makeCovarianceMatrix(some_events, cov_matrix, m_radius);
   else
     makeCovarianceMatrix(some_events, cov_matrix, s_radius);
+  */
 
   std::vector<V3D> eigen_vectors;
   std::vector<double> eigen_values;
@@ -997,8 +1038,22 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvent(
-    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
+void Integrate3DEvents::addEvent(const SlimEvent &event, bool hkl_integ) {
+
+  V3D q(event.second);
+  CellCoords abc(q, m_cellSize);
+  // iterate over the neighbor cells of abc, using their hashes
+  for(const int64_t& hash: abc.nearbyCellHashes()) {
+    auto cell_it = m_occupiedCells.find(hash);
+    if (cell_it != m_occupiedCells.end()) {
+      OccupiedCell &cell = cell_it->second; // cell occupied by a peak
+      SlimEvent neighborEvent = event; // copy
+      neighborEvent.second = q - cell.peakQ;
+      cell.events.emplace_back(neighborEvent);
+    }
+  }
+
+  SlimEvent event_Q = event;
   int64_t hkl_key;
   if (hkl_integ)
     hkl_key = getHklKey2(event_Q.second);

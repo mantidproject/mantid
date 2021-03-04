@@ -16,6 +16,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+#include <boost/container_hash/hash.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -25,6 +26,47 @@ namespace DataObjects {
 class PeakShapeEllipsoid;
 }
 namespace MDAlgorithms {
+
+using Mantid::Kernel::V3D;
+
+struct CellCoords {
+  int64_t a;
+  int64_t b;
+  int64_t c;
+
+  CellCoords(int ax, int bx, int cx) : a(ax), b(bx), c(cx) {}
+
+  CellCoords(const V3D &q, const double cellSize) :
+    a(static_cast<int64_t>(q[0]/cellSize)),
+    b(static_cast<int64_t>(q[1]/cellSize)),
+    c(static_cast<int64_t>(q[2]/cellSize)) {}
+
+  /// cast coordinates to scalar, to be used as key in an unordered map
+  int64_t getHash(){
+    return 1000000000000 * a + 100000000 * b + 10000 * c;
+  }
+
+  /// Hashes for the 26 first neighbor coordinates plus the coordinates themselves
+  std::vector<int64_t> nearbyCellHashes(){
+    std::vector<int64_t> neighbors;
+    for(int64_t ia = a - 1; ia <= a + 1; ia++)
+      for(int64_t ib = b - 1; ib <= b + 1; ib++)
+        for(int64_t ic = c - 1; ic <= c + 1; ic++){
+          int64_t key = 1000000000000 * ia + 100000000 * ib + 10000 * ic;
+          neighbors.emplace_back(key);
+        }
+    return neighbors;
+  }
+};
+
+// [(weight, error), Q-vector], trimmed-down info for an event
+using SlimEvent = std::pair<std::pair<double, double>, V3D>;
+using SlimEvents = std::vector<SlimEvent>;
+struct OccupiedCell {
+  size_t peakIndex;
+  V3D peakQ;  // QLab vector of the peak within this cell
+  SlimEvents events; // events potentially closer than m_radius to the peak
+};
 
 struct IntegrationParameters {
   std::vector<Kernel::V3D> E1Vectors;
@@ -163,9 +205,8 @@ private:
   int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
   /// Add an event to the vector of events for the closest h,k,l
-  void
-  addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
-           bool hkl_integ);
+  void addEvent(const SlimEvent &event, bool hkl_integ);
+
   void
   addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q,
               bool hkl_integ);
@@ -202,6 +243,13 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+
+  /// size of the square cell unit, holding at most one single peak
+  double m_cellSize;
+  /// list the occupied cells in an unordered map for fast searching
+  std::unordered_map<size_t, OccupiedCell> m_occupiedCells;
+  /// List of Q-vectors in the lab frame for each peak
+  std::vector<V3D> m_peaksQLab;
 };
 
 } // namespace MDAlgorithms
