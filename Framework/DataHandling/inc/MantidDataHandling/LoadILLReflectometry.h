@@ -41,6 +41,7 @@ public:
            "FIGARO).";
   }
   double doubleFromRun(const std::string &entryName) const;
+
 private:
   /// ID tags for supported instruments.
   enum class Supported { D17, FIGARO };
@@ -77,8 +78,8 @@ private:
                      const double detectorDistance) const;
   Supported m_instrument{Supported::D17};
   size_t m_acqMode{1}; ///(1: TOF (default), 0: monochromatic)
-  size_t m_numberOfChannels{0};  
-  size_t m_numberOfHistograms{0};  
+  size_t m_numberOfChannels{0};
+  size_t m_numberOfHistograms{0};
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetFrom;

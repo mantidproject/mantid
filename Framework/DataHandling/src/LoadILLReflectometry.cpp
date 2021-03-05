@@ -225,7 +225,7 @@ void LoadILLReflectometry::exec() {
   initWorkspace(monitorsData);
   loadInstrument();
   loadNexusEntriesIntoProperties();
-  loadData(firstEntry, monitorsData, getXValues());  
+  loadData(firstEntry, monitorsData, getXValues());
   firstEntry.close();
   root.close();
   initPixelWidth();
@@ -300,10 +300,10 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
 }
 
 /** Call child algorithm ConvertUnits for conversion from TOF to wavelength
-* Note that DAN calibration is done in preprocess, since it needs information
-* also from the direct beam so converting to wavelength in the loader will not
-* be accurate
-*/
+ * Note that DAN calibration is done in preprocess, since it needs information
+ * also from the direct beam so converting to wavelength in the loader will not
+ * be accurate
+ */
 void LoadILLReflectometry::convertTofToWavelength() {
   if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
     auto convertToWavelength =

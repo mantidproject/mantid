@@ -28,7 +28,7 @@ using Mantid::Kernel::V3D;
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
-  const std::string m_d17File{"ILL/D17/317370.nxs"};  
+  const std::string m_d17File{"ILL/D17/317370.nxs"};
   const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
   const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
   const std::string m_figaroDirectBeamFile{"ILL/Figaro/709922.nxs"};
@@ -221,7 +221,8 @@ public:
     const auto chopper1Speed =
         run.getPropertyValueAsType<double>("chopper1.rotation_speed");
     const double chopper1Phase{0.}; // The value in NeXus is trash.
-    const auto chopper2Phase = run.getPropertyValueAsType<double>("chopper2.phase");
+    const auto chopper2Phase =
+        run.getPropertyValueAsType<double>("chopper2.phase");
     const auto pOffset = run.getPropertyValueAsType<double>("CollAngle.poff");
     const auto openOffset =
         run.getPropertyValueAsType<double>("CollAngle.open_offset");
@@ -240,7 +241,8 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_0")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_1")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("PSD.time_of_flight_2")->units(), "")
-    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(), "usec")
+    TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(),
+                     "usec")
     TS_ASSERT_EQUALS(run.getProperty("chopper1.rotation_speed")->units(), "rpm")
     TS_ASSERT_EQUALS(run.getProperty("chopper2.phase")->units(), "deg")
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.poff")->units(), "deg")
@@ -384,7 +386,8 @@ public:
 
   void testPropertiesFigaro() {
     MatrixWorkspace_sptr output;
-    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, emptyProperties());
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName,
+                    emptyProperties());
     commonProperties(output, "FIGARO");
   }
 
@@ -410,8 +413,7 @@ public:
     TS_ASSERT(output)
     TS_ASSERT_EQUALS(run.getProperty("MainParameters.edelay_delay")->units(),
                      "usec") // a time in the distance field!
-    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(),
-                     "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(), "mm")
   }
 
   void testSourceAndSampleLocationsFigaro() {
@@ -476,7 +478,8 @@ public:
             this->m_outWSName);
     TS_ASSERT(output)
     const auto v1 = loader.doubleFromRun("Theta.sample_horizontal_offset");
-    const auto v2 = loader.doubleFromRun("Distance.sample_changer_horizontal_offset");
+    const auto v2 =
+        loader.doubleFromRun("Distance.sample_changer_horizontal_offset");
     TS_ASSERT_EQUALS(v1, v2)
     // Unused variables -> if used in future they may simplify the loader
     TS_ASSERT_EQUALS(loader.doubleFromRun("Theta.actual_directDan"), 0.)
