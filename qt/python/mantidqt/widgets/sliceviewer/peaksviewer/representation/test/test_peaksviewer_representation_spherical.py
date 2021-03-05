@@ -9,6 +9,7 @@
 # std imports
 import unittest
 from unittest.mock import MagicMock, patch
+import numpy as np
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation.spherical \
@@ -110,6 +111,37 @@ class SphericallyIntergratedPeakRepresentationTest(unittest.TestCase):
             fg_color=fg_color,
             bkgd_slice_radius=0.9,
             bkgd_thickness=0.09,
+            bg_color=bg_color)
+
+    def test_draw_respects_slice_offset(self, compute_alpha_mock):
+        def slice_transform(x):
+            # set slice(x)=data(y)
+            return (x[1], x[0], x[2])
+
+        peak_center = (1, 2, 3.2)  # peak center is 0.2 displaced from slice
+        sphere = create_test_sphere(background=True)
+        painter = MagicMock()
+        fg_color, bg_color = 'r', 'g'
+        fake_alpha = 0.5
+        compute_alpha_mock.return_value = fake_alpha
+
+        painted = draw_representation(SphericallyIntergratedPeakRepresentation, peak_center, sphere,
+                                      painter, fg_color, bg_color, slice_transform)
+
+        slice_diff = 0.2  # difference between peak_center and slice_point in plane normal to slice (3.2 - 3)
+        signal_slice_radius = np.cos(np.arcsin(slice_diff/sphere['radius']))*sphere['radius']
+        bkgd_slice_radius = np.cos(np.arcsin(slice_diff/sphere['background_outer_radius']))*sphere['background_outer_radius']
+        bkgd_slice_radius_inner = np.cos(np.arcsin(slice_diff/sphere['background_inner_radius']))*sphere['background_inner_radius']
+
+        self.assertTrue(painted is not None)
+        self._assert_painter_calls(
+            painter, (peak_center[1], peak_center[0]),
+            cross_width=signal_slice_radius*0.1,
+            signal_slice_radius=signal_slice_radius,
+            alpha=fake_alpha,
+            fg_color=fg_color,
+            bkgd_slice_radius=bkgd_slice_radius,
+            bkgd_thickness=bkgd_slice_radius-bkgd_slice_radius_inner,
             bg_color=bg_color)
 
     # private

@@ -22,6 +22,7 @@ from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
+from mantidqt.widgets.samplematerialdialog.samplematerial_presenter import SampleMaterialDialogPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
@@ -76,6 +77,7 @@ class WorkspaceWidget(PluginWidget):
             partial(self._do_plot_3D, plot_type='wireframe'))
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
+        self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
         self.workspacewidget.contextMenuAboutToShow.connect(
             self._on_context_menu)
 
@@ -242,7 +244,7 @@ class WorkspaceWidget(PluginWidget):
             except ValueError:
                 try:
                     TableWorkspaceDisplay.supports(ws)
-                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self)
+                    presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=self, batch=True)
                     presenter.show_view()
                 except ValueError:
                     logger.error("Could not open workspace: {0} with neither "
@@ -275,6 +277,28 @@ class WorkspaceWidget(PluginWidget):
     def _run_create_detector_table(self, ws):
         CreateDetectorTable(InputWorkspace=ws)
 
+    def _do_sample_material(self, names):
+        """
+        Show a sample material dialog for the workspace for names[0]. It only makes sense
+        to show the dialog for a single workspace, and the context menu option should
+        only be available if a single workspace is selected.
+
+        :param names: A list of workspace names
+        """
+        # It only makes sense to show the sample material dialog with one workspace
+        # selected. The context menu should only add the sample material action
+        # if there's only one workspace selected.
+        if len(names) == 1:
+            try:
+                workspace = self._ads.retrieve(names[0])
+                presenter = SampleMaterialDialogPresenter(workspace, parent=self)
+                presenter.show_view()
+            except Exception as exception:
+                logger.warning("Could not show sample material for workspace "
+                               "'{}':\n{}\n".format(names[0], exception))
+        else:
+            logger.warning("Sample material can only be viewed for a single workspace.")
+
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)
         try:
@@ -284,7 +308,7 @@ class WorkspaceWidget(PluginWidget):
             self._do_show_data([name])
         except ValueError:
             if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
-                #If this is ws is just a single value show the data, else plot the bin
+                # If this ws is just a single value show the data, else plot the bin
                 if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])
                 else:

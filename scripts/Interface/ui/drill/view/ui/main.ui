@@ -128,6 +128,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="export">
+        <property name="toolTip">
+         <string>Export settings window</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="load">
         <property name="toolTip">
          <string>Load rundex</string>

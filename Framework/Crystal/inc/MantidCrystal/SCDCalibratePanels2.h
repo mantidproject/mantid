@@ -68,6 +68,9 @@ private:
   void parseLatticeConstant(
       std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 
+  /// Update the UB matrix
+  void updateUBMatrix(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+
   /// Private function for getting names of banks to be calibrated
   void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
 

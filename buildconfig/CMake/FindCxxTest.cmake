@@ -168,6 +168,15 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # The TESTHELPER_SRCS variable can be set outside the macro and used to pass in test helper classes
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS} )
 
+    set (_misc_bin ${THIRD_PARTY_DIR}/bin)
+    set (_qt5_bin ${THIRD_PARTY_DIR}/lib/qt5/bin ${THIRD_PARTY_DIR}/lib/qt5/lib)
+    set (_qt_qpa_platform_plugin ${THIRD_PARTY_DIR}/lib/qt5/plugins)
+    set (_python_home ${THIRD_PARTY_DIR}/lib/python3.8)
+    # Note: %PATH% isn't understood by cmake but it is by Visual Studio\Windows where it gets used
+    set_target_properties(${_cxxtest_testname} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${_misc_bin};${_qt5_bin};${_python_home};${_python_home}/Scripts;%PATH%\n\
+QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}\n\
+PYTHONHOME=${_python_home}")
+
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
@@ -182,7 +191,17 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
       set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
                              TIMEOUT ${TESTING_TIMEOUT} )
-
+      if(WIN32)
+        set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+           ENVIRONMENT "QT_QPA_PLATFORM_PLUGIN_PATH=${_qt_qpa_platform_plugin}")
+        set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+           ENVIRONMENT "PYTHONHOME=${_python_home}")
+        set (_new_path ${_misc_bin} ${_qt5_bin} ${_python_home} ${_python_home}/Scripts $ENV{PATH})
+        # the value used for PATH has to have explicit semi colons for some reason
+        string(REPLACE ";" "\;" _new_path "${_new_path}")
+        set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+            ENVIRONMENT "PATH=${_new_path}")
+      endif()
       if (CXXTEST_ADD_PERFORMANCE)
         # ------ Performance test version -------
         # Name of the possibly-existing Performance test suite

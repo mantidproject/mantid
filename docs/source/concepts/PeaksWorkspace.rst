@@ -20,8 +20,6 @@ Viewing a PeaksWorkspace
 
 * Double-click a PeaksWorkspace to see the full list of data of each Peak object.
 * In MantidPlot, you can drag/drop a PeaksWorkspace from the list of workspaces onto the `Instrument View <http://www.mantidproject.org/MantidPlot:_Instrument_View>`__ . This will overlay the peaks onto the detector face.
-* Right-click a PeaksWorkspace and select the menu to show the peak positions in 3D in the `VatesSimpleInterface <http://www.mantidproject.org/VatesSimpleInterface_v2>`__
-* In paraview, you can load a .Peaks file loader plugin to view a PeaksWorkspace.
 * `PeaksViewer <http://www.mantidproject.org/PeaksViewer>`__ in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`__ 
 
 The Peak Object

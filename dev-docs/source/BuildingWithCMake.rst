@@ -79,7 +79,7 @@ From the CMake gui
   * Windows developers should choose ``Visual Studio 16 2019`` and in the _Optional platform for generator\_ box select ``x64``. If you see errors related to HDF5 then you have most likely selected the wrong platform.
 
 * Wait a while....
-* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking ``MAKE_VATES`` if you want to build that.
+* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything.
 * Click "Configure" again and wait....
 * Finally, click "Generate". This will create the build files, e.g. for a Visual Studio build there will be a ``Mantid.sln`` in the directory you selected as your build directory.
 

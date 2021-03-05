@@ -43,12 +43,6 @@ public:
   /// Destructor
   ~SlicingAlgorithmDialog() override;
 
-  // Customisation for the VSI
-  void customiseLayoutForVsi(const std::string &initialWorkspace);
-
-  /// Reset the aligned dim values for the VSI
-  void resestAlignedDimProperty(size_t index, const QString &propertyValue);
-
 protected:
   /// view
   Ui::SlicingAlgorithmDialog ui;

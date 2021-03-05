@@ -5,10 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
-#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+#include "MantidQtWidgets/Common/FittingGlobals.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
@@ -25,13 +27,21 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
     IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
     QStringList const &workspaceNames, double startX, double endX)
     : m_warnings(), m_view(view), m_model(model) {
+  m_model->subscribePresenter(this);
   m_view->subscribePresenter(this);
   setWorkspaces(workspaceNames, startX, endX);
 }
 
 FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
-void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
+void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
+                                                  std::string const &arg1,
+                                                  std::string const &arg2) {
+  if (arg1.empty())
+    UNUSED_ARG(arg1);
+  if (arg2.empty())
+    UNUSED_ARG(arg2);
+
   switch (event) {
   case ViewEvent::RemoveClicked:
     handleRemoveClicked();
@@ -45,9 +55,61 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
   case ViewEvent::EndXChanged:
     handleEndXChanged();
     return;
+  case ViewEvent::SelectionChanged:
+    handleSelectionChanged();
+    return;
+  case ViewEvent::FunctionRemoved:
+    handleFunctionRemoved(arg1);
+    return;
+  case ViewEvent::FunctionAdded:
+    handleFunctionAdded(arg1);
+    return;
+  case ViewEvent::FunctionReplaced:
+    handleFunctionReplaced(arg1);
+    return;
+  case ViewEvent::ParameterChanged:
+    handleParameterChanged(arg1);
+    return;
+  case ViewEvent::AttributeChanged:
+    handleAttributeChanged(arg1);
+    return;
+  case ViewEvent::ParameterTieChanged:
+    handleParameterTieChanged(arg1, arg2);
+    return;
+  case ViewEvent::ParameterConstraintRemoved:
+    handleParameterConstraintRemoved(arg1);
+    return;
+  case ViewEvent::ParameterConstraintChanged:
+    handleParameterConstraintChanged(arg1, arg2);
+    return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
   }
+}
 
-  throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
+void FitScriptGeneratorPresenter::notifyPresenter(
+    ViewEvent const &event, std::vector<std::string> const &vec) {
+  switch (event) {
+  case ViewEvent::GlobalParametersChanged:
+    handleGlobalParametersChanged(vec);
+    return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
+  }
+}
+
+void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
+                                                  FittingMode fittingMode) {
+  switch (event) {
+  case ViewEvent::FittingModeChanged:
+    handleFittingModeChanged(fittingMode);
+    return;
+  default:
+    throw std::runtime_error(
+        "Failed to notify the FitScriptGeneratorPresenter.");
+  }
 }
 
 void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
@@ -60,6 +122,8 @@ void FitScriptGeneratorPresenter::handleRemoveClicked() {
     m_view->removeWorkspaceDomain(workspaceName, workspaceIndex);
     m_model->removeWorkspaceDomain(workspaceName, workspaceIndex);
   }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
@@ -92,6 +156,155 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 
     updateEndX(workspaceName, workspaceIndex, endX);
   }
+}
+
+void FitScriptGeneratorPresenter::handleSelectionChanged() {
+  auto const fittingMode = m_model->getFittingMode();
+  m_view->setSimultaneousMode(fittingMode == FittingMode::SIMULTANEOUS);
+
+  auto const selectedRows = m_view->selectedRows();
+  if (!selectedRows.empty()) {
+    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
+    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
+    m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
+    setGlobalParameters(m_model->getGlobalParameters());
+  } else {
+    m_view->clearFunction();
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionRemoved(
+    std::string const &function) {
+  auto const rowIndices = getRowIndices();
+
+  if (!rowIndices.empty()) {
+    removeFunctionForDomains(function, rowIndices);
+    handleSelectionChanged();
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionAdded(
+    std::string const &function) {
+  auto const rowIndices = getRowIndices();
+
+  if (rowIndices.empty()) {
+    m_view->displayWarning("Data needs to be loaded before adding a function.");
+    m_view->clearFunction();
+    return;
+  }
+
+  try {
+    addFunctionForDomains(function, rowIndices);
+  } catch (std::invalid_argument const &ex) {
+    m_view->displayWarning(ex.what());
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionReplaced(
+    std::string const &function) {
+  auto const rowIndices = getRowIndices();
+
+  if (!rowIndices.empty()) {
+    setFunctionForDomains(function, rowIndices);
+  } else {
+    m_view->displayWarning("Data needs to be loaded before adding a function.");
+    m_view->clearFunction();
+  }
+}
+
+void FitScriptGeneratorPresenter::handleParameterChanged(
+    std::string const &parameter) {
+  auto const newValue = m_view->parameterValue(parameter);
+
+  for (auto const &rowIndex : m_view->allRows()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    auto const equivalentParameter =
+        m_model->getEquivalentFunctionIndexForDomain(workspaceName,
+                                                     workspaceIndex, parameter);
+    m_model->updateParameterValue(workspaceName, workspaceIndex,
+                                  equivalentParameter, newValue);
+  }
+
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleAttributeChanged(
+    std::string const &attribute) {
+  auto const newValue = m_view->attributeValue(attribute);
+
+  for (auto const &rowIndex : m_view->allRows()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
+                                  newValue);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleParameterTieChanged(
+    std::string const &parameter, std::string const &tie) {
+  for (auto const &rowIndex : m_view->allRows()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
+  }
+
+  checkForWarningMessages();
+  setGlobalTies(m_model->getGlobalTies());
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
+    std::string const &parameter) {
+  for (auto const &rowIndex : m_view->allRows()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->removeParameterConstraint(workspaceName, workspaceIndex,
+                                       parameter);
+  }
+
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
+    std::string const &functionIndex, std::string const &constraint) {
+  for (auto const &rowIndex : m_view->allRows()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    auto const equivalentFunctionIndex =
+        m_model->getEquivalentFunctionIndexForDomain(
+            workspaceName, workspaceIndex, functionIndex);
+    m_model->updateParameterConstraint(workspaceName, workspaceIndex,
+                                       equivalentFunctionIndex, constraint);
+  }
+
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleGlobalParametersChanged(
+    std::vector<std::string> const &globalParameters) {
+  try {
+    m_model->setGlobalParameters(globalParameters);
+  } catch (std::invalid_argument const &ex) {
+    m_view->displayWarning(ex.what());
+  }
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::handleFittingModeChanged(
+    FittingMode fittingMode) {
+  m_model->setFittingMode(fittingMode);
+  handleSelectionChanged();
+}
+
+void FitScriptGeneratorPresenter::setGlobalTies(
+    std::vector<GlobalTie> const &globalTies) {
+  m_view->setGlobalTies(globalTies);
+}
+
+void FitScriptGeneratorPresenter::setGlobalParameters(
+    std::vector<GlobalParameter> const &globalParameters) {
+  m_view->setGlobalParameters(globalParameters);
 }
 
 void FitScriptGeneratorPresenter::setWorkspaces(
@@ -145,9 +358,7 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
                                                WorkspaceIndex workspaceIndex,
                                                double startX) {
-  if (m_model->isStartXValid(workspaceName, workspaceIndex, startX))
-    m_model->updateStartX(workspaceName, workspaceIndex, startX);
-  else {
+  if (!m_model->updateStartX(workspaceName, workspaceIndex, startX)) {
     m_view->resetSelection();
     m_view->displayWarning("The StartX provided must be within the x limits of "
                            "its workspace, and less than the EndX.");
@@ -157,13 +368,62 @@ void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
                                              WorkspaceIndex workspaceIndex,
                                              double endX) {
-  if (m_model->isEndXValid(workspaceName, workspaceIndex, endX))
-    m_model->updateEndX(workspaceName, workspaceIndex, endX);
-  else {
+  if (!m_model->updateEndX(workspaceName, workspaceIndex, endX)) {
     m_view->resetSelection();
     m_view->displayWarning("The EndX provided must be within the x limits of "
                            "its workspace, and greater than the StartX.");
   }
+}
+
+void FitScriptGeneratorPresenter::removeFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->removeFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::addFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->addFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::setFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->setFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::updateParameterTie(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &parameter, std::string const &tie) {
+  auto const equivalentParameter = m_model->getEquivalentFunctionIndexForDomain(
+      workspaceName, workspaceIndex, parameter);
+  auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
+      workspaceName, workspaceIndex, parameter, tie);
+
+  try {
+    m_model->updateParameterTie(workspaceName, workspaceIndex,
+                                equivalentParameter, equivalentTie);
+  } catch (std::invalid_argument const &ex) {
+    m_warnings.emplace_back(ex.what());
+  }
+}
+
+std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
+  return m_view->isAddRemoveFunctionForAllChecked() ? m_view->allRows()
+                                                    : m_view->selectedRows();
 }
 
 void FitScriptGeneratorPresenter::checkForWarningMessages() {

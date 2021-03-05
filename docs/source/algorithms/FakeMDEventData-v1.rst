@@ -67,13 +67,6 @@ The output looks like the following in the `SliceViewer <http://www.mantidprojec
 .. image:: /images/FakeMDEventData_Peaks3D.png
     :alt: Peaks 3D FakeMDEventData
 
-Running :ref:`BinMD <algm-BinMD>`
-on the resulting workspace, the output looks like the following in the `VSI <http://www.mantidproject.org/VatesSimpleInterface_v2>`_:
-
-.. image:: /images/FakeMDEventData_Peaks3D_VSI.png
-    :alt: Peaks 3D FakeMDEventData in VSI
-    :scale: 75%
-
 |
 
 **4D Peaks Example**
@@ -98,16 +91,6 @@ the T slider is moved to ~5K:
 
 .. image:: /images/FakeMDEventData_Peaks4D.png
     :alt: Peaks 4D FakeMDEventData
-
-Running :ref:`BinMD <algm-BinMD>`
-on the resulting workspace to create a 3D workspace with L integrated, the output looks like the following in the
-`VSI <http://www.mantidproject.org/VatesSimpleInterface_v2>`_:
-
-.. image:: /images/FakeMDEventData_Peaks4D_as_3D_VSI.png
-    :alt: Peaks 4D FakeMDEventData as 3D in VSI
-    :scale: 75%
-
-|
 
 .. categories::
 

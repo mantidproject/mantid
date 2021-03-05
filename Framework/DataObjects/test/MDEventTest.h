@@ -27,6 +27,7 @@ public:
     TS_ASSERT_EQUALS(a.getSignal(), 1.0);
     TS_ASSERT_EQUALS(a.getErrorSquared(), 1.0);
     TS_ASSERT_EQUALS(a.getRunIndex(), 0);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 0);
     TS_ASSERT_EQUALS(a.getDetectorID(), 0);
 
     MDEvent<4> b(2.5, 1.5);
@@ -34,6 +35,7 @@ public:
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 0);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 0);
     TS_ASSERT_EQUALS(b.getDetectorID(), 0);
 
     // NOTE: The pragma (pack,2) call has no effect on some platforms: RHEL5,
@@ -45,24 +47,26 @@ public:
   }
 
   void test_constructor() {
-    MDEvent<3> b(2.5, 1.5, 123, 456789);
+    MDEvent<3> b(2.5, 1.5, 123, 42, 456789);
     TS_ASSERT_EQUALS(b.getNumDims(), 3);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
   }
 
   void test_constructor_withCoords() {
     // Fixed-size array
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
-    MDEvent<3> b(2.5, 1.5, 123, 456789, coords);
+    MDEvent<3> b(2.5, 1.5, 123, 42, 456789, coords);
     TS_ASSERT_EQUALS(b.getSignal(), 2.5);
     TS_ASSERT_EQUALS(b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS(b.getCenter(0), 0.125);
     TS_ASSERT_EQUALS(b.getCenter(1), 1.25);
     TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(b.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(b.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(b.getDetectorID(), 456789);
   }
 
@@ -70,16 +74,17 @@ public:
    * in by the compiler */
   void test_CopyConstructor() {
     Mantid::coord_t coords[3] = {0.125, 1.25, 2.5};
-    MDEvent<3> b(2.5, 1.5, 123, 456789, coords);
+    MDEvent<3> b(2.5, 1.5, 123, 42, 456789, coords);
     MDEvent<3> a(b);
     TS_ASSERT_EQUALS(a.getNumDims(), 3);
     TS_ASSERT_EQUALS(a.getSignal(), 2.5);
     TS_ASSERT_EQUALS(a.getErrorSquared(), 1.5);
-    TS_ASSERT_EQUALS(b.getCenter(0), 0.125);
-    TS_ASSERT_EQUALS(b.getCenter(1), 1.25);
-    TS_ASSERT_EQUALS(b.getCenter(2), 2.5);
     TS_ASSERT_EQUALS(a.getRunIndex(), 123);
+    TS_ASSERT_EQUALS(a.getGoniometerIndex(), 42);
     TS_ASSERT_EQUALS(a.getDetectorID(), 456789);
+    TS_ASSERT_EQUALS(a.getCenter(0), 0.125);
+    TS_ASSERT_EQUALS(a.getCenter(1), 1.25);
+    TS_ASSERT_EQUALS(a.getCenter(2), 2.5);
   }
 
   void test_serialize_deserializeLean() {
@@ -162,8 +167,9 @@ public:
 
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
-      events[i].setDetectorId(uint32_t(i));
       events[i].setRunIndex(uint16_t(i / 10));
+      events[i].setGoniometerIndex(uint16_t(i / 10));
+      events[i].setDetectorId(uint32_t(i));
       sumGuess += double(i);
       errGuess += double(i * i);
       events[i].setCenter(0, 0.1 * static_cast<double>(i));
@@ -178,8 +184,8 @@ public:
     double totalErrSq(0);
     TS_ASSERT_THROWS_NOTHING(
         MDEvent<4>::eventsToData(events, data, ncols, totalSignal, totalErrSq));
-    TS_ASSERT_EQUALS(4 + 4, ncols);
-    TS_ASSERT_EQUALS((4 + 4) * nPoints, data.size());
+    TS_ASSERT_EQUALS(4 + 5, ncols);
+    TS_ASSERT_EQUALS((4 + 5) * nPoints, data.size());
     TS_ASSERT_DELTA(sumGuess, totalSignal, 1.e-7);
     TS_ASSERT_DELTA(errGuess, totalErrSq, 1.e-7);
 
@@ -187,13 +193,15 @@ public:
       TS_ASSERT_DELTA(events[i].getSignal(), data[ncols * i + 0], 1.e-6);
       TS_ASSERT_DELTA(events[i].getErrorSquared(), data[ncols * i + 1], 1.e-6);
       TS_ASSERT_EQUALS(events[i].getRunIndex(), uint16_t(data[ncols * i + 2]));
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       uint16_t(data[ncols * i + 3]));
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
-                       uint32_t(data[ncols * i + 3]));
+                       uint32_t(data[ncols * i + 4]));
 
-      TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 4], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 5], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(2), data[ncols * i + 6], 1.e-6);
-      TS_ASSERT_DELTA(events[i].getCenter(3), data[ncols * i + 7], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(0), data[ncols * i + 5], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(1), data[ncols * i + 6], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(2), data[ncols * i + 7], 1.e-6);
+      TS_ASSERT_DELTA(events[i].getCenter(3), data[ncols * i + 8], 1.e-6);
     }
 
     std::vector<MDEvent<3>> transfEvents3;
@@ -208,6 +216,8 @@ public:
       TS_ASSERT_DELTA(events[i].getErrorSquared(),
                       transfEvents[i].getErrorSquared(), 1.e-6);
       TS_ASSERT_EQUALS(events[i].getRunIndex(), transfEvents[i].getRunIndex());
+      TS_ASSERT_EQUALS(events[i].getGoniometerIndex(),
+                       transfEvents[i].getGoniometerIndex());
       TS_ASSERT_EQUALS(events[i].getDetectorID(),
                        transfEvents[i].getDetectorID());
 
@@ -267,22 +277,24 @@ public:
     float signal(1.5);
     float error(2.5);
     uint16_t runIndex = 123;
+    uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[3] = {1.25, 2.5, 3.5};
     for (size_t i = 0; i < num; i++)
-      events3.emplace_back(
-          MDEvent<3>(signal, error, runIndex, detectorId, center));
+      events3.emplace_back(MDEvent<3>(signal, error, runIndex, goniometerIndex,
+                                      detectorId, center));
   }
 
   void test_create_MDEvent4() {
     float signal(1.5);
     float error(2.5);
     uint16_t runIndex = 123;
+    uint16_t goniometerIndex(42);
     uint16_t detectorId = 45678;
     Mantid::coord_t center[4] = {1.25, 2.5, 3.5, 4.75};
     for (size_t i = 0; i < num; i++)
-      events4.emplace_back(
-          MDEvent<4>(signal, error, runIndex, detectorId, center));
+      events4.emplace_back(MDEvent<4>(signal, error, runIndex, goniometerIndex,
+                                      detectorId, center));
   }
 
   void test_create_MDLeanEvent3() {
@@ -341,8 +353,9 @@ public:
 
       events[i].setSignal(static_cast<float>(i));
       events[i].setErrorSquared(static_cast<float>(i * i));
-      events[i].setDetectorId(uint32_t(i));
       events[i].setRunIndex(uint16_t(i / 10));
+      events[i].setGoniometerIndex(uint16_t(i / 10));
+      events[i].setDetectorId(uint32_t(i));
       sumGuess += double(i);
       errGuess += double(i * i);
       events[i].setCenter(0, 0.1 * static_cast<double>(i));
@@ -357,8 +370,8 @@ public:
     double totalErrSq(0);
     TS_ASSERT_THROWS_NOTHING(
         MDEvent<4>::eventsToData(events, data, ncols, totalSignal, totalErrSq));
-    TS_ASSERT_EQUALS(4 + 4, ncols);
-    TS_ASSERT_EQUALS((4 + 4) * nPoints, data.size());
+    TS_ASSERT_EQUALS(4 + 5, ncols);
+    TS_ASSERT_EQUALS((4 + 5) * nPoints, data.size());
 
     double relerr =
         2 * std::fabs(sumGuess - totalSignal) / (sumGuess + totalSignal);

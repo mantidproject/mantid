@@ -82,7 +82,6 @@ public:
   void setFloodCorrectionType(std::string const &correction) override;
   std::string getFloodWorkspace() const override;
   void setFloodWorkspace(std::string const &workspace) override;
-  void refreshFloodWorkspaceList() override;
 
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;

@@ -289,6 +289,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)
 
+        # differences
+        self.grouping_tab_widget.diff_table.add_subscribers(
+            [self.transform.GroupPairObserver,
+             self.plot_widget.presenter.added_group_or_pair_observer])
+
         self.plot_widget.presenter.plot_type_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_plot_type_observer)
 

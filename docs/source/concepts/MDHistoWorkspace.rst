@@ -29,18 +29,9 @@ created in up to 9 dimensions.
    -  You can use :ref:`CreateMDWorkspace <algm-CreateMDWorkspace>` to create a
       blank MDWorkspace first, if you do not have data to bin.
 
--  Paraview and the `Vates Simple
-   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ will create a MDHistoWorkspace
-   from a :ref:`MDWorkspace <MDWorkspace>` when rebinning on a regular
-   grid.
-
 Viewing a MDHistoWorkspace
 --------------------------
 
--  MDHistoWorkspaces can be created and visualized directly within
-   Paraview and the `Vates Simple
-   Interface <http://www.mantidproject.org/VatesSimpleInterface>`__ when rebinning along a regular
-   grid.
 -  You can right-click on the workspace and select:
 
    -  **Plot MD**: to perform a 1D plot of the signal in the workspace

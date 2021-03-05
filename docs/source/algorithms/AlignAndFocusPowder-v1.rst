@@ -26,11 +26,12 @@ sub-algorithms as listed below.
    #. :ref:`algm-RemoveLowResTOF`
    #. :ref:`algm-ConvertUnits` to d-spacing
 
-#. :ref:`algm-Rebin` if d-space binning
+#. :ref:`algm-Rebin` if d-space binning (optionally :ref:`algm-RebinRagged` if ``DeltaRagged``)
 #. :ref:`algm-DiffractionFocussing`
 #. :ref:`algm-SortEvents` (event workspace only)
 #. :ref:`algm-EditInstrumentGeometry` (if appropriate)
 #. :ref:`algm-ConvertUnits` to time-of-flight
+#. :ref:`algm-RebinRagged` (if ``DeltaRagged`` is specified) to bin each spectrum differently
 
 Workflow
 ########

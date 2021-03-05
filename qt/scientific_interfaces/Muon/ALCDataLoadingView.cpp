@@ -19,13 +19,15 @@
 
 using namespace Mantid::API;
 
+const QString DEFAULT_LOG("run_number");
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI",
                                            "MUSR"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
+    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
 
 ALCDataLoadingView::~ALCDataLoadingView() {}
 
@@ -43,7 +45,10 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
           SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
+  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)),
+          SIGNAL(runsEditingSignal()));
+  connect(m_ui.runs, SIGNAL(findingFiles()),
+          SIGNAL(runsEditingFinishedSignal()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
   connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
           SIGNAL(manageDirectoriesClicked()));
@@ -224,14 +229,28 @@ bool ALCDataLoadingView::displayWarning(const std::string &warning) {
  */
 void ALCDataLoadingView::setAvailableLogs(
     const std::vector<std::string> &logs) {
+  const auto currentLog = m_ui.logValueSelector->getLog();
+  if (!currentLog.isEmpty())
+    m_selectedLog = currentLog;
+
   setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
-  // Set defualt as run number
-  if (!logs.empty()) {
-    auto index =
-        m_ui.logValueSelector->getLogComboBox()->findText("run_number");
-    if (index >= 0)
-      m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+
+  if (!setCurrentLog(m_selectedLog))
+    setCurrentLog(DEFAULT_LOG);
+}
+
+/**
+ * Set the currently selected log
+ * @param log :: The log to search for and select.
+ * @returns true if the log was found and selected.
+ */
+bool ALCDataLoadingView::setCurrentLog(const QString &log) {
+  const auto index = m_ui.logValueSelector->getLogComboBox()->findText(log);
+  if (index >= 0) {
+    m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+    m_selectedLog = log;
   }
+  return index >= 0;
 }
 
 /**
@@ -243,10 +262,23 @@ void ALCDataLoadingView::setAvailablePeriods(
   setAvailableItems(m_ui.redPeriod, periods);
   setAvailableItems(m_ui.greenPeriod, periods);
 
+  // Reset subtraction if single period as not possible
+  if (periods.size() < 2)
+    m_ui.subtractCheckbox->setChecked(false);
+
   // If single period, disable "Subtract" checkbox and green period box
   const bool multiPeriod = periods.size() > 1;
   m_ui.subtractCheckbox->setEnabled(multiPeriod);
   m_ui.greenPeriod->setEnabled(multiPeriod);
+
+  // If two or more periods and number of periods has changed, default to 1
+  // minus 2
+  if (periods.size() >= 2 && m_numPeriods != periods.size()) {
+    m_ui.subtractCheckbox->setChecked(true);
+    m_ui.redPeriod->setCurrentText("1");
+    m_ui.greenPeriod->setCurrentText("2");
+  }
+  m_numPeriods = periods.size();
 }
 
 /**
@@ -303,6 +335,7 @@ void ALCDataLoadingView::help() {
 void ALCDataLoadingView::disableAll() {
 
   // Disable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(false);
   m_ui.dataGroup->setEnabled(false);
   m_ui.deadTimeGroup->setEnabled(false);
   m_ui.detectorGroupingGroup->setEnabled(false);
@@ -314,6 +347,7 @@ void ALCDataLoadingView::disableAll() {
 void ALCDataLoadingView::enableAll() {
 
   // Enable all the widgets in the view
+  m_ui.plotByLogGroup->setEnabled(true);
   m_ui.deadTimeGroup->setEnabled(true);
   m_ui.dataGroup->setEnabled(true);
   m_ui.detectorGroupingGroup->setEnabled(true);

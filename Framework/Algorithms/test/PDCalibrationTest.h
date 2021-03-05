@@ -413,6 +413,60 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
   }
 
+  void test_exec_fit_diff_constants_with_chisq() {
+    // setup the peak postions based on transformation from detID=155
+    // allow refining DIFA, but don't set the transformation to require it
+    // setup the peak postions based on transformation from detID=155
+    std::vector<double> dValues(PEAK_TOFS.size());
+    std::transform(
+        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
+        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+
+    const std::string prefix{"PDCalibration_difc"};
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseChiSq", true));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // check that a table containing the fit parameter errors is returned
+    ITableWorkspace_sptr errorTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            prefix + "diag_fiterror");
+    TS_ASSERT(errorTable);
+    // check the column titles correpsond to names of Gaussian fit parameters
+    // not the generic height, centre, width
+    TS_ASSERT_EQUALS(errorTable->getColumnNames()[4], "Sigma");
+
+    // check cal table
+    ITableWorkspace_sptr calTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix +
+                                                                    "cal");
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    // check get roughly same result as UseChiSQ = false
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+  }
+
   void test_exec_grouped_detectors() {
     // group detectors
     GroupDetectors2 groupDet;

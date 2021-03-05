@@ -45,7 +45,7 @@ Example 1 (using detector IDs and explicit group ID):
 .. code-block:: xml
 
  <?xml version="1.0" encoding="UTF-8" ?>
- <detector-grouping instrument="VULCAN">
+ <detector-grouping instrument="VULCAN" idf-date="2018-01-01 00:00:00">
   <group ID="4">
    <detids>28750-29981</detids>
    <component>bank21</component>
@@ -60,7 +60,7 @@ Example 2 (using detector IDs and default group ID):
 .. code-block:: xml
 
  <?xml version="1.0" encoding="UTF-8" ?>
- <detector-grouping instrument="VULCAN">
+ <detector-grouping instrument="VULCAN" idf-date="2018-01-01 00:00:00">
   <group>
    <detids>28750-29981</detids>
    <component>bank21</component>
@@ -150,7 +150,7 @@ Usage
     filename=mantid.config.getString("defaultsave.directory")+"test.xml"
     f=open(filename,'w')
     f.write('<?xml version="1.0" encoding="UTF-8" ?> \n')
-    f.write('<detector-grouping instrument="VULCAN"> \n')
+    f.write('<detector-grouping instrument="VULCAN" idf-date="2018-01-01 00:00:00"> \n')
     f.write('  <group ID="1"> \n')
     f.write('   <detids>28750-29981</detids> \n')
     f.write('   <component>bank23</component> \n')
