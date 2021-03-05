@@ -230,8 +230,9 @@ Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
   return IndirectFittingModel::getFitFunction();
 }
 
-boost::optional<double> ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
-  if (dataIndex < numberOfWorkspaces())
+boost::optional<double>
+ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
+  if (dataIndex < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(dataIndex));
   return boost::none;
 }
@@ -256,7 +257,7 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { 
 void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
   IndirectFittingModel::removeWorkspace(index);
 
-  const auto newSize = numberOfWorkspaces();
+  const auto newSize = getNumberOfWorkspaces();
   while (m_resolution.size() > newSize)
     m_resolution.remove(index);
 

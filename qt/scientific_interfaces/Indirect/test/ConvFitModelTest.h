@@ -131,7 +131,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace, workspace2, workspace3, workspace4, workspace5);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{5});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{5});
   }
 
   void
@@ -186,7 +186,7 @@ public:
     addWorkspacesToModel(spectra, m_workspace);
     m_model->removeWorkspace(TableDatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{0});
   }
 
   void test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {

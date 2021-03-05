@@ -34,7 +34,7 @@ public:
   getWorkspace(TableDatasetIndex index) const = 0;
   virtual FunctionModelSpectra getSpectra(TableDatasetIndex index) const = 0;
   virtual bool isMultiFit() const = 0;
-  virtual TableDatasetIndex numberOfWorkspaces() const = 0;
+  virtual TableDatasetIndex getNumberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(TableDatasetIndex index) const = 0;
   virtual size_t getNumberOfDomains() const = 0;
   virtual FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,

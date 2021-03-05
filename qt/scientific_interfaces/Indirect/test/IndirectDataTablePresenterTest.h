@@ -58,7 +58,7 @@ public:
   MOCK_CONST_METHOD1(getWorkspace, Mantid::API::MatrixWorkspace_sptr(TableDatasetIndex index));
   MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(TableDatasetIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
+  MOCK_CONST_METHOD0(getNumberOfWorkspaces, TableDatasetIndex());
   MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(TableDatasetIndex index));
   MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
   MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(TableDatasetIndex dataIndex, IDA::WorkspaceIndex spectrum));

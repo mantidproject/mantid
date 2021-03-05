@@ -309,7 +309,7 @@ bool FqFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
 }
 
 bool FqFitModel::isMultiFit() const {
-  if (numberOfWorkspaces() == TableDatasetIndex{0})
+  if (getNumberOfWorkspaces() == TableDatasetIndex{0})
     return false;
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
 }
@@ -346,8 +346,9 @@ std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string FqFitModel::getResultLogName() const { return "SourceName"; }
 
-bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const {
-  for (auto i = TableDatasetIndex{1}; i < numberOfWorkspaces(); ++i) {
+bool FqFitModel::allWorkspacesEqual(
+    const Mantid::API::MatrixWorkspace_sptr &workspace) const {
+  for (auto i = TableDatasetIndex{1}; i < getNumberOfWorkspaces(); ++i) {
     if (getWorkspace(i) != workspace)
       return false;
   }

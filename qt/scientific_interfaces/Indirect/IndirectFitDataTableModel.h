@@ -33,7 +33,7 @@ public:
   getWorkspace(TableDatasetIndex index) const override;
   FunctionModelSpectra getSpectra(TableDatasetIndex index) const override;
   bool isMultiFit() const override;
-  TableDatasetIndex numberOfWorkspaces() const override;
+  TableDatasetIndex getNumberOfWorkspaces() const override;
   size_t getNumberOfSpectra(TableDatasetIndex index) const override;
   size_t getNumberOfDomains() const override;
   FitDomainIndex getDomainIndex(TableDatasetIndex dataIndex,

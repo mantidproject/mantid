@@ -57,7 +57,7 @@ public:
 
     addWorkspacesToModel(spectra, m_workspace);
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   void test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
@@ -66,7 +66,7 @@ public:
     addWorkspacesToModel(spectra, m_workspace);
     m_model->removeWorkspace(TableDatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{0});
+    TS_ASSERT_EQUALS(m_model->getNumberOfWorkspaces(), TableDatasetIndex{0});
   }
 
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {

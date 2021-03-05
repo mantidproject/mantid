@@ -69,12 +69,12 @@ IndirectFitDataTableModel::getSpectra(TableDatasetIndex index) const {
   return FunctionModelSpectra("");
 }
 
-TableDatasetIndex IndirectFitDataTableModel::numberOfWorkspaces() const {
+TableDatasetIndex IndirectFitDataTableModel::getNumberOfWorkspaces() const {
   return TableDatasetIndex{m_fittingData->size()};
 }
 
 bool IndirectFitDataTableModel::isMultiFit() const {
-  return numberOfWorkspaces().value > 1;
+  return getNumberOfWorkspaces().value > 1;
 }
 
 size_t IndirectFitDataTableModel::getNumberOfSpectra(TableDatasetIndex index) const {
