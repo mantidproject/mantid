@@ -110,9 +110,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   IPeaksWorkspace_sptr pws = m_pws->clone();
 
   // Debugging related
-  auto pws_ref = m_pws->clone();
-  double diff_calc_ref = 0;
-  double diff_calc_target = 0;
+  IPeaksWorkspace_sptr pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
   if (m_cmpt != "none/sixteenpack") {
@@ -126,49 +124,46 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   // TODO:
   // need to do something with dT0
 
-  // NOTE:
-  //    getQSampleFrame does not consider the updated instrument, which is why
-  //    the calibration will always fail
+  // calculate residual
+  double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
-
     // cache TOF
-    double tof = pws->getPeak(i).getTOF();
+    const double tof = pws->getPeak(i).getTOF();
 
+    Peak pk = Peak(pws->getPeak(i));
     // update instrument
-    pws->getPeak(i).setInstrument(pws->getInstrument());
-
+    pk.setInstrument(pws->getInstrument());
     // update detector ID
-    pws->getPeak(i).setDetectorID(pws->getPeak(i).getDetectorID());
-
+    pk.setDetectorID(pws->getPeak(i).getDetectorID());
     // calculate&set wavelength based on new instrument
     Units::Wavelength wl;
-    wl.initialize(pws->getPeak(i).getL1(), pws->getPeak(i).getL2(),
-                  pws->getPeak(i).getScattering(), 0,
-                  pws->getPeak(i).getInitialEnergy(), 0.0);
-    pws->getPeak(i).setWavelength(wl.singleFromTOF(tof));
+    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                  pk.getInitialEnergy(), 0.0);
+    pk.setWavelength(wl.singleFromTOF(tof));
 
-    V3D qv = pws->getPeak(i).getQSampleFrame();
+    V3D qv = pk.getQSampleFrame();
     for (int j = 0; j < 3; ++j)
       out[i * 3 + j] = qv[j];
-
-    // check the difference between n and 0
-    V3D dq_calc_ref = qv - pws_ref->getPeak(i).getQSampleFrame();
-    diff_calc_ref += dq_calc_ref.norm2();
 
     // check the difference between n and target
     auto ubm = pws->sample().getOrientedLattice().getUB();
     V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
     qv_target *= 2 * PI;
-    V3D dq_calc_target = qv - qv_target;
-    diff_calc_target += dq_calc_target.norm2();
+    V3D delta_qv = qv - qv_target;
+    residual += delta_qv.norm2();
   }
 
   n_iter += 1;
+
+  V3D dtrans = V3D(dx, dy, dz);
+  V3D rotaxis = V3D(vx, vy, vz);
+  residual /= pws->getNumberPeaks();
   std::ostringstream msgiter;
-  msgiter << "@iter_" << n_iter << "\n"
-          << "-- sum_i((qv_n - qv_0)^2) = " << diff_calc_ref << "\n"
-          << "-- sum_i((qv_n - qv_target)^2) = " << diff_calc_target << "\n\n";
-  g_log.information() << msgiter.str();
+  msgiter.precision(8);
+  msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
+          << "-- (dx, dy, dz) = " << dtrans << "\n"
+          << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
+  g_log.notice() << msgiter.str();
 }
 
 // -------///
