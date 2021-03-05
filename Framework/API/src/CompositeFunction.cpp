@@ -900,6 +900,15 @@ void CompositeFunction::declareAttribute(
 }
 
 /**
+Registers the usage of the function with the UsageService
+ */
+void CompositeFunction::registerFunctionUsage(bool internal) {
+  for (size_t i = 0; i < nFunctions(); i++) {
+    getFunction(i)->registerFunctionUsage(internal);
+  }
+}
+
+/**
  * Prepare the function for a fit.
  */
 void CompositeFunction::setUpForFit() {
