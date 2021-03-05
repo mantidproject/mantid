@@ -121,23 +121,6 @@ void IntegratePeaksMD2::init() {
   declareProperty("Ellipsoid", false, "Default is sphere.");
   declareProperty("FixQAxis", false,
                   "Fix one axis of ellipsoid to be along direction of Q.");
-  declareProperty("FixMajorAxisLength", true,
-                  "This option is ignored if all peak radii are specified. "
-                  "Otherwise, if True the ellipsoid radidi (proportional to "
-                  "the sqrt of the eigenvalues of the covariance matrix) are "
-                  "scaled such that the major axis radius is equal to the "
-                  "PeakRadius. If False then the ellipsoid radii are set to "
-                  "3 times the sqrt of the eigenvalues of the covariance "
-                  "matrix");
-  declareProperty("UseCentroid", false,
-                  "Perform integration on estimated centroid not peak position "
-                  "(ignored if all three peak radii are specified).");
-  auto maxIterValidator = std::make_shared<BoundedValidator<int>>();
-  maxIterValidator->setLower(1);
-  declareProperty(
-      "MaxIterations", 1, maxIterValidator,
-      "Number of iterations in covariance estimation (ignored if all "
-      "peak radii are specified). 2-3 should be sufficient.");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -191,6 +174,25 @@ void IntegratePeaksMD2::init() {
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
+
+  // continued ellipsoid args
+  declareProperty("FixMajorAxisLength", true,
+                  "This option is ignored if all peak radii are specified. "
+                  "Otherwise, if True the ellipsoid radidi (proportional to "
+                  "the sqrt of the eigenvalues of the covariance matrix) are "
+                  "scaled such that the major axis radius is equal to the "
+                  "PeakRadius. If False then the ellipsoid radii are set to "
+                  "3 times the sqrt of the eigenvalues of the covariance "
+                  "matrix");
+  declareProperty("UseCentroid", false,
+                  "Perform integration on estimated centroid not peak position "
+                  "(ignored if all three peak radii are specified).");
+  auto maxIterValidator = std::make_shared<BoundedValidator<int>>();
+  maxIterValidator->setLower(1);
+  declareProperty(
+      "MaxIterations", 1, maxIterValidator,
+      "Number of iterations in covariance estimation (ignored if all "
+      "peak radii are specified). 2-3 should be sufficient.");
 }
 
 std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
