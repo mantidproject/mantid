@@ -26,8 +26,7 @@ public:
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1,
-                     const Mantid::Kernel::V3D &translation =
-                         Mantid::Kernel::V3D(0.0, 0.0, 0.0));
+                     const Mantid::Kernel::V3D &translation = {0.0, 0.0, 0.0});
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
   /// Get radii

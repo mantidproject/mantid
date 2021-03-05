@@ -118,15 +118,17 @@ void IntegratePeaksMD2::init() {
                   "Default is false.   If true, "
                   "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
-
   declareProperty("Ellipsoid", false, "Default is sphere.");
   declareProperty("FixQAxis", false,
                   "Fix one axis of ellipsoid to be along direction of Q.");
   declareProperty("FixMajorAxisLength", true,
-                  "Set major axis to be equal to PeakRadius and scale the "
-                  "length of the orthogonal axes by proportional to the sqrt "
-                  "of the eigenvalues of the covariance matrix (this ignored "
-                  "if all three peak radii are specified)");
+                  "This option is ignored if all peak radii are specified. "
+                  "Otherwise, if True the ellipsoid radidi (proportional to "
+                  "the sqrt of the eigenvalues of the covariance matrix) are "
+                  "scaled such that the major axis radius is equal to the "
+                  "PeakRadius. If False then the ellipsoid radii are set to "
+                  "3 times the sqrt of the eigenvalues of the covariance "
+                  "matrix");
   declareProperty("UseCentroid", false,
                   "Perform integration on estimated centroid not peak position "
                   "(ignored if all three peak radii are specified).");
@@ -522,7 +524,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         std::vector<double> eigenvals;
         V3D translation(0.0, 0.0, 0.0); // translation from peak pos to centroid
         if (PeakRadius.size() == 1) {
-          V3D mean(0.0, 0.0, 0.0); // vector to hold cengtorid
+          V3D mean(0.0, 0.0, 0.0); // vector to hold centroid
           findEllipsoid<MDE, nd>(
               ws, getRadiusSq, pos,
               static_cast<coord_t>(pow(PeakRadiusVector[i], 2)), qAxisIsFixed,
@@ -1025,6 +1027,21 @@ void IntegratePeaksMD2::findEllipsoid(
             eigenvects, eigenvals, mean, maxIter);
 }
 
+/**
+ * Calculate the covariance matrix of a spherical region and store the
+ * eigenvectors and eigenvalues that diagonalise the covariance matrix in the
+ * vectors provided
+ *
+ *  @param peak_events    container of center and signal of events in sphere
+ *  @param pos            V3D of nominal peak centre
+ *  @param radiusSquared  radius squared of spherical region for covarariance
+ *  @param qAxisIsFixed   bool to fix an eigenvector along direction pos
+ *  @param useCentroid    bool to use estimated centroid in variance calc
+ *  @param eigenvects     eigenvectors of covariance matrix of spherical region
+ *  @param eigenvals      eigenvalues of covariance matrix of spherical region
+ *  @param mean           container to hold centroid (fixed at pos if not using)
+ *  @param maxIter        max number of iterations in covariance determination
+ */
 void IntegratePeaksMD2::calcCovar(
     const std::vector<std::pair<V3D, double>> &peak_events,
     const V3D &pos, const coord_t &radiusSquared, const bool &qAxisIsFixed,
@@ -1182,7 +1199,7 @@ void IntegratePeaksMD2::calcCovar(
  * Get the inverse of the matrix P. Left multiply a vector by Pinv to transform
  * from Qlab to basis Qhat, and uhat,vhat in plane perpendicular to Q. P is a
  * matrix with columns corresponding to new basis vectors. The inverse of P is
- * equivilent to the transpose (as for any roation matrix)
+ * equivalent to the transpose (as for any roation matrix)
  *
  *  @param q     Qlab of peak center.
  *  @param Pinv  3 x 3 matrix with rows correpsonding to new basis vectors
