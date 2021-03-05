@@ -243,7 +243,8 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         parameters = super().get_fit_function_parameters()
         if self.tf_asymmetry_mode:
             if self.simultaneous_fitting_mode:
-                return [f"f{domain_index}.N0" for domain_index in range(self.number_of_datasets)] + parameters
+                return self._add_normalisation_to_parameters_for_simultaneous_fitting(
+                    parameters, self._get_normalisation_parameter_name_for_simultaneous_domain)
             else:
                 return ["N0"] + parameters
         else:
@@ -254,12 +255,27 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         parameter_values = self.get_fit_function_parameter_values(fit_function)
         if self.tf_asymmetry_mode:
             if self.simultaneous_fitting_mode:
-                return [self._get_normalisation_from_tf_fit_function(domain_index)
-                        for domain_index in range(self.number_of_datasets)] + parameter_values
+                return self._add_normalisation_to_parameters_for_simultaneous_fitting(
+                    parameter_values, self._get_normalisation_from_tf_fit_function)
             else:
                 return [self._get_normalisation_from_tf_fit_function(tf_function_index)] + parameter_values
         else:
             return parameter_values
+
+    def _add_normalisation_to_parameters_for_simultaneous_fitting(self, parameters, get_normalisation_func):
+        """Returns the names of the fit parameters in the fit functions including the normalisation for simultaneous."""
+        n_params_per_domain = int(len(parameters) / self.number_of_datasets)
+
+        all_parameters = []
+        for domain_index in range(self.number_of_datasets):
+            all_parameters += [get_normalisation_func(domain_index)]
+            all_parameters += parameters[domain_index * n_params_per_domain: (domain_index + 1) * n_params_per_domain]
+        return all_parameters
+
+    @staticmethod
+    def _get_normalisation_parameter_name_for_simultaneous_domain(domain_index: int) -> str:
+        """Returns the parameter name to use for a simultaneous normalisation parameter for a specific domain."""
+        return f"f{domain_index}.N0"
 
     @staticmethod
     def get_fit_function_parameter_values(fit_function: IFunction) -> list:
