@@ -212,3 +212,10 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
             return 0
 
         return log_values[ws_index]
+
+def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
+    if not cmap:
+        cmap = plt.cm.get_cmap(name=colormap_name)
+
+    for i in range(number_colors):
+        yield cmap(float(i) / number_colors)
