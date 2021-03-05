@@ -334,6 +334,9 @@ def plot_peakd(wksp, peak_positions):
     means = []
     stddevs = []
 
+    cm = plt.get_cmap("jet")
+    ax.set_prop_cycle(color=[cm(1.*i/len(peaks)) for i in range(len(peaks))])
+
     # Plot data for each peak position
     for peak in peaks:
         print("Processing peak position {}".format(peak))
@@ -353,7 +356,8 @@ def plot_peakd(wksp, peak_positions):
         means.append(np.mean(y_val))
         stddevs.append(np.std(y_val))
 
-        ax.plot(x, y, marker="x", color="black", linestyle="None")
+        ax.plot(x, y, marker="x", linestyle="None", label="{:0.6f}".format(peak))
+        ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
     # If every peak had nans, raise error
     if len(means) == 0 or len(stddevs) == 0:
