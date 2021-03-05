@@ -305,7 +305,7 @@ public:
     TS_ASSERT_EQUALS(sourcePos.Y(), 0.)
     TS_ASSERT_EQUALS(sourcePos.Z(), -sourceSample)
     TS_ASSERT_EQUALS(run.getProperty("CollAngle.actual_coll_angle")->units(),
-                     "uu")
+                     "deg")
     TS_ASSERT_EQUALS(run.getProperty("Theta.sample_horizontal_offset")->units(),
                      "mm")
     TS_ASSERT_EQUALS(
@@ -354,9 +354,9 @@ public:
     const auto &run = output->run();
     const double centre =
         run.getPropertyValueAsType<double>("reduction.line_position");
-    TS_ASSERT_DELTA(centre, 173.38, 0.001);
+    TS_ASSERT_DELTA(centre, 62.834, 0.001);
     const double centreAngle =
-        (spectrumInfo.twoTheta(173) + spectrumInfo.twoTheta(174)) / 2;
+        (spectrumInfo.twoTheta(62) + spectrumInfo.twoTheta(63)) / 2;
     TS_ASSERT_DELTA(centreAngle * 180 / M_PI, 3., 0.1);
   }
 
@@ -369,9 +369,9 @@ public:
     const auto &run = output->run();
     const double centre =
         run.getPropertyValueAsType<double>("reduction.line_position");
-    TS_ASSERT_DELTA(centre, 173.38, 0.001);
+    TS_ASSERT_DELTA(centre, 62.589, 0.001);
     const double centreAngle =
-        (spectrumInfo.twoTheta(173) + spectrumInfo.twoTheta(174)) / 2;
+        (spectrumInfo.twoTheta(62) + spectrumInfo.twoTheta(63)) / 2;
     TS_ASSERT_DELTA(centreAngle * 180 / M_PI, 0., 0.1);
   }
 
@@ -432,9 +432,11 @@ public:
             this->m_outWSName);
     TS_ASSERT(output)
     const auto &run = output->run();
-    TS_ASSERT_EQUALS(run.getProperty("Distance.D1")->units(), "mm")
-    TS_ASSERT_EQUALS(run.getProperty("Distance.D0")->units(), "mm")
-    TS_ASSERT_EQUALS(run.getProperty("Distance.dist_chop_samp")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.sample_DH1")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.sample_DH2")->units(), "mm")
+    TS_ASSERT_EQUALS(
+        run.getProperty("Distance.Sample_CenterOfDetector_distance")->units(),
+        "mm")
   }
 
   void testSourceAndSampleLocationsD17() {
@@ -536,27 +538,25 @@ public:
 
   void testSlitConfigurationFigaro() {
     MatrixWorkspace_sptr output;
-    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName, emptyProperties());
+    getWorkspaceFor(output, m_figaroDirectBeamFile, m_outWSName,
+                    emptyProperties());
     auto instrument = output->getInstrument();
     auto slit1 = instrument->getComponentByName("slit2");
     auto slit2 = instrument->getComponentByName("slit3");
     const auto &run = output->run();
-    // The S3 position is missing in the NeXus file; use a hard-coded value.
-    const double collimationAngle =
-        run.getPropertyValueAsType<double>("CollAngle.actual_coll_angle") /
-        180. * M_PI;
-    const double sampleOffset = output->run().getPropertyValueAsType<double>(
-                                    "Theta.sample_horizontal_offset") *
-                                1e-3;
-    const double slitZOffset = sampleOffset / std::cos(collimationAngle);
-    const double S3z = -0.368 - slitZOffset;
-    const double slitSeparation =
+    const double s2z =
+        run.getPropertyValueAsType<double>("Distance.S2_Sample") * 1e-3;
+    const double s3z =
+        run.getPropertyValueAsType<double>("Distance.S3_Sample") * 1e-3;
+    const double s23 =
         run.getPropertyValueAsType<double>("Distance.S2_S3") * 1e-3;
-    const double S2z = S3z - slitSeparation;
-    TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
-    TS_ASSERT_EQUALS(slit2->getPos(), V3D(0.0, 0.0, S3z))
-    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(),
-                     "mm")
+    const double ds = s2z - s3z;
+    TS_ASSERT_DELTA(s2z, 2.412, 1e-3);
+    TS_ASSERT_DELTA(s3z, 0.247, 1e-3);
+    TS_ASSERT_DELTA(ds, s23, 1e-3);
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_S3")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S2_Sample")->units(), "mm")
+    TS_ASSERT_EQUALS(run.getProperty("Distance.S3_Sample")->units(), "mm")
   }
 };
 
