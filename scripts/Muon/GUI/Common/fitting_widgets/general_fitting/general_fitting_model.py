@@ -304,7 +304,8 @@ class GeneralFittingModel(BasicFittingModel):
     def perform_fit(self) -> tuple:
         """Performs a single or simultaneous fit and returns the resulting function, status and chi squared."""
         if self.simultaneous_fitting_mode:
-            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(), self.global_parameters)
+            return self._do_simultaneous_fit(self._get_parameters_for_simultaneous_fit(
+                self.dataset_names, self.simultaneous_fit_function), self.global_parameters)
         else:
             return super().perform_fit()
 
@@ -338,10 +339,11 @@ class GeneralFittingModel(BasicFittingModel):
         for input_workspace, output in zip(self.dataset_names, self._get_names_in_group_workspace(output_group)):
             CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
 
-    def _get_parameters_for_simultaneous_fit(self) -> dict:
+    def _get_parameters_for_simultaneous_fit(self, dataset_names: list, simultaneous_function: IFunction) -> dict:
         """Gets the parameters to use for a simultaneous fit."""
         params = self._get_common_parameters()
-        params["InputWorkspace"] = self.dataset_names
+        params["Function"] = simultaneous_function
+        params["InputWorkspace"] = dataset_names
         params["StartX"] = self.start_xs
         params["EndX"] = self.end_xs
         return params
