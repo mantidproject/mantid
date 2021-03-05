@@ -107,7 +107,9 @@ class SeqFittingTabPresenter(object):
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
         for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds,
                                                                   self.selected_rows):
-            parameter_values = self.model.get_fit_function_parameter_values(fit_function)
+            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+            from mantid import logger
+            logger.warning(str(parameter_values))
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
             self.view.fit_table.set_fit_quality(row, fit_status, fit_chi_squared)
 
@@ -122,12 +124,13 @@ class SeqFittingTabPresenter(object):
             self.handle_fit_selected_in_table()
 
     def handle_updated_fit_parameter_in_table(self, index):
-        row = index.row()
+        self._update_parameter_values_in_fitting_model_for_row(index.row())
+        self.fit_parameter_changed_notifier.notify_subscribers()
+
+    def _update_parameter_values_in_fitting_model_for_row(self, row):
         workspaces = self.get_workspaces_for_row_in_fit_table(row)
         parameter_values = self.view.fit_table.get_fit_parameter_values_from_row(row)
         self.model.update_ws_fit_function_parameters(workspaces, parameter_values)
-
-        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_fit_selected_in_table(self):
         rows = self.view.fit_table.get_selected_rows()
