@@ -73,14 +73,12 @@ private:
                      int maxIter = 1);
 
   void calcCovar(
-      const std::vector<std::pair<std::vector<double>, double>> &peak_events,
+      const std::vector<std::pair<Mantid::Kernel::V3D, double>> &peak_events,
       const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
       const bool &qAxisIsFixed, const bool &useCentroid,
-      Mantid::Kernel::Matrix<double> &evecs,
-      Mantid::Kernel::Matrix<double> &evals, Mantid::Kernel::V3D &mean,
-      const int &maxIter, const int &nIter = 1,
-      const Mantid::Kernel::Matrix<double> &prev_cov_mat =
-          Mantid::Kernel::Matrix<double>());
+      std::vector<Mantid::Kernel::V3D> &eigenvects,
+      std::vector<double> &eigenvals, Mantid::Kernel::V3D &mean,
+      const int &maxIter);
 
   // get matrix to transform from Qlab to plane perp to Q
   void getPinv(const Mantid::Kernel::V3D &q,
