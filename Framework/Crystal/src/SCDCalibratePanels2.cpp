@@ -266,40 +266,30 @@ void SCDCalibratePanels2::exec() {
   if (calibrateL1) {
     g_log.notice() << "** Calibrating L1 (moderator) as requested\n";
     // optimizeL1(m_pws);
-    double search_step_L1 = 1e-4; // 100um search step
-    double threshold = 1e-6;      // when to stop
-    double new_L1 = twiddle_search_L1(m_pws, search_step_L1, threshold);
 
-    g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
-
-    // g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
-    // std::ofstream proffile;
-    // proffile.precision(17);
-    // proffile.open("/home/8cz/Workbench/MANTID/"
-    //               "SCD218_newObjFuncSCDCalibratePanels_216/data/"
-    //               "prof_natrollite_FindPeaks_undershoot.csv");
-    // proffile << "dz\terr\n";
-    // std::cout.precision(17);
-    // for (double z = -0.05; z <= 0.05; z = z + 1e-4) {
-    //   double err = objfunc_L1(m_pws, -20 + z, -20);
-    //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
-    //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
-    // }
-    // proffile.close();
-
-    // g_log.notice() << "Profiling objfunc sensitivity (fine) \n";
-    // std::ofstream proffile;
-    // proffile.precision(17);
-    // proffile.open("/home/8cz/Workbench/MANTID/"
-    //               "SCD218_newObjFuncSCDCalibratePanels_216/data/prof_fine.csv");
-    // proffile << "dz\terr\n";
-    // std::cout.precision(17);
-    // for (double z = -0.02; z <= 0.02; z = z + 1e-6) {
-    //   double err = objfunc_L1(m_pws, -20 + z, -20);
-    //   std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
-    //   proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
-    // }
-    // proffile.close();
+    ///
+    /// Twiddle search here is for dev to explore the parameter space
+    ///
+    // double search_step_L1 = 1e-4; // 100um search step
+    // double threshold_L1 = 1e-6;   // when to stop
+    // double new_L1 = twiddle_search_L1(m_pws, search_step_L1, threshold_L1);
+    //
+    // g_log.notice() << "** -- New L1 = " << new_L1 << "\n";
+    //
+    g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
+    std::ofstream proffile;
+    proffile.precision(17);
+    proffile.open("/home/8cz/Workbench/MANTID/"
+                  "SCD218_newObjFuncSCDCalibratePanels_216/data/"
+                  "prof_unittest_nullcase.csv");
+    proffile << "dz\terr\n";
+    std::cout.precision(17);
+    for (double z = -0.02; z <= 0.02; z = z + 1e-5) {
+      double err = objfunc_L1(m_pws, -20 + z, -20);
+      std::cout << std::scientific << z << "\t" << std::fixed << err << "\n";
+      proffile << std::scientific << z << "\t" << std::fixed << err << "\n";
+    }
+    proffile.close();
   }
 
   if (calibrateBanks) {
