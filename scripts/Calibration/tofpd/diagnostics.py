@@ -230,13 +230,13 @@ def __calculate_strain(obs, exp: np.ndarray):
     return np.asarray(list(obs.values())[1:-2]) / exp
 
 
-def __calculate_rel_diff(obs, exp: np.ndarray):
+def __calculate_difference(obs, exp: np.ndarray):
     obs_ndarray = np.asarray(list(obs.values())[1:-2])
-    return (obs_ndarray - exp) / exp
+    return np.abs(obs_ndarray - exp) / exp
 
 
 def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
-    if infotype not in ['strain', 'reldiff']:
+    if infotype not in ['strain', 'difference']:
         raise ValueError('Do not know how to calculate "{}"'.format(infotype))
 
     wksp = mtd[str(wksp)]
@@ -259,8 +259,8 @@ def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
         output.setX(i, peaks)
         if infotype == 'strain':
             output.setY(i, __calculate_strain(wksp.row(i), peaks))
-        elif infotype == 'reldiff':
-            output.setY(i, __calculate_rel_diff(wksp.row(i), peaks))
+        elif infotype == 'difference':
+            output.setY(i, __calculate_difference(wksp.row(i), peaks))
 
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, output)
