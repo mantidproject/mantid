@@ -5,6 +5,7 @@ from mantid.api import WorkspaceFactory
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
+import matplotlib.offsetbox as pltbox
 import numpy as np
 
 
@@ -377,12 +378,8 @@ def plot_peakd(wksp, peak_positions):
 
     # Add mean and stddev text annotations
     stat_str = "Mean = {:0.6f} Stdev = {:0.6f}".format(total_mean, total_stddev)
-    plt_text = ax.text(0, 0, stat_str, transform=ax.transAxes)
-
-    # Center text in the figure
-    box = plt_text.get_window_extent(renderer=fig.canvas.get_renderer()).inverse_transformed(ax.transAxes)
-    text_x = 0.5 - box.width * 0.5
-    plt_text.set_position((text_x, 0.875))
+    plt_text = pltbox.AnchoredText(stat_str, loc="upper center", frameon=False)
+    ax.add_artist(plt_text)
 
     plt.show()
 
