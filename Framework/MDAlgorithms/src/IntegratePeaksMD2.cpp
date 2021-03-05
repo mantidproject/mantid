@@ -118,9 +118,13 @@ void IntegratePeaksMD2::init() {
                   "Default is false.   If true, "
                   "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
                   "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
+
+  std::string ellip_grp = "Ellipsoid Integration";
   declareProperty("Ellipsoid", false, "Default is sphere.");
+  setPropertyGroup("Ellipsoid", ellip_grp);
   declareProperty("FixQAxis", false,
                   "Fix one axis of ellipsoid to be along direction of Q.");
+  setPropertyGroup("FixQAxis", ellip_grp);
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -184,15 +188,18 @@ void IntegratePeaksMD2::init() {
                   "PeakRadius. If False then the ellipsoid radii are set to "
                   "3 times the sqrt of the eigenvalues of the covariance "
                   "matrix");
+  setPropertyGroup("FixMajorAxisLength", ellip_grp);
   declareProperty("UseCentroid", false,
                   "Perform integration on estimated centroid not peak position "
                   "(ignored if all three peak radii are specified).");
+  setPropertyGroup("UseCentroid", ellip_grp);
   auto maxIterValidator = std::make_shared<BoundedValidator<int>>();
   maxIterValidator->setLower(1);
   declareProperty(
       "MaxIterations", 1, maxIterValidator,
       "Number of iterations in covariance estimation (ignored if all "
       "peak radii are specified). 2-3 should be sufficient.");
+  setPropertyGroup("MaxIterations", ellip_grp);
 }
 
 std::map<std::string, std::string> IntegratePeaksMD2::validateInputs() {
