@@ -476,8 +476,9 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._run_tf_asymmetry_fit(parameters)
 
-        CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
-        self._add_single_fit_results_to_ADS_and_context(self.current_dataset_name, parameter_table, output_workspace,
+        dataset_name = parameters["ReNormalizedWorkspaceList"]
+        CopyLogs(InputWorkspace=dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
+        self._add_single_fit_results_to_ADS_and_context(dataset_name, parameter_table, output_workspace,
                                                         covariance_matrix)
         return function, fit_status, chi_squared
 
@@ -486,9 +487,10 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix = \
             self._run_tf_asymmetry_fit(parameters)
 
-        self._copy_logs(output_workspace)
-        self._add_simultaneous_fit_results_to_ADS_and_context(parameter_table, output_workspace, covariance_matrix,
-                                                              global_parameters)
+        dataset_names = parameters["ReNormalizedWorkspaceList"]
+        self._copy_logs(dataset_names, output_workspace)
+        self._add_simultaneous_fit_results_to_ADS_and_context(dataset_names, parameter_table, output_workspace,
+                                                              covariance_matrix, global_parameters)
         return function, fit_status, chi_squared
 
     def _run_tf_asymmetry_fit(self, parameters: dict) -> tuple:
@@ -756,7 +758,6 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         functions, fit_statuses, chi_squared_list = [], [], []
 
         for row_index, row_workspaces in enumerate(workspace_names):
-            logger.warning(str(row_workspaces))
             function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, parameter_values[row_index],
                                                              functions, use_initial_values)
 
