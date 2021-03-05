@@ -50,9 +50,15 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.clear_fit_parameters()
             self.view.fit_table.reset_fit_quality()
         else:
-            parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function, row)
-                                for row, fit_function in enumerate(self.model.get_all_fit_functions())]
+            parameter_values = self._get_fit_function_parameter_values_from_fitting_model()
             self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
+
+    def _get_fit_function_parameter_values_from_fitting_model(self):
+        parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+                            for row, fit_function in enumerate(self.model.get_all_fit_functions())]
+        if len(parameter_values) != self.view.fit_table.get_number_of_fits():
+            parameter_values *= self.view.fit_table.get_number_of_fits()
+        return parameter_values
 
     def handle_fit_function_parameter_changed(self):
         self.view.fit_table.reset_fit_quality()
