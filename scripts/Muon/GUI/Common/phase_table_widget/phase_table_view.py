@@ -353,3 +353,13 @@ class PhaseTableView(QtWidgets.QWidget):
         last_row = self.phase_quad_table.rowCount() - 1
         if last_row >= 0:
             self.phase_quad_table.removeRow(last_row)
+
+    def clear_phase_quads(self):
+        names = []
+        for row in reversed(range(self.num_rows())):
+            names += [self.get_table_item_text(row, 0)]
+            self.phase_quad_table.removeRow(row)
+        return names
+
+    def clear_phase_tables(self):
+        self.phase_table_selector_combo.clear()

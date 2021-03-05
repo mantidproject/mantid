@@ -77,8 +77,10 @@ class PhaseTablePresenter(object):
         return thread_model.ThreadModel(self._calculation_model)
 
     def handle_calculate_phase_quad_button_clicked(self):
+        self.view.phase_table_selector_combo.blockSignals(True)
         self.update_model_from_view()
         self.handle_add_phasequad_button_clicked()
+        self.view.phase_table_selector_combo.blockSignals(False)
 
     def validate_pair_name(self, text):
         if text in self.context.group_pair_context.pairs:
@@ -116,6 +118,10 @@ class PhaseTablePresenter(object):
         self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_phase_quad)
         return thread_model.ThreadModel(self._phasequad_calculation_model)
 
+    def create_phase_quads_calculation_thread(self, phasequads):
+        self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_phase_quads(phasequads))
+        return thread_model.ThreadModel(self._phasequad_calculation_model)
+
     def calculate_phase_quad(self):
         self.context.group_pair_context.add_phasequad(self._phasequad_obj)
 
@@ -129,22 +135,8 @@ class PhaseTablePresenter(object):
     def handle_phasequad_calculation_success(self):
         self.enable_editing_notifier.notify_subscribers()
         self.view.enable_widget()
-
-        names = [self._phasequad_obj.Re.name, self._phasequad_obj.Im.name]
         self.current_alg = None
-        pair_added = True
-
-        for name in names:
-            if pair_added:
-                self.context.group_pair_context.add_pair_to_selected_pairs(
-                    name)
-            else:
-                self.context.group_pair_context.remove_pair_from_selected_pairs(
-                    name)
-
-            group_info = {'is_added': pair_added, 'name': name}
-            self.selected_phasequad_changed_notifier.notify_subscribers(
-                group_info)
+        self.add_phase_quad_to_analysis(True, self._phasequad_obj)
 
         # Add to table
         self.view.add_phase_quad_to_table(self._phasequad_obj.name)
@@ -227,6 +219,9 @@ class PhaseTablePresenter(object):
 
         if self.view.input_workspace == "":
             self.view.disable_widget()
+            # Clear phasequads
+            _ = self.clear_phase_quads()
+            self.view.clear_phase_tables()
         else:
             self.view.setEnabled(True)
 
@@ -263,23 +258,10 @@ class PhaseTablePresenter(object):
 
     # Phasequad Table Functionality
     def to_analyse_data_checkbox_changed(self, state, row, phasequad_name):
-        pair_added = True if state == 2 else False
-        names = []
+        is_added = True if state == 2 else False
         for phasequad in self.context.group_pair_context.phasequads:
             if phasequad.name == phasequad_name:
-                names += [phasequad.Re.name, phasequad.Im.name]
-
-        for name in names:
-            if pair_added:
-                self.context.group_pair_context.add_pair_to_selected_pairs(
-                    name)
-            else:
-                self.context.group_pair_context.remove_pair_from_selected_pairs(
-                    name)
-
-            group_info = {'is_added': pair_added, 'name': name}
-            self.selected_phasequad_changed_notifier.notify_subscribers(
-                group_info)
+                self.add_phase_quad_to_analysis(is_added, phasequad)
 
     def handle_phasequad_table_data_changed(self, row, col):
         item = self.view.get_table_item(row, col)
@@ -296,15 +278,64 @@ class PhaseTablePresenter(object):
             self.view.remove_last_row()
             for phasequad in self.context.group_pair_context.phasequads:
                 if phasequad.name == name:
-                    names = [phasequad.Re.name, phasequad.Im.name]
-                    for name in names:
-                        self.context.group_pair_context.remove_pair_from_selected_pairs(
-                            name)
-                        group_info = {'is_added': False, 'name': name}
-                        self.selected_phasequad_changed_notifier.notify_subscribers(
-                            group_info)
+                    self.add_phase_quad_to_analysis(False, phasequad)
                     self.context.group_pair_context.remove_phasequad(phasequad)
 
     def handle_phase_table_changed(self):
+        print("table changed")
         # clear what is there currently and recalculate with new table
-        pass
+        old_names = self.clear_phase_quads()
+        # Recalculate with new table
+        if old_names:
+            self.phasequad_calculation_thread = self.create_phase_quads_calculation_thread(old_names)
+
+            self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
+                                                                 self.handle_success,
+                                                                 self.handle_calculation_error)
+
+            self.phasequad_calculation_thread.start()
+
+    def clear_phase_quads(self):
+        # Remove from view
+        old_names = self.view.clear_phase_quads()
+        # Remove from analysis and context
+        for phaseqaud in self.context.group_pair_context.phasequads:
+            self.add_phase_quad_to_analysis(False, phaseqaud)
+            self.context.group_pair_context.remove_phasequad(phaseqaud)
+        return old_names
+
+    def add_phase_quad_to_analysis(self, is_added, phasequad):
+        names = [phasequad.Re.name, phasequad.Im.name]
+        for name in names:
+            if is_added:
+                self.context.group_pair_context.add_pair_to_selected_pairs(
+                    name)
+            else:
+                self.context.group_pair_context.remove_pair_from_selected_pairs(
+                    name)
+            group_info = {'is_added': is_added, 'name': name}
+            self.selected_phasequad_changed_notifier.notify_subscribers(
+                group_info)
+
+    def calculate_phase_quads(self, phasequads):
+        table = self.context.phase_context.options_dict['phase_table_for_phase_quad']
+        for name in phasequads:
+            phasequad = MuonPhasequad(name, table)
+            self.context.group_pair_context.add_phasequad(phasequad)
+
+            self.context.calculate_phasequads(
+                phasequad.name, phasequad)
+            self.phase_quad_calculation_complete_notifier.notify_subscribers(
+                phasequad.Re.name)
+            self.phase_quad_calculation_complete_notifier.notify_subscribers(
+                phasequad.Im.name)
+
+    def handle_success(self):
+        self.enable_editing_notifier.notify_subscribers()
+        self.view.enable_widget()
+        self.current_alg = None
+        for phasequad in self.context.group_pair_context.phasequads:
+            self.add_phase_quad_to_analysis(True, phasequad)
+
+            # Add to table
+            self.view.add_phase_quad_to_table(phasequad.name)
