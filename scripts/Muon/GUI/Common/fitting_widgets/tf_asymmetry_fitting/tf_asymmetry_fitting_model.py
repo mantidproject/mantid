@@ -77,7 +77,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return DEFAULT_SINGLE_FIT_FUNCTION
 
-    def update_tf_single_fit_function(self, dataset_index: int, fit_function: IFunction) -> None:
+    def update_tf_asymmetry_single_fit_function(self, dataset_index: int, fit_function: IFunction) -> None:
         """Updates the specified TF Asymmetry and ordinary single fit function."""
         self.tf_asymmetry_single_functions[dataset_index] = fit_function
         self.single_fit_functions[dataset_index] = self._get_normal_fit_function_from(fit_function)
@@ -92,7 +92,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Sets the simultaneous TF Asymmetry fit function stored in the model."""
         self._tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
 
-    def update_simultaneous_fit_functions(self, tf_asymmetry_simultaneous_function: IFunction) -> None:
+    def update_tf_asymmetry_simultaneous_fit_function(self, tf_asymmetry_simultaneous_function: IFunction) -> None:
         """Updates the TF Asymmetry and normal simultaneous fit function based on the function from a TFA fit."""
         self.tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
 
@@ -888,30 +888,46 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         self._set_fit_function_parameter_values(self._get_normal_fit_function_from(tf_domain_function),
                                                 parameter_values_for_domain)
 
-    def _update_fit_functions_after_sequential_fit(self, workspaces, functions):
+    def _update_fit_functions_after_sequential_fit(self, workspaces: list, functions: list) -> None:
+        """Updates the fit functions after a sequential fit has been run on the Sequential fitting tab."""
         if self.tf_asymmetry_mode:
             if self.simultaneous_fitting_mode:
-                pass
+                self._update_tf_asymmetry_simultaneous_fit_function_after_sequential(workspaces, functions)
             else:
                 self._update_tf_asymmetry_single_fit_functions_after_sequential(workspaces, functions)
         else:
             if self.simultaneous_fitting_mode:
-                pass
+                self._update_simultaneous_fit_function_after_sequential(workspaces, functions)
             else:
                 self._update_single_fit_functions_after_sequential(workspaces, functions)
 
     def _update_single_fit_functions_after_sequential(self, workspaces: list, functions: list) -> None:
-        """Updates the single fit data after a sequential fit has been run on the Sequential fitting tab."""
+        """Updates the single fit functions after a sequential fit has been run on the Sequential fitting tab."""
         for workspace_index, workspace_name in enumerate(workspaces):
             if workspace_name in self.dataset_names:
                 dataset_index = self.dataset_names.index(workspace_name)
                 self.single_fit_functions[dataset_index] = functions[workspace_index]
 
     def _update_tf_asymmetry_single_fit_functions_after_sequential(self, workspaces: list, functions: list) -> None:
+        """Updates the TF single fit functions after a sequential fit has been run on the Sequential fitting tab."""
         for workspace_index, workspace_name in enumerate(workspaces):
             if workspace_name in self.dataset_names:
                 dataset_index = self.dataset_names.index(workspace_name)
-                self.update_tf_single_fit_function(dataset_index, functions[workspace_index])
+                self.update_tf_asymmetry_single_fit_function(dataset_index, functions[workspace_index])
+
+    def _update_simultaneous_fit_function_after_sequential(self, workspaces: list, functions: list) -> None:
+        """Updates the single fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        for fit_index, workspace_names in enumerate(workspaces):
+            if self._are_same_workspaces_as_the_datasets(workspace_names):
+                self.simultaneous_fit_function = functions[fit_index]
+                break
+
+    def _update_tf_asymmetry_simultaneous_fit_function_after_sequential(self, workspaces: list, functions: list) -> None:
+        """Updates the single fit functions after a sequential fit has been run on the Sequential fitting tab."""
+        for fit_index, workspace_names in enumerate(workspaces):
+            if self._are_same_workspaces_as_the_datasets(workspace_names):
+                self.update_tf_asymmetry_simultaneous_fit_function(functions[fit_index])
+                break
 
     def _update_fit_statuses_and_chi_squared_after_sequential_fit(self, workspaces, fit_statuses, chi_squared_list):
         """Updates the fit statuses and chi squared after a sequential fit."""
