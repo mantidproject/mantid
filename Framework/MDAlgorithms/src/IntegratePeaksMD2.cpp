@@ -1023,9 +1023,12 @@ void IntegratePeaksMD2::findEllipsoid(
           getRadiusSq.apply(cen_ptr, out);
 
           if (evnt.getSignal() > bg && out[0] < radiusSquared) {
-            peak_events.emplace_back(
-                V3D(center_array[0], center_array[1], center_array[2]),
-                evnt.getSignal() - bg);
+            // need in V3D for matrix maths later
+            V3D center;
+            for (size_t d = 0; d < nd; ++d) {
+              center[d] = static_cast<double>(center_array[d]);
+            }
+            peak_events.emplace_back(center, evnt.getSignal() - bg);
           }
         }
       }
@@ -1052,8 +1055,8 @@ void IntegratePeaksMD2::findEllipsoid(
  *  @param maxIter        max number of iterations in covariance determination
  */
 void IntegratePeaksMD2::calcCovar(
-    const std::vector<std::pair<V3D, double>> &peak_events,
-    const V3D &pos, const coord_t &radiusSquared, const bool &qAxisIsFixed,
+    const std::vector<std::pair<V3D, double>> &peak_events, const V3D &pos,
+    const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const bool &useCentroid, std::vector<V3D> &eigenvects,
     std::vector<double> &eigenvals, V3D &mean, const int &maxIter) {
 
@@ -1064,7 +1067,6 @@ void IntegratePeaksMD2::calcCovar(
   auto mdsq_max = boost::math::quantile(chisq, 0.997);
   Matrix<double> invCov; // required to calc mdsq
   double prev_cov_det = DBL_MAX;
-  bool isSphereFullyContained = false;
 
   // initialise mean with pos
   mean = pos;
@@ -1075,12 +1077,12 @@ void IntegratePeaksMD2::calcCovar(
     mean = Pinv * mean;
   }
   Matrix<double> cov_mat(nd, nd);
-  
+
   for (int nIter = 0; nIter < maxIter; nIter++) {
-    
+
     // reset on each loop
     cov_mat.zeroMatrix();
-    double w_sum = 0; // sum of weights
+    double w_sum = 0;   // sum of weights
     size_t nmasked = 0; // num masked events outside 3stdevs
     auto prev_pos = mean;
 
@@ -1143,7 +1145,7 @@ void IntegratePeaksMD2::calcCovar(
     }
     // normalise the covariance matrix
     cov_mat /= w_sum; // normalise by sum of weights
-  
+
     // check if another iteration is required
     bool anyMasked = (nIter > 1) ? (nmasked > 0) : true;
     // check if ellipsoid volume greater than sphere
@@ -1151,9 +1153,9 @@ void IntegratePeaksMD2::calcCovar(
     bool isEllipVolGreater =
         cov_det > pow(static_cast<double>(radiusSquared / 9), 3);
     // check for convergence of variances
-    bool isConverged = ( cov_det > 0.95 * prev_cov_det);
+    bool isConverged = (cov_det > 0.95 * prev_cov_det);
 
-    if (!anyMasked || isSphereFullyContained || isConverged) {
+    if (!anyMasked || isEllipVolGreater || isConverged) {
       break;
     } else {
       prev_cov_det = cov_det;
@@ -1173,7 +1175,7 @@ void IntegratePeaksMD2::calcCovar(
   Matrix<double> evecs; // hold eigenvectors
   Matrix<double> evals; // hold eigenvals in diag
   cov_mat.Diagonalise(evecs, evals);
-  
+
   auto min_eval = evals[0][0];
   for (size_t d = 1; d < nd; ++d) {
     min_eval = std::min(min_eval, evals[d][d]);
@@ -1192,16 +1194,14 @@ void IntegratePeaksMD2::calcCovar(
   eigenvals = evals.Diagonal();
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
-  std::replace_if(
-      eigenvals.begin(), eigenvals.end(), [&](auto x) { return x < 1e-6; },
-      1e-6);
+  std::replace_if(eigenvals.begin(), eigenvals.end(),
+                  [&](auto x) { return x < 1e-6; }, 1e-6);
 
   // populate V3D vector of eigenvects (needed for ellipsoid shape)
   eigenvects = std::vector<V3D>(nd);
   for (size_t ivect = 0; ivect < nd; ++ivect) {
     eigenvects[ivect] = V3D(evecs[0][ivect], evecs[1][ivect], evecs[2][ivect]);
   }
-
 }
 
 /**
