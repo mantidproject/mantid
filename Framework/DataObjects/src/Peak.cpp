@@ -30,7 +30,8 @@ namespace DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
-Peak::Peak() : BasePeak(), m_detectorID(-1) {
+Peak::Peak()
+    : BasePeak(), m_detectorID(-1), m_initialEnergy(0.), m_finalEnergy(0.) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -159,7 +160,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
  */
 Peak::Peak(const Peak &other)
     : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det),
-      m_detectorID(other.m_detectorID), sourcePos(other.sourcePos),
+      m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
+      m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
       m_detIDs(other.m_detIDs), convention(other.convention) {}
 
@@ -170,7 +172,9 @@ Peak::Peak(const Peak &other)
  * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
-    : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()) {
+    : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
+      m_initialEnergy(ipeak.getInitialEnergy()),
+      m_finalEnergy(ipeak.getFinalEnergy()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   setInstrument(ipeak.getInstrument());
   detid_t id = ipeak.getDetectorID();
@@ -180,6 +184,23 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
     this->m_detIDs = peak->m_detIDs;
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Set the incident wavelength of the neutron. Calculates the energy from this.
+ * Assumes elastic scattering.
+ *
+ * @param wavelength :: wavelength in Angstroms.
+ */
+void Peak::setWavelength(double wavelength) {
+  // Velocity of the neutron (non-relativistic)
+  double velocity = PhysicalConstants::h /
+                    (wavelength * 1e-10 * PhysicalConstants::NeutronMass);
+  // Energy in J of the neutron
+  double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
+  // Convert to meV
+  m_initialEnergy = energy / PhysicalConstants::meV;
+  m_finalEnergy = m_initialEnergy;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -307,6 +328,22 @@ Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
+
+// -------------------------------------------------------------------------------------
+/** Calculate the neutron wavelength (in angstroms) at the peak
+ * (Note for inelastic scattering - it is the wavelength corresponding to the
+ * final energy)*/
+double Peak::getWavelength() const {
+  // Energy in J of the neutron
+  double energy = PhysicalConstants::meV * m_finalEnergy;
+  // v = sqrt(2.0 * E / m)
+  double velocity = sqrt(2.0 * energy / PhysicalConstants::NeutronMass);
+  // wavelength = h / mv
+  double wavelength =
+      PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
+  // Return it in angstroms
+  return wavelength * 1e10;
+}
 
 // -------------------------------------------------------------------------------------
 /** Calculate the time of flight (in microseconds) of the neutrons for this
@@ -615,6 +652,18 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
   return found;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Get the final neutron energy in meV */
+double Peak::getFinalEnergy() const { return m_finalEnergy; }
+
+/** Get the initial (incident) neutron energy in meV */
+double Peak::getInitialEnergy() const { return m_initialEnergy; }
+
+/** Get the difference between the initial and final neutron energy in meV */
+double Peak::getEnergyTransfer() const {
+  return getInitialEnergy() - getFinalEnergy();
+}
+
 /** Set sample position
  *
  * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
@@ -635,6 +684,18 @@ void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
   this->samplePos[0] = XYZ[0];
   this->samplePos[1] = XYZ[1];
   this->samplePos[2] = XYZ[2];
+}
+
+/** Set the final energy
+ * @param m_finalEnergy :: final energy in meV   */
+void Peak::setFinalEnergy(double m_finalEnergy) {
+  this->m_finalEnergy = m_finalEnergy;
+}
+
+/** Set the initial energy
+ * @param m_initialEnergy :: initial energy in meV   */
+void Peak::setInitialEnergy(double m_initialEnergy) {
+  this->m_initialEnergy = m_initialEnergy;
 }
 
 // -------------------------------------------------------------------------------------
@@ -664,6 +725,8 @@ Peak &Peak::operator=(const Peak &other) {
     m_inst = other.m_inst;
     m_det = other.m_det;
     m_detectorID = other.m_detectorID;
+    m_initialEnergy = other.m_initialEnergy;
+    m_finalEnergy = other.m_finalEnergy;
     sourcePos = other.sourcePos;
     samplePos = other.samplePos;
     detPos = other.detPos;

@@ -78,14 +78,6 @@ public:
   void setIntHKL(const Kernel::V3D &HKL) override;
   void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
 
-  void setWavelength(double wavelength) override;
-  double getWavelength() const override;
-  double getInitialEnergy() const override;
-  double getFinalEnergy() const override;
-  double getEnergyTransfer() const override;
-  void setInitialEnergy(double m_initialEnergy) override;
-  void setFinalEnergy(double m_finalEnergy) override;
-
   double getIntensity() const override;
   double getSigmaIntensity() const override;
   double getIntensityOverSigma() const override;
@@ -147,12 +139,6 @@ private:
 
   /// Count in the bin at the peak
   double m_binCount;
-
-  /// Initial energy of neutrons at the peak
-  double m_initialEnergy;
-
-  /// Final energy of the neutrons at peak (normally same as m_InitialEnergy)
-  double m_finalEnergy;
 
   /// absorption weighted path length (aka t bar)
   double m_absorptionWeightedPathLength;

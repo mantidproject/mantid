@@ -30,7 +30,8 @@ namespace DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
-LeanElasticPeak::LeanElasticPeak() : BasePeak(), m_Qsample(V3D(0, 0, 0)) {}
+LeanElasticPeak::LeanElasticPeak()
+    : BasePeak(), m_Qsample(V3D(0, 0, 0)), m_wavelength(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the sample frame)
@@ -55,9 +56,7 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
 LeanElasticPeak::LeanElasticPeak(
     const Mantid::Kernel::V3D &QSampleFrame,
     const Mantid::Kernel::Matrix<double> &goniometer)
-    : BasePeak(goniometer) {
-  this->setQSampleFrame(QSampleFrame);
-}
+    : BasePeak(goniometer), m_Qsample(QSampleFrame) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the sample frame)
@@ -70,10 +69,7 @@ LeanElasticPeak::LeanElasticPeak(
  */
 LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
                                  double wavelength)
-    : BasePeak() {
-  this->setQSampleFrame(QSampleFrame);
-  this->setWavelength(wavelength);
-}
+    : BasePeak(), m_Qsample(QSampleFrame), m_wavelength(wavelength) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -86,17 +82,15 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
 LeanElasticPeak::LeanElasticPeak(
     const Mantid::Kernel::V3D &QSampleFrame,
     const Mantid::Kernel::Matrix<double> &goniometer, double wavelength)
-    : BasePeak(goniometer) {
-  this->setQSampleFrame(QSampleFrame);
-  this->setWavelength(wavelength);
-}
+    : BasePeak(goniometer), m_Qsample(QSampleFrame), m_wavelength(wavelength) {}
 
 /**
  * @brief Copy constructor
  * @param other : Source
  */
 LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
-    : BasePeak(other), m_Qsample(other.m_Qsample) {}
+    : BasePeak(other), m_Qsample(other.m_Qsample),
+      m_wavelength(other.m_wavelength) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanElasticPeak from IPeak interface
@@ -104,7 +98,17 @@ LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
  * @param ipeak :: const reference to an IPeak object
  */
 LeanElasticPeak::LeanElasticPeak(const Geometry::IPeak &ipeak)
-    : BasePeak(ipeak), m_Qsample(ipeak.getQSampleFrame()) {}
+    : BasePeak(ipeak), m_Qsample(ipeak.getQSampleFrame()),
+      m_wavelength(ipeak.getWavelength()) {}
+
+//----------------------------------------------------------------------------------------------
+/** Set the wavelength of the neutron. Assumes elastic scattering.
+ *
+ * @param wavelength :: wavelength in Angstroms.
+ */
+void LeanElasticPeak::setWavelength(double wavelength) {
+  m_wavelength = wavelength;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Set the detector ID of the pixel at the centre of the peak and look up and
@@ -144,6 +148,10 @@ Geometry::Instrument_const_sptr LeanElasticPeak::getInstrument() const {
   throw Exception::NotImplementedError(
       "LeanElasticPeak::setInstrument(): Has no instrument");
 }
+
+// -------------------------------------------------------------------------------------
+/** Return the neutron wavelength (in angstroms) */
+double LeanElasticPeak::getWavelength() const { return m_wavelength; }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the time of flight (in microseconds) of the neutrons for this
@@ -222,20 +230,47 @@ void LeanElasticPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   this->setQSampleFrame(getInverseGoniometerMatrix() * qLab);
 }
 
-/** Set sample position
- *
- */
+//----------------------------------------------------------------------------------------------
+/** Get the final neutron energy in meV */
+double LeanElasticPeak::getFinalEnergy() const {
+  // Velocity of the neutron (non-relativistic)
+  const double velocity =
+      PhysicalConstants::h /
+      (m_wavelength * 1e-10 * PhysicalConstants::NeutronMass);
+  // Energy in J of the neutron
+  const double energy =
+      PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
+  // Convert to meV
+  return energy / PhysicalConstants::meV;
+}
+
+/** Get the initial (incident) neutron energy in meV */
+double LeanElasticPeak::getInitialEnergy() const { return getFinalEnergy(); }
+
+/** Get the difference between the initial and final neutron energy in meV,
+ * elastic so always 0 */
+double LeanElasticPeak::getEnergyTransfer() const { return 0.; }
+
+/** Set sample position */
 void LeanElasticPeak::setSamplePos(double, double, double) {
   throw Exception::NotImplementedError(
       "LeanElasticPeak has no sample information");
 }
 
-/** Set sample position
- *
- */
+/** Set sample position  */
 void LeanElasticPeak::setSamplePos(const Mantid::Kernel::V3D &) {
   throw Exception::NotImplementedError(
       "LeanElasticPeak has no sample information");
+}
+
+/** Set the final energy */
+void LeanElasticPeak::setFinalEnergy(double) {
+  throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
+}
+
+/** Set the initial energy */
+void LeanElasticPeak::setInitialEnergy(double) {
+  throw Exception::NotImplementedError("Use LeanElasticPeak::setWavelength");
 }
 
 // -------------------------------------------------------------------------------------
@@ -275,6 +310,7 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
   if (&other != this) {
     BasePeak::operator=(other);
     m_Qsample = other.m_Qsample;
+    m_wavelength = other.m_wavelength;
   }
   return *this;
 }

@@ -83,10 +83,18 @@ public:
   void setQLabFrame(const Mantid::Kernel::V3D &qLab,
                     boost::optional<double> = boost::none) override;
 
+  void setWavelength(double wavelength) override;
+  double getWavelength() const override;
   double getScattering() const override;
   double getAzimuthal() const override;
   double getDSpacing() const override;
   double getTOF() const override;
+
+  double getInitialEnergy() const override;
+  double getFinalEnergy() const override;
+  double getEnergyTransfer() const override;
+  void setInitialEnergy(double m_initialEnergy) override;
+  void setFinalEnergy(double m_finalEnergy) override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   virtual Mantid::Kernel::V3D getSamplePos() const override;
@@ -99,6 +107,9 @@ public:
 private:
   /// Q_sample vector
   Mantid::Kernel::V3D m_Qsample;
+
+  /// Initial energy of neutrons at the peak
+  double m_wavelength;
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;

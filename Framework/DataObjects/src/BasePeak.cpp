@@ -32,11 +32,11 @@ namespace DataObjects {
 /** Default constructor */
 BasePeak::BasePeak()
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
-      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {}
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
+      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor including goniometer
@@ -46,11 +46,11 @@ BasePeak::BasePeak()
 
 BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
-      m_binCount(0), m_initialEnergy(0.), m_finalEnergy(0.),
-      m_absorptionWeightedPathLength(0), m_GoniometerMatrix(goniometer),
-      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_row(-1), m_col(-1), m_peakNumber(0), m_intHKL(V3D(0, 0, 0)),
-      m_intMNP(V3D(0, 0, 0)), m_peakShape(std::make_shared<NoShape>()) {
+      m_binCount(0), m_absorptionWeightedPathLength(0),
+      m_GoniometerMatrix(goniometer), m_InverseGoniometerMatrix(goniometer),
+      m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
+      m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
+      m_peakShape(std::make_shared<NoShape>()) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "BasePeak::ctor(): Goniometer matrix must non-singular.");
@@ -60,8 +60,6 @@ BasePeak::BasePeak(const BasePeak &other)
     : m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
       m_L(other.m_L), m_intensity(other.m_intensity),
       m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
-      m_initialEnergy(other.m_initialEnergy),
-      m_finalEnergy(other.m_finalEnergy),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
@@ -80,8 +78,6 @@ BasePeak::BasePeak(const Geometry::IPeak &ipeak)
       m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()),
       m_binCount(ipeak.getBinCount()),
-      m_initialEnergy(ipeak.getInitialEnergy()),
-      m_finalEnergy(ipeak.getFinalEnergy()),
       m_absorptionWeightedPathLength(ipeak.getAbsorptionWeightedPathLength()),
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
@@ -93,39 +89,6 @@ BasePeak::BasePeak(const Geometry::IPeak &ipeak)
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Set the incident wavelength of the neutron. Calculates the energy from this.
- * Assumes elastic scattering.
- *
- * @param wavelength :: wavelength in Angstroms.
- */
-void BasePeak::setWavelength(double wavelength) {
-  // Velocity of the neutron (non-relativistic)
-  double velocity = PhysicalConstants::h /
-                    (wavelength * 1e-10 * PhysicalConstants::NeutronMass);
-  // Energy in J of the neutron
-  double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
-  // Convert to meV
-  m_initialEnergy = energy / PhysicalConstants::meV;
-  m_finalEnergy = m_initialEnergy;
-}
-
-// -------------------------------------------------------------------------------------
-/** Calculate the neutron wavelength (in angstroms) at the peak
- * (Note for inelastic scattering - it is the wavelength corresponding to the
- * final energy)*/
-double BasePeak::getWavelength() const {
-  // Energy in J of the neutron
-  double energy = PhysicalConstants::meV * m_finalEnergy;
-  // v = sqrt(2.0 * E / m)
-  double velocity = sqrt(2.0 * energy / PhysicalConstants::NeutronMass);
-  // wavelength = h / mv
-  double wavelength =
-      PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
-  // Return it in angstroms
-  return wavelength * 1e10;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,18 +109,6 @@ double BasePeak::getMonitorCount() const { return m_monitorCount; }
  * @param m_monitorCount :: the monitor count */
 void BasePeak::setMonitorCount(double m_monitorCount) {
   this->m_monitorCount = m_monitorCount;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get the final neutron energy in meV */
-double BasePeak::getFinalEnergy() const { return m_finalEnergy; }
-
-/** Get the initial (incident) neutron energy in meV */
-double BasePeak::getInitialEnergy() const { return m_initialEnergy; }
-
-/** Get the difference between the initial and final neutron energy in meV */
-double BasePeak::getEnergyTransfer() const {
-  return getInitialEnergy() - getFinalEnergy();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -265,18 +216,6 @@ void BasePeak::setBinCount(double m_binCount) { this->m_binCount = m_binCount; }
  * @param m_sigmaIntensity :: intensity error value   */
 void BasePeak::setSigmaIntensity(double m_sigmaIntensity) {
   this->m_sigmaIntensity = m_sigmaIntensity;
-}
-
-/** Set the final energy
- * @param m_finalEnergy :: final energy in meV   */
-void BasePeak::setFinalEnergy(double m_finalEnergy) {
-  this->m_finalEnergy = m_finalEnergy;
-}
-
-/** Set the initial energy
- * @param m_initialEnergy :: initial energy in meV   */
-void BasePeak::setInitialEnergy(double m_initialEnergy) {
-  this->m_initialEnergy = m_initialEnergy;
 }
 
 // -------------------------------------------------------------------------------------
@@ -438,8 +377,6 @@ BasePeak &BasePeak::operator=(const BasePeak &other) {
     m_intensity = other.m_intensity;
     m_sigmaIntensity = other.m_sigmaIntensity;
     m_binCount = other.m_binCount;
-    m_initialEnergy = other.m_initialEnergy;
-    m_finalEnergy = other.m_finalEnergy;
     m_GoniometerMatrix = other.m_GoniometerMatrix;
     m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
     m_runNumber = other.m_runNumber;

@@ -33,8 +33,8 @@ public:
     TS_ASSERT_EQUALS(p.getH(), 0.0)
     TS_ASSERT_EQUALS(p.getK(), 0.0)
     TS_ASSERT_EQUALS(p.getL(), 0.0)
-    TS_ASSERT_EQUALS(p.getInitialEnergy(), 0.0)
-    TS_ASSERT_EQUALS(p.getFinalEnergy(), 0.0)
+    TS_ASSERT(std::isinf(p.getInitialEnergy()))
+    TS_ASSERT(std::isinf(p.getFinalEnergy()))
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(0, 0, 0))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D())
 
@@ -49,7 +49,7 @@ public:
     TS_ASSERT_THROWS(p.getDetPos(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getSamplePos(), const Exception::NotImplementedError &)
     TS_ASSERT(std::isnan(p.getTOF()))
-    TS_ASSERT(std::isnan(p.getScattering()))
+    TS_ASSERT_EQUALS(p.getScattering(), 0.)
     TS_ASSERT(std::isnan(p.getAzimuthal()))
     TS_ASSERT_THROWS(p.getL1(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getL2(), const Exception::NotImplementedError &)
@@ -200,14 +200,13 @@ public:
   }
 
   void test_get_energy() {
-    const double initialEnergy{100};
-    const double finalEnergy{110};
     LeanElasticPeak p;
+    p.setWavelength(1.);
 
-    p.setInitialEnergy(initialEnergy);
-    p.setFinalEnergy(finalEnergy);
+    TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-7);
+    TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-7);
 
-    TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
+    TS_ASSERT_EQUALS(p.getEnergyTransfer(), 0.);
   }
 
   void test_Peak_to_LeanElasticPeak_through_IPeak() {
