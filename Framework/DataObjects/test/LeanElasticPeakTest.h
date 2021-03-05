@@ -10,7 +10,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/LeanPeak.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -19,15 +19,17 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class LeanPeakTest : public CxxTest::TestSuite {
+class LeanElasticPeakTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeanPeakTest *createSuite() { return new LeanPeakTest(); }
-  static void destroySuite(LeanPeakTest *suite) { delete suite; }
+  static LeanElasticPeakTest *createSuite() {
+    return new LeanElasticPeakTest();
+  }
+  static void destroySuite(LeanElasticPeakTest *suite) { delete suite; }
 
   void test_default_constructor() {
-    LeanPeak p;
+    LeanElasticPeak p;
     TS_ASSERT_EQUALS(p.getH(), 0.0)
     TS_ASSERT_EQUALS(p.getK(), 0.0)
     TS_ASSERT_EQUALS(p.getL(), 0.0)
@@ -54,7 +56,7 @@ public:
   }
 
   void test_Qsample_constructor() {
-    LeanPeak p(V3D(1, 2, 3));
+    LeanElasticPeak p(V3D(1, 2, 3));
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(1, 2, 3))
 
@@ -81,14 +83,14 @@ public:
     gon[1][0] = 1;
     gon[2][2] = 1;
 
-    LeanPeak p(V3D(1, 2, 3), gon);
+    LeanElasticPeak p(V3D(1, 2, 3), gon);
 
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
   }
 
   void test_Qsample_wavelength_constructor() {
-    LeanPeak p(V3D(1, 2, 3), 1.);
+    LeanElasticPeak p(V3D(1, 2, 3), 1.);
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(1, 2, 3))
 
@@ -107,7 +109,7 @@ public:
     gon[1][0] = 1;
     gon[2][2] = 1;
 
-    LeanPeak p(V3D(1, 2, 3), gon, 1.);
+    LeanElasticPeak p(V3D(1, 2, 3), gon, 1.);
 
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
@@ -123,9 +125,9 @@ public:
     gon[1][0] = 1;
     gon[2][2] = 1;
 
-    LeanPeak p(V3D(1, 2, 3), gon, 1.);
+    LeanElasticPeak p(V3D(1, 2, 3), gon, 1.);
     // Default (not-explicit) copy constructor
-    LeanPeak p2(p);
+    LeanElasticPeak p2(p);
     TS_ASSERT_EQUALS(p.getQSampleFrame(), p2.getQSampleFrame());
     TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
@@ -138,17 +140,17 @@ public:
     gon[1][0] = 1;
     gon[2][2] = 1;
 
-    LeanPeak p(V3D(1, 2, 3), gon, 1.);
+    LeanElasticPeak p(V3D(1, 2, 3), gon, 1.);
 
     const Mantid::Geometry::IPeak &ipeak = p;
-    LeanPeak p2(ipeak);
+    LeanElasticPeak p2(ipeak);
     TS_ASSERT_EQUALS(p.getQSampleFrame(), p2.getQSampleFrame());
     TS_ASSERT_EQUALS(p.getQLabFrame(), p2.getQLabFrame());
     TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
   }
 
   void test_HKL() {
-    LeanPeak p;
+    LeanElasticPeak p;
     p.setHKL(1.0, 2.0, 3.0);
     TS_ASSERT_EQUALS(p.getH(), 1.0);
     TS_ASSERT_EQUALS(p.getK(), 2.0);
@@ -167,7 +169,7 @@ public:
   }
 
   void test_isIndexed() {
-    LeanPeak p;
+    LeanElasticPeak p;
     TS_ASSERT_EQUALS(false, p.isIndexed());
     p.setHKL(1, 2, 3);
     TS_ASSERT_EQUALS(true, p.isIndexed());
@@ -176,7 +178,7 @@ public:
   void test_get_intensity_over_sigma() {
     const double intensity{100};
     const double sigma{10};
-    LeanPeak p;
+    LeanElasticPeak p;
 
     p.setIntensity(intensity);
     p.setSigmaIntensity(sigma);
@@ -187,7 +189,7 @@ public:
   void test_get_intensity_over_sigma_empty_sigma() {
     const double intensity{10};
     const double sigma{0};
-    LeanPeak p;
+    LeanElasticPeak p;
 
     p.setIntensity(intensity);
     p.setSigmaIntensity(sigma);
@@ -200,7 +202,7 @@ public:
   void test_get_energy() {
     const double initialEnergy{100};
     const double finalEnergy{110};
-    LeanPeak p;
+    LeanElasticPeak p;
 
     p.setInitialEnergy(initialEnergy);
     p.setFinalEnergy(finalEnergy);
@@ -208,7 +210,7 @@ public:
     TS_ASSERT_EQUALS(p.getEnergyTransfer(), initialEnergy - finalEnergy);
   }
 
-  void test_Peak_to_LeanPeak_through_IPeak() {
+  void test_Peak_to_LeanElasticPeak_through_IPeak() {
     Instrument_sptr inst(
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100));
 
@@ -227,7 +229,7 @@ public:
 
     const IPeak &ipeak = peak;
 
-    LeanPeak leanpeak(ipeak);
+    LeanElasticPeak leanpeak(ipeak);
 
     TS_ASSERT_EQUALS(leanpeak.getQSampleFrame(), peak.getQSampleFrame());
     V3D qsample = leanpeak.getQSampleFrame();

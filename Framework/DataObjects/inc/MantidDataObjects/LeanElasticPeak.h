@@ -21,26 +21,28 @@ namespace Mantid {
 namespace DataObjects {
 
 /** Structure describing a single-crystal peak. This is a version of
- * Peak that doesn't require the instrument. The peak is described
- * only by the Q-sample position. Optionally if the wavelength and
- * goniometer is provided other properties can be calculated.
+ * Peak that doesn't require the instrument and also assuming elastic
+ * scattering. The peak is described only by the Q-sample
+ * position. Optionally if the wavelength and goniometer is provided
+ * other properties can be calculated.
  *
  */
-class DLLExport LeanPeak : public BasePeak {
+class DLLExport LeanElasticPeak : public BasePeak {
 public:
   /// Allow PeakColumn class to directly access members.
   friend class PeakColumn;
 
-  LeanPeak();
-  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame);
-  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer);
-  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
-  LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer, double wavelength);
+  LeanElasticPeak();
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
+                  const Mantid::Kernel::Matrix<double> &goniometer);
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
+                  const Mantid::Kernel::Matrix<double> &goniometer,
+                  double wavelength);
 
   /// Copy constructor
-  LeanPeak(const LeanPeak &other);
+  LeanElasticPeak(const LeanElasticPeak &other);
 
   // MSVC 2015/17 can build with noexcept = default however
   // intellisense still incorrectly reports this as an error despite compiling.
@@ -48,15 +50,15 @@ public:
   // For that reason we still use the supplied default which should be noexcept
   // once the above is fixed we can remove this workaround
 #if defined(_MSC_VER) && _MSC_VER <= 1910
-  LeanPeak(LeanPeak &&) = default;
-  LeanPeak &operator=(LeanPeak &&) = default;
+  LeanElasticPeak(LeanElasticPeak &&) = default;
+  LeanElasticPeak &operator=(LeanElasticPeak &&) = default;
 #else
-  LeanPeak(LeanPeak &&) noexcept = default;
-  LeanPeak &operator=(LeanPeak &&) noexcept = default;
+  LeanElasticPeak(LeanElasticPeak &&) noexcept = default;
+  LeanElasticPeak &operator=(LeanElasticPeak &&) noexcept = default;
 #endif
 
   // Construct a peak from a reference to the interface
-  explicit LeanPeak(const Geometry::IPeak &ipeak);
+  explicit LeanElasticPeak(const Geometry::IPeak &ipeak);
 
   void setDetectorID(int) override;
   int getDetectorID() const override;
@@ -92,7 +94,7 @@ public:
   double getL2() const override;
 
   /// Assignment
-  LeanPeak &operator=(const LeanPeak &other);
+  LeanElasticPeak &operator=(const LeanElasticPeak &other);
 
 private:
   /// Q_sample vector

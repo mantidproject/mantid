@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/LeanPeak.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -30,7 +30,7 @@ namespace DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
-LeanPeak::LeanPeak() : BasePeak(), m_Qsample(V3D(0, 0, 0)) {}
+LeanElasticPeak::LeanElasticPeak() : BasePeak(), m_Qsample(V3D(0, 0, 0)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the sample frame)
@@ -40,7 +40,8 @@ LeanPeak::LeanPeak() : BasePeak(), m_Qsample(V3D(0, 0, 0)) {}
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame) : BasePeak() {
+LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
+    : BasePeak() {
   this->setQSampleFrame(QSampleFrame);
 }
 
@@ -51,8 +52,9 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame) : BasePeak() {
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  * @param goniometer :: a 3x3 rotation matrix
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-                   const Mantid::Kernel::Matrix<double> &goniometer)
+LeanElasticPeak::LeanElasticPeak(
+    const Mantid::Kernel::V3D &QSampleFrame,
+    const Mantid::Kernel::Matrix<double> &goniometer)
     : BasePeak(goniometer) {
   this->setQSampleFrame(QSampleFrame);
 }
@@ -66,7 +68,8 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
  *the sample frame (goniometer rotation accounted for).
  * @param wavelength :: wavelength in Angstroms.
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength)
+LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
+                                 double wavelength)
     : BasePeak() {
   this->setQSampleFrame(QSampleFrame);
   this->setWavelength(wavelength);
@@ -80,9 +83,9 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength)
  * @param goniometer :: a 3x3 rotation matrix
  * @param wavelength :: wavelength in Angstroms.
  */
-LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
-                   const Mantid::Kernel::Matrix<double> &goniometer,
-                   double wavelength)
+LeanElasticPeak::LeanElasticPeak(
+    const Mantid::Kernel::V3D &QSampleFrame,
+    const Mantid::Kernel::Matrix<double> &goniometer, double wavelength)
     : BasePeak(goniometer) {
   this->setQSampleFrame(QSampleFrame);
   this->setWavelength(wavelength);
@@ -92,15 +95,15 @@ LeanPeak::LeanPeak(const Mantid::Kernel::V3D &QSampleFrame,
  * @brief Copy constructor
  * @param other : Source
  */
-LeanPeak::LeanPeak(const LeanPeak &other)
+LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
     : BasePeak(other), m_Qsample(other.m_Qsample) {}
 
 //----------------------------------------------------------------------------------------------
-/** Constructor making a LeanPeak from IPeak interface
+/** Constructor making a LeanElasticPeak from IPeak interface
  *
  * @param ipeak :: const reference to an IPeak object
  */
-LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
+LeanElasticPeak::LeanElasticPeak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_Qsample(ipeak.getQSampleFrame()) {}
 
 //----------------------------------------------------------------------------------------------
@@ -108,61 +111,65 @@ LeanPeak::LeanPeak(const Geometry::IPeak &ipeak)
  * cache values related to it. It also adds it to the list of contributing
  * detectors for this peak but does NOT remove the old centre.
  */
-void LeanPeak::setDetectorID(int) {
+void LeanElasticPeak::setDetectorID(int) {
   throw Exception::NotImplementedError(
-      "LeanPeak::setDetectorID(): Can't set detectorID on LeanPeak");
+      "LeanElasticPeak::setDetectorID(): Can't set detectorID on "
+      "LeanElasticPeak");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int LeanPeak::getDetectorID() const { return -1; }
+int LeanElasticPeak::getDetectorID() const { return -1; }
 
 //----------------------------------------------------------------------------------------------
 /** Set the instrument (and save the source/sample pos).
  * Call setDetectorID AFTER this call.
  *
  */
-void LeanPeak::setInstrument(const Geometry::Instrument_const_sptr &) {
+void LeanElasticPeak::setInstrument(const Geometry::Instrument_const_sptr &) {
   throw Exception::NotImplementedError(
-      "LeanPeak::setInstrument(): Can't set instrument on LeanPeak");
+      "LeanElasticPeak::setInstrument(): Can't set instrument on "
+      "LeanElasticPeak");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Return a shared ptr to the detector at center of peak. */
-Geometry::IDetector_const_sptr LeanPeak::getDetector() const {
+Geometry::IDetector_const_sptr LeanElasticPeak::getDetector() const {
   throw Exception::NotImplementedError(
-      "LeanPeak::getDetector(): Has no detector ID");
+      "LeanElasticPeak::getDetector(): Has no detector ID");
 }
 
 /** Return a shared ptr to the instrument for this peak. */
-Geometry::Instrument_const_sptr LeanPeak::getInstrument() const {
+Geometry::Instrument_const_sptr LeanElasticPeak::getInstrument() const {
   throw Exception::NotImplementedError(
-      "LeanPeak::setInstrument(): Has no instrument");
+      "LeanElasticPeak::setInstrument(): Has no instrument");
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the time of flight (in microseconds) of the neutrons for this
  * peak,
  * using the geometry of the detector  */
-double LeanPeak::getTOF() const {
+double LeanElasticPeak::getTOF() const {
   return std::numeric_limits<double>::quiet_NaN();
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the scattering angle of the peak  */
-double LeanPeak::getScattering() const {
+double LeanElasticPeak::getScattering() const {
   return asin(getWavelength() / (2 * getDSpacing())) * 2;
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the azimuthal angle of the peak  */
-double LeanPeak::getAzimuthal() const {
+double LeanElasticPeak::getAzimuthal() const {
   return std::numeric_limits<double>::quiet_NaN();
 }
 
 // -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
-double LeanPeak::getDSpacing() const { return 2 * M_PI / m_Qsample.norm(); }
+double LeanElasticPeak::getDSpacing() const {
+  return 2 * M_PI / m_Qsample.norm();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Return the Q change (of the lattice, k_i - k_f) for this peak.
@@ -170,14 +177,16 @@ double LeanPeak::getDSpacing() const { return 2 * M_PI / m_Qsample.norm(); }
  *
  * Note: There is a 2*pi factor used, so |Q| = 2*pi/wavelength.
  * */
-Mantid::Kernel::V3D LeanPeak::getQLabFrame() const {
+Mantid::Kernel::V3D LeanElasticPeak::getQLabFrame() const {
   return getGoniometerMatrix() * m_Qsample;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Return the Q change (of the lattice, k_i - k_f) for this peak.
  * The Q is in the Sample frame: the goniometer rotation WAS taken out. */
-Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const { return m_Qsample; }
+Mantid::Kernel::V3D LeanElasticPeak::getQSampleFrame() const {
+  return m_Qsample;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Set the peak using the peak's position in reciprocal space, in the sample
@@ -190,8 +199,8 @@ Mantid::Kernel::V3D LeanPeak::getQSampleFrame() const { return m_Qsample; }
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
  */
-void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                               boost::optional<double>) {
+void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                                      boost::optional<double>) {
   m_Qsample = QSampleFrame;
 }
 
@@ -208,47 +217,53 @@ void LeanPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *        Angstroms).
  */
-void LeanPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
-                            boost::optional<double>) {
+void LeanElasticPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
+                                   boost::optional<double>) {
   this->setQSampleFrame(getInverseGoniometerMatrix() * qLab);
 }
 
 /** Set sample position
  *
  */
-void LeanPeak::setSamplePos(double, double, double) {
-  throw Exception::NotImplementedError("LeanPeak has no sample information");
+void LeanElasticPeak::setSamplePos(double, double, double) {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no sample information");
 }
 
 /** Set sample position
  *
  */
-void LeanPeak::setSamplePos(const Mantid::Kernel::V3D &) {
-  throw Exception::NotImplementedError("LeanPeak has no sample information");
+void LeanElasticPeak::setSamplePos(const Mantid::Kernel::V3D &) {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
-Mantid::Kernel::V3D LeanPeak::getDetPos() const {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+Mantid::Kernel::V3D LeanElasticPeak::getDetPos() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the sample position vector */
-Mantid::Kernel::V3D LeanPeak::getSamplePos() const {
-  throw Exception::NotImplementedError("LeanPeak has no sample information");
+Mantid::Kernel::V3D LeanElasticPeak::getSamplePos() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no sample information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
-double LeanPeak::getL1() const {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+double LeanElasticPeak::getL1() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
-double LeanPeak::getL2() const {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+double LeanElasticPeak::getL2() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 /**
@@ -256,7 +271,7 @@ double LeanPeak::getL2() const {
  * @param other : Other peak object to assign from
  * @return this
  */
-LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
+LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
   if (&other != this) {
     BasePeak::operator=(other);
     m_Qsample = other.m_Qsample;
@@ -273,8 +288,9 @@ LeanPeak &LeanPeak::operator=(const LeanPeak &other) {
  *
  * @return true if the detector ID was found.
  */
-bool LeanPeak::findDetector() {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+bool LeanElasticPeak::findDetector() {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 /**
@@ -284,26 +300,29 @@ bool LeanPeak::findDetector() {
  * over the same instrument.
  * @return true if the detector ID was found.
  */
-bool LeanPeak::findDetector(const InstrumentRayTracer &) {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+bool LeanElasticPeak::findDetector(const InstrumentRayTracer &) {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 /**
  Forwarding function. Exposes the detector position directly.
  */
-Mantid::Kernel::V3D LeanPeak::getDetectorPositionNoCheck() const {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+Mantid::Kernel::V3D LeanElasticPeak::getDetectorPositionNoCheck() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
 /**
  Forwarding function. Exposes the detector position directly, but checks that
  the detector is not null before accessing its position. Throws if null.
  */
-Mantid::Kernel::V3D LeanPeak::getDetectorPosition() const {
-  throw Exception::NotImplementedError("LeanPeak has no detector information");
+Mantid::Kernel::V3D LeanElasticPeak::getDetectorPosition() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak has no detector information");
 }
 
-Mantid::Kernel::Logger LeanPeak::g_log("PeakLogger");
+Mantid::Kernel::Logger LeanElasticPeak::g_log("PeakLogger");
 
 } // namespace DataObjects
 } // namespace Mantid
