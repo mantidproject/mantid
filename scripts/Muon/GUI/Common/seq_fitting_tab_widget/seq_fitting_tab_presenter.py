@@ -25,6 +25,7 @@ class SeqFittingTabPresenter(object):
         self.fitting_calculation_model = None
 
         self.fit_parameter_changed_notifier = GenericObservable()
+        self.sequential_fit_finished_notifier = GenericObservable()
 
         # Observers
         self.selected_workspaces_observer = GenericObserver(self.handle_selected_workspaces_changed)
@@ -108,8 +109,6 @@ class SeqFittingTabPresenter(object):
         for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds,
                                                                   self.selected_rows):
             parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function, row)
-            from mantid import logger
-            logger.warning(str(parameter_values))
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
             self.view.fit_table.set_fit_quality(row, fit_status, fit_chi_squared)
 
@@ -122,6 +121,8 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_selection_to_last_row()
         else:
             self.handle_fit_selected_in_table()
+
+        self.sequential_fit_finished_notifier.notify_subscribers()
 
     def handle_updated_fit_parameter_in_table(self, index):
         self._update_parameter_values_in_fitting_model_for_row(index.row())
