@@ -153,6 +153,8 @@ class DrillPresenter:
             Returns:
                 str: A string that represents the incremented input value
             """
+            if i == 0:
+                return value
             if ',' in value:
                 return ','.join([inc(e, i) for e in value.split(',')])
             if '+' in value:
@@ -164,7 +166,10 @@ class DrillPresenter:
                 except:
                     return value
                 if len(l) == 2:
-                    return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
+                    if i > 0:
+                        return str(l[1] + i) + ':' + str(l[1] + (l[1] - l[0]) + i)
+                    else:
+                        return str(l[0] - (l[1] - l[0]) + i) + ':' + str(l[0] + i)
                 if len(l) == 3:
                     return inc(str(l[0]) + ':' + str(l[1]), i) + ':' + str(l[2])
                 else:
