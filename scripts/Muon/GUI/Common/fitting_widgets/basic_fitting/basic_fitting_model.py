@@ -483,7 +483,8 @@ class BasicFittingModel:
 
     def perform_fit(self) -> tuple:
         """Performs a single fit and returns the resulting function, status and chi squared."""
-        function, fit_status, chi_squared = self._do_single_fit(self._get_parameters_for_single_fit())
+        function, fit_status, chi_squared = self._do_single_fit(self._get_parameters_for_single_fit(
+            self.current_dataset_name, self.current_single_fit_function))
         return function, fit_status, chi_squared
 
     def _do_single_fit(self, parameters: dict) -> tuple:
@@ -503,18 +504,18 @@ class BasicFittingModel:
         CopyLogs(InputWorkspace=self.current_dataset_name, OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, parameter_table, function, fit_status, chi_squared, covariance_matrix
 
-    def _get_parameters_for_single_fit(self) -> dict:
+    def _get_parameters_for_single_fit(self, dataset_name: str, single_fit_function: IFunction) -> dict:
         """Returns the parameters used for a single fit."""
         params = self._get_common_parameters()
-        params["InputWorkspace"] = self.current_dataset_name
+        params["Function"] = single_fit_function
+        params["InputWorkspace"] = dataset_name
         params["StartX"] = self.current_start_x
         params["EndX"] = self.current_end_x
         return params
 
     def _get_common_parameters(self) -> dict:
         """Returns the parameters which are common across different fitting modes."""
-        return {"Function": self.get_active_fit_function(),
-                "Minimizer": self.minimizer,
+        return {"Minimizer": self.minimizer,
                 "EvaluationType": self.evaluation_type}
 
     def _create_fit_algorithm(self) -> IAlgorithm:
