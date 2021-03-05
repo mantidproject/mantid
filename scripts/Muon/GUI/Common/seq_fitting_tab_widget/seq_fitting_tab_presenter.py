@@ -89,8 +89,7 @@ class SeqFittingTabPresenter(object):
             return
 
         workspace_names = [self.get_workspaces_for_row_in_fit_table(row) for row in self.selected_rows]
-
-        parameter_values = []
+        parameter_values = [self.view.fit_table.get_fit_parameter_values_from_row(row) for row in self.selected_rows]
 
         calculation_function = functools.partial(self.model.perform_sequential_fit, workspace_names, parameter_values,
                                                  self.view.use_initial_values_for_fits())
