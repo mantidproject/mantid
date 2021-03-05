@@ -23,6 +23,7 @@ Algorithms
 Data Objects
 ------------
 
+- exposed ``geographicalAngles`` method on :py:obj:`mantid.api.SpectrumInfo`
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 
 Python
