@@ -114,7 +114,7 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
             if self.model.simultaneous_fitting_mode:
                 self.model.update_simultaneous_fit_functions(fit_function)
             else:
-                self.model.update_current_single_fit_functions(fit_function)
+                self.model.update_tf_single_fit_function(self.model.current_dataset_index, fit_function)
         else:
             super().update_fit_function_in_model(fit_function)
 
