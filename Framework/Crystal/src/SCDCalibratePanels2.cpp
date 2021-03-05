@@ -28,7 +28,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <boost/math/special_functions/round.hpp>
-
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -295,6 +295,11 @@ void SCDCalibratePanels2::exec() {
   if (calibrateBanks) {
     g_log.notice() << "** Calibrating L2 and orientation (bank) as requested\n";
     optimizeBanks(m_pws);
+    // dx, dy, dz --> 1um
+    // theta, phi, rotang --> 1e-3 deg
+    // double search_step_bank[6] = {1e-6, 1e-6, 1e-6, 0.0, 0.0, 0.0};
+    // double threshold_bank = 1e-6;
+    // twiddle_search_banks(m_pws, search_step_bank, threshold_bank);
   }
 
   // STEP_3: generate a table workspace to save the calibration results
@@ -403,7 +408,6 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws) {
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("InputWorkspace", l1ws);
   fitL1_alg->setProperty("CreateOutput", true);
-  fitL1_alg->setProperty("Minimizer", "Levenberg-MarquardtMD");
   fitL1_alg->setProperty("Output", "fit");
   fitL1_alg->executeAsChildAlg();
 
@@ -698,7 +702,7 @@ void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
     //-- step 1: twiddle search
     double params[6] = {0.0, 0.0, 0.0,  // dx, dy, dz
                         0.0, 0.0, 0.0}; // theta, phi, ang
-    double best_err = objfunc_bank(pwsBanki, params);
+    double best_err = objfunc_bank(pwsBanki, params, bankname);
     double err;
     int niter = 0;
 
@@ -713,7 +717,7 @@ void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
       for (int i = 0; i < 6; ++i) {
         // search positive direction +1
         params[i] += searchStep[i];
-        err = objfunc_bank(pwsBanki, params);
+        err = objfunc_bank(pwsBanki, params, bankname);
 
         if (err < best_err) {
           // got a hit, increase step size
@@ -722,7 +726,7 @@ void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
         } else {
           // search negative direction +1-2 => -1
           params[i] -= 2 * searchStep[i];
-          err = objfunc_bank(pwsBanki, params);
+          err = objfunc_bank(pwsBanki, params, bankname);
 
           if (err < best_err) {
             // got a hit, increase step size
@@ -738,25 +742,51 @@ void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
           }
         }
       }
-
       niter += 1;
-
       stepsSum = 0.0;
       for (int i = 0; i < 6; ++i)
         stepsSum += searchStep[i];
 
       // logging
+      V3D xyz = V3D(params[0], params[1], params[2]);
+      double _theta = params[3];
+      double _phi = params[4];
+      double _ang = params[5];
+      V3D rotvec =
+          V3D(sin(_theta) * cos(_phi), sin(_theta) * sin(_phi), cos(_theta));
       std::ostringstream logmsg;
       logmsg.precision(12);
       logmsg << bankname << "@iter_" << niter << "\n"
              << "-- best_err: " << best_err << "\n"
-             << "-- params: " << params << "\n";
-      g_log.information() << logmsg.str();
+             << "-- (dx,dy,dz): " << xyz << "\n"
+             << "-- ang@rotvec: " << _ang << "@" << rotvec << "\n";
+      g_log.notice() << logmsg.str();
     }
 
     //-- step 2: move bank to corresponding location
+    const double dx = params[0];
+    const double dy = params[1];
+    const double dz = params[2];
+    const double theta = params[3];
+    const double phi = params[4];
+    const double rotang = params[5];
+    double rvx = sin(theta) * cos(phi);
+    double rvy = sin(theta) * sin(phi);
+    double rvz = cos(theta);
+    std::string bn = bankname;
+    if (pws->getInstrument()->getName().compare("CORELLI") == 0)
+      bn.append("/sixteenpack");
+    adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
 
     //-- step 3: log
+    V3D dxyz = V3D(dx, dy, dz);
+    V3D rv = V3D(rvx, rvy, rvz);
+    std::ostringstream msg;
+    msg.precision(8);
+    msg << bankname << " calibration results:\n"
+        << "(dx, dy, dz) = " << dxyz << "\n"
+        << "ang@rot-axis = " << rotang << "@" << rv << "\n";
+    g_log.notice() << msg.str();
 
     PARALLEL_END_INTERUPT_REGION
   }
@@ -764,8 +794,60 @@ void SCDCalibratePanels2::twiddle_search_banks(IPeaksWorkspace_sptr pws,
 }
 
 double SCDCalibratePanels2::objfunc_bank(IPeaksWorkspace_sptr pwsBank,
-                                         double params[6]) {
-  return 0.0;
+                                         double params[6],
+                                         std::string bankname) {
+  // prep
+  double err = 0.0;
+  double tof = 0.0;
+  V3D qv_target;
+  V3D qv_calc;
+  V3D delta_qv;
+  Units::Wavelength wl;
+
+  // only operate on the clone
+  IPeaksWorkspace_sptr pws = pwsBank->clone();
+
+  // purturb the instrument
+  const double dx = params[0];
+  const double dy = params[1];
+  const double dz = params[2];
+  const double theta = params[3];
+  const double phi = params[4];
+  const double rotang = params[5];
+  double rvx = sin(theta) * cos(phi);
+  double rvy = sin(theta) * sin(phi);
+  double rvz = cos(theta);
+  std::string bn = bankname;
+  if (pws->getInstrument()->getName().compare("CORELLI") == 0)
+    bn.append("/sixteenpack");
+  adjustComponent(dx, dy, dz, rvx, rvy, rvz, rotang, bn, pws);
+
+  // calculate the residual
+  auto ubmatrix = pws->sample().getOrientedLattice().getUB();
+  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    qv_target = ubmatrix * pwsBank->getPeak(i).getIntHKL();
+    qv_target *= 2 * PI;
+
+    // cache time-of-flight
+    tof = pws->getPeak(i).getTOF();
+
+    // get qv with updated instrument
+    Peak pk = Peak(pws->getPeak(i));
+    pk.setInstrument(pws->getInstrument());
+    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                  pk.getInitialEnergy(), 0.0);
+    pk.setDetectorID(pws->getPeak(i).getDetectorID());
+    pk.setWavelength(wl.singleFromTOF(tof));
+
+    // calculate the residual
+    qv_calc = pk.getQSampleFrame();
+    delta_qv = qv_calc - qv_target;
+    err += delta_qv.norm2();
+  }
+
+  err /= pws->getNumberPeaks();
+
+  return err;
 }
 
 /// ---------------- ///
@@ -807,22 +889,17 @@ void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
  * @param pws
  */
 void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
-  IAlgorithm_sptr findUB_alg =
-      createChildAlgorithm("FindUBUsingLatticeParameters", -1, -1, false);
-  findUB_alg->setLogging(LOGCHILDALG);
-  findUB_alg->setProperty("PeaksWorkspace", pws);
-  findUB_alg->setProperty("a", m_a);
-  findUB_alg->setProperty("b", m_b);
-  findUB_alg->setProperty("c", m_c);
-  findUB_alg->setProperty("alpha", m_alpha);
-  findUB_alg->setProperty("beta", m_beta);
-  findUB_alg->setProperty("gamma", m_gamma);
-  findUB_alg->setProperty("FixParameters", true);
-  findUB_alg->setProperty("NumInitial", 15);       // all four properties
-  findUB_alg->setProperty("Tolerance", 0.15);      // are using their default
-  findUB_alg->setProperty("FixParameters", false); // values
-  findUB_alg->setProperty("Iterations", 1);        //
-  findUB_alg->executeAsChildAlg();
+  IAlgorithm_sptr calcUB_alg =
+      createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  calcUB_alg->setLogging(LOGCHILDALG);
+  calcUB_alg->setProperty("PeaksWorkspace", pws);
+  calcUB_alg->setProperty("a", m_a);
+  calcUB_alg->setProperty("b", m_b);
+  calcUB_alg->setProperty("c", m_c);
+  calcUB_alg->setProperty("alpha", m_alpha);
+  calcUB_alg->setProperty("beta", m_beta);
+  calcUB_alg->setProperty("gamma", m_gamma);
+  calcUB_alg->executeAsChildAlg();
 
   // Since UB is updated, we need to redo the indexation
   IAlgorithm_sptr idxpks_alg =
@@ -930,23 +1007,6 @@ SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
       yvector[i * 3 + j] = qv[j];
       evector[i * 3 + j] = 1;
     }
-
-    // -- Why we need the 2PI here --
-    // debug output to show case the hist1D for fitting
-    // g_log.notice() << "@peak" << i << "\n"
-    //                << "getIntHKL() = " << pws->getPeak(i).getIntHKL() << "\n"
-    //                << "-- original qv:" << pws->getPeak(i).getQSampleFrame()
-    //                << "\n"
-    //                << "-- inthkl-> qv:" << qv << "\n";
-    //
-    // SCDCalibratePanels-[Notice] @peak0
-    // SCDCalibratePanels-[Notice] getIntHKL() = [1,-5,1]
-    // SCDCalibratePanels-[Notice] -- original qv:[-5.58787,1.1569,1.89309]
-    // SCDCalibratePanels-[Notice] -- inthkl-> qv:[-5.59053,1.15834,1.88903]
-    // SCDCalibratePanels-[Notice] @peak1
-    // SCDCalibratePanels-[Notice] getIntHKL() = [1,-3,1]
-    // SCDCalibratePanels-[Notice] -- original qv:[-3.58063,1.15724,0.728382]
-    // SCDCalibratePanels-[Notice] -- inthkl-> qv:[-3.58662,1.15804,0.732834]
   }
 
   return mws;
