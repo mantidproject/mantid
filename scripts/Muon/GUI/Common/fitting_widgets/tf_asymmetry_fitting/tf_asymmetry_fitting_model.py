@@ -577,12 +577,28 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     Methods used by the Sequential Fitting Tab
     """
 
-    def _parse_parameter_values(self, parameter_values: list):
+    def _parse_parameter_values(self, all_parameter_values: list):
         """Separate the parameter values into the normalisations and ordinary parameter values."""
-        if self.tf_asymmetry_mode:
-            return parameter_values[self.number_of_datasets:], parameter_values[:self.number_of_datasets]
-        else:
-            return parameter_values, []
+        if not self.tf_asymmetry_mode:
+            return all_parameter_values, []
+
+        if not self.simultaneous_fitting_mode:
+            return all_parameter_values[1:], all_parameter_values[:1]
+
+        return self._parse_parameter_values_for_tf_asymmetry_simultaneous_mode(all_parameter_values)
+
+    def _parse_parameter_values_for_tf_asymmetry_simultaneous_mode(self, all_parameter_values: list):
+        """Separate the parameter values into the normalisations and ordinary parameter values."""
+        n_params_per_domain = int(len(all_parameter_values) / self.number_of_datasets)
+
+        parameter_values, normalisations = [], []
+        for parameter_index in range(len(all_parameter_values)):
+            if parameter_index % n_params_per_domain == 0:
+                normalisations.append(all_parameter_values[parameter_index])
+            else:
+                parameter_values.append(all_parameter_values[parameter_index])
+
+        return parameter_values, normalisations
 
     def update_ws_fit_function_parameters(self, dataset_names: list, parameter_values: list) -> None:
         """Updates the function parameter values for the given dataset names."""
@@ -697,16 +713,20 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 for name in self.dataset_names]
         return [";".join(runs)], [self.simultaneous_fit_by_specifier]
 
-    def perform_sequential_fit(self, workspaces: list, use_initial_values: bool = False):
-        """Performs a sequential fit of the workspace names provided for the current fitting mode. The workspaces
-        are provided as a list of lists [[Row 1 workspaces], [Row 2 workspaces], etc...]"""
+    def perform_sequential_fit(self, workspaces: list, parameter_values: list, use_initial_values: bool = False):
+        """Performs a sequential fit of the workspace names provided for the current fitting mode.
+
+        :param workspaces: A list of lists of workspace names e.g. [[Row 1 workspaces], [Row 2 workspaces], etc...]
+        :param parameter_values: A list of lists of parameter values e.g. [[Row 1 params], [Row 2 params], etc...]
+        :param use_initial_values: If false the parameters at the end of each fit are passed on to the next fit.
+        """
         if self.tf_asymmetry_mode:
             fitting_func = self._get_sequential_fitting_func_for_tf_asymmetry_fitting_mode()
         else:
             fitting_func = self._get_sequential_fitting_func_for_normal_fitting_mode()
 
         workspaces = self._flatten_workspace_names_if_in_single_fit_mode(workspaces)
-        return self._evaluate_sequential_fit(fitting_func, workspaces, use_initial_values)
+        return self._evaluate_sequential_fit(fitting_func, workspaces, parameter_values, use_initial_values)
 
     def _get_sequential_fitting_func_for_normal_fitting_mode(self):
         """Returns the fitting func to use when performing a fit in normal fitting mode."""
@@ -729,12 +749,14 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return workspaces
 
-    def _evaluate_sequential_fit(self, fitting_func, workspace_names: list, use_initial_values: bool = False):
+    def _evaluate_sequential_fit(self, fitting_func, workspace_names: list, parameter_values: list,
+                                 use_initial_values: bool = False):
         """Evaluates a sequential fit using the provided fitting func. The workspace_names is either a 1D or 2D list."""
         functions, fit_statuses, chi_squared_list = [], [], []
 
         for row_index, row_workspaces in enumerate(workspace_names):
-            function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, functions, use_initial_values)
+            function, fit_status, chi_squared = fitting_func(row_index, row_workspaces, parameter_values[row_index],
+                                                             functions, use_initial_values)
 
             functions.append(function)
             fit_statuses.append(fit_status)
@@ -742,7 +764,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
         return functions, fit_statuses, chi_squared_list
 
-    def _do_sequential_fit(self, row_index: int, workspace_name: str, functions: list,
+    def _do_sequential_fit(self, row_index: int, workspace_name: str, parameter_values: list, functions: list,
                            use_initial_values: bool = False):
         """Performs a sequential fit of the single fit data."""
         single_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
@@ -752,8 +774,8 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
         return self._do_single_fit(params)
 
-    def _do_sequential_simultaneous_fits(self, row_index: int, workspace_names: list, functions: list,
-                                         use_initial_values: bool = False):
+    def _do_sequential_simultaneous_fits(self, row_index: int, workspace_names: list, parameter_values: list,
+                                         functions: list, use_initial_values: bool = False):
         """Performs a number of simultaneous fits, sequentially."""
         simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
                 self.simultaneous_fit_function
@@ -762,8 +784,8 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
         return self._do_simultaneous_fit(params, self.global_parameters)
 
-    def _do_sequential_tf_asymmetry_fit(self, row_index: int, workspace_name: str, functions: list,
-                                        use_initial_values: bool = False):
+    def _do_sequential_tf_asymmetry_fit(self, row_index: int, workspace_name: str, parameter_values: list,
+                                        functions: list, use_initial_values: bool = False):
         """Performs a sequential fit of the TF Asymmetry single fit data."""
         tf_single_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
                 self.current_tf_asymmetry_single_function
@@ -772,7 +794,8 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
         return self._do_tf_asymmetry_single_fit(params)
 
-    def _do_sequential_tf_asymmetry_simultaneous_fits(self, row_index: int, workspace_names: list, functions: list,
+    def _do_sequential_tf_asymmetry_simultaneous_fits(self, row_index: int, workspace_names: list,
+                                                      parameter_values: list, functions: list,
                                                       use_initial_values: bool = False):
         """Performs a number of TF Asymmetry simultaneous fits, sequentially."""
         tf_simultaneous_function = functions[row_index - 1] if not use_initial_values and row_index >= 1 else \
