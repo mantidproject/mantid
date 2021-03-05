@@ -127,6 +127,9 @@ InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
   const auto colorBar = encodeColorBar(tab->m_colorBarWidget);
   map.insert(QString("colorBar"), QVariant(colorBar));
 
+  map.insert(QString("freezeRotation"),
+             QVariant(tab->m_freezeRotation->isChecked()));
+
   return map;
 }
 
