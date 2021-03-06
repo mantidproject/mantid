@@ -16,6 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <sstream>
 #include <type_traits>
 
 namespace Mantid {
@@ -75,7 +76,10 @@ template <typename T>
 std::string toPrettyString(const T &value, size_t maxLength = 0,
                            bool collapseLists = true) {
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
+  std::ostringstream ss;
+  ss.precision(std::numeric_limits<T>::digits10);
+  ss << value;
+  return Strings::shorten(ss.str(), maxLength);
 }
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
@@ -102,8 +106,14 @@ std::string toPrettyString(
         nullptr) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
-  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
-                          maxLength);
+  std::ostringstream ss;
+  ss.precision(std::numeric_limits<T>::digits10);
+  for (auto it = value.cbegin(); it != value.cend(); it++) {
+    if (it != value.cbegin())
+      ss << delimiter;
+    ss << *it;
+  }
+  return Strings::shorten(ss.str(), maxLength);
 }
 
 /** Specialization for a property of type std::vector of integral types.
