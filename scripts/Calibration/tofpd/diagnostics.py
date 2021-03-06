@@ -1,8 +1,7 @@
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
-from mantid.simpleapi import CalculateDIFC, LoadDiffCal, LoadEmptyInstrument, mtd
+from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
 import matplotlib.pyplot as plt
-import six
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import numpy as np
@@ -59,7 +58,7 @@ def _get_difc_ws(wksp, instr_ws=None):
     else:
         # If workspace exists, check if it is a SpecialWorkspace2D (result from CalculateDIFC)
         if mtd[ws_str].id() == "SpecialWorkspace2D":
-            return mtd[ws_str]
+            difc_ws = mtd[ws_str]
         elif mtd[ws_str].id() == "TableWorkspace":
             if not mtd.doesExist(str(instr_ws)):
                 raise RuntimeError("Expected instrument workspace instr_ws to use with calibration tables")
@@ -139,8 +138,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
     if ws_old is None:
         # If no second workspace is given, then load default instrument to compare against
         instr_name = ws_new.getInstrument().getName()
-        empty_instr = LoadEmptyInstrument(InstrumentName=instr_name, OutputWorkspace="__def_{}".format(instr_name))
-        ws_old = CalculateDIFC(InputWorkspace=empty_instr, OutputWorkspace="__difc_{}".format(instr_name))
+        ws_old = CalculateDIFC(InputWorkspace=ws_new, OutputWorkspace="__difc_{}".format(instr_name))
 
     delta = ws_new - ws_old
 
@@ -171,7 +169,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
     # Use the largest solid angle for circle radius
     sample_position = info.samplePosition()
     maximum_solid_angle = 0.0
-    for idx in six.moves.xrange(info.size()):
+    for idx in range(info.size()):
         maximum_solid_angle = max(maximum_solid_angle, delta.getDetector(idx).solidAngle(sample_position))
 
     # Convert to degrees for plotting
@@ -187,12 +185,12 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
     # Small circles seem to alias less than rectangles.
     radius = maximum_solid_angle * 8.0
     patches = []
-    for x1, y1 in six.moves.zip(theta_array, phi_array):
+    for x1, y1 in zip(theta_array, phi_array):
         circle = Circle((x1, y1), radius)
         patches.append(circle)
 
     masked_patches = []
-    for x1, y1 in six.moves.zip(masked_theta_array, masked_phi_array):
+    for x1, y1 in zip(masked_theta_array, masked_phi_array):
         circle = Circle((x1, y1), radius)
         masked_patches.append(circle)
 
