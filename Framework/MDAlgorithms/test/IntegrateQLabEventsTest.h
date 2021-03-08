@@ -122,5 +122,4 @@ public:
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
     }
   }
-
 };

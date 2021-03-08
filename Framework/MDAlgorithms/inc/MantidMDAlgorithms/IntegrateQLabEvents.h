@@ -6,18 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
 #include <memory>
 
+#include <boost/container_hash/hash.hpp>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
-#include <boost/container_hash/hash.hpp>
 
 namespace Mantid {
 
@@ -27,10 +27,10 @@ class PeakShape;
 namespace DataObjects {
 using DataObjects::EventWorkspace_sptr;
 class PeakShapeEllipsoid;
-}
+} // namespace DataObjects
 namespace MDAlgorithms {
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::PeakShape_const_sptr;
+using Mantid::Kernel::V3D;
 
 /// Cubic lattice coordinates in Q-space
 struct CellCoords {
@@ -38,25 +38,24 @@ struct CellCoords {
   int64_t b;
   int64_t c;
 
-  CellCoords(const V3D &q, const double cellSize) :
-    a(static_cast<int64_t>(q[0]/cellSize)),
-    b(static_cast<int64_t>(q[1]/cellSize)),
-    c(static_cast<int64_t>(q[2]/cellSize)) {}
+  CellCoords(const V3D &q, const double cellSize)
+      : a(static_cast<int64_t>(q[0] / cellSize)),
+        b(static_cast<int64_t>(q[1] / cellSize)),
+        c(static_cast<int64_t>(q[2] / cellSize)) {}
 
   /// Check if all cell coords are zero
-  bool isOrigin() {return !(a || b || c);}
+  bool isOrigin() { return !(a || b || c); }
 
   /// cast coordinates to scalar, to be used as key in an unordered map
-  int64_t getHash(){
-    return 1000000000000 * a + 100000000 * b + 10000 * c;
-  }
+  int64_t getHash() { return 1000000000000 * a + 100000000 * b + 10000 * c; }
 
-  /// Hashes for the 26 first neighbor coordinates plus the coordinates themselves
-  std::vector<int64_t> nearbyCellHashes(){
+  /// Hashes for the 26 first neighbor coordinates plus the coordinates
+  /// themselves
+  std::vector<int64_t> nearbyCellHashes() {
     std::vector<int64_t> neighbors;
-    for(int64_t ia = a - 1; ia <= a + 1; ia++)
-      for(int64_t ib = b - 1; ib <= b + 1; ib++)
-        for(int64_t ic = c - 1; ic <= c + 1; ic++){
+    for (int64_t ia = a - 1; ia <= a + 1; ia++)
+      for (int64_t ib = b - 1; ib <= b + 1; ib++)
+        for (int64_t ic = c - 1; ic <= c + 1; ic++) {
           int64_t key = 1000000000000 * ia + 100000000 * ib + 10000 * ic;
           neighbors.emplace_back(key);
         }
@@ -70,7 +69,7 @@ using SlimEvents = std::vector<SlimEvent>;
 
 struct OccupiedCell {
   size_t peakIndex;
-  V3D peakQ;  // QLab vector of the peak within this cell
+  V3D peakQ;         // QLab vector of the peak within this cell
   SlimEvents events; // events potentially closer than m_radius to the peak
 };
 
@@ -90,7 +89,6 @@ struct OccupiedCell {
 
 class DLLExport IntegrateQLabEvents {
 public:
-
   /**
    * Store events within a certain radius of the specified peak centers,
    * and sum these events to estimate pixel intensities.
@@ -136,7 +134,8 @@ public:
    * half the major axis length of the ellipsoids, and the other axes of the
    * ellipsoids will be set proportionally, based on the standard deviations.
    *
-   * @param E1Vec               Vector of values for calculating edge of detectors
+   * @param E1Vec               Vector of values for calculating edge of
+   * detectors
    * @param peak_q              The Q-vector for the peak center.
    * @param specify_size        If true the integration will be done using the
    *                            ellipsoids with major axes determined by the
@@ -164,20 +163,13 @@ public:
    *
    */
   PeakShape_const_sptr ellipseIntegrateEvents(
-      const std::vector<V3D> &E1Vec,
-      V3D const &peak_q,
-      bool specify_size,
-      double peak_radius,
-      double back_inner_radius,
-      double back_outer_radius,
-      std::vector<double> &axes_radii,
-      double &inti,
-      double &sigi);
+      const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
+      double peak_radius, double back_inner_radius, double back_outer_radius,
+      std::vector<double> &axes_radii, double &inti, double &sigi);
 
   void populateCellsWithPeaks();
 
 private:
-
   /**
    * Calculate the number of events in an ellipsoid centered at 0,0,0 with
    * the three specified axes and the three specified sizes in the direction
@@ -192,8 +184,7 @@ private:
    * @return Then number of events that are in or on the specified ellipsoid.
    */
   static std::pair<double, double>
-  numInEllipsoid(SlimEvents const &events,
-                 std::vector<V3D> const &directions,
+  numInEllipsoid(SlimEvents const &events, std::vector<V3D> const &directions,
                  std::vector<double> const &sizes);
 
   /**
@@ -213,12 +204,10 @@ private:
    correction should be used.
    * @return Then number of events that are in or on the specified ellipsoid.
    */
-  static std::pair<double, double>
-  numInEllipsoidBkg(SlimEvents const &events,
-                    std::vector<V3D> const &directions,
-                    std::vector<double> const &sizes,
-                    std::vector<double> const &sizesIn,
-                    const bool useOnePercentBackgroundCorrection);
+  static std::pair<double, double> numInEllipsoidBkg(
+      SlimEvents const &events, std::vector<V3D> const &directions,
+      std::vector<double> const &sizes, std::vector<double> const &sizesIn,
+      const bool useOnePercentBackgroundCorrection);
 
   /**
    *  Given a list of events, associated with a particular peak
@@ -232,8 +221,8 @@ private:
    *  the covariance. The mean position in each dimension has already been
    *calculated on subtracted, since this corresponds to the centre position of
    *each
-   *  peak, which we knew aprori. The expected values of each correlation test X,X
-   *X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
+   *  peak, which we knew aprori. The expected values of each correlation test
+   *X,X X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
    *  probabilities are equal, we can remove them from the sums of the expected
    *values, and simply divide by the number of events for each matrix element.
    *  Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
@@ -248,7 +237,7 @@ private:
    *                   calculating the covariance matrix.
    */
   static void makeCovarianceMatrix(SlimEvents const &events,
-      Kernel::DblMatrix &matrix, double radius);
+                                   Kernel::DblMatrix &matrix, double radius);
 
   /**
    *  Calculate the eigen vectors of a 3x3 real symmetric matrix using the GSL.
@@ -316,13 +305,14 @@ private:
    *
    */
   std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
-  ellipseIntegrateEvents(
-      const std::vector<V3D> &E1Vec, V3D const &peak_q,
-      SlimEvents const &ev_list,
-      std::vector<V3D> const &directions,
-      std::vector<double> const &sigmas, bool specify_size, double peak_radius,
-      double back_inner_radius, double back_outer_radius,
-      std::vector<double> &axes_radii, double &inti, double &sigi);
+  ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q,
+                         SlimEvents const &ev_list,
+                         std::vector<V3D> const &directions,
+                         std::vector<double> const &sigmas, bool specify_size,
+                         double peak_radius, double back_inner_radius,
+                         double back_outer_radius,
+                         std::vector<double> &axes_radii, double &inti,
+                         double &sigi);
 
   /** Calculate if this Q is on a detector
    * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
@@ -335,12 +325,11 @@ private:
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
-  double detectorQ(const std::vector<V3D> &E1Vec,
-                   const V3D QLabFrame,
+  double detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame,
                    const std::vector<double> &r);
 
   // Private data members
-  double m_radius;            // size of sphere to use for events around a peak
+  double m_radius; // size of sphere to use for events around a peak
   /// if one percent culling of the background should be performed.
   const bool m_useOnePercentBackgroundCorrection;
   /// size of the square cell unit, holding at most one single peak

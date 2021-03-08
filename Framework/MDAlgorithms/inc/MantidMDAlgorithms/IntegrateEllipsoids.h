@@ -42,11 +42,9 @@ private:
 
   void init() override;
   void exec() override;
-  void qListFromEventWS(IntegrateQLabEvents &integrator,
-                        API::Progress &prog,
+  void qListFromEventWS(IntegrateQLabEvents &integrator, API::Progress &prog,
                         DataObjects::EventWorkspace_sptr &wksp);
-  void qListFromHistoWS(IntegrateQLabEvents &integrator,
-                        API::Progress &prog,
+  void qListFromHistoWS(IntegrateQLabEvents &integrator, API::Progress &prog,
                         DataObjects::Workspace2D_sptr &wksp);
 
   /// Calculate if this Q is on a detector

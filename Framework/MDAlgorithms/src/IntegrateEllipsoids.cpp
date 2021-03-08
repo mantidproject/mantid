@@ -499,11 +499,11 @@ void IntegrateEllipsoids::exec() {
       principalaxis2.clear();
       principalaxis3.clear();
       specify_size = true;
-      double meanMax = std::max(std::max(stats1.mean, stats2.mean),
-                                stats3.mean);
-      double stdMax =  std::max(std::max(stats1.standard_deviation,
-                                         stats2.standard_deviation),
-                                stats3.standard_deviation);
+      double meanMax =
+          std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
+      double stdMax = std::max(
+          std::max(stats1.standard_deviation, stats2.standard_deviation),
+          stats3.standard_deviation);
       peak_radius = meanMax + numSigmas * stdMax;
       back_inner_radius = peak_radius;
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
@@ -512,14 +512,14 @@ void IntegrateEllipsoids::exec() {
         const V3D peak_q = peaks[i].getQLabFrame();
         std::vector<double> axes_radii;
         integrator.ellipseIntegrateEvents(
-            E1Vec, peak_q, specify_size, peak_radius,
-            back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
+            E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+            back_outer_radius, axes_radii, inti, sigi);
         peaks[i].setIntensity(inti);
         peaks[i].setSigmaIntensity(sigi);
         if (axes_radii.size() == 3) {
-            principalaxis1.emplace_back(axes_radii[0]);
-            principalaxis2.emplace_back(axes_radii[1]);
-            principalaxis3.emplace_back(axes_radii[2]);
+          principalaxis1.emplace_back(axes_radii[0]);
+          principalaxis2.emplace_back(axes_radii[1]);
+          principalaxis3.emplace_back(axes_radii[2]);
         }
       }
       if (principalaxis1.size() > 1) {

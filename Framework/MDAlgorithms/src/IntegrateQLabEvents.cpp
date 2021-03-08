@@ -4,11 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidMDAlgorithms/IntegrateQLabEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
@@ -36,8 +36,9 @@ using namespace std;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
-IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list,
-    double radius, const bool useOnePercentBackgroundCorrection)
+IntegrateQLabEvents::IntegrateQLabEvents(
+    const SlimEvents &peak_q_list, double radius,
+    const bool useOnePercentBackgroundCorrection)
     : m_radius(radius),
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   m_cellSize = m_radius;
@@ -55,28 +56,22 @@ IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list,
 }
 
 bool IntegrateQLabEvents::isOrigin(const V3D &q, const double &cellSize) {
-  int64_t a(static_cast<int64_t>(q[0]/cellSize));
-  int64_t b(static_cast<int64_t>(q[1]/cellSize));
-  int64_t c(static_cast<int64_t>(q[2]/cellSize));
+  int64_t a(static_cast<int64_t>(q[0] / cellSize));
+  int64_t b(static_cast<int64_t>(q[1] / cellSize));
+  int64_t c(static_cast<int64_t>(q[2] / cellSize));
   return !(a || b || c);
 }
 
 void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
-    for (const auto &event_q : event_qs)
-      addEvent(event_q);
+  for (const auto &event_q : event_qs)
+    addEvent(event_q);
 }
 
 Mantid::Geometry::PeakShape_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec,
-    V3D const &peak_q,
-    bool specify_size,
-    double peak_radius,
-    double back_inner_radius,
-    double back_outer_radius,
-    std::vector<double> &axes_radii,
-    double &inti,
-    double &sigi) {
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
+    double peak_radius, double back_inner_radius, double back_outer_radius,
+    std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
@@ -88,7 +83,6 @@ IntegrateQLabEvents::ellipseIntegrateEvents(
   SlimEvents &some_events = cell.events;
   if (some_events.size() < 3)
     return std::make_shared<NoShape>();
-
 
   DblMatrix cov_matrix(3, 3);
   makeCovarianceMatrix(some_events, cov_matrix, m_radius);
@@ -115,9 +109,10 @@ IntegrateQLabEvents::ellipseIntegrateEvents(
                                 peak_radius, back_inner_radius,
                                 back_outer_radius, axes_radii, inti, sigi);
 }
-std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(
-    SlimEvents const &events,
-    std::vector<V3D> const &directions, std::vector<double> const &sizes) {
+std::pair<double, double>
+IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
+                                    std::vector<V3D> const &directions,
+                                    std::vector<double> const &sizes) {
 
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
@@ -135,9 +130,8 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoid(
 }
 
 std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
-    SlimEvents const &events,
-    std::vector<V3D> const &directions, std::vector<double> const &sizes,
-    std::vector<double> const &sizesIn,
+    SlimEvents const &events, std::vector<V3D> const &directions,
+    std::vector<double> const &sizes, std::vector<double> const &sizesIn,
     const bool useOnePercentBackgroundCorrection) {
   std::pair<double, double> count(0, 0);
   std::vector<std::pair<double, double>> eventVec;
@@ -172,9 +166,9 @@ std::pair<double, double> IntegrateQLabEvents::numInEllipsoidBkg(
   return count;
 }
 
-void IntegrateQLabEvents::makeCovarianceMatrix(
-    SlimEvents const &events,
-    DblMatrix &matrix, double radius) {
+void IntegrateQLabEvents::makeCovarianceMatrix(SlimEvents const &events,
+                                               DblMatrix &matrix,
+                                               double radius) {
   double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
@@ -195,8 +189,8 @@ void IntegrateQLabEvents::makeCovarianceMatrix(
 }
 
 void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix,
-                                        std::vector<V3D> &eigen_vectors,
-                                        std::vector<double> &eigen_values) {
+                                          std::vector<V3D> &eigen_vectors,
+                                          std::vector<double> &eigen_values) {
   unsigned int size = 3;
 
   gsl_matrix *matrix = gsl_matrix_alloc(size, size);
@@ -237,14 +231,12 @@ void IntegrateQLabEvents::addEvent(const SlimEvent event) {
     SlimEvents events = {event};
     std::pair<size_t, SlimEvents> newCell(hash, events);
     m_cellsWithEvents.insert(newCell);
-  }
-  else
+  } else
     cell_it->second.emplace_back(event);
 }
 
 PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q,
-    SlimEvents const &ev_list,
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, SlimEvents const &ev_list,
     std::vector<V3D> const &directions, std::vector<double> const &sigmas,
     bool specify_size, double peak_radius, double back_inner_radius,
     double back_outer_radius, std::vector<double> &axes_radii, double &inti,
@@ -337,8 +329,8 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
       Mantid::Kernel::QLab, "IntegrateEllipsoids");
 }
 double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec,
-                                    const V3D QLabFrame,
-                                    const std::vector<double> &r) {
+                                      const V3D QLabFrame,
+                                      const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
     V3D distv =
@@ -353,13 +345,13 @@ double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec,
 }
 
 void IntegrateQLabEvents::populateCellsWithPeaks() {
-  for (auto& cell_it: m_cellsWithPeaks) {
+  for (auto &cell_it : m_cellsWithPeaks) {
     OccupiedCell &cell = cell_it.second;
     CellCoords abc(cell.peakQ, m_cellSize);
-    for(const int64_t& hash: abc.nearbyCellHashes()) {
+    for (const int64_t &hash : abc.nearbyCellHashes()) {
       auto cellE_it = m_cellsWithEvents.find(hash);
       if (cellE_it != m_cellsWithEvents.end()) {
-        for (const SlimEvent& event : cellE_it->second){
+        for (const SlimEvent &event : cellE_it->second) {
           SlimEvent neighborEvent = event; // copy
           neighborEvent.second = event.second - cell.peakQ;
           cell.events.emplace_back(neighborEvent);
