@@ -167,7 +167,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   setInstrument(ipeak.getInstrument());
   detid_t id = ipeak.getDetectorID();
   if (id >= 0) {
@@ -321,7 +320,8 @@ Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 
-/** Return a shared ptr to the instrument for this peak. */
+/** Return a shared ptr to the reference frame from the instrument for this
+ * peak. */
 std::shared_ptr<const Geometry::ReferenceFrame>
 Peak::getReferenceFrame() const {
   return m_inst->getReferenceFrame();
@@ -498,14 +498,38 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   setCol(-1);
   setBankName("None");
 
-  const double wl = calculateWavelengthFromQLab(qLab);
+  /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
+   * The incident neutron wavevector is along the beam direction, ki = 1/wl
+   * (usually z, but referenceframe is definitive).
+   * In the inelastic convention, q = ki - kf.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
+   * in beam direction.
+   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
+   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
+   */
+  const double norm_q = qLab.norm();
+  if (norm_q == 0.0)
+    throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
 
-  std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
+  std::shared_ptr<const ReferenceFrame> refFrame =
+      this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
   const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
   const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
-  const double one_over_wl = (2.0 * M_PI) / wl;
+
+  if (qBeam == 0.0)
+    throw std::invalid_argument(
+        "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
+
+  const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  const double wl = (2.0 * M_PI) / one_over_wl;
+  if (wl < 0.0) {
+    std::ostringstream mess;
+    mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl
+         << " Ang)! This Q is not physical.";
+    throw std::invalid_argument(mess.str());
+  }
 
   // Save the wavelength
   this->setWavelength(wl);
@@ -705,7 +729,6 @@ Peak &Peak::operator=(const Peak &other) {
     samplePos = other.samplePos;
     detPos = other.detPos;
     m_detIDs = other.m_detIDs;
-    convention = other.convention;
   }
   return *this;
 }

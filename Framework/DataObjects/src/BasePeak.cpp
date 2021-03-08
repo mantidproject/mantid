@@ -393,6 +393,7 @@ BasePeak &BasePeak::operator=(const BasePeak &other) {
     m_intMNP = other.m_intMNP;
     m_peakShape.reset(other.m_peakShape->clone());
     m_absorptionWeightedPathLength = other.m_absorptionWeightedPathLength;
+    convention = other.convention;
   }
   return *this;
 }

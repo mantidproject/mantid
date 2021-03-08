@@ -138,11 +138,7 @@ Geometry::Instrument_const_sptr LeanElasticPeak::getInstrument() const {
       "LeanElasticPeak::setInstrument(): Has no instrument");
 }
 
-/**
-Getter for the reference frame.
-@return : reference frame.
-*/
-
+/** Return a shared ptr to the reference frame for this peak. */
 std::shared_ptr<const Geometry::ReferenceFrame>
 LeanElasticPeak::getReferenceFrame() const {
   return m_refFrame;
