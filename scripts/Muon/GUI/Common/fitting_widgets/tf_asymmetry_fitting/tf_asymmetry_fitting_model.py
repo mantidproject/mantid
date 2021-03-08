@@ -264,23 +264,21 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         else:
             return parameters
 
-    def get_all_fit_function_parameter_values_for(self, fit_function: IFunction, tf_function_index: int) -> list:
+    def get_all_fit_function_parameter_values_for(self, fit_function: IFunction) -> list:
         """Returns the values of the fit function parameters. Also returns the normalisation for TF Asymmetry mode."""
         if self.tf_asymmetry_mode:
             if self.simultaneous_fitting_mode:
                 return self._get_all_fit_function_parameter_values_for_tf_simultaneous_function(fit_function)
             else:
-                return self._get_all_fit_function_parameter_values_for_tf_single_function(fit_function,
-                                                                                          tf_function_index)
+                return self._get_all_fit_function_parameter_values_for_tf_single_function(fit_function)
         else:
             return self.get_fit_function_parameter_values(fit_function)
 
-    def _get_all_fit_function_parameter_values_for_tf_single_function(self, tf_single_function: IFunction,
-                                                                      tf_function_index: int) -> list:
+    def _get_all_fit_function_parameter_values_for_tf_single_function(self, tf_single_function: IFunction) -> list:
         """Returns the required parameters values including normalisation from a TF asymmetry single function."""
         normal_single_function = self._get_normal_fit_function_from(tf_single_function)
         parameter_values = self.get_fit_function_parameter_values(normal_single_function)
-        return [self._get_normalisation_from_tf_fit_function(tf_single_function, tf_function_index)] + parameter_values
+        return [self._get_normalisation_from_tf_fit_function(tf_single_function)] + parameter_values
 
     def _get_all_fit_function_parameter_values_for_tf_simultaneous_function(self, tf_simultaneous_function: IFunction) -> list:
         """Returns the required parameters values including normalisation from a TF asymmetry simultaneous function."""
@@ -373,7 +371,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
                 "Mode": "Construct" if self.tf_asymmetry_mode else "Extract",
                 "CopyTies": False}
 
-    def _get_normalisation_from_tf_fit_function(self, tf_function: IFunction, function_index: int) -> float:
+    def _get_normalisation_from_tf_fit_function(self, tf_function: IFunction, function_index: int = 0) -> float:
         """Returns the normalisation in the specified TF Asymmetry fit function."""
         if self.simultaneous_fitting_mode:
             return self._get_normalisation_from_tf_asymmetry_simultaneous_function(tf_function, function_index)
