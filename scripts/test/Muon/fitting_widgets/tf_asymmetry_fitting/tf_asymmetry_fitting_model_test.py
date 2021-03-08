@@ -467,7 +467,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_all_fit_function_parameter_values_for(self.simultaneous_fit_function),
                          [0.0, 0.0])
 
-    def test_that_get_all_fit_function_parameter_values_for_will_return_the_parameters_values_including_normalisation_for_single_mode(self):
+    def test_that_get_all_fit_function_parameter_values_will_return_the_parameters_values_including_normalisation_for_single_mode(self):
         normalisation = 1.234
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
@@ -480,7 +480,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_all_fit_function_parameter_values_for(
             self.model.tf_asymmetry_single_functions[1]), [normalisation, 0.0])
 
-    def test_that_get_all_fit_function_parameter_values_for_will_return_the_param_values_including_normalisation_for_simultaenous_mode(self):
+    def test_that_get_all_fit_function_parameter_values_will_return_the_param_values_including_normalisation_for_simultaenous_mode(self):
         normalisation = 1.234
         self.model.dataset_names = self.dataset_names
         self.model.single_fit_functions = self.single_fit_functions
