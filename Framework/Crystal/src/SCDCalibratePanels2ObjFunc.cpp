@@ -177,7 +177,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
  * @param deltaY  :: The shift along the Y-axis in m
  * @param deltaZ  :: The shift along the Z-axis in m
  * @param componentName  :: string representation of a component
- * @param ws  :: input workspace (mostly peaksworkspace)
+ * @param pws  :: input workspace (mostly peaksworkspace)
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
     double deltaX, double deltaY, double deltaZ, std::string componentName,
@@ -202,6 +202,17 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
   return pws;
 }
 
+/**
+ * @brief Rotate the instrument by angle axis
+ * 
+ * @param rotVx  :: x of rotation axis
+ * @param rotVy  :: y of rotation axis
+ * @param rotVz  :: z of rotation axis
+ * @param rotAng  :: rotation angle (in degree)
+ * @param componentName  :: component name
+ * @param pws  :: peak workspace
+ * @return IPeaksWorkspace_sptr 
+ */
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
     double rotVx, double rotVy, double rotVz, double rotAng,
     std::string componentName, IPeaksWorkspace_sptr &pws) const {
