@@ -86,11 +86,8 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   const std::size_t bufferThreshold = getProperty("BufferThreshold");
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
-    const std::string spDetInfoTopic(
-        m_instrumentName + KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
-
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic,
+        broker, eventTopic, runInfoTopic, sampleEnvTopic,
         chopperTopic, monitorTopic, bufferThreshold);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "

@@ -25,7 +25,6 @@ public:
   KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &histoTopic,
                           const std::string &runInfoTopic,
-                          const std::string &spDetTopic,
                           const std::string &sampleEnvTopic,
                           const std::string &chopperTopic);
   ~KafkaHistoStreamDecoder() override;
