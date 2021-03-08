@@ -118,6 +118,14 @@ public:
   createPeak(const Mantid::Kernel::V3D &position,
              const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
 
+  //---------------------------------------------------------------------------------------------
+  /** Create an instance of a Peak
+   * @param position :: enter of the peak in the sample frame
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Mantid::Geometry::IPeak>
+  createPeakQSample(const Mantid::Kernel::V3D &position) const = 0;
+
   /**
    * Create an instance of a peak using a V3D
    * @param HKL V3D

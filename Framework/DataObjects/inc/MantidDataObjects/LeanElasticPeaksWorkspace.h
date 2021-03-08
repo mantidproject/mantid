@@ -28,8 +28,8 @@ namespace DataObjects {
 //==========================================================================================
 /** @class Mantid::DataObjects::LeanElasticPeaksWorkspace
 
-   The class LeanElasticPeaksWorkspace stores information about a set of SCD lean
-   peaks.
+   The class LeanElasticPeaksWorkspace stores information about a set of SCD
+   lean peaks.
 
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
@@ -43,7 +43,8 @@ public:
   const std::string id() const override { return "LeanElasticPeaksWorkspace"; }
 
   LeanElasticPeaksWorkspace();
-  LeanElasticPeaksWorkspace &operator=(const LeanElasticPeaksWorkspace &other) = delete;
+  LeanElasticPeaksWorkspace &
+  operator=(const LeanElasticPeaksWorkspace &other) = delete;
 
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
@@ -95,6 +96,9 @@ public:
   std::unique_ptr<Geometry::IPeak>
   createPeak(const Kernel::V3D &Position,
              const Kernel::SpecialCoordinateSystem &frame) const override;
+
+  std::unique_ptr<Geometry::IPeak>
+  createPeakQSample(const Kernel::V3D &position) const override;
 
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
@@ -185,9 +189,6 @@ private:
   void initColumns();
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
-  /// Create a peak from a QSample position
-  std::unique_ptr<Geometry::IPeak>
-  createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -202,12 +203,14 @@ private:
   bool addColumns(const std::string & /*type*/, const std::string & /*name*/,
                   size_t /*n*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanElasticPeaksWorkspace structure is read-only. Cannot add columns.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot add "
+        "columns.");
   }
 
   void removeColumn(const std::string & /*name*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanElasticPeaksWorkspace structure is read-only. Cannot remove column.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot remove "
+        "column.");
   }
 
   void setRowCount(size_t /*count*/) override {
@@ -272,7 +275,8 @@ private:
   std::vector<LeanElasticPeak> peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::LeanElasticPeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::LeanElasticPeakColumn>>
+      columns;
 
   /** Column names */
   std::vector<std::string> columnNames;
@@ -282,9 +286,11 @@ private:
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-using LeanElasticPeaksWorkspace_sptr = std::shared_ptr<LeanElasticPeaksWorkspace>;
+using LeanElasticPeaksWorkspace_sptr =
+    std::shared_ptr<LeanElasticPeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-using LeanElasticPeaksWorkspace_const_sptr = std::shared_ptr<const LeanElasticPeaksWorkspace>;
+using LeanElasticPeaksWorkspace_const_sptr =
+    std::shared_ptr<const LeanElasticPeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
