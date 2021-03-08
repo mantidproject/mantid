@@ -70,6 +70,8 @@ public:
   MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
   MOCK_CONST_METHOD0(getInstrument, Geometry::Instrument_const_sptr());
+  MOCK_CONST_METHOD0(getReferenceFrame,
+                     std::shared_ptr<const Geometry::ReferenceFrame>());
   MOCK_CONST_METHOD0(getRunNumber, int());
   MOCK_CONST_METHOD0(getPeakNumber, int());
   MOCK_CONST_METHOD0(getIntMNP, Mantid::Kernel::V3D());

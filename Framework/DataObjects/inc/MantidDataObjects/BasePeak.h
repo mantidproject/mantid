@@ -118,6 +118,12 @@ public:
   void setAbsorptionWeightedPathLength(double pathLength) override;
   double getAbsorptionWeightedPathLength() const override;
 
+protected:
+  double calculateWavelengthFromQLab(const Mantid::Kernel::V3D qLab);
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
+
 private:
   /// Name of the parent bank
   std::string m_bankName;

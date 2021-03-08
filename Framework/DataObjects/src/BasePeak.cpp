@@ -36,14 +36,15 @@ BasePeak::BasePeak()
       m_GoniometerMatrix(3, 3, true), m_InverseGoniometerMatrix(3, 3, true),
       m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
-      m_peakShape(std::make_shared<NoShape>()) {}
+      m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor including goniometer
  *
  * @param goniometer :: a 3x3 rotation matrix
  */
-
 BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_absorptionWeightedPathLength(0),
@@ -51,15 +52,18 @@ BasePeak::BasePeak(const Mantid::Kernel::Matrix<double> &goniometer)
       m_runNumber(0), m_monitorCount(0), m_row(-1), m_col(-1), m_peakNumber(0),
       m_intHKL(V3D(0, 0, 0)), m_intMNP(V3D(0, 0, 0)),
       m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "BasePeak::ctor(): Goniometer matrix must non-singular.");
 }
 
 BasePeak::BasePeak(const BasePeak &other)
-    : m_bankName(other.m_bankName), m_H(other.m_H), m_K(other.m_K),
-      m_L(other.m_L), m_intensity(other.m_intensity),
-      m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
+    : convention(other.convention), m_bankName(other.m_bankName),
+      m_H(other.m_H), m_K(other.m_K), m_L(other.m_L),
+      m_intensity(other.m_intensity), m_sigmaIntensity(other.m_sigmaIntensity),
+      m_binCount(other.m_binCount),
       m_absorptionWeightedPathLength(other.m_absorptionWeightedPathLength),
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
@@ -86,6 +90,8 @@ BasePeak::BasePeak(const Geometry::IPeak &ipeak)
       m_col(ipeak.getCol()), m_peakNumber(ipeak.getPeakNumber()),
       m_intHKL(ipeak.getIntHKL()), m_intMNP(ipeak.getIntMNP()),
       m_peakShape(std::make_shared<NoShape>()) {
+  convention = Kernel::ConfigService::Instance().getString("Q.convention");
+
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -404,6 +410,45 @@ void BasePeak::setAbsorptionWeightedPathLength(double pathLength) {
  */
 double BasePeak::getAbsorptionWeightedPathLength() const {
   return m_absorptionWeightedPathLength;
+}
+
+double BasePeak::calculateWavelengthFromQLab(const V3D qLab) {
+  /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
+   * The incident neutron wavevector is along the beam direction, ki = 1/wl
+   * (usually z, but referenceframe is definitive).
+   * In the inelastic convention, q = ki - kf.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
+   * in beam direction.
+   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
+   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
+   */
+  const double norm_q = qLab.norm();
+  if (norm_q == 0.0)
+    throw std::invalid_argument("BasePeak::setQLabFrame(): Q cannot be 0,0,0.");
+
+  std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
+  V3D refBeamDir(0, 0, 1); // default beam direction +Z
+  if (refFrame)
+    refBeamDir = refFrame->vecPointingAlongBeam();
+
+  // Default for ki-kf has -q
+  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
+
+  if (qBeam == 0.0)
+    throw std::invalid_argument(
+        "BasePeak::setQLabFrame(): Q cannot be 0 in the beam direction.");
+
+  const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  const double wl = (2.0 * M_PI) / one_over_wl;
+  if (wl < 0.0) {
+    std::ostringstream mess;
+    mess << "BasePeak::setQLabFrame(): Wavelength found was negative (" << wl
+         << " Ang)! This Q is not physical.";
+    throw std::invalid_argument(mess.str());
+  }
+
+  return wl;
 }
 
 Mantid::Kernel::Logger BasePeak::g_log("PeakLogger");

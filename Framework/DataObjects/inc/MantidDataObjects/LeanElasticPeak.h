@@ -8,6 +8,7 @@
 
 #include "MantidDataObjects/BasePeak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -35,11 +36,10 @@ public:
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
-                  const Mantid::Kernel::Matrix<double> &goniometer);
-  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
-  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
                   const Mantid::Kernel::Matrix<double> &goniometer,
-                  double wavelength);
+                  boost::optional<std::shared_ptr<Geometry::ReferenceFrame>>
+                      refFrame = boost::none);
+  LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame, double wavelength);
 
   /// Copy constructor
   LeanElasticPeak(const LeanElasticPeak &other);
@@ -66,6 +66,9 @@ public:
   void setInstrument(const Geometry::Instrument_const_sptr &) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
+  void setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame> frame);
+  std::shared_ptr<const Geometry::ReferenceFrame>
+  getReferenceFrame() const override;
 
   bool findDetector() override;
   bool findDetector(const Geometry::InstrumentRayTracer &) override;
@@ -80,6 +83,8 @@ public:
 
   void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                        boost::optional<double> = boost::none) override;
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                       const Mantid::Kernel::Matrix<double> &goniometer);
   void setQLabFrame(const Mantid::Kernel::V3D &qLab,
                     boost::optional<double> = boost::none) override;
 
@@ -108,8 +113,10 @@ private:
   /// Q_sample vector
   Mantid::Kernel::V3D m_Qsample;
 
-  /// Initial energy of neutrons at the peak
+  /// Wavelength of neutrons at the peak
   double m_wavelength;
+
+  std::shared_ptr<Geometry::ReferenceFrame> m_refFrame;
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;

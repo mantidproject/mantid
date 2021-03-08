@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/NoShape.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
@@ -42,9 +40,7 @@ LeanElasticPeak::LeanElasticPeak()
  *the sample frame (goniometer rotation accounted for).
  */
 LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
-    : BasePeak() {
-  this->setQSampleFrame(QSampleFrame);
-}
+    : BasePeak(), m_Qsample(QSampleFrame), m_wavelength(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -52,11 +48,17 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
  *
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  * @param goniometer :: a 3x3 rotation matrix
+ * @param refFrame :: optional reference frame, will default to beam along +Z
  */
 LeanElasticPeak::LeanElasticPeak(
     const Mantid::Kernel::V3D &QSampleFrame,
-    const Mantid::Kernel::Matrix<double> &goniometer)
-    : BasePeak(goniometer), m_Qsample(QSampleFrame) {}
+    const Mantid::Kernel::Matrix<double> &goniometer,
+    boost::optional<std::shared_ptr<ReferenceFrame>> refFrame)
+    : BasePeak() {
+  if (refFrame.is_initialized())
+    setReferenceFrame(refFrame.get());
+  setQSampleFrame(QSampleFrame, goniometer);
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the sample frame)
@@ -71,26 +73,13 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
                                  double wavelength)
     : BasePeak(), m_Qsample(QSampleFrame), m_wavelength(wavelength) {}
 
-//----------------------------------------------------------------------------------------------
-/** Constructor that uses the Q position of the peak (in the lab frame).
- * No detector ID is set.
- *
- * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
- * @param goniometer :: a 3x3 rotation matrix
- * @param wavelength :: wavelength in Angstroms.
- */
-LeanElasticPeak::LeanElasticPeak(
-    const Mantid::Kernel::V3D &QSampleFrame,
-    const Mantid::Kernel::Matrix<double> &goniometer, double wavelength)
-    : BasePeak(goniometer), m_Qsample(QSampleFrame), m_wavelength(wavelength) {}
-
 /**
  * @brief Copy constructor
  * @param other : Source
  */
 LeanElasticPeak::LeanElasticPeak(const LeanElasticPeak &other)
     : BasePeak(other), m_Qsample(other.m_Qsample),
-      m_wavelength(other.m_wavelength) {}
+      m_wavelength(other.m_wavelength), m_refFrame(other.m_refFrame) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a LeanElasticPeak from IPeak interface
@@ -147,6 +136,24 @@ Geometry::IDetector_const_sptr LeanElasticPeak::getDetector() const {
 Geometry::Instrument_const_sptr LeanElasticPeak::getInstrument() const {
   throw Exception::NotImplementedError(
       "LeanElasticPeak::setInstrument(): Has no instrument");
+}
+
+/**
+Getter for the reference frame.
+@return : reference frame.
+*/
+
+std::shared_ptr<const Geometry::ReferenceFrame>
+LeanElasticPeak::getReferenceFrame() const {
+  return m_refFrame;
+}
+
+/**
+Setter for the reference frame.
+@param frame : reference frame object to use.
+*/
+void LeanElasticPeak::setReferenceFrame(std::shared_ptr<ReferenceFrame> frame) {
+  m_refFrame = std::move(frame);
 }
 
 // -------------------------------------------------------------------------------------
@@ -210,6 +217,23 @@ Mantid::Kernel::V3D LeanElasticPeak::getQSampleFrame() const {
 void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                                       boost::optional<double>) {
   m_Qsample = QSampleFrame;
+}
+
+void LeanElasticPeak::setQSampleFrame(
+    const Mantid::Kernel::V3D &QSampleFrame,
+    const Mantid::Kernel::Matrix<double> &goniometer) {
+  m_Qsample = QSampleFrame;
+  setGoniometerMatrix(goniometer);
+
+  const V3D qLab = getQLabFrame();
+
+  try {
+    double wl = calculateWavelengthFromQLab(qLab);
+    setWavelength(wl);
+  } catch (std::exception &e) {
+    g_log.warning() << "Unable to determine wavelength from q-lab\n"
+                    << e.what() << '\n';
+  }
 }
 
 //----------------------------------------------------------------------------------------------

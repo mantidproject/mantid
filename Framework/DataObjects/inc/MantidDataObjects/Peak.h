@@ -85,6 +85,8 @@ public:
   void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
+  std::shared_ptr<const Geometry::ReferenceFrame>
+  getReferenceFrame() const override;
 
   bool findDetector() override;
   bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
@@ -159,9 +161,6 @@ private:
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;
-
-  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention;
 };
 
 } // namespace DataObjects

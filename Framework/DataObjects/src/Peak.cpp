@@ -31,9 +31,7 @@ namespace DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 Peak::Peak()
-    : BasePeak(), m_detectorID(-1), m_initialEnergy(0.), m_finalEnergy(0.) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
-}
+    : BasePeak(), m_detectorID(-1), m_initialEnergy(0.), m_finalEnergy(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -49,7 +47,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::V3D &QLabFrame,
            boost::optional<double> detectorDistance)
     : BasePeak() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
@@ -72,7 +69,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::Matrix<double> &goniometer,
            boost::optional<double> detectorDistance)
     : BasePeak(goniometer) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
@@ -88,7 +84,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength)
     : BasePeak() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -106,7 +101,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength, const Mantid::Kernel::V3D &HKL)
     : BasePeak() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -127,7 +121,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength, const Mantid::Kernel::V3D &HKL,
            const Mantid::Kernel::Matrix<double> &goniometer)
     : BasePeak(goniometer) {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
@@ -144,7 +137,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
            double m_Wavelength)
     : BasePeak() {
-  convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
   m_detectorID = -1;
@@ -163,7 +155,7 @@ Peak::Peak(const Peak &other)
       m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
       m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
       samplePos(other.samplePos), detPos(other.detPos),
-      m_detIDs(other.m_detIDs), convention(other.convention) {}
+      m_detIDs(other.m_detIDs) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -328,6 +320,12 @@ Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 
 /** Return a shared ptr to the instrument for this peak. */
 Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
+
+/** Return a shared ptr to the instrument for this peak. */
+std::shared_ptr<const Geometry::ReferenceFrame>
+Peak::getReferenceFrame() const {
+  return m_inst->getReferenceFrame();
+}
 
 // -------------------------------------------------------------------------------------
 /** Calculate the neutron wavelength (in angstroms) at the peak
@@ -500,38 +498,14 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
   setCol(-1);
   setBankName("None");
 
-  /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
-   * The incident neutron wavevector is along the beam direction, ki = 1/wl
-   * (usually z, but referenceframe is definitive).
-   * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
-   * in beam direction.
-   * AND: norm(kf) = norm(ki) = 2*pi/wavelength
-   * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
-   */
-  const double norm_q = qLab.norm();
-  if (norm_q == 0.0)
-    throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
+  const double wl = calculateWavelengthFromQLab(qLab);
 
-  std::shared_ptr<const ReferenceFrame> refFrame =
-      this->m_inst->getReferenceFrame();
+  std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
   const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
   const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
-
-  if (qBeam == 0.0)
-    throw std::invalid_argument(
-        "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
-
-  const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
-  const double wl = (2.0 * M_PI) / one_over_wl;
-  if (wl < 0.0) {
-    std::ostringstream mess;
-    mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl
-         << " Ang)! This Q is not physical.";
-    throw std::invalid_argument(mess.str());
-  }
+  const double one_over_wl = (2.0 * M_PI) / wl;
 
   // Save the wavelength
   this->setWavelength(wl);
