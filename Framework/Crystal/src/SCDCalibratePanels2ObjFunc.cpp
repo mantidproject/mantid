@@ -204,14 +204,14 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
 
 /**
  * @brief Rotate the instrument by angle axis
- * 
+ *
  * @param rotVx  :: x of rotation axis
  * @param rotVy  :: y of rotation axis
  * @param rotVz  :: z of rotation axis
  * @param rotAng  :: rotation angle (in degree)
  * @param componentName  :: component name
  * @param pws  :: peak workspace
- * @return IPeaksWorkspace_sptr 
+ * @return IPeaksWorkspace_sptr
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
     double rotVx, double rotVy, double rotVz, double rotAng,
