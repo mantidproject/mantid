@@ -54,7 +54,7 @@ class SeqFittingTabPresenter(object):
             self.view.fit_table.set_parameters_and_values(parameters, parameter_values)
 
     def _get_fit_function_parameter_values_from_fitting_model(self):
-        parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+        parameter_values = [self.model.get_all_fit_function_parameter_values_for(fit_function)
                             for row, fit_function in enumerate(self.model.get_all_fit_functions())]
         if len(parameter_values) != self.view.fit_table.get_number_of_fits():
             parameter_values *= self.view.fit_table.get_number_of_fits()
@@ -63,7 +63,7 @@ class SeqFittingTabPresenter(object):
     def handle_fit_function_parameter_changed(self):
         self.view.fit_table.reset_fit_quality()
         for row, fit_function in enumerate(self.model.get_all_fit_functions()):
-            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function)
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
 
     def handle_selected_workspaces_changed(self):
@@ -114,7 +114,7 @@ class SeqFittingTabPresenter(object):
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
         for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds,
                                                                   self.selected_rows):
-            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function, row)
+            parameter_values = self.model.get_all_fit_function_parameter_values_for(fit_function)
             self.view.fit_table.set_parameter_values_for_row(row, parameter_values)
             self.view.fit_table.set_fit_quality(row, fit_status, fit_chi_squared)
 
