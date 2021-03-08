@@ -15,6 +15,7 @@
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <MantidAPI\MatrixWorkspace.h>
 
 using Mantid::API::IFunction;
 using Mantid::API::IFunction_sptr;
@@ -88,6 +89,16 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
+
+void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace,
+                        int wi, float startX, float endX) {
+  Mantid::API::MatrixWorkspace_sptr matWS =
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(
+              workspace)());
+  self.setMatrixWorkspace(matWS, wi, startX, endX);
+}
+
 } // namespace
 
 void export_IFunction() {
@@ -278,6 +289,12 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
            "Get the number of domains.")
+
+      .def("setMatrixWorkspace", &setMatrixWorkspace,
+           (arg("self"), arg("workspace"), arg("wi"),
+            arg("startX"), arg("endX")),
+           "Changes the integral intensity of the peak function by setting its "
+           "height.")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
