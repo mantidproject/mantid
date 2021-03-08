@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/LeanPeakColumn.h"
+#include "MantidDataObjects/LeanElasticPeakColumn.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -19,7 +19,7 @@ namespace Mantid {
 namespace DataObjects {
 namespace {
 /// static logger
-Kernel::Logger g_log("LeanPeakColumn");
+Kernel::Logger g_log("LeanElasticPeakColumn");
 
 /// Number of items to keep around in the cell cache (see void_pointer())
 size_t NCELL_ITEM_CACHED = 100;
@@ -71,10 +71,10 @@ const std::string typeFromName(const std::string &name) {
   if (iter != typeIndex.data().end()) {
     return iter->second;
   } else {
-    throw std::runtime_error("LeanPeakColumn - Unknown column name: \"" + name +
+    throw std::runtime_error("LeanElasticPeakColumn - Unknown column name: \"" + name +
                              "\""
                              "Peak column names/types must be explicitly "
-                             "marked in LeanPeakColumn.cpp");
+                             "marked in LeanElasticPeakColumn.cpp");
   }
 }
 } // namespace
@@ -84,24 +84,24 @@ const std::string typeFromName(const std::string &name) {
  * @param peaks :: vector of peaks
  * @param name :: name for the column
  */
-LeanPeakColumn::LeanPeakColumn(std::vector<LeanPeak> &peaks,
+LeanElasticPeakColumn::LeanElasticPeakColumn(std::vector<LeanElasticPeak> &peaks,
                                const std::string &name)
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
-  const std::string key = "LeanPeakColumn.hklPrec";
+  const std::string key = "LeanElasticPeakColumn.hklPrec";
   auto hklPrec = ConfigService::Instance().getValue<int>(key);
   this->m_hklPrec = hklPrec.get_value_or(2);
   if (!hklPrec.is_initialized()) {
     g_log.information()
-        << "In LeanPeakColumn constructor, did not find any value for '" << key
+        << "In LeanElasticPeakColumn constructor, did not find any value for '" << key
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
   }
 }
 
 /// Returns typeid for the data in the column
-const std::type_info &LeanPeakColumn::get_type_info() const {
+const std::type_info &LeanElasticPeakColumn::get_type_info() const {
   // This is horrible copy-and-paste with the method below. The whole thing
   // around columns could be much better implemented using templates & traits to
   // avoid this
@@ -117,12 +117,12 @@ const std::type_info &LeanPeakColumn::get_type_info() const {
     return typeid(V3D);
   } else {
     throw std::runtime_error(
-        "LeanPeakColumn::get_type_info() - Unknown column type: " + m_name);
+        "LeanElasticPeakColumn::get_type_info() - Unknown column type: " + m_name);
   }
 }
 
 /// Returns typeid for the pointer type to the data element in the column
-const std::type_info &LeanPeakColumn::get_pointer_type_info() const {
+const std::type_info &LeanElasticPeakColumn::get_pointer_type_info() const {
   if (type() == "double") {
     return typeid(double *);
   } else if (type() == "int") {
@@ -132,7 +132,7 @@ const std::type_info &LeanPeakColumn::get_pointer_type_info() const {
   } else if (type() == "V3D") {
     return typeid(V3D *);
   } else {
-    throw std::runtime_error("LeanPeakColumn::get_pointer_type_info() -: " +
+    throw std::runtime_error("LeanElasticPeakColumn::get_pointer_type_info() -: " +
                              m_name);
   }
 }
@@ -143,8 +143,8 @@ const std::type_info &LeanPeakColumn::get_pointer_type_info() const {
  * @param s :: stream to output
  * @param index :: row index
  */
-void LeanPeakColumn::print(size_t index, std::ostream &s) const {
-  LeanPeak &peak = m_peaks[index];
+void LeanElasticPeakColumn::print(size_t index, std::ostream &s) const {
+  LeanElasticPeak &peak = m_peaks[index];
   s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
@@ -176,7 +176,7 @@ void LeanPeakColumn::print(size_t index, std::ostream &s) const {
  * @param text :: string to read
  * @param index :: index of the peak to modify
  */
-void LeanPeakColumn::read(size_t index, const std::string &text) {
+void LeanElasticPeakColumn::read(size_t index, const std::string &text) {
   // Don't modify read-only ones
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
@@ -197,7 +197,7 @@ void LeanPeakColumn::read(size_t index, const std::string &text) {
  * @param index :: index of the peak to modify
  * @param in :: input stream
  */
-void LeanPeakColumn::read(const size_t index, std::istringstream &in) {
+void LeanElasticPeakColumn::read(const size_t index, std::istringstream &in) {
   if (this->getReadOnly() || index >= m_peaks.size())
     return;
 
@@ -215,19 +215,19 @@ void LeanPeakColumn::read(const size_t index, std::istringstream &in) {
 
 //-------------------------------------------------------------------------------------
 /** @return true if the column is read-only */
-bool LeanPeakColumn::getReadOnly() const {
+bool LeanElasticPeakColumn::getReadOnly() const {
   return !((m_name == "h") || (m_name == "k") || (m_name == "l") ||
            (m_name == "RunNumber"));
 }
 
 //-------------------------------------------------------------------------------------
 /// Specialized type check
-bool LeanPeakColumn::isBool() const { return false; }
+bool LeanElasticPeakColumn::isBool() const { return false; }
 
-bool LeanPeakColumn::isNumber() const { return false; }
+bool LeanElasticPeakColumn::isNumber() const { return false; }
 
 /// @returns overall memory size taken by the column.
-long int LeanPeakColumn::sizeOfData() const {
+long int LeanElasticPeakColumn::sizeOfData() const {
   return sizeof(double) * static_cast<long int>(m_peaks.size());
 }
 
@@ -237,9 +237,9 @@ long int LeanPeakColumn::sizeOfData() const {
  * @param count :: Count of new column size (unused)
  * @throw Exception::NotImplementedError
  */
-void LeanPeakColumn::resize(size_t count) {
+void LeanElasticPeakColumn::resize(size_t count) {
   UNUSED_ARG(count);
-  throw Exception::NotImplementedError("LeanPeakColumn::resize - Peaks must be "
+  throw Exception::NotImplementedError("LeanElasticPeakColumn::resize - Peaks must be "
                                        "added through the PeaksWorkspace "
                                        "interface.");
 }
@@ -250,9 +250,9 @@ void LeanPeakColumn::resize(size_t count) {
  * @param index :: The new index position (unused)
  * @throw Exception::NotImplementedError
  */
-void LeanPeakColumn::insert(size_t index) {
+void LeanElasticPeakColumn::insert(size_t index) {
   UNUSED_ARG(index);
-  throw Exception::NotImplementedError("LeanPeakColumn::insert - Peaks must be "
+  throw Exception::NotImplementedError("LeanElasticPeakColumn::insert - Peaks must be "
                                        "inserted through the PeaksWorkspace "
                                        "interface.");
 }
@@ -263,9 +263,9 @@ void LeanPeakColumn::insert(size_t index) {
  * @param index :: The index position removed(unused)
  * @throw Exception::NotImplementedError
  */
-void LeanPeakColumn::remove(size_t index) {
+void LeanElasticPeakColumn::remove(size_t index) {
   UNUSED_ARG(index);
-  throw Exception::NotImplementedError("LeanPeakColumn::remove - Peaks must be "
+  throw Exception::NotImplementedError("LeanElasticPeakColumn::remove - Peaks must be "
                                        "remove through the PeaksWorkspace "
                                        "interface.");
 }
@@ -275,8 +275,8 @@ void LeanPeakColumn::remove(size_t index) {
  * @param index :: A row index pointing to the PeaksWorkspace
  * @returns A pointer to the data element at that index from this column
  */
-void *LeanPeakColumn::void_pointer(size_t index) {
-  const auto *constThis = const_cast<const LeanPeakColumn *>(this);
+void *LeanElasticPeakColumn::void_pointer(size_t index) {
+  const auto *constThis = const_cast<const LeanElasticPeakColumn *>(this);
   return const_cast<void *>(constThis->void_pointer(index));
 }
 
@@ -285,8 +285,8 @@ void *LeanPeakColumn::void_pointer(size_t index) {
  * @param index :: A row index pointing to the PeaksWorkspace
  * @returns A pointer to the data element at that index from this column
  */
-const void *LeanPeakColumn::void_pointer(size_t index) const {
-  const LeanPeak &peak = m_peaks[index];
+const void *LeanElasticPeakColumn::void_pointer(size_t index) const {
+  const LeanElasticPeak &peak = m_peaks[index];
 
   // The cell() api requires that the value exist somewhere in memory, however,
   // some of the values from a Peak are calculated on the fly so a reference
@@ -327,26 +327,26 @@ const void *LeanPeakColumn::void_pointer(size_t index) const {
   }
 }
 
-LeanPeakColumn *LeanPeakColumn::clone() const {
-  auto temp = new LeanPeakColumn(this->m_peaks, this->m_name);
+LeanElasticPeakColumn *LeanElasticPeakColumn::clone() const {
+  auto temp = new LeanElasticPeakColumn(this->m_peaks, this->m_name);
   return temp;
 }
 
-double LeanPeakColumn::toDouble(size_t /*index*/) const {
+double LeanElasticPeakColumn::toDouble(size_t /*index*/) const {
   throw std::runtime_error(
-      "LeanPeakColumn::toDouble() not implemented, LeanPeakColumn "
+      "LeanElasticPeakColumn::toDouble() not implemented, LeanElasticPeakColumn "
       "is has no general write access");
 }
 
-void LeanPeakColumn::fromDouble(size_t /*index*/, double /*value*/) {
+void LeanElasticPeakColumn::fromDouble(size_t /*index*/, double /*value*/) {
   throw std::runtime_error(
-      "fromDouble() not implemented, LeanPeakColumn is has no "
+      "fromDouble() not implemented, LeanElasticPeakColumn is has no "
       "general write access");
 }
 
-void LeanPeakColumn::setPeakHKLOrRunNumber(const size_t index,
+void LeanElasticPeakColumn::setPeakHKLOrRunNumber(const size_t index,
                                            const double val) {
-  LeanPeak &peak = m_peaks[index];
+  LeanElasticPeak &peak = m_peaks[index];
   if (m_name == "h")
     peak.setH(val);
   else if (m_name == "k")

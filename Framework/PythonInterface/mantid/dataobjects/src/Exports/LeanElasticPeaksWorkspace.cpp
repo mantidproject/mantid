@@ -4,24 +4,24 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/LeanPeaksWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
 
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 
 using Mantid::API::IPeaksWorkspace;
-using Mantid::DataObjects::LeanPeaksWorkspace;
+using Mantid::DataObjects::LeanElasticPeaksWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(LeanPeaksWorkspace)
+GET_POINTER_SPECIALIZATION(LeanElasticPeaksWorkspace)
 
-void export_LeanPeaksWorkspace() {
+void export_LeanElasticPeaksWorkspace() {
 
-  class_<LeanPeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>(
-      "LeanPeaksWorkspace", no_init);
+  class_<LeanElasticPeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>(
+      "LeanElasticPeaksWorkspace", no_init);
 
   // register pointers
-  RegisterWorkspacePtrToPython<LeanPeaksWorkspace>();
+  RegisterWorkspacePtrToPython<LeanElasticPeaksWorkspace>();
 }

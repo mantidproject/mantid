@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Column.h"
-#include "MantidDataObjects/LeanPeak.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
 
 #include <boost/variant.hpp>
 #include <list>
@@ -24,11 +24,11 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-25 18:06:32.952258
  */
-class DLLExport LeanPeakColumn : public Mantid::API::Column {
+class DLLExport LeanElasticPeakColumn : public Mantid::API::Column {
 
 public:
   /// Construct a column with a reference to the peaks list, a name & type
-  LeanPeakColumn(std::vector<LeanPeak> &peaks, const std::string &name);
+  LeanElasticPeakColumn(std::vector<LeanElasticPeak> &peaks, const std::string &name);
 
   /// Number of individual elements in the column.
   size_t size() const override { return m_peaks.size(); }
@@ -58,7 +58,7 @@ public:
   long int sizeOfData() const override;
 
   /// Clone.
-  LeanPeakColumn *clone() const override;
+  LeanElasticPeakColumn *clone() const override;
 
   /// Cast to double
   double toDouble(size_t i) const override;
@@ -67,7 +67,7 @@ public:
   void fromDouble(size_t i, double value) override;
 
   /// Reference to the data.
-  const std::vector<LeanPeak> &data() const { return m_peaks; }
+  const std::vector<LeanElasticPeak> &data() const { return m_peaks; }
 
   bool equals(const Column &otherColumn, double tolerance) const override {
     (void)otherColumn;
@@ -90,7 +90,7 @@ protected:
 
 private:
   /// Reference to the peaks object saved in the PeaksWorkspace.
-  std::vector<LeanPeak> &m_peaks;
+  std::vector<LeanElasticPeak> &m_peaks;
   /// Precision of hkl in table workspace
   int m_hklPrec;
 

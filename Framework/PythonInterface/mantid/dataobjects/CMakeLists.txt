@@ -20,7 +20,7 @@ set(EXPORT_FILES
     src/Exports/MDEventWorkspace.cpp
     src/Exports/MDHistoWorkspace.cpp
     src/Exports/PeaksWorkspace.cpp
-    src/Exports/LeanPeaksWorkspace.cpp
+    src/Exports/LeanElasticPeaksWorkspace.cpp
     src/Exports/PeaksWorkspaceProperty.cpp
     src/Exports/TableWorkspace.cpp
     src/Exports/SplittersWorkspace.cpp

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataObjects/LeanPeaksWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -14,25 +14,25 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class LeanPeaksWorkspaceTest : public CxxTest::TestSuite {
+class LeanElasticPeaksWorkspaceTest : public CxxTest::TestSuite {
 private:
-  class TestableLeanPeaksWorkspace : public LeanPeaksWorkspace {
+  class TestableLeanElasticPeaksWorkspace : public LeanElasticPeaksWorkspace {
   public:
-    TestableLeanPeaksWorkspace(const LeanPeaksWorkspace &other)
-        : LeanPeaksWorkspace(other) {}
+    TestableLeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other)
+        : LeanElasticPeaksWorkspace(other) {}
   };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeanPeaksWorkspaceTest *createSuite() {
-    return new LeanPeaksWorkspaceTest();
+  static LeanElasticPeaksWorkspaceTest *createSuite() {
+    return new LeanElasticPeaksWorkspaceTest();
   }
-  static void destroySuite(LeanPeaksWorkspaceTest *suite) { delete suite; }
+  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) { delete suite; }
 
   void test_defaultConstructor() {
-    auto pw = std::make_shared<LeanPeaksWorkspace>();
-    LeanPeak p(V3D(1, 0, 0), 3.0);
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak p(V3D(1, 0, 0), 3.0);
     pw->addPeak(p);
 
     TS_ASSERT_EQUALS(pw->columnCount(), 20);
@@ -42,19 +42,19 @@ public:
   }
 
   void test_copyConstructor() {
-    auto pw = std::make_shared<LeanPeaksWorkspace>();
-    LeanPeak p(V3D(1, 0, 0), 3.0);
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak p(V3D(1, 0, 0), 3.0);
     pw->addPeak(p);
 
-    auto pw2 = std::make_shared<TestableLeanPeaksWorkspace>(*pw);
+    auto pw2 = std::make_shared<TestableLeanElasticPeaksWorkspace>(*pw);
     TS_ASSERT_EQUALS(pw2->rowCount(), 1);
     TS_ASSERT_EQUALS(pw2->getNumberPeaks(), 1);
     TS_ASSERT_DELTA(pw2->getPeak(0).getWavelength(), 3.0, 1e-9);
   }
 
   void test_clone() {
-    auto pw = std::make_shared<LeanPeaksWorkspace>();
-    LeanPeak p(V3D(1, 0, 0), 3.0);
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak p(V3D(1, 0, 0), 3.0);
     pw->addPeak(p);
 
     auto pw2 = pw->clone();
@@ -65,12 +65,12 @@ public:
 
   void test_addRemovePeaks() {
     // build peaksworkspace (note number of peaks = 1)
-    auto pw = std::make_shared<LeanPeaksWorkspace>();
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
 
     // add peaks
-    LeanPeak p(V3D(1, 0, 0));
-    LeanPeak p2(V3D(0, 1, 0));
-    LeanPeak p3(V3D(0, 0, 1));
+    LeanElasticPeak p(V3D(1, 0, 0));
+    LeanElasticPeak p2(V3D(0, 1, 0));
+    LeanElasticPeak p3(V3D(0, 0, 1));
     pw->addPeak(p);
     pw->addPeak(p2);
     pw->addPeak(p3);
@@ -84,12 +84,12 @@ public:
   }
 
   void test_sort() {
-    auto pw = std::make_shared<LeanPeaksWorkspace>();
-    LeanPeak p0(V3D(1, 0, 0), 3.0);
-    LeanPeak p1(V3D(1, 0, 0), 4.0);
-    LeanPeak p2(V3D(1, 0, 0), 5.0);
-    LeanPeak p3(V3D(1, 1, 0), 3.0);
-    LeanPeak p4(V3D(2, 0, 0), 3.0);
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak p0(V3D(1, 0, 0), 3.0);
+    LeanElasticPeak p1(V3D(1, 0, 0), 4.0);
+    LeanElasticPeak p2(V3D(1, 0, 0), 5.0);
+    LeanElasticPeak p3(V3D(1, 1, 0), 3.0);
+    LeanElasticPeak p4(V3D(2, 0, 0), 3.0);
     pw->addPeak(p0);
     pw->addPeak(p1);
     pw->addPeak(p2);

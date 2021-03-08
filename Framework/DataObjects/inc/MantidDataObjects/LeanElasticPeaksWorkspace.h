@@ -9,8 +9,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
-#include "MantidDataObjects/LeanPeak.h"
-#include "MantidDataObjects/LeanPeakColumn.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
+#include "MantidDataObjects/LeanElasticPeakColumn.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
@@ -26,24 +26,24 @@ class Logger;
 
 namespace DataObjects {
 //==========================================================================================
-/** @class Mantid::DataObjects::LeanPeaksWorkspace
+/** @class Mantid::DataObjects::LeanElasticPeaksWorkspace
 
-   The class LeanPeaksWorkspace stores information about a set of SCD lean
+   The class LeanElasticPeaksWorkspace stores information about a set of SCD lean
    peaks.
 
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
  */
-class MANTID_DATAOBJECTS_DLL LeanPeaksWorkspace
+class MANTID_DATAOBJECTS_DLL LeanElasticPeaksWorkspace
     : public Mantid::API::IPeaksWorkspace {
 public:
   using ColumnAndDirection = std::pair<std::string, bool>;
 
 public:
-  const std::string id() const override { return "LeanPeaksWorkspace"; }
+  const std::string id() const override { return "LeanElasticPeaksWorkspace"; }
 
-  LeanPeaksWorkspace();
-  LeanPeaksWorkspace &operator=(const LeanPeaksWorkspace &other) = delete;
+  LeanElasticPeaksWorkspace();
+  LeanElasticPeaksWorkspace &operator=(const LeanElasticPeaksWorkspace &other) = delete;
 
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
@@ -59,13 +59,13 @@ public:
   API::LogManager_const_sptr getLogs() const override;
 
   /// Returns a clone of the workspace
-  std::unique_ptr<LeanPeaksWorkspace> clone() const {
-    return std::unique_ptr<LeanPeaksWorkspace>(doClone());
+  std::unique_ptr<LeanElasticPeaksWorkspace> clone() const {
+    return std::unique_ptr<LeanElasticPeaksWorkspace>(doClone());
   }
 
   /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<LeanPeaksWorkspace> cloneEmpty() const {
-    return std::unique_ptr<LeanPeaksWorkspace>(doCloneEmpty());
+  std::unique_ptr<LeanElasticPeaksWorkspace> cloneEmpty() const {
+    return std::unique_ptr<LeanElasticPeaksWorkspace>(doCloneEmpty());
   }
 
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
@@ -82,11 +82,11 @@ public:
   void removePeaks(std::vector<int> badPeaks) override;
   void addPeak(const Geometry::IPeak &peak) override;
   /// Move a peak object into this peaks workspace
-  void addPeak(LeanPeak &&peak);
+  void addPeak(LeanElasticPeak &&peak);
   void addPeak(const Kernel::V3D &position,
                const Kernel::SpecialCoordinateSystem &frame) override;
-  LeanPeak &getPeak(int peakNum) override;
-  const LeanPeak &getPeak(int peakNum) const override;
+  LeanElasticPeak &getPeak(int peakNum) override;
+  const LeanElasticPeak &getPeak(int peakNum) const override;
 
   std::unique_ptr<Geometry::IPeak> createPeak(
       const Kernel::V3D &QLabFrame,
@@ -104,8 +104,8 @@ public:
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  std::vector<LeanPeak> &getPeaks();
-  const std::vector<LeanPeak> &getPeaks() const;
+  std::vector<LeanElasticPeak> &getPeaks();
+  const std::vector<LeanElasticPeak> &getPeaks() const;
   bool hasIntegratedPeaks() const override;
   size_t getMemorySize() const override;
 
@@ -169,14 +169,14 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  LeanPeaksWorkspace(const LeanPeaksWorkspace &other);
+  LeanElasticPeaksWorkspace(const LeanElasticPeaksWorkspace &other);
 
 private:
-  LeanPeaksWorkspace *doClone() const override {
-    return new LeanPeaksWorkspace(*this);
+  LeanElasticPeaksWorkspace *doClone() const override {
+    return new LeanElasticPeaksWorkspace(*this);
   }
-  LeanPeaksWorkspace *doCloneEmpty() const override {
-    return new LeanPeaksWorkspace();
+  LeanElasticPeaksWorkspace *doCloneEmpty() const override {
+    return new LeanElasticPeaksWorkspace();
   }
   ITableWorkspace *
   doCloneColumns(const std::vector<std::string> &colNames) const override;
@@ -196,83 +196,83 @@ private:
   API::Column_sptr addColumn(const std::string & /*type*/,
                              const std::string & /*name*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot add column.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot add column.");
   }
 
   bool addColumns(const std::string & /*type*/, const std::string & /*name*/,
                   size_t /*n*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot add columns.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot add columns.");
   }
 
   void removeColumn(const std::string & /*name*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot remove column.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot remove column.");
   }
 
   void setRowCount(size_t /*count*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot setRowCount");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot setRowCount");
   }
 
   size_t insertRow(size_t /*index*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot insertRow");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot insertRow");
   }
 
   void removeRow(size_t /*index*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace structure is read-only. Cannot removeRow.");
+        "LeanElasticPeaksWorkspace structure is read-only. Cannot removeRow.");
   }
 
   /// find method to get the index of integer cell value in a table workspace
   void find(size_t /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  double cell value in a table workspace
   void find(double /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  float cell value in a table workspace
   void find(float /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  API::Boolean value cell in a table
   /// workspace
   void find(API::Boolean /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of cellstd::string  value in a table
   /// workspace
   void find(std::string /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
   void find(Mantid::Kernel::V3D /*value*/, size_t & /*row*/,
             const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError(
-        "LeanPeaksWorkspace::find() not implemented.");
+        "LeanElasticPeaksWorkspace::find() not implemented.");
   }
 
   // ====================================== End ITableWorkspace Methods
   // ==================================
 
   /** Vector of Peak contained within. */
-  std::vector<LeanPeak> peaks;
+  std::vector<LeanElasticPeak> peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::LeanPeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::LeanElasticPeakColumn>> columns;
 
   /** Column names */
   std::vector<std::string> columnNames;
@@ -282,9 +282,9 @@ private:
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-using LeanPeaksWorkspace_sptr = std::shared_ptr<LeanPeaksWorkspace>;
+using LeanElasticPeaksWorkspace_sptr = std::shared_ptr<LeanElasticPeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-using LeanPeaksWorkspace_const_sptr = std::shared_ptr<const LeanPeaksWorkspace>;
+using LeanElasticPeaksWorkspace_const_sptr = std::shared_ptr<const LeanElasticPeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
