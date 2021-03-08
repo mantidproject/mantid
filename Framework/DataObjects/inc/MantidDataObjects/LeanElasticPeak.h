@@ -66,7 +66,6 @@ public:
   void setInstrument(const Geometry::Instrument_const_sptr &) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
-  void setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame> frame);
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
@@ -110,6 +109,8 @@ public:
   LeanElasticPeak &operator=(const LeanElasticPeak &other);
 
 private:
+  void setReferenceFrame(std::shared_ptr<Geometry::ReferenceFrame> frame);
+
   /// Q_sample vector
   Mantid::Kernel::V3D m_Qsample;
 

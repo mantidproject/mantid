@@ -53,7 +53,7 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
 LeanElasticPeak::LeanElasticPeak(
     const Mantid::Kernel::V3D &QSampleFrame,
     const Mantid::Kernel::Matrix<double> &goniometer,
-    boost::optional<std::shared_ptr<ReferenceFrame>> refFrame)
+    boost::optional<std::shared_ptr<Geometry::ReferenceFrame>> refFrame)
     : BasePeak() {
   if (refFrame.is_initialized())
     setReferenceFrame(refFrame.get());
@@ -177,7 +177,15 @@ double LeanElasticPeak::getScattering() const {
 // -------------------------------------------------------------------------------------
 /** Calculate the azimuthal angle of the peak  */
 double LeanElasticPeak::getAzimuthal() const {
-  return std::numeric_limits<double>::quiet_NaN();
+  const V3D qLab = getQLabFrame();
+  std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
+  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const V3D detectorDir = -qLab * qSign;
+  if (refFrame)
+    return atan2(detectorDir[refFrame->pointingUp()],
+                 detectorDir[refFrame->pointingHorizontal()]);
+  else
+    return atan2(detectorDir[1], detectorDir[0]);
 }
 
 // -------------------------------------------------------------------------------------
@@ -206,9 +214,6 @@ Mantid::Kernel::V3D LeanElasticPeak::getQSampleFrame() const {
 //----------------------------------------------------------------------------------------------
 /** Set the peak using the peak's position in reciprocal space, in the sample
  *frame.
- * The GoniometerMatrix will be used to find the Q in the lab frame, so it
- *should
- * be set beforehand.
  *
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space
  *        This is in inelastic convention: momentum transfer of the LATTICE!
@@ -239,10 +244,6 @@ void LeanElasticPeak::setQSampleFrame(
 //----------------------------------------------------------------------------------------------
 /** Set the peak using the peak's position in reciprocal space, in the lab
  *frame.
- * The detector position will be determined.
- * DetectorID, row and column will be set to -1 since they are not (necessarily)
- *found.
- * You can call findDetector to look for the detector ID
  *
  * @param qLab :: Q of the center of the peak, in reciprocal space.
  *        This is in inelastic convention: momentum transfer of the LATTICE!

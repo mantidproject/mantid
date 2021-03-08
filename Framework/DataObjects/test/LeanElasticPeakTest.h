@@ -50,7 +50,7 @@ public:
     TS_ASSERT_THROWS(p.getSamplePos(), const Exception::NotImplementedError &)
     TS_ASSERT(std::isnan(p.getTOF()))
     TS_ASSERT_EQUALS(p.getScattering(), 0.)
-    TS_ASSERT(std::isnan(p.getAzimuthal()))
+    TS_ASSERT_EQUALS(p.getAzimuthal(), -M_PI)
     TS_ASSERT_THROWS(p.getL1(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getL2(), const Exception::NotImplementedError &)
   }
@@ -90,6 +90,17 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(), M_PI * 6 / 7, 1e-9)
     TS_ASSERT_DELTA(p.getDSpacing(), 1.679251908362714, 1e-9)
     TS_ASSERT_DELTA(p.getScattering(), 1.860548028230944, 1e-9)
+    TS_ASSERT_DELTA(p.getAzimuthal(), -2.6779450449, 1e-9)
+
+    // calculate Q_lab from scattering and azimuthal to check values
+    const auto k = 2 * M_PI / p.getWavelength();
+    V3D qLab(-sin(p.getScattering()) * cos(p.getAzimuthal()),
+             -sin(p.getScattering()) * sin(p.getAzimuthal()),
+             1 - cos(p.getScattering()));
+    qLab *= k;
+    TS_ASSERT_DELTA(qLab.X(), 2, 1e-9)
+    TS_ASSERT_DELTA(qLab.Y(), 1, 1e-9)
+    TS_ASSERT_DELTA(qLab.Z(), 3, 1e-9)
   }
 
   void test_Qsample_gon_constructor_refFrame() {
@@ -117,6 +128,16 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(), M_PI * 4 / 7, 1e-9)
     TS_ASSERT_DELTA(p.getDSpacing(), 1.679251908362714, 1e-9)
     TS_ASSERT_DELTA(p.getScattering(), 1.1278852827212578, 1e-9)
+
+    // calculate Q_lab from scattering and azimuthal to check values
+    const auto k = 2 * M_PI / p.getWavelength();
+    V3D qLab(1 - cos(p.getScattering()),
+             -sin(p.getScattering()) * sin(p.getAzimuthal()),
+             -sin(p.getScattering()) * cos(p.getAzimuthal()));
+    qLab *= k;
+    TS_ASSERT_DELTA(qLab.X(), 2, 1e-9)
+    TS_ASSERT_DELTA(qLab.Y(), 1, 1e-9)
+    TS_ASSERT_DELTA(qLab.Z(), 3, 1e-9)
   }
 
   void test_Qsample_gon_constructor_wavelength_fail() {
@@ -293,6 +314,9 @@ public:
 
     TS_ASSERT_DELTA(leanpeak.getScattering(), peak.getScattering(), 1e-7);
     TS_ASSERT_DELTA(leanpeak.getScattering(), 0.2203733065, 1e-7);
+
+    TS_ASSERT_DELTA(leanpeak.getAzimuthal(), peak.getAzimuthal(), 1e-7);
+    TS_ASSERT_DELTA(leanpeak.getAzimuthal(), 0.7853981637, 1e-7);
 
     TS_ASSERT_EQUALS(leanpeak.getRunNumber(), peak.getRunNumber());
     TS_ASSERT_EQUALS(leanpeak.getRunNumber(), 1234);
