@@ -153,24 +153,24 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
     masked_theta_array = []
     masked_phi_array = []
     info = delta.spectrumInfo()
-    for id in range(info.size()):
-        pos = info.position(id)
+    for det_id in range(info.size()):
+        pos = info.position(det_id)
         phi = np.arctan2(pos[0], pos[1])
         theta = np.arccos(pos[2] / pos.norm())
-        if use_mask and mtd[str(mask)].dataY(id):
+        if use_mask and mtd[str(mask)].dataY(det_id):
             masked_theta_array.append(theta)
             masked_phi_array.append(phi)
         else:
             theta_array.append(theta)
             phi_array.append(phi)
-            percent = 100.0 * np.sum(delta.dataY(id)) / np.sum(ws_old.dataY(id))
+            percent = 100.0 * np.sum(delta.dataY(det_id)) / np.sum(ws_old.dataY(det_id))
             value_array.append(percent)
 
     # Use the largest solid angle for circle radius
     sample_position = info.samplePosition()
     maximum_solid_angle = 0.0
-    for idx in range(info.size()):
-        maximum_solid_angle = max(maximum_solid_angle, delta.getDetector(idx).solidAngle(sample_position))
+    for det_id in range(info.size()):
+        maximum_solid_angle = max(maximum_solid_angle, delta.getDetector(det_id).solidAngle(sample_position))
 
     # Convert to degrees for plotting
     theta_array = np.rad2deg(theta_array)
