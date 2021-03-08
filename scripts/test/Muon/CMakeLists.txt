@@ -93,7 +93,7 @@ set ( TEST_PY_FILES
    plotting_canvas/plotting_canvas_presenter_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
-   # seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
+   seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
    seq_fitting_tab_widget/sequential_table_test.py
    transform_widget_new_test.py
    transformWidget_test.py
