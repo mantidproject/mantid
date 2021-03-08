@@ -625,9 +625,9 @@ void InstrumentWidgetMaskTab::shapeChanged() {
       false; // this prevents resetting shape properties by doubleChanged(...)
   RectF rect = m_instrWidget->getSurface()->getCurrentBoundingRect();
   m_doubleManager->setValue(m_left, rect.x0());
-  m_doubleManager->setValue(m_top, rect.y1());
+  m_doubleManager->setValue(m_top, rect.y0());
   m_doubleManager->setValue(m_right, rect.x1());
-  m_doubleManager->setValue(m_bottom, rect.y0());
+  m_doubleManager->setValue(m_bottom, rect.y1());
   for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin();
        it != m_doublePropertyMap.end(); ++it) {
     m_doubleManager->setValue(
