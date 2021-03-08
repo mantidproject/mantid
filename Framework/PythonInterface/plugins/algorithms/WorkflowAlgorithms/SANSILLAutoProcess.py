@@ -569,7 +569,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              FluxOutputWorkspace=flux_name)
         return beam_name, flux_name
 
-    def processFlux(self, i, aborber_name):
+    def processFlux(self, i, absorber_name):
         if self.flux[0]:
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
