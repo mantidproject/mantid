@@ -81,19 +81,12 @@ def __get_regions(x, y, limit=500):
     # Returns a list of tuples with start,stop indices
     # indicating a detector region
     regions = []
-    start = 0
-    end = -1
-    for ind in range(len(x)):
-        if not np.isnan(y[ind]):
-            # Set ending region if we find a nan
-            if ind + 1 < len(y) and np.isnan(y[ind + 1]):
-                end = x[ind]
-                if end - start > limit:
-                    regions.append((start, end))
-        else:
-            # Set starting region if going from nan to non-nan
-            if ind + 1 < len(y) and not np.isnan(y[ind + 1]):
-                start = x[ind]
+
+    bounds = np.argwhere(np.isnan(y)).flatten()
+    for ind in range(len(bounds)):
+        if ind + 1 < len(bounds) and bounds[ind + 1] - bounds[ind] > 1:
+            if x[bounds[ind + 1]] - x[bounds[ind]] > limit:
+                regions.append((x[bounds[ind]], x[bounds[ind + 1]]))
     return regions
 
 
