@@ -402,7 +402,8 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit())
+        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
+            self.model.current_dataset_name, self.model.current_single_fit_function))
 
     def test_perform_fit_will_call_the_correct_function_for_a_simultaneous_fit(self):
         self.model.dataset_names = self.dataset_names
@@ -416,8 +417,8 @@ class GeneralFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_simultaneous_fit.assert_called_once_with(self.model._get_parameters_for_simultaneous_fit(),
-                                                                global_parameters)
+        self.model._do_simultaneous_fit.assert_called_once_with(self.model._get_parameters_for_simultaneous_fit(
+            self.model.dataset_names, self.model.simultaneous_fit_function), global_parameters)
 
 
 if __name__ == '__main__':

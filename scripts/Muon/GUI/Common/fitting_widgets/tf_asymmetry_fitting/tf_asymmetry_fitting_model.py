@@ -681,10 +681,10 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
     def _update_tf_fit_function_parameters_for_simultaneous_fit(self, dataset_names: list, parameter_values: list):
         """Updates the tf asymmetry function parameters for the given dataset names if in simultaneous fit mode."""
         number_parameters_per_domain = int(len(parameter_values) / len(dataset_names))
-        for dataset_index, name in enumerate(dataset_names):
+        for name in dataset_names:
             if name in self.dataset_names:
                 self._set_parameter_values_in_tf_asymmetry_simultaneous_function_domain(
-                    self.tf_asymmetry_simultaneous_function, dataset_index, parameter_values,
+                    self.tf_asymmetry_simultaneous_function, self.dataset_names.index(name), parameter_values,
                     number_parameters_per_domain)
 
     def get_fit_workspace_names_from_groups_and_runs(self, runs: list, groups_and_pairs: list) -> list:

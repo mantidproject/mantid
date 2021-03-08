@@ -117,7 +117,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.model.current_dataset_index = 1
         self.assertEqual(self.model.current_tf_asymmetry_single_function, None)
 
-    def test_that_update_current_single_fit_functions_will_update_the_current_tf_symmetry_and_normal_single_function(self):
+    def test_that_update_tf_asymmetry_single_fit_function_will_update_the_current_tf_symmetry_and_normal_single_function(self):
         self.model.dataset_names = self.dataset_names
         fit_function = self.fit_function.clone()
         tf_fit_function = self.tf_single_function.clone()
@@ -127,7 +127,7 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model._get_normal_fit_function_from = mock.Mock(return_value=fit_function)
 
-        self.model.update_current_single_fit_functions(tf_fit_function)
+        self.model.update_tf_asymmetry_single_fit_function(self.model.current_dataset_index, tf_fit_function)
 
         self.model._get_normal_fit_function_from.assert_called_once_with(tf_fit_function)
         self.assertEqual(str(self.model.current_single_fit_function), str(fit_function))
@@ -140,37 +140,35 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.assertEqual(str(self.model.tf_asymmetry_simultaneous_function), str(self.tf_simultaneous_fit_function))
 
-    def test_that_update_simultaneous_fit_functions_will_update_the_current_functions_when_using_one_dataset(self):
+    def test_that_update_tf_asymmetry_simultaneous_fit_function_will_update_the_current_functions_when_using_one_dataset(self):
         self.model.dataset_names = ["Name1"]
         self.model._get_normal_fit_function_from = mock.Mock(return_value=self.simultaneous_fit_function)
 
-        self.model.update_simultaneous_fit_functions(self.tf_simultaneous_fit_function)
+        self.model.update_tf_asymmetry_simultaneous_fit_function(self.tf_simultaneous_fit_function)
 
         self.model._get_normal_fit_function_from.assert_called_once_with(self.tf_simultaneous_fit_function)
         self.assertEqual(str(self.model.simultaneous_fit_function), str(self.simultaneous_fit_function))
         self.assertEqual(str(self.model.tf_asymmetry_simultaneous_function), str(self.tf_simultaneous_fit_function))
 
-    def test_that_update_simultaneous_fit_functions_will_update_the_current_functions_when_using_multiple_dataset(self):
+    def test_that_update_tf_asymmetry_simultaneous_fit_function_will_update_the_current_functions_when_using_multiple_dataset(self):
         self.model.dataset_names = self.dataset_names
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
         self.model._get_normal_fit_function_from = mock.Mock(return_value=self.fit_function)
 
-        self.model.update_simultaneous_fit_functions(self.tf_simultaneous_fit_function)
+        self.model.update_tf_asymmetry_simultaneous_fit_function(self.tf_simultaneous_fit_function)
 
         self.assertEqual(str(self.model.simultaneous_fit_function), str(self.simultaneous_fit_function))
         self.assertEqual(str(self.model.tf_asymmetry_simultaneous_function), str(self.tf_simultaneous_fit_function))
 
-    def test_that_current_domain_tf_asymmetry_fit_function_returns_the_correct_function_when_there_is_only_one_dataset(self):
+    def test_that_get_domain_tf_asymmetry_fit_function_returns_the_correct_function_when_there_is_only_one_dataset(self):
         self.model.dataset_names = ["Name1"]
-        self.model.tf_asymmetry_simultaneous_function = self.tf_single_function
+        self.assertEqual(str(self.model.get_domain_tf_asymmetry_fit_function(self.tf_single_function, 0)),
+                         str(self.tf_single_function))
 
-        self.assertEqual(str(self.model.current_domain_tf_asymmetry_fit_function()), str(self.tf_single_function))
-
-    def test_that_current_domain_tf_asymmetry_fit_function_returns_the_correct_function_when_there_is_multiple_datasets(self):
+    def test_that_get_domain_tf_asymmetry_fit_function_returns_the_correct_function_when_there_is_multiple_datasets(self):
         self.model.dataset_names = self.dataset_names
-        self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
-
-        self.assertEqual(str(self.model.current_domain_tf_asymmetry_fit_function()), str(self.tf_single_function))
+        self.assertEqual(str(self.model.get_domain_tf_asymmetry_fit_function(self.tf_simultaneous_fit_function, 0)),
+                         str(self.tf_single_function))
 
     def test_that_reset_tf_asymmetry_functions_will_reset_the_tf_asymmetry_fit_functions(self):
         self.model.dataset_names = self.dataset_names
@@ -359,7 +357,8 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._get_parameters_for_tf_asymmetry_single_fit.assert_called_once_with()
+        self.model._get_parameters_for_tf_asymmetry_single_fit.assert_called_once_with(
+            self.model.current_dataset_name, self.model.current_tf_asymmetry_single_function)
         self.model._do_tf_asymmetry_single_fit.assert_called_once_with(fit_variables)
 
     def test_perform_fit_will_call_the_correct_function_for_a_tf_simultaneous_fit(self):
@@ -376,7 +375,8 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._get_parameters_for_tf_asymmetry_simultaneous_fit.assert_called_once_with()
+        self.model._get_parameters_for_tf_asymmetry_simultaneous_fit.assert_called_once_with(
+            self.model.dataset_names, self.model.tf_asymmetry_simultaneous_function)
         self.model._get_global_parameters_for_tf_asymmetry_fit.assert_called_once_with()
         self.model._do_tf_asymmetry_simultaneous_fit.assert_called_once_with(fit_variables, [])
 
@@ -398,16 +398,30 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[0]), [1.0])
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.single_fit_functions[1]), [0.0])
 
-    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_for_the_specified_dataset_in_simultaneous_mode(self):
+    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_simultaneous_mode(self):
         self.model.dataset_names = self.dataset_names
         self.model.simultaneous_fit_function = self.simultaneous_fit_function
         self.model.simultaneous_fitting_mode = True
 
-        self.model.update_ws_fit_function_parameters(["Name1"], [1.0])
+        self.model.update_ws_fit_function_parameters(["Name1"], [1.0, 0.0])
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), [1.0, 0.0])
 
-        self.model.update_ws_fit_function_parameters(["Name2"], [2.0])
+        self.model.update_ws_fit_function_parameters(["Name2"], [1.0, 2.0])
         self.assertEqual(self.model.get_fit_function_parameter_values(self.model.simultaneous_fit_function), [1.0, 2.0])
+
+    def test_that_update_ws_fit_function_parameters_will_update_the_parameters_when_in_TF_asymmetry_simultaneous_mode(self):
+        normalisation1, normalisation2 = 1.345, 2.345
+        param1, param2 = 3.345, 4.345
+
+        self.model.dataset_names = self.dataset_names
+        self.model.simultaneous_fit_function = self.simultaneous_fit_function
+        self.model.tf_asymmetry_simultaneous_function = self.tf_simultaneous_fit_function
+        self.model.simultaneous_fitting_mode = True
+        self.model.tf_asymmetry_mode = True
+
+        self.model.update_ws_fit_function_parameters(["Name1", "Name2"], [normalisation1, param1, normalisation2, param2])
+        self.assertEqual(self.model.get_fit_function_parameter_values(self.model.tf_asymmetry_simultaneous_function),
+                         [normalisation1, 0.0, param1, 0.2, 0.2, normalisation2, 0.0, param2, 0.2, 0.2])
 
     def test_get_fit_workspace_names_from_groups_and_runs_when_fit_to_raw_is_false(self):
         self.model.fit_to_raw = False
