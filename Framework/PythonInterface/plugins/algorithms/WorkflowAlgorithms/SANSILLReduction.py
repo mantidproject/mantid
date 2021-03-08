@@ -481,14 +481,8 @@ class SANSILLReduction(PythonAlgorithm):
             # range in which it possible some pixels are nearing 90 degrees
             # normally, we are talking about D16 here
 
-            sp_info = mtd[ws].spectrumInfo()
-            number_of_tubes = 320
-            number_of_pixels = 320
-            epsilon = 1e-2
-            for i in range(number_of_tubes):
-                if abs(sp_info.two_theta((i + 0.5)*number_of_pixels) - 90) < epsilon:
-                    MaskBTP(Workspace=ws, Instrument="D16", Tube=i)
-                    break
+            epsilon = 1
+            MaskAngle(Workspace=ws, MinAngle=90-epsilon, MaxAngle=90+epsilon, Angle='TwoTheta')
 
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
