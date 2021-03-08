@@ -87,8 +87,8 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, sampleEnvTopic,
-        chopperTopic, monitorTopic, bufferThreshold);
+        broker, eventTopic, runInfoTopic, sampleEnvTopic, chopperTopic,
+        monitorTopic, bufferThreshold);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
