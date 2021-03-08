@@ -91,10 +91,11 @@ private:
   double twiddle_search_L1(Mantid::API::IPeaksWorkspace_sptr pws,
                            double deltaL1, double threshold);
   double objfunc_L1(Mantid::API::IPeaksWorkspace_sptr pws, double source_z,
-                        double init_z);
+                    double init_z);
 
   /// Twiddle search for calibrating bank
-  void twiddle_search_banks(Mantid::API::IPeaksWorkspace_sptr pws, double searchStep[6], double threshold);
+  void twiddle_search_banks(Mantid::API::IPeaksWorkspace_sptr pws,
+                            double searchStep[6], double threshold);
   double objfunc_bank(Mantid::API::IPeaksWorkspace_sptr pwsBank,
                       double params[6], std::string bankname);
 

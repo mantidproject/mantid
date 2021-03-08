@@ -457,7 +457,6 @@ private:
     }
   }
 
-
   /**
    * @brief Run the calibration algorithm
    *
