@@ -549,7 +549,6 @@ double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
   double init_L1 = pws->getInstrument()->getSource()->getPos().Z();
   double L1 = init_L1;
   double best_err = objfunc_L1(pws, L1, init_L1);
-  double err;
 
   int niter = 0;
 
@@ -557,7 +556,7 @@ double SCDCalibratePanels2::twiddle_search_L1(IPeaksWorkspace_sptr pws,
                  << "  err_0 = " << best_err << "\n";
   while (deltaL1 > threshold) {
     L1 += deltaL1;
-    err = objfunc_L1(pws, L1, init_L1);
+    double err = objfunc_L1(pws, L1, init_L1);
 
     if (err < best_err) {
       // There was some improvement
@@ -621,7 +620,6 @@ double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
   IPeaksWorkspace_sptr pws = pws_org->clone();
 
   double err = 0.0;
-  double tof = 0.0;
   V3D qv_target;
   V3D qv_calc;
   V3D delta_qv;
@@ -649,7 +647,7 @@ double SCDCalibratePanels2::objfunc_L1(IPeaksWorkspace_sptr pws_org,
     qv_target *= 2.0 * PI;
 
     // cache time-of-flight
-    tof = pws->getPeak(i).getTOF();
+    double tof = pws->getPeak(i).getTOF();
 
     // make a peak that has the new instrument
     // NOTE:
@@ -798,7 +796,6 @@ double SCDCalibratePanels2::objfunc_bank(IPeaksWorkspace_sptr pwsBank,
                                          std::string bankname) {
   // prep
   double err = 0.0;
-  double tof = 0.0;
   V3D qv_target;
   V3D qv_calc;
   V3D delta_qv;
@@ -829,7 +826,7 @@ double SCDCalibratePanels2::objfunc_bank(IPeaksWorkspace_sptr pwsBank,
     qv_target *= 2 * PI;
 
     // cache time-of-flight
-    tof = pws->getPeak(i).getTOF();
+    double tof = pws->getPeak(i).getTOF();
 
     // get qv with updated instrument
     Peak pk = Peak(pws->getPeak(i));
