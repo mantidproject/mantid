@@ -974,12 +974,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  */
 template <typename MDE, size_t nd>
 void IntegratePeaksMD2::findEllipsoid(
-    typename MDEventWorkspace<MDE, nd>::sptr ws,
+    const typename MDEventWorkspace<MDE, nd>::sptr ws,
     const CoordTransform &getRadiusSq, const V3D &pos,
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const bool &useCentroid, const double &bgDensity,
     std::vector<V3D> &eigenvects, std::vector<double> &eigenvals, V3D &mean,
-    int maxIter) {
+    const int maxIter) {
 
   // get leaf-only iterators over all boxes in ws
   auto function = std::make_unique<Geometry::MDAlgorithms::MDBoxMaskFunction>(
@@ -1058,11 +1058,11 @@ void IntegratePeaksMD2::calcCovar(
     const std::vector<std::pair<V3D, double>> &peak_events, const V3D &pos,
     const coord_t &radiusSquared, const bool &qAxisIsFixed,
     const bool &useCentroid, std::vector<V3D> &eigenvects,
-    std::vector<double> &eigenvals, V3D &mean, const int &maxIter) {
+    std::vector<double> &eigenvals, V3D &mean, const int maxIter) {
 
   size_t nd = 3;
 
-  // calc threhold mdsq to exclude events over 3 stdevs away
+  // to calc threshold mdsq to exclude events over 3 stdevs away
   boost::math::chi_squared chisq(static_cast<double>(nd));
   auto mdsq_max = boost::math::quantile(chisq, 0.997);
   Matrix<double> invCov; // required to calc mdsq
@@ -1098,7 +1098,7 @@ void IntegratePeaksMD2::calcCovar(
       bool useEvent = true;
       if (nIter > 0) {
         // check if point within 3 stdevs of mean (in MD frame)
-        // pos is set equal to mean is useCentroid after each iteration
+        // prev_pos is the mean if useCentroid
         const auto displ = center - prev_pos;
         auto mdsq = displ.scalar_prod(invCov * displ);
         if (mdsq > mdsq_max) {
@@ -1147,7 +1147,7 @@ void IntegratePeaksMD2::calcCovar(
     cov_mat /= w_sum; // normalise by sum of weights
 
     // check if another iteration is required
-    bool anyMasked = (nIter > 1) ? (nmasked > 0) : true;
+    bool anyMasked = (nIter > 0) ? (nmasked > 0) : true;
     // check if ellipsoid volume greater than sphere
     auto cov_det = cov_mat.determinant();
     bool isEllipVolGreater =
@@ -1190,7 +1190,7 @@ void IntegratePeaksMD2::calcCovar(
                     << std::endl;
   }
 
-  // covnert to vectors for output
+  // convert to vectors for output
   eigenvals = evals.Diagonal();
   // set min eigenval to be small but non-zero (1e-6)
   // when no discernible peak above background
