@@ -443,7 +443,8 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model.perform_fit()
 
-        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit())
+        self.model._do_single_fit.assert_called_once_with(self.model._get_parameters_for_single_fit(
+            self.model.current_dataset_name, self.model.current_single_fit_function))
 
 
 if __name__ == '__main__':
