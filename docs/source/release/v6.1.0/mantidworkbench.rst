@@ -23,5 +23,6 @@ Bugfixes
 - For the elliptical shell of integrated peaks, the background is correct when plotting with varying background thicknesses
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Fixed a bug that use wrong help links in certain interfaces
+- Fixed a bug that would not let the user input the bounding box of a shape in the instrument viewer.
 
 :ref:`Release 6.1.0 <v6.1.0>`
