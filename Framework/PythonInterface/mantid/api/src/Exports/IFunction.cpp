@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -291,10 +292,9 @@ void export_IFunction() {
            "Get the number of domains.")
 
       .def("setMatrixWorkspace", &setMatrixWorkspace,
-           (arg("self"), arg("workspace"), arg("wi"),
-            arg("startX"), arg("endX")),
-           "Changes the integral intensity of the peak function by setting its "
-           "height.")
+           (arg("self"), arg("workspace"), arg("wi"), arg("startX"),
+            arg("endX")),
+           "Set matrix workspace to parse Parameters.xml")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

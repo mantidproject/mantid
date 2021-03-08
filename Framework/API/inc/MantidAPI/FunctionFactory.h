@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <vector>
@@ -52,6 +53,9 @@ public:
 
   /// Creates an instance of a function
   std::shared_ptr<IFunction> createInitialized(const std::string &input) const;
+
+  std::shared_ptr<IPeakFunction>
+  createInitializedPeakFunction(const std::string &name) const;
 
   /// Creates an instnce of an inizialised multidomain function where each
   /// domain has the same function.

@@ -74,6 +74,21 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   return createSimple(e, parentAttributes);
 }
 
+IPeakFunction_sptr
+FunctionFactoryImpl::createInitializedPeakFunction(const std::string &name) const {
+
+  IPeakFunction_sptr peakFun;
+  if (peakFun) {
+    std::cout << "hello";
+  }
+  auto fun = createFunction(name);
+  peakFun = std::dynamic_pointer_cast<IPeakFunction>(fun);
+  if (!peakFun) {
+    inputError(name);
+  }
+  return peakFun;
+}
+
 /**
  * @param input :: An input string which defines the function and initial values
  * for the parameters.

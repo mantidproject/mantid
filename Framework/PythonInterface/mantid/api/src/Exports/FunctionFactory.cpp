@@ -72,6 +72,7 @@ PythonObjectInstantiator<IFunction>::createInstance() const {
   instancePtr.reset(instancePtr.get(), GILSharedPtrDeleter(*deleter));
   return instancePtr;
 }
+
 } // namespace PythonInterface
 } // namespace Mantid
 
@@ -242,5 +243,8 @@ void export_FunctionFactory() {
            "Returns a list of the currently available background functions")
       .def("getPeakFunctionNames", &getPeakFunctionNames, arg("self"),
            "Returns a list of the currently available peak functions")
+      .def("createInitializedPeakFunction",
+           &FunctionFactoryImpl::createInitializedPeakFunction,
+           (arg("self"), arg("name")), "Return pointer to peak function.")
       .staticmethod("Instance");
 }
