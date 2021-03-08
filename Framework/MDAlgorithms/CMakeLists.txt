@@ -277,6 +277,7 @@ set(TEST_FILES
     ImportMDEventWorkspaceTest.h
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
+    IntegrateQLabEventsTest.h
     IntegrateEllipsoidsTest.h
     IntegrateEllipsoidsTwoStepTest.h
     IntegrateEllipsoidsWithSatellitesTest.h

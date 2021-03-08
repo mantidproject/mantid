@@ -68,10 +68,15 @@ void IntegrateQLabEvents::addEvents(SlimEvents const &event_qs) {
 
 Mantid::Geometry::PeakShape_const_sptr
 IntegrateQLabEvents::ellipseIntegrateEvents(
-    const std::vector<V3D> &E1Vec, V3D const &peak_q,
-    bool specify_size, double peak_radius,
-    double back_inner_radius, double back_outer_radius,
-    std::vector<double> &axes_radii, double &inti, double &sigi) {
+    const std::vector<V3D> &E1Vec,
+    V3D const &peak_q,
+    bool specify_size,
+    double peak_radius,
+    double back_inner_radius,
+    double back_outer_radius,
+    std::vector<double> &axes_radii,
+    double &inti,
+    double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
