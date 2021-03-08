@@ -1,6 +1,7 @@
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
 from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
+from mantid.plots.utility import colormap_as_plot_color
 from mantid.api import WorkspaceFactory
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
@@ -382,8 +383,7 @@ def plot_peakd(wksp, peak_positions):
     means = []
     stddevs = []
 
-    cm = plt.get_cmap("jet")
-    ax.set_prop_cycle(color=[cm(1.*i/len(peaks)) for i in range(len(peaks))])
+    ax.set_prop_cycle(color=colormap_as_plot_color(len(peaks), cmap=plt.get_cmap("jet")))
 
     # Plot data for each peak position
     for peak in peaks:
