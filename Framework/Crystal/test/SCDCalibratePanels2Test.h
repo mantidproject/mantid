@@ -133,7 +133,7 @@ public:
    *        Therefore the calibration results should be close to a zero
    *        vector.
    */
-  void test_Null_Case() {
+  void run_Null_Case() {
     g_log.notice() << "test: !Null case!\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -161,7 +161,7 @@ public:
     // TS_ASSERT(sameInstrument);
   }
 
-  void test_L1() {
+  void run_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
@@ -192,7 +192,7 @@ public:
     // TS_ASSERT(sameInstrument);
   }
 
-  void test_Bank() {
+  void run_Bank() {
     g_log.notice() << "test_Bank() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();
