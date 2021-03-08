@@ -82,12 +82,13 @@ class GeneralFittingPresenter(BasicFittingPresenter):
         """Handle when the fitting mode is changed to or from simultaneous fitting."""
         self.model.simultaneous_fitting_mode = self.view.simultaneous_fitting_mode
         self.switch_fitting_mode_in_view()
-        self.automatically_update_function_name()
 
         self.update_fit_functions_in_model_from_view()
 
         # Triggers handle_dataset_name_changed
         self.update_dataset_names_in_view_and_model()
+
+        self.automatically_update_function_name()
 
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()

@@ -77,10 +77,10 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
 
         self.update_tf_asymmetry_functions_in_model_and_view()
 
+        self.automatically_update_function_name()
+
         self.reset_fit_status_and_chi_squared_information()
         self.clear_cached_fit_functions()
-
-        self.automatically_update_function_name()
 
         if self._update_plot:
             self.selected_fit_results_changed.notify_subscribers(self.model.get_active_fit_results())
