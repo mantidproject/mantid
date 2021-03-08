@@ -163,7 +163,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
           << "-- (dx, dy, dz) = " << dtrans << "\n"
           << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
-  g_log.notice() << msgiter.str();
+  g_log.information() << msgiter.str();
 }
 
 // -------///
