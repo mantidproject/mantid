@@ -77,6 +77,26 @@ def _get_difc_ws(wksp, instr_ws=None):
     return difc_ws
 
 
+def __get_regions(x, y, limit=500):
+    # Returns a list of tuples with start,stop indices
+    # indicating a detector region
+    regions = []
+    start = 0
+    end = -1
+    for ind in range(len(x)):
+        if not np.isnan(y[ind]):
+            # Set ending region if we find a nan
+            if ind + 1 < len(y) and np.isnan(y[ind + 1]):
+                end = x[ind]
+                if end - start > limit:
+                    regions.append((start, end))
+        else:
+            # Set starting region if going from nan to non-nan
+            if ind + 1 < len(y) and not np.isnan(y[ind + 1]):
+                start = x[ind]
+    return regions
+
+
 def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
            xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
@@ -385,6 +405,8 @@ def plot_peakd(wksp, peak_positions):
 
     ax.set_prop_cycle(color=colormap_as_plot_color(len(peaks), cmap=plt.get_cmap("jet")))
 
+    regions = []
+
     # Plot data for each peak position
     for peak in peaks:
         print("Processing peak position {}".format(peak))
@@ -403,6 +425,13 @@ def plot_peakd(wksp, peak_positions):
 
         means.append(np.mean(y_val))
         stddevs.append(np.std(y_val))
+
+        # Draw vertical lines between detector regions
+        if not regions:
+            regions = __get_regions(x, y, limit=200)
+            for region in regions:
+                ax.axvline(x=region[0])
+                ax.axvline(x=region[1])
 
         ax.plot(x, y, marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
