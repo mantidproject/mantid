@@ -105,9 +105,10 @@ void ThresholdMD::exec() {
 
   using namespace std::placeholders;
   boost::function<bool(double)> comparitor =
-      std::bind(std::less<double>(), _1, referenceValue);
+      std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
   if (condition == GreaterThan()) {
-    comparitor = std::bind(std::greater<double>(), _1, referenceValue);
+    comparitor = std::bind(std::greater<double>(), std::placeholders::_1,
+                           referenceValue);
   }
 
   Progress prog(this, 0.0, 1.0, 100);

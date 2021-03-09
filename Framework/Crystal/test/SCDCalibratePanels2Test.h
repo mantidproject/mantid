@@ -497,8 +497,8 @@ private:
     sub_alg->initialize();
     sub_alg->setLogging(LOGCHILDALG);
     sub_alg->setProperty("Workspace", wsname);
-    sub_alg->setProperty("u", "1,0,0");
-    sub_alg->setProperty("v", "0,1,0");
+    sub_alg->setProperty("u", "0.5,0.8660254037844387,0");
+    sub_alg->setProperty("v", "-0.8660254037844387,0.5,0");
     sub_alg->setProperty("a", silicon_a);
     sub_alg->setProperty("b", silicon_b);
     sub_alg->setProperty("c", silicon_c);

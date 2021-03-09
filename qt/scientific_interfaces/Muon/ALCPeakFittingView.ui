@@ -83,7 +83,14 @@
        </item>
       </layout>
      </widget>
-     <widget class="MantidQt::MantidWidgets::PreviewPlot" name="plot" native="true"/>
+     <widget class="MantidQt::MantidWidgets::PreviewPlot" name="plot" native="true">
+      <property name="toolTip">
+       <string>Use right-click for plot options</string>
+      </property>
+      <property name="toolTipDuration">
+       <number>2000</number>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>

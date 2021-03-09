@@ -28,7 +28,7 @@
 #include <Poco/Path.h>
 #include <cmath>
 #include <limits>
-#include <numeric> // std::accumulate
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -155,14 +155,11 @@ void LoadILLSANS::exec() {
     // we move the parent "detector" component, but since it is at (0,0,0), we
     // need to find the distance it has to move and move it to this position
     double finalDistance =
-        firstEntry.getFloat(instrumentPath + "/detector/det_calc") / 1000.;
+        firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
     V3D pos = getComponentPosition("detector_center");
     double currentDistance = pos.Z();
 
     moveDetectorDistance(finalDistance - currentDistance, "detector");
-
-    // L2 was put at "finalDistance - currentDistance", so we update it to the
-    // correct value
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", finalDistance, true);
 
@@ -173,45 +170,48 @@ void LoadILLSANS::exec() {
 
     // first we move the central detector
     double distance =
-        firstEntry.getFloat(instrumentPath + "/Detector/det_calc");
-    moveDetectorDistance(distance, "detector");
+        firstEntry.getFloat(instrumentPath + "/Detector 2/det2_calc");
+    moveDetectorDistance(distance, "detector_back");
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", distance, true);
 
     double offset =
-        firstEntry.getFloat(instrumentPath + "/Detector/dtr_actual");
-    // TODO : check sign on actual data
-    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+        firstEntry.getFloat(instrumentPath + "/Detector 2/dtr2_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector_back"); // mm to meter
 
     // then the right one
-    distance = firstEntry.getFloat(instrumentPath + "/RightDetector/det_calc");
-    moveDetectorDistance(distance, "detector_right");
+    distance = firstEntry.getFloat(instrumentPath + "/Detector 1/det1_calc");
+    moveDetectorDistance(distance, "detector_front");
 
-    offset = firstEntry.getFloat(instrumentPath + "/RightDetector/dtr_actual");
-    moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
+    // mm to meter
+    offset = firstEntry.getFloat(instrumentPath + "/Detector 1/dtr1_actual");
+    moveDetectorHorizontal(-offset / 1000, "detector_front"); // mm to meter
+    double angle =
+        firstEntry.getFloat(instrumentPath + "/Detector 1/dan1_actual");
+    rotateInstrument(-angle, "detector_front");
 
   } else {
+    // D11 and D22
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
     double distance = m_loadHelper.getDoubleFromNexusPath(
         firstEntry, instrumentPath + "/detector/det_calc");
-
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty<double>("L2", distance, true);
     if (m_instrumentName == "D22") {
       double offset = m_loadHelper.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
-      /*TODO: DO NOT ROTATE UNTIL CONFIRMED BY INSTRUMENT SCIENTIST
-      double angle = m_loader.getDoubleFromNexusPath(
-          firstEntry, instrumentPath + "/detector/dan_actual");
-      rotateD22(angle, "detector");*/
     }
   }
 
   progress.report("Setting sample logs");
   setFinalProperties(filename);
   setProperty("OutputWorkspace", m_localWorkspace);
-} // namespace DataHandling
+}
 
 /**
  * Set member variable with the instrument name
@@ -219,9 +219,8 @@ void LoadILLSANS::exec() {
 void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
   if (instrumentNamePath.empty()) {
-    std::string message("Cannot set the instrument name from the Nexus file!");
-    g_log.error(message);
-    throw std::runtime_error(message);
+    throw std::runtime_error(
+        "Cannot set the instrument name from the Nexus file!");
   }
   m_instrumentName = m_loadHelper.getStringFromNexusPath(
       firstEntry, instrumentNamePath + "/name");
@@ -321,15 +320,15 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
+  NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
   NXInt dataCenter = data1.openIntData();
   dataCenter.load();
-  NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataRight = data2.openIntData();
-  dataRight.load();
-  NXData data3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = data3.openIntData();
+  NXData data2 = firstEntry.openNXData("D11/Detector 2/data");
+  NXInt dataLeft = data2.openIntData();
   dataLeft.load();
+  NXData data3 = firstEntry.openNXData("D11/Detector 3/data");
+  NXInt dataRight = data3.openIntData();
+  dataRight.load();
 
   size_t numberOfHistograms =
       static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() +
@@ -356,11 +355,11 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
-  NXInt dataCenter = data1.openIntData();
-  dataCenter.load();
   NXData data2 = firstEntry.openNXData("data2");
-  NXInt dataSide = data2.openIntData();
+  NXInt dataCenter = data2.openIntData();
+  dataCenter.load();
+  NXData data1 = firstEntry.openNXData("data1");
+  NXInt dataSide = data1.openIntData();
   dataSide.load();
 
   size_t numberOfHistograms =
@@ -627,8 +626,10 @@ void LoadILLSANS::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   if (m_resMode == "nominal") {
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setPropertyValue("Filename",
+                               getInstrumentFilePath(m_instrumentName));
   } else if (m_resMode == "low") {
+    // low resolution mode we have only defined for the old D11 and D22
     loadInst->setPropertyValue("Filename",
                                getInstrumentFilePath(m_instrumentName + "lr"));
   }
@@ -681,8 +682,6 @@ void LoadILLSANS::moveDetectorDistance(double distance,
 
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
-  API::Run &runDetails = m_localWorkspace->mutableRun();
-  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**

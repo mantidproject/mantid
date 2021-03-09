@@ -681,10 +681,6 @@ void QtExperimentView::setFloodWorkspace(std::string const &workspace) {
   setSelected(*m_ui.floodWorkspaceWsSelector, workspace);
 }
 
-void QtExperimentView::refreshFloodWorkspaceList() {
-  m_ui.floodWorkspaceWsSelector->refresh();
-}
-
 std::string QtExperimentView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }

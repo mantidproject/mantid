@@ -46,7 +46,7 @@ public:
     parameters.hasDx = true;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
     parameters.idf = getIDFfromWorkspace(ws);
     save_file_no_issues(ws, parameters);
 
@@ -74,7 +74,7 @@ public:
     parameters.hasDx = false;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
     parameters.idf = getIDFfromWorkspace(ws);
     save_file_no_issues(ws, parameters);
 
@@ -102,7 +102,7 @@ public:
     parameters.hasDx = false;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
     parameters.idf = getIDFfromWorkspace(ws);
 
     const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
@@ -117,13 +117,12 @@ public:
     transmissionCanParameters.usesTransmission = true;
 
     auto transmission = getTransmissionWorkspace(transmissionParameters);
-    setXValuesOn1DWorkspaceWithPointData(
-        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+    setXValuesOn1DWorkspace(transmission, transmissionParameters.xmin,
+                            transmissionParameters.xmax);
 
     auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
-    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
-                                         transmissionCanParameters.xmin,
-                                         transmissionCanParameters.xmax);
+    setXValuesOn1DWorkspace(transmissionCan, transmissionCanParameters.xmin,
+                            transmissionCanParameters.xmax);
 
     save_file_no_issues(ws, parameters, transmission, transmissionCan);
 
@@ -149,6 +148,20 @@ public:
     removeWorkspaceFromADS(outWsName);
     removeWorkspaceFromADS(transName);
     removeWorkspaceFromADS(transNameCan);
+  }
+
+  void test_that_legacy_transmissions_saved_as_histograms_are_loaded() {
+    NXcanSASTestParameters parameters;
+    parameters.filename = "NXcanSAS-histo-lambda.h5";
+    const std::string outWsName{"loaded_histo_trans"};
+
+    Mantid::API::MatrixWorkspace_sptr wsOut;
+    TS_ASSERT_THROWS_NOTHING(
+        wsOut = load_file_no_issues(parameters, true /*load transmission*/,
+                                    outWsName));
+    TS_ASSERT(!wsOut->isHistogramData());
+
+    removeWorkspaceFromADS(outWsName);
   }
 
   void test_that_2D_workspace_can_be_loaded() {
@@ -237,7 +250,7 @@ public:
     parameters.isHistogram = true;
 
     auto ws = provide1DWorkspace(parameters);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
     parameters.idf = getIDFfromWorkspace(ws);
     save_file_no_issues(ws, parameters);
 
@@ -570,8 +583,7 @@ private:
     parameters1D.hasDx = true;
 
     auto ws = provide1DWorkspace(parameters1D);
-    setXValuesOn1DWorkspaceWithPointData(ws, parameters1D.xmin,
-                                         parameters1D.xmax);
+    setXValuesOn1DWorkspace(ws, parameters1D.xmin, parameters1D.xmax);
     parameters1D.idf = getIDFfromWorkspace(ws);
 
     save_no_assert(ws, parameters1D);

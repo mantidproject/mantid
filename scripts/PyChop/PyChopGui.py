@@ -680,8 +680,8 @@ class PyChopGui(QMainWindow):
         Shows the help page
         """
         try:
-            from pymantidplot.proxies import showCustomInterfaceHelp
-            showCustomInterfaceHelp("PyChop")
+            import mantidqt
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("PyChop")
         except ImportError:
             helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
             helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"

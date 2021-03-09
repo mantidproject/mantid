@@ -57,7 +57,7 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
                                              related_y_column=y_err["relatedY"]))
         pres.model.marked_columns.as_y_err = error_columns
 
-        pres.update_column_headers()
+        pres.presenter.update_column_headers()
 
         return pres.container
 

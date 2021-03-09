@@ -94,11 +94,16 @@ private:
   void setAvailableItems(QComboBox *comboBox,
                          const std::vector<std::string> &items);
 
+  bool setCurrentLog(const QString &log);
+
   /// UI form
   Ui::ALCDataLoadingView m_ui;
 
   /// The widget used
   QWidget *const m_widget;
+
+  QString m_selectedLog;
+  size_t m_numPeriods;
 };
 
 } // namespace CustomInterfaces

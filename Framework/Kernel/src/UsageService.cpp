@@ -12,7 +12,6 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/String.h>
@@ -70,6 +69,8 @@ std::string FeatureUsage::featureTypeToString() const {
     return "Feature";
   case FeatureType::Interface:
     return "Interface";
+  case FeatureType::Function:
+    return "Function";
   }
   return "Unknown";
 }
@@ -274,12 +275,8 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osVersion"] = ConfigService::Instance().getOSVersion();
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
-#if defined(MAKE_VATES)
-  // paraview
-  message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
-#else
+  // legacy interface requires paraview version DON'T REMOVE
   message["ParaView"] = 0;
-#endif
 
   // mantid version and sha1
   message["mantidVersion"] = MantidVersion::version();

@@ -129,16 +129,8 @@ configure_file(
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 # build version
 set(MANTIDPYTHON_PREAMBLE
-    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%"
+    "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%PATH%"
 )
-
-if(MAKE_VATES)
-  set(PARAVIEW_PYTHON_PATHS
-      ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk"
-  )
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -152,19 +144,8 @@ file(
 )
 # install version
 set(MANTIDPYTHON_PREAMBLE
-    "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%"
+    "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%PATH%"
 )
-
-if(MAKE_VATES)
-  set(PV_LIBS
-      "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}"
-  )
-  set(PARAVIEW_PYTHON_PATHS
-      ";${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk"
-  )
-else()
-  set(PARAVIEW_PYTHON_PATHS "")
-endif()
 
 configure_file(
   ${PACKAGING_DIR}/mantidpython.bat.in
@@ -200,8 +181,3 @@ set(WORKBENCH_BIN_DIR ${BIN_DIR})
 set(WORKBENCH_LIB_DIR ${LIB_DIR})
 set(WORKBENCH_SITE_PACKAGES ${LIB_DIR})
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
-
-# Separate directory of plugins to be discovered by the ParaView framework These
-# cannot be mixed with our other plugins. Further sub-directories based on the
-# Qt version will also be created by the installation targets
-set(PVPLUGINS_SUBDIR paraview) # Need to tidy these things up!

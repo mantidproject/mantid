@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import (Load, PaalmanPingsMonteCarloAbsorption, mtd)
+from mantid.simpleapi import (Load, PaalmanPingsMonteCarloAbsorption, mtd, SetSample)
 from mantid.api import WorkspaceGroup
 import unittest
 
@@ -12,26 +12,30 @@ import unittest
 class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     _red_ws = None
-    _container_ws = None
     _indirect_elastic_ws = None
     _indirect_fws_ws = None
+    _geoms_ws = None
 
     @classmethod
     def setUpClass(cls):
         Load('irs26176_graphite002_red.nxs', OutputWorkspace='red_ws')
-        Load('irs26173_graphite002_red.nxs', OutputWorkspace='container_ws')
         Load('osi104367_elf.nxs', OutputWorkspace='indirect_elastic_ws')
         Load('ILL_IN16B_FWS_Reduced.nxs', OutputWorkspace='indirect_fws_ws')
         Load('HRP38692a.nxs', OutputWorkspace='elastic_ws')
         Load('MAR21335_Ei60meV.nxs', OutputWorkspace='direct_ws')
+        Load('irs26176_graphite002_red.nxs', OutputWorkspace='geoms_ws')
+        # set this workspace to have defined sample and can geometries to test the preset option
+        SetSample('geoms_ws', Geometry={'Shape': 'Cylinder', 'Height': 4.0, 'Radius': 2.0, 'Center': [0., 0., 0.]},
+                  ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0, 'InnerRadius': 2.0,
+                                     'OuterRadius': 3.5})
 
     def setUp(self):
         self._red_ws = mtd['red_ws']
-        self._container_ws = mtd['container_ws']
         self._indirect_elastic_ws = mtd['indirect_elastic_ws']
         self._indirect_fws_ws = mtd['indirect_fws_ws']
         self._elastic_ws = mtd['elastic_ws']
         self._direct_ws = mtd['direct_ws']
+        self._geoms_ws = mtd['geoms_ws']
 
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
@@ -43,12 +47,11 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
                            'EventsPerPoint': 200,
                            'BeamHeight': 3.5,
                            'BeamWidth': 4.0,
-                           'Height': 2.0 }
+                           'Height': 2.0}
 
-        self._container_args = {'ContainerWorkspace':self._container_ws,
-                                'ContainerChemicalFormula':'Al',
-                                'ContainerDensityType':'Mass Density',
-                                'ContainerDensity':1.0 }
+        self._container_args = {'ContainerChemicalFormula': 'Al',
+                                'ContainerDensityType': 'Mass Density',
+                                'ContainerDensity': 1.0}
         self._test_arguments = dict()
 
     @classmethod
@@ -68,6 +71,15 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._test_arguments['SampleInnerRadius'] = 1.2
         self._test_arguments['SampleOuterRadius'] = 1.8
         test_func('Annulus')
+
+    def _preset_with_override_material_test(self, test_func):
+        test_func(shape='Preset', sample_ws=self._geoms_ws, with_container=True)
+
+    def _preset_without_override_material_test(self, test_func):
+        self._arguments = {'EventsPerPoint': 200,
+                           'BeamHeight': 3.5,
+                           'BeamWidth': 4.0}
+        test_func(shape='Preset', sample_ws=self._geoms_ws, with_container=True)
 
     def _material_with_cross_section_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
@@ -113,13 +125,12 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
             self._test_corrections_workspace(workspace, spectrum_axis)
 
     def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None, with_container=False):
-
         if sample_ws is None:
             sample_ws = self._red_ws
 
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = PaalmanPingsMonteCarloAbsorption(SampleWorkspace=sample_ws,
+        corrected = PaalmanPingsMonteCarloAbsorption(InputWorkspace=sample_ws,
                                                      Shape=shape,
                                                      **arguments)
         self._test_corrections_workspaces(corrected, spectrum_axis, with_container)
@@ -166,7 +177,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_blocksize = 23987
         self._run_correction_and_test(shape, self._elastic_ws, 'Label')
 
-    def _run_direct_test(self,shape):
+    def _run_direct_test(self, shape):
         self._expected_unit = "DeltaE"
         self._expected_hist = 285
         self._expected_blocksize = 294
@@ -183,6 +194,12 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_annulus_no_container(self):
         self._annulus_test(self._run_correction_and_test)
+
+    def test_preset_with_override_material(self):
+        self._preset_with_override_material_test(self._run_correction_and_test)
+
+    def test_preset_without_overriding_material(self):
+        self._preset_without_override_material_test(self._run_correction_and_test)
 
     def test_flat_plate_with_container(self):
         self._flat_plate_test(self._run_correction_with_container_test)
@@ -216,6 +233,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_cylinder_direct(self):
         self._cylinder_test(self._run_direct_test)
+
 
 if __name__ == "__main__":
     unittest.main()

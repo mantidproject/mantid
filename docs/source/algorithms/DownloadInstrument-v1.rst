@@ -9,10 +9,10 @@
 Description
 -----------
 
-This algorithm connects with the cloud based Mantid Instrument Definition 
+This algorithm connects with the cloud based Mantid Instrument Definition
 Repository and downloads any updated instrument files for use within Mantid.
 
-This algorithm is normally run on startup of Mantid for official installed 
+This algorithm is normally run on startup of Mantid for official installed
 releases of Mantid from version 3.3 onwards.
 
 Mantid Property Keys
@@ -25,6 +25,9 @@ UpdateInstrumentDefinitions.OnStartup = 1
 
 UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/instrument
    This stores the url used to access the contents of the Mantid Instrument Definition Repository.
+
+network.github.api_token = (not shown)
+   This overrides the github api token that is used by the algorithm. To use unauthenticated requests, set it to an empty string or the values ``unset``.
 
 Output Messages
 ###############
@@ -46,7 +49,7 @@ Instrument Definition Update: The Github API rate limit has been reached, try ag
 The details
 ###########
 
-The Mantid Instrument Definition Repository is currently a directory within the Mantid code repository on Github. 
+The Mantid Instrument Definition Repository is currently a directory within the Mantid code repository on Github.
 https://github.com/mantidproject/mantid
 
 The instrument files within Mantid can be accessed in three locations.

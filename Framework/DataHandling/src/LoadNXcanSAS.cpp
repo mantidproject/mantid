@@ -449,10 +449,32 @@ void loadTransmissionData(H5::Group &transmission,
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
           transmission, sasTransmissionSpectrumTdev);
   //-----------------------------------------
-  // Load Lambda
-  workspace->setPoints(0,
-                       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
-                           transmission, sasTransmissionSpectrumLambda));
+  // Load Lambda. A bug in older versions (fixed in 6.0) allowed the
+  // transmission lambda points to be saved as bin edges rather than points as
+  // required by the NXcanSAS standard. We allow loading those files and convert
+  // to points on the fly
+  auto lambda = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
+      transmission, sasTransmissionSpectrumLambda);
+  if (lambda.size() == workspace->blocksize())
+    workspace->setPoints(0, std::move(lambda));
+  else if (lambda.size() == workspace->blocksize() + 1)
+    workspace->setBinEdges(0, std::move(lambda));
+  else {
+#if defined(H5_USE_18_API)
+    const std::string objectName{transmission.getObjName()};
+#else
+    const size_t nchars = H5Iget_name(transmission.getId(), nullptr, 0);
+    std::string objectName;
+    objectName.resize(nchars);
+    H5Iget_name(transmission.getId(), objectName.data(),
+                nchars + 1); // +1 for null terminator
+#endif
+    throw std::runtime_error(
+        "Unexpected array size for lambda in transmission group '" +
+        objectName +
+        "'. Expected length=" + std::to_string(workspace->blocksize()) +
+        ", found length=" + std::to_string(lambda.size()));
+  }
 
   workspace->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");

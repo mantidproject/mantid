@@ -102,7 +102,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         # TOF resolution is not yet implemented
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
-        self.assertEqual(mtd['iq'].blocksize(), 217)
+        self.assertEqual(mtd['iq'].blocksize(), 162)
 
     def _check_output(self, ws, spectra = 1):
         self.assertTrue(ws)

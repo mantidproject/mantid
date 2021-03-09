@@ -10,6 +10,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 from ..model.DrillSample import DrillSample
+from .DrillExportPresenter import DrillExportPresenter
 from .DrillContextMenuPresenter import DrillContextMenuPresenter
 
 
@@ -322,7 +323,7 @@ class DrillPresenter:
         QDialog to get the file path from the user.
         """
         filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -350,7 +351,7 @@ class DrillPresenter:
         """
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
                                                './*.mrd',
-                                               "Rundex (*.mrd);;All (*.*)")
+                                               "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
@@ -382,6 +383,10 @@ class DrillPresenter:
                 lambda : self.model.setSettings(sw.getSettings())
                 )
         sw.show()
+
+    def onShowExportDialog(self, dialog):
+        exportModel = self.model.getExportModel()
+        DrillExportPresenter(dialog, exportModel)
 
     def onShowContextMenu(self, menu):
         """

@@ -23,7 +23,8 @@ class ILL_D11_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D11_IQ.nxs']
 
@@ -83,7 +84,8 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D22_IQ_v2.nxs']
 
@@ -129,6 +131,76 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
 
 
+class ILL_D22_Multiple_Sensitivity_Test(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(ILL_D22_Multiple_Sensitivity_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D22'
+        config.appendDataSearchSubDir('ILL/D22/')
+
+        # create necessary masks:
+        MaskBTP(Instrument='D22', Pixel='0-12,245-255')
+        RenameWorkspace(InputWorkspace='D22MaskBTP', OutputWorkspace='top_bottom')
+        MaskBTP(Instrument='D22', Tube='10-31', Pixel='105-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_offset')
+        MaskBTP(Instrument='D22', Tube='54-75', Pixel='108-150')
+        Plus(LHSWorkspace='top_bottom', RHSWorkspace='D22MaskBTP', OutputWorkspace='mask_central')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        self.disableChecking = ['Instrument']
+        return ['iq_multi_sens', 'ILL_SANS_D22_IQ_multi_sens.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D22_mask.nxs', OutputWorkspace='mask')
+
+        # Absorber
+        SANSILLReduction(Run='241238', ProcessAs='Absorber', OutputWorkspace='Cd')
+
+        # Beam
+        SANSILLReduction(Run='241226', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db', FluxOutputWorkspace='fl')
+
+        # Container transmission known
+        CreateSingleValuedWorkspace(DataValue=0.94638, ErrorValue=0.0010425, OutputWorkspace='ctr')
+        AddSampleLog(Workspace='ctr', LogName='ProcessedAs', LogText='Transmission')
+
+        # Container
+        SANSILLReduction(Run='241239', ProcessAs='Container', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+
+        # Sample transmission known
+        CreateSingleValuedWorkspace(DataValue=0.52163, ErrorValue=0.00090538, OutputWorkspace='str')
+        AddSampleLog(Workspace='str', LogName='ProcessedAs', LogText='Transmission')
+
+        # Reference
+        SANSILLReduction(Run='344411', ProcessAs='Sample', MaskedInputWorkspace='mask_central',
+                         OutputWorkspace='ref1', SensitivityOutputWorkspace='sens1')
+
+        SANSILLReduction(Run='344407', ProcessAs='Sample', MaskedInputWorkspace='mask_offset',
+                         OutputWorkspace='ref2', SensitivityOutputWorkspace='sens2')
+
+        GroupWorkspaces(InputWorkspaces=['ref1', 'ref2'], OutputWorkspace='sensitivity_input')
+        CalculateEfficiency(InputWorkspace='sensitivity_input', MergeGroup=True, OutputWorkspace='sens')
+
+        AddSampleLog(Workspace='sens', LogName='ProcessedAs', LogText='Reference')
+
+        # Sample
+        SANSILLReduction(Run='241240', ProcessAs='Sample', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='str', ContainerInputWorkspace='can', MaskedInputWorkspace='mask',
+                         SensitivityInputWorkspace='sens', OutputWorkspace='sample', FluxInputWorkspace='fl')
+
+        # Integration
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq_multi_sens')
+
+
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
     def __init__(self):
@@ -144,7 +216,8 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_VTOF_IQ.nxs']
 
@@ -169,8 +242,7 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
@@ -188,7 +260,8 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_LTOF_IQ.nxs']
 
@@ -214,8 +287,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample', FluxInputWorkspace='flux')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1',
-                           OutputWorkspace='iq', BinMaskingCriteria='x<1 || x>10')
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
 
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
@@ -234,6 +306,7 @@ class ILL_D33_Test(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
         return ['iq', 'ILL_SANS_D33_IQ.nxs']
 

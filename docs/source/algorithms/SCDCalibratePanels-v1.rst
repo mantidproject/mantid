@@ -107,7 +107,7 @@ Output:
 .. code-block:: python
 
     matches
-      
+
 .. categories::
 
 .. sourcelink::

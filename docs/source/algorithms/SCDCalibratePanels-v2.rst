@@ -11,7 +11,7 @@ Description
 
 This calibration algorithm is developed for CORELLI type instrument (pack of tubes).
 The calibration targets includes `L_1` (source to sample distance in meters), panel
-position (in meters) and orientation (as angle-axis pairs, in degrees), as well as 
+position (in meters) and orientation (as angle-axis pairs, in degrees), as well as
 initial TOF offset (not fully implemented yet).
 The underlining mechanism of this calibration is to match the measured Q vectors
 (`Q_{sample}`) with the those generated from tweaked instrument position and orientation,
@@ -50,12 +50,12 @@ Usage
     # generate synthetic testing data
     def convert(dictionary):
         return namedtuple('GenericDict', dictionary.keys())(**dictionary)
-    
+
     # lattice constant for Si
     # data from Mantid web documentation
     lc_silicon = {
-        "a": 5.431,  # A 
-        "b": 5.431,  # A 
+        "a": 5.431,  # A
+        "b": 5.431,  # A
         "c": 5.431,  # A
         "alpha": 90,  # deg
         "beta": 90,  # deg
@@ -170,11 +170,11 @@ This algorithm is a work-in-progress as the development team as well as the inst
 scientists are working on the following targets:
 
 1) Fix the current T0 (initial TOF offset) calibration issue for synthetic data where a
-   constant zero offset was found regardless of the actual prescribed T0.
+   constant zero offset was found regardless of the actual prescirbed T0.
 
 2) The original (version 1) SCDCalibratePanels can also support TOPAZ, which consists of
    multi-panels banks.
-   It is important for the new version of SCDCalibratePanels to provide similar support.
+   It is imporant for the new version of SCDCalibratePanels to provide similar support.
 
 3) In the current implementation, the calibration results are recorded as the absolute
    position and orientation of each component, which does not provide an intuitive

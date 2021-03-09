@@ -143,8 +143,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
     V3D hkl =
         V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
             boost::math::iround(pk.getL()));
-    if (hkl == UNSET_HKL)
-      throw std::runtime_error("Found unindexed peak in input workspace!");
+    // if (hkl == UNSET_HKL)
+    //   throw std::runtime_error("Found unindexed peak in input workspace!");
 
     // construct the out vector (Qvectors)
     Units::Wavelength wl;
