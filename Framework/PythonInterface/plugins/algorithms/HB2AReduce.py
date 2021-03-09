@@ -9,7 +9,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, Workspa
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
                            StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
                            PropertyCriterion, Property)
-from mantid.simpleapi import (SaveGSS, SaveFocusedXYE)
+from mantid.simpleapi import (SaveGSSCW, SaveFocusedXYE)
 from mantid import logger
 import numpy as np
 import datetime
@@ -281,7 +281,7 @@ class HB2AReduce(PythonAlgorithm):
             outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
             _outputfunc = {
                 'XYE': SaveFocusedXYE,
-                'GSAS': SaveGSS
+                'GSAS': SaveGSSCW
             }[self.getProperty('OutputFormat').value]
             _outputext = {
                 "XYE": 'dat',
