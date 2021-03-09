@@ -8,7 +8,7 @@
 #
 #
 from mantid.simpleapi import (Divide, DivideMD, Minus, MinusMD, mtd, Multiply, MultiplyMD,
-                              Plus, PlusMD, Scale, WeightedMean)
+                              Plus, PlusMD, Scale, WeightedMean, WeightedMeanMD)
 from mantid.api import WorkspaceGroup
 from mantid.dataobjects import MDHistoWorkspace
 from mantid.kernel import logger as log
