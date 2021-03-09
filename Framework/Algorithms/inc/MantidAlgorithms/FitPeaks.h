@@ -19,6 +19,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <utility>
+
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
@@ -149,9 +151,10 @@ private:
                        bool estimate_peak_width, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
-                       const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       std::vector<double> &vec_xmin,
-                       std::vector<double> &vec_xmax);
+                       const API::MatrixWorkspace_sptr &dataws,
+                       const size_t wsindex,
+                       const std::pair<double, double> &vec_xmin,
+                       const std::pair<double, double> &vec_xmax);
 
   /// fit a single peak with high background
   double fitFunctionHighBackground(

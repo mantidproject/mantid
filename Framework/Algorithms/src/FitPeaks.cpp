@@ -210,17 +210,19 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
 } // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
+namespace {
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
  */
-size_t findXIndex(const std::vector<double> &vecx, double x) {
+size_t findXIndex(const std::vector<double> &vecx, const double x,
+                  const size_t startindex = 0) {
   size_t index;
   if (x <= vecx.front()) {
     index = 0;
   } else if (x >= vecx.back()) {
     index = vecx.size() - 1;
   } else {
-    auto fiter = lower_bound(vecx.begin(), vecx.end(), x);
+    const auto fiter = lower_bound(vecx.begin() + startindex, vecx.end(), x);
     if (fiter == vecx.end())
       throw runtime_error("It seems impossible to have this value. ");
 
@@ -233,6 +235,7 @@ size_t findXIndex(const std::vector<double> &vecx, double x) {
 }
 
 enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
@@ -384,7 +387,7 @@ void FitPeaks::init() {
       "List of tolerance on fitted peak positions against given peak positions."
       "If there is only one value given, then ");
 
-  declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
+  declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 1.,
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
@@ -506,10 +509,11 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   if (!error_table_name.empty()) {
     const bool use_raw_params = getProperty(PropertyNames::RAW_PARAMS);
     if (!use_raw_params) {
-      const std::string msg =
-          "FitPeaks must output RAW peak parameters if fitting error "
-          "is chosen to be output";
-      issues[PropertyNames::RAW_PARAMS] = msg;
+      issues[PropertyNames::OUTPUT_WKSP_PARAM_ERRS] =
+          "Cannot be used with " + PropertyNames::RAW_PARAMS + "=False";
+      issues[PropertyNames::RAW_PARAMS] =
+          "Cannot be False with " + PropertyNames::OUTPUT_WKSP_PARAM_ERRS +
+          " specified";
     }
   }
 
@@ -649,7 +653,7 @@ void FitPeaks::processInputFunctions() {
   } else if ((!partablename.empty()) && m_peakParamNames.empty()) {
     // use non-uniform starting value of peak parameters
     m_profileStartingValueTable = getProperty(partablename);
-  } else {
+  } else if (peakfunctiontype != "Gaussian") {
     // user specifies nothing
     g_log.warning("Neither parameter value table nor initial "
                   "parameter name/value vectors is specified. Fitting might "
@@ -890,8 +894,8 @@ void FitPeaks::processInputPeakTolerance() {
 
   // minimum peak height: set default to zero
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
-  if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
-    m_minPeakHeight = 0.;
+  if (isEmpty(m_minPeakHeight) || m_minPeakHeight <= 0.)
+    m_minPeakHeight = 1.;
 
   return;
 }
@@ -1537,12 +1541,11 @@ int FitPeaks::estimatePeakParameters(
   // Estimate FHWM (peak width)
   if (observe_peak_width &&
       m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
-    double peak_fwhm = observePeakFwhm(
+    const double peak_fwhm = observePeakFwhm(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
     if (peak_fwhm > 0.0) {
-      g_log.warning() << "Peak function " << peakfunction->name()
-                      << " still set estimated FWHM"
-                      << "\n";
+      g_log.debug() << "Peak function " << peakfunction->name()
+                    << " still set estimated FWHM\n";
       peakfunction->setFwhm(peak_fwhm);
     }
   }
@@ -1672,26 +1675,26 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
                              const std::pair<double, double> &fit_window,
                              const double &expected_peak_pos,
                              const API::IBackgroundFunction_sptr &bkgd_func) {
+  constexpr size_t MIN_POINTS{10}; // TODO explain why 10
 
   // find out how to fit background
   const auto &points = m_inputMatrixWS->histogram(ws_index).points();
   size_t start_index = findXIndex(points.rawData(), fit_window.first);
-  size_t stop_index = findXIndex(points.rawData(), fit_window.second);
-  size_t expected_peak_index = findXIndex(points.rawData(), expected_peak_pos);
+  size_t expected_peak_index =
+      findXIndex(points.rawData(), expected_peak_pos, start_index);
+  size_t stop_index =
+      findXIndex(points.rawData(), fit_window.second, expected_peak_index);
 
   // treat 5 as a magic number - TODO explain why
   bool good_fit(false);
-  if (expected_peak_index - start_index > 10 && // TODO explain why 10
-      stop_index - expected_peak_index - stop_index > 10) {
+  if (expected_peak_index - start_index > MIN_POINTS &&
+      stop_index - expected_peak_index > MIN_POINTS) {
     // enough data points left for multi-domain fitting
     // set a smaller fit window
-    std::vector<double> vec_min(2);
-    std::vector<double> vec_max(2);
-
-    vec_min[0] = fit_window.first;
-    vec_max[0] = points[expected_peak_index - 5];
-    vec_min[1] = points[expected_peak_index + 5];
-    vec_max[1] = fit_window.second;
+    const std::pair<double, double> vec_min{fit_window.first,
+                                            points[expected_peak_index + 5]};
+    const std::pair<double, double> vec_max{points[expected_peak_index - 5],
+                                            fit_window.second};
 
     // reset background function value
     for (size_t n = 0; n < bkgd_func->nParams(); ++n)
@@ -1709,8 +1712,11 @@ bool FitPeaks::fitBackground(const size_t &ws_index,
     // fit as a single domain function.  check whether the result is good or bad
 
     // TODO FROM HERE!
-    g_log.error("Don't know what to do with background fitting with single "
-                "domain function!");
+    g_log.debug()
+        << "Don't know what to do with background fitting with single "
+        << "domain function! " << (expected_peak_index - start_index)
+        << " points to the left " << (stop_index - expected_peak_index)
+        << " points to the right\n";
   }
 
   return good_fit;
@@ -1845,12 +1851,9 @@ double FitPeaks::fitFunctionSD(
 //----------------------------------------------------------------------------------------------
 double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
                                const API::MatrixWorkspace_sptr &dataws,
-                               size_t wsindex, std::vector<double> &vec_xmin,
-                               std::vector<double> &vec_xmax) {
-  // Validate
-  if (vec_xmin.size() != vec_xmax.size())
-    throw runtime_error("Sizes of xmin and xmax (vectors) are not equal. ");
-
+                               const size_t wsindex,
+                               const std::pair<double, double> &vec_xmin,
+                               const std::pair<double, double> &vec_xmax) {
   // Note: after testing it is found that multi-domain Fit cannot be reused
   API::IAlgorithm_sptr fit;
   try {
@@ -1875,22 +1878,19 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
 
   //  set domain for function with index 0 covering both sides
   md_function->clearDomainIndices();
-  std::vector<size_t> ii(2);
-  ii[0] = 0;
-  ii[1] = 1;
-  md_function->setDomainIndices(0, ii);
+  md_function->setDomainIndices(0, {0, 1});
 
   // Set the properties
   fit->setProperty("Function",
                    std::dynamic_pointer_cast<IFunction>(md_function));
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit->setProperty("StartX", vec_xmin[0]);
-  fit->setProperty("EndX", vec_xmax[0]);
+  fit->setProperty("StartX", vec_xmin.first);
+  fit->setProperty("EndX", vec_xmax.first);
   fit->setProperty("InputWorkspace_1", dataws);
   fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
-  fit->setProperty("StartX_1", vec_xmin[1]);
-  fit->setProperty("EndX_1", vec_xmax[1]);
+  fit->setProperty("StartX_1", vec_xmin.second);
+  fit->setProperty("EndX_1", vec_xmax.second);
   fit->setProperty("MaxIterations", m_fitIterations);
 
   // Execute
@@ -1946,8 +1946,9 @@ double FitPeaks::fitFunctionHighBackground(
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +
                                 high_bkgd_function->getParameter(0));
-  bkgdfunc->setParameter(1, bkgdfunc->getParameter(1) +
-                                high_bkgd_function->getParameter(1));
+  bkgdfunc->setParameter(
+      1, bkgdfunc->getParameter(1) + // TODO doesn't work for flat background
+             high_bkgd_function->getParameter(1));
 
   double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, m_inputMatrixWS,
                               ws_index, vec_x.front(), vec_x.back(),
@@ -2222,12 +2223,9 @@ void FitPeaks::getRangeData(size_t iws,
 
   // get the original vector of X and determine the start and end index
   const vector<double> orig_x = m_inputMatrixWS->histogram(iws).x().rawData();
-  size_t left_index =
-      std::lower_bound(orig_x.begin(), orig_x.end(), fit_window.first) -
-      orig_x.begin();
-  size_t right_index =
-      std::lower_bound(orig_x.begin(), orig_x.end(), fit_window.second) -
-      orig_x.begin();
+  size_t left_index = findXIndex(orig_x, fit_window.first);
+  size_t right_index = findXIndex(orig_x, fit_window.second, left_index);
+
   if (left_index >= right_index) {
     std::stringstream err_ss;
     err_ss << "Unable to get subset of histogram from given fit window. "
@@ -2310,7 +2308,8 @@ void FitPeaks::estimateLinearBackground(const Histogram &histogram,
 
   const auto &vecX = histogram.points();
   const size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
-  const size_t istop = findXIndex(vecX.rawData(), right_window_boundary);
+  const size_t istop =
+      findXIndex(vecX.rawData(), right_window_boundary, istart);
 
   // 10 is a magic number that worked in a variety of situations
   const size_t iback_start = istart + 10;
