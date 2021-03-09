@@ -279,9 +279,7 @@ void SCDCalibratePanels2::exec() {
     // g_log.notice() << "Profiling objfunc sensitivity (coarse) \n";
     // std::ofstream proffile;
     // proffile.precision(17);
-    // proffile.open("/home/8cz/Workbench/MANTID/"
-    //               "SCD218_newObjFuncSCDCalibratePanels_216/data/"
-    //               "prof_unittest_nullcase.csv");
+    // proffile.open("/tmp/prof_unittest_nullcase.csv");
     // proffile << "dz\terr\n";
     // std::cout.precision(17);
     // for (double z = -0.02; z <= 0.02; z = z + 1e-5) {
