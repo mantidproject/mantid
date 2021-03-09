@@ -46,8 +46,7 @@ class DimensionWidget(QWidget):
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
             self.qflags.append(dim['qdim'])
-            dim_type = dim['type']
-            if dim_type == 'MDE' or (dim_type == 'MDH' and dim['has_original']):
+            if dim['can_rebin']:
                 self.dims.append(DimensionNonIntegrated(dim, number=n, parent=self))
             else:
                 self.dims.append(Dimension(dim, number=n, parent=self))
@@ -188,6 +187,7 @@ class Dimension(QWidget):
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, self.nbins - 1)
         self.slider.valueChanged.connect(self.slider_changed)
+        self.update_value_from_slider = True
 
         self.spinbox = QDoubleSpinBox()
         self.spinbox.setDecimals(3)
@@ -251,19 +251,22 @@ class Dimension(QWidget):
         self.set_state(State.X)
         if self.state != old_state:
             self.stateChanged.emit(self.number)
+            self.valueChanged.emit()
 
     def y_clicked(self):
         old_state = self.state
         self.set_state(State.Y)
         if self.state != old_state:
             self.stateChanged.emit(self.number)
+            self.valueChanged.emit()
 
     def spinbox_changed(self):
         self.value = self.spinbox.value()
         self.update_slider()
 
     def slider_changed(self):
-        self.value = self.get_bin_center(self.slider.value())
+        if self.update_value_from_slider:
+            self.value = self.get_bin_center(self.slider.value())
         self.update_spinbox()
         self.valueChanged.emit()
 
@@ -280,7 +283,6 @@ class Dimension(QWidget):
     def set_value(self, value):
         self.value = value
         self.update_slider()
-        self.update_spinbox()
 
     def get_value(self):
         return self.value
@@ -353,3 +355,17 @@ class DimensionNonIntegrated(Dimension):
             self.spinBins.hide()
             self.spinThick.hide()
             self.rebinLabel.hide()
+
+    def set_value(self, value):
+        """Override the set_value for MDE, this allows the exact value to be
+        set instead of limiting to the value of the slider. This
+        allows when selecting a peak to go to the exact layer where
+        the peak is.
+
+        """
+        self.value = value
+        # temporary disable updating value from slider change
+        self.update_value_from_slider = False
+        self.update_slider()
+        self.update_value_from_slider = True
+        self.update_spinbox()

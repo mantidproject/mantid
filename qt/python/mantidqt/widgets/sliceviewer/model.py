@@ -122,8 +122,8 @@ class SliceViewerModel:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH
-                                          and self._get_ws().hasOriginalWorkspace(0))
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
+            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -196,7 +196,7 @@ class SliceViewerModel:
     def get_dim_info(self, n: int) -> dict:
         """
         returns dict of (minimum :float, maximum :float, number_of_bins :int,
-                         width :float, name :str, units :str, type :str, has_original: bool, qdim: bool) for dimension n
+                         width :float, name :str, units :str, type :str, can_rebin: bool, qdim: bool) for dimension n
         """
         workspace = self._get_ws()
         dim = workspace.getDimension(n)
@@ -208,7 +208,7 @@ class SliceViewerModel:
             'name': dim.name,
             'units': dim.getUnits(),
             'type': self.get_ws_type().name,
-            'has_original': workspace.hasOriginalWorkspace(0),
+            'can_rebin': self.can_support_dynamic_rebinning(),
             'qdim': dim.getMDFrame().isQ()
         }
 
@@ -259,8 +259,8 @@ class SliceViewerModel:
         except (AttributeError, KeyError):  # run can be None so no .get()
             # assume orthogonal projection
             proj_matrix = np.diag([1., 1., 1.])
-
-        display_indices = slice_info.transform([0, 1, 2]).astype(int)
+        display_indices = list(range(0, proj_matrix.shape[0]))
+        display_indices.pop(slice_info.z_index)
         return NonOrthogonalTransform.from_lattice(lattice,
                                                    x_proj=proj_matrix[:, display_indices[0]],
                                                    y_proj=proj_matrix[:, display_indices[1]])

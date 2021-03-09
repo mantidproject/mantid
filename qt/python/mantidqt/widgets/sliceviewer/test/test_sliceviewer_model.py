@@ -158,6 +158,7 @@ def _add_dimensions(mock_ws,
     :param nbins: Number of bins in each dimension
     :param units: Unit labels for each dimension
     """
+
     def create_dimension(index):
         dimension = MagicMock(spec=IMDDimension)
         dimension.name = names[index]
@@ -185,6 +186,7 @@ def _add_dimensions(mock_ws,
 class ArraysEqual:
     """Compare arrays for equality in mock.assert_called_with calls.
     """
+
     def __init__(self, expected):
         self._expected = expected
 
@@ -518,13 +520,19 @@ class SliceViewerModelTest(unittest.TestCase):
                                                 IMDEventWorkspace,
                                                 has_original_workspace=False)
 
-    def test_mdhistoworkspace_supports_dynamic_rebinning_if_original_exists(self):
+    def test_mdhistoworkspace_supports_dynamic_rebinning_if_original_exists_with_same_ndims(self):
         self._assert_supports_dynamic_rebinning(True,
                                                 IMDHistoWorkspace,
                                                 has_original_workspace=True)
         self._assert_supports_dynamic_rebinning(False,
                                                 IMDHistoWorkspace,
                                                 has_original_workspace=False)
+
+    def test_mdhistoworkspace_does_not_support_dynamic_rebinning_if_original_exists_with_different_ndims(self):
+        self._assert_supports_dynamic_rebinning(False,
+                                                IMDHistoWorkspace,
+                                                has_original_workspace=True,
+                                                original_ws_ndims=4)
 
     def test_matrixworkspace_does_not_dynamic_rebinning(self):
         self._assert_supports_dynamic_rebinning(False, MatrixWorkspace)
@@ -559,7 +567,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertRaises(RuntimeError, model.create_nonorthogonal_transform, (0, 1, 2))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
-    def test_create_non_orthogonal_transform_uses_W_if_avilable(self, mock_nonortho_trans):
+    def test_create_non_orthogonal_transform_uses_W_if_available(self, mock_nonortho_trans):
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
                                     has_oriented_lattice=True)
@@ -576,11 +584,11 @@ class SliceViewerModelTest(unittest.TestCase):
 
         mock_nonortho_trans.from_lattice.assert_called_once_with(
             lattice,
-            x_proj=ArraysEqual(np.array([1, 0, 0])),
+            x_proj=ArraysEqual(np.array([0, 0, 1])),
             y_proj=ArraysEqual(np.array([1, 1, 0])))
 
     @patch("mantidqt.widgets.sliceviewer.model.NonOrthogonalTransform")
-    def test_create_non_orthogonal_transform_uses_identity_if_W_unavilable(
+    def test_create_non_orthogonal_transform_uses_identity_if_W_unavailable(
             self, mock_nonortho_trans):
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
@@ -596,7 +604,7 @@ class SliceViewerModelTest(unittest.TestCase):
 
         mock_nonortho_trans.from_lattice.assert_called_once_with(
             lattice,
-            x_proj=ArraysEqual(np.array([0, 1, 0])),
+            x_proj=ArraysEqual(np.array([1, 0, 0])),
             y_proj=ArraysEqual(np.array([0, 0, 1])))
 
     def test_get_dim_limits_returns_limits_for_display_dimensions_for_matrix(self):
@@ -882,15 +890,23 @@ class SliceViewerModelTest(unittest.TestCase):
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_peaks_overlays())
 
-    def _assert_supports_dynamic_rebinning(self, expectation, ws_type, has_original_workspace=None):
+    def _assert_supports_dynamic_rebinning(self, expectation, ws_type, ndims=3, has_original_workspace=None,
+                                           original_ws_ndims=None):
         ws = _create_mock_workspace(ws_type,
                                     coords=SpecialCoordinateSystem.QLab,
                                     has_oriented_lattice=False,
-                                    ndims=3)
+                                    ndims=ndims)
         if ws_type == MatrixWorkspace:
             ws.hasOriginalWorkspace.side_effect = lambda index: False
         elif has_original_workspace is not None:
             ws.hasOriginalWorkspace.side_effect = lambda index: has_original_workspace
+            if not original_ws_ndims:
+                original_ws_ndims = ndims
+            orig_ws = _create_mock_workspace(ws_type,
+                                             coords=SpecialCoordinateSystem.QLab,
+                                             has_oriented_lattice=False,
+                                             ndims=original_ws_ndims)
+            ws.getOriginalWorkspace.side_effect = lambda index: orig_ws
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 

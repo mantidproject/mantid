@@ -21,6 +21,36 @@ using namespace Mantid::DataObjects;
 using MantidQt::API::toQStringInternal;
 using InfoItems = std::vector<std::pair<QString, QString>>;
 
+namespace {
+
+struct DirectEFixed {
+  DirectEFixed(std::string logName) : m_logName(std::move(logName)) {}
+  const std::string m_logName;
+
+  MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
+    auto &instParams = ws->instrumentParameters();
+    instParams.addString(ws->getInstrument()->baseInstrument().get(),
+                         "deltaE-mode", "Direct");
+    ws->mutableRun().addProperty<double>(m_logName, 60., true);
+    return ws;
+  }
+};
+
+struct IndirectEFixed {
+  IndirectEFixed(std::string paramName) : m_paramName(std::move(paramName)) {}
+  const std::string m_paramName;
+
+  MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
+    auto &instParams = ws->instrumentParameters();
+    auto baseInst = ws->getInstrument()->baseInstrument().get();
+    instParams.addString(baseInst, "deltaE-mode", "Indirect");
+    instParams.addDouble(baseInst, m_paramName, 50.);
+    return ws;
+  }
+};
+
+} // namespace
+
 /**
  * Convenience operator for concatenating two InfoItems
  */
@@ -127,19 +157,6 @@ public:
   }
 
   void test_info_with_efixed_for_direct_mode() {
-    struct DirectEFixed {
-      DirectEFixed(std::string logName) : m_logName(std::move(logName)) {}
-      const std::string m_logName;
-
-      MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
-        auto &instParams = ws->instrumentParameters();
-        instParams.addString(ws->getInstrument()->baseInstrument().get(),
-                             "deltaE-mode", "Direct");
-        ws->mutableRun().addProperty<double>(m_logName, 60., true);
-        return ws;
-      }
-    };
-
     const double x(15200), y(4), signal(7);
     const auto expectedInfo =
         expectedCommonTOFInfo() << expectedUnitsInfo(
@@ -151,20 +168,6 @@ public:
   }
 
   void test_info_with_efixed_for_indirect_mode() {
-    struct IndirectEFixed {
-      IndirectEFixed(std::string paramName)
-          : m_paramName(std::move(paramName)) {}
-      const std::string m_paramName;
-
-      MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr ws) const {
-        auto &instParams = ws->instrumentParameters();
-        auto baseInst = ws->getInstrument()->baseInstrument().get();
-        instParams.addString(baseInst, "deltaE-mode", "Indirect");
-        instParams.addDouble(baseInst, m_paramName, 50.);
-        return ws;
-      }
-    };
-
     const double x(15200), y(4), signal(7);
     const auto expectedUnitsNoGroups =
         expectedUnitsInfo("2.6862", "14.1501", "40.1274", "0.1566", "-38.6633");
@@ -184,6 +187,25 @@ public:
           << expectedUnitsWithGroup;
       assertInfoAsExpected(IndirectEFixed(paramName), x, y, signal,
                            expectedInfoWithGroup, includeGrouping);
+    }
+  }
+
+  void
+  test_that_info_will_not_throw_when_the_x_unit_is_something_other_than_TOF() {
+    const double x(15200), y(4), signal(7);
+
+    for (const auto &logName : {"Ei", "EnergyRequested", "EnergyEstimate"}) {
+      auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(
+          10, 10, 15000.0, 100.);
+      workspace->getAxis(0)->setUnit("Wavelength");
+      workspace->setYUnit("Counts");
+
+      InstrumentCreationHelper::addFullInstrumentToWorkspace(
+          *workspace, true, false, "test-instrument");
+
+      ImageInfoModelMatrixWS model(DirectEFixed(logName)(workspace));
+
+      TS_ASSERT_THROWS_NOTHING(model.info(x, y, signal));
     }
   }
 

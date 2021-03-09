@@ -63,16 +63,16 @@ class CalibrationModelTest(unittest.TestCase):
                                              output_files, update_table, setting, path):
         path.return_value = True
         setting.return_value = "mocked/out/path"
-        van_corr.return_value = ("mocked_integration", "mocked_curves")
-        load_workspace.return_value = "mocked_workspace"
-        load_ascii.return_value = "mocked_det_pos"
+        mocked_integration = MagicMock()
+        mocked_curves = MagicMock()
+        van_corr.return_value = (mocked_integration, mocked_curves)
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        calibrate_alg.assert_called_with("mocked_workspace",
-                                         "mocked_integration",
-                                         "mocked_curves",
+        calibrate_alg.assert_called_with(load_workspace.return_value,
+                                         mocked_integration,
+                                         mocked_curves,
                                          None,
                                          None,
-                                         full_calib_ws="mocked_det_pos")
+                                         full_calib_ws=load_ascii.return_value)
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
@@ -174,6 +174,7 @@ class CalibrationModelTest(unittest.TestCase):
         output_name.return_value = filename
 
         self.model.create_output_files("test/", [2, 2], [0, 0], [1, 1],
+                                       [[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]],
                                        sample_path,
                                        vanadium_path,
                                        "ENGINX",
@@ -183,6 +184,7 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
         write_file.assert_called_with("test/" + filename, [2], [0], [1],
+                                      [[0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5]],
                                       bank_names=['South'],
                                       ceria_run="20",
                                       template_file="template_ENGINX_241391_236516_South_bank.prm",

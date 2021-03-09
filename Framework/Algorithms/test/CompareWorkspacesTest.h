@@ -22,8 +22,10 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -31,6 +33,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::V3D;
 
 class CompareWorkspacesTest : public CxxTest::TestSuite {
 public:
@@ -825,14 +828,16 @@ public:
   void testDifferentInstruments() {
     if (!checker.isInitialized())
       checker.initialize();
-
-    Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::Geometry::Instrument_sptr instrument(
-        new Mantid::Geometry::Instrument("different"));
-    ws2->setInstrument(instrument);
-
-    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            1, 2, false, false, true, "original", false);
+    AnalysisDataService::Instance().addOrReplace("original", ws);
+    // test different names
+    Workspace2D_sptr ws2 =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            1, 2, false, false, true, "distorted", false);
+    AnalysisDataService::Instance().addOrReplace("distorted", ws2);
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
     TS_ASSERT(checker.execute());
@@ -846,6 +851,30 @@ public:
 
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT((!Mantid::API::equals(ws1, ws2)));
+
+    // test different source position
+    Workspace2D_sptr ws3 = ws->clone(); // shared to unique ptr conversion
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
+    auto &info3 = ws3->mutableComponentInfo();
+    info3.setPosition(info3.source(), info3.sourcePosition() + V3D(0, 0, 1e-6));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
+    TS_ASSERT(table->cell<std::string>(0, 0).find("Source mismatch") !=
+              std::string::npos);
+
+    // Compare different sample position
+    Workspace2D_sptr ws4 = ws->clone(); // shared to unique ptr conversion
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws4));
+    auto &info4 = ws4->mutableComponentInfo();
+    info4.setPosition(info4.sample(), info4.samplePosition() + V3D(0, 0, 1e-6));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
+    TS_ASSERT(table->cell<std::string>(0, 0).find("Sample mismatch") !=
+              std::string::npos);
   }
 
   void testDifferentParameterMaps() {

@@ -882,6 +882,7 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
+        SetInstrumentParameter(data_ws,ParameterName='EFixed',ParameterType='Number', Value='{0}'.format(ei))
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:

@@ -122,7 +122,8 @@ private:
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+      std::vector<std::vector<double>> &lastGoodPeakParameters);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
@@ -134,7 +135,7 @@ private:
   double fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
                            const double expected_peak_center,
                            const std::pair<double, double> &fitwindow,
-                           const bool observe_peak_params,
+                           const bool estimate_peak_width,
                            const API::IPeakFunction_sptr &peakfunction,
                            const API::IBackgroundFunction_sptr &bkgdfunc);
 
@@ -145,7 +146,7 @@ private:
                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
                        double xmin, double xmax,
                        const double &expected_peak_center,
-                       bool observe_peak_shape, bool estimate_background);
+                       bool estimate_peak_width, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
@@ -206,12 +207,12 @@ private:
                         size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
-  double observePeakWidth(const HistogramData::Histogram &histogram,
-                          API::FunctionValues &bkgd_values, size_t ipeak,
-                          size_t istart, size_t istop);
+  double observePeakFwhm(const HistogramData::Histogram &histogram,
+                         API::FunctionValues &bkgd_values, size_t ipeak,
+                         size_t istart, size_t istop);
 
   /// Process the result from fitting a single peak
-  void processSinglePeakFitResult(
+  bool processSinglePeakFitResult(
       size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
       const FitPeaksAlgorithm::FitFunction &fitfunction,

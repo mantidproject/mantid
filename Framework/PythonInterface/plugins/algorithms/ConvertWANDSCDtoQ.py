@@ -96,8 +96,12 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         # Check that all logs are there and are of correct length
         run = inWS.getExperimentInfo(0).run()
 
+        # Check number of goniometers
+        if run.getNumGoniometers() != number_of_runs:
+            issues["InputWorkspace"] = "goniometers not set correctly, did you run SetGoniometer with Average=False"
+
         if instrument == "HB3A":
-            for prop in ['omega', 'chi', 'phi', 'monitor', 'time']:
+            for prop in ['monitor', 'time']:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
                     if np.size(p) != number_of_runs:
@@ -105,7 +109,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 else:
                     issues["InputWorkspace"] = "missing log {}".format(prop)
         else:
-            for prop in ['duration', 'monitor_count', 's1']:
+            for prop in ['duration', 'monitor_count']:
                 if run.hasProperty(prop):
                     p = run.getProperty(prop).value
                     if np.size(p) != number_of_runs:
@@ -168,14 +172,6 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         number_of_runs = data_array.shape[2]
 
         progress = Progress(self, 0.0, 1.0, number_of_runs+4)
-
-        # Get rotation array
-        if instrument == "HB3A":
-            omega = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('omega').value)
-            chi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('chi').value)
-            phi = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('phi').value)
-        else:
-            s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value) + np.deg2rad(self.getProperty("S1Offset").value)
 
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":
@@ -248,7 +244,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if inWS.getExperimentInfo(0).getInstrument().getName() == 'HB3A':
                 polar = polar.reshape(512*3, 512).T.flatten()
 
-        if inWS.getExperimentInfo(0).run().hasProperty('twotheta'):
+        if inWS.getExperimentInfo(0).run().hasProperty('azimuthal'):
             azim = np.array(inWS.getExperimentInfo(0).run().getProperty('azimuthal').value)
         else:
             di = inWS.getExperimentInfo(0).detectorInfo()
@@ -287,21 +283,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         assert data_array[:,:,0].flags.fnc
 
         for n in range(number_of_runs):
-            if instrument == "HB3A":
-                R1 = np.array([[np.cos(omega[n]), 0, -np.sin(omega[n])], # omega 0,1,0,-1
-                               [               0, 1,                 0],
-                               [np.sin(omega[n]), 0,  np.cos(omega[n])]])
-                R2 = np.array([[ np.cos(chi[n]),  np.sin(chi[n]), 0], # chi 0,0,1,-1
-                               [-np.sin(chi[n]),  np.cos(chi[n]), 0],
-                               [              0,               0, 1]])
-                R3 = np.array([[np.cos(phi[n]), 0, -np.sin(phi[n])], # phi 0,1,0,-1
-                               [             0, 1,               0],
-                               [np.sin(phi[n]), 0,  np.cos(phi[n])]])
-                R = np.dot(np.dot(R1, R2), R3)
-            else:
-                R = np.array([[ np.cos(s1[n]), 0, np.sin(s1[n])], # s1 0,1,0,1
-                              [             0, 1,             0],
-                              [-np.sin(s1[n]), 0, np.cos(s1[n])]])
+            R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
             RUBW = np.dot(R,UBW)
             q = np.round(np.dot(np.linalg.inv(RUBW),qlab.T)/bin_size-offset).astype(np.int)
             q_index = np.ravel_multi_index(q, (dim0_bins+2, dim1_bins+2, dim2_bins+2), mode='clip')

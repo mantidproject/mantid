@@ -155,6 +155,10 @@ IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
       m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
 }
 
+IndirectDataAnalysisIqtTab::~IndirectDataAnalysisIqtTab() {
+  m_iqtTree->unsetFactoryForManager(m_dblManager);
+}
+
 void IndirectDataAnalysisIqtTab::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_iqtTree);

@@ -56,8 +56,8 @@ def _get_splash_image():
 
     # the proportion of the whole window size for the splash screen
     splash_screen_scaling = 0.25
-    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(width * splash_screen_scaling,
-                                                                height * splash_screen_scaling,
+    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(int(width * splash_screen_scaling),
+                                                                int(height * splash_screen_scaling),
                                                                 Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)
 
@@ -76,6 +76,8 @@ QApplication.processEvents(QEventLoop.AllEvents)
 
 class MainWindow(QMainWindow):
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
+    # list of custom interfaces that are not qt4/qt5 compatible
+    PYTHON_GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -135,6 +137,8 @@ class MainWindow(QMainWindow):
         self.messagedisplay = LogMessageDisplay(self)
         # this takes over stdout/stderr
         self.messagedisplay.register_plugin()
+        # read settings early so that logging level is in place before framework mgr created
+        self.messagedisplay.readSettings(CONF)
         self.widgets.append(self.messagedisplay)
 
         self.set_splash("Loading Algorithm Selector")
@@ -386,8 +390,6 @@ class MainWindow(QMainWindow):
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-        # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -397,7 +399,7 @@ class MainWindow(QMainWindow):
                 logger.warning('Failed to find script "{}" in "{}"'.format(
                     scriptname, interface_dir))
                 continue
-            if scriptname in GUI_BLACKLIST:
+            if scriptname in self.PYTHON_GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)
@@ -722,8 +724,8 @@ class MainWindow(QMainWindow):
         # read in settings for children
         AlgorithmInputHistory().readSettings(settings)
         for widget in self.widgets:
-            if hasattr(widget, 'readSettings'):
-                widget.readSettings(settings)
+            if hasattr(widget, 'readSettingsIfNotDone'):
+                widget.readSettingsIfNotDone(settings)
 
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize

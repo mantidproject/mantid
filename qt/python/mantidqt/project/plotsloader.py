@@ -31,7 +31,6 @@ class PlotsLoader(object):
     def load_plots(self, plots_list):
         if plots_list is None:
             return
-
         for plot_ in plots_list:
             try:
                 self.make_fig(plot_)
@@ -40,6 +39,10 @@ class PlotsLoader(object):
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt(str(e))
                 logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
+
+    def restore_normalise_obj_from_dict(self, norm_dict):
+        norm = matplotlib.colors.Normalize(norm_dict['vmin'], norm_dict['vmax'], norm_dict['clip'])
+        return norm
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -56,6 +59,10 @@ class PlotsLoader(object):
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
 
+        for sublist in creation_args:
+            for cargs_dict in sublist:
+                if 'norm' in cargs_dict and type(cargs_dict['norm']) is dict:
+                    cargs_dict['norm'] = self.restore_normalise_obj_from_dict(cargs_dict['norm'])
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()
         for ax, cargs_list in zip(axes_list, creation_args):
@@ -67,7 +74,8 @@ class PlotsLoader(object):
                     self.workspace_plot_func(workspace, ax, ax.figure, cargs)
                 elif "function" in cargs:
                     self.plot_func(ax, cargs)
-
+            for cargs in creation_args_copy:
+                cargs.pop('normalize_by_bin_width', None)
             ax.creation_args = creation_args_copy
 
         # Update the fig
@@ -115,7 +123,7 @@ class PlotsLoader(object):
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
         if function_to_call in ["imshow", "pcolormesh"]:
-            func([workspace], fig)
+            func([workspace], fig, normalize_by_bin_width=creation_arg['normalize_by_bin_width'])
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)

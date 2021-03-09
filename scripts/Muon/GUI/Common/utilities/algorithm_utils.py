@@ -9,6 +9,8 @@ import mantid.simpleapi as mantid
 from mantid.kernel import Logger
 from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from copy import copy
+from mantid.kernel import PhysicalConstants as const
+
 
 muon_logger = Logger('Muon-Algs')
 
@@ -237,7 +239,7 @@ def convert_to_field(workspace_name):
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
     alg.setProperty("OutputWorkspace", workspace_name)
-    alg.setProperty("Formula", 'x * 1.e3 / 13.55')
+    alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
     alg.execute()
@@ -283,5 +285,16 @@ def apply_deadtime(ws, output, table):
     alg.setProperty("InputWorkspace", ws)
     alg.setProperty("OutputWorkspace", output)
     alg.setProperty("DeadTimeTable", table)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def calculate_diff_data(diff, forward_group_workspace_name, backward_group_workspace_name, output):
+    alg = mantid.AlgorithmManager.create("Minus")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("LHSWorkspace", forward_group_workspace_name)
+    alg.setProperty("RHSWorkspace", backward_group_workspace_name)
+    alg.setProperty("OutputWorkspace", output)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr

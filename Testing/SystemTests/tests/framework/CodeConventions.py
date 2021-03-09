@@ -50,7 +50,8 @@ ALG_BAD_PARAMS = {
     "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "CreateMD(v1)" : ("u", "v"),
     "AccumulateMD(v1)" : ("u", "v")
-    }
+}
+
 
 # TODO this list should be empty
 FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")

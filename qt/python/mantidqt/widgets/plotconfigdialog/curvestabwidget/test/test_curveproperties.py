@@ -39,6 +39,7 @@ class CurvePropertiesTest(unittest.TestCase):
         ax1 = fig0.add_subplot(212)
         ax1.errorbar([0, 2, 4], [0, 2, 4], xerr=[0, 0.1, 0.2],
                      yerr=[0, 0.1, 0.2], fmt='none', label='ax1')
+        ax1.containers[0][2][0].axes.creation_args = [{'errorevery': 1}]
         cls.props = CurveProperties.from_curve(ax0.get_lines()[0])
         cls.error_props = CurveProperties.from_curve(ax1.containers[0])
 

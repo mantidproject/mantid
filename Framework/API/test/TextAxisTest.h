@@ -132,6 +132,7 @@ public:
   void test_indexOfValue_Returns_Input_As_Index() {
     TextAxis ta(2);
     TS_ASSERT_EQUALS(static_cast<size_t>(1.5), ta.indexOfValue(1.5));
-    TS_ASSERT_EQUALS(static_cast<size_t>(-1), ta.indexOfValue(-1.5));
+    TS_ASSERT_THROWS(ta.indexOfValue(-1.5), const std::out_of_range &);
+    TS_ASSERT_THROWS(ta.indexOfValue(5), const std::out_of_range &);
   }
 };

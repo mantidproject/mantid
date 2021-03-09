@@ -145,6 +145,7 @@ set(PYTHON_PLUGINS
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
     algorithms/PowderReduceP2D.py
+    algorithms/RebinRagged.py
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py

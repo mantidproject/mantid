@@ -118,6 +118,7 @@ void InstrumentWidgetDecoder::decodeRenderTab(
   obj->m_lighting->setChecked(map[QString("displayLighting")].toBool());
   obj->m_GLView->setChecked(map[QString("useOpenGL")].toBool());
   obj->m_UCorrection->setChecked(map[QString("useUCorrection")].toBool());
+  obj->m_freezeRotation->setChecked(map[QString("freezeRotation")].toBool());
 
   // Load the surface
   auto surface = obj->getSurface();

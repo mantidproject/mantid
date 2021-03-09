@@ -14,6 +14,7 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
@@ -25,6 +26,11 @@ using namespace boost::python;
 // Helper method to make the python iterator
 SpectrumInfoPythonIterator make_pyiterator(SpectrumInfo &spectrumInfo) {
   return SpectrumInfoPythonIterator(spectrumInfo);
+}
+
+PyObject *geographicalAngles(SpectrumInfo &spectrumInfo, const size_t index) {
+  const auto angles = spectrumInfo.geographicalAngles(index);
+  return incref(make_tuple(angles.first, angles.second).ptr());
 }
 
 // Export SpectrumInfo
@@ -55,6 +61,10 @@ void export_SpectrumInfo() {
            "Returns the out-of-plane angle in radians angle w.r.t. to "
            "vecPointingHorizontal "
            "direction.")
+      .def("geographicalAngles", &geographicalAngles,
+           (arg("self"), arg("index")),
+           "Returns the latitude and longitude for given spectrum index. "
+           "The returned value is a pair of (latitude, longitude)")
       .def("l1", &SpectrumInfo::l1, arg("self"),
            "Returns the distance from the source to the sample.")
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),

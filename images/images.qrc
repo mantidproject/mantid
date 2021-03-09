@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>pvIcon.png</file>
         <file>MantidPlotSplashScreen-Deprecated.png</file>
         <file>mantidplot.png</file>
         <file>First_use_Background.png</file>

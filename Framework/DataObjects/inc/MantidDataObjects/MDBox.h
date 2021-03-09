@@ -158,13 +158,15 @@ public:
    * <-------------------------------------------------------------*/
   void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
                         const std::vector<coord_t> &point, uint16_t runIndex,
-                        uint32_t detectorId) override;
+                        uint16_t goniometerIndex, uint32_t detectorId) override;
   void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
                               const std::vector<coord_t> &point,
-                              uint16_t runIndex, uint32_t detectorId) override;
+                              uint16_t runIndex, uint16_t goniometernIndex,
+                              uint32_t detectorId) override;
   size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
                            const std::vector<coord_t> &Coord,
                            const std::vector<uint16_t> &runIndex,
+                           const std::vector<uint16_t> &goniometernIndex,
                            const std::vector<uint32_t> &detectorId) override;
 
   //---------------------------------------------------------------------------------------------------------------------------------
@@ -262,17 +264,19 @@ public:
   static inline void
   EXEC(std::vector<MDE> &data, const std::vector<signal_t> &sigErrSq,
        const std::vector<coord_t> &Coord, const std::vector<uint16_t> &runIndex,
+       const std::vector<uint16_t> &goniometerIndex,
        const std::vector<uint32_t> &detectorId, size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++) {
       data.emplace_back(sigErrSq[2 * i], sigErrSq[2 * i + 1], runIndex[i],
-                        detectorId[i], &Coord[i * nd]);
+                        goniometerIndex[i], detectorId[i], &Coord[i * nd]);
     }
   }
   // create single generic event from event's data
   static inline MDE BUILD_EVENT(const signal_t Signal, const signal_t Error,
                                 const coord_t *Coord, const uint16_t runIndex,
+                                const uint16_t goniometerIndex,
                                 const uint32_t detectorId) {
-    return MDE(Signal, Error, runIndex, detectorId, Coord);
+    return MDE(Signal, Error, runIndex, goniometerIndex, detectorId, Coord);
   }
 };
 /* Specialize for the case of LeanEvent */
@@ -283,6 +287,7 @@ public:
                           const std::vector<signal_t> &sigErrSq,
                           const std::vector<coord_t> &Coord,
                           const std::vector<uint16_t> & /*runIndex*/,
+                          const std::vector<uint16_t> & /*goniometerIndex*/,
                           const std::vector<uint32_t> & /*detectorId*/,
                           size_t nEvents) {
     for (size_t i = 0; i < nEvents; i++) {
@@ -292,7 +297,8 @@ public:
   // create single lean event from event's data
   static inline MDLeanEvent<nd>
   BUILD_EVENT(const signal_t Signal, const signal_t Error, const coord_t *Coord,
-              const uint16_t /*runIndex*/, const uint32_t /*detectorId*/) {
+              const uint16_t /*runIndex*/, const uint16_t /*goniometerIndex*/,
+              const uint32_t /*detectorId*/) {
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }
 };

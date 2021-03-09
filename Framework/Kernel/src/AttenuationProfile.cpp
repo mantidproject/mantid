@@ -63,7 +63,7 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
     if (input) {
       std::string line;
       double minX = std::numeric_limits<double>::max();
-      double maxX = std::numeric_limits<double>::min();
+      double maxX = std::numeric_limits<double>::lowest();
       while (std::getline(input, line)) {
         double x, alpha, error;
         if (std::stringstream(line) >> x >> alpha >> error) {
@@ -82,7 +82,7 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
               0, extrapolationMaterial->attenuationCoefficient(0));
         }
         if ((maxX < extrapolationMaxX) &&
-            (maxX > std::numeric_limits<double>::min())) {
+            (maxX > std::numeric_limits<double>::lowest())) {
           m_Interpolator.addPoint(
               extrapolationMaxX,
               extrapolationMaterial->attenuationCoefficient(extrapolationMaxX));
