@@ -49,8 +49,6 @@ LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace()
  *
  * @param other :: other LeanElasticPeaksWorkspace to copy from
  */
-// LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace(const
-// LeanElasticPeaksWorkspace &other) = default;
 LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace(
     const LeanElasticPeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
