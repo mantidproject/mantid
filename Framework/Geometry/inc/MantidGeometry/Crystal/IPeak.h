@@ -33,6 +33,8 @@ public:
   virtual void setDetectorID(int m_DetectorID) = 0;
   virtual Geometry::IDetector_const_sptr getDetector() const = 0;
   virtual Geometry::Instrument_const_sptr getInstrument() const = 0;
+  virtual std::shared_ptr<const Geometry::ReferenceFrame>
+  getReferenceFrame() const = 0;
 
   virtual int getRunNumber() const = 0;
   virtual void setRunNumber(int m_RunNumber) = 0;
