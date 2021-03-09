@@ -27,7 +27,7 @@ Improvements
 Bugfixes
 ########
 
-- Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using `HB2AReduce` algorithm.
+- Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` algorithm.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug to actually implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 - New options, including three "cache directory" and one "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
