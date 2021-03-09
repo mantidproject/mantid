@@ -6,7 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -28,7 +32,9 @@ public:
   static LeanElasticPeaksWorkspaceTest *createSuite() {
     return new LeanElasticPeaksWorkspaceTest();
   }
-  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) { delete suite; }
+  static void destroySuite(LeanElasticPeaksWorkspaceTest *suite) {
+    delete suite;
+  }
 
   void test_defaultConstructor() {
     auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
@@ -63,6 +69,98 @@ public:
     TS_ASSERT_DELTA(pw2->getPeak(0).getWavelength(), 3.0, 1e-9);
   }
 
+  void test_createPeak() {
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    Mantid::Geometry::Goniometer goniometer;
+    goniometer.pushAxis("axis1", 0, 1, 0);
+    goniometer.setRotationAngle(0, 90);
+
+    pw->mutableRun().setGoniometer(goniometer, false);
+
+    // cannot create peak using q-lab
+    TS_ASSERT_THROWS(pw->createPeak(V3D(1, 1, 0)),
+                     const Exception::NotImplementedError &)
+
+    auto peak = pw->createPeakQSample(V3D(1, 1, 0));
+
+    auto qSample = peak->getQSampleFrame();
+    TS_ASSERT_DELTA(qSample.X(), 1, 1e-7)
+    TS_ASSERT_DELTA(qSample.Y(), 1, 1e-7)
+    TS_ASSERT_DELTA(qSample.Z(), 0, 1e-7)
+    auto qLab = peak->getQLabFrame();
+    TS_ASSERT_DELTA(qLab.X(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Y(), 1, 1e-7)
+    TS_ASSERT_DELTA(qLab.Z(), -1, 1e-7)
+  }
+
+  void test_createPeakHKL() {
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    Mantid::Geometry::Goniometer goniometer;
+    goniometer.pushAxis("axis1", 0, 1, 0);
+    goniometer.setRotationAngle(0, 90);
+
+    pw->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableRun().setGoniometer(goniometer, false);
+    auto peak = pw->createPeakHKL(V3D(1, 0, 0));
+
+    TS_ASSERT_EQUALS(peak->getH(), 1)
+    TS_ASSERT_EQUALS(peak->getK(), 0)
+    TS_ASSERT_EQUALS(peak->getL(), 0)
+    auto qSample = peak->getQSampleFrame();
+    TS_ASSERT_DELTA(qSample.X(), 2 * M_PI / 5, 1e-7)
+    TS_ASSERT_DELTA(qSample.Y(), 0, 1e-7)
+    TS_ASSERT_DELTA(qSample.Z(), 0, 1e-7)
+    auto qLab = peak->getQLabFrame();
+    TS_ASSERT_DELTA(qLab.X(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Y(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Z(), -2 * M_PI / 5, 1e-7)
+  }
+
+  void test_addPeakSpecialCoordinate() {
+    auto pw = std::make_shared<LeanElasticPeaksWorkspace>();
+    Mantid::Geometry::Goniometer goniometer;
+    goniometer.pushAxis("axis1", 0, 1, 0);
+    goniometer.setRotationAngle(0, 90);
+
+    pw->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(5, 5, 5, 90, 90, 90));
+    pw->mutableRun().setGoniometer(goniometer, false);
+
+    TS_ASSERT_THROWS(pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::QLab),
+                     const Exception::NotImplementedError &)
+
+    pw->addPeak(V3D(1, 1, 0), Mantid::Kernel::QSample);
+    pw->addPeak(V3D(1, 0, 0), Mantid::Kernel::HKL);
+
+    TS_ASSERT_EQUALS(pw->getNumberPeaks(), 2);
+
+    auto peak = pw->getPeak(0);
+    TS_ASSERT_EQUALS(peak.getH(), 0)
+    TS_ASSERT_EQUALS(peak.getK(), 0)
+    TS_ASSERT_EQUALS(peak.getL(), 0)
+    auto qSample = peak.getQSampleFrame();
+    TS_ASSERT_DELTA(qSample.X(), 1, 1e-7)
+    TS_ASSERT_DELTA(qSample.Y(), 1, 1e-7)
+    TS_ASSERT_DELTA(qSample.Z(), 0, 1e-7)
+    auto qLab = peak.getQLabFrame();
+    TS_ASSERT_DELTA(qLab.X(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Y(), 1, 1e-7)
+    TS_ASSERT_DELTA(qLab.Z(), -1, 1e-7)
+
+    peak = pw->getPeak(1);
+    TS_ASSERT_EQUALS(peak.getH(), 1)
+    TS_ASSERT_EQUALS(peak.getK(), 0)
+    TS_ASSERT_EQUALS(peak.getL(), 0)
+    qSample = peak.getQSampleFrame();
+    TS_ASSERT_DELTA(qSample.X(), 2 * M_PI / 5, 1e-7)
+    TS_ASSERT_DELTA(qSample.Y(), 0, 1e-7)
+    TS_ASSERT_DELTA(qSample.Z(), 0, 1e-7)
+    qLab = peak.getQLabFrame();
+    TS_ASSERT_DELTA(qLab.X(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Y(), 0, 1e-7)
+    TS_ASSERT_DELTA(qLab.Z(), -2 * M_PI / 5, 1e-7)
+  }
   void test_addRemovePeaks() {
     // build peaksworkspace (note number of peaks = 1)
     auto pw = std::make_shared<LeanElasticPeaksWorkspace>();

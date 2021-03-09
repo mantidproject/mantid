@@ -89,7 +89,7 @@ LeanElasticPeakColumn::LeanElasticPeakColumn(std::vector<LeanElasticPeak> &peaks
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
-  const std::string key = "LeanElasticPeakColumn.hklPrec";
+  const std::string key = "PeakColumn.hklPrec";
   auto hklPrec = ConfigService::Instance().getValue<int>(key);
   this->m_hklPrec = hklPrec.get_value_or(2);
   if (!hklPrec.is_initialized()) {
