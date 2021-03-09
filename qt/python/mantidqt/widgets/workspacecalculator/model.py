@@ -8,7 +8,7 @@
 #
 #
 from mantid.simpleapi import (Divide, DivideMD, Minus, MinusMD, mtd, Multiply, MultiplyMD,
-                              Plus, PlusMD, Scale, WeightedMean, WeightedMeanMD)
+                              Plus, PlusMD, WeightedMean, WeightedMeanMD)
 from mantid.api import WorkspaceGroup
 from mantid.dataobjects import MDHistoWorkspace
 from mantid.kernel import logger as log
@@ -65,8 +65,8 @@ class WorkspaceCalculatorModel():
     def performOperation(self):
         if not self.validateInputs():
             return
-        lhs_ws = Scale(InputWorkspace=self._lhs_ws, Factor=self._lhs_scale)
-        rhs_ws = Scale(InputWorkspace=self._rhs_ws, Factor=self._rhs_scale)
+        lhs_ws = self._lhs_scale * mtd[self._lhs_ws]
+        rhs_ws = self._rhs_scale * mtd[self._rhs_ws]
 
         if self._operation == '+':
             if self._md_ws:
