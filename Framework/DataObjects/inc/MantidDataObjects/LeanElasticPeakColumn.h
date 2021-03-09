@@ -28,7 +28,8 @@ class DLLExport LeanElasticPeakColumn : public Mantid::API::Column {
 
 public:
   /// Construct a column with a reference to the peaks list, a name & type
-  LeanElasticPeakColumn(std::vector<LeanElasticPeak> &peaks, const std::string &name);
+  LeanElasticPeakColumn(std::vector<LeanElasticPeak> &peaks,
+                        const std::string &name);
 
   /// Number of individual elements in the column.
   size_t size() const override { return m_peaks.size(); }

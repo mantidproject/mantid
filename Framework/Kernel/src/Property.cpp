@@ -382,8 +382,9 @@ std::string getUnmangledTypeName(const std::type_info &type) {
                         string("EventWorkspace"));
     typestrings.emplace(typeid(std::shared_ptr<PeaksWorkspace>).name(),
                         string("PeaksWorkspace"));
-    typestrings.emplace(typeid(std::shared_ptr<LeanElasticPeaksWorkspace>).name(),
-                        string("LeanElasticPeaksWorkspace"));
+    typestrings.emplace(
+        typeid(std::shared_ptr<LeanElasticPeaksWorkspace>).name(),
+        string("LeanElasticPeaksWorkspace"));
     typestrings.emplace(typeid(std::shared_ptr<IPeaksWorkspace>).name(),
                         string("IPeaksWorkspace"));
     typestrings.emplace(typeid(std::shared_ptr<GroupingWorkspace>).name(),
