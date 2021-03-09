@@ -328,6 +328,15 @@ LeanElasticPeaksWorkspace::createPeakHKL(const V3D &HKL) const {
 }
 
 /**
+ * Create a Peak using default values
+ *
+ * @return a point to a new peak object
+ */
+std::unique_ptr<IPeak> LeanElasticPeaksWorkspace::createPeak() const {
+  return std::make_unique<LeanElasticPeak>();
+}
+
+/**
  * Returns selected information for a "peak" at QLabFrame.
  *
  * @param qFrame      An arbitrary position in Q-space.  This does not have to

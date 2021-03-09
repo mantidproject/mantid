@@ -106,6 +106,8 @@ public:
   std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Kernel::V3D &HKL) const override;
 
+  std::unique_ptr<Geometry::IPeak> createPeak() const override;
+
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
   std::vector<LeanElasticPeak> &getPeaks();

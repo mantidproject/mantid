@@ -510,6 +510,15 @@ std::unique_ptr<IPeak> PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
 }
 
 /**
+ * Create a Peak using default values
+ *
+ * @return a point to a new peak object
+ */
+std::unique_ptr<IPeak> PeaksWorkspace::createPeak() const {
+  return std::make_unique<Peak>();
+}
+
+/**
  * Returns selected information for a "peak" at QLabFrame.
  *
  * @param qFrame      An arbitrary position in Q-space.  This does not have to

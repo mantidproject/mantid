@@ -134,6 +134,12 @@ public:
   virtual std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
 
+  /**
+   * Create an instance of a peak using default constructor
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Geometry::IPeak> createPeak() const = 0;
+
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
    * algorithm.
