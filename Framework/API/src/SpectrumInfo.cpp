@@ -173,6 +173,16 @@ SpectrumInfo::diffractometerConstants(const size_t index,
     warningDets.insert(warningDets.end(), uncalibratedDets.begin(),
                        uncalibratedDets.end());
   };
+  // if no calibration is found then return difc only based on the average
+  // of the detector L2 and twoThetas. This will be different to the average
+  // of the per detector difcs. This is for backwards compatibility because
+  // Mantid always used to calculate spectrum level difc's this way
+  if (calibratedDets.size() == 0) {
+    return {0.,
+            1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
+                     l1(), l2(index), twoTheta(index), 0.),
+            0.};
+  }
   return {difa / static_cast<double>(spectrumDefinition(index).size()),
           difc / static_cast<double>(spectrumDefinition(index).size()),
           tzero / static_cast<double>(spectrumDefinition(index).size())};

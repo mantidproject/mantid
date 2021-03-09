@@ -77,16 +77,6 @@ void EditInstrumentGeometry::init() {
   declareProperty("InstrumentName", "",
                   "Name of the newly built instrument.  If left empty, "
                   "the original instrument will be used. ");
-
-  // DIFA
-  declareProperty(std::make_unique<ArrayProperty<double>>("DIFA"),
-                  "DIFA diffractometer constant for detectors");
-  // DIFC
-  declareProperty(std::make_unique<ArrayProperty<double>>("DIFC"),
-                  "DIFC diffractometer constant for detectors");
-  // TZERO
-  declareProperty(std::make_unique<ArrayProperty<double>>("TZERO"),
-                  "TZERO diffractometer constant for detectors");
 }
 
 template <typename NumT> std::string checkValues(const std::vector<NumT> &thingy, const size_t numHist) {
@@ -200,12 +190,6 @@ void EditInstrumentGeometry::exec() {
   const std::vector<double> l2s = this->getProperty("L2");
   const std::vector<double> tths = this->getProperty("Polar");
   std::vector<double> phis = this->getProperty("Azimuthal");
-  const std::vector<double> difas = this->getProperty("DIFA");
-  const bool haveDifas(!difas.empty());
-  const std::vector<double> difcs = this->getProperty("DIFC");
-  const bool haveDifcs(!difcs.empty());
-  const std::vector<double> tzeros = this->getProperty("TZERO");
-  const bool haveTZeros(!tzeros.empty());
 
   // empty list of L2 and 2-theta is not allowed
   if (l2s.empty()) {
@@ -246,9 +230,6 @@ void EditInstrumentGeometry::exec() {
   std::vector<double> stor2Thetas(nspec, 0.);
   std::vector<double> storPhis(nspec, 0.);
   std::vector<int> storDetIDs(nspec, 0);
-  std::vector<double> storDIFAs(nspec, 0.);
-  std::vector<double> storDIFCs(nspec, 0.);
-  std::vector<double> storTZEROs(nspec, 0.);
 
   // Map the properties from spectrum Number to workspace index
   for (size_t i = 0; i < specids.size(); i++) {
@@ -270,12 +251,6 @@ void EditInstrumentGeometry::exec() {
     storPhis[workspaceindex] = phis[i];
     if (renameDetID)
       storDetIDs[workspaceindex] = vec_detids[i];
-    if (haveDifas)
-      storDIFAs[workspaceindex] = difas[i];
-    if (haveDifcs)
-      storDIFCs[workspaceindex] = difcs[i];
-    if (haveTZeros)
-      storTZEROs[workspaceindex] = tzeros[i];
 
     g_log.debug() << "workspace index = " << workspaceindex
                   << " is for Spectrum " << specids[i] << '\n';
@@ -358,17 +333,6 @@ void EditInstrumentGeometry::exec() {
 
   // Add the new instrument
   workspace->setInstrument(instrument);
-
-  auto &paramMap = workspace->instrumentParameters();
-  for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
-    auto detector = workspace->getDetector(i);
-    if (haveDifas)
-      paramMap.addDouble(detector->getComponentID(), "DIFA", storDIFAs[i]);
-    if (haveDifcs)
-      paramMap.addDouble(detector->getComponentID(), "DIFC", storDIFCs[i]);
-    if (haveTZeros)
-      paramMap.addDouble(detector->getComponentID(), "TZERO", storTZEROs[i]);
-  }
 }
 
 } // namespace Algorithms
