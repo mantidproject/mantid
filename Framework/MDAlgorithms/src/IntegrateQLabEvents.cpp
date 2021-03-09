@@ -262,8 +262,7 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
     r1 = peak_radius / max_sigma;
     r2 = back_inner_radius / max_sigma;
     r3 = back_outer_radius / max_sigma;
-  }
-  else {
+  } else {
     r1 = 3;
     r2 = 3;
     r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background

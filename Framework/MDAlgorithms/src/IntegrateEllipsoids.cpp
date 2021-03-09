@@ -500,7 +500,6 @@ void IntegrateEllipsoids::exec() {
   setProperty("OutputWorkspace", peak_ws);
 }
 
-
 void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
@@ -522,7 +521,6 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
   else
     m_targWSDescr.m_PreprDetTable = table;
 }
-
 
 void IntegrateEllipsoids::calculateE1(
     const Geometry::DetectorInfo &detectorInfo) {

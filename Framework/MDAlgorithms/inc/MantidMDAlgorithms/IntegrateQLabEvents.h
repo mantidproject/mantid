@@ -26,9 +26,9 @@ class PeakShape;
 }
 
 namespace MDAlgorithms {
+using Mantid::DataObjects::PeakShapeEllipsoid_const_sptr;
 using Mantid::Geometry::PeakShape_const_sptr;
 using Mantid::Kernel::V3D;
-using Mantid::DataObjects::PeakShapeEllipsoid_const_sptr;
 
 /// Partition QLab space into a cubic lattice
 struct CellCoords {
@@ -90,13 +90,13 @@ struct OccupiedCell {
 class DLLExport IntegrateQLabEvents {
 public:
   /**
-  * @brief Store events within a certain radius of the specified peak centers,
-  * and sum these events to estimate pixel intensities.
-  * @param peak_q_list : List of Q-vectors for peak centers.
-  * @param radius : The maximum distance from a peak's Q-vector, for an
-  * event to be stored in the list associated with that peak.
-  * @param useOnePercentBackgroundCorrection : flag if one percent background
-  * correction should be used. */
+   * @brief Store events within a certain radius of the specified peak centers,
+   * and sum these events to estimate pixel intensities.
+   * @param peak_q_list : List of Q-vectors for peak centers.
+   * @param radius : The maximum distance from a peak's Q-vector, for an
+   * event to be stored in the list associated with that peak.
+   * @param useOnePercentBackgroundCorrection : flag if one percent background
+   * correction should be used. */
   IntegrateQLabEvents(const SlimEvents &peak_q_list, double radius,
                       const bool useOnePercentBackgroundCorrection = true);
 
@@ -148,11 +148,11 @@ public:
       std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /**
-  * @brief Assign events to each of the cells occupied by events.
-  * @details Iterate over each QLab cell containing a peak and accumulate the
-  * list of events for the cell and for the first-neighbor cells into a
-  * single list of events. The QLab vectors for this events are shifted
-  * by the QLab vector of the peak. */
+   * @brief Assign events to each of the cells occupied by events.
+   * @details Iterate over each QLab cell containing a peak and accumulate the
+   * list of events for the cell and for the first-neighbor cells into a
+   * single list of events. The QLab vectors for this events are shifted
+   * by the QLab vector of the peak. */
   void populateCellsWithPeaks();
 
 private:
@@ -260,11 +260,9 @@ private:
   PeakShapeEllipsoid_const_sptr ellipseIntegrateEvents(
       const std::vector<V3D> &E1Vec, V3D const &peak_q,
       SlimEvents const &ev_list, std::vector<V3D> const &directions,
-                         std::vector<double> const &sigmas, bool specify_size,
-                         double peak_radius, double back_inner_radius,
-                         double back_outer_radius,
-                         std::vector<double> &axes_radii, double &inti,
-                         double &sigi);
+      std::vector<double> const &sigmas, bool specify_size, double peak_radius,
+      double back_inner_radius, double back_outer_radius,
+      std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /**
    * @brief Calculate if this Q is on a detector
