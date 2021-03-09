@@ -188,24 +188,38 @@ class DrillExportModel:
         exportPath = config.getString("defaultsave.directory")
         workspaceName = sample.getOutputName()
 
-        tasks = list()
+        wsNames = list()
         for wsName in mtd.getObjectNames():
             if ((workspaceName in wsName)
                     and (not isinstance(mtd[wsName], WorkspaceGroup))):
-                for a,s in self._exportAlgorithms.items():
-                    if s:
-                        if not self._validCriteria(wsName, a):
-                            logger.notice("Export of {} with {} was skipped "
-                                          "because the workspace is not "
-                                          "compatible.".format(wsName, a))
-                            continue
-                        filename = exportPath + wsName \
-                                   + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        name = wsName + ":" + filename
-                        if wsName not in self._exports:
-                            self._exports[wsName] = set()
-                        self._exports[wsName].add(filename)
-                        task = DrillTask(name, a, InputWorkspace=wsName,
-                                         FileName=filename)
-                        tasks.append(task)
+                wsNames.append(wsName)
+
+        tasks = list()
+        for algo,active in self._exportAlgorithms.items():
+            if not active:
+                continue
+
+            i = 0
+            validCriteria = False
+            while validCriteria is False and i < len(wsNames):
+                validCriteria = self._validCriteria(wsNames[i], algo)
+                i += 1
+
+            if validCriteria is False:
+                logger.notice("Export of sample {} with {} was skipped "
+                              "because workspaces are not compatible."
+                              .format(sample, algo))
+                continue
+
+            for wsName in wsNames:
+                filename = exportPath + wsName \
+                           + RundexSettings.EXPORT_ALGO_EXTENSION[algo]
+                name = wsName + ":" + filename
+                if wsName not in self._exports:
+                    self._exports[wsName] = set()
+                self._exports[wsName].add(filename)
+                task = DrillTask(name, algo, InputWorkspace=wsName,
+                                 FileName=filename)
+                tasks.append(task)
+
         self._pool.addProcesses(tasks)
