@@ -24,11 +24,6 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = UserSubWindowFactory.Instance().keys()
 
-    def skipTests(self):
-        # skipping while the test is segfaulting. It does not appear to be a real
-        # failure
-        return True
-
     def runTest(self):
         if len(self._cpp_interface_names) == 0:
             self.fail("Failed to find the names of the c++ interfaces.")
