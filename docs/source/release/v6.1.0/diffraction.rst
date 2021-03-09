@@ -39,6 +39,7 @@ Bugfixes
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
+- :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 
 Engineering Diffraction
 -----------------------
