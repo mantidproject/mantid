@@ -253,7 +253,7 @@ def generate_unsplined_name(vanadium_string, *args):
     return _generate_vanadium_name(vanadium_string, False, *args)
 
 
-def generate_summed_empty_name(empty_runs_string):
+def generate_summed_empty_name(empty_runs_string, *args):
     """
     Generates a name for the summed empty instrument runs
     so that the file can be later loaded.
@@ -261,8 +261,14 @@ def generate_summed_empty_name(empty_runs_string):
     :return: The generated file name
     """
     out_name = 'summed_empty'
-
     out_name += '_' + str(empty_runs_string)
+
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
 
     out_name += ".nxs"
     return out_name
