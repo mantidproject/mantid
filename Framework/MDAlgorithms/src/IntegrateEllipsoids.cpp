@@ -341,36 +341,19 @@ void IntegrateEllipsoids::exec() {
   if (peak_ws != in_peak_ws)
     peak_ws = in_peak_ws->clone();
 
-  // get UBinv and the list of
-  // peak Q's for the integrator
+  // get the list of peak Q's for the integrator
   std::vector<Peak> &peaks = peak_ws->getPeaks();
   size_t n_peaks = peak_ws->getNumberPeaks();
-  size_t indexed_count = 0;
-  std::vector<V3D> peak_q_list;
-  std::vector<std::pair<std::pair<double, double>, V3D>> qList;
-  std::vector<V3D> hkl_vectors;
-  std::vector<V3D> mnp_vectors;
-  int ModDim = 0;
+  SlimEvents qList;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
+    const V3D peak_q = peaks[i].getQLabFrame();
+    if (IntegrateQLabEvents::isOrigin(peak_q, radius_m))
+      continue;
     V3D hkl(peaks[i].getIntHKL());
-    V3D mnp(peaks[i].getIntMNP());
-
-    if (mnp[0] != 0 && ModDim == 0)
-      ModDim = 1;
-    if (mnp[1] != 0 && ModDim == 1)
-      ModDim = 2;
-    if (mnp[2] != 0 && ModDim == 2)
-      ModDim = 3;
-
     // use tolerance == 1 to just check for (0,0,0,0,0,0)
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-      peak_q_list.emplace_back(peaks[i].getQLabFrame());
-      qList.emplace_back(std::pair<double, double>(1., 1.),
-                         V3D(peaks[i].getQLabFrame()));
-      hkl_vectors.emplace_back(hkl);
-      mnp_vectors.emplace_back(mnp);
-      indexed_count++;
+      qList.emplace_back(std::pair<double, double>(1., 1.), peak_q);
     }
   }
 
