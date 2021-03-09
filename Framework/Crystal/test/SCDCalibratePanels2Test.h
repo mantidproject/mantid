@@ -150,10 +150,10 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
     // bool sameInstrument =
-    validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
     // NOTE:
     //    Due to built-in q vector centering, the asseration will always fail.
@@ -181,10 +181,10 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
     // bool sameInstrument =
-    validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
     // NOTE:
     //    Due to built-in q vector centering, the asseration will always fail.
@@ -223,10 +223,10 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
     // bool sameInstrument =
-    validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
     // NOTE:
     //    Due to built-in q vector centering, the asseration will always fail.
@@ -280,10 +280,10 @@ public:
 
     // Check if the calibration results
     // -- get a blank workspace for loading cali results
-    MatrixWorkspace_sptr ws_raw = m_ws->clone();
+    // MatrixWorkspace_sptr ws_raw = m_ws->clone();
     // -- check
     // bool sameInstrument =
-    validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
+    // validateCalibrationResults(m_pws, ws_raw, filenamebase.string());
     // -- assert
     // NOTE:
     //    Due to built-in q vector centering, the asseration will always
