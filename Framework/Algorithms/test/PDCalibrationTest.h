@@ -429,13 +429,16 @@ public:
   }
 
   void test_exec_fit_diff_constants_with_chisq() {
+    using Mantid::Kernel::UnitParams;
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     // setup the peak postions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(
-        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(
+        dValues, unusedy, -1., 0,
+        Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
