@@ -13,8 +13,6 @@
 #include "MantidKernel/V3D.h"
 
 #include <memory>
-
-#include <boost/container_hash/hash.hpp>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -114,7 +112,7 @@ public:
 
   /**
    * @brief Integrate the events around the specified peak QLab vector.
-   * @detail The principal axes of the events near this Q-vector
+   * @details The principal axes of the events near this Q-vector
    * and the standard deviations in the directions of these principal
    * axes determine ellipsoidal regions for integrating the peak and
    * estimating the background.  Alternatively, if peak and background
@@ -158,7 +156,7 @@ public:
 private:
   /**
    * @brief Number of events in an ellipsoid.
-   * @detail The ellipsoid is centered at 0,0,0 with the three specified
+   * @details The ellipsoid is centered at 0,0,0 with the three specified
    * axes and the three specified sizes in the direction of those axes.
    * NOTE: The three axes must be mutually orthogonal unit vectors.
    * @param events : List of SlimEvents centered at 0,0,0
@@ -173,7 +171,7 @@ private:
 
   /**
    * @brief Number of events in an ellipsoid with background correction.
-   * @detail The ellipsoid is centered at 0,0,0 with the three specified
+   * @details The ellipsoid is centered at 0,0,0 with the three specified
    * axes and the three specified sizes in the direction of those axes.
    * NOTE: The three axes must be mutually orthogonal unit vectors.
    * @param events : List of 3D events centered at 0,0,0
@@ -193,7 +191,7 @@ private:
 
   /**
    * @brief 3x3 covariance matrix of a list of SlimEvent objects
-   * @detail the purpose of the covariance matrix is to find the principal axes
+   * @details the purpose of the covariance matrix is to find the principal axes
    * of the SlimeEvents, associated with a particular peak. Their QLab vectors
    * are already shifted by the QLab vector of the peak. Only events within
    * the specified distance from the peak (here at Q=[0,0,0]) will be used.
@@ -230,7 +228,7 @@ private:
 
   /**
    * @brief Integrate a list of events associated to one peak.
-   * @detail The QLab vector of the events are shifted by the QLab vector
+   * @details The QLab vector of the events are shifted by the QLab vector
    * of the peak. Spatial distribution of the events in QLab space is
    * described with principal axes of the ellipsoid, as well as the
    * standard deviations in the the directions of the principal axes.
@@ -266,7 +264,7 @@ private:
 
   /**
    * @brief Calculate if this Q is on a detector
-   * @detail The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
+   * @details The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
    * If dv.norm<integration_radius, one of the detector trajectories on the
    * edge is too close to the peak. This method is applied to all masked
    * pixels. If there are masked pixels trajectories inside an integration
