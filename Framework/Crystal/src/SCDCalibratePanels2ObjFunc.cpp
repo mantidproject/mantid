@@ -125,7 +125,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   // need to do something with dT0
 
   // calculate residual
-  double residual = 0.0;
+  // double residual = 0.0;
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
     // cache TOF
     const double tof = pws->getPeak(i).getTOF();
@@ -146,24 +146,24 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
       out[i * 3 + j] = qv[j];
 
     // check the difference between n and target
-    auto ubm = pws->sample().getOrientedLattice().getUB();
-    V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
-    qv_target *= 2 * PI;
-    V3D delta_qv = qv - qv_target;
-    residual += delta_qv.norm2();
+    // auto ubm = pws->sample().getOrientedLattice().getUB();
+    // V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
+    // qv_target *= 2 * PI;
+    // V3D delta_qv = qv - qv_target;
+    // residual += delta_qv.norm2();
   }
 
   n_iter += 1;
 
-  V3D dtrans = V3D(dx, dy, dz);
-  V3D rotaxis = V3D(vx, vy, vz);
-  residual /= pws->getNumberPeaks();
-  std::ostringstream msgiter;
-  msgiter.precision(8);
-  msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
-          << "-- (dx, dy, dz) = " << dtrans << "\n"
-          << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
-  g_log.information() << msgiter.str();
+  // V3D dtrans = V3D(dx, dy, dz);
+  // V3D rotaxis = V3D(vx, vy, vz);
+  // residual /= pws->getNumberPeaks();
+  // std::ostringstream msgiter;
+  // msgiter.precision(8);
+  // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
+  //         << "-- (dx, dy, dz) = " << dtrans << "\n"
+  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
+  // g_log.information() << msgiter.str();
 }
 
 // -------///
