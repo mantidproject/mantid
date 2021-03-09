@@ -899,7 +899,8 @@ public:
     std::vector<double> yy = y;
     double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(1.0 / 2) *
                   (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
-    TS_ASSERT_THROWS_NOTHING(q2.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
+    TS_ASSERT_THROWS_NOTHING(
+        q2.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 231.9220, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -935,8 +936,7 @@ public:
     q2.initialize(1.1, 0,
                   {{UnitParams::difc, difc}, {UnitParams::efixed, 99.0}});
 
-    std::string err_mess =
-        convert_units_check_range(q2, sample, rezult);
+    std::string err_mess = convert_units_check_range(q2, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
 
     for (size_t i = 0; i < sample.size(); i++) {
