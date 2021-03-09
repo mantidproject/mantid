@@ -517,6 +517,7 @@ public:
   }
 };
 
+/*
 class RealCaseTest : public CxxTest::TestSuite {
 
 private:
@@ -580,3 +581,4 @@ public:
     TS_ASSERT_EQUALS(hkl1[0], 0.1);
   }
 };
+*/

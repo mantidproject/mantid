@@ -40,6 +40,9 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDAlgorithms {
 
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(IntegrateEllipsoids)
+
 /// This only works for diffraction.
 const std::string ELASTIC("Elastic");
 
@@ -49,12 +52,6 @@ const std::string Q3D("Q3D");
 /// Q-vector is always three dimensional.
 const std::size_t DIMS(3);
 
-/**
- * @brief qListFromEventWS creates qlist from events
- * @param integrator : itegrator object on which qlists are accumulated
- * @param prog : progress object
- * @param wksp : input EventWorkspace
- */
 void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
                                            Progress &prog,
                                            EventWorkspace_sptr &wksp) {
@@ -115,13 +112,6 @@ void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator,
   integrator.populateCellsWithPeaks();
 }
 
-/**
- * @brief qListFromHistoWS creates qlist from input workspaces of type
- * Workspace2D
- * @param integrator : itegrator object on which qlists are accumulated
- * @param prog : progress object
- * @param wksp : input Workspace2D
- */
 void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator,
                                            Progress &prog,
                                            Workspace2D_sptr &wksp) {
@@ -182,31 +172,6 @@ void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator,
   integrator.populateCellsWithPeaks();
 }
 
-/** NOTE: This has been adapted from the SaveIsawQvector algorithm.
- */
-
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(IntegrateEllipsoids)
-
-//---------------------------------------------------------------------
-/// Algorithm's name for identification. @see Algorithm::name
-const std::string IntegrateEllipsoids::name() const {
-  return "IntegrateEllipsoids";
-}
-
-/// Algorithm's version for identification. @see Algorithm::version
-int IntegrateEllipsoids::version() const { return 1; }
-
-/// Algorithm's category for identification. @see Algorithm::category
-const std::string IntegrateEllipsoids::category() const {
-  return "Crystal\\Integration";
-}
-
-//---------------------------------------------------------------------
-
-//---------------------------------------------------------------------
-/** Initialize the algorithm's properties.
- */
 void IntegrateEllipsoids::init() {
   auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<WorkspaceUnitValidator>("TOF");
@@ -282,9 +247,6 @@ void IntegrateEllipsoids::init() {
                   "before the background subtraction.");
 }
 
-//---------------------------------------------------------------------
-/** Execute the algorithm.
- */
 void IntegrateEllipsoids::exec() {
   // get the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
@@ -538,12 +500,7 @@ void IntegrateEllipsoids::exec() {
   setProperty("OutputWorkspace", peak_ws);
 }
 
-/**
- * @brief IntegrateEllipsoids::initTargetWSDescr Initialize the
- * output information for the MD conversion framework.
- *
- * @param wksp The workspace to get information from.
- */
+
 void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
@@ -566,18 +523,6 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
     m_targWSDescr.m_PreprDetTable = table;
 }
 
-/*
- * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and
- *pixels 0 and 255.
- * Get Q in the lab frame for every peak, call it C
- * For every point on the edge, the trajectory in reciprocal space is a straight
- *line, going through O=V3D(0,0,0).
- * Calculate a point at a fixed momentum, say k=1. Q in the lab frame
- *E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
- * Normalize E to 1: E=E*(1./E.norm())
- *
- * @param inst: instrument
- */
 
 void IntegrateEllipsoids::calculateE1(
     const Geometry::DetectorInfo &detectorInfo) {

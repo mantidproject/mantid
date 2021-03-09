@@ -113,7 +113,6 @@ std::pair<double, double>
 IntegrateQLabEvents::numInEllipsoid(SlimEvents const &events,
                                     std::vector<V3D> const &directions,
                                     std::vector<double> const &sizes) {
-
   std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
     double sum = 0;
@@ -241,12 +240,12 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
     bool specify_size, double peak_radius, double back_inner_radius,
     double back_outer_radius, std::vector<double> &axes_radii, double &inti,
     double &sigi) {
-  // r1, r2 and r3 will give the sizes of the major axis of
-  // the peak ellipsoid, and of the inner and outer surface
-  // of the background ellipsoidal shell, respectively.
-  // They will specify the size as the number of standard
-  // deviations in the direction of each of the pricipal
-  // axes that the ellipsoid will extend from the center.
+  /* r1, r2 and r3 will give the sizes of the major axis of the peak
+   * ellipsoid, and of the inner and outer surface of the background
+   * ellipsoidal shell, respectively.
+   * They will specify the size as the number of standard deviations
+   * in the direction of each of the principal axes that the ellipsoid
+   * will extend from the center. */
   double r1, r2, r3;
 
   double max_sigma = sigmas[0];
@@ -257,19 +256,20 @@ PeakShapeEllipsoid_const_sptr IntegrateQLabEvents::ellipseIntegrateEvents(
   }
 
   if (specify_size) {
-    r1 = peak_radius / max_sigma;       // scale specified sizes by 1/max_sigma
-    r2 = back_inner_radius / max_sigma; // so when multiplied by the individual
-    r3 = back_outer_radius / max_sigma; // sigmas in different directions, the
-  }                                     // major axis has the specified size
+    /* scale specified sizes by 1/max_sigma so when multiplied by the
+     * individual sigmas in different directions, the major axis has
+     * the specified size */
+    r1 = peak_radius / max_sigma;
+    r2 = back_inner_radius / max_sigma;
+    r3 = back_outer_radius / max_sigma;
+  }
   else {
     r1 = 3;
     r2 = 3;
     r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-    // shell volume equal to the peak region volume.
-
-    // if necessary restrict the background ellipsoid
-    // to lie within the specified sphere, and adjust
-    // the other sizes, proportionally
+    /* shell volume equal to the peak region volume. If necessary,
+     * restrict the background ellipsoid to lie within the specified
+     * sphere, and adjust the other sizes, proportionally */
     if (r3 * max_sigma > m_radius) {
       r3 = m_radius / max_sigma;
       r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background

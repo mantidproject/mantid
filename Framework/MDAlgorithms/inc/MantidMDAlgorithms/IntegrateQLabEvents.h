@@ -24,15 +24,13 @@ namespace Mantid {
 namespace Geometry {
 class PeakShape;
 }
-namespace DataObjects {
-using DataObjects::EventWorkspace_sptr;
-class PeakShapeEllipsoid;
-} // namespace DataObjects
+
 namespace MDAlgorithms {
 using Mantid::Geometry::PeakShape_const_sptr;
 using Mantid::Kernel::V3D;
+using Mantid::DataObjects::PeakShapeEllipsoid_const_sptr;
 
-/// Cubic lattice coordinates in Q-space
+/// Partition QLab space into a cubic lattice
 struct CellCoords {
   int64_t a;
   int64_t b;
@@ -67,8 +65,9 @@ struct CellCoords {
 using SlimEvent = std::pair<std::pair<double, double>, V3D>;
 using SlimEvents = std::vector<SlimEvent>;
 
+// A cell in partitioned QLab space containing one peak
 struct OccupiedCell {
-  size_t peakIndex;
+  size_t peakIndex;  // index of the peak within this cell
   V3D peakQ;         // QLab vector of the peak within this cell
   SlimEvents events; // events potentially closer than m_radius to the peak
 };
@@ -77,11 +76,12 @@ struct OccupiedCell {
  @class IntegrateQLabEvents
 
  This is a low-level class to construct a map with lists of events near
- each peak Q-vector in the lab frame, shifted to be centered at (0,0,0).
- A method is also provided to find the principal axes
- of such a list of events, and to find the net integrated counts,
- using ellipsoids with axis lengths determined from the standard
- deviations in the directions of the principal axes.
+ each peak Q-vector in the lab frame. The Q-vector of each event is shifted
+ by the Q-vector of the associated peak.
+ A method is also provided to find the principal axes of such a list
+ of events and to find the net integrated counts using ellipsoids
+ with axis lengths determined from the standard deviations in the
+ directions of the principal axes.
 
  @author Dennis Mikkelson
  @date   2012-12-19
@@ -90,16 +90,13 @@ struct OccupiedCell {
 class DLLExport IntegrateQLabEvents {
 public:
   /**
-   * Store events within a certain radius of the specified peak centers,
-   * and sum these events to estimate pixel intensities.
-   *
-   * @param   peak_q_list  List of Q-vectors for peak centers.
-   * @param   radius       The maximum distance from a peak's Q-vector, for
-   *                       an event to be stored in the list associated with
-   *                       that peak.
-   * @param   useOnePercentBackgroundCorrection flag if one percent background
-   *                       correction should be used.
-   */
+  * @brief Store events within a certain radius of the specified peak centers,
+  * and sum these events to estimate pixel intensities.
+  * @param peak_q_list : List of Q-vectors for peak centers.
+  * @param radius : The maximum distance from a peak's Q-vector, for an
+  * event to be stored in the list associated with that peak.
+  * @param useOnePercentBackgroundCorrection : flag if one percent background
+  * correction should be used. */
   IntegrateQLabEvents(const SlimEvents &peak_q_list, double radius,
                       const bool useOnePercentBackgroundCorrection = true);
 
@@ -107,221 +104,176 @@ public:
   static bool isOrigin(const V3D &q, const double &cellSize);
 
   /**
-   * Add the specified event Q's to lists of events near peaks.  An event is
-   * added to at most one list.  First the nearest h,k,l for that event Q vector
-   * is calculated.  If a peak with that h,k,l was specified when this object
-   * was constructed and if the distance from the specified event Q to that
-   * peak is less than the radius that was specified at construction time,
-   * then the event Q vector is added to the list of event Q vectors for that
-   * peak.
-   * NOTE: The Q-vectors passed in to this method will be shifted by the center
-   *       Q for it's associated peak, so that the list of Q-vectors for a peak
-   *       are centered around 0,0,0 and represent offsets in Q from the peak
-   *       center.
-   *
-   * @param event_qs   List of event Q vectors to add to lists of Q's associated
-   *                   with peaks.
-   * @param hkl_integ
-   */
+   * @brief distribute the events among the cells of the partitioned QLab
+   * space.
+   * @details Given QLab partitioned into a cubic lattice with unit cell of
+   * certain size, assign each event to one particular cell depending on its
+   * QLab vector.
+   * @param event_qs : List of SlimEvent objects to be distributed */
   void addEvents(SlimEvents const &event_qs);
 
   /**
-   * Integrate the events around the specified peak Q-vector.  The principal
-   * axes of the events near this Q-vector and the standard deviations in the
-   * directions of these principal axes determine ellipsoidal regions
-   * for integrating the peak and estimating the background.  Alternatively,
-   * if peak and background radii are specified, then those will be used for
-   * half the major axis length of the ellipsoids, and the other axes of the
-   * ellipsoids will be set proportionally, based on the standard deviations.
-   *
-   * @param E1Vec               Vector of values for calculating edge of
-   * detectors
-   * @param peak_q              The Q-vector for the peak center.
-   * @param specify_size        If true the integration will be done using the
-   *                            ellipsoids with major axes determined by the
-   *                            peak, back_inner and back_outer radii
-   *                            parameters.  If false, the integration will be
-   *                            done using a peak region with major axis chosen
-   *                            so that it covers +- three standard deviations
-   *                            of the data in each direction.  In this case,
-   *                            the background ellipsoidal shell is chosen to
-   *                            have the same VOLUME as the peak ellipsoid, and
-   *                            to use the peak ellipsoid for the inner
-   *                            radius.
-   * @param peak_radius         Size of half the major axis of the ellipsoidal
-   *                            peak region.
-   * @param back_inner_radius   Size of half the major axis of the INNER
-   *                            ellipsoidal boundary of the background region
-   * @param back_outer_radius   Size of half the major axis of the OUTER
-   *                            ellipsoidal boundary of the background region
-   *
-   * @param axes_radii          The radii used for integration in the
-   *                            directions of the three principal axes.
-   * @param inti                Returns the net integrated intensity
-   * @param sigi                Returns an estimate of the standard deviation
-   *                            of the net integrated intensity
-   *
-   */
+   * @brief Integrate the events around the specified peak QLab vector.
+   * @detail The principal axes of the events near this Q-vector
+   * and the standard deviations in the directions of these principal
+   * axes determine ellipsoidal regions for integrating the peak and
+   * estimating the background.  Alternatively, if peak and background
+   * radii are specified, then those will be used for half the major
+   * axis length of the ellipsoids, and the other axes of the ellipsoids
+   * will be set proportionally, based on the standard deviations.
+   * @param E1Vec : Vector of values for calculating edge of detectors
+   * @param peak_q : The QLab-vector for the peak center.
+   * @param specify_size : If true the integration will be done using the
+   * ellipsoids with major axes determined by the peak, back_inner
+   * and back_outer radii parameters. If false, the integration will be
+   * done using a peak region with major axis chosen so that it
+   * covers +- three standard deviations of the data in each direction. In
+   * this case, the background ellipsoidal shell is chosen to have the
+   * same VOLUME as the peak ellipsoid, and to use the peak ellipsoid
+   * for the inner radius.
+   * @param peak_radius : Size of half the major axis of the ellipsoidal
+   * peak region.
+   * @param back_inner_radius : Size of half the major axis of the INNER
+   * ellipsoidal boundary of the background region
+   * @param back_outer_radius : Size of half the major axis of the OUTER
+   * ellipsoidal boundary of the background region
+   * @param axes_radii : The radii used for integration in the directions
+   * of the three principal axes.
+   * @param inti : (output) collects the net integrated intensity
+   * @param sigi : (output) collects an estimate of the standard deviation
+   * of the net integrated intensity */
   PeakShape_const_sptr ellipseIntegrateEvents(
       const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
       double peak_radius, double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
 
+  /**
+  * @brief Assign events to each of the cells occupied by events.
+  * @details Iterate over each QLab cell containing a peak and accumulate the
+  * list of events for the cell and for the first-neighbor cells into a
+  * single list of events. The QLab vectors for this events are shifted
+  * by the QLab vector of the peak. */
   void populateCellsWithPeaks();
 
 private:
   /**
-   * Calculate the number of events in an ellipsoid centered at 0,0,0 with
-   * the three specified axes and the three specified sizes in the direction
-   * of those axes.  NOTE: The three axes must be mutually orthogonal unit
-   *                       vectors.
-   *
-   * @param  events      List of 3D events centered at 0,0,0
-   * @param  directions  List of 3 orthonormal directions for the axes of
-   *                     the ellipsoid.
-   * @param  sizes       List of three values a,b,c giving half the length
-   *                     of the three axes of the ellisoid.
-   * @return Then number of events that are in or on the specified ellipsoid.
-   */
+   * @brief Number of events in an ellipsoid.
+   * @detail The ellipsoid is centered at 0,0,0 with the three specified
+   * axes and the three specified sizes in the direction of those axes.
+   * NOTE: The three axes must be mutually orthogonal unit vectors.
+   * @param events : List of SlimEvents centered at 0,0,0
+   * @param directions : List of 3 orthonormal directions for the axes of
+   * the ellipsoid.
+   * @param sizes : List of three values a,b,c giving half the length
+   * of the three axes of the ellisoid.
+   * @return number of events and estimated error */
   static std::pair<double, double>
   numInEllipsoid(SlimEvents const &events, std::vector<V3D> const &directions,
                  std::vector<double> const &sizes);
 
   /**
-   * Calculate the number of events in an ellipsoid centered at 0,0,0 with
-   * the three specified axes and the three specified sizes in the direction
-   * of those axes.  NOTE: The three axes must be mutually orthogonal unit
-   *                       vectors.
-   *
-   * @param  events      List of 3D events centered at 0,0,0
-   * @param  directions  List of 3 orthonormal directions for the axes of
-   *                     the ellipsoid.
-   * @param  sizes       List of three values a,b,c giving half the length
-   *                     of the three axes of the ellisoid.
-   * @param  sizesIn       List of three values a,b,c giving half the length
-   *                     of the three inner axes of the ellisoid.
-   * @param  useOnePercentBackgroundCorrection  flag if one percent background
-   correction should be used.
-   * @return Then number of events that are in or on the specified ellipsoid.
-   */
+   * @brief Number of events in an ellipsoid with background correction.
+   * @detail The ellipsoid is centered at 0,0,0 with the three specified
+   * axes and the three specified sizes in the direction of those axes.
+   * NOTE: The three axes must be mutually orthogonal unit vectors.
+   * @param events : List of 3D events centered at 0,0,0
+   * @param directions : List of 3 orthonormal directions for the axes of
+   * the ellipsoid.
+   * @param sizes : List of three values a,b,c giving half the length
+   * of the three axes of the ellisoid.
+   * @param sizesIn : List of three values a,b,c giving half the length
+   * of the three inner axes of the ellisoid.
+   * @param useOnePercentBackgroundCorrection : flag if one percent background
+   * correction should be used.
+   * @return number of events and estimated error */
   static std::pair<double, double> numInEllipsoidBkg(
       SlimEvents const &events, std::vector<V3D> const &directions,
       std::vector<double> const &sizes, std::vector<double> const &sizesIn,
       const bool useOnePercentBackgroundCorrection);
 
   /**
-   *  Given a list of events, associated with a particular peak
-   *  and already SHIFTED to be centered at (0,0,0), calculate the 3x3
-   *  covariance matrix for finding the principal axes of that
-   *  local event data.  Only events within the specified radius
-   *  of (0,0,0) will be used.
-   *
-   *  The covariance matrix can be easily constructed. X, Y, Z of each peak
-   *position are the variables we wish to determine
-   *  the covariance. The mean position in each dimension has already been
-   *calculated on subtracted, since this corresponds to the centre position of
-   *each
-   *  peak, which we knew aprori. The expected values of each correlation test
-   *X,X X,Y X,Z e.t.c form the elements of this 3 by 3 matrix, but since the
-   *  probabilities are equal, we can remove them from the sums of the expected
-   *values, and simply divide by the number of events for each matrix element.
-   *  Note that the diagonal elements form the variance X,X, Y,Y, Z,Z
-   *
-   *  @param events    Vector of V3D objects containing the
-   *                   Q vectors for a peak, with mean at (0,0,0).
-   *  @param matrix    A 3x3 matrix that will be filled out with
-   *                   the covariance matrix for the list of
-   *                   events.
-   *  @param radius    Only events within this radius of the
-   *                   peak center (0,0,0) will be used for
-   *                   calculating the covariance matrix.
-   */
+   * @brief 3x3 covariance matrix of a list of SlimEvent objects
+   * @detail the purpose of the covariance matrix is to find the principal axes
+   * of the SlimeEvents, associated with a particular peak. Their QLab vectors
+   * are already shifted by the QLab vector of the peak. Only events within
+   * the specified distance from the peak (here at Q=[0,0,0]) will be used.
+   * The covariance matrix can be easily constructed. X, Y, Z of each peak
+   * position are the variables we wish to determine the covariance. The mean
+   * position in each dimension has already been calculated on subtracted,
+   * since this corresponds to the QLab vector peak. The expected values
+   * of each correlation test X,X X,Y X,Z e.t.c form the elements of this
+   * 3x3 matrix, but since the  probabilities are equal, we can remove them
+   * from the sums of the expected values, and simply divide by the number
+   * of events for each matrix element. Note that the diagonal elements
+   * form the variance X,X, Y,Y, Z,Z
+   * @param events : SlimEvents associated to one peak
+   * @param matrix : (output) 3x3 covariance matrix
+   * @param radius : Only events within this distance radius of the
+   * peak (here at Q=[0,0,0]) are used for calculating the covariance matrix.*/
   static void makeCovarianceMatrix(SlimEvents const &events,
                                    Kernel::DblMatrix &matrix, double radius);
 
   /**
-   *  Calculate the eigen vectors of a 3x3 real symmetric matrix using the GSL.
-   *
-   *  @param cov_matrix     3x3 real symmetric matrix.
-   *  @param eigen_vectors  The eigen vectors for the matrix are returned
-   *                        in this list.
-   *  @param eigen_values   3 eigenvalues of matrix
+   * @brief Eigen vectors of a 3x3 real symmetric matrix using the GSL.
+   * @param cov_matrix : 3x3 real symmetric matrix.
+   * @param eigen_vectors : (output) returned eigen vectors
+   * @param eigen_values : (output) three eigenvalues
    */
   static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,
                               std::vector<V3D> &eigen_vectors,
                               std::vector<double> &eigen_values);
 
   /**
-   * Add an event to the appropriate vector of events for the closest h,k,l,
-   * if it is within the required radius of the corresponding peak in the
-   * PeakQMap.
-   *
-   * NOTE: The event passed in may be modified by this method.  In particular,
-   * if it corresponds to one of the specified peak_qs, the corresponding peak q
-   * will be subtracted from the event and the event will be added to that
-   * peak's vector in the event_lists map.
-   *
-   * @param event_Q      The Q-vector for the event that may be added to the
-   *                     event_lists map, if it is close enough to some peak
-   * @param hkl_integ
-   */
+   * @brief assign an event to one cell of the partitioned QLab space.
+   * @param event : SlimEvent to be assigned */
   void addEvent(const SlimEvent event);
 
   /**
-   * Integrate a list of events, centered about (0,0,0) given the principal
-   * axes for the events and the standard deviations in the the directions
-   * of the principal axes.
-   *
-   * @param E1Vec             Vector of values for calculating edge of detectors
-   * @param peak_q            The Q-vector for the peak center.
-   * @param ev_list             List of events centered at (0,0,0) for a
-   *                            particular peak.
-   * @param directions          The three principal axes of the list of events
-   * @param sigmas              The standard deviations of the events in the
-   *                            directions of the three principal axes.
-   * @param specify_size        If true the integration will be done using the
-   *                            ellipsoids with major axes determined by the
-   *                            peak, back_inner and back_outer radii
-   *                            parameters.  If false, the integration will be
-   *                            done using a peak region with major axis chosen
-   *                            so that it covers +- three standard deviations
-   *                            of the data in each direction.  In this case,
-   *                            the background ellipsoidal shell is chosen to
-   *                            have the same VOLUME as the peak ellipsoid, and
-   *                            to use the peak ellipsoid for the inner
-   *                            radius.
-   * @param peak_radius         Size of half the major axis of the ellipsoidal
-   *                            peak region.
-   * @param back_inner_radius   Size of half the major axis of the INNER
-   *                            ellipsoidal boundary of the background region
-   * @param back_outer_radius   Size of half the major axis of the OUTER
-   *                            ellipsoidal boundary of the background region
-   *
-   * @param axes_radii          The radii used for integration in the
-   *                            directions of the three principal axes.
-   * @param inti                Returns the net integrated intensity
-   * @param sigi                Returns an estimate of the standard deviation
-   *                            of the net integrated intensity
-   *
-   */
-  std::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
-  ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D const &peak_q,
-                         SlimEvents const &ev_list,
-                         std::vector<V3D> const &directions,
+   * @brief Integrate a list of events associated to one peak.
+   * @detail The QLab vector of the events are shifted by the QLab vector
+   * of the peak. Spatial distribution of the events in QLab space is
+   * described with principal axes of the ellipsoid, as well as the
+   * standard deviations in the the directions of the principal axes.
+   * @param E1Vec : Vector of values for calculating edge of detectors
+   * @param peak_q : The Q-vector for the peak center.
+   * @param ev_list : List of events centered around the peak (here with
+   * Q=[0,0,0]).
+   * @param directions : The three principal axes of the list of events
+   * @param sigmas : The standard deviations of the events in the
+   * directions of the three principal axes.
+   * @param specify_size : If true the integration will be done using the
+   * ellipsoids with major axes determined by the peak, back_inner and
+   * back_outer radii parameters. If false, the integration will be done
+   * using a peak region with major axis chosen so that it covers +- three
+   * standard deviations of the data in each direction. In this case, the
+   * background ellipsoidal shell is chosen to have the same VOLUME as the
+   * peak ellipsoid, and to use the peak ellipsoid for the inner radius.
+   * @param peak_radius : Size of half the major axis of the ellipsoid
+   * @param back_inner_radius : Size of half the major axis of the INNER
+   * ellipsoidal boundary of the background region
+   * @param back_outer_radius : Size of half the major axis of the OUTER
+   * ellipsoidal boundary of the background region
+   * @param axes_radii : The radii used for integration in the directions
+   * of the three principal axes.
+   * @param inti : (output) net integrated intensity
+   * @param sigi : (output) estimate of the standard deviation the intensity */
+  PeakShapeEllipsoid_const_sptr ellipseIntegrateEvents(
+      const std::vector<V3D> &E1Vec, V3D const &peak_q,
+      SlimEvents const &ev_list, std::vector<V3D> const &directions,
                          std::vector<double> const &sigmas, bool specify_size,
                          double peak_radius, double back_inner_radius,
                          double back_outer_radius,
                          std::vector<double> &axes_radii, double &inti,
                          double &sigi);
 
-  /** Calculate if this Q is on a detector
-   * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
-   * If dv.norm<integration_radius, one of the detector trajectories on the edge
-   *is too close to the peak
-   * This method is applied to all masked pixels. If there are masked pixels
-   *trajectories inside an integration volume, the peak must be rejected.
-   *
-   * @param E1Vec          Vector of values for calculating edge of detectors
+  /**
+   * @brief Calculate if this Q is on a detector
+   * @detail The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
+   * If dv.norm<integration_radius, one of the detector trajectories on the
+   * edge is too close to the peak. This method is applied to all masked
+   * pixels. If there are masked pixels trajectories inside an integration
+   * volume, the peak must be rejected.
+   * @param E1Vec : Vector of values for calculating edge of detectors
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
