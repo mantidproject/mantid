@@ -299,7 +299,9 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
     // no background removal for this spectra as it does not have a detector or
     // other reason
     if (m_pgLog)
-      m_pgLog->debug() << " Can not remove background for the spectra with number (id)" << nHist;
+      m_pgLog->debug()
+          << " Can not remove background for the spectra with number (id)"
+          << nHist;
   }
 }
 
