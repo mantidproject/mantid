@@ -65,3 +65,6 @@ New Additions in Workbench:
       applications, elements of the GUI similar to the
       :ref:`WorkbenchWorkspaceToolbox` and :ref:`WorkbenchAlgorithmToolbox` are
       usually on the left-hand side of the window.
+    * **Workspace calculator** plugin has been added to the workbench, it allows
+      to perform binary operations on chosen workspaces with an option of simultaneous
+      scaling.

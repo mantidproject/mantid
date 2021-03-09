@@ -90,6 +90,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
+        self.workspacecalculator = None
         self.editor = None
         self.algorithm_selector = None
         self.plot_selector = None
@@ -179,6 +180,11 @@ class MainWindow(QMainWindow):
         # set the link between the algorithm and workspace widget
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
             self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
+
+        from workbench.plugins.workspacecalculatorwidget import WorkspaceCalculatorWidget
+        self.workspacecalculator = WorkspaceCalculatorWidget(self)
+        self.workspacecalculator.register_plugin()
+        self.widgets.append(self.workspacecalculator)
 
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
@@ -470,12 +476,13 @@ class MainWindow(QMainWindow):
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
+        workspacecalculator = self.workspacecalculator
         default_layout = {
             'widgets': [
                 # column 0
                 [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
-                [[editor, ipython]],
+                [[editor, ipython], [workspacecalculator]],
                 # column 2
                 [[logmessages]]
             ],
@@ -486,7 +493,7 @@ class MainWindow(QMainWindow):
             ],  # column 2 width
             'height-fraction': [
                 [0.5, 0.5],  # column 0 row heights
-                [1.0],  # column 1 row heights
+                [0.9, 0.1],  # column 1 row heights
                 [1.0]
             ]  # column 2 row heights
         }
