@@ -90,6 +90,13 @@ def __get_regions(x, y, limit=500):
     return regions
 
 
+def __get_bad_counts(y, mean, band=0.01):
+    # Counts pixels in y that are outside of +/- mean*band
+    top = mean + mean * band
+    bot = mean - mean * band
+    return len(y[(y > top) | (y < bot)])
+
+
 def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
            xmin: float=np.nan, xmax: float=np.nan, horiz_markers=[]):
     TOLERANCE_COLOR = 'w'  # color to mark the area within tolerance
@@ -399,6 +406,7 @@ def plot_peakd(wksp, peak_positions):
     ax.set_prop_cycle(color=colormap_as_plot_color(len(peaks), cmap=plt.get_cmap("jet")))
 
     regions = []
+    region_cnts = []
 
     # Plot data for each peak position
     for peak in peaks:
@@ -425,6 +433,7 @@ def plot_peakd(wksp, peak_positions):
             for region in regions:
                 ax.axvline(x=region[0])
                 ax.axvline(x=region[1])
+                region_cnts.append(__get_bad_counts(y[region[0]:region[1]], means[len(means)-1]))
 
         ax.plot(x, y, marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
