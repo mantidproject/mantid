@@ -124,7 +124,7 @@ public:
   }
 
   void test_ConstructorFromLeanElasticPeak() {
-    const LeanElasticPeak &lpeak = p(V3D(1, 2, 3));
+    const LeanElasticPeak &lpeak = LeanElasticPeak(V3D(1, 2, 3));
 
     TS_ASSERT_THROWS_NOTHING(Peak p(lpeak, inst));
   }
