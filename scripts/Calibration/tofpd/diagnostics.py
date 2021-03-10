@@ -77,16 +77,25 @@ def _get_difc_ws(wksp, instr_ws=None):
     return difc_ws
 
 
-def __get_regions(x, y, limit=500):
+def __get_regions(x, y, limit=500, mask=None):
     # Returns a list of tuples with start,stop indices
     # indicating a detector region
     regions = []
 
-    bounds = np.argwhere(np.isnan(y)).flatten()
+    # Get regions of nans to find gaps in data to determine bounds of regions
+    # Add in masked regions if provided
+    if mask is not None:
+        masky = mtd[str(mask)].extractY().flatten()
+        bounds = np.argwhere((np.isnan(y)) & (masky==0)).flatten()
+    else:
+        bounds = np.argwhere(np.isnan(y)).flatten()
     for ind in range(len(bounds)):
         if ind + 1 < len(bounds) and bounds[ind + 1] - bounds[ind] > 1:
             if x[bounds[ind + 1]] - x[bounds[ind]] > limit:
-                regions.append((x[bounds[ind]], x[bounds[ind + 1]]))
+                # Exclude regions that are invalid
+                if np.isnan(np.sum(y[int(bounds[ind])+1:int(bounds[ind+1])])):
+                    continue
+                regions.append((int(x[bounds[ind]]), int(x[bounds[ind + 1]])))
     return regions
 
 
@@ -378,7 +387,7 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     return mtd[outputname]
 
 
-def plot_peakd(wksp, peak_positions):
+def plot_peakd(wksp, peak_positions, mask_ws=None):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -395,6 +404,9 @@ def plot_peakd(wksp, peak_positions):
 
     if not mtd.doesExist(str(wksp)):
         raise ValueError("Could not find provided workspace in ADS")
+
+    if mask_ws:
+        mask_ws = mtd[str(mask_ws)]
 
     fig, ax = plt.subplots()
     ax.set_xlabel("det IDs")
@@ -429,7 +441,7 @@ def plot_peakd(wksp, peak_positions):
 
         # Draw vertical lines between detector regions
         if not regions:
-            regions = __get_regions(x, y, limit=200)
+            regions = __get_regions(x, y, limit=200, mask=mask_ws)
             for region in regions:
                 ax.axvline(x=region[0])
                 ax.axvline(x=region[1])
