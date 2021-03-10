@@ -30,7 +30,7 @@
 // The below can be replaced with global_control when all platforms
 // have 2019U4
 #if __has_include("tbb_stddef.h")
-# include "tbb_stddef.h"
+#include "tbb_stddef.h"
 #if TBB_INTERFACE_VERSION_MAJOR < 11
 #include "tbb/task_scheduler_init.h"
 #include <thread>
@@ -39,11 +39,10 @@
 #include "tbb/global_control.h"
 #endif
 // check version export
-# elif __has_include("tbb/version.h")
+#elif __has_include("tbb/version.h")
 #define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"
-# endif
-
+#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
