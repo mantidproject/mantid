@@ -38,8 +38,7 @@
 #define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"
 #endif
-// check version export
-#elif __has_include("tbb/version.h")
+#else
 #define TBB_HAS_GLOBAL_CONTROL
 #include "tbb/global_control.h"
 #endif
