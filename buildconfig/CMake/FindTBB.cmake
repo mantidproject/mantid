@@ -348,6 +348,8 @@ if(NOT TBB_VERSION)
     string(REGEX REPLACE
           ".*#define TBB_COMPATIBLE_INTERFACE_VERSION ([0-9]+).*" "\\1"
           TBB_COMPATIBLE_INTERFACE_VERSION "${TBB_VERSION_CONTENTS}")
+  else()
+    message(WARNING "Cannot establish TBB version information. Expected files missing.")
   endif()
  
 endif()
