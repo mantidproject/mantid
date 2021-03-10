@@ -153,9 +153,9 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
  *  @param warningDets A vector containing the det ids where an uncalibrated
  * value was used in the situation where some dets have calibrated values and
  * some don't
- *  @return tuple containing the average constants
+ *  @return map containing the average constants
  */
-std::tuple<double, double, double>
+UnitParametersMap
 SpectrumInfo::diffractometerConstants(const size_t index,
                                       std::vector<detid_t> &warningDets) const {
   if (m_detectorInfo.isScanning()) {
@@ -185,37 +185,40 @@ SpectrumInfo::diffractometerConstants(const size_t index,
   // if no calibration is found then return difc only based on the average
   // of the detector L2 and twoThetas.
   if (calibratedDets.size() == 0) {
-    return {0., difcUncalibrated(index), 0.};
+    return {{UnitParams::difc, difcUncalibrated(index)}};
   }
-  return {difa / static_cast<double>(spectrumDefinition(index).size()),
-          difc / static_cast<double>(spectrumDefinition(index).size()),
-          tzero / static_cast<double>(spectrumDefinition(index).size())};
+  return {{UnitParams::difa,
+           difa / static_cast<double>(spectrumDefinition(index).size())},
+          {UnitParams::difc,
+           difc / static_cast<double>(spectrumDefinition(index).size())},
+          {UnitParams::tzero,
+           tzero / static_cast<double>(spectrumDefinition(index).size())}};
 }
 
-/** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of detectors
- * associated with this spectrum. Use calibrated values where possible, filling
- * in with uncalibrated values where they're missing
+/** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of
+ * detectors associated with this spectrum. Use calibrated values where
+ * possible, filling in with uncalibrated values where they're missing
  *  @param index Index of the spectrum that constants are required for
- *  @return tuple containing the average constants
+ *  @return map containing the average constants
  */
-std::tuple<double, double, double>
+UnitParametersMap
 SpectrumInfo::diffractometerConstants(const size_t index) const {
   std::vector<int> warningDets;
   return diffractometerConstants(index, warningDets);
 }
 
-/** Calculate average uncalibrated DIFC value of detectors associated with this
- * spectrum
+/** Calculate average uncalibrated DIFC value of detectors associated with
+ * this spectrum
  *  @param index Index of the spectrum that DIFC is required for
  *  @return The average DIFC
  */
 double SpectrumInfo::difcUncalibrated(const size_t index) const {
-  // calculate difc based on the average of the detector L2 and twoThetas. This
-  // will be different to the average of the per detector difcs. This is for
-  // backwards compatibility because Mantid always used to calculate spectrum
-  // level difc's this way
-  return 1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
-                  l1(), l2(index), twoTheta(index), 0.);
+  // calculate difc based on the average of the detector L2 and twoThetas.
+  // This will be different to the average of the per detector difcs. This is
+  // for backwards compatibility because Mantid always used to calculate
+  // spectrum level difc's this way
+  return 1. / Kernel::Units::tofToDSpacingFactor(l1(), l2(index),
+                                                 twoTheta(index), 0.);
 }
 
 /** Get the detector values relevant to unit conversion for a workspace index
@@ -225,9 +228,9 @@ double SpectrumInfo::difcUncalibrated(const size_t index) const {
  * @param signedTheta :: Return twotheta with sign or without
  * @param wsIndex :: The workspace index
  * @param pmap :: a map containing values for conversion parameters that are
-required by unit classes to perform their conversions eg efixed. It can contain
-values on the way in if a look up isn't desired here eg if value supplied in
-parameters to the calling algorithm
+required by unit classes to perform their conversions eg efixed. It can
+contain values on the way in if a look up isn't desired here eg if value
+supplied in parameters to the calling algorithm
  */
 void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
                                      const Kernel::Unit &outputUnit,
@@ -247,7 +250,6 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
         pmap[UnitParams::twoTheta] = twoTheta(wsIndex);
     } catch (const std::runtime_error &e) {
       g_log.warning(e.what());
-      pmap[UnitParams::twoTheta] = std::numeric_limits<double>::quiet_NaN();
     }
     if (emode != Kernel::DeltaEMode::Elastic &&
         pmap.find(UnitParams::efixed) == pmap.end()) {
@@ -265,17 +267,13 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
 
     std::vector<detid_t> warnDetIds;
     try {
-      std::vector<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer",
-                                                 "Empty"};
+      std::set<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer",
+                                              "Empty"};
       if ((emode == Kernel::DeltaEMode::Elastic) &&
-          (std::find(diffConstUnits.begin(), diffConstUnits.end(),
-                     inputUnit.unitID()) != diffConstUnits.end()) &&
-          (std::find(diffConstUnits.begin(), diffConstUnits.end(),
-                     outputUnit.unitID()) != diffConstUnits.end())) {
-        auto [difa, difc, tzero] = diffractometerConstants(wsIndex, warnDetIds);
-        pmap[UnitParams::difa] = difa;
-        pmap[UnitParams::difc] = difc;
-        pmap[UnitParams::tzero] = tzero;
+          (diffConstUnits.count(inputUnit.unitID()) ||
+           diffConstUnits.count(outputUnit.unitID()))) {
+        auto diffConstsMap = diffractometerConstants(wsIndex, warnDetIds);
+        pmap.insert(diffConstsMap.begin(), diffConstsMap.end());
         if (warnDetIds.size() > 0) {
           createDetectorIdLogMessages(warnDetIds, wsIndex);
         }
@@ -315,7 +313,8 @@ void SpectrumInfo::createDetectorIdLogMessages(
       detIDstring);
 }
 
-/// Returns true if the spectrum is associated with detectors in the instrument.
+/// Returns true if the spectrum is associated with detectors in the
+/// instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.

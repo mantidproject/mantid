@@ -15,6 +15,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -335,8 +336,8 @@ std::tuple<double, double, double> DetectorInfo::diffractometerConstants(
 }
 
 double DetectorInfo::difcUncalibrated(const size_t index) const {
-  return 1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
-                  l1(), l2(index), twoTheta(index), 0.);
+  return 1. / Kernel::Units::tofToDSpacingFactor(l1(), l2(index),
+                                                 twoTheta(index), 0.);
 }
 
 std::pair<double, double>

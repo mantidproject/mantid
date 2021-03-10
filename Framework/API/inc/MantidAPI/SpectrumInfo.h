@@ -72,11 +72,10 @@ public:
   double azimuthal(const size_t index) const;
   std::pair<double, double> geographicalAngles(const size_t index) const;
   Kernel::V3D position(const size_t index) const;
-  std::tuple<double, double, double>
+  Kernel::UnitParametersMap
   diffractometerConstants(const size_t index,
                           std::vector<detid_t> &uncalibratedDets) const;
-  std::tuple<double, double, double>
-  diffractometerConstants(const size_t index) const;
+  Kernel::UnitParametersMap diffractometerConstants(const size_t index) const;
   double difcUncalibrated(const size_t index) const;
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;

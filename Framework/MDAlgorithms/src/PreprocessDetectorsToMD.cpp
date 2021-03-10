@@ -279,11 +279,11 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     Azimuthal[liveDetectorsCount] = azim;
 
     std::vector<int> warningDets;
-    auto [difaValue, difcValue, tzeroValue] =
-        spectrumInfo.diffractometerConstants(i, warningDets);
-    DIFA[liveDetectorsCount] = difaValue;
-    DIFC[liveDetectorsCount] = difcValue;
-    TZERO[liveDetectorsCount] = tzeroValue;
+    auto diffConsts = spectrumInfo.diffractometerConstants(i, warningDets);
+    // map will create an entry with zero value if not present already
+    DIFA[liveDetectorsCount] = diffConsts[Kernel::UnitParams::difa];
+    DIFC[liveDetectorsCount] = diffConsts[Kernel::UnitParams::difc];
+    TZERO[liveDetectorsCount] = diffConsts[Kernel::UnitParams::tzero];
 
     double sPhi = sin(polar);
     double ez = cos(polar);
