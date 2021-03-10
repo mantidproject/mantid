@@ -325,7 +325,7 @@ if(NOT TBB_VERSION)
       "${TBB_INCLUDE_DIR}/tbb/tbb_stddef.h"
       TBB_VERSION_CONTENTS
       LIMIT 2048)
-  elseif(EXISTS "{TBB_INCLUDE_DIR}/tbb/version.h")
+  elseif(EXISTS "${TBB_INCLUDE_DIR}/tbb/version.h")
     #only read the start of the file
     file(READ
       "${TBB_INCLUDE_DIR}/tbb/version.h"
