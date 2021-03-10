@@ -174,14 +174,9 @@ SpectrumInfo::diffractometerConstants(const size_t index,
                        uncalibratedDets.end());
   };
   // if no calibration is found then return difc only based on the average
-  // of the detector L2 and twoThetas. This will be different to the average
-  // of the per detector difcs. This is for backwards compatibility because
-  // Mantid always used to calculate spectrum level difc's this way
+  // of the detector L2 and twoThetas.
   if (calibratedDets.size() == 0) {
-    return {0.,
-            1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
-                     l1(), l2(index), twoTheta(index), 0.),
-            0.};
+    return {0., difcUncalibrated(index), 0.};
   }
   return {difa / static_cast<double>(spectrumDefinition(index).size()),
           difc / static_cast<double>(spectrumDefinition(index).size()),
@@ -206,19 +201,12 @@ SpectrumInfo::diffractometerConstants(const size_t index) const {
  *  @return The average DIFC
  */
 double SpectrumInfo::difcUncalibrated(const size_t index) const {
-  double difc{0.0};
-  if (m_detectorInfo.isScanning()) {
-    throw std::runtime_error("Retrieval of diffractometer constants not "
-                             "implemented for scanning instrument");
-  }
-  auto spectrumDef = checkAndGetSpectrumDefinition(index);
-  std::vector<size_t> detectorIndicesOnly;
-  std::transform(spectrumDef.begin(), spectrumDef.end(),
-                 std::back_inserter(detectorIndicesOnly),
-                 [](auto const &pair) { return pair.first; });
-  for (const auto &detIndex : detectorIndicesOnly)
-    difc += m_detectorInfo.difcUncalibrated(detIndex);
-  return difc / static_cast<double>(spectrumDefinition(index).size());
+  // calculate difc based on the average of the detector L2 and twoThetas. This
+  // will be different to the average of the per detector difcs. This is for
+  // backwards compatibility because Mantid always used to calculate spectrum
+  // level difc's this way
+  return 1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
+                  l1(), l2(index), twoTheta(index), 0.);
 }
 
 /** Get the detector values relevant to unit conversion for a workspace index
@@ -268,11 +256,13 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit,
 
     std::vector<detid_t> warnDetIds;
     try {
+      std::vector<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer",
+                                                 "Empty"};
       if ((emode == Kernel::DeltaEMode::Elastic) &&
-          ((inputUnit.unitID() == "dSpacing") ||
-           (inputUnit.unitID() == "Empty") ||
-           (outputUnit.unitID() == "dSpacing") ||
-           (outputUnit.unitID() == "Empty"))) {
+          (std::find(diffConstUnits.begin(), diffConstUnits.end(),
+                     inputUnit.unitID()) != diffConstUnits.end()) &&
+          (std::find(diffConstUnits.begin(), diffConstUnits.end(),
+                     outputUnit.unitID()) != diffConstUnits.end())) {
         auto [difa, difc, tzero] = diffractometerConstants(wsIndex, warnDetIds);
         pmap[UnitParams::difa] = difa;
         pmap[UnitParams::difc] = difc;
