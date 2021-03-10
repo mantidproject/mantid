@@ -13,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -674,7 +675,11 @@ public:
             outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
-    TS_ASSERT(std::isnan(output->x(0)[0]));
+
+    // conversion fails due to error in two theta calculation and leaves
+    // spectrum masked and zeroed
+    TS_ASSERT_EQUALS(output->y(0)[0], 0);
+    TS_ASSERT(output->spectrumInfo().isMasked(0));
   }
 
   void setup_Event() {

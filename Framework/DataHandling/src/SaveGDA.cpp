@@ -175,8 +175,8 @@ void SaveGDA::exec() {
     std::vector<double> tofScaled;
     tofScaled.reserve(x.size());
     Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.toTOF(x, std::vector<double>{}, 0.,
-                       Kernel::DeltaEMode::Elastic,
+    std::vector<double> yunused;
+    dSpacingUnit.toTOF(x, yunused, 0., Kernel::DeltaEMode::Elastic,
                        {{Kernel::UnitParams::difa, bankCalibParams.difa},
                         {Kernel::UnitParams::difa, bankCalibParams.difc},
                         {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
