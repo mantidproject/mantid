@@ -236,8 +236,12 @@ def __calculate_difference(obs, exp: np.ndarray):
     return np.abs(obs_ndarray - exp) / exp
 
 
+def __calculate_dspacing(obs):
+    return np.asarray(list(obs.values())[1:-2])
+
+
 def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
-    if infotype not in ['strain', 'difference']:
+    if infotype not in ['strain', 'difference', 'dspacing']:
         raise ValueError('Do not know how to calculate "{}"'.format(infotype))
 
     wksp = mtd[str(wksp)]
@@ -262,6 +266,10 @@ def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
             output.setY(i, __calculate_strain(wksp.row(i), peaks))
         elif infotype == 'difference':
             output.setY(i, __calculate_difference(wksp.row(i), peaks))
+        elif infotype == 'dspacing':
+            output.setY(i, __calculate_dspacing(wksp.row(i)))
+        else:
+            raise ValueError(f'Do not know how to calculate {infotype}')
 
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, output)
