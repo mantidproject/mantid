@@ -8,19 +8,41 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
+
+namespace {
+// static logger object
+Logger g_log("Unit");
+
+bool ParamPresent(const UnitParametersMap &params, UnitParams param) {
+  return params.find(param) != params.end();
+}
+
+bool ParamPresentAndSet(const UnitParametersMap *params, UnitParams param,
+                        double &var) {
+  auto it = params->find(param);
+  if (it != params->end()) {
+    var = it->second;
+    return true;
+  } else {
+    return false;
+  }
+}
+} // namespace
 
 /**
  * Default constructor
  * Gives the unit an empty UnitLabel
  */
-Unit::Unit() : initialized(false), l1(0), l2(0), emode(0) {}
+Unit::Unit() : initialized(false), l1(0), emode(0) {}
 
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
@@ -309,14 +331,12 @@ const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
 void Wavelength::validateUnitParams(const int emode,
                                     const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::l2)) {
     throw std::runtime_error("An l2 value must be supplied in the extra "
                              "parameters when initialising " +
                              this->unitID() + " for conversion via TOF");
   }
-  it = params.find(UnitParams::efixed);
-  if ((emode != 0) && (it == params.end())) {
+  if ((emode != 0) && (!ParamPresent(params, UnitParams::efixed))) {
     throw std::runtime_error("An efixed value must be supplied in the extra "
                              "parameters when initialising " +
                              this->unitID() + " for conversion via TOF");
@@ -325,19 +345,14 @@ void Wavelength::validateUnitParams(const int emode,
 
 void Wavelength::init() {
   // ------------ Factors to convert TO TOF ---------------------
+  double l2 = 0.0;
   double ltot = 0.0;
   double TOFisinMicroseconds = 1e6;
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params->find(UnitParams::efixed);
-  if (it != m_params->end()) {
-    efixed = it->second;
-  }
-  it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
+  ParamPresentAndSet(m_params, UnitParams::efixed, efixed);
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
 
   if (emode == 1) {
     ltot = l2;
@@ -439,10 +454,8 @@ Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
 }
 
 void Energy::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
+  double l2 = 0.0;
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
   {
     const double TOFinMicroseconds = 1e6;
     factorTo = sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * (l1 + l2) * TOFinMicroseconds;
@@ -498,8 +511,7 @@ Energy_inWavenumber::Energy_inWavenumber() : Unit(), factorTo(DBL_MIN), factorFr
 
 void Energy_inWavenumber::validateUnitParams(const int,
                                              const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::l2)) {
     throw std::runtime_error("An l2 value must be supplied in the extra "
                              "parameters when initialising " +
                              this->unitID() + " for conversion via TOF");
@@ -507,10 +519,8 @@ void Energy_inWavenumber::validateUnitParams(const int,
 }
 
 void Energy_inWavenumber::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
+  double l2 = 0.0;
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
   {
     const double TOFinMicroseconds = 1e6;
     factorTo =
@@ -551,27 +561,51 @@ Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this)
  *
  * Conversion uses Bragg's Law: 2d sin(theta) = n * lambda
  */
-DECLARE_UNIT(dSpacing)
 
-const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
+const double CONSTANT = (PhysicalConstants::h * 1e10) /
+                        (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
-dSpacing::dSpacing()
-    : Unit(), difa(0), difc(DBL_MIN), tzero(0),
-      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {
-  const double factor = 2.0 * M_PI;
-  addConversion("MomentumTransfer", factor, -1.0);
-  addConversion("QSquared", (factor * factor), -2.0);
+/**
+ * Calculate and return conversion factor from tof to d-spacing.
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param offset
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta, const double offset) {
+  if (offset <=
+      -1.) // not physically possible, means result is negative d-spacing
+  {
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset
+        << " which converts data to negative d-spacing\n";
+    throw std::logic_error(msg.str());
+  }
+
+  auto sinTheta = std::sin(twoTheta / 2);
+
+  const double numerator = (1.0 + offset);
+  sinTheta *= (l1 + l2);
+
+  return (numerator * CONSTANT) / sinTheta;
 }
 
-void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::difc);
-  if (it == params.end()) {
-    throw std::runtime_error(
-        "A difc value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
-  }
-  if (it->second < 0.) {
+dSpacingBase::dSpacingBase()
+    : Unit(), difa(0), difc(DBL_MIN), tzero(0),
+      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {}
+
+void dSpacingBase::validateUnitParams(const int,
+                                      const UnitParametersMap &params) {
+  double difc;
+  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+    if (!ParamPresent(params, UnitParams::twoTheta) ||
+        (!ParamPresent(params, UnitParams::l2)))
+      throw std::runtime_error("A difc value or L2\two theta must be supplied "
+                               "in the extra parameters when initialising " +
+                               this->unitID() + " for conversion via TOF");
+  } else if (difc < 0.) {
     throw std::runtime_error(
         "A positive difc value must be supplied in the extra parameters when "
         "initialising " +
@@ -579,35 +613,44 @@ void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
   }
 }
 
-void dSpacing::init() {
+void dSpacingBase::init() {
   // First the crux of the conversion
   difa = 0.;
   difc = 0.;
   tzero = 0.;
-  auto it = m_params->find(UnitParams::difc);
-  if (it != m_params->end()) {
-    difc = it->second;
-  }
-  it = m_params->find(UnitParams::difa);
-  if (it != m_params->end()) {
-    difa = it->second;
-  }
-  it = m_params->find(UnitParams::tzero);
-  if (it != m_params->end()) {
-    tzero = it->second;
+  ParamPresentAndSet(m_params, UnitParams::difa, difa);
+  ParamPresentAndSet(m_params, UnitParams::tzero, tzero);
+
+  if (!ParamPresentAndSet(m_params, UnitParams::difc, difc)) {
+    // also support inputs as L2, two theta
+    double l2;
+    if (ParamPresentAndSet(m_params, UnitParams::l2, l2)) {
+      double twoTheta;
+      if (ParamPresentAndSet(m_params, UnitParams::twoTheta, twoTheta)) {
+        if (difa != 0.) {
+          g_log.warning("Supplied difa ignored");
+          difa = 0.;
+        }
+        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta, 0.);
+        if (tzero != 0.) {
+          g_log.warning("Supplied tzero ignored");
+          tzero = 0.;
+        }
+      }
+    }
   }
 }
 
-double dSpacing::singleToTOF(const double x) const {
+double dSpacingBase::singleToTOF(const double x) const {
   if (!isInitialized())
-    throw std::runtime_error(
-        "dSpacing::singleToTOF called before object has been initialized.");
+    throw std::runtime_error("dSpacingBase::singleToTOF called before object "
+                             "has been initialized.");
   return difa * x * x + difc * x + tzero;
 }
-double dSpacing::singleFromTOF(const double tof) const {
+double dSpacingBase::singleFromTOF(const double tof) const {
   if (!isInitialized())
-    throw std::runtime_error(
-        "dSpacing::singleFromTOF called before object has been initialized.");
+    throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
+                             "has been initialized.");
   // handle special cases first...
   if (tof == tzero) {
     if (difa != 0)
@@ -622,8 +665,8 @@ double dSpacing::singleFromTOF(const double tof) const {
         "Cannot convert to d spacing. Quadratic doesn't have real roots");
   }
   if ((difa > 0) && ((tzero - tof) > 0)) {
-    throw std::runtime_error(
-        "Cannot convert to d spacing. Quadratic doesn't have a positive root");
+    throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
+                             "have a positive root");
   }
   // and then solve quadratic using Muller formula
   double sqrtTerm;
@@ -638,7 +681,7 @@ double dSpacing::singleFromTOF(const double tof) const {
   else
     return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
-double dSpacing::conversionTOFMin() const {
+double dSpacingBase::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
   if (difa > 0) {
     // min of the quadratic is at d=-difc/(2*difa)
@@ -652,7 +695,7 @@ double dSpacing::conversionTOFMin() const {
     return TOFmin;
   }
 }
-double dSpacing::conversionTOFMax() const {
+double dSpacingBase::conversionTOFMax() const {
   // quadratic only has a max if difa is negative
   if (difa < 0) {
     return std::min(DBL_MAX, tzero - difc * difc / (4 * difa));
@@ -666,8 +709,8 @@ double dSpacing::conversionTOFMax() const {
   }
 }
 
-double dSpacing::calcTofMin(const double difc, const double difa,
-                            const double tzero, const double tofmin) {
+double dSpacingBase::calcTofMin(const double difc, const double difa,
+                                const double tzero, const double tofmin) {
   Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
                                    {Kernel::UnitParams::difc, difc},
                                    {Kernel::UnitParams::tzero, tzero}};
@@ -675,13 +718,23 @@ double dSpacing::calcTofMin(const double difc, const double difa,
   return std::max(conversionTOFMin(), tofmin);
 }
 
-double dSpacing::calcTofMax(const double difc, const double difa,
-                            const double tzero, const double tofmax) {
+double dSpacingBase::calcTofMax(const double difc, const double difa,
+                                const double tzero, const double tofmax) {
   Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
                                    {Kernel::UnitParams::difc, difc},
                                    {Kernel::UnitParams::tzero, tzero}};
   initialize(-1, 0, params);
   return std::min(conversionTOFMax(), tofmax);
+}
+
+DECLARE_UNIT(dSpacing)
+
+const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
+
+dSpacing::dSpacing() : dSpacingBase() {
+  const double factor = 2.0 * M_PI;
+  addConversion("MomentumTransfer", factor, -1.0);
+  addConversion("QSquared", (factor * factor), -2.0);
 }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
@@ -736,15 +789,13 @@ void dSpacingPerpendicular::validateUnitParams(
 
 void dSpacingPerpendicular::validateUnitParams(
     const int, const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::l2)) {
     throw std::runtime_error(
         "A l2 value must be supplied in the extra parameters when "
         "initialising " +
         this->unitID() + " for conversion via TOF");
   }
-  it = params.find(UnitParams::twoTheta);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::twoTheta)) {
     throw std::runtime_error(
         "A two theta value must be supplied in the extra parameters when "
         "initialising " +
@@ -753,14 +804,9 @@ void dSpacingPerpendicular::validateUnitParams(
 }
 
 void dSpacingPerpendicular::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
-  it = m_params->find(UnitParams::twoTheta);
-  if (it != m_params->end()) {
-    twoTheta = it->second;
-  }
+  double l2 = 0.0;
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
+  ParamPresentAndSet(m_params, UnitParams::twoTheta, twoTheta);
   factorTo =
       (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
 
@@ -804,7 +850,7 @@ DECLARE_UNIT(MomentumTransfer)
 
 const UnitLabel MomentumTransfer::label() const { return Symbol::InverseAngstrom; }
 
-MomentumTransfer::MomentumTransfer() : dSpacing() {
+MomentumTransfer::MomentumTransfer() : dSpacingBase() {
   addConversion("QSquared", 1.0, 2.0);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -1.0);
@@ -813,18 +859,18 @@ MomentumTransfer::MomentumTransfer() : dSpacing() {
 }
 
 double MomentumTransfer::singleToTOF(const double x) const {
-  return dSpacing::singleToTOF(2. * M_PI / x);
+  return dSpacingBase::singleToTOF(2. * M_PI / x);
 }
 //
 double MomentumTransfer::singleFromTOF(const double tof) const {
-  return 2. * M_PI / dSpacing::singleFromTOF(tof);
+  return 2. * M_PI / dSpacingBase::singleFromTOF(tof);
 }
 
 double MomentumTransfer::conversionTOFMin() const {
-  return dSpacing::conversionTOFMin();
+  return dSpacingBase::conversionTOFMin();
 }
 double MomentumTransfer::conversionTOFMax() const {
-  return dSpacing::conversionTOFMax();
+  return dSpacingBase::conversionTOFMax();
 }
 
 Unit *MomentumTransfer::clone() const { return new MomentumTransfer(*this); }
@@ -879,9 +925,9 @@ void DeltaE::validateUnitParams(const int emode,
     throw std::invalid_argument(
         "emode must be equal to 1 or 2 for energy transfer calculation");
   }
-  auto it = params.find(UnitParams::efixed);
   // Efixed must be set to something
-  if (it == params.end()) {
+  double efixed;
+  if (!ParamPresentAndSet(&params, UnitParams::efixed, efixed)) {
     if (emode == 1) { // direct, efixed=ei
       throw std::invalid_argument(
           "efixed must be set for energy transfer calculation");
@@ -890,11 +936,10 @@ void DeltaE::validateUnitParams(const int emode,
           "efixed must be set for energy transfer calculation");
     }
   }
-  if (it->second <= 0) {
+  if (efixed <= 0) {
     throw std::runtime_error("efixed must be greater than zero");
   }
-  it = params.find(UnitParams::l2);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::l2)) {
     throw std::runtime_error(
         "A l2 value must be supplied in the extra parameters when "
         "initialising " +
@@ -903,14 +948,9 @@ void DeltaE::validateUnitParams(const int emode,
 }
 
 void DeltaE::init() {
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
-  it = m_params->find(UnitParams::efixed);
-  if (it != m_params->end()) {
-    efixed = it->second;
-  }
+  double l2 = 0.0;
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
+  ParamPresentAndSet(m_params, UnitParams::efixed, efixed);
   const double TOFinMicroseconds = 1e6;
   factorTo = sqrt(PhysicalConstants::NeutronMass / (2.0 * PhysicalConstants::meV)) * TOFinMicroseconds;
   if (emode == 1) {
@@ -1008,8 +1048,8 @@ Unit *DeltaE::clone() const { return new DeltaE(*this); }
 /* Energy Transfer in units of wavenumber
  * =====================================================================================================
  *
- * This is identical to the above (Energy Transfer in meV) with one division by
- *meVtoWavenumber.
+ * This is identical to the above (Energy Transfer in meV) with one division
+ *by meVtoWavenumber.
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
 
@@ -1083,14 +1123,12 @@ Momentum::Momentum()
 
 void Momentum::validateUnitParams(const int emode,
                                   const UnitParametersMap &params) {
-  auto it = params.find(UnitParams::l2);
-  if (it == params.end()) {
+  if (!ParamPresent(params, UnitParams::l2)) {
     throw std::runtime_error(
         "An l2 value must be supplied in the extra parameters when "
         "initialising momentum for conversion via TOF");
   }
-  it = params.find(UnitParams::efixed);
-  if ((emode != 0) && (it == params.end())) {
+  if ((emode != 0) && (!ParamPresent(params, UnitParams::efixed))) {
     throw std::runtime_error(
         "An efixed value must be supplied in the extra parameters when "
         "initialising momentum for conversion via TOF");
@@ -1099,20 +1137,14 @@ void Momentum::validateUnitParams(const int emode,
 
 void Momentum::init() {
   // ------------ Factors to convert TO TOF ---------------------
+  double l2 = 0.0;
   double ltot = 0.0;
   double TOFisinMicroseconds = 1e6;
   double toAngstroms = 1e10;
   sfpTo = 0.0;
 
-  auto it = m_params->find(UnitParams::l2);
-  if (it != m_params->end()) {
-    l2 = it->second;
-  }
-
-  it = m_params->find(UnitParams::efixed);
-  if (it != m_params->end()) {
-    efixed = it->second;
-  }
+  ParamPresentAndSet(m_params, UnitParams::l2, l2);
+  ParamPresentAndSet(m_params, UnitParams::efixed, efixed);
 
   if (emode == 1) {
     ltot = l2;
@@ -1203,10 +1235,7 @@ const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
-  auto it = m_params->find(UnitParams::efixed);
-  if (it != m_params->end()) {
-    efixed = it->second;
-  }
+  ParamPresentAndSet(m_params, UnitParams::efixed, efixed);
   // Efixed must be set to something
   if (efixed == 0.0)
     throw std::invalid_argument("efixed must be set for spin echo length calculation");
@@ -1256,10 +1285,7 @@ const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 SpinEchoTime::SpinEchoTime() : Wavelength(), efixed(0.) {}
 
 void SpinEchoTime::init() {
-  auto it = m_params->find(UnitParams::efixed);
-  if (it != m_params->end()) {
-    efixed = it->second;
-  }
+  ParamPresentAndSet(m_params, UnitParams::efixed, efixed);
   // Efixed must be set to something
   if (efixed == 0.0)
     throw std::invalid_argument("efixed must be set for spin echo time calculation");

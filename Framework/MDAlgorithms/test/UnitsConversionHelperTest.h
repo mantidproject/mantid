@@ -45,6 +45,7 @@ public:
     auto pSourceWSUnit = UnitFactory::Instance().create("Wavelength");
     auto pWSUnit = UnitFactory::Instance().create("MomentumTransfer");
     double L1(10), L2(10), TwoTheta(0.1), efix(10);
+
     int emode(0);
     TS_ASSERT_THROWS_NOTHING(
         pWSUnit->initialize(L1, emode,

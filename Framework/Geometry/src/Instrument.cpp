@@ -20,6 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 
 #include <memory>
 #include <nexus/NeXusFile.hpp>
@@ -1290,20 +1291,9 @@ namespace Conversion {
  * @param offset
  * @return
  */
-double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
-  if (offset <= -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
-
-  auto sinTheta = std::sin(twoTheta / 2);
-
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-
-  return (numerator * CONSTANT) / sinTheta;
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta, const double offset) {
+  return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
 }
 
 } // namespace Conversion

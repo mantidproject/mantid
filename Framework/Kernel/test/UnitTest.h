@@ -562,6 +562,17 @@ public:
     TS_ASSERT(yy == y)
   }
 
+  void testdSpacing_toTOFWithL2TwoTheta() {
+    std::vector<double> x(1, 1.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(d.toTOF(
+        x, y, 1.0, 1, {{UnitParams::l2, 1.0}, {UnitParams::twoTheta, 1.0}}))
+    TS_ASSERT_DELTA(x[0], 484.7537, 0.0001)
+    TS_ASSERT(yy == y)
+  }
+
   void testdSpacing_toTOFWithDIFATZERO() {
     std::vector<double> x(1, 2.0), y(1, 1.0);
     std::vector<double> yy = y;

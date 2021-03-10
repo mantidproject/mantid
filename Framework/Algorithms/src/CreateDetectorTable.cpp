@@ -300,11 +300,12 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
         if (isMonitor) {
           colValues << 0. << 0. << 0. << 0.;
         } else {
-          auto [difaValue, difcValue, tzeroValue] =
-              spectrumInfo.diffractometerConstants(wsIndex);
+          auto diffConsts = spectrumInfo.diffractometerConstants(wsIndex);
           auto difcValueUncalibrated = spectrumInfo.difcUncalibrated(wsIndex);
-          colValues << difaValue << difcValue << difcValueUncalibrated
-                    << tzeroValue;
+          // map will create an entry with zero value if not present already
+          colValues << diffConsts[UnitParams::difa]
+                    << diffConsts[UnitParams::difc] << difcValueUncalibrated
+                    << diffConsts[UnitParams::tzero];
         }
       }
     } catch (const std::exception &) {

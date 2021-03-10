@@ -25,6 +25,8 @@ namespace Kernel {
 
 enum class UnitParams { l2, twoTheta, efixed, delta, difa, difc, tzero };
 
+// list of parameter names and values - some code may relay on map behaviour
+// where [] creates element with value 0 if param name not present
 using UnitParametersMap = std::unordered_map<UnitParams, double>;
 
 /** The base units (abstract) class. All concrete units should inherit from
@@ -232,12 +234,12 @@ protected:
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
   double l1;
-  /// l2 ::       The sample-detector distance (in metres)
-  double l2;
   /// emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect
   /// geometry)
   int emode;
   /// additional parameters
+  /// l2 :: distance from sample to detector (in metres)
+  /// twoTheta :: scattering angle in radians
   /// efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
   /// difc :: diffractometer constant DIFC
   const UnitParametersMap *m_params;
@@ -407,18 +409,15 @@ protected:
   double factorFrom; ///< Constant factor for from conversion
 };
 
-//=================================================================================================
-/// d-Spacing in Angstrom
-class MANTID_KERNEL_DLL dSpacing : public Unit {
-public:
-  const std::string unitID() const override; ///< "dSpacing"
-  const std::string caption() const override { return "d-Spacing"; }
-  const UnitLabel label() const override;
+MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2,
+                                             const double twoTheta,
+                                             const double offset);
 
+class MANTID_KERNEL_DLL dSpacingBase : public Unit {
+public:
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
-  Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
   double calcTofMin(const double difc, const double difa, const double tzero,
@@ -427,7 +426,7 @@ public:
                     const double tofmax = 0.);
 
   /// Constructor
-  dSpacing();
+  dSpacingBase();
 
 protected:
   void validateUnitParams(const int emode,
@@ -437,6 +436,20 @@ protected:
   double tzero;
   double valueThatGivesLargestTOF;
   double valueThatGivesSmallestTOF;
+};
+
+//=================================================================================================
+/// d-Spacing in Angstrom
+class MANTID_KERNEL_DLL dSpacing : public dSpacingBase {
+public:
+  const std::string unitID() const override; ///< "dSpacing"
+  const std::string caption() const override { return "d-Spacing"; }
+  const UnitLabel label() const override;
+
+  Unit *clone() const override;
+
+  /// Constructor
+  dSpacing();
 };
 
 //=================================================================================================
@@ -469,7 +482,7 @@ protected:
 
 //=================================================================================================
 /// Momentum Transfer in Angstrom^-1
-class MANTID_KERNEL_DLL MomentumTransfer : public dSpacing {
+class MANTID_KERNEL_DLL MomentumTransfer : public dSpacingBase {
 public:
   const std::string unitID() const override; ///< "MomentumTransfer"
   const std::string caption() const override { return "q"; }
