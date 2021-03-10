@@ -8,6 +8,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
