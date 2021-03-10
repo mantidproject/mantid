@@ -207,9 +207,8 @@ class DrillExportModel:
                               .format(outputWs, algo))
                 continue
 
-            for wsName in mtd.getObjectNames():
-                if ((workspaceName not in wsName)
-                        or (isinstance(mtd[wsName], WorkspaceGroup))):
+            for wsName in mtd.getObjectNames(contain=workspaceName):
+                if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
 
                 filename = exportPath + wsName \
