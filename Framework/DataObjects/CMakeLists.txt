@@ -177,6 +177,7 @@ set(TEST_FILES
     NoShapeTest.h
     OffsetsWorkspaceTest.h
     PeakColumnTest.h
+    LeanElasticPeakColumnTest.h
     PeakNoShapeFactoryTest.h
     PeakShapeEllipsoidFactoryTest.h
     PeakShapeEllipsoidTest.h
