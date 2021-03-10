@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>521</width>
+    <height>709</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTreeView" name="fileTree">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>501</width>
+     <height>601</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="targetType">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>401</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="accumulate">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>70</y>
+     <width>101</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Accumulate</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="repositoryPath">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>401</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="instrumentSelector">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>241</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="previewType">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>40</y>
+     <width>241</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="browse">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>10</y>
+     <width>91</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Browse</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
