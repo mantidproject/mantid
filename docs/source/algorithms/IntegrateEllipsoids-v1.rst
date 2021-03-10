@@ -12,10 +12,9 @@ Description
 Overview and similar algorithms
 ###############################
 
-This algorithm will integrate disjoint single crystal Bragg peaks and satellites
-(See :ref:`ModulatedStructure <ModulatedStructure>`)
+This algorithm will integrate disjoint single crystal Bragg peaks
 by summing the number of raw or weighted events in a 3D ellipsoidal peak region in
-reciprocal space (See *IntegrateInHKL* option for integrating in HKL)
+reciprocal space (QLab frame)
 and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
@@ -33,9 +32,6 @@ from :ref:`algm-IntegratePeaksMD` in several critical ways.
 -  This algorithm includes an option to automatically choose the size of
    the ellipsoidal regions based on the statistics of the set of events
    near the peak.
--  This algorithm only applies to peaks with integral HKL values and as
-   currently implemented it cannot be used to integrate ellipsoidal
-   regions at other locations in reciprocal space.
 
 The algorithm calculates the three principal axes of the events near a
 peak, and uses the standard deviations in the directions of the
@@ -49,19 +45,18 @@ Explanation of Inputs
    :ref:`EventWorkspace <EventWorkspace>`
    with an X-axis in time-of-flight, as loaded from a
    NeXus event file. This algorithm maps the events to reciprocal space
-   using *PeaksWorkwpace* with indexed peaks to determine the parameters
-   of the transformation into the reciprocal space (:ref:`UB matrix <Lattice>`)
+   using *PeaksWorkspace* with indexed peaks to determine the parameters
+   of the transformation into the reciprocal space
 
 -  The peaks to be integrated are are also obtained from a *PeaksWorkspace*. The
    peaks must be indexed, and any peaks indexed as (0,0,0) will be
-   ignored. The HKL values for valid peaks should all be integers, to
-   make this check for unindexed peaks reliable.
+   ignored.
 
 -  Only events that are near a peak are considered when constructing the
    ellipsoids. The *RegionRadius* specifies the maximum distance from the
-   peak center to an event in reciprocal space, for that event to used.
+   peak center to an event in reciprocal space, for that event to be used.
    See the figure below. Also, each event will be counted for at most
-   one peak, the one with the nearest HKL value. The RegionRadius should
+   one peak, the one with the nearest QLab value. The RegionRadius should
    be specified to be just slightly larger than the expected peak region
    to avoid overlap with other peaks, and to avoid including excessive
    background. As the size of the *RegionRadius* increases, the ellipsoids
@@ -93,20 +88,18 @@ Explanation of Inputs
    :math:`0 < PeakSize \leq BackgroundInnerSize` and
    :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
--  If *UseOnePercentBackgroundCorrection* is enabled, then the top 1% of the background events are removed so that there are no intensity spikes near the edges. This is enabled by default.
+-  If *UseOnePercentBackgroundCorrection* is enabled, then the top 1% of the background
+   events are removed so that there are no intensity spikes near the edges. This
+   is enabled by default.
 
--  *AdaptiveQMultiplier* can be used with *SpecifySize* for the radius to vary as a function of the modulus of Q. If the *AdaptiveQBackground* option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
+-  *AdaptiveQMultiplier* can be used with *SpecifySize* for the radius to vary as
+   a function of the modulus of Q. If the *AdaptiveQBackground* option is set to True,
+   the background radius also changes so each peak has a different integration
+   radius. Q includes the 2*pi factor.
 
    -  PeakRadius + AdaptiveQMultiplier * **|Q|**
    -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**
    -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
-
--  If the *IntegrateInHKL* option is selected, then HKL space is used for
-   the integration instead of reciprocal space.  This option may be useful
-   for large unit cells where the radius of integration needs to be very different
-   for peaks at low Q and high Q.  With this option the *PeakSize*,
-   *BackgroundInnerSize* and *BackgroundOuterSize* are specified in HKL and they
-   just need to be smaller than 0.5.
 
 -  The integrated intensities will be set in the specified
    *OutputWorkspace*. If this is different from the input *PeaksWorkspace*,
@@ -119,15 +112,14 @@ Detailed Algorithm Description
 This algorithm will integrate a list of indexed single-crystal
 diffraction peaks from a *PeaksWorkspace*, using events from an
 ( :ref:`EventWorkspace <EventWorkspace>` ).
-The indexed peaks are first used to determine a :ref:`UB matrix <Lattice>`.
-The inverse of that :ref:`UB matrix <Lattice>` is then used to form lists of
-events that are close to peaks in reciprocal space. An event will be
-added to the list of events for a peak provided that the fractional
-:math:`h,k,l` value of that event (obtained by applying UB-inverse to the
-:math:`Q` -vector) is closer to the :math:`h,k,l` of that peak,
-than to the :math:`h,k,l` of any
-other peak AND the :math:`Q` -vector for that event is within the specified
-radius of the :math:`Q` -vector for that peak. This technique makes the algorithm suitable for nuclear peaks, but may not be suitable for magnetic peaks.
+
+Given and input **RegionRadius**, QLab space is partitioned into a
+cubic lattice with unit cell of size **RegionRadius**. This guarantees
+that no two peaks can occupy the same cell. Events are distributed
+among the cells according to their QLab Q-vectors. Later, each of the cells
+containing one peak is inspected for the events it contains, as well as
+its 27 fist-neighbor cells. The events thus collected are inspected to
+determine which lie within **RegionRadius** of the peak Q-vector.
 
 When the lists of events near the peaks have been built, the three
 principal axes of the set of events near each peak are found, and the
@@ -172,15 +164,21 @@ ellipsoid. The outer surface of the background ellipsoidal shell is an
 ellipsoidal surface with the same relative axis lengths as the inner
 surface.
 
-This algorithm uses principle component analysis to determine the principle axis for each peak. For the event list (QLab) associated with each peak, the algorithm determines a covariance matrix, and uses that to establish eigenvectors corresponding to the principle axis (all orthogonal). The sizes of each principle axis are used define the region of which events will be counted/integrated from those already associated with each peak.
+This algorithm uses principle component analysis to determine the principle
+axis for each peak. For the event list (QLab) associated with each peak,
+the algorithm determines a covariance matrix, and uses that to establish
+eigenvectors corresponding to the principle axis (all orthogonal).
+The sizes of each principle axis are used define the region of which events
+will be counted/integrated from those already associated with each peak.
 
 IntegrateIfOnEdge=False option
-###################################
+##############################
 
-Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument.
-e.g. For CORELLI, tubes 1 and 16, and pixels 0 and 255.
-Q in the lab frame for every peak is calculated, call it C
-For every point on the edge, the trajectory in reciprocal space is a straight line, going through:
+Edges for each bank or pack of tubes of the instrument are defined by masking
+the edges in the PeaksWorkspace instrument. e.g. For CORELLI, tubes 1 and 16,
+and pixels 0 and 255. Q in the lab frame for every peak is calculated, call it C
+For every point on the edge, the trajectory in reciprocal space is a straight line,
+going through:
 
 :math:`\vec{O}=(0,0,0)`
 
@@ -202,12 +200,13 @@ If:
 :math:`\left|dv\right|<PeakRadius`
 
 for the integration, one of the detector trajectories on the edge is too close to the peak
-This method is also applied to all masked pixels.  If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
-If there are masked pixel trajectories inside the background volume, the background events are scaled by estimating the volume of the ellipsoid
-on the detector.
+This method is also applied to all masked pixels. If there are masked pixels
+trajectories inside an integration volume, the peak must be rejected.
+If there are masked pixel trajectories inside the background volume, the background
+events are scaled by estimating the volume of the ellipsoid on the detector.
 
 Sigma from the background
-###################################
+#########################
 The sigma from the background could be too small because the background contains
 events from other peaks. In an effort to reduce this, all the background events
 are sorted and the top 1% are removed. Note that this behaviour is optional and
