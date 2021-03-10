@@ -119,7 +119,7 @@ def plot2d(workspace, tolerance: float=0.001, peakpositions: np.ndarray=DIAMOND,
     return fig, fig.axes
 
 
-def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,1)):
+def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1)):
     """
     Plots the percent change in DIFC between calib_new and calib_old
     :param calib_new: New calibration, can be filename, SpecialWorkspace2D, or calibration table (TableWorkspace)
@@ -163,7 +163,7 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
         else:
             theta_array.append(theta)
             phi_array.append(phi)
-            percent = 100.0 * np.sum(delta.dataY(det_id)) / np.sum(ws_old.dataY(det_id))
+            percent = 100.0 * np.sum(np.abs(delta.dataY(det_id))) / np.sum(ws_old.dataY(det_id))
             value_array.append(percent)
 
     # Use the largest solid angle for circle radius
@@ -209,8 +209,8 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(-1,
     ax.add_collection(mp)
     cb = fig.colorbar(p, ax=ax)
     cb.set_label('delta DIFC (%)')
-    ax.set_xlabel(r'polar ($\phi$)')
-    ax.set_ylabel(r'azimuthal ($\theta$)')
+    ax.set_xlabel(r'in-plane polar (deg)')
+    ax.set_ylabel(r'azimuthal (deg)')
 
     # Find bounds based on detector pos
     xmin = np.min(theta_array)
