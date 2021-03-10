@@ -126,6 +126,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
   this->setWavelength(m_Wavelength);
   this->setHKL(HKL);
 }
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  *
@@ -175,6 +176,14 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
     this->m_detIDs = peak->m_detIDs;
   }
+}
+
+//----------------------------------------------------------------------------------------------
+Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak,
+           const Geometry::Instrument_const_sptr &inst,
+           boost::optional<double> detectorDistance) {
+  this->setInstrument(inst);
+  this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
