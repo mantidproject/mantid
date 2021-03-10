@@ -68,6 +68,7 @@ Improvements
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` now update attached UB matrix with given lattice constants (optional).
 - :ref:`FilterPeaks <algm-FilterPeaks>` now can select banks in addition to filtering by values.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to make use of the multiple goniometers add to :ref:`Run <mantid.api.Run>` and `goniometerIndex` add to MDEvents.
+- :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` calculates intensity for satellite peaks with fractional HKL
 
 Instrument Updates
 ##################
