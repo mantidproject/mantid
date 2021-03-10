@@ -123,6 +123,12 @@ public:
     check_Contributing_Detectors(p2, expectedIDs);
   }
 
+  void test_ConstructorFromLeanElasticPeak() {
+    const LeanElasticPeak &lpeak = p(V3D(1, 2, 3));
+
+    TS_ASSERT_THROWS_NOTHING(Peak p(lpeak, inst));
+  }
+
   void test_copyConstructor() {
     Peak p(inst, 10102, 2.0);
     p.setHKL(1, 2, 3);
