@@ -1458,7 +1458,7 @@ void FitPeaks::calculateFittedPeaks(
 }
 namespace {
 double estimateBackgroundParameters(
-    const Histogram &histogram, const std::pair<double, double> &peak_window,
+    const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
     const API::IBackgroundFunction_sptr &bkgd_function) {
   // for estimating background parameters
   // 0 = constant, 1 = linear
@@ -1471,14 +1471,10 @@ double estimateBackgroundParameters(
   const auto nParams = bkgd_function->nParams();
   for (size_t i = 0; i < nParams; ++i)
     bkgd_function->setParameter(i, 0.);
-  // find the indices of the window boundaries
-  const auto &vecX = histogram.points();
-  const size_t istart = findXIndex(vecX, peak_window.first);
-  const size_t istop = findXIndex(vecX, peak_window.second, istart);
 
   // 10 is a magic number that worked in a variety of situations
-  const size_t iback_start = istart + 10;
-  const size_t iback_stop = istop - 10;
+  const size_t iback_start = peak_window.first + 10;
+  const size_t iback_stop = peak_window.second - 10;
 
   double chisq{DBL_MAX}; // how well the fit worked
 
@@ -1489,9 +1485,9 @@ double estimateBackgroundParameters(
     double bkgd_a0{0.}; // will be fit
     double bkgd_a1{0.}; // may be fit
     double bkgd_a2{0.}; // will be ignored
-    HistogramData::estimateBackground(POLYNOMIAL_ORDER, histogram, istart,
-                                      istop, iback_start, iback_stop, bkgd_a0,
-                                      bkgd_a1, bkgd_a2, chisq);
+    HistogramData::estimateBackground(
+        POLYNOMIAL_ORDER, histogram, peak_window.first, peak_window.second,
+        iback_start, iback_stop, bkgd_a0, bkgd_a1, bkgd_a2, chisq);
     // update the background function with the result
     bkgd_function->setParameter(0, bkgd_a0);
     if (nParams > 1)
@@ -1518,24 +1514,15 @@ double estimateBackgroundParameters(
  * @return :: obervation success or not
  */
 int FitPeaks::estimatePeakParameters(
-    const Histogram &histogram, const std::pair<double, double> &peak_window,
+    const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
     const API::IPeakFunction_sptr &peakfunction,
     const API::IBackgroundFunction_sptr &bkgdfunction,
     bool observe_peak_width) {
 
-  // get the range of start and stop to construct a function domain
-  const auto &vector_x = histogram.points();
-  auto start_iter =
-      std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.first);
-  auto stop_iter =
-      std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.second);
-  size_t start_index = static_cast<size_t>(start_iter - vector_x.begin());
-  size_t stop_index = static_cast<size_t>(stop_iter - vector_x.begin());
-
   // calculate background
-  if (start_index == stop_index)
-    throw std::runtime_error("Range size is zero in estimatePeakParameters");
-  FunctionDomain1DVector domain(start_iter, stop_iter);
+  const auto &vector_x = histogram.points();
+  FunctionDomain1DVector domain(vector_x.cbegin() + peak_window.first,
+                                vector_x.cbegin() + peak_window.second);
   FunctionValues bkgd_values(domain);
   bkgdfunction->function(domain, bkgd_values);
 
@@ -1544,9 +1531,9 @@ int FitPeaks::estimatePeakParameters(
   double peak_center = peakfunction->centre();
   size_t peak_center_index;
 
-  int result =
-      observePeakCenter(histogram, bkgd_values, start_index, stop_index,
-                        peak_center, peak_center_index, peak_height);
+  int result = observePeakCenter(histogram, bkgd_values, peak_window.first,
+                                 peak_window.second, peak_center,
+                                 peak_center_index, peak_height);
 
   // return if failing to 'observe' peak center
   if (result != GOOD)
@@ -1564,8 +1551,9 @@ int FitPeaks::estimatePeakParameters(
   // Estimate FHWM (peak width)
   if (observe_peak_width &&
       m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
-    const double peak_fwhm = observePeakFwhm(
-        histogram, bkgd_values, peak_center_index, start_index, stop_index);
+    const double peak_fwhm =
+        observePeakFwhm(histogram, bkgd_values, peak_center_index,
+                        peak_window.first, peak_window.second);
     if (peak_fwhm > 0.0) {
       g_log.debug() << "Peak function " << peakfunction->name()
                     << " still set estimated FWHM\n";
@@ -1770,8 +1758,8 @@ FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
   } else {
     // fit peak and background
     cost = fitFunctionSD(fitter, peakfunction, bkgdfunc, m_inputMatrixWS, wi,
-                         fitwindow.first, fitwindow.second,
-                         expected_peak_center, estimate_peak_width, true);
+                         fitwindow, expected_peak_center, estimate_peak_width,
+                         true);
   }
 
   return cost;
@@ -1783,26 +1771,35 @@ FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter,
  * This is the core fitting algorithm to deal with the simplest situation
  * @exception :: Fit.isExecuted is false (cannot be executed)
  */
-double FitPeaks::fitFunctionSD(
-    const IAlgorithm_sptr &fit, const API::IPeakFunction_sptr &peak_function,
-    const API::IBackgroundFunction_sptr &bkgd_function,
-    const API::MatrixWorkspace_sptr &dataws, size_t wsindex, double xmin,
-    double xmax, const double &expected_peak_center, bool estimate_peak_width,
-    bool estimate_background) {
+double
+FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit,
+                        const API::IPeakFunction_sptr &peak_function,
+                        const API::IBackgroundFunction_sptr &bkgd_function,
+                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
+                        const std::pair<double, double> &peak_range,
+                        const double &expected_peak_center,
+                        bool estimate_peak_width, bool estimate_background) {
   std::stringstream errorid;
   errorid << "(WorkspaceIndex=" << wsindex
           << " PeakCentre=" << expected_peak_center << ")";
 
   // generate peak window
-  if (xmin >= xmax) {
+  if (peak_range.first >= peak_range.second) {
     std::stringstream msg;
-    msg << "Invalid peak window: xmin>xmax (" << xmin << ", " << xmax << ")"
-        << errorid.str();
+    msg << "Invalid peak window: xmin>xmax (" << peak_range.first << ", "
+        << peak_range.second << ")" << errorid.str();
     throw std::runtime_error(msg.str());
   }
-  std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
 
+  // determine the peak window in array index
   const auto &histogram = dataws->histogram(wsindex);
+  const auto &vector_x = histogram.points();
+  const auto start_index = findXIndex(vector_x, peak_range.first);
+  const auto stop_index = findXIndex(vector_x, peak_range.second, start_index);
+  if (start_index == stop_index)
+    throw std::runtime_error("Range size is zero in estimatePeakParameters");
+  std::pair<size_t, size_t> peak_window =
+      std::make_pair(start_index, stop_index);
 
   // Estimate background
   if (estimate_background) {
@@ -1831,8 +1828,8 @@ double FitPeaks::fitFunctionSD(
   fit->setProperty("InputWorkspace", dataws);
   fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fit->setProperty("MaxIterations", m_fitIterations); // magic number
-  fit->setProperty("StartX", xmin);
-  fit->setProperty("EndX", xmax);
+  fit->setProperty("StartX", peak_range.first);
+  fit->setProperty("EndX", peak_range.second);
 
   if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
@@ -1969,8 +1966,9 @@ double FitPeaks::fitFunctionHighBackground(
       createMatrixWorkspace(vec_x, vec_y, vec_e);
 
   // Fit peak with background
-  fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0, vec_x.front(),
-                vec_x.back(), expected_peak_center, observe_peak_shape, false);
+  fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
+                {vec_x.front(), vec_x.back()}, expected_peak_center,
+                observe_peak_shape, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +
@@ -1980,7 +1978,7 @@ double FitPeaks::fitFunctionHighBackground(
              high_bkgd_function->getParameter(1));
 
   double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, m_inputMatrixWS,
-                              ws_index, vec_x.front(), vec_x.back(),
+                              ws_index, {vec_x.front(), vec_x.back()},
                               expected_peak_center, false, false);
 
   return cost;
@@ -2251,7 +2249,7 @@ void FitPeaks::getRangeData(size_t iws,
                             std::vector<double> &vec_e) {
 
   // get the original vector of X and determine the start and end index
-  const vector<double> orig_x = m_inputMatrixWS->histogram(iws).x().rawData();
+  const auto &orig_x = m_inputMatrixWS->histogram(iws).x();
   size_t left_index = findXIndex(orig_x, fit_window.first);
   size_t right_index = findXIndex(orig_x, fit_window.second, left_index);
 

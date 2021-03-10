@@ -146,7 +146,7 @@ private:
                        const API::IPeakFunction_sptr &peak_function,
                        const API::IBackgroundFunction_sptr &bkgd_function,
                        const API::MatrixWorkspace_sptr &dataws, size_t wsindex,
-                       double xmin, double xmax,
+                       const std::pair<double, double> &peak_range,
                        const double &expected_peak_center,
                        bool estimate_peak_width, bool estimate_background);
 
@@ -185,7 +185,7 @@ private:
 
   /// Estimate peak parameters by 'observation'
   int estimatePeakParameters(const HistogramData::Histogram &histogram,
-                             const std::pair<double, double> &peak_window,
+                             const std::pair<size_t, size_t> &peak_window,
                              const API::IPeakFunction_sptr &peakfunction,
                              const API::IBackgroundFunction_sptr &bkgdfunction,
                              bool observe_peak_width);
