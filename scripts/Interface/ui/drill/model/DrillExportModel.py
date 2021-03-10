@@ -14,6 +14,7 @@ from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
 import re
+import os
 
 
 class DrillExportModel:
@@ -188,6 +189,8 @@ class DrillExportModel:
             sample (DrillSample): sample to be exported
         """
         exportPath = config.getString("defaultsave.directory")
+        if not exportPath:
+            exportPath = os.getcwd()
         workspaceName = sample.getOutputName()
 
         try:
@@ -211,8 +214,9 @@ class DrillExportModel:
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
 
-                filename = exportPath + wsName \
-                           + RundexSettings.EXPORT_ALGO_EXTENSION[algo]
+                filename = os.path.join(
+                        exportPath,
+                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
                 name = wsName + ":" + filename
                 if wsName not in self._exports:
                     self._exports[wsName] = set()
