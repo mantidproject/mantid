@@ -18,7 +18,6 @@ class IntegrateEllipsoidsTest(MantidSystemTest):
     def runTest(self):
         r"""Calculate intensities for a set of peaks. The first and secon peaks in the
         table corresponds to satellite peak HKL=(1.5, 1.5,0) and main peak (1,1,0)"""
-        open('/tmp/junk1.log', 'w').write(f'Intensities: 0, 0')
         LoadNexus(Filename='TOPAZ_39037_bank29.nxs', OutputWorkspace='events')
         LoadNexus(Filename='TOPAZ_39037_peaks_short.nxs', OutputWorkspace='peaks_input')
         IntegrateEllipsoids(InputWorkspace='events',
@@ -36,6 +35,4 @@ class IntegrateEllipsoidsTest(MantidSystemTest):
 
         table = mtd['peaks_output']
         # intensities for the first two peaks
-        intensities = table.column('Intens')[0:2]
-        open('/tmp/junk2.log', 'w').write(f'Intensities: {intensities}')
         assert_allclose(table.column('Intens')[0:2], [938, 13936], atol=1.0)
