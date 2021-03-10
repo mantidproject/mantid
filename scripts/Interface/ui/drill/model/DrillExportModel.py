@@ -178,40 +178,40 @@ class DrillExportModel:
 
     def run(self, sample):
         """
-        Run the export algorithms on a workspace. If the provided workspace is
-        a groupworkspace, the export algorithms will be run on each member of
-        the group.
+        Run the export algorithms on a sample. For each export algorithm, the
+        function will try to validate the criteria (using _validCriteria()) on
+        the output workspace that corresponds to the sample. If the criteria are
+        valid, the export will be run on all workspaces whose name contains the
+        sample name.
 
         Args:
-            workspaceName (str): name of the workspace
+            sample (DrillSample): sample to be exported
         """
         exportPath = config.getString("defaultsave.directory")
         workspaceName = sample.getOutputName()
 
-        wsNames = list()
-        for wsName in mtd.getObjectNames():
-            if ((workspaceName in wsName)
-                    and (not isinstance(mtd[wsName], WorkspaceGroup))):
-                wsNames.append(wsName)
+        try:
+            outputWsGroup = mtd[workspaceName]
+            names = outputWsGroup.getNames()
+            outputWs = names[0]
+        except:
+            return
 
         tasks = list()
         for algo,active in self._exportAlgorithms.items():
             if not active:
                 continue
-
-            i = 0
-            validCriteria = False
-            while validCriteria is False and i < len(wsNames):
-                validCriteria = self._validCriteria(wsNames[i], algo)
-                i += 1
-
-            if validCriteria is False:
+            if not self._validCriteria(outputWs, algo):
                 logger.notice("Export of sample {} with {} was skipped "
                               "because workspaces are not compatible."
-                              .format(sample, algo))
+                              .format(outputWs, algo))
                 continue
 
-            for wsName in wsNames:
+            for wsName in mtd.getObjectNames():
+                if ((workspaceName not in wsName)
+                        or (isinstance(mtd[wsName], WorkspaceGroup))):
+                    continue
+
                 filename = exportPath + wsName \
                            + RundexSettings.EXPORT_ALGO_EXTENSION[algo]
                 name = wsName + ":" + filename
