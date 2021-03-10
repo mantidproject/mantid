@@ -34,7 +34,7 @@ import importlib.util
 import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
-from mantid.kernel import config, MemoryStats
+from mantid.kernel import config, MemoryStats, ConfigService
 from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
 import platform
@@ -1198,6 +1198,10 @@ class MantidFrameworkConfig:
 
         # Make sure we only save these keys here
         config.reset()
+
+        # With the default facility changed from ISIS to nothing (EMPTY),
+        # the following setting is put in place to avoid failure of tests
+        ConfigService.Instance().setString("default.facility", "ISIS")
 
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
