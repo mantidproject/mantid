@@ -183,16 +183,6 @@ private:
                         const std::vector<double> &vec_y,
                         const std::vector<double> &vec_e);
 
-  /// Esitmate background by 'observation'
-  void estimateBackground(const HistogramData::Histogram &histogram,
-                          const std::pair<double, double> &peak_window,
-                          const API::IBackgroundFunction_sptr &bkgd_function);
-  /// estimate linear background
-  void estimateLinearBackground(const HistogramData::Histogram &histogram,
-                                double left_window_boundary,
-                                double right_window_boundary, double &bkgd_a0,
-                                double &bkgd_a1);
-
   /// Estimate peak parameters by 'observation'
   int estimatePeakParameters(const HistogramData::Histogram &histogram,
                              const std::pair<double, double> &peak_window,

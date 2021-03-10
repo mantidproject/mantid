@@ -211,10 +211,12 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
 
 //----------------------------------------------------------------------------------------------
 namespace {
+
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
  */
-size_t findXIndex(const std::vector<double> &vecx, const double x,
+template <typename vector_like>
+size_t findXIndex(const vector_like &vecx, const double x,
                   const size_t startindex = 0) {
   size_t index;
   if (x <= vecx.front()) {
@@ -222,12 +224,12 @@ size_t findXIndex(const std::vector<double> &vecx, const double x,
   } else if (x >= vecx.back()) {
     index = vecx.size() - 1;
   } else {
-    const auto fiter = lower_bound(vecx.begin() + startindex, vecx.end(), x);
-    if (fiter == vecx.end())
+    const auto fiter = lower_bound(vecx.cbegin() + startindex, vecx.cend(), x);
+    if (fiter == vecx.cend())
       throw runtime_error("It seems impossible to have this value. ");
 
-    index = static_cast<size_t>(fiter - vecx.begin());
-    if (x - vecx[index - 1] < vecx[index] - x)
+    index = static_cast<size_t>(fiter - vecx.cbegin());
+    if (index > 0 && (x - vecx[index - 1] < vecx[index] - x))
       --index;
   }
 
@@ -387,7 +389,7 @@ void FitPeaks::init() {
       "List of tolerance on fitted peak positions against given peak positions."
       "If there is only one value given, then ");
 
-  declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 1.,
+  declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
                   "Minimum peak height such that all the fitted peaks with "
                   "height under this value will be excluded.");
 
@@ -626,9 +628,10 @@ void FitPeaks::processInputFunctions() {
   std::string bkgdname;
   if (bkgdfunctiontype == "Linear")
     bkgdname = "LinearBackground";
-  else if (bkgdfunctiontype == "Flat")
+  else if (bkgdfunctiontype == "Flat") {
+    g_log.warning("There may be problems with Flat background");
     bkgdname = "FlatBackground";
-  else
+  } else
     bkgdname = bkgdfunctiontype;
   m_bkgdFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
       API::FunctionFactory::Instance().createFunction(bkgdname));
@@ -894,8 +897,8 @@ void FitPeaks::processInputPeakTolerance() {
 
   // minimum peak height: set default to zero
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
-  if (isEmpty(m_minPeakHeight) || m_minPeakHeight <= 0.)
-    m_minPeakHeight = 1.;
+  if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
+    m_minPeakHeight = 0.;
 
   return;
 }
@@ -1093,7 +1096,7 @@ void FitPeaks::fitSpectrumPeaks(
 
     // reset the background function
     for (size_t i = 0; i < bkgdfunction->nParams(); ++i)
-      bkgdfunction->setParameter(0, 0.);
+      bkgdfunction->setParameter(i, 0.);
 
     double expected_peak_pos = expected_peak_centers[peak_index];
 
@@ -1386,8 +1389,8 @@ void FitPeaks::calculateFittedPeaks(
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
 
-  size_t num_peakfunc_params = m_peakFunction->nParams();
-  size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
+  const size_t num_peakfunc_params = m_peakFunction->nParams();
+  const size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
   for (auto iws = static_cast<int64_t>(m_startWorkspaceIndex);
@@ -1453,32 +1456,52 @@ void FitPeaks::calculateFittedPeaks(
 
   return;
 }
-
-//----------------------------------------------------------------------------------------------
-/**  Estimate background: There are two methods that will be tried.
- * First, algorithm FindPeakBackground will be tried;
- * If it fails, then a linear background estimator will be called.
- */
-void FitPeaks::estimateBackground(
+namespace {
+double estimateBackgroundParameters(
     const Histogram &histogram, const std::pair<double, double> &peak_window,
     const API::IBackgroundFunction_sptr &bkgd_function) {
+  // for estimating background parameters
+  // 0 = constant, 1 = linear
+  const auto POLYNOMIAL_ORDER = std::min<size_t>(1, bkgd_function->nParams());
+
   if (peak_window.first >= peak_window.second)
     throw std::runtime_error("Invalid peak window");
 
-  // use the simple way to find linear background
-  double bkgd_a0, bkgd_a1;
-  this->estimateLinearBackground(histogram, peak_window.first,
-                                 peak_window.second, bkgd_a0, bkgd_a1);
+  // reset the background function
+  const auto nParams = bkgd_function->nParams();
+  for (size_t i = 0; i < nParams; ++i)
+    bkgd_function->setParameter(i, 0.);
+  // find the indices of the window boundaries
+  const auto &vecX = histogram.points();
+  const size_t istart = findXIndex(vecX, peak_window.first);
+  const size_t istop = findXIndex(vecX, peak_window.second, istart);
 
-  // set result
-  // FIXME - this is not flexible for background other than
-  // flat/linear/quadratic
-  bkgd_function->setParameter(0, bkgd_a0);
-  if (bkgd_function->nParams() > 1)
-    bkgd_function->setParameter(1, bkgd_a1);
-  if (bkgd_function->nParams() > 2)
-    bkgd_function->setParameter(2, 0.);
+  // 10 is a magic number that worked in a variety of situations
+  const size_t iback_start = istart + 10;
+  const size_t iback_stop = istop - 10;
+
+  double chisq{DBL_MAX}; // how well the fit worked
+
+  // use the simple way to find linear background
+  // there aren't enough bins in the window to try to estimate so just leave the
+  // estimate at zero
+  if (iback_start < iback_stop) {
+    double bkgd_a0{0.}; // will be fit
+    double bkgd_a1{0.}; // may be fit
+    double bkgd_a2{0.}; // will be ignored
+    HistogramData::estimateBackground(POLYNOMIAL_ORDER, histogram, istart,
+                                      istop, iback_start, iback_stop, bkgd_a0,
+                                      bkgd_a1, bkgd_a2, chisq);
+    // update the background function with the result
+    bkgd_function->setParameter(0, bkgd_a0);
+    if (nParams > 1)
+      bkgd_function->setParameter(1, bkgd_a1);
+    // quadratic term is always estimated to be zero
+  }
+
+  return chisq;
 }
+} // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Estimate peak profile's parameters values via observation
@@ -1771,13 +1794,19 @@ double FitPeaks::fitFunctionSD(
           << " PeakCentre=" << expected_peak_center << ")";
 
   // generate peak window
+  if (xmin >= xmax) {
+    std::stringstream msg;
+    msg << "Invalid peak window: xmin>xmax (" << xmin << ", " << xmax << ")"
+        << errorid.str();
+    throw std::runtime_error(msg.str());
+  }
   std::pair<double, double> peak_window = std::make_pair(xmin, xmax);
 
   const auto &histogram = dataws->histogram(wsindex);
 
   // Estimate background
   if (estimate_background) {
-    estimateBackground(histogram, peak_window, bkgd_function);
+    estimateBackgroundParameters(histogram, peak_window, bkgd_function);
   }
 
   // Estimate peak profile parameter
@@ -2286,42 +2315,6 @@ void FitPeaks::reduceByBackground(
   }
 
   return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Estimate linear background from observation in a given fit window
- *  This assumes that there are significantly more background bins than peak
- *  bins
- * @param histogram :: Histogram instance
- * @param left_window_boundary :: x value as the left boundary of the fit window
- * @param right_window_boundary :: x value as the right boundary of the fit
- * window
- * @param bkgd_a0 :: constant factor (output)
- * @param bkgd_a1 :: linear factor (output)
- */
-void FitPeaks::estimateLinearBackground(const Histogram &histogram,
-                                        double left_window_boundary,
-                                        double right_window_boundary,
-                                        double &bkgd_a0, double &bkgd_a1) {
-  bkgd_a0 = 0.;
-  bkgd_a1 = 0.;
-
-  const auto &vecX = histogram.points();
-  const size_t istart = findXIndex(vecX.rawData(), left_window_boundary);
-  const size_t istop =
-      findXIndex(vecX.rawData(), right_window_boundary, istart);
-
-  // 10 is a magic number that worked in a variety of situations
-  const size_t iback_start = istart + 10;
-  const size_t iback_stop = istop - 10;
-
-  // there aren't enough bins in the window to try to estimate so just leave the
-  // estimate at zero
-  if (iback_start < iback_stop) {
-    double bg2, chisq;
-    HistogramData::estimateBackground(1, histogram, istart, istop, iback_start,
-                                      iback_stop, bkgd_a0, bkgd_a1, bg2, chisq);
-  }
 }
 
 //----------------------------------------------------------------------------------------------
