@@ -69,11 +69,6 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
-  /*
-  bool findDetector() override;
-  bool findDetector(const Geometry::InstrumentRayTracer &) override;
-  */
-
   void setSamplePos(double, double, double) override;
   void setSamplePos(const Mantid::Kernel::V3D &) override;
 

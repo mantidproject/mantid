@@ -39,7 +39,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
 class PeakTest : public CxxTest::TestSuite {
 private:
   /// Common instrument
-  Instrument_sptr inst;
+  Instrument_sptr inddinst;
   Instrument_sptr m_minimalInstrument;
 
 public:
