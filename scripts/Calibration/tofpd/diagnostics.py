@@ -240,6 +240,19 @@ def __calculate_dspacing(obs):
     return np.asarray(list(obs.values())[1:-2])
 
 
+def __create_outputws(donor, numSpec, numPeaks):
+    '''The resulting workspace needs to be added to the ADS'''
+    # convert the d-space table to a Workspace2d
+    if donor:
+        donor = mtd[str(donor)]
+    else:
+        donor = 'Workspace2D'
+    output = WorkspaceFactory.create(donor, NVectors=numSpec,
+                                     XLength=numPeaks, YLength=numPeaks)
+    output.getAxis(0).setUnit('dSpacing')
+    return output
+
+
 def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
     if infotype not in ['strain', 'difference', 'dspacing']:
         raise ValueError('Do not know how to calculate "{}"'.format(infotype))
@@ -253,13 +266,7 @@ def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
     numPeaks = len(peaks)
 
     # convert the d-space table to a Workspace2d
-    if donor:
-        donor = mtd[str(donor)]
-    else:
-        donor = 'Workspace2D'
-    output = WorkspaceFactory.create(donor, NVectors=numSpec,
-                                     XLength=numPeaks, YLength=numPeaks)
-    output.getAxis(0).setUnit('dSpacing')
+    output = __create_outputws(donor, numSpec, numPeaks)
     for i in range(numSpec):  # TODO get the detID correct
         output.setX(i, peaks)
         if infotype == 'strain':
@@ -274,6 +281,37 @@ def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
     # add the workspace to the AnalysisDataService
     mtd.addOrReplace(outputname, output)
     return mtd[outputname]
+
+
+def collect_fit_result(wksp, outputname: str, peaks, donor=None, infotype: str = 'centre', chisq_max: float = 1.e4):
+    '''This assumes that the input is sorted by wsindex then peakindex'''
+    KNOWN_COLUMNS = ['centre', 'width', 'height', 'intensity']
+    if infotype not in KNOWN_COLUMNS:
+        raise ValueError(f'Do not know how to extract "{infotype}"')
+
+    wksp = mtd[str(wksp)]
+    for name in KNOWN_COLUMNS + ['wsindex', 'peakindex', 'chi2']:
+        if name not in wksp.getColumnNames():
+            raise RuntimeError('did not find column "{}" in workspace "{}"'.format(name, str(wksp)))
+
+    wsindex = np.asarray(wksp.column('wsindex'))
+    chi2 = np.asarray(wksp.column('chi2'))
+    observable = np.asarray(wksp.column(infotype))
+    # set values to nan where the chisq is too high
+    observable[chi2 > chisq_max] = np.nan
+
+    # convert the numpy arrays to a Workspace2d
+    if donor:
+        numSpec = mtd[str(donor)].getNumberHistograms()
+    else:
+        numSpec = len(np.unique(wsindex))
+    output = __create_outputws(donor, numSpec, len(peaks))
+    for i in np.unique(wsindex):
+        selection = wsindex == i
+        i = int(i)  # to be compliant with mantid API
+        output.setX(i, peaks)
+        output.setY(i, observable[selection])
+    mtd.addOrReplace(outputname, output)
 
 
 def extract_peak_info(wksp, outputname: str, peak_position: float):
