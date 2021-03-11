@@ -35,7 +35,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # Both FixSource=True, AdjustSource=True can't be True
         try:
             CorelliPowderCalibrationCreate(
-                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
+                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_',
                 TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, FixSource=True, AdjustSource=True,
                 ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         except RuntimeError as error:
@@ -44,7 +44,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # Both FixSource=True, AdjustSource=True can't be False
         try:
             CorelliPowderCalibrationCreate(
-                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
+                InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_',
                 TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, FixSource=False, AdjustSource=False,
                 ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         except RuntimeError as error:
@@ -55,7 +55,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # a result, the final position and orientation is not exactly perpendicular to the X-axis and positioned
         # five meters away from the sample.
         CorelliPowderCalibrationCreate(
-            InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
+            InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_',
             TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, SourceToSampleDistance=10.0,
             ComponentList='bank1', ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         # Check source position

@@ -10,6 +10,9 @@ Direct Geometry Changes
     improvements, followed by bug fixes.
   
 
+
+* Updated instrument geometry for CHESS
+
 MSlice
 ------
 

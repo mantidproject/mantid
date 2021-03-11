@@ -33,6 +33,7 @@ New Features
 Improvements
 ############
 - Exported workspaces now have history.
+- The interface saves previous settings if possible instead of resetting.
 
 Bug fixes
 ##########
@@ -49,6 +50,7 @@ Bug fixes
 
 Algorithms
 ----------
+- Added the ability to specify the spectrum number in :ref:`FindPeaksAutomatic <algm-FindPeaksAutomatic>`.
 
 Fit Functions
 -------------

@@ -25,7 +25,17 @@ public:
   static LoadILLTest *createSuite() { return new LoadILLTest(); }
   static void destroySuite(LoadILLTest *suite) { delete suite; }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void setUp() override {
+
+    ConfigService::Instance().setString("default.facility", "ILL");
+  }
+
+  void tearDown() override {
+
+    ConfigService::Instance().setString("default.facility", " ");
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void checkLoader(const std::string &filename, std::string resultLoader) {
     Load alg;
