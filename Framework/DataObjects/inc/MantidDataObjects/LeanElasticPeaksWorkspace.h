@@ -10,7 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/LeanElasticPeak.h"
-#include "MantidDataObjects/LeanElasticPeakColumn.h"
+#include "MantidDataObjects/PeakColumn.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
@@ -277,7 +277,7 @@ private:
   std::vector<LeanElasticPeak> peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::LeanElasticPeakColumn>>
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn<LeanElasticPeak>>>
       columns;
 
   /** Column names */

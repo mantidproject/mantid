@@ -34,9 +34,6 @@ namespace DataObjects {
  */
 class DLLExport Peak : public BasePeak {
 public:
-  /// Allow PeakColumn class to directly access members.
-  friend class PeakColumn;
-
   Peak();
   Peak(const Geometry::Instrument_const_sptr &m_inst,
        const Mantid::Kernel::V3D &QLabFrame,

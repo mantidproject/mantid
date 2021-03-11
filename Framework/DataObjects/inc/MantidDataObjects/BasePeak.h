@@ -32,9 +32,6 @@ namespace DataObjects {
  */
 class DLLExport BasePeak : public Geometry::IPeak {
 public:
-  /// Allow PeakColumn class to directly access members.
-  friend class PeakColumn;
-
   BasePeak();
   BasePeak(const Mantid::Kernel::Matrix<double> &goniometer);
   /// Copy constructor

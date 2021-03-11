@@ -426,7 +426,8 @@ void LeanElasticPeaksWorkspace::initColumns() {
 void LeanElasticPeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
   columns.emplace_back(
-      std::make_shared<DataObjects::LeanElasticPeakColumn>(this->peaks, name));
+      std::make_shared<DataObjects::PeakColumn<LeanElasticPeak>>(this->peaks,
+                                                                 name));
   // Cache the names
   columnNames.emplace_back(name);
 }

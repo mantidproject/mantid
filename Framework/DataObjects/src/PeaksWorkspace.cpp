@@ -659,7 +659,7 @@ void PeaksWorkspace::initColumns() {
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
   columns.emplace_back(
-      std::make_shared<DataObjects::PeakColumn>(this->peaks, name));
+      std::make_shared<DataObjects::PeakColumn<Peak>>(this->peaks, name));
   // Cache the names
   columnNames.emplace_back(name);
 }

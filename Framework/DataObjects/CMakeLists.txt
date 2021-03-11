@@ -31,7 +31,6 @@ set(SRC_FILES
     src/LeanElasticPeak.cpp
     src/BasePeak.cpp
     src/PeakColumn.cpp
-    src/LeanElasticPeakColumn.cpp
     src/PeakNoShapeFactory.cpp
     src/PeakShapeBase.cpp
     src/PeakShapeEllipsoid.cpp
@@ -115,7 +114,6 @@ set(INC_FILES
     inc/MantidDataObjects/LeanElasticPeak.h
     inc/MantidDataObjects/BasePeak.h
     inc/MantidDataObjects/PeakColumn.h
-    inc/MantidDataObjects/LeanElasticPeakColumn.h
     inc/MantidDataObjects/PeakNoShapeFactory.h
     inc/MantidDataObjects/PeakShapeBase.h
     inc/MantidDataObjects/PeakShapeEllipsoid.h
@@ -177,7 +175,6 @@ set(TEST_FILES
     NoShapeTest.h
     OffsetsWorkspaceTest.h
     PeakColumnTest.h
-    LeanElasticPeakColumnTest.h
     PeakNoShapeFactoryTest.h
     PeakShapeEllipsoidFactoryTest.h
     PeakShapeEllipsoidTest.h

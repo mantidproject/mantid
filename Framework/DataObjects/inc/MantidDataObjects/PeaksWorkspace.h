@@ -269,7 +269,7 @@ private:
   std::vector<Peak> peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn<Peak>>> columns;
 
   /** Column names */
   std::vector<std::string> columnNames;
