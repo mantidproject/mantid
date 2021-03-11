@@ -33,9 +33,11 @@ public:
   static void showFitFunction(QWidget *parent,
                               const std::string &name = std::string());
   static void showCustomInterface(QWidget *parent, const QString &name,
+                                  const QString &area = QString(),
                                   const QString &section = QString());
   static void showCustomInterface(QWidget *parent,
                                   const std::string &name = std::string(),
+                                  const std::string &area = std::string(),
                                   const std::string &section = std::string());
 };
 } // namespace API

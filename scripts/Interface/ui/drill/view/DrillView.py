@@ -145,6 +145,9 @@ class DrillView(QMainWindow):
         super(DrillView, self).__init__(None, Qt.Window)
         self.here = os.path.dirname(os.path.realpath(__file__))
 
+        # help
+        self.assistant_process = QProcess(self)
+
         # setup ui
         uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self)
         self.setup_header()
@@ -259,6 +262,8 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
@@ -426,8 +431,8 @@ class DrillView(QMainWindow):
         """
         Popup the help window.
         """
-        InterfaceManager().showHelpPage(
-                "qthelp://org.mantidproject/doc/interfaces/DrILL.html")
+        from mantidqt.gui_helper import show_interface_help
+        show_interface_help("DrILL",self.assistant_process,area="ILL")
 
     def keyPressEvent(self, event):
         """

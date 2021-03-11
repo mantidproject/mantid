@@ -44,8 +44,9 @@ public:
   void showFitFunction(const std::string &name = std::string()) override;
   void showFitFunction(const QString &name) override;
   void showCustomInterface(const std::string &name = std::string(),
+                           const std::string &area = std::string(),
                            const std::string &section = std::string()) override;
-  void showCustomInterface(const QString &name,
+  void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
 
 private:
