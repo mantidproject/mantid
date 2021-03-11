@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 
 from qtpy.QtCore import Qt
+from qtpy import QtGui
 from qtpy.QtWidgets import QWidget
 from mantidqt.utils.qt import load_ui
 
@@ -21,6 +22,30 @@ class WorkspaceCalculatorView(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        scale_validator = ScaleValidator()
+        self.lhs_scaling.setValidator(scale_validator)
+        self.rhs_scaling.setValidator(scale_validator)
+
     def closeEvent(self, event):
         self.deleteLater()
         super(WorkspaceCalculatorView, self).closeEvent(event)
+
+
+class ScaleValidator(QtGui.QValidator):
+    def __init__(self, parent=None):
+        QtGui.QValidator.__init__(self, parent=parent)
+
+    def validate(self, input, pos):
+        try:
+            float(input)
+        except ValueError:
+            if (input[-1].lower() == "e"
+                    or input[-2].lower() == "e" and input[-1].lower() == "-"):
+                return QtGui.QValidator.Acceptable, input, pos
+            return QtGui.QValidator.Invalid, input, pos
+        if float(input) == 0:
+            return QtGui.QValidator.Intermediate, input, pos
+        return QtGui.QValidator.Acceptable, input, pos
+
+    def fixup(self, input):
+        return "1.0"
