@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidDataObjects/BasePeak.h"
+#include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
@@ -75,6 +76,11 @@ public:
   // Construct a peak from a reference to the interface
 
   explicit Peak(const Geometry::IPeak &ipeak);
+
+  // Construct a peak from LeanPeak
+  Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak,
+       const Geometry::Instrument_const_sptr &inst,
+       boost::optional<double> detectorDistance = boost::none);
 
   void setDetectorID(int id) override;
   int getDetectorID() const override;
