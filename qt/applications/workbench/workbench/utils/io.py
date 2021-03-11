@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QInputDialog
 def input_qinputdialog(prompt: str = "") -> str:
     """
     Raises a QInputDialog with a given prompt and returns the user input as a string.
-    If the user cancels the dialog, a RuntimeError is raised.
+    If the user cancels the dialog, an EOFError is raised.
     Intended to be used to override python's `input` function to be more user friendly.
     """
     dlg = QInputDialog()
@@ -21,4 +21,4 @@ def input_qinputdialog(prompt: str = "") -> str:
     if accepted:
         return dlg.textValue()
     else:
-        raise RuntimeError("User input request cancelled")
+        raise EOFError("User input request cancelled")
