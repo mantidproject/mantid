@@ -391,7 +391,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
 
   try {
     IPeak_uptr iPeak = createPeak(Qlab);
-    Peak_uptr peak(static_cast<DataObjects::Peak*>(iPeak.release()));
+    Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
 
     if (sample().hasOrientedLattice()) {
 

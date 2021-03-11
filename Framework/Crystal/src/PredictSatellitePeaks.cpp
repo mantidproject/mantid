@@ -36,8 +36,8 @@ using namespace Mantid::Kernel;
 namespace Crystal {
 
 // handy shortcuts
-using Mantid::Geometry::IPeak_uptr;
 using Mantid::DataObjects::Peak_uptr;
+using Mantid::Geometry::IPeak_uptr;
 
 DECLARE_ALGORITHM(PredictSatellitePeaks)
 
@@ -363,7 +363,7 @@ void PredictSatellitePeaks::predictOffsets(
       continue;
 
     IPeak_uptr iPeak = Peaks->createPeak(Qs, 1);
-    Peak_uptr peak(static_cast<DataObjects::Peak*>(iPeak.release()));
+    Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
 
     peak->setGoniometerMatrix(goniometer);
 
@@ -436,7 +436,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
           continue;
 
         IPeak_uptr iPeak(Peaks->createPeak(Qs, 1));
-        Peak_uptr peak(static_cast<DataObjects::Peak*>(iPeak.release()));
+        Peak_uptr peak(static_cast<DataObjects::Peak *>(iPeak.release()));
 
         peak->setGoniometerMatrix(goniometer);
 
