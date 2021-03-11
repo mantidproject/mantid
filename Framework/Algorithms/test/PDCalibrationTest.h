@@ -433,7 +433,7 @@ public:
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     // setup the peak postions based on transformation from detID=155
-    std::vector<double> dValues(PEAK_TOFS.size());
+    std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(

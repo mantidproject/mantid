@@ -413,6 +413,7 @@ public:
 protected:
   void validateUnitParams(const int emode,
                           const UnitParametersMap &params) override;
+  std::string toDSpacingError;
   double difa;
   double difc;
   double tzero;

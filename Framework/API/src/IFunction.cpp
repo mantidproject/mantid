@@ -1324,8 +1324,8 @@ void IFunction::convertValue(std::vector<double> &values,
       wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
       outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
     } catch (std::exception &) {
-      throw std::runtime_error("Unable to retrieve detector properties "
-                               "required for unit conversion");
+      throw std::runtime_error("Unable to perform unit conversion to " +
+                               outUnit->unitID());
     }
   }
 }

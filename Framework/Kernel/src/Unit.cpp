@@ -631,22 +631,33 @@ double tofToDSpacingFactor(const double l1, const double l2,
 
 dSpacingBase::dSpacingBase()
     : Unit(), difa(0), difc(DBL_MIN), tzero(0),
-      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {}
+      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.),
+      toDSpacingError("") {}
 
 void dSpacingBase::validateUnitParams(const int,
                                       const UnitParametersMap &params) {
-  double difc;
+  double difc = 0.;
   if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
     if (!ParamPresent(params, UnitParams::twoTheta) ||
         (!ParamPresent(params, UnitParams::l2)))
-      throw std::runtime_error("A difc value or L2\two theta must be supplied "
+      throw std::runtime_error("A difc value or L2/two theta must be supplied "
                                "in the extra parameters when initialising " +
                                this->unitID() + " for conversion via TOF");
-  } else if (difc < 0.) {
-    throw std::runtime_error(
-        "A positive difc value must be supplied in the extra parameters when "
-        "initialising " +
-        this->unitID() + " for conversion via TOF");
+  } else {
+    // check validations only applicable to fromTOF
+    toDSpacingError = "";
+    double difa = 0.;
+    ParamPresentAndSet(&params, UnitParams::difa, difa);
+    if ((difa == 0) && (difc == 0)) {
+      toDSpacingError = "Cannot convert to d spacing with DIFA=0 and DIFC=0";
+    };
+    // singleFromTOF currently assuming difc not negative
+    if (difc < 0.) {
+      toDSpacingError =
+          "A positive difc value must be supplied in the extra parameters when "
+          "initialising " +
+          this->unitID() + " for conversion via TOF";
+    }
   }
 }
 
@@ -684,18 +695,17 @@ double dSpacingBase::singleToTOF(const double x) const {
                              "has been initialized.");
   return difa * x * x + difc * x + tzero;
 }
+
 double dSpacingBase::singleFromTOF(const double tof) const {
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
+  if (!toDSpacingError.empty())
+    throw std::runtime_error(toDSpacingError);
   // handle special cases first...
   if (tof == tzero) {
     if (difa != 0)
       return -difc / difa;
-  }
-  if ((difa == 0) && (difc == 0)) {
-    throw std::runtime_error(
-        "Cannot convert to d spacing with DIFA=0 and DIFC=0");
   }
   if ((difc * difc - 4 * difa * (tzero - tof)) < 0) {
     throw std::runtime_error(
