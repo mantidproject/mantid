@@ -23,10 +23,12 @@ class ResetNegatives2DTest(unittest.TestCase):
         shutil.rmtree(cls._test_dir)
 
     def setUp(self):
-        self._workspace = self._create_workspace()
+        self._workspace1 = self._create_workspace()
+        self._workspace2 = self._create_workspace()
 
     def tearDown(self):
-        DeleteWorkspace(self._workspace)
+        DeleteWorkspace(self._workspace1)
+        DeleteWorkspace(self._workspace2)
 
     def _create_workspace(self):
         """Create a dummy workspace for testing purposes"""
@@ -41,8 +43,7 @@ class ResetNegatives2DTest(unittest.TestCase):
         xDataTotal = []  # d Values for all spectra
         zDataTotal = []  # intensity values for all spectra
         eDataTotal = []  # error values for all spectra
-        nSpec = len(yData)-1  # number of spectra
-
+        nSpec = len(yData) - 1  # number of spectra
         # Create d and intensity lists for workspace
         for i in range(0, nSpec):
             xDataTotal.extend(
@@ -65,33 +66,45 @@ class ResetNegatives2DTest(unittest.TestCase):
                              VerticalAxisValues=yData)
         return ws
 
-    def test_resetNegatives2D(self):
-        ResetNegatives2D(self._workspace)
-        SaveP2D(Workspace=self._workspace,
+    def test_resetNegatives2D_addMinimum(self):
+        ResetNegatives2D(self._workspace1)
+        SaveP2D(Workspace=self._workspace1,
+                OutputFile=os.path.join(self._test_dir,
+                                        "test_ResetNegatives2D_addMinimum"),
+                RemoveNaN=False,
+                RemoveNegatives=False,
+                CutData=False)
+        text = '#Title: test\n#Inst: .prm\n#Binning: ddperp   0.8888889    1.0000000\n#Bank: 1\n#2theta   lambda   d-value   dp-value   counts\n  81.3046911      1.3029352      1.0000000      1.5000000      3.0000000\n  42.5730378      1.4521280      2.0000000      1.5000000      1.0000000\n  28.5401669      1.4789581      3.0000000      1.5000000      3.0000000\n  21.4420009      1.4882141      4.0000000      1.5000000      3.0000000\n  17.1666094      1.4924723      5.0000000      1.5000000      3.0000000\n  14.3112545      1.4947782      6.0000000      1.5000000      3.0000000\n  10.7376523      1.4970660      8.0000000      1.5000000      3.0000000\n   9.5455787      1.4976825      9.0000000      1.5000000      3.0000000\n 147.7039064      1.9210925      1.0000000      2.5000000      3.0000000\n  74.0366222      2.4082809      2.0000000      2.5000000      1.0000000\n  48.4687709      2.4628222      3.0000000      2.5000000      3.0000000\n  36.1141714      2.4797153      4.0000000      2.5000000      3.0000000\n  28.8035116      2.4871957      5.0000000      2.5000000      3.0000000\n  17.9428625      2.4950714      8.0000000      2.5000000      3.0000000\n  15.9421282      2.4961135      9.0000000      2.5000000      3.0000000\n 178.1486860      1.9997390      1.0000000      3.5000000      3.0000000\n 112.5838945      3.3275045      2.0000000      3.5000000      1.0000000\n  70.0240404      3.4424897      3.0000000      3.5000000      3.0000000\n  51.4130764      3.4700953      4.0000000      3.5000000      3.0000000\n  40.7483187      3.4814929      5.0000000      3.5000000      3.0000000\n  33.7894761      3.4873718      6.0000000      3.5000000      3.0000000\n  25.2199975      3.4930167      8.0000000      3.5000000      3.0000000\n  22.3888960      3.4945073      9.0000000      3.5000000      3.0000000\n'
+        with open(
+                os.path.join(self._test_dir,
+                             "ref_resetNegatives_addMinimum.txt"), 'w') as of:
+            of.write(text)
+        self._assert_workspace_positive(
+            os.path.join(self._test_dir, "ref_resetNegatives_addMinimum.txt"),
+            os.path.join(self._test_dir, "test_resetNegatives_addMinimum.p2d"))
+
+    def test_resetNegatives2D_addMinimum(self):
+        ResetNegatives2D(self._workspace2, AddMinimum=False, ResetValue=0)
+        SaveP2D(Workspace=self._workspace2,
                 OutputFile=os.path.join(self._test_dir,
                                         "test_ResetNegatives2D"),
                 RemoveNaN=False,
                 RemoveNegatives=False,
                 CutData=False)
-
-        text = '#Title: test\n#Inst: .prm\n#Binning: ddperp   0.8888889    1.0000000\n#Bank: 1\n#2theta   lambda   d-value   dp-value   counts\n  81.3046911      1.3029352      1.0000000      1.5000000      3.0000000\n  42.5730378      1.4521280      2.0000000      1.5000000      1.0000000\n  28.5401669      1.4789581      3.0000000      1.5000000      3.0000000\n  21.4420009      1.4882141      4.0000000      1.5000000      3.0000000\n  17.1666094      1.4924723      5.0000000      1.5000000      3.0000000\n  14.3112545      1.4947782      6.0000000      1.5000000      3.0000000\n  12.2697184      1.4961662      7.0000000      1.5000000      0.0000000\n  10.7376523      1.4970660      8.0000000      1.5000000      3.0000000\n   9.5455787      1.4976825      9.0000000      1.5000000      3.0000000\n 147.7039064      1.9210925      1.0000000      2.5000000      3.0000000\n  74.0366222      2.4082809      2.0000000      2.5000000      1.0000000\n  48.4687709      2.4628222      3.0000000      2.5000000      3.0000000\n  36.1141714      2.4797153      4.0000000      2.5000000      3.0000000\n  28.8035116      2.4871957      5.0000000      2.5000000      3.0000000\n  23.9632304      2.4911738      6.0000000      2.5000000      3.0000000\n  20.5194188      2.4935442      7.0000000      2.5000000      0.0000000\n  17.9428625      2.4950714      8.0000000      2.5000000      3.0000000\n  15.9421282      2.4961135      9.0000000      2.5000000      3.0000000\n 178.1486860      1.9997390      1.0000000      3.5000000      3.0000000\n 112.5838945      3.3275045      2.0000000      3.5000000      1.0000000\n  70.0240404      3.4424897      3.0000000      3.5000000      3.0000000\n  51.4130764      3.4700953      4.0000000      3.5000000      3.0000000\n  40.7483187      3.4814929      5.0000000      3.5000000      3.0000000\n  33.7894761      3.4873718      6.0000000      3.5000000      3.0000000\n  28.8774112      3.4908181      7.0000000      3.5000000      0.0000000\n  25.2199975      3.4930167      8.0000000      3.5000000      3.0000000\n  22.3888960      3.4945073      9.0000000      3.5000000      3.0000000\n'
-
-        with open(os.path.join(self._test_dir, "ref_resetNegatives2D.txt"),
+        text = '#Title: test\n#Inst: .prm\n#Binning: ddperp   0.8888889    1.0000000\n#Bank: 1\n#2theta   lambda   d-value   dp-value   counts\n  81.3046911      1.3029352      1.0000000      1.5000000      3.0000000\n  42.5730378      1.4521280      2.0000000      1.5000000      0.0000000\n  28.5401669      1.4789581      3.0000000      1.5000000      3.0000000\n  21.4420009      1.4882141      4.0000000      1.5000000      3.0000000\n  17.1666094      1.4924723      5.0000000      1.5000000      3.0000000\n  14.3112545      1.4947782      6.0000000      1.5000000      3.0000000\n  10.7376523      1.4970660      8.0000000      1.5000000      3.0000000\n   9.5455787      1.4976825      9.0000000      1.5000000      3.0000000\n 147.7039064      1.9210925      1.0000000      2.5000000      3.0000000\n  74.0366222      2.4082809      2.0000000      2.5000000      0.0000000\n  48.4687709      2.4628222      3.0000000      2.5000000      3.0000000\n  36.1141714      2.4797153      4.0000000      2.5000000      3.0000000\n  28.8035116      2.4871957      5.0000000      2.5000000      3.0000000\n  17.9428625      2.4950714      8.0000000      2.5000000      3.0000000\n  15.9421282      2.4961135      9.0000000      2.5000000      3.0000000\n 178.1486860      1.9997390      1.0000000      3.5000000      3.0000000\n 112.5838945      3.3275045      2.0000000      3.5000000      0.0000000\n  70.0240404      3.4424897      3.0000000      3.5000000      3.0000000\n  51.4130764      3.4700953      4.0000000      3.5000000      3.0000000\n  40.7483187      3.4814929      5.0000000      3.5000000      3.0000000\n  33.7894761      3.4873718      6.0000000      3.5000000      3.0000000\n  25.2199975      3.4930167      8.0000000      3.5000000      3.0000000\n  22.3888960      3.4945073      9.0000000      3.5000000      3.0000000\n'
+        with open(os.path.join(self._test_dir, "ref_resetNegatives.txt"),
                   'w') as of:
             of.write(text)
-
         self._assert_workspace_positive(
-            os.path.join(self._test_dir, "ref_resetNegatives2D.txt"),
-            os.path.join(self._test_dir, "test_ResetNegatives2D.p2d"))
+            os.path.join(self._test_dir, "ref_resetNegatives.txt"),
+            os.path.join(self._test_dir, "test_resetNegatives.p2d"))
 
     def _assert_workspace_positive(self, reference_file, result_file):
         with open(reference_file, 'r') as ref_file:
             reference = ref_file.read()
-
         with open(result_file, 'r') as res_file:
             result = res_file.read()
             self.maxDiff = 10000
-
         self.assertMultiLineEqual(reference, result)
 
 
