@@ -123,6 +123,75 @@ public:
     check_Contributing_Detectors(p2, expectedIDs);
   }
 
+  void test_ConstructorFromLeanElasticPeak() {
+    // step_1: constructing a peak (follow example in LeanElasticPeakTest)
+    Matrix<double> r(3, 3, false);
+    r[0][2] = 1;
+    r[1][1] = 1;
+    r[2][0] = -1;
+    // NOTE: the detector ID here (19999) is an arbitrary number and will most
+    //       likely no the same as the one from find_detector(). DO NOT compare
+    //       detector verbatim
+    Peak peak(inst, 19999, 2.0, V3D(1, 2, 3), r);
+    peak.setRunNumber(1234);
+    peak.setPeakNumber(42);
+    peak.setIntensity(900);
+    peak.setSigmaIntensity(30);
+    peak.setBinCount(90);
+
+    // step_2: extract qsample, goniometer, [wavelength] to construct a leanpeak
+    V3D qsample = peak.getQSampleFrame();
+    // NOTE: the goniometer matrix should be handled by BasePeak, and it should
+    // be an exact copy of r created above
+    auto goniometerMatrix = peak.getGoniometerMatrix();
+    // construct the LeanPeak using QSample and goniometerMatrix
+    const LeanElasticPeak &lpeak = LeanElasticPeak(qsample, goniometerMatrix);
+
+    // step_3: construct Peak based on leanpeak and check
+    //           - qlab
+    //           - qsample
+    //           - goniometer
+    //           - sacttering
+    //           - wavelength
+    //           - d-spacing
+    //           - initial and final energy
+    //           - getAzimuthal angle
+    //           - check detector id is any number (using LeanPeak test peak)
+    const double tolerance{1e-10};
+    Peak plp(lpeak, inst); // peak->leanpeak->peak
+    TS_ASSERT_EQUALS(plp.getQLabFrame(), peak.getQLabFrame());
+    TS_ASSERT_EQUALS(plp.getQSampleFrame(), peak.getQSampleFrame());
+    TS_ASSERT_EQUALS(plp.getGoniometerMatrix(), r);
+    TS_ASSERT_EQUALS(plp.getGoniometerMatrix(), goniometerMatrix);
+    TS_ASSERT_EQUALS(plp.getScattering(), peak.getScattering());
+    // NOTE: reasons to use TS_ASSERT_DELTA for some values
+    //                  LeanPeak          Peak
+    // wavelength    2.000000000000018    2
+    // dspacing      9.093899818222381    9.093899818222283
+    // initialEnergy 20.45105062499033    20.45105062499069
+    // finalEnergy   20.45105062499033    20.45105062499069
+    TS_ASSERT_DELTA(plp.getWavelength(), peak.getWavelength(), tolerance);
+    TS_ASSERT_DELTA(plp.getDSpacing(), peak.getDSpacing(), tolerance);
+    TS_ASSERT_DELTA(plp.getInitialEnergy(), peak.getInitialEnergy(), tolerance);
+    TS_ASSERT_DELTA(plp.getFinalEnergy(), peak.getFinalEnergy(), tolerance);
+    //
+    TS_ASSERT_EQUALS(plp.getAzimuthal(), peak.getAzimuthal());
+    TS_ASSERT_THROWS_NOTHING(plp.getDetectorID());
+
+    std::ostringstream msg;
+    msg.precision(16);
+    msg << "\t\tLeanPeak\t\tPeak\n"
+        << "wavelength\t\t" << plp.getWavelength() << "\t\t"
+        << peak.getWavelength() << "\n"
+        << "dspacing\t\t" << plp.getDSpacing() << "\t\t" << peak.getDSpacing()
+        << "\n"
+        << "initialEnergy\t\t" << plp.getInitialEnergy() << "\t\t"
+        << peak.getInitialEnergy() << "\n"
+        << "finalEnergy\t\t" << plp.getFinalEnergy() << "\t\t"
+        << peak.getFinalEnergy() << "\n";
+    std::cout << msg.str();
+  }
+
   void test_copyConstructor() {
     Peak p(inst, 10102, 2.0);
     p.setHKL(1, 2, 3);
