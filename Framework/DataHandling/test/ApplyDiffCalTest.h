@@ -77,7 +77,28 @@ public:
     if (par)
       tzero = par->value<double>();
     TS_ASSERT_EQUALS(tzero, 2);
+
+    ApplyDiffCal appDiffCalClear;
+    pmap->addDouble(det->getComponentID(), "extraparam", 1.23);
+    TS_ASSERT_THROWS_NOTHING(appDiffCalClear.initialize());
+    TS_ASSERT(appDiffCalClear.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        appDiffCalClear.setProperty("InstrumentWorkspace", testWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        appDiffCalClear.setProperty("ClearCalibration", true));
+    TS_ASSERT_THROWS_NOTHING(appDiffCalClear.execute(););
+    TS_ASSERT(appDiffCalClear.isExecuted());
+
+    instFromWS = instrumentWS->getInstrument();
+    det = instFromWS->getDetector(3);
+    pmap = instFromWS->getParameterMap();
+    par = pmap->getRecursive(det.get(), "DIFC");
+    TS_ASSERT(!par);
+    par = pmap->getRecursive(det.get(), "extraparam");
+    TS_ASSERT(par);
   }
+
+  void TestClear() {}
 
 private:
   Mantid::Geometry::Instrument_sptr createInstrument() {

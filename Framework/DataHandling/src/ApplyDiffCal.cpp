@@ -15,6 +15,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -76,6 +77,20 @@ void ApplyDiffCal::init() {
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
       "this, CalibrationWorkspace or CalibrationFile needs to be specified.");
+  declareProperty("ClearCalibration", false,
+                  "Remove any existing calibration from the workspace");
+  setPropertySettings(
+      "CalibrationFile",
+      std::make_unique<Kernel::EnabledWhenProperty>(
+          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
+  setPropertySettings(
+      "CalibrationWorkspace",
+      std::make_unique<Kernel::EnabledWhenProperty>(
+          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
+  setPropertySettings(
+      "OffsetsWorkspace",
+      std::make_unique<Kernel::EnabledWhenProperty>(
+          "ClearCalibration", Kernel::ePropertyCriterion::IS_EQUAL_TO, "0"));
 }
 
 std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
@@ -106,14 +121,21 @@ std::map<std::string, std::string> ApplyDiffCal::validateInputs() {
   if (bool(offsetsWS))
     numWays += 1;
 
+  bool clearCalibration = getProperty("ClearCalibration");
   std::string message;
-  if (numWays == 0) {
-    message = "You must specify only one of CalibrationFile, "
-              "CalibrationWorkspace, OffsetsWorkspace.";
+  if ((clearCalibration) && (numWays > 0)) {
+    message =
+        "You cannot supply a calibration input when clearing the calibration.";
   }
-  if (numWays > 1) {
-    message = "You must specify one of CalibrationFile, "
-              "CalibrationWorkspace, OffsetsWorkspace.";
+  if (!clearCalibration) {
+    if (numWays == 0) {
+      message = "You must specify only one of CalibrationFile, "
+                "CalibrationWorkspace, OffsetsWorkspace.";
+    }
+    if (numWays > 1) {
+      message = "You must specify one of CalibrationFile, "
+                "CalibrationWorkspace, OffsetsWorkspace.";
+    }
   }
 
   if (!message.empty()) {
@@ -172,26 +194,32 @@ void ApplyDiffCal::exec() {
   // validateInputs guarantees this will be an ExperimentInfo object
   auto experimentInfo =
       std::dynamic_pointer_cast<API::ExperimentInfo>(InstrumentWorkspace);
+  auto instrument = experimentInfo->getInstrument();
+  auto &paramMap = experimentInfo->instrumentParameters();
+  bool clearCalibration = getProperty("ClearCalibration");
+  if (clearCalibration) {
+    paramMap.clearParametersByName("DIFC");
+    paramMap.clearParametersByName("DIFA");
+    paramMap.clearParametersByName("TZERO");
+  } else {
+    this->getCalibrationWS(InstrumentWorkspace);
 
-  this->getCalibrationWS(InstrumentWorkspace);
+    Column_const_sptr detIdColumn = m_calibrationWS->getColumn("detid");
+    Column_const_sptr difcColumn = m_calibrationWS->getColumn("difc");
+    Column_const_sptr difaColumn = m_calibrationWS->getColumn("difa");
+    Column_const_sptr tzeroColumn = m_calibrationWS->getColumn("tzero");
 
-  Column_const_sptr detIdColumn = m_calibrationWS->getColumn("detid");
-  Column_const_sptr difcColumn = m_calibrationWS->getColumn("difc");
-  Column_const_sptr difaColumn = m_calibrationWS->getColumn("difa");
-  Column_const_sptr tzeroColumn = m_calibrationWS->getColumn("tzero");
+    for (size_t i = 0; i < m_calibrationWS->rowCount(); ++i) {
+      auto detid = static_cast<detid_t>((*detIdColumn)[i]);
+      double difc = (*difcColumn)[i];
+      double difa = (*difaColumn)[i];
+      double tzero = (*tzeroColumn)[i];
 
-  for (size_t i = 0; i < m_calibrationWS->rowCount(); ++i) {
-    auto detid = static_cast<detid_t>((*detIdColumn)[i]);
-    double difc = (*difcColumn)[i];
-    double difa = (*difaColumn)[i];
-    double tzero = (*tzeroColumn)[i];
-
-    auto instrument = experimentInfo->getInstrument();
-    auto det = instrument->getDetector(detid);
-    auto &paramMap = experimentInfo->instrumentParameters();
-    paramMap.addDouble(det->getComponentID(), "DIFC", difc);
-    paramMap.addDouble(det->getComponentID(), "DIFA", difa);
-    paramMap.addDouble(det->getComponentID(), "TZERO", tzero);
+      auto det = instrument->getDetector(detid);
+      paramMap.addDouble(det->getComponentID(), "DIFC", difc);
+      paramMap.addDouble(det->getComponentID(), "DIFA", difa);
+      paramMap.addDouble(det->getComponentID(), "TZERO", tzero);
+    }
   }
 }
 
