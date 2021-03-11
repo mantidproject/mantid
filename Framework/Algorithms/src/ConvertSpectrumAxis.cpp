@@ -90,6 +90,7 @@ void ConvertSpectrumAxis::exec() {
     const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
     auto emode = Kernel::DeltaEMode::fromString(emodeStr);
+    int nfailures = 0;
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       UnitParametersMap pmap{};
@@ -102,15 +103,23 @@ void ConvertSpectrumAxis::exec() {
       }
 
       spectrumInfo.getDetectorValues(*fromUnit, *toUnit, emode, false, i, pmap);
+      double value = 0.;
       try {
         fromUnit->toTOF(xval, emptyVector, l1, emode, pmap);
         toUnit->fromTOF(xval, emptyVector, l1, emode, pmap);
-      } catch (std::exception &) {
-        throw std::runtime_error("Unable to retrieve detector properties "
-                                 "required for unit conversion");
+        value = (xval.front() + xval.back()) / 2;
+      } catch (std::runtime_error &) {
+        nfailures++;
+        g_log.warning(
+            "Unable to calculate new spectrum axis value for workspace index " +
+            i);
+        value = inputWS->getAxis(1)->getValue(i);
       }
-      double value = (xval.front() + xval.back()) / 2;
       indexMap.emplace(value, i);
+    }
+    if (nfailures == nHist) {
+      throw std::runtime_error(
+          "Unable to convert spectrum axis values on all spectra");
     }
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over

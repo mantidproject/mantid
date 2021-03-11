@@ -109,9 +109,9 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3727, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[423], 2702);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.7702, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
     TS_ASSERT_EQUALS(m_outWS->y(0)[970], 149165);
   }
 
@@ -153,9 +153,9 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3727, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[423], 1634.3791, 0.0001);
     TS_ASSERT_DELTA(m_outWS->y(0)[423], 2419.5680, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.7702, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[970], 14719.8272, 0.0001);
     TS_ASSERT_DELTA(m_outWS->y(0)[970], 148503.3853, 0.0001);
   }
 
@@ -499,15 +499,15 @@ public:
     TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 1);
 
     // Maximum of peak near TOF approx. equal to 22,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[333], 21989.8543, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[333], 21990.0502, 0.0001);
     TS_ASSERT_DELTA(m_outWS->y(0)[333], 770.2515, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 25,800 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25750.0819, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25750.3113, 0.0001);
     TS_ASSERT_DELTA(m_outWS->y(0)[398], 1522.3778, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 42,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42056.2345, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42056.6091, 0.0001);
     TS_ASSERT_DELTA(m_outWS->y(0)[600], 7283.29652, 0.0001);
   }
 

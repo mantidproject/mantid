@@ -81,7 +81,9 @@ boost::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::s
 
 DECLARE_ALGORITHM(SaveGDA)
 
-SaveGDA::CalibrationParams::CalibrationParams(const double _difa, const double _difc, const double _tzero)
+SaveGDA::CalibrationParams::CalibrationParams(const double _difc,
+                                              const double _difa,
+                                              const double _tzero)
     : difa(_difa), difc(_difc), tzero(_tzero) {}
 
 const std::string SaveGDA::name() const { return "SaveGDA"; }
@@ -142,7 +144,7 @@ void SaveGDA::exec() {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    auto &x = matrixWS->dataX(0);
+    auto x = matrixWS->dataX(0);
     const size_t bankIndex(groupingScheme[i] - 1);
     if (bankIndex >= calibParams.size()) {
       throw Kernel::Exception::IndexError(bankIndex, calibParams.size(), "Bank number out of range");
@@ -157,7 +159,7 @@ void SaveGDA::exec() {
     std::vector<double> yunused;
     dSpacingUnit.toTOF(x, yunused, 0., Kernel::DeltaEMode::Elastic,
                        {{Kernel::UnitParams::difa, bankCalibParams.difa},
-                        {Kernel::UnitParams::difa, bankCalibParams.difc},
+                        {Kernel::UnitParams::difc, bankCalibParams.difc},
                         {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
     std::transform(x.begin(), x.end(), std::back_inserter(tofScaled),
                    [](const double tofVal) { return tofVal * tofScale; });
