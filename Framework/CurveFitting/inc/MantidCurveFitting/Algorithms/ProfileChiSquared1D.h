@@ -37,7 +37,7 @@ private:
   std::tuple<double, double>
   getChiSquaredRoots(const Functions::ChebfunBase_sptr &approximation,
                      std::vector<double> &coeffs, double qvalue, double rBound,
-                     double lBound);
+                     double lBound) const;
   /// Cache indices of fixed parameters
   std::vector<size_t> m_fixedParameters;
 };

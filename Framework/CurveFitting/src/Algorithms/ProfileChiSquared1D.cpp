@@ -59,13 +59,14 @@ public:
   /// @param domain :: Function's domain.
   /// @param values :: Functin's values.
   /// @param chi0 :: Chi squared at the minimum.
+  /// @param freeParameters :: Parameters which are free in the function.
   ChiSlice(IFunction_sptr inputFunction, const GSLVector &dir,
            API::MatrixWorkspace_sptr inputWS, int workspaceIndex,
            const API::FunctionDomain &domain, API::FunctionValues &values,
-           double chi0)
+           double chi0, std::vector<int> &freeParameters)
       : m_direction(dir), m_domain(domain), m_values(values), m_chi0(chi0),
         m_function(inputFunction), m_ws(inputWS),
-        m_workspaceIndex(workspaceIndex) {
+        m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
     m_fitalg = AlgorithmFactory::Instance().create("Fit", -1);
     m_fitalg->setChild(true);
@@ -81,22 +82,25 @@ public:
     m_fitalg->setProperty("WorkspaceIndex", m_workspaceIndex);
     IFunction_sptr function = m_fitalg->getProperty("Function");
     std::vector<double> originalParamValues(function->nParams());
-    for (size_t ip = 0; ip < function->nParams(); ++ip) {
+    for (auto ip : m_freeParameters) {
       originalParamValues[ip] = function->getParameter(ip);
       function->setParameter(ip, originalParamValues[ip] + p * m_direction[ip]);
-      if (m_direction[ip] > 1e-7) {
+      if (m_direction[ip] > 0.0) {
         function->fix(ip);
       }
     }
     // re run the fit to minimze the unfixed parameters
     m_fitalg->execute();
     // find change in chi 2
+    // num free parameters is the number of global free parameters - the 1 we've
+    // just fixed
+    int numFreeParameters = static_cast<int>(m_freeParameters.size() - 1);
     double res =
-        getDiff(*function, function->nParams(), m_domain, m_values, m_chi0);
+        getDiff(*function, numFreeParameters, m_domain, m_values, m_chi0);
     // reset fit to original values
-    for (size_t ip = 0; ip < function->nParams(); ++ip) {
+    for (auto ip : m_freeParameters) {
       function->setParameter(ip, originalParamValues[ip]);
-      if (m_direction[ip] > 1e-7) {
+      if (m_direction[ip] > 0.0) {
         function->unfix(ip);
       }
     }
@@ -176,6 +180,8 @@ private:
   IFunction_sptr m_function;
   MatrixWorkspace_sptr m_ws;
   int m_workspaceIndex;
+  // Vector of free parameter indices
+  std::vector<int> m_freeParameters;
 };
 
 /// Default constructor
@@ -214,7 +220,19 @@ void ProfileChiSquared1D::execConcrete() {
     // find chi2 quanitile for given p value
     qvalues[i] = boost::math::quantile(chi2Dist, pvalue);
   }
-  // convert sigmas to p values
+
+  // Find number of free parameter, should be >= 2
+  std::vector<int> freeParameters;
+  for (size_t ip = 0; ip < nParams; ++ip) {
+    if (m_function->isActive(ip)) {
+      freeParameters.push_back(static_cast<int>(ip));
+    }
+  }
+
+  if (freeParameters.size() < 2) {
+    throw std::invalid_argument("Function must have 2 or more free parameters");
+  }
+
   std::string baseName = getProperty("Output");
   Workspace_sptr ws = getProperty("InputWorkspace");
   int workspaceIndex = getProperty("WorkspaceIndex");
@@ -248,7 +266,7 @@ void ProfileChiSquared1D::execConcrete() {
       errorsTable->addColumn("double", "Right Error (3-sigma )");
   auto quadraticErrColumn =
       errorsTable->addColumn("double", "Quadratic Error (1-sigma)");
-  errorsTable->setRowCount(nParams);
+  errorsTable->setRowCount(freeParameters.size());
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "Errors", "", Kernel::Direction::Output),
@@ -279,12 +297,12 @@ void ProfileChiSquared1D::execConcrete() {
   pdfTable->setRowCount(n);
   const double fac = 1e-4;
 
-  // Loop over each parameter
-  for (size_t ip = 0; ip < nParams; ++ip) {
-
+  for (auto p = 0u; p < freeParameters.size(); ++p) {
+    int row = p;
+    int ip = freeParameters[p];
     // Add columns for the parameter to the pdf table.
     auto parName = m_function->parameterName(ip);
-    nameColumn->read(ip, parName);
+    nameColumn->read(row, parName);
     // Parameter values
     auto col1 = pdfTable->addColumn("double", parName);
     col1->setPlotType(1);
@@ -306,7 +324,7 @@ void ProfileChiSquared1D::execConcrete() {
     dir.zero();
     dir[ip] = 1.0;
     ChiSlice slice(m_function, dir, inputws, workspaceIndex, *domain, *values,
-                   chi0);
+                   chi0, freeParameters);
 
     // Find the bounds withn which the PDF is significantly above zero.
     // The bounds are defined relative to par0:
@@ -359,13 +377,13 @@ void ProfileChiSquared1D::execConcrete() {
     }
     // Get intersection of curve and line of constant q value to get confidence
     // interval on parameter ip
-    valueColumn->fromDouble(ip, par0);
-    minValueColumn->fromDouble(ip, par0 + parMin);
+    valueColumn->fromDouble(row, par0);
+    minValueColumn->fromDouble(row, par0 + parMin);
     for (size_t i = 0; i < qvalues.size(); i++) {
       auto [rootsMin, rootsMax] =
           getChiSquaredRoots(base, A, qvalues[i], rBound, lBound);
-      errorsTable->getColumn(3 + 2 * i)->fromDouble(ip, rootsMin - parMin);
-      errorsTable->getColumn(4 + 2 * i)->fromDouble(ip, rootsMax - parMin);
+      errorsTable->getColumn(3 + 2 * i)->fromDouble(row, rootsMin - parMin);
+      errorsTable->getColumn(4 + 2 * i)->fromDouble(row, rootsMax - parMin);
     }
 
     // Output the PDF
@@ -380,8 +398,9 @@ void ProfileChiSquared1D::execConcrete() {
   // Square roots of the diagonals of the covariance matrix give
   // the standard deviations in the quadratic approximation of the chi^2.
   GSLMatrix V = getCovarianceMatrix();
-  for (size_t i = 0; i < nParams; ++i) {
-    quadraticErrColumn->fromDouble(i, sqrt(V.get(i, i)));
+  for (size_t i = 0; i < freeParameters.size(); ++i) {
+    int ip = freeParameters[i];
+    quadraticErrColumn->fromDouble(i, sqrt(V.get(ip, ip)));
   }
 }
 
@@ -431,11 +450,13 @@ void ProfileChiSquared1D::refixParameters() {
   for (auto &fixedParameter : m_fixedParameters) {
     m_function->fix(fixedParameter);
   }
+  m_fixedParameters.clear();
 }
 
 std::tuple<double, double> ProfileChiSquared1D::getChiSquaredRoots(
     const Functions::ChebfunBase_sptr &approximation,
-    std::vector<double> &coeffs, double qvalue, double rBound, double lBound) {
+    std::vector<double> &coeffs, double qvalue, double rBound,
+    double lBound) const {
   // Points of intersections with line chi^2 = 1  give an estimate of
   // the standard deviation of this parameter if it's uncorrelated with the
   // others.

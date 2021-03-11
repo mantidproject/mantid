@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm explore the surface of the :math:`\chi^{2}` around its minimum and estimates the standard deviations for the parameters.
+This algorithm explores the surface of the :math:`\chi^{2}` around its minimum and estimates the standard deviations for the parameters.
 The value of the output property is a base name for two output table workspaces: '<Output>_errors' and '<Output>_pdf'.
 The former workspace contains parameter error estimates and the latter shows :math:`\chi^{2}`'s 1d slices along each parameter.
 
@@ -80,7 +80,7 @@ This can be seen in the following example
 
     # explore the chi squared profile for the fit parameters
     fitted_func = "name=LinearBackground, A0={}, A1={}".format(a0_fit, a1_fit);
-    ProfileChiSquared1D(fitted_func, ws, Output="LinearProfile", weighted)
+    ProfileChiSquared1D(fitted_func, ws, Output="LinearProfile")
 
     # print left and right errors of parameters
     # you should note that they are approx equal to the quadratic error for this linear model
