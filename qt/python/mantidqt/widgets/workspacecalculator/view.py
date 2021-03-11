@@ -26,6 +26,18 @@ class WorkspaceCalculatorView(QWidget):
         self.lhs_scaling.setValidator(scale_validator)
         self.rhs_scaling.setValidator(scale_validator)
 
+    def setValidationLabel(self, ws, validationValue, tooltip=""):
+        if ws == "LHS":
+            if isinstance(tooltip, list):
+                tooltip = tooltip[0]
+            self.label_validation_lhs.setVisible(not validationValue)
+            self.label_validation_lhs.setToolTip(tooltip)
+        else:
+            if isinstance(tooltip, list):
+                tooltip = tooltip[1]
+            self.label_validation_rhs.setVisible(not validationValue)
+            self.label_validation_rhs.setToolTip(tooltip)
+
     def closeEvent(self, event):
         self.deleteLater()
         super(WorkspaceCalculatorView, self).closeEvent(event)
