@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "<tbb/task_arena.h>"
+#include <tbb/task_arena.h>
 #include <queue>
 #include <tbb/parallel_sort.h>
 #include <thread>
