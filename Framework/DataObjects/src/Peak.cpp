@@ -181,7 +181,8 @@ Peak::Peak(const Geometry::IPeak &ipeak)
 //----------------------------------------------------------------------------------------------
 Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak,
            const Geometry::Instrument_const_sptr &inst,
-           boost::optional<double> detectorDistance) {
+           boost::optional<double> detectorDistance)
+    : BasePeak(lpeak) {
   this->setInstrument(inst);
   this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
 }
