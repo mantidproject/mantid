@@ -29,6 +29,7 @@ class DrillPresenterTest(unittest.TestCase):
         self.addCleanup(patch.stop)
 
         self.view = mock.Mock()
+        self.view.windowTitle.return_value = ""
         self.presenter = DrillPresenter(self.view)
         self.model = self.mModel.return_value
 

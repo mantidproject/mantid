@@ -45,6 +45,8 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
+        self._windowTitle = self.view.windowTitle()
+        self.view.setWindowTitle("Untitled [*] -- " + self._windowTitle)
         self._invalidCells = set()
         self._processError = set()
         self._customOptions = set()
@@ -425,6 +427,7 @@ class DrillPresenter:
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
+        self.view.setWindowTitle(filename[0] + "[*] -- " + self._windowTitle)
         self.model.importRundexData()
         self._syncViewHeader()
         self._syncViewTable()
@@ -453,6 +456,7 @@ class DrillPresenter:
         if not filename[0]:
             return
         self.model.setIOFile(filename[0])
+        self.view.setWindowTitle(filename[0] + "[*] -- " + self._windowTitle)
         self.model.setVisualSettings(self.view.getVisualSettings())
         self.model.exportRundexData()
         self.view.setWindowModified(False)
@@ -514,6 +518,7 @@ class DrillPresenter:
             self._saveDataQuestion()
         self.model.clear()
         self.model.resetIOFile()
+        self.view.setWindowTitle("Untitled [*] -- " + self._windowTitle)
         self._syncViewHeader()
         self._syncViewTable()
 
