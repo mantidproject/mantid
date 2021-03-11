@@ -316,7 +316,8 @@ void ALCDataLoadingView::setTimeRange(double tMin, double tMax) {
 }
 
 void ALCDataLoadingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"),
+                                                 QString("muon"));
 }
 
 void ALCDataLoadingView::disableAll() {

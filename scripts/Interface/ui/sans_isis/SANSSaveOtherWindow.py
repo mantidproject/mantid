@@ -98,7 +98,7 @@ class SANSSaveOtherDialog(QtWidgets.QDialog, Ui_SaveOtherDialog):
     def _on_help_button_clicked(self):
         try:
             import mantidqt
-            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other')
+            mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp('sans_save_other','isis_sans')
         except:
             pass
 
