@@ -83,20 +83,20 @@ Local Project Manager(s) Checklist
 **Role**: People in charge of communicating with local development teams, facility 
 management, and other people at their sponsoring facility.
 
-Friday, 4 weeks & 1 day prior to Release (1 week before code freeze)
---------------------------------------------------------------------
+Friday, 4 weeks & 1 day
+-----------------------
 
 *  Before the code freeze is in place the PM and Technical Steering Committee (TSC)
    need to agree the maintenance tasks for the next release period.
 
-Friday, 3 weeks & 1 day prior to Release (code freeze begins)
--------------------------------------------------------------
+Friday, 3 weeks & 1 day
+-----------------------
 
 *  Attempt to drive the pull requests for this milestone down to 0, in collaboration
    with the Release Manager.
 
-Wednesday, 2 weeks & 3 days prior to Release (beta testing begins)
-------------------------------------------------------------------
+Wednesday, 2 weeks & 3 days
+---------------------------
 
 *  Ensure that developers arrange to meet with their beta testers.
 *  Triage when necessary the issues discovered during beta testing.
@@ -110,16 +110,16 @@ Quality Assurance Manager Checklist
 They will ensure Mantid meets quality requirements before delivery in consultation 
 with the Release Manager.
 
-Monday, 3 weeks prior to Release
---------------------------------
+Monday, 3 weeks
+---------------
 
 *  Ensure that Manual testing begins. The instructions for Manual testing are found 
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
-Tuesday, 4 days prior to Release (beta testing ends)
-----------------------------------------------------
+Tuesday, 4 days
+---------------
 
-*  Is is likely that many changes have been made over the beta test period, therefore 
+*  It is likely that many changes have been made over the beta test period, therefore 
    ensure the manual testing is redone following the instructions described `here 
    <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
@@ -131,13 +131,13 @@ Release Editor Checklist
 **Role**: Person responsible for editing the release notes and giving them a common 
 language, layout, and collecting images.
 
-Wednesday, 2 weeks & 3 days prior to Release (beta testing begins)
-------------------------------------------------------------------
+Wednesday, 2 weeks & 3 days
+---------------------------
 
 *  Create issues for people to neaten up the release notes and add images etc.
 
-Tuesday, 4 days prior to Release (beta testing ends)
-----------------------------------------------------
+Tuesday, 4 days
+---------------
 
 *  Review the complete set of release notes to make sure there are no glaring mistakes.
 
@@ -150,27 +150,27 @@ Release Manager Checklist
 is to reiterate the timeline and be the collection point for information between 
 all of the Local Project Managers.
 
-Friday, 4 weeks & 1 day prior to Release (1 week before code freeze)
---------------------------------------------------------------------
+Friday, 4 weeks & 1 day
+-----------------------
 
-*  Post on the **\#general** slack channel reminding developers of the impending 
+*  Post on the *\#general* slack channel reminding developers of the impending 
    release and stating that they have only 5 days left before the code freeze.
 *  Send an email to beta test users explaining the dates for the testing, and 
    stating they will have more detail on the start of the first day (cc the Local 
    Project Manager(s) so they can organise a similar message at their facilities).
 
-Friday, 3 weeks & 1 day prior to Release (code freeze begins)
--------------------------------------------------------------
+Friday, 3 weeks & 1 day
+-----------------------
 
-*  Post on the **\#general** slack channel asking everyone to ensure they have moved 
+*  Post on the *\#general* slack channel asking everyone to ensure they have moved 
    any incomplete issues to the next milestone, stating the code freeze is in place, 
    and warning developers that non-blocker issues will be moved from the milestone 
    on Monday morning.
 *  Attempt to drive the pull requests for this milestone down to 0, in collaboration
    with the Local Project Managers.
 
-Monday, 3 weeks prior to Release
---------------------------------
+Monday, 3 weeks
+---------------
 
 *  Ensure that PR testing has been completed for PRs from before the code freeze.
 
@@ -191,8 +191,8 @@ milestone), ensuring that:
 *  Emphasize the order of work priorities as noted by the task priorities in this 
    checklist. Maintenance tasks may need to be paused to work on tasks for the release.
 
-Wednesday, 2 weeks & 3 days prior to Release (beta testing begins)
-------------------------------------------------------------------
+Wednesday, 2 weeks & 3 days
+---------------------------
 
 *  Before sending an email to users regarding the beginning of beta testing, ensure that 
    the Usage data *.zip file containing usage data is up-to-date. This is done by 
@@ -202,22 +202,22 @@ Wednesday, 2 weeks & 3 days prior to Release (beta testing begins)
    to report issues (cc the Local Project Managers so they can organise a similar message 
    at their facilities).
 
-Wednesday, 1 week & 3 days prior to Release
--------------------------------------------
+Wednesday, 1 week & 3 days
+--------------------------
 
 *  Send a beta test reminder email to beta test users thanking them for there feedback so 
    far and reminding them to feedback as soon as possible and not to send in a list of 
    issues at the end of testing (cc the Local Project Managers so they can organise a 
    similar message at their facilities).
 
-Tuesday, 4 days prior to Release (beta testing ends)
-----------------------------------------------------
+Tuesday, 4 days
+---------------
 
 *  At the end of the day email the beta test users thanking them.
 *  Review the complete set of release notes to make sure there are no glaring mistakes.
 
-Friday, 1 day prior to Release
-------------------------------
+Friday, 1 day
+-------------
 
 * This is the final day for code changes to the build for blocker issues.
 
@@ -230,7 +230,7 @@ After the Technical Release Manager has finished their release day tasks:
   *  ``nobugs@nobugsconference.org``
   *  ``news@neutronsources.org``
   *  ``neutron@neutronsources.org``
-*  Also post the contents of the message to the **\#announcements** channel on 
+*  Also post the contents of the message to the *\#announcements* channel on 
    Slack.
 *  Create a new item on the forum news.
 *  Close the release milestone on github.
@@ -243,8 +243,8 @@ Technical Release Manager Checklist
 **Role**: Person responsible for technical tasks such as renaming branches, creating 
 tags, configuring build servers.
 
-Monday, 3 weeks prior to Release
---------------------------------
+Monday, 3 weeks
+---------------
 
 **Create the Release Branch (once most PR's are merged)**
 
@@ -260,7 +260,7 @@ Monday, 3 weeks prior to Release
    branches of these pull requests run `update-pr-base-branch.py 
    <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
 *  Inform other developers that release-next has been created by posting to the 
-   **\#announcements** slack channel. You can use an adapted version of the 
+   *\#announcements* slack channel. You can use an adapted version of the 
    following announcement:
 
   .. code
