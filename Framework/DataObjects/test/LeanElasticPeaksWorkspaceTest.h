@@ -41,7 +41,7 @@ public:
     LeanElasticPeak p(V3D(1, 0, 0), 3.0);
     pw->addPeak(p);
 
-    TS_ASSERT_EQUALS(pw->columnCount(), 20);
+    TS_ASSERT_EQUALS(pw->columnCount(), 14);
     TS_ASSERT_EQUALS(pw->rowCount(), 1);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-9);

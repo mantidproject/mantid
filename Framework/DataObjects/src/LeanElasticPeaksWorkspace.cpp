@@ -403,25 +403,19 @@ LeanElasticPeaksWorkspace::createDetectorTable() const {
 void LeanElasticPeaksWorkspace::initColumns() {
   // Note: The column types are controlled in PeakColumn.cpp
   addPeakColumn("RunNumber");
-  addPeakColumn("DetID");
   addPeakColumn("h");
   addPeakColumn("k");
   addPeakColumn("l");
   addPeakColumn("Wavelength");
   addPeakColumn("Energy");
-  addPeakColumn("TOF");
   addPeakColumn("DSpacing");
   addPeakColumn("Intens");
   addPeakColumn("SigInt");
   addPeakColumn("Intens/SigInt");
   addPeakColumn("BinCount");
-  addPeakColumn("BankName");
-  addPeakColumn("Row");
-  addPeakColumn("Col");
   addPeakColumn("QLab");
   addPeakColumn("QSample");
   addPeakColumn("PeakNumber");
-  addPeakColumn("TBar");
 }
 
 //---------------------------------------------------------------------------------------------

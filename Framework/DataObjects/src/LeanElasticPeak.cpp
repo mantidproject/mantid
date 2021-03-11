@@ -112,7 +112,10 @@ void LeanElasticPeak::setDetectorID(int) {
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int LeanElasticPeak::getDetectorID() const { return -1; }
+int LeanElasticPeak::getDetectorID() const {
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak::getDetectorID(): no detector ID on LeanElasticPeak");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Set the instrument (and save the source/sample pos).
@@ -161,7 +164,8 @@ double LeanElasticPeak::getWavelength() const { return m_wavelength; }
  * peak,
  * using the geometry of the detector  */
 double LeanElasticPeak::getTOF() const {
-  return std::numeric_limits<double>::quiet_NaN();
+  throw Exception::NotImplementedError(
+      "LeanElasticPeak::getTOF(): no detector infomation in LeanElasticPeak");
 }
 
 // -------------------------------------------------------------------------------------
