@@ -62,9 +62,10 @@ public:
 
   virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
+  /*
   virtual bool findDetector() = 0;
   virtual bool findDetector(const InstrumentRayTracer &tracer) = 0;
-
+  */
   virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                                boost::optional<double> detectorDistance) = 0;
   virtual void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
@@ -115,6 +116,8 @@ public:
   virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
   virtual double getAbsorptionWeightedPathLength() const = 0;
 };
+
+using IPeak_uptr = std::unique_ptr<IPeak>;
 
 } // namespace Geometry
 } // namespace Mantid

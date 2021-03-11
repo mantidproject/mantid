@@ -345,10 +345,12 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
  *
  * @return true if the detector ID was found.
  */
+/*
 bool LeanElasticPeak::findDetector() {
   throw Exception::NotImplementedError(
       "LeanElasticPeak has no detector information");
 }
+*/
 
 /**
  * Performs the same algorithm as findDetector() but uses a pre-existing
@@ -357,10 +359,12 @@ bool LeanElasticPeak::findDetector() {
  * over the same instrument.
  * @return true if the detector ID was found.
  */
+/*
 bool LeanElasticPeak::findDetector(const InstrumentRayTracer &) {
   throw Exception::NotImplementedError(
       "LeanElasticPeak has no detector information");
 }
+*/
 
 /**
  Forwarding function. Exposes the detector position directly.

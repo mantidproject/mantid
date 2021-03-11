@@ -97,9 +97,11 @@ public:
   MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
+  /*
   MOCK_METHOD0(findDetector, bool());
   MOCK_METHOD1(findDetector,
                bool(const Mantid::Geometry::InstrumentRayTracer &tracer));
+  */
   MOCK_METHOD2(setQSampleFrame, void(const Mantid::Kernel::V3D &QSampleFrame,
                                      boost::optional<double> detectorDistance));
   MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame,
