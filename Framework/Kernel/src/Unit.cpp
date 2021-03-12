@@ -873,6 +873,18 @@ MomentumTransfer::MomentumTransfer() : Unit() {
   addConversion("dSpacing", factor, -1.0);
 }
 
+void MomentumTransfer::validateUnitParams(const int,
+                                          const UnitParametersMap &params) {
+  double difc = 0.;
+  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+    if (!ParamPresent(params, UnitParams::twoTheta) ||
+        (!ParamPresent(params, UnitParams::l2)))
+      throw std::runtime_error("A difc value or L2/two theta must be supplied "
+                               "in the extra parameters when initialising " +
+                               this->unitID() + " for conversion via TOF");
+  };
+}
+
 void MomentumTransfer::init() {
   // First the crux of the conversion
   difc = 0.;
