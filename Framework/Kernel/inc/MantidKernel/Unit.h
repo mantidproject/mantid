@@ -395,11 +395,17 @@ MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2,
                                              const double twoTheta,
                                              const double offset);
 
-class MANTID_KERNEL_DLL dSpacingBase : public Unit {
+//=================================================================================================
+/// d-Spacing in Angstrom
+class MANTID_KERNEL_DLL dSpacing : public Unit {
 public:
+  const std::string unitID() const override; ///< "dSpacing"
+  const std::string caption() const override { return "d-Spacing"; }
+  const UnitLabel label() const override;
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
   void init() override;
+  Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
   double calcTofMin(const double difc, const double difa, const double tzero,
@@ -408,7 +414,7 @@ public:
                     const double tofmax = 0.);
 
   /// Constructor
-  dSpacingBase();
+  dSpacing();
 
 protected:
   void validateUnitParams(const int emode,
@@ -417,22 +423,6 @@ protected:
   double difa;
   double difc;
   double tzero;
-  double valueThatGivesLargestTOF;
-  double valueThatGivesSmallestTOF;
-};
-
-//=================================================================================================
-/// d-Spacing in Angstrom
-class MANTID_KERNEL_DLL dSpacing : public dSpacingBase {
-public:
-  const std::string unitID() const override; ///< "dSpacing"
-  const std::string caption() const override { return "d-Spacing"; }
-  const UnitLabel label() const override;
-
-  Unit *clone() const override;
-
-  /// Constructor
-  dSpacing();
 };
 
 //=================================================================================================
@@ -467,7 +457,7 @@ protected:
 
 //=================================================================================================
 /// Momentum Transfer in Angstrom^-1
-class MANTID_KERNEL_DLL MomentumTransfer : public dSpacingBase {
+class MANTID_KERNEL_DLL MomentumTransfer : public Unit {
 public:
   const std::string unitID() const override; ///< "MomentumTransfer"
   const std::string caption() const override { return "q"; }
@@ -475,11 +465,15 @@ public:
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
+  void init() override;
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
   /// Constructor
   MomentumTransfer();
+
+protected:
+  double difc;
 };
 
 //=================================================================================================

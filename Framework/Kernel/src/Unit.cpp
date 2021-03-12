@@ -629,12 +629,20 @@ double tofToDSpacingFactor(const double l1, const double l2,
   return (numerator * CONSTANT) / sinTheta;
 }
 
-dSpacingBase::dSpacingBase()
-    : Unit(), toDSpacingError(""), difa(0), difc(DBL_MIN), tzero(0),
-      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {}
+DECLARE_UNIT(dSpacing)
 
-void dSpacingBase::validateUnitParams(const int,
-                                      const UnitParametersMap &params) {
+dSpacing::dSpacing()
+    : Unit(), toDSpacingError(""), difa(0), difc(DBL_MIN), tzero(0) {
+  const double factor = 2.0 * M_PI;
+  addConversion("MomentumTransfer", factor, -1.0);
+  addConversion("QSquared", (factor * factor), -2.0);
+}
+
+const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
+
+Unit *dSpacing::clone() const { return new dSpacing(*this); }
+
+void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
   double difc = 0.;
   if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
     if (!ParamPresent(params, UnitParams::twoTheta) ||
@@ -660,7 +668,7 @@ void dSpacingBase::validateUnitParams(const int,
   }
 }
 
-void dSpacingBase::init() {
+void dSpacing::init() {
   // First the crux of the conversion
   difa = 0.;
   difc = 0.;
@@ -688,14 +696,14 @@ void dSpacingBase::init() {
   }
 }
 
-double dSpacingBase::singleToTOF(const double x) const {
+double dSpacing::singleToTOF(const double x) const {
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleToTOF called before object "
                              "has been initialized.");
   return difa * x * x + difc * x + tzero;
 }
 
-double dSpacingBase::singleFromTOF(const double tof) const {
+double dSpacing::singleFromTOF(const double tof) const {
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
@@ -727,27 +735,27 @@ double dSpacingBase::singleFromTOF(const double tof) const {
   else
     return (tof - tzero) / (0.5 * (difc + sqrtTerm));
 }
-double dSpacingBase::conversionTOFMin() const {
+double dSpacing::conversionTOFMin() const {
   // quadratic only has a min if difa is positive
   if (difa > 0) {
     // min of the quadratic is at d=-difc/(2*difa)
     return std::max(0., tzero - difc * difc / (4 * difa));
   } else {
     // no min so just pick value closest to zero that works
-    double TOFmin = singleToTOF(valueThatGivesSmallestTOF);
+    double TOFmin = singleToTOF(0.);
     if (TOFmin < std::numeric_limits<double>::min()) {
       TOFmin = 0.;
     }
     return TOFmin;
   }
 }
-double dSpacingBase::conversionTOFMax() const {
+double dSpacing::conversionTOFMax() const {
   // quadratic only has a max if difa is negative
   if (difa < 0) {
     return std::min(DBL_MAX, tzero - difc * difc / (4 * difa));
   } else {
     // no max so just pick value closest to DBL_MAX that works
-    double TOFmax = singleToTOF(valueThatGivesLargestTOF);
+    double TOFmax = singleToTOF(DBL_MAX);
     if (std::isinf(TOFmax)) {
       TOFmax = DBL_MAX;
     }
@@ -755,8 +763,8 @@ double dSpacingBase::conversionTOFMax() const {
   }
 }
 
-double dSpacingBase::calcTofMin(const double difc, const double difa,
-                                const double tzero, const double tofmin) {
+double dSpacing::calcTofMin(const double difc, const double difa,
+                            const double tzero, const double tofmin) {
   Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
                                    {Kernel::UnitParams::difc, difc},
                                    {Kernel::UnitParams::tzero, tzero}};
@@ -764,26 +772,14 @@ double dSpacingBase::calcTofMin(const double difc, const double difa,
   return std::max(conversionTOFMin(), tofmin);
 }
 
-double dSpacingBase::calcTofMax(const double difc, const double difa,
-                                const double tzero, const double tofmax) {
+double dSpacing::calcTofMax(const double difc, const double difa,
+                            const double tzero, const double tofmax) {
   Kernel::UnitParametersMap params{{Kernel::UnitParams::difa, difa},
                                    {Kernel::UnitParams::difc, difc},
                                    {Kernel::UnitParams::tzero, tzero}};
   initialize(-1, 0, params);
   return std::min(conversionTOFMax(), tofmax);
 }
-
-DECLARE_UNIT(dSpacing)
-
-const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
-
-dSpacing::dSpacing() : dSpacingBase() {
-  const double factor = 2.0 * M_PI;
-  addConversion("MomentumTransfer", factor, -1.0);
-  addConversion("QSquared", (factor * factor), -2.0);
-}
-
-Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
 // ==================================================================================================
 /* D-SPACING Perpendicular
@@ -871,28 +867,40 @@ const UnitLabel MomentumTransfer::label() const {
   return Symbol::InverseAngstrom;
 }
 
-MomentumTransfer::MomentumTransfer() : dSpacingBase() {
+MomentumTransfer::MomentumTransfer() : Unit() {
   addConversion("QSquared", 1.0, 2.0);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -1.0);
-  valueThatGivesLargestTOF = 2 * M_PI / DBL_MAX;
-  valueThatGivesSmallestTOF = DBL_MAX;
+}
+
+void MomentumTransfer::init() {
+  // First the crux of the conversion
+  difc = 0.;
+
+  if (!ParamPresentAndSet(m_params, UnitParams::difc, difc)) {
+    // also support inputs as L2, two theta
+    double l2;
+    if (ParamPresentAndSet(m_params, UnitParams::l2, l2)) {
+      double twoTheta;
+      if (ParamPresentAndSet(m_params, UnitParams::twoTheta, twoTheta)) {
+        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta, 0.);
+      }
+    }
+  }
 }
 
 double MomentumTransfer::singleToTOF(const double x) const {
-  return dSpacingBase::singleToTOF(2. * M_PI / x);
+  return 2. * M_PI * difc / x;
 }
 //
 double MomentumTransfer::singleFromTOF(const double tof) const {
-  return 2. * M_PI / dSpacingBase::singleFromTOF(tof);
+  return 2. * M_PI * difc / tof;
 }
 
 double MomentumTransfer::conversionTOFMin() const {
-  return dSpacingBase::conversionTOFMin();
+  return 2. * M_PI * difc / DBL_MAX;
 }
-double MomentumTransfer::conversionTOFMax() const {
-  return dSpacingBase::conversionTOFMax();
-}
+double MomentumTransfer::conversionTOFMax() const { return DBL_MAX; }
 
 Unit *MomentumTransfer::clone() const { return new MomentumTransfer(*this); }
 
@@ -918,10 +926,13 @@ double QSquared::singleFromTOF(const double tof) const {
 }
 
 double QSquared::conversionTOFMin() const {
-  return MomentumTransfer::conversionTOFMin();
+  return 2 * M_PI * difc / sqrt(DBL_MAX);
 }
 double QSquared::conversionTOFMax() const {
-  return MomentumTransfer::conversionTOFMax();
+  double tofmax = 2 * M_PI * difc / sqrt(DBL_MIN);
+  if (isinf(tofmax))
+    tofmax = DBL_MAX;
+  return tofmax;
 }
 
 Unit *QSquared::clone() const { return new QSquared(*this); }
