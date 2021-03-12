@@ -38,7 +38,7 @@ Mantid::Kernel::Logger g_log("PeaksWorkspace");
  * @return PeaksWorkspace object
  */
 PeaksWorkspace::PeaksWorkspace()
-    : IPeaksWorkspace(), peaks(), columns(), columnNames(),
+    : IPeaksWorkspace(), m_peaks(), m_columns(), m_columnNames(),
       m_coordSystem(None) {
   initColumns();
   // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
@@ -52,8 +52,8 @@ PeaksWorkspace::PeaksWorkspace()
  */
 // PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other) = default;
 PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
-    : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
-      m_coordSystem(other.m_coordSystem) {
+    : IPeaksWorkspace(other), m_peaks(other.m_peaks), m_columns(),
+      m_columnNames(), m_coordSystem(other.m_coordSystem) {
   initColumns();
   // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
   setNumberOfDetectorGroups(0);
@@ -117,13 +117,13 @@ public:
  */
 void PeaksWorkspace::sort(std::vector<ColumnAndDirection> &criteria) {
   PeakComparator comparator(criteria);
-  std::stable_sort(peaks.begin(), peaks.end(), comparator);
+  std::stable_sort(m_peaks.begin(), m_peaks.end(), comparator);
 }
 
 //---------------------------------------------------------------------------------------------
 /** @return the number of peaks
  */
-int PeaksWorkspace::getNumberPeaks() const { return int(peaks.size()); }
+int PeaksWorkspace::getNumberPeaks() const { return int(m_peaks.size()); }
 
 //---------------------------------------------------------------------------------------------
 /** @return the convention
@@ -135,11 +135,11 @@ std::string PeaksWorkspace::getConvention() const { return convention; }
  * @param peakNum  the peak to remove. peakNum starts at 0
  */
 void PeaksWorkspace::removePeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "PeaksWorkspace::removePeak(): peakNum is out of range.");
   }
-  peaks.erase(peaks.begin() + peakNum);
+  m_peaks.erase(m_peaks.begin() + peakNum);
 }
 
 /** Removes multiple peaks
@@ -151,13 +151,13 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   // if index of peak is in badPeaks remove
   int ip = -1;
   auto it =
-      std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
+      std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](Peak &pk) {
         (void)pk;
         ip++;
         return std::any_of(badPeaks.cbegin(), badPeaks.cend(),
                            [ip](int badPeak) { return badPeak == ip; });
       });
-  peaks.erase(it, peaks.end());
+  m_peaks.erase(it, m_peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -166,9 +166,9 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
-    peaks.emplace_back((const Peak &)ipeak);
+    m_peaks.emplace_back((const Peak &)ipeak);
   } else {
-    peaks.emplace_back(Peak(ipeak));
+    m_peaks.emplace_back(Peak(ipeak));
   }
 }
 
@@ -187,7 +187,7 @@ void PeaksWorkspace::addPeak(const V3D &position,
 /** Add a peak to the list
  * @param peak :: Peak object to add (move) into this.
  */
-void PeaksWorkspace::addPeak(Peak &&peak) { peaks.emplace_back(peak); }
+void PeaksWorkspace::addPeak(Peak &&peak) { m_peaks.emplace_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
@@ -195,11 +195,11 @@ void PeaksWorkspace::addPeak(Peak &&peak) { peaks.emplace_back(peak); }
  * @return a reference to a Peak object.
  */
 Peak &PeaksWorkspace::getPeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "PeaksWorkspace::getPeak(): peakNum is out of range.");
   }
-  return peaks[peakNum];
+  return m_peaks[peakNum];
 }
 
 //---------------------------------------------------------------------------------------------
@@ -208,11 +208,11 @@ Peak &PeaksWorkspace::getPeak(const int peakNum) {
  * @return a reference to a Peak object.
  */
 const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "PeaksWorkspace::getPeak(): peakNum is out of range.");
   }
-  return peaks[peakNum];
+  return m_peaks[peakNum];
 }
 
 //---------------------------------------------------------------------------------------------
@@ -510,6 +510,15 @@ std::unique_ptr<IPeak> PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
 }
 
 /**
+ * Create a Peak using default values
+ *
+ * @return a point to a new peak object
+ */
+std::unique_ptr<IPeak> PeaksWorkspace::createPeak() const {
+  return std::make_unique<Peak>();
+}
+
+/**
  * Returns selected information for a "peak" at QLabFrame.
  *
  * @param qFrame      An arbitrary position in Q-space.  This does not have to
@@ -561,10 +570,10 @@ int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peaks vector */
-std::vector<Peak> &PeaksWorkspace::getPeaks() { return peaks; }
+std::vector<Peak> &PeaksWorkspace::getPeaks() { return m_peaks; }
 
 /** Return a const reference to the Peaks vector */
-const std::vector<Peak> &PeaksWorkspace::getPeaks() const { return peaks; }
+const std::vector<Peak> &PeaksWorkspace::getPeaks() const { return m_peaks; }
 
 /** Getter for the integration status.
  @return TRUE if it has been integrated using a peak integration algorithm.
@@ -602,7 +611,7 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
   const auto npeaks(static_cast<int>(this->rowCount()));
   int nrows(0);
   for (int i = 0; i < npeaks; ++i) {
-    const Peak &peak = this->peaks[i];
+    const Peak &peak = this->m_peaks[i];
     auto detIDs = peak.getContributingDetIDs();
     auto itEnd = detIDs.end();
     for (auto it = detIDs.begin(); it != itEnd; ++it) {
@@ -649,17 +658,17 @@ void PeaksWorkspace::initColumns() {
  **/
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.emplace_back(
-      std::make_shared<DataObjects::PeakColumn>(this->peaks, name));
+  m_columns.emplace_back(
+      std::make_shared<DataObjects::PeakColumn<Peak>>(this->m_peaks, name));
   // Cache the names
-  columnNames.emplace_back(name);
+  m_columnNames.emplace_back(name);
 }
 
 //---------------------------------------------------------------------------------------------
 /// @return the index of the column with the given name.
 size_t PeaksWorkspace::getColumnIndex(const std::string &name) const {
-  for (size_t i = 0; i < columns.size(); i++)
-    if (columns[i]->name() == name)
+  for (size_t i = 0; i < m_columns.size(); i++)
+    if (m_columns[i]->name() == name)
       return i;
   throw std::invalid_argument("Column named " + name +
                               " was not found in the PeaksWorkspace.");
@@ -668,26 +677,26 @@ size_t PeaksWorkspace::getColumnIndex(const std::string &name) const {
 //---------------------------------------------------------------------------------------------
 /// Gets the shared pointer to a column by index.
 std::shared_ptr<Mantid::API::Column> PeaksWorkspace::getColumn(size_t index) {
-  if (index >= columns.size())
+  if (index >= m_columns.size())
     throw std::invalid_argument(
         "PeaksWorkspace::getColumn() called with invalid index.");
-  return columns[index];
+  return m_columns[index];
 }
 
 //---------------------------------------------------------------------------------------------
 /// Gets the shared pointer to a column by index.
 std::shared_ptr<const Mantid::API::Column>
 PeaksWorkspace::getColumn(size_t index) const {
-  if (index >= columns.size())
+  if (index >= m_columns.size())
     throw std::invalid_argument(
         "PeaksWorkspace::getColumn() called with invalid index.");
-  return columns[index];
+  return m_columns[index];
 }
 
 void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Number of Peaks
-  const size_t np(peaks.size());
+  const size_t np(m_peaks.size());
 
   // Column vectors for peaks table
   std::vector<int> detectorID(np);
@@ -712,7 +721,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // Populate column vectors from Peak Workspace
   size_t maxShapeJSONLength = 0;
   for (size_t i = 0; i < np; i++) {
-    Peak p = peaks[i];
+    Peak p = m_peaks[i];
     detectorID[i] = p.getDetectorID();
     H[i] = p.getH();
     K[i] = p.getK();
@@ -893,7 +902,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Goniometer Matrix Column
   std::vector<int> array_dims;
-  array_dims.emplace_back(static_cast<int>(peaks.size()));
+  array_dims.emplace_back(static_cast<int>(m_peaks.size()));
   array_dims.emplace_back(9);
   file->writeData("column_15", goniometerMatrix, array_dims);
   file->openData("column_15");

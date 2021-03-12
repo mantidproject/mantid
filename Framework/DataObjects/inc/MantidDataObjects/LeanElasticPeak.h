@@ -30,9 +30,6 @@ namespace DataObjects {
  */
 class DLLExport LeanElasticPeak : public BasePeak {
 public:
-  /// Allow PeakColumn class to directly access members.
-  friend class PeakColumn;
-
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
