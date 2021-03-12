@@ -301,16 +301,17 @@ def collect_fit_result(wksp, outputname: str, peaks, donor=None, infotype: str =
     observable[chi2 > chisq_max] = np.nan
 
     # convert the numpy arrays to a Workspace2d
+    numPeaks = len(peaks)
     if donor:
         numSpec = mtd[str(donor)].getNumberHistograms()
     else:
         numSpec = len(np.unique(wsindex))
-    output = __create_outputws(donor, numSpec, len(peaks))
+    output = __create_outputws(donor, numSpec, numPeaks)
     for i in np.unique(wsindex):
-        selection = wsindex == i
+        start = np.searchsorted(wsindex, i)
         i = int(i)  # to be compliant with mantid API
         output.setX(i, peaks)
-        output.setY(i, observable[selection])
+        output.setY(i, observable[start:start+numPeaks])
     mtd.addOrReplace(outputname, output)
 
 
