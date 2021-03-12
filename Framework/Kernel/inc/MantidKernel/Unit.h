@@ -489,6 +489,8 @@ public:
   MomentumTransfer();
 
 protected:
+  void validateUnitParams(const int emode,
+                          const UnitParametersMap &params) override;
   double difc;
 };
 
