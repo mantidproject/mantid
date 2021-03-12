@@ -340,32 +340,6 @@ LeanElasticPeak &LeanElasticPeak::operator=(const LeanElasticPeak &other) {
   return *this;
 }
 
-/** After creating a peak using the Q in the lab frame,
- * the detPos is set to the direction of the detector (but the detector is
- *unknown)
- *
- * Using the instrument set in the peak, perform ray tracing
- * to find the exact detector.
- *
- * @return true if the detector ID was found.
- */
-bool LeanElasticPeak::findDetector() {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
-}
-
-/**
- * Performs the same algorithm as findDetector() but uses a pre-existing
- * InstrumentRayTracer object to be able to take adavtange of its caches.
- * This method should be preferred if findDetector is to be called many times
- * over the same instrument.
- * @return true if the detector ID was found.
- */
-bool LeanElasticPeak::findDetector(const InstrumentRayTracer &) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
-}
-
 /**
  Forwarding function. Exposes the detector position directly.
  */

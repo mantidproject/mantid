@@ -41,7 +41,6 @@ public:
     TS_ASSERT_THROWS(p.getDetectorID(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetector(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getInstrument(), const Exception::NotImplementedError &)
-    TS_ASSERT_THROWS(p.findDetector(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPosition(),
                      const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(),

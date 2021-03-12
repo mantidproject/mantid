@@ -91,8 +91,12 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
+  /*
   bool findDetector() override;
   bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
+  */
+  bool findDetector();
+  bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
   void setSamplePos(double samX, double samY, double samZ) override;
   void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
@@ -165,6 +169,8 @@ private:
   /// Static logger
   static Mantid::Kernel::Logger g_log;
 };
+
+using Peak_uptr = std::unique_ptr<Peak>;
 
 } // namespace DataObjects
 } // namespace Mantid
