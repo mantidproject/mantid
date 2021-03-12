@@ -103,7 +103,7 @@ class WorkspaceCalculatorModel():
                     Multiply(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
             elif self._operation == 'WM':
                 if self._md_ws:
-                    WeightedMeanMD(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
+                    WeightedMeanMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     WeightedMean(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
             else:
@@ -111,6 +111,6 @@ class WorkspaceCalculatorModel():
                     DivideMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-        except RuntimeError as err:
-            return str(err)
+        except (RuntimeError, ValueError) as err:
+            return False, False, str(err)
         return True, True, ""
