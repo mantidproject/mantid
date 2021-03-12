@@ -123,13 +123,6 @@ void export_IPeak() {
            ":class:`~mantid.geometry.Goniometer` rotation was NOT taken "
            "out.\n"
            "Note: There is no 2*pi factor used, so \\|Q| = 1/wavelength.")
-      /*
-      .def("findDetector", (bool (IPeak::*)()) & IPeak::findDetector,
-           arg("self"),
-           "Using the :class:`~mantid.geometry.Instrument` set in the peak, "
-           "perform ray tracing to find "
-           "the exact :class:`~mantid.geometry.Detector`.")
-      */
       .def("getQSampleFrame", &IPeak::getQSampleFrame, arg("self"),
            "Return the Q change (of the lattice, k_i - k_f) for this peak."
            "The Q is in the Sample frame: the "
