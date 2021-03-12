@@ -73,7 +73,7 @@ public:
    */
   bool customSort() const override { return true; }
 
-  void sort(std::vector<std::pair<std::string, bool>> &criteria) override;
+  void sort(std::vector<ColumnAndDirection> &criteria) override;
 
   int getNumberPeaks() const override;
   std::string getConvention() const override;

@@ -30,7 +30,6 @@ namespace DataObjects {
  */
 class DLLExport LeanElasticPeak : public BasePeak {
 public:
-
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,

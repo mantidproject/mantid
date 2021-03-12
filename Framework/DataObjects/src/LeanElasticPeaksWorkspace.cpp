@@ -308,12 +308,11 @@ LeanElasticPeaksWorkspace::createPeakHKL(const V3D &HKL) const {
   const auto &lattice = this->sample().getOrientedLattice();
   const auto &goniometer = this->run().getGoniometer();
 
-  // Calculate qLab from q HKL. As per Busing and Levy 1967, q_lab_frame = 2pi *
-  // Goniometer * UB * HKL
+  // Calculate qSample from q HKL. As per Busing and Levy 1967, q_sample_frame =
+  // 2pi * UB * HKL
   const V3D qSampleFrame = lattice.getUB() * HKL * 2 * M_PI;
 
-  // create a peak using the qLab frame
-  // This should calculate the detector positions too
+  // create a peak using the qSample frame
   std::unique_ptr<IPeak> peak =
       std::make_unique<LeanElasticPeak>(qSampleFrame, goniometer.getR());
   // We need to set HKL separately to keep things consistent.

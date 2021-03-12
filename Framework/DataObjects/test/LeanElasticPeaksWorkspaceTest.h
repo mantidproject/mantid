@@ -195,7 +195,7 @@ public:
     pw->addPeak(p4);
 
     std::vector<std::pair<std::string, bool>> criteria;
-    // Sort by ascending wavelength then decending dspacing
+    // Sort by decending wavelength then decending dspacing
     criteria.emplace_back(std::pair<std::string, bool>("wavelength", false));
     criteria.emplace_back(std::pair<std::string, bool>("dspacing", false));
     pw->sort(criteria);
