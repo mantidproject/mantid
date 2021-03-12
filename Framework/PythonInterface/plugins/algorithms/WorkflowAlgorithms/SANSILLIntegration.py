@@ -226,8 +226,7 @@ class SANSILLIntegration(PythonAlgorithm):
                 if wavelength != 0:
                     run = mtd[self._input_ws].getRun()
                     instrument = mtd[self._input_ws].getInstrument()
-                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value") \
-                            and run.getLogData("Gamma.value") != 0:
+                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value"):
                         if instrument.hasParameter('detector-width'):
                             pixel_nb = instrument.getNumberParameter('detector-width')[0]
                         else:
