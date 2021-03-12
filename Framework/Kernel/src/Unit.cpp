@@ -930,7 +930,7 @@ double QSquared::conversionTOFMin() const {
 }
 double QSquared::conversionTOFMax() const {
   double tofmax = 2 * M_PI * difc / sqrt(DBL_MIN);
-  if (isinf(tofmax))
+  if (std::isinf(tofmax))
     tofmax = DBL_MAX;
   return tofmax;
 }
