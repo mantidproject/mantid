@@ -54,9 +54,6 @@ public:
   /// Creates an instance of a function
   std::shared_ptr<IFunction> createInitialized(const std::string &input) const;
 
-  std::shared_ptr<IPeakFunction>
-  createInitializedPeakFunction(const std::string &name) const;
-
   /// Creates an instnce of an inizialised multidomain function where each
   /// domain has the same function.
   std::shared_ptr<MultiDomainFunction>
@@ -92,6 +89,8 @@ private:
   std::shared_ptr<IFunction>
   createSimple(const Expression &expr,
                std::map<std::string, std::string> &parentAttributes) const;
+  std::shared_ptr<IPeakFunction>
+  createPeakFunction(const Expression &expr, const std::string &name) const;
   /// Create a composite function
   std::shared_ptr<CompositeFunction>
   createComposite(const Expression &expr,
