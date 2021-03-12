@@ -20,6 +20,10 @@ for example.
 If the input workspace is a MDWorkspace then the instrument from the
 first experiment info is used.
 
+If the `InstrumentWorkspace` is not provided then a
+:ref:`LeanElasticPeaksWorkspace` is created instead of a
+:ref:`PeaksWorkspace`.
+
 Usage
 -----
 
@@ -34,7 +38,7 @@ Output:
 
 .. testoutput:: ExEmptyTable
 
-    Created a PeaksWorkspace with 0 rows
+    Created a LeanElasticPeaksWorkspace with 0 rows
 
 **Example: With a few peaks in place**
 
