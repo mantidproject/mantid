@@ -95,7 +95,7 @@ void ConvertSpectrumAxis::exec() {
     const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
     auto emode = Kernel::DeltaEMode::fromString(emodeStr);
-    int nfailures = 0;
+    size_t nfailures = 0;
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       UnitParametersMap pmap{};
@@ -115,9 +115,9 @@ void ConvertSpectrumAxis::exec() {
         value = (xval.front() + xval.back()) / 2;
       } catch (std::runtime_error &) {
         nfailures++;
-        g_log.warning(
-            "Unable to calculate new spectrum axis value for workspace index " +
-            i);
+        g_log.warning() << "Unable to calculate new spectrum axis value for "
+                           "workspace index "
+                        << i;
         value = inputWS->getAxis(1)->getValue(i);
       }
       indexMap.emplace(value, i);
