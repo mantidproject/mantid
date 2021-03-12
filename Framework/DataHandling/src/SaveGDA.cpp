@@ -89,8 +89,8 @@ getParamLinesFromGSASFile(const std::string &paramsFilename) {
 
 DECLARE_ALGORITHM(SaveGDA)
 
-SaveGDA::CalibrationParams::CalibrationParams(const double _difa,
-                                              const double _difc,
+SaveGDA::CalibrationParams::CalibrationParams(const double _difc,
+                                              const double _difa,
                                               const double _tzero)
     : difa(_difa), difc(_difc), tzero(_tzero) {}
 
@@ -176,8 +176,8 @@ void SaveGDA::exec() {
     tofScaled.reserve(d.size());
     std::transform(d.begin(), d.end(), std::back_inserter(tofScaled),
                    [&bankCalibParams](const double dVal) {
-                     return (dVal * bankCalibParams.difa +
-                             dVal * dVal * bankCalibParams.difc +
+                     return (dVal * bankCalibParams.difc +
+                             dVal * dVal * bankCalibParams.difa +
                              bankCalibParams.tzero) *
                             tofScale;
                    });
