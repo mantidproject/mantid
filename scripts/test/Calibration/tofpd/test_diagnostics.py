@@ -30,20 +30,24 @@ class TestDiagnostics(unittest.TestCase):
         test_strain = diagnostics.collect_peaks('diag_dspacing', 'test_strain', infotype='strain')
         result = CompareWorkspaces(test_strain, "strain", Tolerance=1e-6)
         self.assertTrue(result)
+        DeleteWorkspaces(test_strain)
 
     def test_collect_peaks_diff(self):
         test_diff = diagnostics.collect_peaks('diag_dspacing', 'test_diff', infotype='difference')
         result = CompareWorkspaces(test_diff, "difference", Tolerance=1e-6)
         self.assertTrue(result)
+        DeleteWorkspaces(test_diff)
 
     def test_extract_peak_info(self):
         test_single_strain = diagnostics.extract_peak_info('strain', 'test_single_strain', self.PEAK)
         result = CompareWorkspaces(test_single_strain, "single_strain", Tolerance=1e-6)
         self.assertTrue(result)
+        DeleteWorkspaces(test_single_strain)
 
         test_single_diff = diagnostics.extract_peak_info('difference', 'test_single_diff', self.PEAK)
         result = CompareWorkspaces(test_single_diff, "single_diff", Tolerance=1e-6)
         self.assertTrue(result)
+        DeleteWorkspaces(test_single_diff)
 
 
 if __name__ == '__main__':

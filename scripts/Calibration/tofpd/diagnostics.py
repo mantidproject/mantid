@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from mantid.plots.resampling_image.samplingimage import imshow_sampling
 from mantid.plots.datafunctions import get_axes_labels
 from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
@@ -374,9 +381,10 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     x = single.dataX(0)
     y = single.dataY(0)
     e = single.dataE(0)
+    start_detid = np.searchsorted(detids, 0)
     for wksp_index in range(numSpec):
         if have_detids:
-            x[wksp_index] = detids[wksp_index]
+            x[wksp_index] = detids[start_detid + wksp_index]
         else:
             x[wksp_index] = wksp_index
         y[wksp_index] = wksp.readY(wksp_index)[peak_index]

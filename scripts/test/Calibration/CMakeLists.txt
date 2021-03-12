@@ -4,8 +4,9 @@ set(TEST_PY_FILES
     test_ideal_tube.py
     test_tube.py
     test_tube_calib.py
-    tofpd/test_diagnostics.py
     )
+
+add_subdirectory(tofpd)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
