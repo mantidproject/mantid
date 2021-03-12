@@ -815,8 +815,6 @@ void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjCompone
   }
 }
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
-
 //------------------------------------------------------------------------------------------------
 /** Get several instrument parameters used in tof to D-space conversion
  *

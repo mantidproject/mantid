@@ -593,9 +593,8 @@ double tofToDSpacingFactor(const double l1, const double l2,
 }
 
 dSpacingBase::dSpacingBase()
-    : Unit(), difa(0), difc(DBL_MIN), tzero(0),
-      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.),
-      toDSpacingError("") {}
+    : Unit(), toDSpacingError(""), difa(0), difc(DBL_MIN), tzero(0),
+      valueThatGivesLargestTOF(DBL_MAX), valueThatGivesSmallestTOF(0.) {}
 
 void dSpacingBase::validateUnitParams(const int,
                                       const UnitParametersMap &params) {
