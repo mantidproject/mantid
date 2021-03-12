@@ -474,10 +474,9 @@ class SANSILLReduction(PythonAlgorithm):
             @param transmission_ws: transmission workspace
         """
         theta_dependent = self.getProperty('ThetaDependent').value
-
         run = mtd[ws].getRun()
 
-        if run.hasProperty("Gamma.value") and 75 < run.getLogData('Gamma.value').value < 105:
+        if theta_dependent and run.hasProperty("Gamma.value") and 75 < run.getLogData('Gamma.value').value < 105:
             # range in which it possible some pixels are nearing 90 degrees
             # normally, we are talking about D16 here
 
