@@ -526,11 +526,11 @@ class DrillPresenter:
         self.view.blockSignals(True)
         self.view.set_table(columns, tooltips)
         if not samples:
-            self.view.add_row_after()
+            self.view.add_row_after(1)
             self.model.addSample(-1, DrillSample())
         else:
             for i in range(len(samples)):
-                self.view.add_row_after()
+                self.view.add_row_after(1)
                 params = samples[i].getParameters()
                 for k,v in params.items():
                     if k not in self.view.columns:
