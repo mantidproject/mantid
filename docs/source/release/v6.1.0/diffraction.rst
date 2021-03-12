@@ -79,4 +79,8 @@ Known Defects
 #############
 - When using new ellipsoidal peak integration capability in :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`, some peak intensities are returned as zero. When using the default spherical integration, the same behavior is not observed.
 
+Bugfixes
+########
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
+
 :ref:`Release 6.1.0 <v6.1.0>`
