@@ -29,6 +29,11 @@ class DrillPresenter:
     """
     _processError = set()
 
+    """
+    Set of custom options. Used to keep an history of the previous values.
+    """
+    _customOptions = set()
+
     def __init__(self, view):
         """
         Initialize the presenter by giving a view and a model. This method
@@ -42,6 +47,7 @@ class DrillPresenter:
         self.view = view
         self._invalidCells = set()
         self._processError = set()
+        self._customOptions = set()
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
@@ -98,6 +104,9 @@ class DrillPresenter:
             params = {}
             if not contents:
                 self.onParamOk(row, column)
+                for name in self._customOptions:
+                    self.model.changeParameter(row, name, "")
+                self._customOptions = set()
                 return
             for option in contents.split(';'):
                 if option and '=' not in option:
@@ -121,8 +130,13 @@ class DrillPresenter:
                 if value in ['false', 'False', 'FALSE']:
                     value = False
                 params[name] = value
+                currentOptions = set()
             for name,value in params.items():
+                currentOptions.add(name)
                 self.model.changeParameter(row, name, value)
+            for name in self._customOptions.difference(currentOptions):
+                self.model.changeParameter(row, name, "")
+            self._customOptions = currentOptions
         else:
             self.model.changeParameter(row, column, contents)
 
