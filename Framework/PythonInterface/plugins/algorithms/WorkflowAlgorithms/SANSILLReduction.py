@@ -419,8 +419,7 @@ class SANSILLReduction(PythonAlgorithm):
         solvent_ws = self.getProperty('SolventInputWorkspace').value
         if solvent_ws:
             self._apply_solvent(ws, solvent_ws)
-        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                             NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+        MaskDetectorsIf(InputWorkspace=ws, OutputWorkspace=ws, Operator='NotFinite')
 
     def _rescale_flux(self, ws, ref_ws):
         """
