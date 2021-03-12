@@ -28,25 +28,23 @@ class WorkspaceCalculatorModel():
         self._operation = operation
         self._md_ws = False
 
-    def validateInputs(self):
-        correct_inputs = True
-        if self._lhs_scale == 0 or self._rhs_scale == 0:
-            log.error("At least one scaling factor is equal to zero.")
-            correct_inputs = False
+    def _validateSingleInput(self, ws, info):
         try:
-            mtd[self._lhs_ws]
-            mtd[self._rhs_ws]
+            mtd[ws]
         except KeyError:
-            log.error("At least one of the input workspaces does not exist.")
-            correct_inputs = False
-            return correct_inputs
+            err_msg = "The {} input workspace does not exist.".format(info)
+            if ws is not None:
+                log.error(err_msg)
+            return False, err_msg
+        return True, ""
 
+    def _validateMD(self):
         if isinstance(mtd[self._lhs_ws], MDHistoWorkspace):
             self._md_ws = True
         multi_dim_err_msg = "Only one of the provided workspaces is multidimensional."
         if self._md_ws and not isinstance(mtd[self._rhs_ws], MDHistoWorkspace):
             log.error(multi_dim_err_msg)
-            correct_inputs = False
+            return False, multi_dim_err_msg
 
         def check_group_for_md(group_name):
             for entry in mtd[group_name]:
@@ -54,42 +52,65 @@ class WorkspaceCalculatorModel():
                     self._md_ws = True
                 elif self._md_ws:
                     log.error(multi_dim_err_msg)
-                    return False
+                    return multi_dim_err_msg
+            return ""
+        err_msg = str()
         if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
-            correct_inputs = check_group_for_md (mtd[self._lhs_ws])
+            err_msg = check_group_for_md(self._lhs_ws)
         if isinstance(mtd[self._rhs_ws], WorkspaceGroup):
-            correct_inputs = check_group_for_md (mtd[self._rhs_ws])
+            err_msg = check_group_for_md(self._rhs_ws)
+        if err_msg != str():
+            return False, err_msg
+        return True, ""
 
-        return correct_inputs
+    def validateInputs(self, lhs_ws=None, rhs_ws=None, operation="+"):
+        if operation:
+            self._operation = operation
+        if lhs_ws:
+            self._lhs_ws = lhs_ws
+        valid_lhs, err_msg_lhs = self._validateSingleInput(self._lhs_ws, "LHS")
+        if rhs_ws:
+            self._rhs_ws = rhs_ws
+        valid_rhs, err_msg_rhs = self._validateSingleInput(self._rhs_ws, "RHS")
+        if not valid_lhs or not valid_rhs:
+            return valid_lhs, valid_rhs, [err_msg_lhs, err_msg_rhs]
+
+        valid, err_msg = self._validateMD()
+        return valid, valid, err_msg
 
     def performOperation(self):
-        if not self.validateInputs():
-            return
+        lhs_valid, rhs_valid, err_msg = self.validateInputs()
+        if err_msg != str():
+            return lhs_valid, rhs_valid, err_msg
         lhs_ws = self._lhs_scale * mtd[self._lhs_ws]
         rhs_ws = self._rhs_scale * mtd[self._rhs_ws]
 
-        if self._operation == '+':
-            if self._md_ws:
-                PlusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+        try:
+            if self._operation == '+':
+                if self._md_ws:
+                    PlusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+                else:
+                    Plus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+            elif self._operation == '-':
+                if self._md_ws:
+                    MinusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+                else:
+                    Minus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+            elif self._operation == '*':
+                if self._md_ws:
+                    MultiplyMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+                else:
+                    Multiply(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+            elif self._operation == 'WM':
+                if self._md_ws:
+                    WeightedMeanMD(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
+                else:
+                    WeightedMean(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
             else:
-                Plus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-        elif self._operation == '-':
-            if self._md_ws:
-                MinusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-            else:
-                Minus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-        elif self._operation == '*':
-            if self._md_ws:
-                MultiplyMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-            else:
-                Multiply(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-        elif self._operation == 'WM':
-            if self._md_ws:
-                WeightedMeanMD(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
-            else:
-                WeightedMean(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
-        else:
-            if self._md_ws:
-                DivideMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
-            else:
-                Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+                if self._md_ws:
+                    DivideMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+                else:
+                    Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
+        except RuntimeError as err:
+            return str(err)
+        return True, True, ""

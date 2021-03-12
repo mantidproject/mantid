@@ -10,7 +10,6 @@
 
 from .model import WorkspaceCalculatorModel
 from .view import WorkspaceCalculatorView
-from mantid.kernel import logger as log
 
 
 class WorkspaceCalculator():
@@ -23,38 +22,42 @@ class WorkspaceCalculator():
         self.model = model if model else WorkspaceCalculatorModel()
         self.view = view if view else WorkspaceCalculatorView(parent)
 
-        self.lhs_scale = 1.0
-        self.lhs_ws = None
-        self.rhs_scale = 1.0
-        self.rhs_ws = None
-        self.operation = None
-        self.output_ws = None
-
         self.view.pushButton.clicked.connect(self.onPressedGo)
         self.view.lhs_scaling.returnPressed.connect(self.onPressedGo)
         self.view.rhs_scaling.returnPressed.connect(self.onPressedGo)
+        # validate inputs when workspace is selected, or the operation changed
+        self.view.lhs_ws.currentIndexChanged.connect(self.validateInputs)
+        self.view.rhs_ws.currentIndexChanged.connect(self.validateInputs)
+        self.view.operation.currentIndexChanged.connect(self.validateInputs)
 
     def readParameters(self):
-        try:
-            self.lhs_scale = float(self.view.lhs_scaling.text())
-            self.rhs_scale = float(self.view.rhs_scaling.text())
-        except ValueError:
-            log.error("At least one of the scaling factors is not a valid number.")
-            return False
-        self.lhs_ws = self.view.lhs_ws.currentText()
-        self.rhs_ws = self.view.rhs_ws.currentText()
-        self.operation = self.view.operation.currentText()
-        self.output_ws = self.view.output_ws.currentText()
-        if self.output_ws == str():
-            self.output_ws = "output"
-        return True
+        parameters = dict()
+        parameters['lhs_scale'] = float(self.view.lhs_scaling.text())
+        parameters['rhs_scale'] = float(self.view.rhs_scaling.text())
+        parameters['lhs_ws'] = self.view.lhs_ws.currentText()
+        parameters['rhs_ws'] = self.view.rhs_ws.currentText()
+        parameters['operation'] = self.view.operation.currentText()
+        output_ws = self.view.output_ws.currentText()
+        if output_ws == str():
+            output_ws = "output"
+        parameters['output_ws'] = output_ws
+        return parameters
+
+    def validateInputs(self):
+        parameters = self.readParameters()
+        lhs_ws = parameters['lhs_ws'] if parameters['lhs_ws'] != str() else None
+        rhs_ws = parameters['rhs_ws'] if parameters['rhs_ws'] != str() else None
+        valid_lhs, valid_rhs, err_msg = self.model.validateInputs(lhs_ws=lhs_ws,
+                                                                  rhs_ws=rhs_ws,
+                                                                  operation=parameters['operation'])
+        if lhs_ws:
+            self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)
+        if rhs_ws:
+            self.view.setValidationLabel(ws="RHS", validationValue=valid_rhs, tooltip=err_msg)
 
     def onPressedGo(self):
-        if self.readParameters():
-            self.model = WorkspaceCalculatorModel(lhs_scale=self.lhs_scale,
-                                                  lhs_ws=self.lhs_ws,
-                                                  rhs_scale=self.rhs_scale,
-                                                  rhs_ws=self.rhs_ws,
-                                                  output_ws=self.output_ws,
-                                                  operation=self.operation)
-            self.model.performOperation()
+        parameters = self.readParameters()
+        self.model = WorkspaceCalculatorModel(**parameters)
+        valid_lhs, valid_rhs, err_msg = self.model.performOperation()
+        self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)
+        self.view.setValidationLabel(ws="RHS", validationValue=valid_rhs, tooltip=err_msg)

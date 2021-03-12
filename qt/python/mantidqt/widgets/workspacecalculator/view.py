@@ -22,6 +22,9 @@ class WorkspaceCalculatorView(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        self.label_validation_lhs.setVisible(False)
+        self.label_validation_rhs.setVisible(False)
+
         scale_validator = ScaleValidator()
         self.lhs_scaling.setValidator(scale_validator)
         self.rhs_scaling.setValidator(scale_validator)
