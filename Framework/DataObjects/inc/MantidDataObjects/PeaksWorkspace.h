@@ -129,7 +129,7 @@ public:
   // ==================================
   /// Number of columns in the workspace.
   size_t columnCount() const override {
-    return static_cast<int>(columns.size());
+    return static_cast<int>(m_columns.size());
   }
 
   /// Number of rows in the workspace.
@@ -162,7 +162,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /// Returns a vector of all column names.
   std::vector<std::string> getColumnNames() const override {
-    return this->columnNames;
+    return this->m_columnNames;
   }
   /// This is always threadsafe
   bool threadSafe() const override { return true; }
@@ -266,13 +266,13 @@ private:
   // ==================================
 
   /** Vector of Peak contained within. */
-  std::vector<Peak> peaks;
+  std::vector<Peak> m_peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn<Peak>>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn<Peak>>> m_columns;
 
   /** Column names */
-  std::vector<std::string> columnNames;
+  std::vector<std::string> m_columnNames;
 
   /// Coordinates
   Kernel::SpecialCoordinateSystem m_coordSystem;

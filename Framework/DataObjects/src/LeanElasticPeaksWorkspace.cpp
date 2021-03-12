@@ -36,7 +36,7 @@ DECLARE_WORKSPACE(LeanElasticPeaksWorkspace)
  * @return LeanElasticPeaksWorkspace object
  */
 LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace()
-    : IPeaksWorkspace(), peaks(), columns(), columnNames(),
+    : IPeaksWorkspace(), m_peaks(), m_columns(), m_columnNames(),
       m_coordSystem(None) {
   initColumns();
   // LeanElasticPeaksWorkspace does not use the grouping mechanism of
@@ -51,8 +51,8 @@ LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace()
  */
 LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace(
     const LeanElasticPeaksWorkspace &other)
-    : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
-      m_coordSystem(other.m_coordSystem) {
+    : IPeaksWorkspace(other), m_peaks(other.m_peaks), m_columns(),
+      m_columnNames(), m_coordSystem(other.m_coordSystem) {
   initColumns();
   // LeanElasticPeaksWorkspace does not use the grouping mechanism of
   // ExperimentInfo.
@@ -118,14 +118,14 @@ public:
 void LeanElasticPeaksWorkspace::sort(
     std::vector<ColumnAndDirection> &criteria) {
   PeakComparator comparator(criteria);
-  std::stable_sort(peaks.begin(), peaks.end(), comparator);
+  std::stable_sort(m_peaks.begin(), m_peaks.end(), comparator);
 }
 
 //---------------------------------------------------------------------------------------------
 /** @return the number of peaks
  */
 int LeanElasticPeaksWorkspace::getNumberPeaks() const {
-  return int(peaks.size());
+  return int(m_peaks.size());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -140,11 +140,11 @@ std::string LeanElasticPeaksWorkspace::getConvention() const {
  * @param peakNum  the peak to remove. peakNum starts at 0
  */
 void LeanElasticPeaksWorkspace::removePeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "LeanElasticPeaksWorkspace::removePeak(): peakNum is out of range.");
   }
-  peaks.erase(peaks.begin() + peakNum);
+  m_peaks.erase(m_peaks.begin() + peakNum);
 }
 
 /** Removes multiple peaks
@@ -156,13 +156,13 @@ void LeanElasticPeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   // if index of peak is in badPeaks remove
   int ip = -1;
   auto it = std::remove_if(
-      peaks.begin(), peaks.end(), [&ip, badPeaks](LeanElasticPeak &pk) {
+      m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](LeanElasticPeak &pk) {
         (void)pk;
         ip++;
         return std::any_of(badPeaks.cbegin(), badPeaks.cend(),
                            [ip](int badPeak) { return badPeak == ip; });
       });
-  peaks.erase(it, peaks.end());
+  m_peaks.erase(it, m_peaks.end());
 }
 
 //---------------------------------------------------------------------------------------------
@@ -171,9 +171,9 @@ void LeanElasticPeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void LeanElasticPeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const LeanElasticPeak *>(&ipeak)) {
-    peaks.emplace_back((const LeanElasticPeak &)ipeak);
+    m_peaks.emplace_back((const LeanElasticPeak &)ipeak);
   } else {
-    peaks.emplace_back(LeanElasticPeak(ipeak));
+    m_peaks.emplace_back(LeanElasticPeak(ipeak));
   }
 }
 
@@ -193,7 +193,7 @@ void LeanElasticPeaksWorkspace::addPeak(const V3D &position,
  * @param peak :: Peak object to add (move) into this.
  */
 void LeanElasticPeaksWorkspace::addPeak(LeanElasticPeak &&peak) {
-  peaks.emplace_back(peak);
+  m_peaks.emplace_back(peak);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -202,11 +202,11 @@ void LeanElasticPeaksWorkspace::addPeak(LeanElasticPeak &&peak) {
  * @return a reference to a Peak object.
  */
 LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "LeanElasticPeaksWorkspace::getPeak(): peakNum is out of range.");
   }
-  return peaks[peakNum];
+  return m_peaks[peakNum];
 }
 
 //---------------------------------------------------------------------------------------------
@@ -216,11 +216,11 @@ LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) {
  */
 const LeanElasticPeak &
 LeanElasticPeaksWorkspace::getPeak(const int peakNum) const {
-  if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0) {
+  if (peakNum >= static_cast<int>(m_peaks.size()) || peakNum < 0) {
     throw std::invalid_argument(
         "LeanElasticPeaksWorkspace::getPeak(): peakNum is out of range.");
   }
-  return peaks[peakNum];
+  return m_peaks[peakNum];
 }
 
 //---------------------------------------------------------------------------------------------
@@ -356,13 +356,13 @@ int LeanElasticPeaksWorkspace::peakInfoNumber(const Kernel::V3D &, bool) const {
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peaks vector */
 std::vector<LeanElasticPeak> &LeanElasticPeaksWorkspace::getPeaks() {
-  return peaks;
+  return m_peaks;
 }
 
 /** Return a const reference to the Peaks vector */
 const std::vector<LeanElasticPeak> &
 LeanElasticPeaksWorkspace::getPeaks() const {
-  return peaks;
+  return m_peaks;
 }
 
 /** Getter for the integration status.
@@ -425,19 +425,19 @@ void LeanElasticPeaksWorkspace::initColumns() {
  **/
 void LeanElasticPeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.emplace_back(
-      std::make_shared<DataObjects::PeakColumn<LeanElasticPeak>>(this->peaks,
+  m_columns.emplace_back(
+      std::make_shared<DataObjects::PeakColumn<LeanElasticPeak>>(this->m_peaks,
                                                                  name));
   // Cache the names
-  columnNames.emplace_back(name);
+  m_columnNames.emplace_back(name);
 }
 
 //---------------------------------------------------------------------------------------------
 /// @return the index of the column with the given name.
 size_t
 LeanElasticPeaksWorkspace::getColumnIndex(const std::string &name) const {
-  for (size_t i = 0; i < columns.size(); i++)
-    if (columns[i]->name() == name)
+  for (size_t i = 0; i < m_columns.size(); i++)
+    if (m_columns[i]->name() == name)
       return i;
   throw std::invalid_argument(
       "Column named " + name +
@@ -448,20 +448,20 @@ LeanElasticPeaksWorkspace::getColumnIndex(const std::string &name) const {
 /// Gets the shared pointer to a column by index.
 std::shared_ptr<Mantid::API::Column>
 LeanElasticPeaksWorkspace::getColumn(size_t index) {
-  if (index >= columns.size())
+  if (index >= m_columns.size())
     throw std::invalid_argument(
         "LeanElasticPeaksWorkspace::getColumn() called with invalid index.");
-  return columns[index];
+  return m_columns[index];
 }
 
 //---------------------------------------------------------------------------------------------
 /// Gets the shared pointer to a column by index.
 std::shared_ptr<const Mantid::API::Column>
 LeanElasticPeaksWorkspace::getColumn(size_t index) const {
-  if (index >= columns.size())
+  if (index >= m_columns.size())
     throw std::invalid_argument(
         "LeanElasticPeaksWorkspace::getColumn() called with invalid index.");
-  return columns[index];
+  return m_columns[index];
 }
 
 void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *) const {
