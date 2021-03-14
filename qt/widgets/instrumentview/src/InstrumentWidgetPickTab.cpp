@@ -758,14 +758,14 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
-    const std::pair<std::vector<Mantid::DataObjects::Peak *>,
-                    std::vector<Mantid::DataObjects::Peak *>> &peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
 void InstrumentWidgetPickTab::alignPeaks(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::DataObjects::Peak *peak) {
+    const Mantid::Geometry::IPeak *peak) {
   m_infoController->displayAlignPeaksInfo(planePeaks, peak);
 }
 
@@ -1005,8 +1005,9 @@ QString ComponentInfoController::displayNonDetectorInfo(
 }
 
 QString
-ComponentInfoController::displayPeakInfo(Mantid::DataObjects::Peak *peak) {
+ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
+  auto peak = static_cast<Mantid::DataObjects::Peak*>(ipeak);
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
   auto source = instrument->getSource()->getPos();
@@ -1042,8 +1043,8 @@ QString ComponentInfoController::displayPeakAngles(
 }
 
 void ComponentInfoController::displayComparePeaksInfo(
-    const std::pair<std::vector<Mantid::DataObjects::Peak *>,
-                    std::vector<Mantid::DataObjects::Peak *>> &peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   std::stringstream text;
 
   text << "Comparison Information\n";
@@ -1068,7 +1069,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::DataObjects::Peak *peak) {
+    const Mantid::Geometry::IPeak *ipeak) {
 
   using Mantid::Kernel::V3D;
 
@@ -1080,6 +1081,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
+  auto peak = static_cast<const Mantid::DataObjects::Peak*>(ipeak);
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();

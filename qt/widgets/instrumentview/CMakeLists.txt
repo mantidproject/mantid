@@ -211,8 +211,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      ../../../Framework/DataObjects/inc
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
-                     PythonInterfaceCore
                      DataObjects
+                     PythonInterfaceCore
                      ${POCO_LIBRARIES}
                      ${OPENGL_gl_LIBRARY}
                      ${OPENGL_glu_LIBRARY}
