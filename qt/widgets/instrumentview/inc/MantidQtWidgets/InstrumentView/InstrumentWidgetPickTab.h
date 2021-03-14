@@ -12,6 +12,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -116,10 +117,10 @@ private slots:
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                  const Mantid::Geometry::IPeak *peak);
+                  const Mantid::DataObjects::Peak *peak);
   void
-  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  comparePeaks(const std::pair<std::vector<Mantid::DataObjects::Peak *>,
+                               std::vector<Mantid::DataObjects::Peak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -208,16 +209,16 @@ public:
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
-      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
+      const std::pair<std::vector<Mantid::DataObjects::Peak *>,
+                      std::vector<Mantid::DataObjects::Peak *>> &peaks);
   void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
-                             const Mantid::Geometry::IPeak *peak);
+                             const Mantid::DataObjects::Peak *peak);
   void clear();
 
 private:
   QString displayDetectorInfo(size_t index);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
-  QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
+  QString displayPeakInfo(Mantid::DataObjects::Peak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
                                             Mantid::Geometry::IPeak *> &peaks);
   QString getPeakOverlayInfo();

@@ -168,14 +168,14 @@ Peak::Peak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
-  setInstrument(ipeak.getInstrument());
+  const auto *peak = dynamic_cast<const Peak *>(&ipeak);
+  if (peak)
+    setInstrument(peak->getInstrument());
   detid_t id = ipeak.getDetectorID();
-  if (id >= 0) {
+  if (id >= 0)
     setDetectorID(id);
-  }
-  if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
+  if (peak)
     this->m_detIDs = peak->m_detIDs;
-  }
 }
 
 //----------------------------------------------------------------------------------------------
