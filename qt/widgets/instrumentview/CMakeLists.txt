@@ -164,6 +164,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      IN_MANTIDQT_INSTRUMENTVIEW
                    INCLUDE_DIRS
                      inc
+                     ../../../Framework/DataObjects/inc
                    SYSTEM_INCLUDE_DIRS
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
@@ -206,6 +207,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      IN_MANTIDQT_INSTRUMENTVIEW
                    INCLUDE_DIRS
                      inc
+                     ../../../Framework/DataObjects/inc
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
                      PythonInterfaceCore

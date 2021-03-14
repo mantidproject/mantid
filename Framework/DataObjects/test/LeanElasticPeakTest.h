@@ -40,7 +40,6 @@ public:
 
     TS_ASSERT_THROWS(p.getDetectorID(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetector(), const Exception::NotImplementedError &)
-    TS_ASSERT_THROWS(p.getInstrument(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPosition(),
                      const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(),
@@ -334,8 +333,6 @@ public:
     TS_ASSERT_EQUALS(leanpeak.getBinCount(), 90);
 
     TS_ASSERT_THROWS(leanpeak.getDetector(),
-                     const Exception::NotImplementedError &)
-    TS_ASSERT_THROWS(leanpeak.getInstrument(),
                      const Exception::NotImplementedError &)
   }
 };

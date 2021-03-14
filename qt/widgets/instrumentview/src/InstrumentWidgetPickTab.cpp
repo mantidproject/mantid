@@ -757,14 +757,14 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
-    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+    const std::pair<std::vector<Mantid::DataObjects::Peak *>,
+                    std::vector<Mantid::DataObjects::Peak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
 void InstrumentWidgetPickTab::alignPeaks(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+    const Mantid::DataObjects::Peak *peak) {
   m_infoController->displayAlignPeaksInfo(planePeaks, peak);
 }
 
@@ -1004,7 +1004,7 @@ QString ComponentInfoController::displayNonDetectorInfo(
 }
 
 QString
-ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
+ComponentInfoController::displayPeakInfo(Mantid::DataObjects::Peak *peak) {
   std::stringstream text;
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
@@ -1041,8 +1041,8 @@ QString ComponentInfoController::displayPeakAngles(
 }
 
 void ComponentInfoController::displayComparePeaksInfo(
-    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+    const std::pair<std::vector<Mantid::DataObjects::Peak *>,
+                    std::vector<Mantid::DataObjects::Peak *>> &peaks) {
   std::stringstream text;
 
   text << "Comparison Information\n";
@@ -1067,7 +1067,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+    const Mantid::DataObjects::Peak *peak) {
 
   using Mantid::Kernel::V3D;
 
