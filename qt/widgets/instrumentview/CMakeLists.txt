@@ -169,6 +169,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
+                     DataObjects
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${PYTHON_LIBRARIES}
@@ -211,6 +212,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
                      PythonInterfaceCore
+                     DataObjects
                      ${POCO_LIBRARIES}
                      ${OPENGL_gl_LIBRARY}
                      ${OPENGL_glu_LIBRARY}
