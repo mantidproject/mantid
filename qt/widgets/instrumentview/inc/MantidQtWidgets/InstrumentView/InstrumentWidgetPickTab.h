@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -118,9 +118,9 @@ private slots:
   void singleComponentPicked(size_t pickID);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
                   const Mantid::DataObjects::Peak *peak);
-  void
-  comparePeaks(const std::pair<std::vector<Mantid::DataObjects::Peak *>,
-                               std::vector<Mantid::DataObjects::Peak *>> &peaks);
+  void comparePeaks(
+      const std::pair<std::vector<Mantid::DataObjects::Peak *>,
+                      std::vector<Mantid::DataObjects::Peak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
