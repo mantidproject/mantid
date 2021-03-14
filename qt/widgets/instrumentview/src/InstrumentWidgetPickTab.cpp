@@ -1007,7 +1007,7 @@ QString ComponentInfoController::displayNonDetectorInfo(
 QString
 ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
-  auto peak = static_cast<Mantid::DataObjects::Peak*>(ipeak);
+  auto peak = static_cast<Mantid::DataObjects::Peak *>(ipeak);
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
   auto source = instrument->getSource()->getPos();
@@ -1081,7 +1081,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
-  auto peak = static_cast<const Mantid::DataObjects::Peak*>(ipeak);
+  auto peak = static_cast<const Mantid::DataObjects::Peak *>(ipeak);
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();
