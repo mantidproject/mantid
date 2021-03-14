@@ -766,9 +766,8 @@ bool IntegratePeakTimeSlices::updateNeighbors(
  * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
  *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
  */
-double
-IntegratePeakTimeSlices::CalculatePositionSpan(Peak const &peak,
-                                               const double dQ) {
+double IntegratePeakTimeSlices::CalculatePositionSpan(Peak const &peak,
+                                                      const double dQ) {
 
   try {
     double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
