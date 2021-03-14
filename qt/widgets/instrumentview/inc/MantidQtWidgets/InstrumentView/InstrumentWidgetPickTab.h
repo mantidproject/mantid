@@ -118,9 +118,9 @@ private slots:
   void singleComponentPicked(size_t pickID);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
                   const Mantid::Geometry::IPeak *peak);
-  void comparePeaks(
-      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  void
+  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
