@@ -88,7 +88,8 @@ public:
   MOCK_METHOD1(showAlphaMessage, void(const bool));
 
   // Some dummy signals
-  void changeRuns() { emit runsChangedSignal(); }
+  void emitRunsEditingSignal() { emit runsEditingSignal(); }
+  void changeRuns() { emit runsEditingFinishedSignal(); }
   void foundRuns() { emit runsFoundSignal(); }
   void requestLoading() { emit loadRequested(); }
 };
@@ -517,5 +518,12 @@ public:
                                             WorkspaceY(0, 0, 0.29773, 1E-5)),
                                       0));
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+  }
+
+  void test_that_the_runsEditingSignal_will_disable_the_load_button() {
+    EXPECT_CALL(*m_view, enableLoad(false)).Times(1);
+    EXPECT_CALL(*m_view, setPath(std::string{})).Times(1);
+
+    m_view->emitRunsEditingSignal();
   }
 };

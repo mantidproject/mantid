@@ -26,11 +26,11 @@ class RebinRagged(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
+            MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
             "input workspace",
         )
         self.declareProperty(
-            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             "output workspace",
         )
         self.declareProperty(FloatArrayProperty("XMin"),
@@ -38,6 +38,7 @@ class RebinRagged(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("XMax"),
                              "maximum x values with NaN meaning no maximum")
         self.declareProperty(FloatArrayProperty("Delta"), "step parameter for rebin")
+        self.declareProperty("PreserveEvents", True, "False converts event workspaces to histograms")
 
     def validateInputs(self):
         inputWS = self.getProperty("InputWorkspace").value
@@ -110,12 +111,13 @@ class RebinRagged(PythonAlgorithm):
         xmins = self.getProperty("XMin").value
         xmaxs = self.getProperty("XMax").value
         deltas = self.getProperty("Delta").value
+        preserveEvents = self.getProperty("PreserveEvents").value
 
         if self.__use_simple_rebin(xmins, xmaxs, deltas):
             # plain old rebin should have been used
             name = "__{}_rebinned_".format(outputWS)
             params = (xmins[0], deltas[0], xmaxs[0])
-            Rebin(InputWorkspace=inputWS, OutputWorkspace=name, Params=params)
+            Rebin(InputWorkspace=inputWS, OutputWorkspace=name, Params=params, PreserveEvents=preserveEvents)
             self.setProperty("OutputWorkspace", mtd[name])
             DeleteWorkspace(name)
         else:
@@ -141,9 +143,9 @@ class RebinRagged(PythonAlgorithm):
             for i, (name, xmin, xmax, delta) in enumerate(zip(names, xmins, xmaxs, deltas)):
                 # don't  go beyond the range of the data
                 x = inputWS.readX(i)
-                if xmin < x[0] or xmin == Property.EMPTY_DBL:
+                if xmin == Property.EMPTY_DBL:
                     xmin = x[0]
-                if xmax > x[-1] or xmax == Property.EMPTY_DBL:
+                if xmax == Property.EMPTY_DBL:
                     xmax = x[-1]
 
                 progStart = 3 * i * progStep
@@ -164,11 +166,12 @@ class RebinRagged(PythonAlgorithm):
                     Rebin(InputWorkspace=name,
                           OutputWorkspace=name,
                           Params=(xmin, delta, xmax),
+                          PreserveEvents = preserveEvents,
                           startProgress=progStart,
                           endProgress=(progStart + progStep),
                           EnableLogging=False)
                 except Exception as e:
-                    raise RuntimeError('for index={}'.format(i)) from e
+                    raise RuntimeError('for index={}: {}'.format(i, e)) from e
 
                 # accumulate
                 if accumulationWS is None:
@@ -181,7 +184,7 @@ class RebinRagged(PythonAlgorithm):
                                       endProgress=(progStart + 3 * progStep),
                                       EnableLogging=False)
             self.setProperty("OutputWorkspace", mtd[accumulationWS])
-            DeleteWorkspace(accumulationWS)
+            DeleteWorkspace(accumulationWS, EnableLogging=False)
 
 
 AlgorithmFactory.subscribe(RebinRagged)

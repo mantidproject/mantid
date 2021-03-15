@@ -614,14 +614,16 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
             millerindex[2] = static_cast<float>(hkl.Z());
             millerindex[3] = static_cast<float>(dE);
             PARALLEL_CRITICAL(addValues) {
-              inserter.insertMDEvent(
-                  static_cast<float>(signal), static_cast<float>(error * error),
-                  static_cast<uint16_t>(runindex), detid, millerindex.data());
+              inserter.insertMDEvent(static_cast<float>(signal),
+                                     static_cast<float>(error * error),
+                                     static_cast<uint16_t>(runindex), 0, detid,
+                                     millerindex.data());
 
               norm_inserter.insertMDEvent(
                   static_cast<float>(norm_signal),
                   static_cast<float>(norm_error * norm_error),
-                  static_cast<uint16_t>(runindex), detid, millerindex.data());
+                  static_cast<uint16_t>(runindex), 0, detid,
+                  millerindex.data());
             }
           }
           PARALLEL_END_INTERUPT_REGION
@@ -773,12 +775,12 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           PARALLEL_CRITICAL(addValues) {
             inserter.insertMDEvent(
                 static_cast<float>(signal), static_cast<float>(error * error),
-                static_cast<uint16_t>(runindex), detid, datapoint.data());
+                static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
 
             norm_inserter.insertMDEvent(
                 static_cast<float>(norm_signal),
                 static_cast<float>(norm_error * norm_error),
-                static_cast<uint16_t>(runindex), detid, datapoint.data());
+                static_cast<uint16_t>(runindex), 0, detid, datapoint.data());
           }
           PARALLEL_END_INTERUPT_REGION
         }

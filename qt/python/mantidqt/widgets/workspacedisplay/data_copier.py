@@ -97,13 +97,21 @@ class DataCopier(UserNotifier):
         left = selectionRange.left()
         right = selectionRange.right()
 
+        # if we have all rows selected, but we are using the custom table model
+        # then we have to expand the selection to include non-visible rows
+        from mantidqt.widgets.workspacedisplay.table.table_model import TableModel
+        if isinstance(table.model(), TableModel):
+            if (bottom + 1 - top) == table.rowCount():
+                bottom = table.model().max_rows() - 1
+
         data = []
-        index = selectionModel.currentIndex()
         for i in range(top, bottom + 1):
             for j in range(left, right):
-                data.append(str(index.sibling(i, j).data()))
+                index = table.model().createIndex(i, j)
+                data.append(str(table.model().data(index)))
                 data.append("\t")
-            data.append(str(index.sibling(i, right).data()))
+            index = table.model().createIndex(i, right)
+            data.append(str(table.model().data(index)))
             data.append("\n")
 
         # strip the string to remove the trailing new line

@@ -10,13 +10,13 @@
 from enum import Enum
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.presenter \
-    import TableWorkspaceDataPresenter, create_table_item
+from mantidqt.widgets.workspacedisplay.table.presenter_standard \
+    import TableWorkspaceDataPresenterStandard, create_table_item
 from .model import create_peaksviewermodel
 from ..adsobsever import SliceViewerADSObserver
 
 
-class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenter):
+class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
     """Override create_item method to format table columns more
     appropriately
     """

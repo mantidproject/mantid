@@ -45,7 +45,7 @@ def draw_representation(cls,
     return cls.draw(peak_origin, peak_shape, slice_info, painter, fg_color, bg_color)
 
 
-def create_ellipsoid_info(radii, axes, bkgd_radii):
+def create_ellipsoid_info(radii, axes, bkgd_radii, translation = [0,0,0]):
     """
     Create a dict describing an ellipsoid.
     :param radii: 3-tuple containing radii for each axis
@@ -64,7 +64,10 @@ def create_ellipsoid_info(radii, axes, bkgd_radii):
         "background_outer_radius2": bkgd_radii[1][2],
         "background_inner_radius0": bkgd_radii[0][0],
         "background_inner_radius1": bkgd_radii[0][1],
-        "background_inner_radius2": bkgd_radii[0][2]
+        "background_inner_radius2": bkgd_radii[0][2],
+        "translation0": translation[0],
+        "translation1": translation[1],
+        "translation2": translation[2]
     }
 
 

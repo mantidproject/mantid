@@ -81,7 +81,7 @@ def initialize():
 
     :return: A reference to the existing application instance
     """
-    if sys.version_info.major >= 3 and sys.platform == 'win32':
+    if sys.platform == 'win32':
         # Tornado requires WindowsSelectorEventLoop
         # https://www.tornadoweb.org/en/stable/#installation
         import asyncio

@@ -47,7 +47,7 @@ public:
 
     // Now set it...
     // specify name of file to load workspace from
-    inputFile = "mcstas.n5";
+    inputFile = "mcstas.h5";
     algToBeTested.setPropertyValue("Filename", inputFile);
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
@@ -95,7 +95,7 @@ public:
     outputSpace = "LoadMcStasNexusTest";
     loadMcStasNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
 
-    inputFile = "mcstas.n5";
+    inputFile = "mcstas.h5";
     loadMcStasNexusAlg.setPropertyValue("Filename", inputFile);
   }
 

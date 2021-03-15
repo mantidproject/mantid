@@ -40,6 +40,16 @@ using testing::ReturnRef;
 //=====================================================================================
 class RunsPresenterTest : public CxxTest::TestSuite {
 public:
+  void setUp() override {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        "ISIS");
+  }
+
+  void tearDown() override {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility",
+                                                        " ");
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }

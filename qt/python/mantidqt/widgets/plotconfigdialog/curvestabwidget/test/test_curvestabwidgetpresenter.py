@@ -436,6 +436,53 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
             args, kwargs = presenter.view.update_fields.call_args
             self.assertEqual(args[0].errorevery, 7)
 
+    def test_set_axes_from_object_when_multiple_axes_exist_on_fig(self):
+        fig, axes = subplots(2, subplot_kw={'projection': 'mantid'})
+        axes[0].plot(self.ws, specNum=1, label='Workspace')
+        axes[1].plot(self.ws, specNum=1, label='Workspace')
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        presenter.set_axes_from_object(axes[1])
+
+        # ax1 should be index 1 in the axes combo
+        mock_view.select_axes_combo_box.setCurrentIndex.assert_called_with(1)
+
+    def test_set_axes_from_object_raises_error_when_axes_not_found(self):
+        fig, axes = subplots(2, subplot_kw={'projection': 'mantid'})
+        axes[0].plot(self.ws, specNum=1, label='Workspace')
+        axes[1].plot(self.ws, specNum=1, label='Workspace')
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        with self.assertRaises(ValueError):
+            presenter.set_axes_from_object(None)
+
+    def test_set_curve_from_object_when_multiple_curves_exist_on_fig(self):
+        fig = self.make_figure_with_multiple_curves()
+        ax0 = fig.get_axes()[0]
+        curve1 = ax0.lines[1]
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        presenter.set_curve_from_object(curve1)
+
+        # line should be index 1 in the curves list
+        mock_view.select_curve_list.setCurrentRow.assert_called_with(1)
+
+    def test_set_axes_from_object_raises_error_when_curve_not_found(self):
+        fig, axes = subplots(2, subplot_kw={'projection': 'mantid'})
+        axes[0].plot(self.ws, specNum=1, label='Workspace')
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        with self.assertRaises(ValueError):
+            presenter.set_curve_from_object(None)
+
 
 if __name__ == '__main__':
     unittest.main()

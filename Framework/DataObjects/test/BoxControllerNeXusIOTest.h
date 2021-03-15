@@ -41,8 +41,9 @@ public:
       Poco::File(FullPathFile).remove();
   }
 
-  void test_contstructor_setters() {
+  void test_constructor_setters() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
 
     BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
@@ -53,6 +54,7 @@ public:
     // default settings
     TS_ASSERT_EQUALS(4, CoordSize);
     TS_ASSERT_EQUALS("MDEvent", typeName);
+    TS_ASSERT_EQUALS(EDV::EDVGoniometer, pSaver->getEventDataVersion());
 
     // set size
     TS_ASSERT_THROWS(pSaver->setDataType(9, typeName),
@@ -70,6 +72,36 @@ public:
     TS_ASSERT_EQUALS(4, CoordSize);
     TS_ASSERT_EQUALS("MDLeanEvent", typeName);
 
+    // MDLeanEvent and EDVOriginal are incompatible
+    pSaver->setDataType(CoordSize, "MDLeanEvent");
+    TS_ASSERT_THROWS(pSaver->setEventDataVersion(EDV::EDVOriginal),
+                     const std::invalid_argument &);
+
+    pSaver->setDataType(CoordSize, "MDEvent");
+    TS_ASSERT_THROWS_NOTHING(pSaver->setEventDataVersion(EDV::EDVOriginal));
+    TS_ASSERT_EQUALS(EDV::EDVOriginal, pSaver->getEventDataVersion());
+
+    delete pSaver;
+  }
+
+  void test_eventDataVersion() {
+    // initialization
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = Mantid::DataObjects::BoxControllerNeXusIO::EventDataVersion;
+    BoxControllerNeXusIO *pSaver(nullptr);
+    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+
+    // valid values
+    std::map<EDV, size_t> traitsCountToEDV = {
+        {EDV::EDVLean, 2}, {EDV::EDVOriginal, 4}, {EDV::EDVGoniometer, 5}};
+    for (auto const &pair : traitsCountToEDV)
+      TS_ASSERT_EQUALS(pair.first, static_cast<EDV>(pair.second));
+
+    // some invalid values
+    std::vector<size_t> invalids{3, 6, 7, 8, 9, 42};
+    for (auto const &invalid : invalids)
+      TS_ASSERT_THROWS(pSaver->setEventDataVersion(invalid),
+                       const std::invalid_argument &)
     delete pSaver;
   }
 
@@ -233,8 +265,71 @@ public:
 
   void test_WriteFloatReadDouble() { this->WriteReadRead<float, double>(); }
 
+  void test_dataEventCount() {
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = BoxControllerNeXusIO::EventDataVersion;
+
+    // MDEvents, where the dimensionality of the event coordinates is 4
+    BoxControllerNeXusIO *pSaver(nullptr);
+    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+
+    // MDEvent cannot accept EDVLean
+    TS_ASSERT_THROWS(pSaver->setEventDataVersion(EDV::EDVLean),
+                     const std::invalid_argument &);
+
+    int64_t dataSizePerEvent(pSaver->getNDataColums());
+    // MDEvent can accept EDVOriginal and EDVGoniometer
+    pSaver->setEventDataVersion(EDV::EDVOriginal);
+    TS_ASSERT_EQUALS(pSaver->dataEventCount(), dataSizePerEvent - 1);
+    pSaver->setEventDataVersion(EDV::EDVGoniometer);
+    TS_ASSERT_EQUALS(pSaver->dataEventCount(), dataSizePerEvent);
+
+    delete (pSaver);
+  }
+
+  void test_adjustEventDataBlock() {
+
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+    using EDV = BoxControllerNeXusIO::EventDataVersion;
+
+    // MDEvents, where the dimensionality of the event coordinates is 4
+    BoxControllerNeXusIO *pSaver(nullptr);
+    TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
+
+    // We're dealing with an old Nexus file
+    pSaver->setEventDataVersion(EDV::EDVOriginal);
+
+    // A data block has been read from the file, containing two events.
+    // Each event has 8 data items
+    std::vector<float> blockREAD{1.,  2.,  3.,  4.,  -1.,  -2.,  -3.,  -4.,
+                                 10., 20., 30., 40., -10., -20., -30., -40.};
+
+    // insert goniometerIndex
+    pSaver->adjustEventDataBlock(blockREAD, "READ");
+    std::vector<float> expectedREAD{1.,  2.,  3.,   0.,   4.,   -1.,
+                                    -2., -3., -4.,  10.,  20.,  30.,
+                                    0.,  40., -10., -20., -30., -40.};
+
+    TS_ASSERT_EQUALS(blockREAD.size(), expectedREAD.size());
+    for (size_t i = 0; i < blockREAD.size(); i++)
+      TS_ASSERT_DELTA(blockREAD[i], expectedREAD[i], 1.e-6);
+
+    // A data block is to be written to the file, containing two events.
+    // Each event has 9 items
+    std::vector<float> blockWRITE{1.,  2.,   3.,   0.,   4.0,  -1.,
+                                  -2., -3.,  -4.,  10.,  20.,  30.,
+                                  0.,  40.0, -10., -20., -30., -40.};
+    pSaver->adjustEventDataBlock(blockWRITE, "WRITE"); // remove goniometerIndex
+    std::vector<float> expectedWRITE{1.,   2.,   3.,   4.0, -1., -2.,
+                                     -3.,  -4.,  10.,  20., 30., 40.0,
+                                     -10., -20., -30., -40.};
+    TS_ASSERT_EQUALS(blockWRITE.size(), expectedWRITE.size());
+    for (size_t i = 0; i < blockWRITE.size(); i++)
+      TS_ASSERT_DELTA(blockWRITE[i], expectedWRITE[i], 1.e-6);
+  }
+
 private:
-  /// Create a test box controller. Ownership is passed to the caller
+  /// Create a Nexus reader/writer for boxController sc
   Mantid::DataObjects::BoxControllerNeXusIO *createTestBoxController() {
     return new Mantid::DataObjects::BoxControllerNeXusIO(sc.get());
   }

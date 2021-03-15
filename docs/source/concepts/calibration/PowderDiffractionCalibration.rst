@@ -191,5 +191,105 @@ This approach attempts to correct the instrument component positions based on th
    * At ISIS enter the resulting workspace as the calibration workspace into the DAE software when recording new runs.  The calibrated workspace will be copied into the resulting NeXuS file of the run.
 
 
+Calibration Diagnostics
+-----------------------
+
+Pixel-by-pixel results
+######################
+
+.. figure:: /images/VULCAN_192227_pixel_calibration.png
+  :width: 400px
+
+There are some common ways of diagnosing the calibration results.
+One of the more common is to plot the aligned data in d-spacing.
+While this can be done via the "colorfill" plot or sliceviewer,
+a function has been created to annotate the plot with additional information.
+This can be done using the following code
+
+.. code::
+
+   from mantid.simpleapi import (AlignDetectors, LoadDiffCal, LoadEventNexus, LoadInstrument, Rebin)
+   from Calibration.tofpd import diagnostics
+
+   LoadEventNexus(Filename='VULCAN_192227.nxs.h5', OutputWorkspace='ws')
+   Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000,-.002,70000))
+   LoadDiffCal(Filename='VULCAN_Calibration_CC_4runs_hybrid.h5', InputWorkspace='ws', WorkspaceName='VULCAN')
+   AlignDetectors(InputWorkspace='ws', OutputWorkspace='ws', CalibrationWorkspace='VULCAN_cal')
+   diagnostics.plot2d(mtd['ws'], horiz_markers=[8*512*20, 2*8*512*20], xmax=1.3)
+
+Here the expected peak positions are vertical lines, the horizontal lines are boundaries between banks.
+When run interactively, the zoom/pan tools are available.
+
+DIFC of unwrapped instrument
+############################
+
+To check the consistency of pixel-level calibration, the DIFC value of each
+pixel can be compared between two different instrument calibrations. The percent
+change in DIFC value is plotted over a view of the unwrapped instrument where the
+horizontal and vertical axis corresponds to the polar and azimuthal angle, respectively.
+The azimuthal angle of 0 corresponds to the direction parallel of the positive Y-axis in
+3D space.
+
+Below is an example of the change in DIFC between two different calibrations of the
+NOMAD instrument.
+
+.. figure:: /images/NOMAD_difc_calibration.png
+  :width: 400px
+
+This plot can be generated several different ways: by using calibration files,
+calibration workspaces, or resulting workspaces from :ref:`CalculateDIFC <algm-CalculateDIFC>`.
+The first input parameter is always required and represents the new calibration.
+The second parameter is optional and represents the old calibration. When it is
+not specified, the default instrument geometry is used for comparison. Masks can
+be included by providing a mask using the ``mask`` parameter. To control the
+scale of the plot, a tuple of the minimum and maximum percentage can be specified
+for the ``vrange`` parameter.
+
+.. code::
+
+    from Calibration.tofpd import diagnostics
+
+    # Use filenames to generate the plot
+    fig, ax = diagnostics.difc_plot2d("NOM_calibrate_d135279_2019_11_28.h5", "NOM_calibrate_d131573_2019_08_18.h5")
+
+When calibration tables are used as inputs, an additional workspace parameter
+is needed (``instr_ws``) to hold the instrument definition. This can be the GroupingWorkspace
+generated with the calibration tables from :ref:`LoadDiffCal <algm-LoadDiffCal>` as seen below.
+
+.. code::
+
+    from mantid.simpleapi import LoadDiffCal
+    from Calibration.tofpd import diagnostics
+
+    # Use calibration tables to generate the plot
+    LoadDiffCal(Filename="NOM_calibrate_d135279_2019_11_28.h5", WorkspaceName="new")
+    LoadDiffCal(Filename="NOM_calibrate_d131573_2019_08_18.h5", WorkspaceName="old")
+    fig, ax = diagnostics.difc_plot2d("new_cal", "old_cal", instr_ws="new_group")
+
+Finally, workspaces with DIFC values can be used directly:
+
+.. code::
+
+    from mantid.simpleapi import CalculateDIFC, LoadDiffCal
+    from Calibration.tofpd import diagnostics
+
+    # Use the results from CalculateDIFC directly
+    LoadDiffCal(Filename="NOM_calibrate_d135279_2019_11_28.h5", WorkspaceName="new")
+    LoadDiffCal(Filename="NOM_calibrate_d131573_2019_08_18.h5", WorkspaceName="old")
+    difc_new = CalculateDIFC(InputWorkspace="new_group", CalibrationWorkspace="new_cal")
+    difc_old = CalculateDIFC(InputWorkspace="old_group", CalibrationWorkspace="old_cal")
+    fig, ax = diagnostics.difc_plot2d(difc_new, difc_old)
+
+A mask can also be applied with a ``MaskWorkspace`` to hide pixels from the plot:
+
+.. code::
+
+    from mantid.simpleapi import LoadDiffCal
+    from Calibration.tofpd import diagnostics
+
+    # Use calibration tables to generate the plot
+    LoadDiffCal(Filename="NOM_calibrate_d135279_2019_11_28.h5", WorkspaceName="new")
+    LoadDiffCal(Filename="NOM_calibrate_d131573_2019_08_18.h5", WorkspaceName="old")
+    fig, ax = diagnostics.difc_plot2d("new_cal", "old_cal", instr_ws="new_group", mask="new_mask")
 
 .. categories:: Calibration

@@ -7,7 +7,7 @@
 import unittest
 
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
@@ -24,6 +24,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
     def test_groups_and_pairs_initially_empty(self):
         self.assertEqual(self.context.groups, [])
         self.assertEqual(self.context.pairs, [])
+        self.assertEqual(self.context.diffs, [])
 
     def test_group_can_be_added(self):
         group = MuonGroup('group_1', [1,3,5,7,9])
@@ -34,8 +35,10 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
     def test_non_group_cannot_be_added(self):
         pair = MuonPair('pair_1')
+        diff = MuonDiff('diff_1', 'positive', 'negative')
 
         self.assertRaises(AssertionError, self.context.add_group, pair)
+        self.assertRaises(AssertionError, self.context.add_group, diff)
 
     def test_cannot_add_group_with_duplicate_name(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -53,9 +56,12 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEqual(self.context['pair_1'], pair)
 
     def test_non_pair_cannot_be_added(self):
-        pair = MuonPair('pair_1')
+        group = MuonGroup('group_1', [1, 3, 5, 7, 9])
+        diff = MuonDiff('diff_1', 'positive', 'negative')
 
-        self.assertRaises(AssertionError, self.context.add_group, pair)
+        # Value error as cannot assert isinstance in code since could add MuonPair or MuonBasePair
+        self.assertRaises(ValueError, self.context.add_pair, group)
+        self.assertRaises(ValueError, self.context.add_pair, diff)
 
     def test_cannot_add_pair_with_duplicate_name(self):
         pair_1 = MuonPair('pair')
@@ -64,6 +70,52 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_pair(pair_1)
 
         self.assertRaises(ValueError, self.context.add_pair, pair_2)
+
+    def test_diff_can_be_added(self):
+        diff = MuonDiff('diff_1', 'positive', 'negative')
+
+        self.context.add_diff(diff)
+
+        self.assertEqual(self.context['diff_1'], diff)
+
+    def test_non_diff_cannot_be_added(self):
+        group = MuonGroup('group_1', [1, 3, 5, 7, 9])
+        pair = MuonPair('pair_1')
+
+        self.assertRaises(AssertionError, self.context.add_diff, group)
+        self.assertRaises(AssertionError, self.context.add_diff, pair)
+
+    def test_cannot_add_diff_with_duplicate_name(self):
+        diff_1 = MuonDiff('diff', 'positive', 'negative')
+        diff_2 = MuonDiff('diff', 'positive', 'negative')
+
+        self.context.add_diff(diff_1)
+
+        self.assertRaises(ValueError, self.context.add_diff, diff_2)
+
+    def test_groups_pairs_diffs_should_all_have_unique_names(self):
+        group_1 = MuonGroup('group', [1, 3, 5, 7, 9])
+        group_2 = MuonGroup('pair', [1, 3, 5, 7, 9])
+        group_3 = MuonGroup('diff', [1, 3, 5, 7, 9])
+        pair_1 = MuonPair('pair')
+        pair_2 = MuonPair('group')
+        pair_3 = MuonPair('diff')
+        diff_1 = MuonDiff('diff', 'positive', 'negative')
+        diff_2 = MuonDiff('group', 'positive', 'negative')
+        diff_3 = MuonDiff('pair', 'positive', 'negative')
+
+        # Add correct group, pair and diff
+        self.context.add_group(group_1)
+        self.context.add_pair(pair_1)
+        self.context.add_diff(diff_1)
+
+        # Now check cannot duplicate names
+        self.assertRaises(ValueError, self.context.add_group, group_2)
+        self.assertRaises(ValueError, self.context.add_group, group_3)
+        self.assertRaises(ValueError, self.context.add_pair, pair_2)
+        self.assertRaises(ValueError, self.context.add_pair, pair_3)
+        self.assertRaises(ValueError, self.context.add_diff, diff_2)
+        self.assertRaises(ValueError, self.context.add_diff, diff_3)
 
     def test_group_names_returns_ordered_list_of_names(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -86,6 +138,17 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_pair(pair_3)
 
         self.assertEqual(self.context.pair_names, ['pair_1', 'pair_2', 'pair_3'])
+
+    def test_diff_names_returns_ordered_list_of_names(self):
+        diff_1 = MuonDiff('diff_1', 'positive', 'negative')
+        diff_2 = MuonDiff('diff_2', 'positive', 'negative')
+        diff_3 = MuonDiff('diff_3', 'positive', 'negative')
+
+        self.context.add_diff(diff_1)
+        self.context.add_diff(diff_2)
+        self.context.add_diff(diff_3)
+
+        self.assertEqual(self.context.diff_names, ['diff_1', 'diff_2', 'diff_3'])
 
     def test_can_remove_groups_as_expected(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -111,6 +174,18 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEqual(self.context.pair_names, ['pair_1', 'pair_3'])
 
+    def test_can_remove_diffs_as_expected(self):
+        diff_1 = MuonDiff('diff_1', 'positive', 'negative')
+        diff_2 = MuonDiff('diff_2', 'positive', 'negative')
+        diff_3 = MuonDiff('diff_3', 'positive', 'negative')
+        self.context.add_diff(diff_1)
+        self.context.add_diff(diff_2)
+        self.context.add_diff(diff_3)
+
+        self.context.remove_diff('diff_2')
+
+        self.assertEqual(self.context.diff_names, ['diff_1', 'diff_3'])
+
     def test_get_group_workspace_names_returns_correct_workspace_names(self):
         group = create_group_populated_by_two_workspace()
         self.context.add_group(group)
@@ -127,6 +202,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEquals(self.context.group_names, ['fwd', 'bwd'])
         self.assertEquals(self.context.pair_names, ['long'])
+        self.assertEquals(self.context.diff_names, [])
         for group in self.context.groups:
             self.assertEquals(group.periods, [1])
 
@@ -138,6 +214,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEquals(self.context.group_names, ['fwd1', 'bwd1', 'fwd2', 'bwd2'])
         self.assertEquals(self.context.pair_names, ['long1', 'long2'])
+        self.assertEquals(self.context.diff_names, ['pair_diff1'])
         self.assertEquals(self.context.groups[0].periods, [1])
         self.assertEquals(self.context.groups[1].periods, [1])
         self.assertEquals(self.context.groups[2].periods, [2])
@@ -145,6 +222,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
         self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
         self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
+        self.assertEquals(self.context.diffs[0].forward_group, 'long1')
+        self.assertEquals(self.context.diffs[0].backward_group, 'long2')
         self.assertEquals(self.context.selected, 'long1')
 
     def test_get_group_pair_name_and_run_from_workspace_name(self):

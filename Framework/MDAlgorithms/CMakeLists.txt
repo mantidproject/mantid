@@ -52,6 +52,7 @@ set(SRC_FILES
     src/ImportMDHistoWorkspace.cpp
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
+    src/IntegrateQLabEvents.cpp
     src/IntegrateEllipsoids.cpp
     src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
@@ -85,7 +86,6 @@ set(SRC_FILES
     src/MinusMD.cpp
     src/MultiplyMD.cpp
     src/NotMD.cpp
-    src/OneStepMDEW.cpp
     src/OrMD.cpp
     src/PlusMD.cpp
     src/PowerMD.cpp
@@ -166,6 +166,7 @@ set(
   inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
   inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
   inc/MantidMDAlgorithms/Integrate3DEvents.h
+  inc/MantidMDAlgorithms/IntegrateQLabEvents.h
   inc/MantidMDAlgorithms/IntegrateEllipsoids.h
   inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
   inc/MantidMDAlgorithms/IntegrateFlux.h
@@ -202,7 +203,6 @@ set(
   inc/MantidMDAlgorithms/MinusMD.h
   inc/MantidMDAlgorithms/MultiplyMD.h
   inc/MantidMDAlgorithms/NotMD.h
-  inc/MantidMDAlgorithms/OneStepMDEW.h
   inc/MantidMDAlgorithms/OrMD.h
   inc/MantidMDAlgorithms/PlusMD.h
   inc/MantidMDAlgorithms/PowerMD.h
@@ -277,6 +277,7 @@ set(TEST_FILES
     ImportMDEventWorkspaceTest.h
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
+    IntegrateQLabEventsTest.h
     IntegrateEllipsoidsTest.h
     IntegrateEllipsoidsTwoStepTest.h
     IntegrateEllipsoidsWithSatellitesTest.h
@@ -310,7 +311,6 @@ set(TEST_FILES
     MinusMDTest.h
     MultiplyMDTest.h
     NotMDTest.h
-    OneStepMDEWTest.h
     OrMDTest.h
     PlusMDTest.h
     PowerMDTest.h

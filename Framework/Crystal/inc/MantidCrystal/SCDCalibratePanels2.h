@@ -31,6 +31,7 @@ namespace Crystal {
  *
  * Spirit successor of ISAW and its reincarnation: SCDCalibratePanels
  */
+
 class MANTID_CRYSTAL_DLL SCDCalibratePanels2 : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification
@@ -65,31 +66,48 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// Private function dedicated for parsing lattice constant
-  void parseLatticeConstant(
-      std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void parseLatticeConstant(Mantid::API::IPeaksWorkspace_sptr pws);
+
+  /// Update the UB matrix
+  void updateUBMatrix(Mantid::API::IPeaksWorkspace_sptr pws);
+
+  /// Remove unindexed peaks from workspace
+  Mantid::API::IPeaksWorkspace_sptr
+  removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for getting names of banks to be calibrated
-  void getBankNames(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void getBankNames(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for calibrating T0
-  void optimizeT0(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void optimizeT0(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for calibrating L1
-  void optimizeL1(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Private function for calibrating banks
-  void optimizeBanks(std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> pws);
+  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws);
+
+  /// Helper function for selecting peaks based on given bank name
+  Mantid::API::IPeaksWorkspace_sptr
+  selectPeaksByBankName(Mantid::API::IPeaksWorkspace_sptr pws,
+                        const std::string bankname,
+                        const std::string outputwsn);
+
+  /// Helper function that calculates the ideal qSample based on
+  /// integer HKL
+  Mantid::API::MatrixWorkspace_sptr
+  getIdealQSampleAsHistogram1D(Mantid::API::IPeaksWorkspace_sptr pws);
 
   /// Helper functions for adjusting T0 for all peaks
-  void adjustT0(double dT0, DataObjects::PeaksWorkspace_sptr &pws);
+  void adjustT0(double dT0, Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Helper functions for adjusting components
   void adjustComponent(double dx, double dy, double dz, double rvx, double rvy,
                        double rvz, double rang, std::string cmptName,
-                       DataObjects::PeaksWorkspace_sptr &pws);
+                       Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
-  DataObjects::TableWorkspace_sptr
+  Mantid::API::ITableWorkspace_sptr
   generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
 
   /// Save to xml file for Mantid to load
@@ -105,7 +123,7 @@ private:
 
   /// Save the calibration table to a CSV file
   void saveCalibrationTable(const std::string &FileName,
-                            DataObjects::TableWorkspace_sptr &tws);
+                            Mantid::API::ITableWorkspace_sptr &tws);
 
   /// unique vars for a given instance of calibration
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
@@ -117,8 +135,9 @@ private:
   double m_bank_translation_bounds = 5e-2;  // meter
   double m_bank_rotation_bounds = 5.0;      // degree
   double m_source_translation_bounds = 0.1; // meter
-  bool LOGCHILDALG{false};
+  bool LOGCHILDALG{true};
   const int MINIMUM_PEAKS_PER_BANK{6};
+  const double PI{3.1415926535897932384626433832795028841971693993751058209};
 
   // Column names and types
   const std::string calibrationTableColumnNames[8] = {
@@ -130,7 +149,7 @@ private:
       "double", "double", "double", "double"};
 
   boost::container::flat_set<std::string> m_BankNames;
-  Mantid::DataObjects::TableWorkspace_sptr mCaliTable;
+  Mantid::API::ITableWorkspace_sptr mCaliTable;
 };
 
 } // namespace Crystal

@@ -39,9 +39,6 @@ InstrumentInfo::InstrumentInfo(const FacilityInfo *f,
     : m_facility(f) {
 
   m_name = elem->getAttribute("name");
-  if (m_name.empty()) {
-    throw std::runtime_error("Instrument name is not defined");
-  }
 
   // The string to separate the instrument name and the run number.
   m_delimiter = elem->getAttribute("delimiter");

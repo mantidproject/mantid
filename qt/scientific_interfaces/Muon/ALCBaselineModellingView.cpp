@@ -168,6 +168,7 @@ void ALCBaselineModellingView::addSectionSelector(
 
   // Set initial values
   newSelector->setRange(values.first, values.second);
+  newSelector->setBounds(values.first, values.second);
   setSelectorValues(newSelector, values);
 
   m_ui.dataPlot->replot();
@@ -225,7 +226,8 @@ void ALCBaselineModellingView::setSelectorValues(
 }
 
 void ALCBaselineModellingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"),
+                                                 QString("muon"));
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }

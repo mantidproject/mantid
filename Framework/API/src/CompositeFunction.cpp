@@ -250,6 +250,15 @@ double CompositeFunction::getParameter(size_t i) const {
   return m_functions[iFun]->getParameter(i - m_paramOffsets[iFun]);
 }
 
+/** Get the j-th parameter from the i-th function.
+ *  @param i :: The function index
+ *  @param j :: The i-th function's j-th parameter
+ *  @return value of the requested parameter
+ */
+double CompositeFunction::getParameter(size_t i, size_t j) const {
+  return m_functions[i]->getParameter(j);
+}
+
 /**
  * Check if function has a parameter with a particular name.
  * @param name :: A name of a parameter.
@@ -388,6 +397,16 @@ std::string CompositeFunction::parameterName(size_t i) const {
   return ostr.str();
 }
 
+/// Returns the name of i-th function's j-th parameter
+/// @param i :: The function index
+/// @param j :: The local index of the parameter relative to the function index
+/// @return The name of the parameter
+std::string CompositeFunction::parameterName(size_t i, size_t j) const {
+  std::ostringstream ostr;
+  ostr << 'f' << i << '.' << m_functions[i]->parameterName(j);
+  return ostr.str();
+}
+
 /// Returns the name of the ith attribute
 /// @param index :: The index of the attribute
 /// @return The name of the attribute
@@ -422,6 +441,15 @@ std::string CompositeFunction::parameterDescription(size_t i) const {
 double CompositeFunction::getError(size_t i) const {
   size_t iFun = functionIndex(i);
   return m_functions[iFun]->getError(i - m_paramOffsets[iFun]);
+}
+/**
+ * Get the fitting error for the i-th function's j-th parameter
+ * @param i :: The index of the i-th function
+ * @param j :: The index of the i-th function's j-th parameter
+ * @return :: the error
+ */
+double CompositeFunction::getError(size_t i, size_t j) const {
+  return m_functions[i]->getError(j);
 }
 
 /**
@@ -659,6 +687,18 @@ void CompositeFunction::replaceFunction(size_t functionIndex,
 }
 
 /**
+ * @param functionName :: The function name to search for.
+ * @returns true if the composite function has at least one of a function with a
+ * matching name.
+ */
+bool CompositeFunction::hasFunction(const std::string &functionName) const {
+  return std::any_of(m_functions.cbegin(), m_functions.cend(),
+                     [&functionName](const IFunction_const_sptr &function) {
+                       return function->name() == functionName;
+                     });
+}
+
+/**
  * @param i :: The index of the function
  * @return function at the requested index
  */
@@ -669,6 +709,27 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
                             ").");
   }
   return m_functions[i];
+}
+
+/**
+ * Gets the index of the first function with a matching function string.
+ * @param functionName :: The name of the function to search for.
+ * @returns function index of the first function with a matching function
+ * string.
+ */
+std::size_t
+CompositeFunction::functionIndex(const std::string &functionName) const {
+  const auto iter =
+      std::find_if(m_functions.cbegin(), m_functions.cend(),
+                   [&functionName](const IFunction_const_sptr &function) {
+                     return function->name() == functionName;
+                   });
+
+  if (iter != m_functions.cend())
+    return std::distance(m_functions.cbegin(), iter);
+
+  throw std::invalid_argument("A function with name '" + functionName +
+                              "' does not exist in this composite function.");
 }
 
 /**
@@ -836,6 +897,15 @@ void CompositeFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
   m_globalAttributeNames.emplace_back(name);
   IFunction::declareAttribute(name, defaultValue);
+}
+
+/**
+Registers the usage of the function with the UsageService
+ */
+void CompositeFunction::registerFunctionUsage(bool internal) {
+  for (size_t i = 0; i < nFunctions(); i++) {
+    getFunction(i)->registerFunctionUsage(internal);
+  }
 }
 
 /**

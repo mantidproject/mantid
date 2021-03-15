@@ -70,6 +70,8 @@ public:
   MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
   MOCK_CONST_METHOD0(getInstrument, Geometry::Instrument_const_sptr());
+  MOCK_CONST_METHOD0(getReferenceFrame,
+                     std::shared_ptr<const Geometry::ReferenceFrame>());
   MOCK_CONST_METHOD0(getRunNumber, int());
   MOCK_CONST_METHOD0(getPeakNumber, int());
   MOCK_CONST_METHOD0(getIntMNP, Mantid::Kernel::V3D());
@@ -95,9 +97,6 @@ public:
   MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
-  MOCK_METHOD0(findDetector, bool());
-  MOCK_METHOD1(findDetector,
-               bool(const Mantid::Geometry::InstrumentRayTracer &tracer));
   MOCK_METHOD2(setQSampleFrame, void(const Mantid::Kernel::V3D &QSampleFrame,
                                      boost::optional<double> detectorDistance));
   MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame,
