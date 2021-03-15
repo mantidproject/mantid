@@ -105,9 +105,9 @@ class WorkspaceCalculatorModel():
         def scale_ws(ws_name, scale):
             return mtd[ws_name] * scale
 
-        if (self._md_ws and
-                (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
-                 or isinstance(mtd[self._rhs_ws], WorkspaceGroup))):
+        if (self._md_ws
+                and (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
+                     or isinstance(mtd[self._rhs_ws], WorkspaceGroup))):
             if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
                 lhs_ws = self._scale_md_group(self._lhs_ws, self._lhs_scale)
             else:
