@@ -99,15 +99,15 @@ public:
                                  std::string const &functionIndex,
                                  std::string const &constraint) override;
 
-  [[nodiscard]] inline std::vector<GlobalTie> getGlobalTies() const
-      noexcept override {
+  [[nodiscard]] inline std::vector<GlobalTie>
+  getGlobalTies() const noexcept override {
     return m_globalTies;
   }
 
   void setGlobalParameters(std::vector<std::string> const &parameters) override;
 
-  [[nodiscard]] inline std::vector<GlobalParameter> getGlobalParameters() const
-      noexcept override {
+  [[nodiscard]] inline std::vector<GlobalParameter>
+  getGlobalParameters() const noexcept override {
     return m_globalParameters;
   }
 
@@ -153,6 +153,7 @@ private:
   getParameterValue(FitDomainIndex domainIndex,
                     std::string const &fullParameter) const;
 
+  [[nodiscard]] bool validParameter(std::string const &fullParameter) const;
   [[nodiscard]] bool validParameter(FitDomainIndex domainIndex,
                                     std::string const &fullParameter) const;
   [[nodiscard]] bool validTie(std::string const &fullTie) const;
@@ -177,6 +178,9 @@ private:
   void checkParameterIsInAllDomains(std::string const &globalParameter) const;
   void checkGlobalParameterhasNoTies(std::string const &globalParameter) const;
   void checkParameterIsNotGlobal(std::string const &fullParameter) const;
+
+  void tryToAdjustParameterInGlobalTieIfInvalidated(GlobalTie &globalTie);
+  void tryToAdjustTieInGlobalTieIfInvalidated(GlobalTie &globalTie);
 
   IFitScriptGeneratorPresenter *m_presenter;
   std::vector<std::unique_ptr<FitDomain>> m_fitDomains;

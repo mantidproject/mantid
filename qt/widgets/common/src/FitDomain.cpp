@@ -283,6 +283,9 @@ void FitDomain::appendParametersTiedTo(
 
 bool FitDomain::isParameterValueWithinConstraints(std::string const &parameter,
                                                   double value) const {
+  if (!hasParameter(parameter))
+    return false;
+
   auto isValid = true;
 
   auto const parameterIndex = m_function->parameterIndex(parameter);
