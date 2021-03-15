@@ -110,4 +110,3 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def set_on_instrument_changed(self, slot):
         self.comboBox_instrument.currentIndexChanged.connect(slot)
-
