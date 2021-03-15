@@ -34,6 +34,10 @@ class EllipsoidalIntergratedPeakRepresentation():
         shape_info = json_loads(peak_shape.toJSON())
         # use signal ellipse to see if it is valid at this slice
         axes, signal_radii = _signal_ellipsoid_info(shape_info)
+        # apply a translation if present in shape_info (required for backwards compatibility)
+        if "translation0" in shape_info:
+            for idim in range(0, len(peak_origin)):
+                peak_origin[idim] += float(shape_info[f"translation{idim}"])
         peak_origin = slice_info.transform(peak_origin)
 
         slice_origin, major_radius, minor_radius, angle, isort = slice_ellipsoid(

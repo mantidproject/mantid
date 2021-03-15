@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <facilities>
 
+<!--  EMPTY  -->
+<facility name=" " FileExtensions=" ">
+  <timezone></timezone>
+
+  <instrument name=" ">
+    <technique> </technique>
+  </instrument>
+
+</facility>
+
 <facility name="ISIS" zeropadding="5" FileExtensions=".nxs,.raw,.sav,.n*,.s*,.add,.nxspe">
 
   <archive>

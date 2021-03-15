@@ -131,6 +131,11 @@ class DrillView(QMainWindow):
     """
     showSettings = Signal()
 
+    """
+    Sent when the user asks for the increment fill function.
+    """
+    automaticFilling = Signal()
+
     # colors for the table rows
     OK_COLOR = "#3f00ff00"
     ERROR_COLOR = "#3fff0000"
@@ -139,6 +144,9 @@ class DrillView(QMainWindow):
     def __init__(self):
         super(DrillView, self).__init__(None, Qt.Window)
         self.here = os.path.dirname(os.path.realpath(__file__))
+
+        # help
+        self.assistant_process = QProcess(self)
 
         # setup ui
         uic.loadUi(os.path.join(self.here, 'ui/main.ui'), self)
@@ -223,7 +231,7 @@ class DrillView(QMainWindow):
         self.help.clicked.connect(self.helpWindow)
 
         self.fill.setIcon(icons.get_icon("mdi.arrow-expand-down"))
-        self.fill.clicked.connect(self.automatic_filling)
+        self.fill.clicked.connect(self.automaticFilling.emit)
 
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process.emit)
@@ -254,6 +262,8 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
@@ -353,16 +363,20 @@ class DrillView(QMainWindow):
         for (r, c) in indexes:
             self.table.eraseCell(r, c)
 
-    def add_row_after(self):
+    def add_row_after(self, n=0):
         """
         Add row(s) after the selected ones. If no row selected, the row(s)
         is(are) added at the end of the table. The number of row to add is
         taken from the ui spinbox.
+
+        Args:
+            n(int): number of rows. If 0, it will be taken from the spinbox
         """
         position = self.table.getLastSelectedRow()
         if position == -1:
             position = self.table.getLastRow()
-        n = self.nrows.value()
+        if not n:
+            n = self.nrows.value()
         for i in range(n):
             self.table.addRow(position + 1)
             self.rowAdded.emit(position + 1)
@@ -421,83 +435,8 @@ class DrillView(QMainWindow):
         """
         Popup the help window.
         """
-        InterfaceManager().showHelpPage(
-                "qthelp://org.mantidproject/doc/interfaces/DrILL.html")
-
-    def automatic_filling(self):
-        """
-        Copy (and increment) the contents of the first selected cell in the
-        other ones. If a numors string is detected in the first cell, the
-        numors values are incremented by the number found in the ui spinbox
-        associated with this action. If a single row is selected, the increment
-        will be propagated along that row. Otherwise, the increment is
-        propagated along columns.
-        """
-        def inc(numors, i):
-            """
-            Increment a numors string by i.
-            For example, for increment by 1:
-            "1000,2000,3000"  ->  "1001,2001,3001"
-            "1000+2000,3000"  ->  "1001+2001,3001"
-            "1000:2000,3000"  ->  "2001-3001,3001"
-            "1000-2000,3000"  ->  "2001-3001,3001"
-
-            Args:
-                numors (str): a numors string
-                i (int): increment value
-
-            Returns:
-                str: A string that represents the incremented numors
-            """
-            try:
-                return str(int(numors) + i)
-            except:
-                if ((',' in numors) or ('+' in numors)):
-                    c = ',' if ',' in numors else '+'
-                    splitted = numors.split(c)
-                    out = list()
-                    for e in splitted:
-                        out.append(inc(e, i))
-                        if out[-1] == e:
-                            return numors
-                    return c.join(out)
-                elif ((':' in numors) or ('-' in numors)):
-                    c = ':' if ':' in numors else '-'
-                    splitted = numors.split(c)
-                    try:
-                        mini = min(int(splitted[0]), int(splitted[1]))
-                        maxi = max(int(splitted[0]), int(splitted[1]))
-                        if (i > 0):
-                            r0 = maxi + i
-                            r1 = 2 * maxi + i - mini
-                            r0 = 0 if r0 < 0 else r0
-                            r1 = 0 if r1 < 0 else r1
-                            return str(r0) + c + str(r1)
-                        else:
-                            r0 = 2 * mini + i - maxi
-                            r1 = mini + i
-                            r0 = 0 if r0 < 0 else r0
-                            r1 = 0 if r1 < 0 else r1
-                            return str(r0) + c + str(r1)
-                    except:
-                        return numors
-                else:
-                    return numors
-
-        increment = self.increment.value()
-        cells = self.table.getSelectedCells()
-        # check if increment should append along columns
-        columnIncrement = (len(self.table.getRowsFromSelectedCells()) > 1)
-        if not cells:
-            return
-        # increment or copy the content of the previous cell
-        for i in range(1, len(cells)):
-            # if we increment along columns and this is a new column
-            if columnIncrement and cells[i][1] != cells[i-1][1]:
-                continue
-            contents = self.table.getCellContents(cells[i-1][0], cells[i-1][1])
-            self.table.setCellContents(cells[i][0], cells[i][1],
-                                       inc(contents, increment))
+        from mantidqt.gui_helper import show_interface_help
+        show_interface_help("DrILL",self.assistant_process,area="ILL")
 
     def keyPressEvent(self, event):
         """

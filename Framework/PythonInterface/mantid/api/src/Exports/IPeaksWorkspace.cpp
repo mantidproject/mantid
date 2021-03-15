@@ -54,6 +54,15 @@ IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
   // Python will manage the object
   return peak.release();
 }
+
+/// Create a peak via it's QSample value from a list or numpy array
+IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
+  auto peak = self.createPeakQSample(
+      Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+  // Python will manage it
+  return peak.release();
+}
+
 /// Create a peak via it's QLab value from a list or numpy array
 void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
 
@@ -265,6 +274,10 @@ void export_IPeaksWorkspace() {
            return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the QLab "
            "frame, detector-sample distance explicitly provided")
+      .def("createPeakQSample", createPeakQSample, (arg("self"), arg("data")),
+           return_value_policy<manage_new_object>(),
+           "Create a Peak and return it from its coordinates in the QSample "
+           "frame")
       .def("createPeakHKL", createPeakHKL, (arg("self"), arg("data")),
            return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the HKL frame")
