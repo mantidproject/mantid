@@ -808,6 +808,22 @@ void dSpacingPerpendicular::validateUnitParams(
   }
 }
 
+void dSpacingPerpendicular::validateUnitParams(
+    const int, const UnitParametersMap &params) {
+  if (!ParamPresent(params, UnitParams::l2)) {
+    throw std::runtime_error(
+        "A l2 value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+  if (!ParamPresent(params, UnitParams::twoTheta)) {
+    throw std::runtime_error(
+        "A two theta value must be supplied in the extra parameters when "
+        "initialising " +
+        this->unitID() + " for conversion via TOF");
+  }
+}
+
 void dSpacingPerpendicular::init() {
   double l2 = 0.0;
   ParamPresentAndSet(m_params, UnitParams::l2, l2);
