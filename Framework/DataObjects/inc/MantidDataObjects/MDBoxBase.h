@@ -17,6 +17,7 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include <boost/optional.hpp>
 #include <iosfwd>
 #include <mutex>
 
@@ -138,7 +139,8 @@ public:
       Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
       signal_t &signal, signal_t &errorSquared,
       const coord_t innerRadiusSquared = 0.0,
-      const bool useOnePercentBackgroundCorrection = true) const override = 0;
+      const bool useOnePercentBackgroundCorrection = true,
+      boost::optional<bool> isEllipsoidPeak = false) const override = 0;
 
   /** Find the centroid around a sphere */
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,

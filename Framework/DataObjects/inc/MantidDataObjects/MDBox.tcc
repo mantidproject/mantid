@@ -12,6 +12,7 @@
 #include "MantidKernel/DiskBuffer.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
+#include <boost/optional.hpp>
 #include <cmath>
 #include <numeric>
 
@@ -596,10 +597,13 @@ TMDE(void MDBox)::generalBin(
  * @param[out] errorSquared :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
  */
-TMDE(void MDBox)::integrateSphere(
-    Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
-    signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
-    const bool useOnePercentBackgroundCorrection) const {
+TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
+                                  const coord_t radiusSquared, signal_t &signal,
+                                  signal_t &errorSquared,
+                                  const coord_t innerRadiusSquared,
+                                  const bool useOnePercentBackgroundCorrection,
+                                  boost::optional<bool> isEllipsoidPeak) const {
+  UNUSED_ARG(isEllipsoidPeak);
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   if (innerRadiusSquared == 0.0) {

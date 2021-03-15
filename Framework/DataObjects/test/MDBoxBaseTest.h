@@ -13,6 +13,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <Poco/File.h>
+#include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -131,7 +132,8 @@ public:
       Mantid::API::CoordTransform & /*radiusTransform*/,
       const coord_t /*radiusSquared*/, signal_t & /*signal*/,
       signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
-      const bool /*useOnePercentBackgroundCorrection*/) const override{};
+      const bool /*useOnePercentBackgroundCorrection*/,
+      boost::optional<bool> /*isEllipsoidPeak = false*/) const override{};
   void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
                       const coord_t /*radiusSquared*/, coord_t *,
                       signal_t &) const override{};

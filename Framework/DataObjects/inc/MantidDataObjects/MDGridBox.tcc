@@ -1133,7 +1133,8 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
 TMDE(void MDGridBox)::integrateSphere(
     API::CoordTransform &radiusTransform, const coord_t radiusSquared,
     signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
-    const bool useOnePercentBackgroundCorrection) const {
+    const bool useOnePercentBackgroundCorrection,
+    boost::optional<bool> isEllipsoidPeak) const {
   // We start by looking at the vertices at every corner of every box contained,
   // to see which boxes are partially contained/fully contained.
 
@@ -1273,6 +1274,15 @@ TMDE(void MDGridBox)::integrateSphere(
     } else {
       partialBox = true;
       //        std::cout << "box at " << i << " has a vertex touching\n";
+    }
+
+    // NOTE:
+    //  the smart partial box check (sub-devide box into smaller grid)
+    //  does not work for ellipsoid peaks, so we are force using the
+    //  finest grid for now until a suitable check can be identified
+    //  in the future.
+    if (isEllipsoidPeak) {
+      partialBox = true;
     }
 
     // We couldn't rule out that the box might be partially contained.
