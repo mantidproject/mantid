@@ -16,7 +16,6 @@
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <MantidAPI\MatrixWorkspace.h>
 
 using Mantid::API::IFunction;
 using Mantid::API::IFunction_sptr;
