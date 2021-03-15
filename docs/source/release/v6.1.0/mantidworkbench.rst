@@ -17,7 +17,8 @@ New and Improved
 
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
-
+- Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
+  
 Bugfixes
 --------
 
