@@ -249,7 +249,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
 
         # superplot
-        self.superplot = Superplot(self.window)
+        self.superplot = Superplot(canvas, self.window)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.superplot.getSideWidget())
         self.window.addDockWidget(Qt.BottomDockWidgetArea, self.superplot.getBottomWidget())
         self.superplot.hide()

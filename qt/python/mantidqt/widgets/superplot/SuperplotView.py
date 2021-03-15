@@ -38,9 +38,11 @@ class SuperplotView(QWidget):
     _presenter = None
     _sideView = None
     _bottomView = None
+    _canvas = None
 
-    def __init__(self, parent=None):
+    def __init__(self, canvas, parent=None):
         super().__init__(parent)
+        self._canvas = canvas
         self._presenter = SuperplotPresenter(self)
         self._sideView = SuperplotViewSide(self)
         self._bottomView = SuperplotViewBottom(self)
