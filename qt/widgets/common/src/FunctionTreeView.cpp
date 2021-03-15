@@ -56,11 +56,18 @@ using namespace Mantid::API;
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
-QString addPrefix(QString &param) { return QString("f0.") + param; }
 const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) {
   return std::regex_match(name, PREFIX_REGEX);
 }
+
+QString insertPrefix(const QString &param) {
+  return param.left(param.indexOf(".") + 1) + QString("f0.") +
+         param.right(param.size() - param.indexOf(".") - 1);
+}
+
+QString addPrefix(const QString &param) { return QString("f0.") + param; }
+
 QString removePrefix(QString &param) {
   if (variableIsPrefixed(param.toStdString()))
     return param.split(QString("."))[1];
@@ -1418,7 +1425,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
       if (f0) {
         // Modify the previous globals so they have a function prefix
         std::transform(globalParameters.begin(), globalParameters.end(),
-                       globalParameters.begin(), addPrefix);
+                       globalParameters.begin(),
+                       m_multiDomainFunctionPrefix.isEmpty() ? addPrefix
+                                                             : insertPrefix);
         cf->addFunction(f0);
       }
       cf->addFunction(f);
