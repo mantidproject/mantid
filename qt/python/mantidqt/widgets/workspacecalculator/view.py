@@ -47,6 +47,8 @@ class WorkspaceCalculatorView(QWidget):
 
 
 class ScaleValidator(QtGui.QValidator):
+    """Validator for QLineEdit input used for scaling of LHS and RHS workspaces."""
+
     def __init__(self, parent=None):
         QtGui.QValidator.__init__(self, parent=parent)
 
