@@ -14,11 +14,12 @@ from mantid.dataobjects import MDHistoWorkspace, WorkspaceSingleValue
 from mantid.kernel import logger as log
 
 
-class WorkspaceCalculatorModel():
+class WorkspaceCalculatorModel:
     """This class stores all of the objects necessary to perform required
     operation and places the product in the ADS."""
 
-    def __init__(self, lhs_scale=1.0, lhs_ws=None, rhs_scale=1.0, rhs_ws=None, output_ws=None, operation='+'):
+    def __init__(self, lhs_scale=1.0, lhs_ws=None, rhs_scale=1.0,
+                 rhs_ws=None, output_ws=None, operation='+'):
         """Initializes the model with all parameters necessary for performing the desired operation.
          Default parameters do not pass the validation step."""
         self._lhs_scale = lhs_scale
@@ -28,6 +29,20 @@ class WorkspaceCalculatorModel():
         self._output_ws = output_ws
         self._operation = operation
         self._md_ws = None
+
+    def updateParameters(self, lhs_scale, lhs_ws, rhs_scale,
+                         rhs_ws, output_ws, operation):
+        lhs_valid, rhs_valid, err_msg = self.validateInputs(lhs_ws=lhs_ws,
+                                                            rhs_ws=rhs_ws,
+                                                            operation=operation)
+        if err_msg == str():
+            self._lhs_scale = lhs_scale
+            self._lhs_ws = lhs_ws
+            self._rhs_scale = rhs_scale
+            self._rhs_ws = rhs_ws
+            self._output_ws = output_ws
+            self._operation = operation
+        return lhs_valid, rhs_valid, err_msg
 
     def _check_group_for_md(self, group_name):
         multi_dim_err_msg = "Group contains MD and non-MD workspaces."
