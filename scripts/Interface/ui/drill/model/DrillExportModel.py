@@ -194,9 +194,12 @@ class DrillExportModel:
         workspaceName = sample.getOutputName()
 
         try:
-            outputWsGroup = mtd[workspaceName]
-            names = outputWsGroup.getNames()
-            outputWs = names[0]
+            outputWs = mtd[workspaceName]
+            if isinstance(outputWs, WorkspaceGroup):
+                names = outputWs.getNames()
+                outputWs = names[0]
+            else:
+                outputWs = workspaceName
         except:
             return
 
