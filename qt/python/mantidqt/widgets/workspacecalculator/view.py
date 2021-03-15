@@ -54,9 +54,19 @@ class ScaleValidator(QtGui.QValidator):
         try:
             float(input)
         except ValueError:
-            if (input[-1].lower() == "e"
-                    or input[-2].lower() == "e" and input[-1].lower() == "-"):
-                return QtGui.QValidator.Acceptable, input, pos
+            try:
+                last_char = input[-1].lower()
+                penultimate_char = input[-2].lower()
+                if last_char == "e":
+                    try:
+                        int(penultimate_char)
+                        return QtGui.QValidator.Acceptable, input, pos
+                    except ValueError:
+                        pass
+                elif penultimate_char == "e" and last_char == "-":
+                        return QtGui.QValidator.Acceptable, input, pos
+            except IndexError:
+                pass
             return QtGui.QValidator.Invalid, input, pos
         if float(input) == 0:
             return QtGui.QValidator.Intermediate, input, pos

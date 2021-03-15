@@ -10,6 +10,7 @@
 
 from .model import WorkspaceCalculatorModel
 from .view import WorkspaceCalculatorView
+from mantid.kernel import logger as log
 
 
 class WorkspaceCalculator():
@@ -32,8 +33,12 @@ class WorkspaceCalculator():
 
     def readParameters(self):
         parameters = dict()
-        parameters['lhs_scale'] = float(self.view.lhs_scaling.text())
-        parameters['rhs_scale'] = float(self.view.rhs_scaling.text())
+        try:
+            parameters['lhs_scale'] = float(self.view.lhs_scaling.text())
+            parameters['rhs_scale'] = float(self.view.rhs_scaling.text())
+        except ValueError as err:
+            log.error(str(err))
+            return
         parameters['lhs_ws'] = self.view.lhs_ws.currentText()
         parameters['rhs_ws'] = self.view.rhs_ws.currentText()
         parameters['operation'] = self.view.operation.currentText()
@@ -45,6 +50,8 @@ class WorkspaceCalculator():
 
     def validateInputs(self):
         parameters = self.readParameters()
+        if parameters == dict():
+            return
         lhs_ws = parameters['lhs_ws'] if parameters['lhs_ws'] != str() else None
         rhs_ws = parameters['rhs_ws'] if parameters['rhs_ws'] != str() else None
         valid_lhs, valid_rhs, err_msg = self.model.validateInputs(lhs_ws=lhs_ws,
