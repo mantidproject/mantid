@@ -45,6 +45,11 @@ class SuperplotView(QWidget):
         self._sideView = SuperplotViewSide(self)
         self._bottomView = SuperplotViewBottom(self)
 
+        side = self._sideView
+        side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
+        bottom = self._bottomView
+        bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
+
     def getSideWidget(self):
         return self._sideView
 

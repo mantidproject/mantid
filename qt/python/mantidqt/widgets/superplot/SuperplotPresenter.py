@@ -16,3 +16,9 @@ class SuperplotPresenter:
     def __init__(self, view):
         self._view = view
         self._model = SuperplotModel()
+
+    def onAddButtonClicked(self):
+        pass
+
+    def onHoldButtonToggled(self, state):
+        pass
