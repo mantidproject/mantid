@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
         self.setObjectName(MAIN_WINDOW_OBJECT_NAME)
 
         # widgets
+        self.memorywidget = None
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
@@ -171,6 +172,12 @@ class MainWindow(QMainWindow):
         prompt = CONF.get('project/prompt_on_deleting_workspace')
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
+
+        self.set_splash("Loading memory widget")
+        from workbench.plugins.memorywidget import MemoryWidget
+        self.memorywidget = MemoryWidget(self)
+        self.memorywidget.register_plugin()
+        self.widgets.append(self.memorywidget)
 
         # set the link between the algorithm and workspace widget
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
@@ -462,6 +469,7 @@ class MainWindow(QMainWindow):
     def setup_default_layouts(self):
         """Set the default layouts of the child widgets"""
         # layout definition
+        memorywidget = self.memorywidget
         logmessages = self.messagedisplay
         ipython = self.ipythonconsole
         workspacewidget = self.workspacewidget
@@ -475,7 +483,7 @@ class MainWindow(QMainWindow):
                 # column 1
                 [[editor, ipython]],
                 # column 2
-                [[logmessages]]
+                [[memorywidget], [logmessages]]
             ],
             'width-fraction': [
                 0.25,  # column 0 width
@@ -485,7 +493,7 @@ class MainWindow(QMainWindow):
             'height-fraction': [
                 [0.5, 0.5],  # column 0 row heights
                 [1.0],  # column 1 row heights
-                [1.0]
+                [0.1, 0.9]
             ]  # column 2 row heights
         }
 
