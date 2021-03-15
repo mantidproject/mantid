@@ -62,16 +62,26 @@ inline bool variableIsPrefixed(const std::string &name) {
 }
 
 QString insertPrefix(const QString &param) {
-  return param.left(param.indexOf(".") + 1) + QString("f0.") +
+  return param.left(param.indexOf(".") + 1) + "f0." +
          param.right(param.size() - param.indexOf(".") - 1);
 }
 
-QString addPrefix(const QString &param) { return QString("f0.") + param; }
+QString addPrefix(const QString &param) { return "f0." + param; }
 
-QString removePrefix(QString &param) {
-  if (variableIsPrefixed(param.toStdString()))
-    return param.split(QString("."))[1];
-  else {
+QString removeEmbeddedPrefix(const QString &param) {
+  if (variableIsPrefixed(param.toStdString())) {
+    const auto paramSplit = param.split(".");
+    return paramSplit[0] + "." + paramSplit[paramSplit.size() - 1];
+  } else {
+    return param;
+  }
+}
+
+QString removePrefix(const QString &param) {
+  if (variableIsPrefixed(param.toStdString())) {
+    const auto paramSplit = param.split(".");
+    return paramSplit[paramSplit.size() - 1];
+  } else {
     return param;
   }
 }
@@ -1778,21 +1788,22 @@ void FunctionTreeView::removeFunction() {
     // Check if the current function in the browser is a
     // composite function
     auto topProp = props[0];
-    auto fun = Mantid::API::FunctionFactory::Instance().createFunction(
-        topProp->propertyName().toStdString());
-    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
+        getFunction(topProp));
     if (cf) {
       // If it is a composite function
       // check that there are more than one function
       // which means more than two subproperties
-      size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if (nFunctions == 1 && cf->name() == "CompositeFunction") {
+      if (cf->nFunctions() == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
         auto func = getFunction(props[0]->subProperties()[1]);
         std::transform(globalParameters.begin(), globalParameters.end(),
-                       globalParameters.begin(), removePrefix);
+                       globalParameters.begin(),
+                       m_multiDomainFunctionPrefix.isEmpty()
+                           ? removePrefix
+                           : removeEmbeddedPrefix);
         // Remove the composite function
         m_browser->removeProperty(topProp);
         // Add the temporary stored function
