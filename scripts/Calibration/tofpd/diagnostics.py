@@ -395,7 +395,7 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     return mtd[outputname]
 
 
-def plot_peakd(wksp, peak_positions, mask_ws=None):
+def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -428,6 +428,10 @@ def plot_peakd(wksp, peak_positions, mask_ws=None):
     regions = []
     region_cnts = []
 
+    # Use full detector range if not specified
+    if drange == (0, 0):
+        drange = (0, int(np.max(mtd[str(wksp)].detectorInfo().detectorIDs())))
+
     # Plot data for each peak position
     for peak in peaks:
         print("Processing peak position {}".format(peak))
@@ -447,15 +451,20 @@ def plot_peakd(wksp, peak_positions, mask_ws=None):
         means.append(np.mean(y_val))
         stddevs.append(np.std(y_val))
 
+        cut_id = (single.yIndexOfX(drange[0]), single.yIndexOfX(drange[1]))
+
         # Draw vertical lines between detector regions
         if not regions:
-            regions = __get_regions(x, y, limit=200, mask=mask_ws)
+            if mask_ws:
+                regions = __get_regions(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], limit=200, mask=mtd[str(mask_ws)].extractY().flatten()[cut_id[0]:cut_id[1]])
+            else:
+                regions = __get_regions(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], limit=200)
             for region in regions:
                 ax.axvline(x=region[0])
                 ax.axvline(x=region[1])
                 region_cnts.append(__get_bad_counts(y[region[0]:region[1]], means[len(means)-1]))
 
-        ax.plot(x, y, marker="x", linestyle="None", label="{:0.6f}".format(peak))
+        ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
     # If every peak had nans, raise error
