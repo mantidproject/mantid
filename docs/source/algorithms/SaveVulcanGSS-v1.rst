@@ -75,7 +75,7 @@ Output:
   #Pulsestart:    0
   #Pulsestop:     0
   #
-  # Total flight path 19.3695m, tth 9.14421deg, DIFC 780.469
+  # Total flight path 19.3695m, tth 9.14421deg, DIFC 780.587
   # Data for spectrum :0
   BANK 2 2997 2997 SLOG 1000.5 19987.7 0.0010000 0 FXYE
                   1000.5                 520.0                 22.80
