@@ -27,5 +27,17 @@ class SuperplotPresenter:
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
 
+    def onDelButtonClicked(self):
+        """
+        Triggered when the del button is pressed. This function removes the
+        selected workspace from the selection list.
+        """
+        name = self._view.getSelectedWorkspaceFromList()
+        if name is None:
+            return
+        self._model.delWorkspace(name)
+        names = self._model.getWorkspaces()
+        self._view.setWorkspacesList(names)
+
     def onHoldButtonToggled(self, state):
         pass

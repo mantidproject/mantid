@@ -26,6 +26,16 @@ class SuperplotModel:
         if name not in self._workspaces:
             self._workspaces.append(name)
 
+    def delWorkspace(self, name):
+        """
+        Remove a workspace from the list.
+
+        Args:
+            name (str): name of the workspace
+        """
+        if name in self._workspaces:
+            self._workspaces.remove(name)
+
     def getWorkspaces(self):
         """
         Get the list of workspace names.

@@ -47,6 +47,7 @@ class SuperplotView(QWidget):
 
         side = self._sideView
         side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
+        side.delButton.clicked.connect(self._presenter.onDelButtonClicked)
         bottom = self._bottomView
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
 
@@ -74,6 +75,19 @@ class SuperplotView(QWidget):
             str: name of the workspace
         """
         return self._sideView.workspaceSelector.currentText()
+
+    def getSelectedWorkspaceFromList(self):
+        """
+        Get the selected workspace from the selection list.
+
+        Returns:
+            str: name of the selected workspace, None if nothing is selected
+        """
+        item = self._sideView.workspacesList.currentItem()
+        if item:
+            return item.text()
+        else:
+            return None
 
     def setWorkspacesList(self, names):
         """
