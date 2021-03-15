@@ -320,13 +320,13 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
+  NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
   NXInt dataCenter = data1.openIntData();
   dataCenter.load();
-  NXData data2 = firstEntry.openNXData("data2");
+  NXData data2 = firstEntry.openNXData("D11/Detector 2/data");
   NXInt dataLeft = data2.openIntData();
   dataLeft.load();
-  NXData data3 = firstEntry.openNXData("data3");
+  NXData data3 = firstEntry.openNXData("D11/Detector 3/data");
   NXInt dataRight = data3.openIntData();
   dataRight.load();
 

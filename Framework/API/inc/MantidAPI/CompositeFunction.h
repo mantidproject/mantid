@@ -69,6 +69,8 @@ public:
   void setParameterDescription(size_t, const std::string &description) override;
   /// Get i-th parameter
   [[nodiscard]] double getParameter(size_t i) const override;
+  /// Get parameter from i-th function, j-th local parameter index
+  [[nodiscard]] double getParameter(size_t i, size_t j) const;
   /// Set parameter by name.
   void setParameter(const std::string &name, const double &value,
                     bool explicitlySet = true) override;
@@ -86,6 +88,8 @@ public:
   // Set an attribute value
   void setAttribute(const std::string &name,
                     const API::IFunction::Attribute &value) override;
+  // Register the functions usage
+  void registerFunctionUsage(bool internal) override;
   /// Total number of parameters
   [[nodiscard]] size_t nParams() const override;
   // Total number of attributes, which includes global and local function
@@ -99,6 +103,7 @@ public:
   [[nodiscard]] size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
   [[nodiscard]] std::string parameterName(size_t i) const override;
+  [[nodiscard]] std::string parameterName(size_t i, size_t j) const;
   /// Returns the name of attribute i
   [[nodiscard]] std::string attributeName(size_t i) const override;
   /// Returns the description of parameter i
@@ -107,6 +112,8 @@ public:
   [[nodiscard]] bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
   [[nodiscard]] double getError(size_t i) const override;
+  /// Get the fitting error for i-th function's j-th parameter
+  [[nodiscard]] double getError(size_t i, size_t j) const;
   /// Get the fitting error for a parameter by name
   [[nodiscard]] double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter

@@ -15,6 +15,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
@@ -50,10 +51,24 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaRotationAngle", 0.0,
                    "angle of relative rotation in degree");
   declareParameter("DeltaT0", 0.0, "delta of TOF");
+}
 
-  // attributes
-  declareAttribute("Workspace", Attribute(""));
-  declareAttribute("ComponentName", Attribute(""));
+void SCDCalibratePanels2ObjFunc::setPeakWorkspace(
+    IPeaksWorkspace_sptr &pws, const std::string componentName) {
+  m_pws = pws->clone();
+  m_cmpt = componentName;
+
+  // Special adjustment for CORELLI
+  Instrument_sptr inst =
+      std::const_pointer_cast<Instrument>(m_pws->getInstrument());
+  if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
+    // the second check is just to ensure that no accidental passing in
+    // a bank name with sixteenpack already appended
+    if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
+      m_cmpt.append("/sixteenpack");
+
+  // Set the iteration count
+  n_iter = 0;
 }
 
 /**
@@ -84,96 +99,71 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
   const double drotang = getParameter("DeltaRotationAngle");
 
   //-- delta in TOF
-  const double dT0 = getParameter("DeltaT0");
+  // const double dT0 = getParameter("DeltaT0");
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
   //         xValues
   UNUSED_ARG(xValues);
   UNUSED_ARG(order);
 
-  // Get workspace and component name (string type)
-  m_ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-      getAttribute("Workspace").asString());
-  m_cmpt = getAttribute("ComponentName").asString();
+  // -- always working on a copy only
+  IPeaksWorkspace_sptr pws = m_pws->clone();
 
-  // Special adjustment for CORELLI
-  PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(m_ws);
-  Instrument_sptr inst =
-      std::const_pointer_cast<Instrument>(pws->getInstrument());
-  if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
-    m_cmpt.append("/sixteenpack");
-
-  // NOTE: Since the feature vectors are all deltas with respect to the starting
-  // position,
-  //       we need to only operate on a copy instead of the original to avoid
-  //       changing the base value
-  std::shared_ptr<API::Workspace> calc_ws = m_ws->clone();
+  // Debugging related
+  IPeaksWorkspace_sptr pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
   if (m_cmpt != "none/sixteenpack") {
     // rotation
-    // NOTE: moderator should not be reoriented
-    rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, calc_ws);
+    pws = rotateInstrumentComponentBy(vx, vy, vz, drotang, m_cmpt, pws);
 
     // translation
-    moveInstruentComponentBy(dx, dy, dz, m_cmpt, calc_ws);
+    pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
   }
 
-  // generate a flatten Q_sampleframe from calculated ws (by moving instrument
-  // component) so that a direct comparison can be performed between measured
-  // and calculated
-  PeaksWorkspace_sptr calc_pws =
-      std::dynamic_pointer_cast<PeaksWorkspace>(calc_ws);
-  Instrument_sptr calc_inst =
-      std::const_pointer_cast<Instrument>(calc_pws->getInstrument());
+  // TODO:
+  // need to do something with dT0
 
-  // NOTE: We are not sure if the PeaksWorkspace level T0
-  //       if going go affect the peak.getTOF
-  Mantid::API::Run &run = calc_pws->mutableRun();
-  double T0 = 0.0;
-  if (run.hasProperty("T0")) {
-    T0 = run.getPropertyValueAsType<double>("T0");
-  }
-  T0 += dT0;
-  run.addProperty<double>("T0", T0, true);
+  // calculate residual
+  // double residual = 0.0;
+  for (int i = 0; i < pws->getNumberPeaks(); ++i) {
+    // cache TOF
+    const double tof = pws->getPeak(i).getTOF();
 
-  for (int i = 0; i < calc_pws->getNumberPeaks(); ++i) {
-    const Peak pk = calc_pws->getPeak(i);
-
-    V3D hkl =
-        V3D(boost::math::iround(pk.getH()), boost::math::iround(pk.getK()),
-            boost::math::iround(pk.getL()));
-    // if (hkl == UNSET_HKL)
-    //   throw std::runtime_error("Found unindexed peak in input workspace!");
-
-    // construct the out vector (Qvectors)
+    Peak pk = Peak(pws->getPeak(i));
+    // update instrument
+    pk.setInstrument(pws->getInstrument());
+    // update detector ID
+    pk.setDetectorID(pws->getPeak(i).getDetectorID());
+    // calculate&set wavelength based on new instrument
     Units::Wavelength wl;
-    V3D calc_qv;
-    // somehow calibration results works better with direct method
-    // but moderator requires the strange in-and-out way
-    if (m_cmpt != "moderator") {
-      wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
-                    pk.getInitialEnergy(), 0.0);
-      // create a peak with shifted wavelength
-      Peak calc_pk(calc_inst, pk.getDetectorID(),
-                   wl.singleFromTOF(pk.getTOF() + dT0), hkl,
-                   pk.getGoniometerMatrix());
-      calc_qv = calc_pk.getQSampleFrame();
-    } else {
-      Peak calc_pk(calc_inst, pk.getDetectorID(), pk.getWavelength(), hkl,
-                   pk.getGoniometerMatrix());
-      wl.initialize(calc_pk.getL1(), calc_pk.getL2(), calc_pk.getScattering(),
-                    0, calc_pk.getInitialEnergy(), 0.0);
-      // adding the TOF shift here
-      calc_pk.setWavelength(wl.singleFromTOF(pk.getTOF() + dT0));
-      calc_qv = calc_pk.getQSampleFrame();
-    }
+    wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,
+                  pk.getInitialEnergy(), 0.0);
+    pk.setWavelength(wl.singleFromTOF(tof));
 
-    // get the updated/calculated q vector in sample frame and set it to out
-    // V3D calc_qv = calc_pk.getQSampleFrame();
+    V3D qv = pk.getQSampleFrame();
     for (int j = 0; j < 3; ++j)
-      out[i * 3 + j] = calc_qv[j];
+      out[i * 3 + j] = qv[j];
+
+    // check the difference between n and target
+    // auto ubm = pws->sample().getOrientedLattice().getUB();
+    // V3D qv_target = ubm * pws->getPeak(i).getIntHKL();
+    // qv_target *= 2 * PI;
+    // V3D delta_qv = qv - qv_target;
+    // residual += delta_qv.norm2();
   }
+
+  n_iter += 1;
+
+  // V3D dtrans = V3D(dx, dy, dz);
+  // V3D rotaxis = V3D(vx, vy, vz);
+  // residual /= pws->getNumberPeaks();
+  // std::ostringstream msgiter;
+  // msgiter.precision(8);
+  // msgiter << "residual@iter_" << n_iter << ": " << residual << "\n"
+  //         << "-- (dx, dy, dz) = " << dtrans << "\n"
+  //         << "-- ang@axis = " << drotang << "@" << rotaxis << "\n\n";
+  // g_log.information() << msgiter.str();
 }
 
 // -------///
@@ -187,29 +177,45 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
  * @param deltaY  :: The shift along the Y-axis in m
  * @param deltaZ  :: The shift along the Z-axis in m
  * @param componentName  :: string representation of a component
- * @param ws  :: input workspace (mostly peaksworkspace)
+ * @param pws  :: input workspace (mostly peaksworkspace)
  */
-void SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
+IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(
     double deltaX, double deltaY, double deltaZ, std::string componentName,
-    const API::Workspace_sptr &ws) const {
+    IPeaksWorkspace_sptr &pws) const {
+  // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
+
   // move instrument is really fast, even with zero input
   IAlgorithm_sptr mv_alg = Mantid::API::AlgorithmFactory::Instance().create(
       "MoveInstrumentComponent", -1);
+  //
   mv_alg->initialize();
   mv_alg->setChild(true);
   mv_alg->setLogging(LOGCHILDALG);
-  mv_alg->setProperty<Workspace_sptr>("Workspace", ws);
+  mv_alg->setProperty("Workspace", pws);
   mv_alg->setProperty("ComponentName", componentName);
   mv_alg->setProperty("X", deltaX);
   mv_alg->setProperty("Y", deltaY);
   mv_alg->setProperty("Z", deltaZ);
   mv_alg->setProperty("RelativePosition", true);
   mv_alg->executeAsChildAlg();
+
+  return pws;
 }
 
-void SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
+/**
+ * @brief Rotate the instrument by angle axis
+ *
+ * @param rotVx  :: x of rotation axis
+ * @param rotVy  :: y of rotation axis
+ * @param rotVz  :: z of rotation axis
+ * @param rotAng  :: rotation angle (in degree)
+ * @param componentName  :: component name
+ * @param pws  :: peak workspace
+ * @return IPeaksWorkspace_sptr
+ */
+IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
     double rotVx, double rotVy, double rotVz, double rotAng,
-    std::string componentName, const API::Workspace_sptr &ws) const {
+    std::string componentName, IPeaksWorkspace_sptr &pws) const {
   // rotate
   IAlgorithm_sptr rot_alg = Mantid::API::AlgorithmFactory::Instance().create(
       "RotateInstrumentComponent", -1);
@@ -217,7 +223,7 @@ void SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
   rot_alg->initialize();
   rot_alg->setChild(true);
   rot_alg->setLogging(LOGCHILDALG);
-  rot_alg->setProperty<Workspace_sptr>("Workspace", ws);
+  rot_alg->setProperty("Workspace", pws);
   rot_alg->setProperty("ComponentName", componentName);
   rot_alg->setProperty("X", rotVx);
   rot_alg->setProperty("Y", rotVy);
@@ -225,6 +231,8 @@ void SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(
   rot_alg->setProperty("Angle", rotAng);
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->executeAsChildAlg();
+
+  return pws;
 }
 
 } // namespace Crystal

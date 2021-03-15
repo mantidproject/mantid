@@ -1,0 +1,513 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2021-03-05 17:20:13.718971" name="MANDI" valid-from="2021-02-01 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view view="spherical_y"/>
+  </defaults>
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-30.036737"/>
+  </component>
+  <type is="Source" name="moderator"/>
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+  <!--MONITORS-->
+  <component idlist="monitors" type="monitors">
+    <location/>
+  </component>
+  <type name="monitors">
+    <component type="monitor">
+      <location name="monitor1" z="-2.935"/>
+      <location name="monitor2" z="-0.898"/>
+      <location name="monitor3" z="1.042"/>
+    </component>
+  </type>
+  <!--panel1-->
+  <type is="rectangular_detector" name="panel1" type="pixel" xpixels="256" xstart="-0.0791775" xstep="0.000621" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="65536" idstepbyrow="256" type="panel1">
+    <location name="bank1" x="-0.020395" y="-0.37801" z="0.156048">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="89.90044294815564">
+        <rot val="65.82325126374168">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="87.97476071722399"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel2-->
+  <type is="rectangular_detector" name="panel2" type="pixel" xpixels="256" xstart="-0.079305" xstep="0.000622" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="131072" idstepbyrow="256" type="panel2">
+    <location name="bank2" x="0.152478" y="-0.375683" z="0.16316">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="84.11272776190728">
+        <rot val="66.81029193723666">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="116.30045422142526"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel3-->
+  <type is="rectangular_detector" name="panel3" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="196608" idstepbyrow="256" type="panel3">
+    <location name="bank3" x="0.148487" y="-0.381313" z="-0.011952">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="179.58472588055355">
+        <rot val="72.32487160649438">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="89.9542976780168"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel5-->
+  <type is="rectangular_detector" name="panel5" type="pixel" xpixels="256" xstart="-0.0784125" xstep="0.000615" ypixels="256" ystart="-0.07854" ystep="0.000616"/>
+  <component idfillbyfirst="y" idstart="327680" idstepbyrow="256" type="panel5">
+    <location name="bank5" x="-0.018456" y="-0.367851" z="-0.176565">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-92.3034507330249">
+        <rot val="65.9847410742322">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="93.56195767445382"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel7-->
+  <type is="rectangular_detector" name="panel7" type="pixel" xpixels="256" xstart="-0.07854" xstep="0.000616" ypixels="256" ystart="-0.0786675" ystep="0.000617"/>
+  <component idfillbyfirst="y" idstart="458752" idstepbyrow="256" type="panel7">
+    <location name="bank7" x="-0.184704" y="-0.364022" z="-0.014354">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="1.0963788208423804">
+        <rot val="53.30348174500838">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="89.91425026674166"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel8-->
+  <type is="rectangular_detector" name="panel8" type="pixel" xpixels="256" xstart="-0.0786675" xstep="0.000617" ypixels="256" ystart="-0.07905" ystep="0.00062"/>
+  <component idfillbyfirst="y" idstart="524288" idstepbyrow="256" type="panel8">
+    <location name="bank8" x="-0.189849" y="-0.355586" z="0.165184">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-7.0657776829519285">
+        <rot val="59.15463429487957">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="116.51308239245449"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel10-->
+  <type is="rectangular_detector" name="panel10" type="pixel" xpixels="256" xstart="-0.0786675" xstep="0.000617" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="655360" idstepbyrow="256" type="panel10">
+    <location name="bank10" x="-0.014385" y="-0.250523" z="0.381006">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="153.33661700080467">
+        <rot val="55.31455253990126">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="40.084503493642295"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel11-->
+  <type is="rectangular_detector" name="panel11" type="pixel" xpixels="256" xstart="-0.07854" xstep="0.000616" ypixels="256" ystart="-0.0784125" ystep="0.000615"/>
+  <component idfillbyfirst="y" idstart="720896" idstepbyrow="256" type="panel11">
+    <location name="bank11" x="0.214812" y="-0.255596" z="0.30451">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-173.0412733756564">
+        <rot val="55.0778435899359">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="41.596894240538624"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel12-->
+  <type is="rectangular_detector" name="panel12" type="pixel" xpixels="256" xstart="-0.077775" xstep="0.00061" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="786432" idstepbyrow="256" type="panel12">
+    <location name="bank12" x="0.354601" y="-0.263436" z="0.107259">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-135.35540507106643">
+        <rot val="50.493170631295534">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="39.35079354055164"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel13-->
+  <type is="rectangular_detector" name="panel13" type="pixel" xpixels="256" xstart="-0.07803" xstep="0.000612" ypixels="256" ystart="-0.0779025" ystep="0.000611"/>
+  <component idfillbyfirst="y" idstart="851968" idstepbyrow="256" type="panel13">
+    <location name="bank13" x="0.350199" y="-0.260273" z="-0.129011">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-104.87045157384762">
+        <rot val="55.05828162592753">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="51.11921964059511"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel17-->
+  <type is="rectangular_detector" name="panel17" type="pixel" xpixels="256" xstart="-0.0779025" xstep="0.000611" ypixels="256" ystart="-0.0779025" ystep="0.000611"/>
+  <component idfillbyfirst="y" idstart="1114112" idstepbyrow="256" type="panel17">
+    <location name="bank17" x="-0.373018" y="-0.224899" z="-0.133739">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="43.16210684925021">
+        <rot val="49.4221008028239">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="37.11171536638554"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel18-->
+  <type is="rectangular_detector" name="panel18" type="pixel" xpixels="256" xstart="-0.0781575" xstep="0.000613" ypixels="256" ystart="-0.0781575" ystep="0.000613"/>
+  <component idfillbyfirst="y" idstart="1179648" idstepbyrow="256" type="panel18">
+    <location name="bank18" x="-0.381403" y="-0.221025" z="0.113867">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="86.73949104620155">
+        <rot val="52.72039407268509">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="32.89003469216333"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel19-->
+  <type is="rectangular_detector" name="panel19" type="pixel" xpixels="256" xstart="-0.0784125" xstep="0.000615" ypixels="256" ystart="-0.07854" ystep="0.000616"/>
+  <component idfillbyfirst="y" idstart="1245184" idstepbyrow="256" type="panel19">
+    <location name="bank19" x="-0.24011" y="-0.231698" z="0.312112">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="121.19504843159369">
+        <rot val="54.61080914270201">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="39.093224938429564"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel20-->
+  <type is="rectangular_detector" name="panel20" type="pixel" xpixels="256" xstart="-0.0781575" xstep="0.000613" ypixels="256" ystart="-0.0789225" ystep="0.000619"/>
+  <component idfillbyfirst="y" idstart="1310720" idstepbyrow="256" type="panel20">
+    <location name="bank20" x="0.119598" y="-0.125435" z="0.385855">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-176.81069222029342">
+        <rot val="48.971074710296364">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="22.115065813725646"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel21-->
+  <type is="rectangular_detector" name="panel21" type="pixel" xpixels="256" xstart="-0.07803" xstep="0.000612" ypixels="256" ystart="-0.07803" ystep="0.000612"/>
+  <component idfillbyfirst="y" idstart="1376256" idstepbyrow="256" type="panel21">
+    <location name="bank21" x="0.323722" y="-0.136078" z="0.2348">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-144.13935844254172">
+        <rot val="50.19751342159706">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="24.553842529603866"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel22-->
+  <type is="rectangular_detector" name="panel22" type="pixel" xpixels="256" xstart="-0.0779025" xstep="0.000611" ypixels="256" ystart="-0.07803" ystep="0.000612"/>
+  <component idfillbyfirst="y" idstart="1441792" idstepbyrow="256" type="panel22">
+    <location name="bank22" x="0.400729" y="-0.140632" z="-0.007255">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-119.22538561690251">
+        <rot val="49.35850720434595">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="26.822639949273377"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel23-->
+  <type is="rectangular_detector" name="panel23" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="1507328" idstepbyrow="256" type="panel23">
+    <location name="bank23" x="0.324059" y="-0.13934" z="-0.251848">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-75.54946085969836">
+        <rot val="46.12441560498678">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="26.10919974850318"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel26-->
+  <type is="rectangular_detector" name="panel26" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="1703936" idstepbyrow="256" type="panel26">
+    <location name="bank26" x="-0.337923" y="-0.096549" z="-0.245617">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="60.55853552032346">
+        <rot val="39.2597955277344">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="10.251319894694738"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel27-->
+  <type is="rectangular_detector" name="panel27" type="pixel" xpixels="256" xstart="-0.077775" xstep="0.00061" ypixels="256" ystart="-0.0779025" ystep="0.000611"/>
+  <component idfillbyfirst="y" idstart="1769472" idstepbyrow="256" type="panel27">
+    <location name="bank27" x="-0.414256" y="-0.094169" z="-0.006051">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="80.95738292129421">
+        <rot val="45.33328924481879">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="2.289879874477694"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel28-->
+  <type is="rectangular_detector" name="panel28" type="pixel" xpixels="256" xstart="-0.0781575" xstep="0.000613" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="1835008" idstepbyrow="256" type="panel28">
+    <location name="bank28" x="-0.33735" y="-0.098646" z="0.236475">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="109.65091612769245">
+        <rot val="49.43561697067477">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="17.679044443845502"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel29-->
+  <type is="rectangular_detector" name="panel29" type="pixel" xpixels="256" xstart="-0.07905" xstep="0.00062" ypixels="256" ystart="-0.0781575" ystep="0.000613"/>
+  <component idfillbyfirst="y" idstart="1900544" idstepbyrow="256" type="panel29">
+    <location name="bank29" x="-0.132759" y="-0.110328" z="0.388556">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="152.5535781472138">
+        <rot val="50.72028930219535">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="17.582556748714296"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel31-->
+  <type is="rectangular_detector" name="panel31" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.0784125" ystep="0.000615"/>
+  <component idfillbyfirst="y" idstart="2031616" idstepbyrow="256" type="panel31">
+    <location name="bank31" x="0.231313" y="-0.011811" z="0.318024">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-147.5723469461024">
+        <rot val="47.01502997637603">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="1.5297524712502117"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel32-->
+  <type is="rectangular_detector" name="panel32" type="pixel" xpixels="256" xstart="-0.0779025" xstep="0.000611" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="2097152" idstepbyrow="256" type="panel32">
+    <location name="bank32" x="0.375955" y="-0.021004" z="0.11822">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-97.51708363722604">
+        <rot val="44.57726067529005">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-3.280230189768805"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel33-->
+  <type is="rectangular_detector" name="panel33" type="pixel" xpixels="256" xstart="-0.0776475" xstep="0.000609" ypixels="256" ystart="-0.077775" ystep="0.00061"/>
+  <component idfillbyfirst="y" idstart="2162688" idstepbyrow="256" type="panel33">
+    <location name="bank33" x="0.374054" y="-0.021585" z="-0.128214">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-73.1654568076235">
+        <rot val="43.87354248747757">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="6.259706042060367"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel37-->
+  <type is="rectangular_detector" name="panel37" type="pixel" xpixels="256" xstart="-0.07752" xstep="0.000608" ypixels="256" ystart="-0.0776475" ystep="0.000609"/>
+  <component idfillbyfirst="y" idstart="2424832" idstepbyrow="256" type="panel37">
+    <location name="bank37" x="-0.373029" y="0.022565" z="-0.125639">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="69.29251605756815">
+        <rot val="44.08632073137204">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-4.880659361473724"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel39-->
+  <type is="rectangular_detector" name="panel39" type="pixel" xpixels="256" xstart="-0.0781575" xstep="0.000613" ypixels="256" ystart="-0.0779025" ystep="0.000611"/>
+  <component idfillbyfirst="y" idstart="2555904" idstepbyrow="256" type="panel39">
+    <location name="bank39" x="-0.233702" y="0.014496" z="0.320659">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="141.67396582503144">
+        <rot val="47.42369547216081">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-2.436754717534644"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel40-->
+  <type is="rectangular_detector" name="panel40" type="pixel" xpixels="256" xstart="-0.0784125" xstep="0.000615" ypixels="256" ystart="-0.07803" ystep="0.000612"/>
+  <component idfillbyfirst="y" idstart="2621440" idstepbyrow="256" type="panel40">
+    <location name="bank40" x="0.130716" y="0.112704" z="0.389433">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-150.4754385560299">
+        <rot val="48.77899891104581">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-20.5869819781849"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel41-->
+  <type is="rectangular_detector" name="panel41" type="pixel" xpixels="256" xstart="-0.0784125" xstep="0.000615" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="2686976" idstepbyrow="256" type="panel41">
+    <location name="bank41" x="0.337179" y="0.100545" z="0.240148">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-113.81751543891885">
+        <rot val="48.355451878303306">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-17.83484803420658"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel42-->
+  <type is="rectangular_detector" name="panel42" type="pixel" xpixels="256" xstart="-0.07803" xstep="0.000612" ypixels="256" ystart="-0.07803" ystep="0.000612"/>
+  <component idfillbyfirst="y" idstart="2752512" idstepbyrow="256" type="panel42">
+    <location name="bank42" x="0.414899" y="0.096375" z="-0.00195">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-68.03034714056038">
+        <rot val="47.97451663652043">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-25.628596757973533"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel43-->
+  <type is="rectangular_detector" name="panel43" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="2818048" idstepbyrow="256" type="panel43">
+    <location name="bank43" x="0.334803" y="0.101711" z="-0.245932">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-39.104718123426366">
+        <rot val="43.33933244392492">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-17.281068079087746"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel46-->
+  <type is="rectangular_detector" name="panel46" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.078795" ystep="0.000618"/>
+  <component idfillbyfirst="y" idstart="3014656" idstepbyrow="256" type="panel46">
+    <location name="bank46" x="-0.327308" y="0.137405" z="-0.244776">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="72.83456927392164">
+        <rot val="45.61312843678671">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-28.339059443581903"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel47-->
+  <type is="rectangular_detector" name="panel47" type="pixel" xpixels="256" xstart="-0.077775" xstep="0.00061" ypixels="256" ystart="-0.077775" ystep="0.00061"/>
+  <component idfillbyfirst="y" idstart="3080192" idstepbyrow="256" type="panel47">
+    <location name="bank47" x="-0.399535" y="0.14103" z="-0.001266">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="110.04905881436338">
+        <rot val="49.20321752009509">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-30.4534385042749"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel48-->
+  <type is="rectangular_detector" name="panel48" type="pixel" xpixels="256" xstart="-0.0781575" xstep="0.000613" ypixels="256" ystart="-0.0781575" ystep="0.000613"/>
+  <component idfillbyfirst="y" idstart="3145728" idstepbyrow="256" type="panel48">
+    <location name="bank48" x="-0.323102" y="0.137291" z="0.239223">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="143.5808775647066">
+        <rot val="50.55563088731933">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-25.25457408366883"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel49-->
+  <type is="rectangular_detector" name="panel49" type="pixel" xpixels="256" xstart="-0.078795" xstep="0.000618" ypixels="256" ystart="-0.07905" ystep="0.00062"/>
+  <component idfillbyfirst="y" idstart="3211264" idstepbyrow="256" type="panel49">
+    <location name="bank49" x="-0.121522" y="0.127445" z="0.390043">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="178.4567299887093">
+        <rot val="50.06564353707071">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-23.308805797514665"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel50-->
+  <type is="rectangular_detector" name="panel50" type="pixel" xpixels="256" xstart="-0.0779025" xstep="0.000611" ypixels="256" ystart="-0.0784125" ystep="0.000615"/>
+  <component idfillbyfirst="y" idstart="3276800" idstepbyrow="256" type="panel50">
+    <location name="bank50" x="0.007149" y="0.237469" z="0.37972">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-143.74626478209737">
+        <rot val="61.35189974132609">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-35.653778446026315"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel51-->
+  <type is="rectangular_detector" name="panel51" type="pixel" xpixels="256" xstart="-0.0776475" xstep="0.000609" ypixels="256" ystart="-0.0784125" ystep="0.000615"/>
+  <component idfillbyfirst="y" idstart="3342336" idstepbyrow="256" type="panel51">
+    <location name="bank51" x="0.234833" y="0.230243" z="0.313209">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-118.20723544850004">
+        <rot val="54.24752418782588">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-39.31432944945371"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel52-->
+  <type is="rectangular_detector" name="panel52" type="pixel" xpixels="256" xstart="-0.078285" xstep="0.000614" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="3407872" idstepbyrow="256" type="panel52">
+    <location name="bank52" x="0.377949" y="0.225704" z="0.121815">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-82.64751148365244">
+        <rot val="52.817349999650894">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-39.905584193795775"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel53-->
+  <type is="rectangular_detector" name="panel53" type="pixel" xpixels="256" xstart="-0.0776475" xstep="0.000609" ypixels="256" ystart="-0.077775" ystep="0.00061"/>
+  <component idfillbyfirst="y" idstart="3473408" idstepbyrow="256" type="panel53">
+    <location name="bank53" x="0.378042" y="0.218758" z="-0.122244">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="-42.31719808049264">
+        <rot val="54.69226841817592">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-44.5222983502363"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel57-->
+  <type is="rectangular_detector" name="panel57" type="pixel" xpixels="256" xstart="-0.07752" xstep="0.000608" ypixels="256" ystart="-0.07752" ystep="0.000608"/>
+  <component idfillbyfirst="y" idstart="3735552" idstepbyrow="256" type="panel57">
+    <location name="bank57" x="-0.349481" y="0.260997" z="-0.116233">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="101.56254621271171">
+        <rot val="53.54164976522382">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-44.18364867699368"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel58-->
+  <type is="rectangular_detector" name="panel58" type="pixel" xpixels="256" xstart="-0.07803" xstep="0.000612" ypixels="256" ystart="-0.077775" ystep="0.00061"/>
+  <component idfillbyfirst="y" idstart="3801088" idstepbyrow="256" type="panel58">
+    <location name="bank58" x="-0.351421" y="0.262343" z="0.119542">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="136.00120589386748">
+        <rot val="55.55414358153423">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-42.987753293739246"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!--panel59-->
+  <type is="rectangular_detector" name="panel59" type="pixel" xpixels="256" xstart="-0.078285" xstep="0.000614" ypixels="256" ystart="-0.078285" ystep="0.000614"/>
+  <component idfillbyfirst="y" idstart="3866624" idstepbyrow="256" type="panel59">
+    <location name="bank59" x="-0.210909" y="0.252322" z="0.309117">
+      <rot axis-x="0" axis-y="1" axis-z="0" val="170.43057088442026">
+        <rot val="55.056502961501806">
+          <rot axis-x="0" axis-y="1" axis-z="0" val="-41.779227104906326"/>
+        </rot>
+      </rot>
+    </location>
+  </component>
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point x="-0.000309" y="-0.000309" z="0.0"/>
+      <left-front-top-point x="-0.000309" y="0.000309" z="0.0"/>
+      <left-back-bottom-point x="-0.000309" y="-0.000309" z="-0.0001"/>
+      <right-front-bottom-point x="0.000309" y="-0.000309" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+  <!-- Shape for Monitors-->
+  <!-- TODO: Update to real shape -->
+  <type is="monitor" name="monitor">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="cyl-approx"/>
+  </type>
+  <!--MONITOR IDs-->
+  <idlist idname="monitors">
+    <id val="-1"/>
+    <id val="-2"/>
+    <id val="-3"/>
+  </idlist>
+</instrument>
