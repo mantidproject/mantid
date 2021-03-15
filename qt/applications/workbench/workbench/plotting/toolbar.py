@@ -24,6 +24,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_toggle_superplot_triggered = QtCore.Signal()
     sig_copy_to_clipboard_triggered = QtCore.Signal()
     sig_plot_options_triggered = QtCore.Signal()
     sig_plot_help_triggered = QtCore.Signal()
@@ -54,6 +55,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
          'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
+        ('SP', 'Open/close superplot tab', None, 'toggle_superplot', False),
         (None, None, None, None, None),
         ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
          'waterfall_offset_amount', None),
@@ -130,6 +132,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             if self._actions['pan'].isChecked():
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
+
+    def toggle_superplot(self):
+        self.sig_toggle_superplot_triggered.emit()
 
     def trigger_fit_toggle_action(self):
         self._actions['toggle_fit'].trigger()
