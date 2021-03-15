@@ -1129,6 +1129,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
  * @param signal [out] :: set to the integrated signal
  * @param errorSquared [out] :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
+ * @param isEllipsoidPeak :: specify if peaks are ellipsoids
  */
 TMDE(void MDGridBox)::integrateSphere(
     API::CoordTransform &radiusTransform, const coord_t radiusSquared,
