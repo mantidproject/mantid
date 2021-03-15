@@ -53,20 +53,21 @@ class ChiSlice {
 public:
   /// Constructor.
   /// @param inputFunction :: The fitting function
-  /// @param dir :: A normalised direction vector in the parameter space.
+  /// @param fixedParameterIndex :: index of the parameter which is fixed
   /// @param inputWS :: The input workspace (used for fit algorithm)
   /// @param workspaceIndex :: Workspace index (used for fit algorithm)
   /// @param domain :: Function's domain.
   /// @param values :: Functin's values.
   /// @param chi0 :: Chi squared at the minimum.
   /// @param freeParameters :: Parameters which are free in the function.
-  ChiSlice(IFunction_sptr inputFunction, const GSLVector &dir,
+  ChiSlice(IFunction_sptr inputFunction, int fixedParameterIndex,
            API::MatrixWorkspace_sptr inputWS, int workspaceIndex,
            const API::FunctionDomain &domain, API::FunctionValues &values,
            double chi0, std::vector<int> &freeParameters)
-      : m_direction(dir), m_domain(domain), m_values(values), m_chi0(chi0),
-        m_function(inputFunction), m_ws(inputWS),
-        m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
+      : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain),
+        m_values(values), m_chi0(chi0), m_function(inputFunction),
+        m_ws(inputWS), m_workspaceIndex(workspaceIndex),
+        m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
     m_fitalg = AlgorithmFactory::Instance().create("Fit", -1);
     m_fitalg->setChild(true);
@@ -82,13 +83,13 @@ public:
     m_fitalg->setProperty("WorkspaceIndex", m_workspaceIndex);
     IFunction_sptr function = m_fitalg->getProperty("Function");
     std::vector<double> originalParamValues(function->nParams());
-    for (auto ip : m_freeParameters) {
+    for (auto ip = 0u; ip < function->nParams(); ++ip) {
       originalParamValues[ip] = function->getParameter(ip);
-      function->setParameter(ip, originalParamValues[ip] + p * m_direction[ip]);
-      if (m_direction[ip] > 0.0) {
-        function->fix(ip);
-      }
     }
+    function->setParameter(m_fixedParameterIndex,
+                           originalParamValues[m_fixedParameterIndex] + p);
+    function->fix(m_fixedParameterIndex);
+
     // re run the fit to minimze the unfixed parameters
     m_fitalg->execute();
     // find change in chi 2
@@ -98,12 +99,10 @@ public:
     double res =
         getDiff(*function, numFreeParameters, m_domain, m_values, m_chi0);
     // reset fit to original values
-    for (auto ip : m_freeParameters) {
+    for (auto ip = 0u; ip < function->nParams(); ++ip) {
       function->setParameter(ip, originalParamValues[ip]);
-      if (m_direction[ip] > 0.0) {
-        function->unfix(ip);
-      }
     }
+    function->unfix(m_fixedParameterIndex);
     return res;
   }
 
@@ -166,8 +165,8 @@ public:
   }
 
 private:
-  /// The direction in the parameter space
-  GSLVector m_direction;
+  // Fixed parameter index
+  int m_fixedParameterIndex;
   /// The domain
   const API::FunctionDomain &m_domain;
   /// The values
@@ -182,7 +181,7 @@ private:
   int m_workspaceIndex;
   // Vector of free parameter indices
   std::vector<int> m_freeParameters;
-};
+}; // namespace Algorithms
 
 /// Default constructor
 ProfileChiSquared1D::ProfileChiSquared1D() : IFittingAlgorithm() {}
@@ -320,10 +319,7 @@ void ProfileChiSquared1D::execConcrete() {
     }
 
     // Make a slice along this parameter
-    GSLVector dir(nParams);
-    dir.zero();
-    dir[ip] = 1.0;
-    ChiSlice slice(m_function, dir, inputws, workspaceIndex, *domain, *values,
+    ChiSlice slice(m_function, ip, inputws, workspaceIndex, *domain, *values,
                    chi0, freeParameters);
 
     // Find the bounds withn which the PDF is significantly above zero.
