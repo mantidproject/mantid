@@ -66,7 +66,7 @@ class ScaleValidator(QtGui.QValidator):
                     except ValueError:
                         pass
                 elif penultimate_char == "e" and last_char == "-":
-                        return QtGui.QValidator.Acceptable, input, pos
+                    return QtGui.QValidator.Acceptable, input, pos
             except IndexError:
                 pass
             return QtGui.QValidator.Invalid, input, pos
