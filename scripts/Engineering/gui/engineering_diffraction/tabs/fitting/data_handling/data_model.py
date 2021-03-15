@@ -13,16 +13,10 @@ from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
-from numpy import full, nan, max, array, vstack, argsort, sqrt
+from numpy import full, nan, max, array, vstack, argsort, sqrt, sin
 from itertools import chain
 from collections import defaultdict
 from re import findall, sub
-from scipy import constants
-from math import sin
-
-
-pi = constants.pi
-m_over_h = 252.816
 
 
 class FittingDataModel(object):
@@ -331,6 +325,7 @@ class FittingDataModel(object):
 
     def _get_diff_constants(self, ws_name):
         """Subject to change when ws will be able to carry diff constant on ws object post calibration"""
+        m_over_h = 252.816
         si = self._loaded_workspaces[ws_name].spectrumInfo()
         difc = 2 * m_over_h * (si.l1() + si.l2(0)) * sin(si.twoTheta(0) / 2)
         difa = 0
