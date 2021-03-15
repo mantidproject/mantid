@@ -84,25 +84,24 @@ def _get_difc_ws(wksp, instr_ws=None):
     return difc_ws
 
 
-def __get_regions(x, y, limit=500, mask=None):
+def __get_regions(x):
     # Returns a list of tuples with start,stop indices
     # indicating a detector region
     regions = []
-
-    # Get regions of nans to find gaps in data to determine bounds of regions
-    # Add in masked regions if provided
-    if mask is not None:
-        masky = mtd[str(mask)].extractY().flatten()
-        bounds = np.argwhere((np.isnan(y)) & (masky==0)).flatten()
-    else:
-        bounds = np.argwhere(np.isnan(y)).flatten()
-    for ind in range(len(bounds)):
-        if ind + 1 < len(bounds) and bounds[ind + 1] - bounds[ind] > 1:
-            if x[bounds[ind + 1]] - x[bounds[ind]] > limit:
-                # Exclude regions that are invalid
-                if np.isnan(np.sum(y[int(bounds[ind])+1:int(bounds[ind+1])])):
-                    continue
-                regions.append((int(x[bounds[ind]]), int(x[bounds[ind + 1]])))
+    lower = np.asarray((x+1)[:-1], dtype=int)
+    upper = np.asarray((x-1)[1:], dtype=int)
+    gaps = lower<=upper
+    lower, upper = lower[gaps], upper[gaps]
+    i = 0
+    for start, stop in zip(lower, upper):
+        if i == 0:
+            regions.append((int(np.min(x)), start))
+        else:
+            regions.append((upper[i-1], start))
+        i = i + 1
+    # Add ending region if there was atleast one region found:
+    if i > 0:
+        regions.append((upper[i-1], int(np.max(x))))
     return regions
 
 
@@ -395,7 +394,7 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     return mtd[outputname]
 
 
-def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
+def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0), threshold=0.01):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -418,6 +417,7 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
 
     fig, ax = plt.subplots()
     ax.set_xlabel("det IDs")
+    ax.set_ylabel("rel strain")
 
     # Hold the mean and stddev for each peak to compute total at end
     means = []
@@ -448,17 +448,14 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
         if len(y_val) == 0:
             continue
 
-        means.append(np.mean(y_val))
-        stddevs.append(np.std(y_val))
-
         cut_id = (single.yIndexOfX(drange[0]), single.yIndexOfX(drange[1]))
+
+        means.append(np.mean(y_val[cut_id[0]:cut_id[1]]))
+        stddevs.append(np.std(y_val[cut_id[0]:cut_id[1]]))
 
         # Draw vertical lines between detector regions
         if not regions:
-            if mask_ws:
-                regions = __get_regions(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], limit=200, mask=mtd[str(mask_ws)].extractY().flatten()[cut_id[0]:cut_id[1]])
-            else:
-                regions = __get_regions(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], limit=200)
+            regions = __get_regions(x[cut_id[0]:cut_id[1]])
             for region in regions:
                 ax.axvline(x=region[0])
                 ax.axvline(x=region[1])
@@ -479,7 +476,7 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
     ax.axhline(total_mean, color="black", lw=2.5)  # default lw=1.5
 
     # Upper and lower lines calibration lines (1 percent of mean)
-    band = total_mean * 0.01
+    band = total_mean * threshold
     ax.axhline(total_mean + band, color="black", ls="--")
     ax.axhline(total_mean - band, color="black", ls="--")
 
@@ -491,4 +488,3 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0)):
     plt.show()
 
     return fig, ax
-
