@@ -65,3 +65,24 @@ class SuperplotView(QWidget):
         super().show()
         self._sideView.show()
         self._bottomView.show()
+
+    def getSelectedWorkspace(self):
+        """
+        Get the workspace selected in the workspace selector.
+
+        Return:
+            str: name of the workspace
+        """
+        return self._sideView.workspaceSelector.currentText()
+
+    def setWorkspacesList(self, names):
+        """
+        Set the list of selected workspaces and update the workspace slider
+        length.
+
+        Args:
+            names (list(str)): list if the workspace names
+        """
+        self._sideView.workspacesList.clear()
+        self._sideView.workspacesList.addItems(names)
+        self._bottomView.workspaceSlider.setMaximum(len(names))

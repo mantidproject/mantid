@@ -18,7 +18,14 @@ class SuperplotPresenter:
         self._model = SuperplotModel()
 
     def onAddButtonClicked(self):
-        pass
+        """
+        Triggered when the add button is pressed. This function adds the
+        workspace to the selection list.
+        """
+        name = self._view.getSelectedWorkspace()
+        self._model.addWorkspace(name)
+        names = self._model.getWorkspaces()
+        self._view.setWorkspacesList(names)
 
     def onHoldButtonToggled(self, state):
         pass
