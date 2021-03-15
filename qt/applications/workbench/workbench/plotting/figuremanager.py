@@ -33,6 +33,7 @@ from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
@@ -211,6 +212,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_toggle_superplot_triggered.connect(self.superplot_toggle)
             self.toolbar.sig_copy_to_clipboard_triggered.connect(self.copy_to_clipboard)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.sig_plot_help_triggered.connect(self.launch_plot_help)
@@ -245,6 +247,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+
+        # superplot
+        self.superplot = Superplot(self.window)
+        self.window.addDockWidget(Qt.LeftDockWidgetArea, self.superplot.getSideWidget())
+        self.window.addDockWidget(Qt.BottomDockWidgetArea, self.superplot.getBottomWidget())
+        self.superplot.hide()
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
@@ -380,6 +388,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.fit_browser.hide()
         else:
             self.fit_browser.show()
+
+    def superplot_toggle(self):
+        """Toggle superplot dockwidgets on/off"""
+        if self.superplot.isVisible():
+            self.superplot.hide()
+        else:
+            self.superplot.show()
 
     def handle_fit_browser_close(self):
         """
