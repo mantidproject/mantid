@@ -199,6 +199,7 @@ public:
    * @param innerRadiusSquared :: radius^2 of inner background
    * @param useOnePercentBackgroundCorrection :: if one percent correction
    *should be applied to background.
+   * @param isEllipsoidPeak :: specify if peaks are ellipsoids
    */
   virtual void
   integrateSphere(Mantid::API::CoordTransform &radiusTransform,
