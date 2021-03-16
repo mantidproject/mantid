@@ -9,7 +9,7 @@
 #
 from mantid.simpleapi import (Divide, DivideMD, Minus, MinusMD, mtd, Multiply, MultiplyMD,
                               Plus, PlusMD, WeightedMean, WeightedMeanMD)
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid.dataobjects import MDHistoWorkspace, WorkspaceSingleValue
 from mantid.kernel import logger as log
 
@@ -28,7 +28,141 @@ class WorkspaceCalculatorModel:
         self._rhs_ws = rhs_ws
         self._output_ws = output_ws
         self._operation = operation
-        self._md_ws = None
+        self._md_lhs = None
+        self._md_rhs = None
+
+    def _figure_out_algorithm(self):
+        alg_name = ""
+        if self._operation == '+':
+            alg_name = 'Plus'
+        elif self._operation == '-':
+            alg_name = 'Minus'
+        elif self._operation == '*':
+            alg_name = 'Multiply'
+        elif self._operation == '/':
+            alg_name = 'Divide'
+        elif self._operation == 'WM':
+            alg_name = 'WeightedMean'
+
+        if self._md_lhs or self._md_rhs:
+            alg_name += 'MD'
+        return alg_name
+
+    def _validate_algorithm(self, lhs=None, rhs=None):
+        """Validates the inputs for algorithm that is going to be called to process inputs."""
+        valid_lhs = valid_rhs = True
+        err_msg_lhs = err_msg_rhs = ""
+        err_msg = ""
+        alg_name = self._figure_out_algorithm()
+        alg = AlgorithmManager.createUnmanaged(alg_name)
+        alg.initialize()
+        if lhs:
+            try:
+                if alg_name == 'WeightedMean':
+                    alg.setProperty("InputWorkspace1", lhs)
+                else:
+                    alg.setProperty("LHSWorkspace", lhs)
+            except (RuntimeError, ValueError) as err:
+                valid_lhs = False
+                err_msg_lhs = str(err)
+                err_msg = err_msg_lhs
+        if rhs:
+            try:
+                if alg_name == 'WeightedMean':
+                    alg.setProperty("InputWorkspace2", rhs)
+                else:
+                    alg.setProperty("RHSWorkspace", rhs)
+            except (RuntimeError, ValueError) as err:
+                valid_rhs = False
+                err_msg_rhs = str(err)
+                err_msg = err_msg_rhs
+        if lhs and rhs:
+            err_msg = [err_msg_lhs, err_msg_rhs]
+        return valid_lhs, valid_rhs, err_msg
+
+    def _check_group_for_md(self, group_name, info):
+        multi_dim_err_msg = "Group contains MD and non-MD workspaces."
+        md_check = self._md_lhs if info == "LHS" else self._md_rhs
+        for entry in mtd[group_name]:
+            if isinstance(entry, MDHistoWorkspace):
+                if md_check is not None and not md_check:
+                    log.error(multi_dim_err_msg)
+                    return multi_dim_err_msg
+                md_check = True
+            else:
+                if md_check:
+                    log.error(multi_dim_err_msg)
+                    return multi_dim_err_msg
+                md_check = False
+        if info == 'LHS':
+            self._md_lhs = md_check
+        else:
+            self._md_rhs = md_check
+        return ""
+
+    def _validateMD(self):
+        multi_dim_err_msg = "Only one of the provided workspaces is multidimensional."
+        err_msg = str()
+        if (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
+                or isinstance(mtd[self._rhs_ws], WorkspaceGroup)):
+            if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
+                err_msg = self._check_group_for_md(self._lhs_ws, "LHS")
+            if isinstance(mtd[self._rhs_ws], WorkspaceGroup):
+                err_msg = self._check_group_for_md(self._rhs_ws, "RHS")
+        else:
+            if self._md_lhs and (not isinstance(mtd[self._lhs_ws], MDHistoWorkspace)
+                                 and not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)):
+                log.error(multi_dim_err_msg)
+                err_msg = multi_dim_err_msg
+            if self._md_lhs and (not isinstance(mtd[self._lhs_ws], MDHistoWorkspace)
+                                 and not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)):
+                log.error(multi_dim_err_msg)
+                err_msg = multi_dim_err_msg
+        return err_msg == str(), err_msg
+
+    def _validateSingleInput(self, ws, info):
+        try:
+            mtd[ws]
+        except KeyError:
+            err_msg = "The {} input workspace does not exist.".format(info)
+            if ws is not None:
+                log.error(err_msg)
+            return False, err_msg
+        if isinstance(mtd[ws], WorkspaceGroup):
+            err_msg = self._check_group_for_md(ws, info)
+            if err_msg != str():
+                return False, err_msg
+        elif isinstance(mtd[ws], MDHistoWorkspace):
+            if info == 'LHS':
+                self._md_lhs = True
+            else:
+                self._md_rhs = True
+        else:
+            if info == 'LHS':
+                self._md_lhs = False
+            else:
+                self._md_rhs = False
+        return True, ""
+
+    def validateInputs(self, lhs_ws=None, rhs_ws=None, operation=None):
+        if operation:
+            self._operation = operation
+        if lhs_ws:
+            self._lhs_ws = lhs_ws
+        valid_lhs, err_msg_lhs = self._validateSingleInput(self._lhs_ws, "LHS")
+        if valid_lhs: # validates algorithm input individually
+            valid_lhs, _, err_msg_lhs = self._validate_algorithm(lhs=self._lhs_ws)
+        if rhs_ws:
+            self._rhs_ws = rhs_ws
+        valid_rhs, err_msg_rhs = self._validateSingleInput(self._rhs_ws, "RHS")
+        if valid_rhs: # validates algorithm input individually
+            _, valid_rhs, err_msg_rhs = self._validate_algorithm(rhs=self._rhs_ws)
+        if not valid_lhs or not valid_rhs:
+            return valid_lhs, valid_rhs, [err_msg_lhs, err_msg_rhs]
+
+        valid, err_msg = self._validateMD()
+        self._validate_algorithm(lhs=self._lhs_ws, rhs=self._rhs_ws) # validates input together
+        return valid, valid, err_msg
 
     def updateParameters(self, lhs_scale, lhs_ws, rhs_scale,
                          rhs_ws, output_ws, operation):
@@ -44,70 +178,6 @@ class WorkspaceCalculatorModel:
             self._operation = operation
         return lhs_valid, rhs_valid, err_msg
 
-    def _check_group_for_md(self, group_name):
-        multi_dim_err_msg = "Group contains MD and non-MD workspaces."
-        for entry in mtd[group_name]:
-            if isinstance(entry, MDHistoWorkspace):
-                if self._md_ws is not None and not self._md_ws:
-                    log.error(multi_dim_err_msg)
-                    return multi_dim_err_msg
-                self._md_ws = True
-            else:
-                if self._md_ws:
-                    log.error(multi_dim_err_msg)
-                    return multi_dim_err_msg
-                else:
-                    self._md_ws = False
-        return ""
-
-    def _validateSingleInput(self, ws, info):
-        try:
-            mtd[ws]
-        except KeyError:
-            err_msg = "The {} input workspace does not exist.".format(info)
-            if ws is not None:
-                log.error(err_msg)
-            return False, err_msg
-        if isinstance(mtd[ws], WorkspaceGroup):
-            err_msg = self._check_group_for_md(ws)
-            if err_msg != str():
-                return False, err_msg
-        return True, ""
-
-    def _validateMD(self):
-        if isinstance(mtd[self._lhs_ws], MDHistoWorkspace):
-            self._md_ws = True
-        multi_dim_err_msg = "Only one of the provided workspaces is multidimensional."
-        err_msg = str()
-        if (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
-                or isinstance(mtd[self._rhs_ws], WorkspaceGroup)):
-            if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
-                err_msg = self._check_group_for_md(self._lhs_ws)
-            if isinstance(mtd[self._rhs_ws], WorkspaceGroup):
-                err_msg = self._check_group_for_md(self._rhs_ws)
-        else:
-            if (self._md_ws
-                    and (not isinstance(mtd[self._rhs_ws], MDHistoWorkspace)
-                         and not isinstance(mtd[self._rhs_ws], WorkspaceSingleValue))):
-                log.error(multi_dim_err_msg)
-                err_msg = multi_dim_err_msg
-        return err_msg == str(), err_msg
-
-    def validateInputs(self, lhs_ws=None, rhs_ws=None, operation=None):
-        if operation:
-            self._operation = operation
-        if lhs_ws:
-            self._lhs_ws = lhs_ws
-        valid_lhs, err_msg_lhs = self._validateSingleInput(self._lhs_ws, "LHS")
-        if rhs_ws:
-            self._rhs_ws = rhs_ws
-        valid_rhs, err_msg_rhs = self._validateSingleInput(self._rhs_ws, "RHS")
-        if not valid_lhs or not valid_rhs:
-            return valid_lhs, valid_rhs, [err_msg_lhs, err_msg_rhs]
-
-        valid, err_msg = self._validateMD()
-        return valid, valid, err_msg
-
     @staticmethod
     def _scale_md_group(ws_group, scale):
         md_group = mtd[ws_group].clone()
@@ -120,7 +190,7 @@ class WorkspaceCalculatorModel:
         def scale_ws(ws_name, scale):
             return mtd[ws_name] * scale
 
-        if (self._md_ws
+        if (self._md_lhs or self._md_rhs
                 and (isinstance(mtd[self._lhs_ws], WorkspaceGroup)
                      or isinstance(mtd[self._rhs_ws], WorkspaceGroup))):
             if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
@@ -140,32 +210,30 @@ class WorkspaceCalculatorModel:
         lhs_valid, rhs_valid, err_msg = self.validateInputs()
         if err_msg != str():
             return lhs_valid, rhs_valid, err_msg
-
         lhs_ws, rhs_ws = self._scale_input_workspaces()
-
         try:
             if self._operation == '+':
-                if self._md_ws:
+                if self._md_lhs or self._md_rhs:
                     PlusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     Plus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
             elif self._operation == '-':
-                if self._md_ws:
+                if self._md_lhs or self._md_rhs:
                     MinusMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     Minus(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
             elif self._operation == '*':
-                if self._md_ws:
+                if self._md_lhs or self._md_rhs:
                     MultiplyMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     Multiply(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
             elif self._operation == 'WM':
-                if self._md_ws:
+                if self._md_lhs or self._md_rhs:
                     WeightedMeanMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     WeightedMean(InputWorkspace1=lhs_ws, InputWorkspace2=rhs_ws, OutputWorkspace=self._output_ws)
             else:
-                if self._md_ws:
+                if self._md_lhs or self._md_rhs:
                     DivideMD(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)
                 else:
                     Divide(LHSWorkspace=lhs_ws, RHSWorkspace=rhs_ws, OutputWorkspace=self._output_ws)

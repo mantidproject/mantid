@@ -71,7 +71,6 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         ws_event_group_1 = CloneWorkspace(InputWorkspace=ws_event_1)
         cls.mixed_group = "matrix_event_mixed_group"
         GroupWorkspaces(InputWorkspaces=[ws_matrix_group_1, ws_event_group_1], OutputWorkspace=cls.mixed_group)
-        print("CLASS MIXED GROUP SIZE", mtd[cls.mixed_group].getNumberOfEntries())
 
         S1 = range(0, 10)
         S2 = range(5, 15)
