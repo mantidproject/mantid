@@ -12,7 +12,7 @@ Direct Geometry Changes
 New
 ###
 
-- Loading of the omega-scan mode is supported for ILL instruments IN5 and PANTHER via :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` loader
+- Loading of the omega-scan mode is supported for ILL instruments IN5, PANTHER, and SHARP via :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` loader
 
 MSlice
 ------
