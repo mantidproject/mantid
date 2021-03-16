@@ -69,4 +69,14 @@ class SuperplotPresenter:
         self._view.plotData([(currentWsName, value)])
 
     def onHoldButtonToggled(self, state):
-        pass
+        """
+        Add or delete the currently selected workspace, spectrum pair from the
+        plotted data.
+
+        Args:
+            state (bool): status of the two state button (not used)
+        """
+        wsIndex = self._view.getWorkspaceSliderPosition()
+        spectrumIndex = self._view.getSpectrumSliderPosition()
+        names = self._model.getWorkspaces()
+        self._model.toggleData(names[wsIndex], spectrumIndex)

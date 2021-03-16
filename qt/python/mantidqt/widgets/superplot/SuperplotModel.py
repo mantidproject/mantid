@@ -13,8 +13,14 @@ class SuperplotModel:
     """
     _workspaces = None
 
+    """
+    List of plotted workspace, spectrum index pairs.
+    """
+    _plottedData = None
+
     def __init__(self):
         self._workspaces = list()
+        self._plottedData = list()
 
     def addWorkspace(self, name):
         """
@@ -44,3 +50,16 @@ class SuperplotModel:
             list(str): list of workspace names
         """
         return [name for name in self._workspaces]
+
+    def toggleData(self, workspace, spectrum):
+        """
+        Add or remove a workspace, spectrum index pair from the plotted data.
+
+        Args:
+            workspaces (str): name of the workspace
+            spectrum (int): spectrum index
+        """
+        if (workspace, spectrum) in self._plottedData:
+            self._plottedData.remove((workspace, spectrum))
+        else:
+            self._plottedData.append((workspace, spectrum))
