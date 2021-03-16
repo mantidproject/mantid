@@ -10,8 +10,11 @@
 from psutil import virtual_memory
 
 def getMemoryUsed():
-    memory_used  = virtual_memory().used
-    memory_available = virtual_memory().available
-    memory_free = round(memory_used * 100 / memory_available)
-    memory_free_percent = min(int(memory_free), 100)
-    return memory_free_percent
+    mem_used  = virtual_memory().used
+    mem_avail = virtual_memory().available
+    mem_used_percent = min(int(round(mem_used * 100 / mem_avail)),100)
+    conversion_factor_to_GB = 1.0 / 1024 / 1024 / 1024
+    mem_used_GB = mem_used * conversion_factor_to_GB
+    mem_avail_GB = mem_avail * conversion_factor_to_GB
+    return mem_used_percent, mem_used_GB, mem_avail_GB
+

@@ -493,7 +493,7 @@ class MainWindow(QMainWindow):
             'height-fraction': [
                 [0.5, 0.5],  # column 0 row heights
                 [1.0],  # column 1 row heights
-                [0.1, 0.9]
+                [0.05, 0.95]
             ]  # column 2 row heights
         }
 

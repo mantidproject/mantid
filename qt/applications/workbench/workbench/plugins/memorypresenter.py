@@ -1,6 +1,5 @@
 from qtpy.QtCore import QTimer
 
-from random import random
 from workbench.plugins.memoryinfo import getMemoryUsed
 
 class MemoryPresenter(object):
@@ -15,7 +14,6 @@ class MemoryPresenter(object):
         self.timer.start(10)
 
     def updateMemoryUsage(self):
-        memory_used = getMemoryUsed()
-        #memory_used = int(random() * 100)
-        self.view.setValue(memory_used)
+        mem_used_percent, mem_used, mem_avail = getMemoryUsed()
+        self.view.setValue(mem_used_percent, mem_used, mem_avail)
 
