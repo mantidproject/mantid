@@ -169,13 +169,13 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
   const auto *peak = dynamic_cast<const Peak *>(&ipeak);
-  if (peak)
-    setInstrument(peak->getInstrument());
-  detid_t id = ipeak.getDetectorID();
+  if (!peak)
+    throw std::invalid_argument("Cannot construct a Peak from this non-Peak object");
+  setInstrument(peak->getInstrument());
+  detid_t id = peak->getDetectorID();
   if (id >= 0)
     setDetectorID(id);
-  if (peak)
-    this->m_detIDs = peak->m_detIDs;
+  this->m_detIDs = peak->m_detIDs;
 }
 
 //----------------------------------------------------------------------------------------------
