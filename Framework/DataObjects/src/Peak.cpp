@@ -170,7 +170,8 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_finalEnergy(ipeak.getFinalEnergy()) {
   const auto *peak = dynamic_cast<const Peak *>(&ipeak);
   if (!peak)
-    throw std::invalid_argument("Cannot construct a Peak from this non-Peak object");
+    throw std::invalid_argument(
+        "Cannot construct a Peak from this non-Peak object");
   setInstrument(peak->getInstrument());
   detid_t id = peak->getDetectorID();
   if (id >= 0)
