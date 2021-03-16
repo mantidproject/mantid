@@ -7,6 +7,8 @@
 
 from .SuperplotModel import SuperplotModel
 
+from mantid.api import mtd
+
 
 class SuperplotPresenter:
 
@@ -38,6 +40,20 @@ class SuperplotPresenter:
         self._model.delWorkspace(name)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
+
+    def onWorkspaceSliderMoved(self, value):
+        """
+        Triggered when the workspace slider moved.
+
+        Args:
+            value (int): slider value
+        """
+        names = self._model.getWorkspaces()
+        currentWsName = names[value]
+        currentWs = mtd[currentWsName]
+        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(0)
+        self._view.plotData([(currentWsName, 0)])
 
     def onHoldButtonToggled(self, state):
         pass
