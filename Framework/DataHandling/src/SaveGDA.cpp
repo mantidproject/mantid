@@ -182,7 +182,6 @@ void SaveGDA::exec() {
                         {Kernel::UnitParams::tzero, bankCalibParams.tzero}});
     std::transform(x.begin(), x.end(), std::back_inserter(tofScaled),
                    [](const double tofVal) { return tofVal * tofScale; });
-
     const auto averageDeltaTByT = computeAverageDeltaTByT(tofScaled);
 
     const auto &intensity = matrixWS->y(0);
