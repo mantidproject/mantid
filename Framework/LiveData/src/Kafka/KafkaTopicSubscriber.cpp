@@ -62,6 +62,9 @@ namespace LiveData {
 // Public members
 // -----------------------------------------------------------------------------
 
+// These are for default topic names and can be overridden by providing
+// topics in configuration in the Facilities.xml file, see
+// docs/source/concepts/KafkaLiveStreams.rst
 const std::string KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX = "_events";
 const std::string KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX = "_eventSum";
 const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";

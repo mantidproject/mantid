@@ -19,6 +19,8 @@ namespace LiveData {
 
   A call to startCapture() starts the process of capturing the stream on a
   separate thread.
+
+  Some further documentation is in docs/source/concepts/KafkaLiveStreams.rst
 */
 class DLLExport KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
 public:
