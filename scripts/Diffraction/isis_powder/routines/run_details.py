@@ -123,9 +123,9 @@ class _RunDetails(object):
         self.output_suffix = output_suffix
         self.van_paths = van_paths
 
-    def update_spline_properties(self, inst_settings, new_splined_name_list):
-        """Updates the spline path using a new splined name list, this is necessary on instruments where the spline path
-        may change e.g. Pearl due to long-mode
+    def update_file_paths(self, inst_settings, new_splined_name_list):
+        """Updates the file path for splined, unsplined and summed_empty files using a new splined name list,
+        this is necessary on instruments where the path may change e.g. Pearl due to long-mode
         :param inst_settings The current Instrument settings
         :param new_splined_name_list  List of unique properties to generate a splined vanadium name from
         """

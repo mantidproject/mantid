@@ -106,7 +106,7 @@ class Pearl(AbstractInst):
             add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
                 [self._inst_settings.tt_mode]
 
-            self._cached_run_details[run_number_string_key].update_spline_properties(
+            self._cached_run_details[run_number_string_key].update_file_paths(
                 self._inst_settings, add_spline)
         yield
         # reset instrument settings
@@ -116,8 +116,7 @@ class Pearl(AbstractInst):
         add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
             [self._inst_settings.tt_mode]
 
-        self._cached_run_details[run_number_string_key].update_spline_properties(self._inst_settings,
-                                                                                 add_spline)
+        self._cached_run_details[run_number_string_key].update_file_paths(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round

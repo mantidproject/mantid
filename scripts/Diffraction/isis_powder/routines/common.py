@@ -263,12 +263,14 @@ def generate_summed_empty_name(empty_runs_string, *args):
     out_name = 'summed_empty'
     out_name += '_' + str(empty_runs_string)
 
+    # Only arg that may be added is long_mode. tt_mode and cal file are not needed.
     for passed_arg in args:
         if isinstance(passed_arg, list):
-            for arg in passed_arg:
-                out_name += '_' + str(arg)
+            if 'long' in passed_arg:
+                out_name += '_long'
         else:
-            out_name += '_' + (str(passed_arg))
+            if passed_arg == 'long':
+                out_name += '_long'
 
     out_name += ".nxs"
     return out_name
