@@ -16,6 +16,7 @@ namespace API {
  *  Sets the property names but initialises the function pointer to null.
  *  @param name :: The name to assign to the property
  *  @param direction :: The direction of the function (i.e. input or output)
+ *  @param isOptional :: A boolean stating whether the property is optional.
  */
 FunctionProperty::FunctionProperty(const std::string &name, const unsigned int direction)
     : Kernel::PropertyWithValue<std::shared_ptr<IFunction>>(
