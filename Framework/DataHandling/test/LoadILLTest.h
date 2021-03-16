@@ -70,6 +70,10 @@ public:
     checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction");
   }
 
+  void test_loadDiffraction_SHARP() {
+    checkLoader("ILL/SHARP/000104.nxs", "LoadILLDiffraction");
+  }
+
   void test_LoadPolarizedDiffraction_D7() {
     checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction");
   }

@@ -65,7 +65,7 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
   // the second one is to recognize D1B
-  // the third one is to recognize IN5/PANTHER scan mode
+  // the third one is to recognize IN5/PANTHER/SHARP scan mode
   if (descriptor.pathExists("/entry0/instrument/2theta") ||
       descriptor.pathExists("/entry0/instrument/Canne") ||
       (descriptor.pathExists("/entry0/data_scan") &&
@@ -100,7 +100,7 @@ const std::string LoadILLDiffraction::summary() const {
  */
 LoadILLDiffraction::LoadILLDiffraction()
     : IFileLoader<NexusDescriptor>(),
-      m_instNames({"D20", "D2B", "D1B", "IN5", "PANTHER"}) {}
+      m_instNames({"D20", "D2B", "D1B", "IN5", "PANTHER", "SHARP"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -218,7 +218,8 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else if (m_instName != "IN5" && m_instName != "PANTHER") {
+  } else if (m_instName != "IN5" && m_instName != "PANTHER" &&
+             m_instName != "SHARP") {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -555,7 +556,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
 
   size_t monitorIndex = 0;
   size_t startIndex = NUMBER_MONITORS;
-  if (m_instName == "IN5" || m_instName == "PANTHER") {
+  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
     startIndex = 0;
     monitorIndex = m_numberDetectorsActual;
   }
@@ -589,7 +590,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
 
   // Link the instrument
   loadStaticInstrument();
-  if (m_instName != "IN5" && m_instName != "PANTHER") {
+  if (m_instName != "IN5" && m_instName != "PANTHER" && m_instName != "SHARP") {
     // Move to the starting 2theta
     moveTwoThetaZero(twoTheta0);
   }
