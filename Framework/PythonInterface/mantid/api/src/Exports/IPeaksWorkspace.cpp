@@ -85,7 +85,6 @@ public:
     // Create a map of string -> setter functions
     // Each function will extract the given value from the passed python type.
     m_setterMap = {{"RunNumber", setterFunction(&IPeak::setRunNumber)},
-                   {"DetID", setterFunction(&IPeak::setDetectorID)},
                    {"h", setterFunction(&IPeak::setH)},
                    {"k", setterFunction(&IPeak::setK)},
                    {"l", setterFunction(&IPeak::setL)},
@@ -145,7 +144,7 @@ private:
   /**
    * Wrap a setter function on a IPeak with the bpl::extract function.
    *
-   * This is a specilization of the templated function to handle the
+   * This is a specialization of the templated function to handle the
    * 2 parameter signature of V3D setter functions.
    *
    * @param func A pointer to a member function to wrap.

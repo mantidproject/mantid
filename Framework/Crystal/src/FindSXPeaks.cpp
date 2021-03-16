@@ -40,6 +40,7 @@ DECLARE_ALGORITHM(FindSXPeaks)
 
 using namespace Kernel;
 using namespace API;
+using Mantid::Geometry::IPeak_uptr;
 
 FindSXPeaks::FindSXPeaks()
     : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX),
@@ -346,8 +347,8 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
     try {
-      auto peak = std::unique_ptr<Geometry::IPeak>(
-          m_peaks->createPeak(finalPeak.getQ()));
+      IPeak_uptr ipeak = m_peaks->createPeak(finalPeak.getQ());
+      Peak_uptr peak(static_cast<Peak*>(ipeak.release()));
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
         peak->setDetectorID(finalPeak.getDetectorId());
