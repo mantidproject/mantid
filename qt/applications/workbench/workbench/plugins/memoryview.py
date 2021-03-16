@@ -9,7 +9,6 @@
 #
 from qtpy.QtWidgets import QWidget, QProgressBar
 from qtpy.QtCore import Signal
-from mantidqt.utils.qt import load_ui
 
 NORMAL_STYLE = """
 QProgressBar::chunk {
@@ -37,8 +36,6 @@ class MemoryView(QWidget):
         super(MemoryView, self).__init__(parent)
 
         self.critical = 90
-        # For the future use, if needed
-        #self.ui = load_ui(__file__, 'memorybar.ui', baseinstance=self)
         self.memory_bar = QProgressBar(self)
 
     def setBarColor(self, currentValue, newValue):
@@ -49,11 +46,15 @@ class MemoryView(QWidget):
         else:
             pass
 
-    def setValue(self, newValue):
+    def setValue(self, newValue, mem_used, mem_avail):
+        # newValue is the mem_used_percent(int)
         currentValue = self.memory_bar.value()
         if currentValue != newValue:
             self.setBarColor(currentValue, newValue)
             self.memory_bar.setValue(newValue)
+            display_str = "%3.1f"%mem_used + "/" + "%3.1f"%mem_avail + " GB " + \
+                        "(" + "%d"%newValue+"%" +")"
+            self.memory_bar.setFormat(display_str)
 
     def onUpdateRequest(self):
         self.updateSignal.emit()

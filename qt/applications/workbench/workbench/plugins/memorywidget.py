@@ -30,7 +30,7 @@ class MemoryWidget(PluginWidget):
     # ----------------- Plugin API --------------------
 
     def get_plugin_title(self):
-        return "Memory"
+        return "Memory Usage"
 
     def readSettings(self, _):
         pass
