@@ -79,8 +79,8 @@ public:
        const Geometry::Instrument_const_sptr &inst,
        boost::optional<double> detectorDistance = boost::none);
 
-  void setDetectorID(int id) override;
-  int getDetectorID() const override;
+  void setDetectorID(int id);
+  int getDetectorID() const;
   void addContributingDetID(const int id);
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
@@ -91,10 +91,6 @@ public:
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
-  /*
-  bool findDetector() override;
-  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
-  */
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
