@@ -500,8 +500,9 @@ class TestFittingDataModel(unittest.TestCase):
         self.assertAlmostEqual(tof / d, 18000, delta=1E-10)
         self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1E-10)
 
-    def test_get_diff_constants(self):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
+    @patch(data_model_path + '.ADS')
+    def test_get_diff_constants(self, mock_ads):
+        mock_ads.retrieve.return_value = self.mock_ws
         difa, difc, tzero = self.model._get_diff_constants("name1")
 
         # presently only difc can be determined from the workspace

@@ -342,8 +342,9 @@ class FittingDataModel(object):
 
     def _get_diff_constants(self, ws_name):
         """Subject to change when ws will be able to carry diff constant on ws object post calibration"""
+        ws = ADS.retrieve(ws_name)
+        si = ws.spectrumInfo()
         m_over_h = 252.816
-        si = self._loaded_workspaces[ws_name].spectrumInfo()
         difc = 2 * m_over_h * (si.l1() + si.l2(0)) * sin(si.twoTheta(0) / 2)
         difa = 0
         tzero = 0
