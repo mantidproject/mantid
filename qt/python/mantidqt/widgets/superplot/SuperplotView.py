@@ -7,6 +7,8 @@
 
 from .SuperplotPresenter import SuperplotPresenter
 
+from mantid.plots.plotfunctions import plot, get_plot_fig
+
 from qtpy.QtWidgets import QDockWidget, QWidget
 from qtpy import uic
 
@@ -102,3 +104,14 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.clear()
         self._sideView.workspacesList.addItems(names)
         self._bottomView.workspaceSlider.setMaximum(len(names) - 1)
+
+    def plotData(self, data):
+        """
+        Plot a list of workspace, spectrum pairs.
+
+        Args:
+            data (list(tuple(str, int))): list of ws, spectrum number pairs
+        """
+        figure, _ = get_plot_fig(fig=self._canvas.figure)
+        for i in data:
+            plot([i[0]], spectrum_nums=[i[1] + 1], overplot=True, fig=figure)
