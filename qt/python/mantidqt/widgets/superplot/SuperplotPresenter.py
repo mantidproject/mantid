@@ -55,5 +55,18 @@ class SuperplotPresenter:
         self._view.setSpectrumSliderPosition(0)
         self._view.plotData([(currentWsName, 0)])
 
+    def onSpectrumSliderMoved(self, value):
+        """
+        Triggered when the spectrum slider position changed.
+
+        Args:
+            value (int): slider position
+        """
+        wsIndex = self._view.getWorkspaceSliderPosition()
+        names = self._model.getWorkspaces()
+        currentWsName = names[wsIndex]
+        currentWs = mtd[currentWsName]
+        self._view.plotData([(currentWsName, value)])
+
     def onHoldButtonToggled(self, state):
         pass

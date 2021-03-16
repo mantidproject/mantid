@@ -55,6 +55,7 @@ class SuperplotView(QWidget):
         bottom = self._bottomView
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
         bottom.workspaceSlider.valueChanged.connect(self._presenter.onWorkspaceSliderMoved)
+        bottom.spectrumSlider.valueChanged.connect(self._presenter.onSpectrumSliderMoved)
 
     def getSideWidget(self):
         return self._sideView
@@ -105,6 +106,15 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.clear()
         self._sideView.workspacesList.addItems(names)
         self._bottomView.workspaceSlider.setMaximum(len(names) - 1)
+
+    def getWorkspaceSliderPosition(self):
+        """
+        Get the workspace slider position.
+
+        Returns:
+            int: slider position
+        """
+        return self._bottomView.workspaceSlider.value()
 
     def setSpectrumSliderMax(self, length):
         """
