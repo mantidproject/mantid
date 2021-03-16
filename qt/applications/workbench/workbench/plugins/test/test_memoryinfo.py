@@ -13,7 +13,7 @@ from workbench.plugins.memoryinfo import getMemoryUsed
 class MemoryInfoTest(unittest.TestCase):
 
     def test_MemoryInfo(self):
-        mem_used_percent, mem_used, mem_avail = getMemoryUsed()
+        mem_used_percent, mem_used, mem_total = getMemoryUsed()
         self.assertTrue(isinstance(mem_used_percent, int))
         self.assertTrue(0 <= mem_used_percent <= 100)
 
