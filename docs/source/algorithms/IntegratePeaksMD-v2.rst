@@ -52,7 +52,7 @@ the provided radii. Errors are also summed in quadrature.
    -  The volume of integration is :math:`V_{peak}`.
    -  An ellipsoidal shape is integrated when the **Ellipsoid** option is enabled (the following also applies to BackgroundInnerRadius and BackgroundOuterRadius):
 
-      -  When only one value for PeakRadius is given, then the ellipsoidal shape is calculated automatically with axes proportional to the sqrt of the eigenvalues of the covariance matrix.
+      -  When only one value for PeakRadius is given, then the ellipsoidal shape is calculated automatically with axes proportional to the sqrt of the eigenvalues of the covariance matrix. If **FixMajorAxisLength = true** then with the ellipsoid will be scaled such that the radius along the major axis is equal to the radius of the spherical region over which the covariance was estimated. In addition the covariance can be estimated iteratively (by setting **MaxIterations > 1**) - points outside of 3 standard deviations will be exluded and the covariance will be estimated again. If the ellipsoid is large enough to fully contain the spherical region then the spherical region will be used instead.
       -  Three values for PeakRadius can be given, which correspond to the semi-axis lengths (a,b,c) of the ellipsoid.
 
 -  If **BackgroundOuterRadius** is specified, then a shell, with radius
