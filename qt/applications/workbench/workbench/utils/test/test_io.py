@@ -8,7 +8,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from PyQt5.QtWidgets import QInputDialog
+from qtpy.QtWidgets import QInputDialog
 from workbench.utils.io import input_qinputdialog
 
 
