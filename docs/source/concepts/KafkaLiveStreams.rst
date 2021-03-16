@@ -62,6 +62,13 @@ The topics that the listener will subscribe to are defined for a particular inst
       </livedata>
     </instrument>
 
+Data in the Kafka topics is serialised using Google FlatBuffers, according to schema which can be found in the `ESS Streaming-Data-Types repository <https://github.com/ess-dmsc/streaming-data-types>`.
+The FlatBuffer Compiler tool generates C++ code for each schema file to provide an implementation for serialising and deserialising data to the format it is communicated in, over the network, through Kafka.
+These generated C++ files are included in the Mantid source.
+Each schema is identified by a four character string, for example "ev42" which identifies the schema defining the serialised data format for detection event data.
+The schema identifiers are defined in their corresponding schema file, and are included in the schema file name and the generated C++ code filenames.
+Particular serialised data are expected to be found in different topics on Kafka. The schema identifier, or identifiers, for data in each topic "type" are documented in the table below.
+
 .. list-table:: Topic configuration
    :widths: 15 15 30 30
    :header-rows: 1
@@ -91,7 +98,9 @@ The topics that the listener will subscribe to are defined for a particular inst
      - Yes (but topic can be empty)
      - Detection event data from monitors (single pixel detectors). This just allows using a separate topic for these data, alternatively they can be published to the "event" topic with other data from other detectors.
 
-Note, there must be a run start message (schema pl72) available in the "run" topic for the listener to start. If the "nexus_structure" field of this message contains geometry information in NeXus format (NXoff_geometry or NXcylindrical_geometry) then Mantid will parse this to get the instrument geometry and expected detector ids etc. Otherwise it uses the "instrument_name" to look up a Mantid Instrument Definition File (IDF) for the instrument.
+Note, there must be a run start message (schema pl72) available in the "run" topic for the listener to start.
+If the "nexus_structure" field of this message contains geometry information in NeXus format (NXoff_geometry or NXcylindrical_geometry) then Mantid will parse this to get the instrument geometry and expected detector ids etc.
+Otherwise it uses the "instrument_name" to look up a Mantid Instrument Definition File (IDF) for the instrument. This behaviour is consistent with the :ref:`LoadInstrument <algm-LoadInstrument>` algorithm.
 Comments in the pl72 schema file may be useful, in particular it documents which fields need to be populated to use the Mantid streamer and which are required by other software:
 https://github.com/ess-dmsc/streaming-data-types/blob/master/schemas/pl72_run_start.fbs
 
