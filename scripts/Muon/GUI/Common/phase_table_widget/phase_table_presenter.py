@@ -77,10 +77,8 @@ class PhaseTablePresenter(object):
         return thread_model.ThreadModel(self._calculation_model)
 
     def handle_calculate_phase_quad_button_clicked(self):
-        self.view.phase_table_selector_combo.blockSignals(True)
         self.update_model_from_view()
         self.handle_add_phasequad_button_clicked()
-        self.view.phase_table_selector_combo.blockSignals(False)
 
     def validate_pair_name(self, text):
         if text in self.context.group_pair_context.pairs:
@@ -282,18 +280,20 @@ class PhaseTablePresenter(object):
                     self.context.group_pair_context.remove_phasequad(phasequad)
 
     def handle_phase_table_changed(self):
-        print("table changed")
+        current_table = self.context.phase_context.options_dict['phase_table_for_phase_quad']
+        new_table = self.view.get_phase_table()
+        if not new_table or not current_table or current_table == new_table:
+            return  # No need to update
+        self.context.phase_context.options_dict['phase_table_for_phase_quad'] = new_table
         # clear what is there currently and recalculate with new table
-        old_names = self.clear_phase_quads()
-        # Recalculate with new table
-        if old_names:
-            self.phasequad_calculation_thread = self.create_phase_quads_calculation_thread(old_names)
-
-            self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
-                                                                 self.handle_success,
-                                                                 self.handle_calculation_error)
-
-            self.phasequad_calculation_thread.start()
+        if self.context.group_pair_context.phasequads:
+            for i, phasequad in enumerate(self.context.group_pair_context.phasequads):
+                self.add_phase_quad_to_analysis(False, phasequad)
+                self.context.group_pair_context.phasequads[i].phase_table = new_table
+                # Need to recalculate phasequads with new table
+                self.context.calculate_phasequads(phasequad.name, phasequad)
+                self.add_phase_quad_to_analysis(True, phasequad)
+            self.view.set_phase_table(new_table)
 
     def clear_phase_quads(self):
         # Remove from view

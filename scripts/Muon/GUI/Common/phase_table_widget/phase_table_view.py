@@ -363,3 +363,13 @@ class PhaseTableView(QtWidgets.QWidget):
 
     def clear_phase_tables(self):
         self.phase_table_selector_combo.clear()
+
+    def get_phase_table(self):
+        return str(self.phase_table_selector_combo.currentText())
+
+    def set_phase_table(self, table):
+        self.phase_table_selector_combo.blockSignals(True)
+        index = self.phase_table_selector_combo.findText(table)
+        if index != -1:
+            self.phase_table_selector_combo.setCurrentIndex(index)
+        self.phase_table_selector_combo.blockSignals(False)

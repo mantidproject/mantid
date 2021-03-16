@@ -192,6 +192,11 @@ class MuonContext(object):
         for run in self._data_context.current_runs:
             with WorkspaceGroupDefinition():
                 for pair_name in self._group_pair_context.pair_names:
+                    # Do not want to rename phasequad parts here
+                    # bug here is does not show on graph immediately have to untick and retick analyse
+                    if "_Re_" in pair_name or "_Im_" in pair_name:
+                        continue
+
                     run_as_string = run_list_to_string(run)
                     name = get_pair_asymmetry_name(
                         self,
@@ -230,9 +235,9 @@ class MuonContext(object):
         # this is to force a reset of phasequads
         for pair in to_rm:
             self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
-        # lets remove the phasequads for now -> later will recalculate
-        for pair in self.group_pair_context.phasequads:
-            self.group_pair_context.remove_phasequad(pair)
+        # lets recalculate the phasequads
+        for phasequad in self.group_pair_context.phasequads:
+            self.calculate_phasequads(phasequad.name, phasequad)
 
     def _calculate_pairs(self, rebin):
         for run in self._data_context.current_runs:
