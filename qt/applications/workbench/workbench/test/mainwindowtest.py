@@ -20,7 +20,7 @@ import matplotlib
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.api import FrameworkManager
 from qtpy.QtWidgets import QMessageBox, QAction, QMenu
-from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu  # noqa
 from io import StringIO
 
 
@@ -51,7 +51,7 @@ class MainWindowTest(unittest.TestCase):
 
     @patch("workbench.app.mainwindow.FrameworkManager")
     @patch("workbench.app.mainwindow.QMessageBox")
-    def test_clear_all_memory_calls_frameworkmanager_when_user_presses_ok(self,mock_msg_box, mock_fm):
+    def test_clear_all_memory_calls_frameworkmanager_when_user_presses_ok(self, mock_msg_box, mock_fm):
         mock_msg_box_instance = MagicMock(spec=QMessageBox)
         mock_msg_box.return_value = mock_msg_box_instance
         mock_msg_box_instance.exec.return_value = mock_msg_box.Ok
@@ -118,9 +118,9 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.editor = Mock()
         self.main_window.populate_interfaces_menu = Mock()
         expected_file_menu_items = [
-            'Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu,
-            'Generate Recovery Script', None, 'Save Project', 'Save Project as...', None, 'Settings', None,
-            'Manage User Directories', None, 'Script Repository', None, 'Clear All Memory', None, '&Quit'
+            'Open Script', 'Open Project', None, 'Save Script', 'Save Script as...', RecentlyClosedScriptsMenu, 'Generate Recovery Script',
+            None, 'Save Project', 'Save Project as...', None, 'Settings', None, 'Manage User Directories', None, 'Script Repository', None,
+            'Clear All Memory', None, '&Quit'
         ]
         # There are no wigets on this instance of MainWindow, so they will not appear on the view menu.
         expected_view_menu_items = ['Restore Default Layout', None]
@@ -133,7 +133,6 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.create_actions()
         self.main_window.populate_menus()
 
-        self.main_window.populate_interfaces_menu.assert_called()
         actual_file_menu_items = list(map(convert_action_to_text, self.main_window.file_menu_actions))
         actual_view_menu_items = list(map(convert_action_to_text, self.main_window.view_menu_actions))
         actual_help_menu_items = list(map(convert_action_to_text, self.main_window.help_menu_actions))
@@ -155,8 +154,11 @@ class MainWindowTest(unittest.TestCase):
         }
 
         with patch('workbench.app.mainwindow.ConfigService',
-                   new={'interfaces.categories.hidden': '', 'mantidqt.python_interfaces_directory': interface_dir}):
-            self.main_window._discover_python_interfaces = Mock(return_value=example_interfaces)
+                   new={
+                       'interfaces.categories.hidden': '',
+                       'mantidqt.python_interfaces_directory': interface_dir
+                   }):
+            self.main_window._discover_python_interfaces = Mock(return_value=(example_interfaces, {}))
             self.main_window._discover_cpp_interfaces = Mock()
 
         self.main_window.create_menus()
@@ -176,33 +178,31 @@ class MainWindowTest(unittest.TestCase):
     @patch('workbench.app.mainwindow.add_actions')
     def test_that_populate_interfaces_menu_discovers_interfaces(self, _):
         interface_dir = './interfaces/'
+        interfaces = {'category': ['interface.py']}
 
-        self.main_window._discover_python_interfaces = Mock(return_value={'category': ['interface.py']})
+        self.main_window._discover_python_interfaces = Mock(return_value=(interfaces, {}))
         self.main_window._discover_cpp_interfaces = Mock()
 
         with patch('workbench.app.mainwindow.ConfigService',
-                   new={'interfaces.categories.hidden': '', 'mantidqt.python_interfaces_directory': interface_dir}):
+                   new={
+                       'interfaces.categories.hidden': '',
+                       'mantidqt.python_interfaces_directory': interface_dir
+                   }):
             self.main_window.create_menus()
             self.main_window.populate_interfaces_menu()
 
-        self.main_window._discover_python_interfaces.assert_called_with(
-            interface_dir
-        )
-        self.main_window._discover_cpp_interfaces.assert_called_with(
-            self.main_window._discover_python_interfaces.return_value
-        )
+        self.main_window._discover_python_interfaces.assert_called_with(interface_dir)
+        self.main_window._discover_cpp_interfaces.assert_called_with(interfaces)
 
     def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self):
         interface_dir = './interfaces/'
-        self.main_window._discover_python_interfaces = Mock(return_value={
-            'category1': ['interface1.py'], 'category2': ['interface2.py']
-        })
+        self.main_window._discover_python_interfaces = Mock(return_value=({
+            'category1': ['interface1.py'],
+            'category2': ['interface2.py']
+        }, {}))
         self.main_window._discover_cpp_interfaces = Mock()
         self.main_window.interfaces_menu = Mock()
-        ConfigService_dict = {
-            'interfaces.categories.hidden': 'category1;category2',
-            'mantidqt.python_interfaces_directory': interface_dir
-        }
+        ConfigService_dict = {'interfaces.categories.hidden': 'category1;category2', 'mantidqt.python_interfaces_directory': interface_dir}
 
         with patch.object(self.main_window, 'interfaces_menu') as mock_interfaces_menu:
             with patch('workbench.app.mainwindow.ConfigService', new=ConfigService_dict):
@@ -247,12 +247,8 @@ class MainWindowTest(unittest.TestCase):
     @patch('workbench.app.mainwindow.ConfigService')
     @patch('workbench.app.mainwindow.QApplication')
     @patch('matplotlib.pyplot.close')
-    def test_main_window_close_behavior_correct_when_workbench_able_to_be_closed(
-            self,
-            mock_plt_close,
-            mock_QApplication,
-            mock_ConfigService
-    ):
+    def test_main_window_close_behavior_correct_when_workbench_able_to_be_closed(self, mock_plt_close, mock_QApplication,
+                                                                                 mock_ConfigService):
         mock_event = Mock()
         mock_project = Mock()
         mock_project.is_saving, mock_project.is_loading, mock_project.saved = False, False, True
@@ -288,10 +284,11 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.PYTHON_GUI_BLACKLIST = []
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interfaces_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('')
+            returned_interfaces, registration_files = self.main_window._discover_python_interfaces('')
 
         expected_interfaces = {'Muon': ['Frequency_Domain_Analysis.py'], 'ILL': ['Drill.py']}
         self.assertDictEqual(expected_interfaces, returned_interfaces)
+        self.assertDictEqual({}, registration_files)
 
     @patch('workbench.app.mainwindow.logger')
     @patch('os.path.exists')
@@ -301,9 +298,10 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.PYTHON_GUI_BLACKLIST = []
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('')
+            returned_interfaces, registration_files = self.main_window._discover_python_interfaces('')
 
         self.assertDictEqual({}, returned_interfaces)
+        self.assertDictEqual({}, registration_files)
         mock_logger.warning.assert_called()
 
     @patch('workbench.app.mainwindow.logger')
@@ -314,9 +312,10 @@ class MainWindowTest(unittest.TestCase):
         mock_os_path_exists.return_value = True
 
         with patch('workbench.app.mainwindow.ConfigService', new={'mantidqt.python_interfaces': interface_str}):
-            returned_interfaces = self.main_window._discover_python_interfaces('')
+            returned_interfaces, registration_files = self.main_window._discover_python_interfaces('')
 
         self.assertDictEqual({}, returned_interfaces)
+        self.assertDictEqual({}, registration_files)
         mock_logger.information.assert_called()
 
     @patch('workbench.app.mainwindow.UserSubWindowFactory')
