@@ -51,7 +51,6 @@ The topics that the listener will subscribe to are defined for a particular inst
 .. code-block:: xml
 
     <instrument name="V20" shortname="V20" >
-      <zeropadding size="8" />
       <technique>ESS Test Beamline</technique>
       <livedata default="event">
         <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
