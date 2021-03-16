@@ -18,13 +18,11 @@ class MemoryWidget(PluginWidget):
     def __init__(self, parent, view=None):
         super(MemoryWidget, self).__init__(parent)
 
-        view = MemoryView(self)
-        self.presenter = MemoryPresenter(view)
-
         self.view = view if view else MemoryView(self)
+        self.presenter = MemoryPresenter(self.view)
         
         layout = QVBoxLayout()
-        layout.addWidget(view.memory_bar)
+        layout.addWidget(self.view.memory_bar)
 
         self.setLayout(layout)
         self.setWindowTitle(self.get_plugin_title())

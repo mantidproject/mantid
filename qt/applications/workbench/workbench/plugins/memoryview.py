@@ -39,7 +39,7 @@ class MemoryView(QWidget):
         self.critical = 90
         # For the future use, if needed
         #self.ui = load_ui(__file__, 'memorybar.ui', baseinstance=self)
-        self.memory_bar = QProgressBar()
+        self.memory_bar = QProgressBar(self)
 
     def setBarColor(self, currentValue, newValue):
         if (fromNormalToCritical(self.critical, currentValue, newValue)):
