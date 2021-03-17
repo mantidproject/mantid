@@ -58,7 +58,10 @@ class SuperplotView(QWidget):
                 self._presenter.onWorkspaceSliderMoved)
         bottom.workspaceSpinBox.valueChanged.connect(
                 self._presenter.onWorkspaceSpinBoxChanged)
-        bottom.spectrumSlider.valueChanged.connect(self._presenter.onSpectrumSliderMoved)
+        bottom.spectrumSlider.valueChanged.connect(
+                self._presenter.onSpectrumSliderMoved)
+        bottom.spectrumSpinBox.valueChanged.connect(
+                self._presenter.onSpectrumSpinBoxChanged)
 
     def getSideWidget(self):
         return self._sideView
@@ -191,6 +194,36 @@ class SuperplotView(QWidget):
             int: slider position
         """
         return self._bottomView.spectrumSlider.value()
+
+    def setSpectrumSpinBoxMax(self, value):
+        """
+        Set the max value of the spectrum spinbox.
+
+        Args:
+            value (int): spinbox max value
+        """
+        self._bottomView.spectrumSpinBox.setMaximum(value)
+
+    def setSpectrumSpinBoxValue(self, value):
+        """
+        Set the spectrum spinbox value. This function does not trigger any
+        spinbox signals.
+
+        Args:
+            value (int): spinbox value
+        """
+        self._bottomView.spectrumSpinBox.blockSignals(True)
+        self._bottomView.spectrumSpinBox.setValue(value)
+        self._bottomView.spectrumSpinBox.blockSignals(False)
+
+    def getSpectrumSpinBoxValue(self):
+        """
+        Get the current spectrum spinbox value.
+
+        Returns:
+            int: spinbox value
+        """
+        return self._bottomView.spectrumSpinBox.value()
 
     def plotData(self, data):
         """

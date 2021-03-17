@@ -71,6 +71,8 @@ class SuperplotPresenter:
         currentWs = mtd[currentWsName]
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
         self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(0)
         self._updatePlot()
 
     def onWorkspaceSpinBoxChanged(self, value):
@@ -86,27 +88,29 @@ class SuperplotPresenter:
         currentWs = mtd[currentWsName]
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
         self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(0)
         self._updatePlot()
 
-    def onSpectrumSliderMoved(self, value):
+    def onSpectrumSliderMoved(self, position):
         """
-        Triggered when the spectrum slider position changed.
+        Triggered when the spectrum slider moved.
 
         Args:
-            value (int): slider position
+            position (int): slider position
         """
-        wsIndex = self._view.getWorkspaceSliderPosition()
-        spectrumIndex = self._view.getSpectrumSliderPosition()
-        names = self._model.getWorkspaces()
-        currentWsName = names[wsIndex]
-        currentWs = mtd[currentWsName]
-        plottedData = self._model.getPlottedData()
-        if (currentWsName, spectrumIndex) in plottedData:
-            self._view.checkHoldButton(True)
-        else:
-            self._view.checkHoldButton(False)
-            plottedData.append((currentWsName, value))
-        self._view.plotData(plottedData)
+        self._view.setSpectrumSpinBoxValue(position)
+        self._updatePlot()
+
+    def onSpectrumSpinBoxChanged(self, value):
+        """
+        Triggered when the spectrum spinbox changed.
+
+        Args:
+            value (int): spinbox value
+        """
+        self._view.setSpectrumSliderPosition(value)
+        self._updatePlot()
 
     def onHoldButtonToggled(self, state):
         """
