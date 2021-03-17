@@ -199,15 +199,13 @@ public:
    * @param innerRadiusSquared :: radius^2 of inner background
    * @param useOnePercentBackgroundCorrection :: if one percent correction
    *should be applied to background.
-   * @param isEllipsoidPeak :: specify if peaks are ellipsoids
    */
   virtual void
   integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                   const coord_t radiusSquared, signal_t &signal,
                   signal_t &errorSquared,
                   const coord_t innerRadiusSquared = 0.0,
-                  const bool useOnePercentBackgroundCorrection = true,
-                  boost::optional<bool> isEllipsoidPeak = false) const = 0;
+                  const bool useOnePercentBackgroundCorrection = true) const = 0;
   /** Find the centroid of all events contained within by doing a weighted
    *average
    * of their coordinates.

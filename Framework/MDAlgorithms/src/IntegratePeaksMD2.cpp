@@ -648,22 +648,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           }
         }
       }
-      // spherical integration of signal
-      if (PeakRadius.size() == 1) {
-        // using findEllispoid, use previous method to down select box
-        ws->getBox()->integrateSphere(
-            getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
-            signal, errorSquared, 0.0 /* innerRadiusSquared */,
-            useOnePercentBackgroundCorrection);
-      } else {
-        // only apply the fix for the case when you manually specify the three
-        // radii
-        ws->getBox()->integrateSphere(
-            getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
-            signal, errorSquared, 0.0 /* innerRadiusSquared */,
-            useOnePercentBackgroundCorrection, isEllipse);
-      }
-
+      ws->getBox()->integrateSphere(
+        getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
+        signal, errorSquared, 0.0 /* innerRadiusSquared */,
+        useOnePercentBackgroundCorrection);
+      //
     } else {
       CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 

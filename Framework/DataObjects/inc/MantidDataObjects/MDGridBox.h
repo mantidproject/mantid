@@ -162,13 +162,11 @@ public:
       MDBin<MDE, nd> & /*bin*/,
       Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
 
-  void
-  integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                  const coord_t radiusSquared, signal_t &signal,
-                  signal_t &errorSquared,
-                  const coord_t innerRadiusSquared = 0.0,
-                  const bool useOnePercentBackgroundCorrection = true,
-                  boost::optional<bool> isEllipsoidPeak = false) const override;
+  void integrateSphere(
+      Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+      signal_t &signal, signal_t &errorSquared,
+      const coord_t innerRadiusSquared = 0.0,
+      const bool useOnePercentBackgroundCorrection = true) const override;
 
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,

@@ -596,15 +596,11 @@ TMDE(void MDBox)::generalBin(
  * @param[out] signal :: set to the integrated signal
  * @param[out] errorSquared :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
- * @param isEllipsoidPeak :: specify if peaks are ellipsoids
  */
-TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                                  const coord_t radiusSquared, signal_t &signal,
-                                  signal_t &errorSquared,
-                                  const coord_t innerRadiusSquared,
-                                  const bool useOnePercentBackgroundCorrection,
-                                  boost::optional<bool> isEllipsoidPeak) const {
-  UNUSED_ARG(isEllipsoidPeak);
+TMDE(void MDBox)::integrateSphere(
+    Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+    signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
+    const bool useOnePercentBackgroundCorrection) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   if (innerRadiusSquared == 0.0) {
