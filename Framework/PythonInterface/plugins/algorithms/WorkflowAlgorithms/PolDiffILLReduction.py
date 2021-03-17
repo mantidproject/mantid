@@ -281,9 +281,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                     else:
                         list_pol.append('{0}_{1}'.format(numor, direction))
                 if average_detectors:
-                    CreateSingleValuedWorkspace(DataValue=len(numors), OutputWorkspace='norm')
-                    Divide(LHSWorkspace=name, RHSWorkspace='norm', OutputWorkspace=name)
-                    DeleteWorkspace(Workspace='norm')
+                    norm_name = name + '_norm'
+                    CreateSingleValuedWorkspace(DataValue=len(numors), OutputWorkspace=norm_name)
+                    Divide(LHSWorkspace=name, RHSWorkspace=norm_name, OutputWorkspace=name)
+                    DeleteWorkspace(Workspace=norm_name)
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
                                         OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
@@ -630,27 +631,27 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Performs normalisation of the vanadium data to the expected cross-section."""
 
         vanadium_expected_cross_section = 0.404 # barns
+        norm_name = ws + "_norm"
         CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
                                     * self._sampleAndEnvironmentProperties['NMoles'].value,
-                                    OutputWorkspace='norm')
+                                    OutputWorkspace=norm_name)
+        to_remove = [norm_name]
         if self.getPropertyValue('OutputTreatment') == 'Sum':
             tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
             RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
-            to_remove = ['norm']
             for entry_no in range(1, mtd[ws].getNumberOfEntries()):
                 ws_name = mtd[ws][entry_no].name()
                 Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
                 to_remove.append(ws_name)
             # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
             # and normalised to 0.404 barns times the number of moles of V:
-            Divide(LHSWorkspace='norm', RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
-            DeleteWorkspaces(WorkspaceList=to_remove)
+            Divide(LHSWorkspace=norm_name, RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
             if self.getPropertyValue('OutputTreatment') == 'Average':
                 self._merge_polarisations(ws, average_detectors=True)
-            Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
-            DeleteWorkspace(Workspace='norm')
+            Divide(LHSWorkspace=norm_name, RHSWorkspace=ws, OutputWorkspace=ws)
+        DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
     def _set_units(self, ws, process):
