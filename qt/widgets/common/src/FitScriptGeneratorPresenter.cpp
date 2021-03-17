@@ -167,12 +167,8 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  try {
-    updateFunctionForDomainsInModel<&IFitScriptGeneratorModel::addFunction>(
-        function);
-  } catch (std::invalid_argument const &ex) {
-    m_view->displayWarning(ex.what());
-  }
+  updateFunctionForDomainsInModel<&IFitScriptGeneratorModel::addFunction>(
+      function);
 }
 
 void FitScriptGeneratorPresenter::handleFunctionReplaced(
