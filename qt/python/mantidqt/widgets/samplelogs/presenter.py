@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 from .model import SampleLogsModel
 from .view import SampleLogsView

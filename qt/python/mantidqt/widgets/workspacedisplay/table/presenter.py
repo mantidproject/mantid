@@ -7,7 +7,7 @@
 #  This file is part of mantidqt package.
 from functools import partial
 
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
 from mantid.plots.utility import legend_set_draggable
