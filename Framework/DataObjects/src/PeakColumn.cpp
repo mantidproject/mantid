@@ -153,10 +153,9 @@ void PeakColumn<T>::print(size_t index, std::ostream &s) const {
     s << peak.getRunNumber();
   else if (m_name == "DetID") {
     auto fullPeak = dynamic_cast<Peak *>(&peak);
-    if(fullPeak)
+    if (fullPeak)
       s << fullPeak->getDetectorID();
-  }
-  else if (m_name == "BankName")
+  } else if (m_name == "BankName")
     s << peak.getBankName();
   else if (m_name == "QLab")
     s << peak.getQLabFrame();
@@ -317,7 +316,7 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
     value = peak.getPeakNumber();
     return boost::get<int>(&value);
   } else if (m_name == "DetID") {
-    auto fatPeak = dynamic_cast<const DataObjects::Peak&>(peak);
+    auto fatPeak = dynamic_cast<const DataObjects::Peak &>(peak);
     value = fatPeak.getDetectorID();
     return boost::get<int>(&value);
   } else if (m_name == "BankName") {

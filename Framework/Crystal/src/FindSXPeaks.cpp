@@ -348,7 +348,7 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
     finalPeak.reduce();
     try {
       IPeak_uptr ipeak = m_peaks->createPeak(finalPeak.getQ());
-      Peak_uptr peak(static_cast<Peak*>(ipeak.release()));
+      Peak_uptr peak(static_cast<Peak *>(ipeak.release()));
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
         peak->setDetectorID(finalPeak.getDetectorId());

@@ -28,14 +28,14 @@ using Mantid::API::Algorithm;
 using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::DataObjects::Peak;
+using Mantid::DataObjects::Peak_uptr;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
-using Mantid::DataObjects::Peak_uptr;
-using Mantid::Geometry::IPeak_uptr;
 using Mantid::Geometry::HKLFilter;
 using Mantid::Geometry::HKLFilter_uptr;
 using Mantid::Geometry::HKLGenerator;
 using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Geometry::IPeak_uptr;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Geometry::ReflectionCondition_sptr;
 using Mantid::Kernel::DblMatrix;
@@ -257,7 +257,7 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
         // it
         continue;
       }
-      Peak_uptr peak(static_cast<Peak*>(ipeak.release()));
+      Peak_uptr peak(static_cast<Peak *>(ipeak.release()));
       peak->setGoniometerMatrix(gonioMatrix);
       if (requirePeaksOnDetector && peak->getDetectorID() < 0)
         continue;

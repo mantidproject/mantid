@@ -26,9 +26,9 @@ DECLARE_ALGORITHM(AddPeak)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::DataObjects::Peak_uptr;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
-using Mantid::DataObjects::Peak_uptr;
 using Mantid::Geometry::IPeak_uptr;
 
 /** Initialize the algorithm's properties.
@@ -128,7 +128,7 @@ void AddPeak::exec() {
   Qz *= knorm;
 
   IPeak_uptr ipeak = peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
-  Peak_uptr peak(static_cast<DataObjects::Peak*>(ipeak.release()));
+  Peak_uptr peak(static_cast<DataObjects::Peak *>(ipeak.release()));
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());
   peak->setBinCount(count);

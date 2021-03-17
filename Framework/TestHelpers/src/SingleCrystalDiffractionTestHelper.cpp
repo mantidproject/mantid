@@ -165,7 +165,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
 
   // Create the peak and add it to the peaks ws
   auto ipeak = m_peaksWorkspace->createPeakHKL(hkl);
-  Peak_uptr peak(dynamic_cast<Peak*>(ipeak.release()));
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak

@@ -37,7 +37,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
   IPeak_uptr ipeak = peaksWS->createPeakHKL(peakHKL);
-  Peak_uptr peak(dynamic_cast<Peak*>(ipeak.release()));
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   peak->setIntMNP(peakMNP);
   peaksWS->addPeak(*peak);
   const auto detectorId = peak->getDetectorID();
@@ -83,7 +83,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP,
       step_perp[ivect] += 0.02;
       auto q = Q + eigvects[ivect] * step_perp[ivect];
       IPeak_uptr ipk = peaksWS->createPeak(q);
-      Peak_uptr pk(dynamic_cast<Peak*>(ipk.release()));
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       detId = pk->getDetectorID();
     } while (detId == detectorId);
   }
@@ -93,7 +93,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP,
     for (size_t ivect = 0; ivect < step_perp.size(); ivect++) {
       auto q = Q + eigvects[ivect] * step_perp[ivect] * istep;
       IPeak_uptr ipk = peaksWS->createPeak(q);
-      Peak_uptr pk(dynamic_cast<Peak*>(ipk.release()));
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       // add event
       auto detId = pk->getDetectorID();
       EventList &el = eventWS->getSpectrum(detId - totalNPixels);

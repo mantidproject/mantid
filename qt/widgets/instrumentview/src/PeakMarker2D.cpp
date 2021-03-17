@@ -20,8 +20,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using Mantid::Geometry::IPeak;
 using Mantid::DataObjects::Peak;
+using Mantid::Geometry::IPeak;
 /// Default size in screen pixels of the marker's symbol
 const int PeakMarker2D::g_defaultMarkerSize = 5;
 
@@ -131,8 +131,8 @@ void PeakMarker2D::setPeak(const IPeak &ipeak, int row) {
   m_label = QString("%1 %2 %3")
                 .arg(QString::number(m_h, 'g', 2), QString::number(m_k, 'g', 2),
                      QString::number(m_l, 'g', 2));
-  auto peak = dynamic_cast<const Peak*>(&ipeak);
-  if(peak)
+  auto peak = dynamic_cast<const Peak *>(&ipeak);
+  if (peak)
     m_detID = peak->getDetectorID();
   m_row = row;
 }
