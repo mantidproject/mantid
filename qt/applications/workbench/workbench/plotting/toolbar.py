@@ -55,7 +55,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
          'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Open/close fitting tab', None, 'toggle_fit', False),
-        ('SP', 'Open/close superplot tab', None, 'toggle_superplot', False),
+        ('Superplot', 'Open/close superplot tab', None, 'toggle_superplot', False),
         (None, None, None, None, None),
         ('Offset', 'Adjust curve offset %', 'mdi.arrow-expand-horizontal',
          'waterfall_offset_amount', None),
