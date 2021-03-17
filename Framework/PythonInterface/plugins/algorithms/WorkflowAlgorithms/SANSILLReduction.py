@@ -92,8 +92,8 @@ class SANSILLReduction(PythonAlgorithm):
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     @staticmethod
-    def _mask(ws, masked_ws):
-        if masked_ws.detectorInfo().hasMaskedDetectors():
+    def _mask(ws, masked_ws, check_if_masked_detectors=True):
+        if not check_if_masked_detectors or masked_ws.detectorInfo().hasMaskedDetectors():
             MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
 
     def PyInit(self):
@@ -568,11 +568,11 @@ class SANSILLReduction(PythonAlgorithm):
         # apply the default mask, e.g. the bad detector edges
         default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
         if default_mask_ws:
-            self._mask(ws, default_mask_ws)
+            self._mask(ws, default_mask_ws, False)
         # apply the beam stop mask
         mask_ws = self.getProperty('MaskedInputWorkspace').value
         if mask_ws:
-            self._mask(ws, mask_ws)
+            self._mask(ws, mask_ws, False)
 
     def _apply_thickness(self, ws):
         """
