@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from mantid.api import mtd, WorkspaceGroup
+
 
 class SuperplotModel:
 
@@ -24,12 +26,19 @@ class SuperplotModel:
 
     def addWorkspace(self, name):
         """
-        Add a workspace to the list.
+        Add a workspace to the list. If it is a workspace group, all the members
+        are added.
 
         Args:
             name (str): name of the workspace
         """
-        if name not in self._workspaces:
+        if name in self._workspaces:
+            return
+        if isinstance(mtd[name], WorkspaceGroup):
+            names = mtd[name].getNames()
+            for name in names:
+                self._workspaces.append(name)
+        else:
             self._workspaces.append(name)
 
     def delWorkspace(self, name):
