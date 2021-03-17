@@ -27,8 +27,11 @@
 using Mantid::API::Algorithm;
 using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Progress;
+using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
+using Mantid::DataObjects::Peak_uptr;
+using Mantid::Geometry::IPeak_uptr;
 using Mantid::Geometry::HKLFilter;
 using Mantid::Geometry::HKLFilter_uptr;
 using Mantid::Geometry::HKLGenerator;
@@ -246,16 +249,15 @@ IPeaksWorkspace_sptr predictFractionalPeaks(
       if (qLab[2] <= 0)
         continue;
 
-      using Mantid::Geometry::IPeak;
-      std::unique_ptr<IPeak> peak;
+      IPeak_uptr ipeak;
       try {
-        peak = inputPeaks.createPeak(qLab);
+        ipeak = inputPeaks.createPeak(qLab);
       } catch (...) {
         // If we can't create a valid peak we have no choice but to skip
         // it
         continue;
       }
-
+      Peak_uptr peak(static_cast<Peak*>(ipeak.release()));
       peak->setGoniometerMatrix(gonioMatrix);
       if (requirePeaksOnDetector && peak->getDetectorID() < 0)
         continue;

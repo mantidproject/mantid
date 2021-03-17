@@ -165,8 +165,7 @@ Peak::Peak(const Peak &other)
  * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
-    : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
-      m_initialEnergy(ipeak.getInitialEnergy()),
+    : BasePeak(ipeak), m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
   const auto *peak = dynamic_cast<const Peak *>(&ipeak);
   if (!peak)

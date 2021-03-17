@@ -131,7 +131,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int i = 0; i < npeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = inputWS->getPeak(i);
+    Peak peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
     std::vector<double> lambdas{peakWavelength}, absFactors(NLAMBDA),

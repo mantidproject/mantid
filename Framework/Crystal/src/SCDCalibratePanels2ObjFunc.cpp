@@ -134,7 +134,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues,
     // update instrument
     pk.setInstrument(pws->getInstrument());
     // update detector ID
-    pk.setDetectorID(pws->getPeak(i).getDetectorID());
+    pk.setDetectorID(pk.getDetectorID());
     // calculate&set wavelength based on new instrument
     Units::Wavelength wl;
     wl.initialize(pk.getL1(), pk.getL2(), pk.getScattering(), 0,

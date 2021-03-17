@@ -309,8 +309,6 @@ double BasePeak::getValueByColName(std::string name) const {
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   if (name == "runnumber")
     return double(this->getRunNumber());
-  else if (name == "detid")
-    return double(this->getDetectorID());
   else if (name == "h")
     return this->getH();
   else if (name == "k")
