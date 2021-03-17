@@ -31,7 +31,8 @@ class LoadRunWidgetModel(object):
         failed_files = []
         for filename in self._filenames:
             try:
-                ws, run, filename, _ = load_utils.load_workspace_from_filename(filename)
+                ws, run, filename, _, period_info = load_utils.load_workspace_from_filename(filename)
+                self._data_context.periods_info = period_info
             except ValueError as error:
                 failed_files += [(filename, error)]
                 continue

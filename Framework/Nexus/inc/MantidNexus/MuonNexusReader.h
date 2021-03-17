@@ -36,6 +36,8 @@ private:
   int nexusLogCount;                 ///< number of NXlog sections read from file
   std::vector<bool> logType;         ///< true if i'th log is numeric
   std::vector<std::string> logNames; ///< stores name read from file
+  std::vector<std::string>
+      m_periodInformation; /// stores the information of the periods
   void openFirstNXentry(NeXus::File &handle);
   bool readMuonLogData(NeXus::File &handle);             ///< method to read the fields of open NXlog section
   std::vector<std::vector<float>> logValues,             ///< array of values for i'th NXlog section
@@ -90,4 +92,5 @@ public:
   int *detectorGroupings;                ///< detector grouping info
   int numDetectors;                      ///< detector count
   std::string getInstrumentName() const; ///< return instrument name
+  std::vector<std::string> getPeriodInfo() const; /// Return period information
 };

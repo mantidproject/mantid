@@ -21,6 +21,7 @@ class GroupingTabView(QtWidgets.QWidget):
         self.save_grouping_button = None
         self.clear_grouping_button = None
         self.default_grouping_button = None
+        self.period_information_button = None
         self.vertical_layout = None
         self.horizontal_layout_base = None
         self.horizontal_layout_description = None
@@ -64,12 +65,18 @@ class GroupingTabView(QtWidgets.QWidget):
         self.default_grouping_button.setToolTip(
             "Restore the default grouping for the currently selected instrument.")
 
+        self.period_information_button = QtWidgets.QPushButton(self)
+        self.period_information_button.setText("Periods")
+        self.period_information_button.setToolTip(
+            "Display a table with further information about the periods of the run(s)")
+
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.load_grouping_button)
         self.horizontal_layout.addWidget(self.save_grouping_button)
         self.horizontal_layout.addWidget(self.clear_grouping_button)
         self.horizontal_layout.addWidget(self.default_grouping_button)
+        self.horizontal_layout.addWidget(self.period_information_button)
 
         self.horizontal_layout_base = QtWidgets.QHBoxLayout()
 
@@ -112,6 +119,7 @@ class GroupingTabView(QtWidgets.QWidget):
         self.save_grouping_button.setEnabled(enabled)
         self.clear_grouping_button.setEnabled(enabled)
         self.default_grouping_button.setEnabled(enabled)
+        self.period_information_button.setEnabled(enabled)
 
     def set_grouping_table(self, table):
         self._grouping_table = table
@@ -193,3 +201,6 @@ class GroupingTabView(QtWidgets.QWidget):
 
     def on_save_grouping_button_clicked(self, slot):
         self.save_grouping_button.clicked.connect(slot)
+
+    def on_period_information_button_clicked(self, slot):
+        self.period_information_button.clicked.connect(slot)

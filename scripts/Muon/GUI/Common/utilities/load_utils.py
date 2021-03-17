@@ -232,7 +232,7 @@ def load_workspace_from_filename(filename,
         load_result["DeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 3)
 
-    return load_result, run, filename, psi_data
+    return load_result, run, filename, psi_data, alg.getProperty("PeriodsInformation").value
 
 
 def empty_loaded_data():

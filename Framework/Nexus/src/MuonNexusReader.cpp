@@ -122,7 +122,39 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // get instrument name
   handle.openGroup("instrument", "NXinstrument");
   handle.readData("name", nexus_instrument_name);
-  handle.closeGroup();
+
+  // Try to read in period information
+  std::vector<std::string> periodInformation{"period_sequences", "period_labels",
+                                             "frames_period_raw"};
+  try {
+    handle.openGroup("beam", "NXbeam");
+    for (const auto &info : periodInformation) {
+      try {
+        std::string tempString;
+        if (info == "period_sequences") {
+          int temp = 0;
+          handle.readData(info, temp);
+          tempString = std::to_string(temp);
+        } else if (info == "frames_period_raw") {
+          std::vector<int> temp;
+          handle.readData(info, temp);
+          for (const auto &value : temp)
+            tempString += std::to_string(value) + ";";
+        } else {
+          handle.readData(info, tempString);
+        }
+        m_periodInformation.emplace_back(tempString);
+      } catch (...) {
+        g_log.debug("Muon nexus file does not contain " + info);
+        m_periodInformation.emplace_back(std::string{""});
+      }
+    }
+    handle.closeGroup();
+  } catch (...) {
+    g_log.debug("Muon nexus file does not contain beam info");
+  }
+
+  handle.closeGroup(); // Close instrument group
 
   // Get number of switching states if available. Take this as number of periods
   // If not available set as one period.
@@ -319,3 +351,7 @@ bool MuonNexusReader::logTypeNumeric(const int i) const { return (logType[i]); }
  * @return the log name at the given index
  */
 string MuonNexusReader::getLogName(const int i) const { return (logNames[i]); }
+
+std::vector<std::string> MuonNexusReader::getPeriodInfo() const {
+  return m_periodInformation;
+}

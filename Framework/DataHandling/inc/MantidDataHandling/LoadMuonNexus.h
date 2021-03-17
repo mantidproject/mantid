@@ -88,6 +88,8 @@ protected:
   specnum_t m_numberOfSpectra;
   /// The number of periods in the raw file
   int64_t m_numberOfPeriods;
+  /// The different pieces of information about periods
+  std::vector<std::string> m_periodInformation;
   /// Has the spectrum_list property been set?
   bool m_list;
   /// Have the spectrum_min/max properties been set?

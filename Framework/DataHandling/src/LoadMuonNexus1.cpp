@@ -141,6 +141,10 @@ void LoadMuonNexus1::exec() {
     m_numberOfPeriods = nxload.t_nper;
   }
 
+  // Read in period information
+  m_periodInformation = nxload.getPeriodInfo();
+  setProperty("PeriodsInformation", m_periodInformation);
+
   bool autoGroup = getProperty("AutoGroup");
 
   // Grouping info should be returned if user has set the property

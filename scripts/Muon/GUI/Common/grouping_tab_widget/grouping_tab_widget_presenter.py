@@ -12,6 +12,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
+from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget
 
 
 class GroupingTabPresenter(object):
@@ -34,6 +35,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget = grouping_table_widget
         self.pairing_table_widget = pairing_table_widget
         self.diff_table = diff_table
+        self.period_info_widget = MuonPeriodInfoWidget()
 
         self._view.set_description_text('')
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
@@ -41,6 +43,7 @@ class GroupingTabPresenter(object):
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
+        self._view.on_period_information_button_clicked(self.handle_period_information_button_clicked)
 
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
@@ -276,6 +279,17 @@ class GroupingTabPresenter(object):
                 self.pairing_table_widget.plot_default_case()
             else:  # else plot groups
                 self.grouping_table_widget.plot_default_case()
+
+    def handle_period_information_button_clicked(self):
+        if self._model._data.periods_info:
+            self._add_period_info_to_widget()
+        self.period_info_widget.show()
+
+    def _add_period_info_to_widget(self):
+        self.period_info_widget.number_of_sequences = self._model._data.periods_info[0]
+        total_frames = self._model._data.periods_info[2].split(';')
+        for index, name in enumerate(self._model._data.periods_info[1].split(';')):
+            self.period_info_widget.add_period_to_table(name, total_frames[index])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

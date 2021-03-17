@@ -79,6 +79,7 @@ class MuonDataContext(object):
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
         self.message_notifier = MuonDataContext.MessageNotifier(self)
         self.base_directory = base_directory
+        self.periods_info = []
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
