@@ -132,7 +132,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # load the chosen YIG scan
-        fit_output_name = self.getPropertyValue('FitOutputWorkspace')
+        fit_output_name = \
+            self.getPropertyValue('FitOutputWorkspace') \
+            if not self.getProperty('FitOutputWorkspace').isDefault else 'calibration'
         conjoined_scan = "conjoined_input_{}".format(fit_output_name)
         if self.getProperty('InputWorkspace').isDefault:
             self._get_scan_data(fit_output_name, progress)
