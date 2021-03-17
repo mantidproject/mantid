@@ -19,6 +19,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <boost/optional.hpp>
 #include <ostream>
+#include <iostream>
 
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
 // This is okay (though would be better if it were for only that function
@@ -1229,71 +1230,124 @@ TMDE(void MDGridBox)::integrateSphere(
   }
 
   // OK, we've done all the vertices. Now we go through and check each box.
-  size_t numFullyContained = 0;
-  size_t numPartiallyContained = 0;
-
+  // size_t numFullyContained = 0;
+  // size_t numPartiallyContained = 0;
   for (size_t i = 0; i < numBoxes; ++i) {
     API::IMDNode *box = m_Children[i];
-    // Box partially contained?
-    bool partialBox = false;
 
-    // Is this box fully contained?
+    // compute characteristics of this child box
+    // Let's get the box center
+    coord_t boxCenter[nd];
+    box->getCenter(boxCenter);
+
+    // Calculate the equivalent distance bewteen box center
+    // and peak center
+    // NOTE: peak center is embedded in radiusTransform
+    // NOTE: using sqrt here to make the physics easy to
+    //       understand, also getting it done right is more
+    //       important than getting it done fast.
+    coord_t out[nd];
+    radiusTransform.apply(boxCenter, out);
+    double distBoxcntrPkcntr = std::sqrt(out[0]);
+    double r_box = std::sqrt(diagonalSquared);
+    double r_pk = std::sqrt(radiusSquared);
+    double r_pk_inner = std::sqrt(innerRadiusSquared);
+
+    // Debug
+    // std::ostringstream debugmsg;
+    // debugmsg << "Box center: ( ";
+    // for (size_t d = 0; d < nd; d++) {
+    //   debugmsg << boxCenter[d] << " ";
+    // }
+    // debugmsg << ")\n";
+    // //
+    // debugmsg << "-- contains vertes: " << verticesContained[i] << "\n"
+    //          << "-- distBoxcntrPkcntr = " << distBoxcntrPkcntr << "\n"
+    //          << "-- r_box = " << r_box << "\n"
+    //          << "-- r_pk = " << r_pk << "\n"
+    //          << "-- r_pk_inner = " << r_pk_inner << "\n";
+
+    // DEV_NOTE:
+    // There are four possible relations between peak and box
+    // - [a] box and peak has no overlap
+    //     [a.1] box outside of peak
+    //     This case is very difficult to pin-point precisely,
+    //     but we can safely find boxes satisfy the following
+    //     criteria
+    //        d - r_box > r_peak
+    //     where
+    //        d: distance bewteen peak center and box center
+    //        r_box: equivalent radius of box (half box diagnal)
+    //        r_peak: equivalent radisu of peak
+    //     [a.2] box in the donut hole of peak
+    //     Similar as above, but we check the inner radius this time
+    //        d + r_box < r_peak_inner
+    //     where
+    //        d: distance bewteen peak center and box center
+    //        r_box: equivalent radius of box (half box diagnal)
+    //        r_peak_inner: equivalent inner radius of peak
+    // - [b] box and peak has overlap
+    //   - [b.0] box is enveloped by the peak
+    //             -> add to process list (signal, errorSquared)
+    //   - [b.1] peak is enveloped by the box (box too big)
+    //             -> recursively search the children of
+    //                the current box
+    //                --> box has children (repeat the process recursively)
+    //                --> box has no children (end of tree, ERROR)
+    //                    !!! this means the peak falls below the finest grid
+    //                    !!! resolution, therefore there is nothing we can do
+    //   - [b.2] box and peak are partially overlap
+    //             -> recursively search the children of
+    //                the current box
+    //                --> box has children (repeat the process recursively)
+    //                --> box has no childreinnerRadiusSquarederefore we have to accept the fact
+    //                    !!! some uncentainty is present due to discretization
+    //
     if (verticesContained[i] >= maxVertices) {
+      // case [b.0]
       // Use the integrated sum of signal in the box
       signal += box->getSignal();
       errorSquared += box->getErrorSquared();
 
-      //        std::cout << "box at " << i << " (" << box->getExtentsStr() <<
-      //        ") is fully contained. Vertices = " << verticesContained[i] <<
-      //        "\n";
+      // debugmsg << "case[b.0]\n";
 
-      numFullyContained++;
-      // Go on to the next box
-      continue;
-    }
-
-    if (verticesContained[i] == 0) {
-      // There is a chance that this part of the box is within integration
-      // volume,
-      // even if no vertex of it is.
-      coord_t boxCenter[nd];
-      box->getCenter(boxCenter);
-
-      // Distance from center to the peak integration center
-      coord_t out[nd];
-      radiusTransform.apply(boxCenter, out);
-
-      if (out[0] < diagonalSquared * 0.72 + radiusSquared ||
-          out[0] < diagonalSquared * 0.72 + innerRadiusSquared) {
-        // If the center is closer than the size of the box, then it MIGHT be
-        // touching.
-        // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
-        // NOTE! Watch out for non-spherical transforms!
-        //          std::cout << "box at " << i << " is maybe touching\n";
-        partialBox = true;
-      }
     } else {
-      partialBox = true;
-      //        std::cout << "box at " << i << " has a vertex touching\n";
-    }
+      // assume we need to recusively search the children of current box
+      // NOTE: both [b.1] and [b.2] invoke recursive search
+      bool searchSubBox = true;
 
-    // NOTE:
-    //  the smart partial box check (sub-devide box into smaller grid)
-    //  does not work for ellipsoid peaks, so we are force using the
-    //  finest grid for now until a suitable check can be identified
-    //  in the future.
-    if (isEllipsoidPeak) {
-      partialBox = true;
-    }
+      // check if it is case [a]
+      // NOTE: for case [a], we don't need to do the recursive search
+      if (verticesContained[i] == 0) {
+        // case [a.1]
+        if (distBoxcntrPkcntr - r_box > r_pk){
+          searchSubBox = false;
 
-    // We couldn't rule out that the box might be partially contained.
-    if (partialBox) {
-      // Use the detailed integration method.
-      box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
-                           innerRadiusSquared,
-                           useOnePercentBackgroundCorrection);
-      //        std::cout << ".signal=" << signal << "\n";
-      numPartiallyContained++;
+          debugmsg << "case[a.1]\n";
+
+        }
+        // case [a.2]
+        if (distBoxcntrPkcntr + r_box < r_pk_inner) {
+          searchSubBox = false;
+
+          // debugmsg << "case[a.2]\n";
+
+        }
+      }
+
+      // do the recursive search if needed
+      // NOTE: for cases [b.1] and [b.2]
+      if (searchSubBox){
+        box->integrateSphere(radiusTransform, radiusSquared, signal,
+                             errorSquared, innerRadiusSquared,
+                             useOnePercentBackgroundCorrection);
+        // debugmsg << "!!recusively search children\n";
+      }
+
+      // debugmsg << "\n";
+
+      // std::cout << debugmsg.str();
+
     }
   } // (for each box)
 
