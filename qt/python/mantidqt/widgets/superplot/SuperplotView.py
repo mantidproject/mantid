@@ -52,6 +52,8 @@ class SuperplotView(QWidget):
         side = self._sideView
         side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
         side.delButton.clicked.connect(self._presenter.onDelButtonClicked)
+        side.workspacesList.currentRowChanged.connect(
+                self._presenter.onWorkspaceSelectionChanged)
         bottom = self._bottomView
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
         bottom.workspaceSlider.valueChanged.connect(
@@ -78,6 +80,18 @@ class SuperplotView(QWidget):
         super().show()
         self._sideView.show()
         self._bottomView.show()
+
+    def setSelectedWorkspace(self, index):
+        """
+        Select a specific workspace in the workspace list. This function does
+        not raise any QList signals.
+
+        Args:
+            index (int): new selection index
+        """
+        self._sideView.workspacesList.blockSignals(True)
+        self._sideView.workspacesList.setCurrentRow(index)
+        self._sideView.workspacesList.blockSignals(False)
 
     def getSelectedWorkspace(self):
         """

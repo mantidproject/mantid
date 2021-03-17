@@ -27,7 +27,9 @@ class SuperplotPresenter:
         name = self._view.getSelectedWorkspace()
         self._model.addWorkspace(name)
         names = self._model.getWorkspaces()
+        selectedWs = self._view.getSelectedWorkspace()
         self._view.setWorkspacesList(names)
+        self._view.setSelectedWorkspace(names.index(selectedWs))
 
     def onDelButtonClicked(self):
         """
@@ -58,6 +60,24 @@ class SuperplotPresenter:
             self._view.checkHoldButton(False)
             plottedData.append((currentWsName, currentSpectrumIndex))
         self._view.plotData(plottedData)
+
+    def onWorkspaceSelectionChanged(self, index):
+        """
+        Triggered when the selected workspace (in the workspace list) changed.
+
+        Args:
+            index (int): index of the selected workspace
+        """
+        self._view.setWorkspaceSliderPosition(index)
+        self._view.setWorkspaceSpinBoxValue(index)
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[index]
+        currentWs = mtd[currentWsName]
+        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(0)
+        self._updatePlot()
 
     def onWorkspaceSliderMoved(self, position):
         """
