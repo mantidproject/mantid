@@ -1247,7 +1247,7 @@ TMDE(void MDGridBox)::integrateSphere(
     coord_t out[nd];
     radiusTransform.apply(boxCenter, out);
     double distBoxcntrPkcntr = std::sqrt(out[0]);
-    double r_box = std::sqrt(diagonalSquared);
+    double r_box = std::sqrt(diagonalSquared) / 2;
     double r_pk = std::sqrt(radiusSquared);
     double r_pk_inner = std::sqrt(innerRadiusSquared);
 
@@ -1298,7 +1298,7 @@ TMDE(void MDGridBox)::integrateSphere(
     //             -> recursively search the children of
     //                the current box
     //                --> box has children (repeat the process recursively)
-    //                --> box has no childreinnerRadiusSquarederefore we have to accept the fact
+    //                --> box has no childre, we have to accept the fact
     //                    !!! some uncentainty is present due to discretization
     //
     if (verticesContained[i] >= maxVertices) {
