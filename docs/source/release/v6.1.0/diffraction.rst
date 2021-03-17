@@ -43,7 +43,7 @@ Bugfixes
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 - Allow a different number of spectra for absorption correction division of PEARL data. This allows ``create_vanadium`` to work for a non-standard dataset.
-
+- Saved filenames for summed empty workspaces now include spline properties to avoid long_mode confusion when focussing.
 
 Engineering Diffraction
 -----------------------
