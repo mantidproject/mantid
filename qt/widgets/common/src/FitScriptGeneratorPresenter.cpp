@@ -422,8 +422,8 @@ void FitScriptGeneratorPresenter::updateParameterTie(
 }
 
 std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
-  return m_view->isAddRemoveFunctionForAllChecked() ? m_view->allRows()
-                                                    : m_view->selectedRows();
+  return m_view->applyFunctionChangesToAll() ? m_view->allRows()
+                                             : m_view->selectedRows();
 }
 
 void FitScriptGeneratorPresenter::checkForWarningMessages() {

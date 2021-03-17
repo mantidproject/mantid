@@ -88,7 +88,7 @@ public:
 
   virtual void resetSelection() = 0;
 
-  virtual bool isAddRemoveFunctionForAllChecked() const = 0;
+  virtual bool applyFunctionChangesToAll() const = 0;
 
   virtual void clearFunction() = 0;
   virtual void

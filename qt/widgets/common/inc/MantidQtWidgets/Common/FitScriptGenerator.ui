@@ -14,7 +14,81 @@
    <string>Fit Script Generator</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="3" rowspan="2" colspan="3">
+   <item row="0" column="1">
+    <widget class="QPushButton" name="pbRemove">
+     <property name="text">
+      <string>Remove</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="6">
+    <widget class="QPushButton" name="pbGenerateFitScript">
+     <property name="text">
+      <string>Generate Fit Script</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>325</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="6">
+    <widget class="QPushButton" name="pbSelectedDomains">
+     <property name="minimumSize">
+      <size>
+       <width>98</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>98</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Selected Domains</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5">
+    <widget class="QPushButton" name="pbAllDomains">
+     <property name="minimumSize">
+      <size>
+       <width>98</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>98</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>All Domains</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3" rowspan="2" colspan="4">
     <widget class="QFrame" name="fBrowsers">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
@@ -45,57 +119,6 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="QCheckBox" name="ckAddRemoveFunctionForAllDatasets">
-     <property name="text">
-      <string>Add/Remove function for all datasets</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="3" colspan="2">
-    <widget class="QLineEdit" name="leScriptName">
-     <property name="text">
-      <string>new_fit_script.py</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QPushButton" name="pbAddWorkspace">
-     <property name="text">
-      <string>Add Workspace</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="5">
-    <widget class="QPushButton" name="pbGenerateFitScript">
-     <property name="text">
-      <string>Generate Fit Script</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="pbRemove">
-     <property name="text">
-      <string>Remove</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>325</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="1" column="0" rowspan="2" colspan="3">
     <widget class="QFrame" name="fDataTable">
      <layout class="QGridLayout" name="gridLayout_2">
@@ -112,6 +135,27 @@
        <number>0</number>
       </property>
      </layout>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="pbAddWorkspace">
+     <property name="text">
+      <string>Add Workspace</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3" colspan="3">
+    <widget class="QLineEdit" name="leScriptName">
+     <property name="text">
+      <string>new_fit_script.py</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Apply function changes to:</string>
+     </property>
     </widget>
    </item>
   </layout>
