@@ -986,7 +986,7 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
         if (componentInfo.isDetector(detector)) {
           const double pixelCounts = actor.getIntegratedCounts(detector);
           if (pixelCounts != InstrumentActor::INVALID_VALUE) {
-            tubeCounts += pixelCounts;
+            tubeCounts += static_cast<int64_t>(pixelCounts);
           }
         }
       }
