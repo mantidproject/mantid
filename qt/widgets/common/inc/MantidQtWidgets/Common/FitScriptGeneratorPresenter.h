@@ -93,12 +93,21 @@ private:
   template <void (FitScriptGeneratorPresenter::*func)(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       FitDomainIndex domainIndex)>
-  void updateDomainXRange();
+  void updateXLimitForDomainInModel();
+  template <void (FitScriptGeneratorPresenter::*func)(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      FitDomainIndex domainIndex)>
+  void updateXLimitForDomainInModel(FitDomainIndex domainIndex);
 
   template <void (IFitScriptGeneratorModel::*func)(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       std::string const &function)>
-  void updateDomainFunctions(std::string const &function);
+  void updateFunctionForDomainsInModel(std::string const &function);
+  template <void (IFitScriptGeneratorModel::*func)(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &function)>
+  void updateFunctionForDomainInModel(FitDomainIndex domainIndex,
+                                      std::string const &function);
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 
