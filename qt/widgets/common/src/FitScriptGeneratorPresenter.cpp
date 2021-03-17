@@ -148,10 +148,10 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
   auto const fittingMode = m_model->getFittingMode();
   m_view->setSimultaneousMode(fittingMode == FittingMode::SIMULTANEOUS);
 
-  auto const selectedRows = m_view->selectedRows();
-  if (!selectedRows.empty()) {
-    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
-    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
+  if (m_view->hasLoadedData()) {
+    auto const domainIndex = m_view->currentRow();
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
     m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
     setGlobalParameters(m_model->getGlobalParameters());
   } else {
