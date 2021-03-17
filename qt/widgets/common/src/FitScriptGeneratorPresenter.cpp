@@ -136,27 +136,22 @@ void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
   }
 }
 
+void FitScriptGeneratorPresenter::handleSelectionChanged() {
+  m_view->setSimultaneousMode(m_model->isSimultaneousMode());
+
+  if (m_view->hasLoadedData()) {
+    updateFunctionInViewFromModel(m_view->currentRow());
+  } else {
+    m_view->clearFunction();
+  }
+}
+
 void FitScriptGeneratorPresenter::handleStartXChanged() {
   updateXLimitForDomainInModel<&FitScriptGeneratorPresenter::updateStartX>();
 }
 
 void FitScriptGeneratorPresenter::handleEndXChanged() {
   updateXLimitForDomainInModel<&FitScriptGeneratorPresenter::updateEndX>();
-}
-
-void FitScriptGeneratorPresenter::handleSelectionChanged() {
-  auto const fittingMode = m_model->getFittingMode();
-  m_view->setSimultaneousMode(fittingMode == FittingMode::SIMULTANEOUS);
-
-  if (m_view->hasLoadedData()) {
-    auto const domainIndex = m_view->currentRow();
-    auto const workspaceName = m_view->workspaceName(domainIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-    m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
-    setGlobalParameters(m_model->getGlobalParameters());
-  } else {
-    m_view->clearFunction();
-  }
 }
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
@@ -356,6 +351,14 @@ void FitScriptGeneratorPresenter::updateParameterTie(
   } catch (std::invalid_argument const &ex) {
     m_warnings.emplace_back(ex.what());
   }
+}
+
+void FitScriptGeneratorPresenter::updateFunctionInViewFromModel(
+    FitDomainIndex domainIndex) {
+  auto const workspaceName = m_view->workspaceName(domainIndex);
+  auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+  m_view->setFunction(m_model->getFunction(workspaceName, workspaceIndex));
+  setGlobalParameters(m_model->getGlobalParameters());
 }
 
 template <void (FitScriptGeneratorPresenter::*func)(

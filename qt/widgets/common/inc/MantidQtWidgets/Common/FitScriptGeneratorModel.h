@@ -116,6 +116,8 @@ public:
     return m_fittingMode;
   }
 
+  [[nodiscard]] bool isSimultaneousMode() const override;
+
 private:
   [[nodiscard]] FitDomainIndex
   findDomainIndex(std::string const &workspaceName,

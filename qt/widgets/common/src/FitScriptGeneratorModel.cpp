@@ -477,6 +477,10 @@ void FitScriptGeneratorModel::setFittingMode(FittingMode fittingMode) {
   m_presenter->setGlobalParameters(m_globalParameters);
 }
 
+bool FitScriptGeneratorModel::isSimultaneousMode() const {
+  return m_fittingMode == FittingMode::SIMULTANEOUS;
+}
+
 void FitScriptGeneratorModel::checkParameterIsInAllDomains(
     std::string const &globalParameter) const {
   auto const hasParameter = [&globalParameter](auto const &fitDomain) {

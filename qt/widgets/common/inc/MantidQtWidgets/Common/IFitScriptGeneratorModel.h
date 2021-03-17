@@ -94,6 +94,8 @@ public:
   [[nodiscard]] virtual std::vector<GlobalTie> getGlobalTies() const = 0;
   [[nodiscard]] virtual std::vector<GlobalParameter>
   getGlobalParameters() const = 0;
+
+  [[nodiscard]] virtual bool isSimultaneousMode() const = 0;
 };
 
 } // namespace MantidWidgets

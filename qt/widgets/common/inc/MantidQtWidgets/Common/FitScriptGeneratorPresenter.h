@@ -50,9 +50,9 @@ public:
 private:
   void handleRemoveClicked();
   void handleAddWorkspaceClicked();
+  void handleSelectionChanged();
   void handleStartXChanged();
   void handleEndXChanged();
-  void handleSelectionChanged();
   void handleFunctionRemoved(std::string const &function);
   void handleFunctionAdded(std::string const &function);
   void handleFunctionReplaced(std::string const &function);
@@ -89,6 +89,8 @@ private:
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
+
+  void updateFunctionInViewFromModel(FitDomainIndex domainIndex);
 
   template <void (FitScriptGeneratorPresenter::*func)(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
