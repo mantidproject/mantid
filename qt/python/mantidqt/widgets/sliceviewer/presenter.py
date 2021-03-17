@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 # 3rdparty imports
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 import mantid.api
 import mantid.kernel

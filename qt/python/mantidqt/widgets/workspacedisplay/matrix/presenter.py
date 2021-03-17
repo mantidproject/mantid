@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver

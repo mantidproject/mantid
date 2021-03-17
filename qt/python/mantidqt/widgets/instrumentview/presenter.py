@@ -10,7 +10,7 @@
 """
 Contains the presenter for displaying the InstrumentWidget
 """
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
