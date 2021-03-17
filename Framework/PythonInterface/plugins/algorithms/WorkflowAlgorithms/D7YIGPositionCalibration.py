@@ -140,7 +140,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             self._get_scan_data(fit_output_name, progress)
         else:
             input_name = self.getPropertyValue('InputWorkspace')
-            RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
+            CloneWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
             progress.report(2, 'Loading YIG scan data')
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
