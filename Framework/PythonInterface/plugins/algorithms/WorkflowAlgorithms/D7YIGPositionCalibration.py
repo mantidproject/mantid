@@ -528,6 +528,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         gradients and offsets.
         Returns a list of pixel positions relative to their
         respective bank"""
+
+        chi2 = parameter_table.row(parameter_table.rowCount()-1)['Value']
         intitial_wavelength = self.getProperty('ApproximateWavelength').value
         wavelength = parameter_table.column(1)[1] * intitial_wavelength
         if parameter_table.column(1)[0] == 0:
@@ -562,6 +564,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         self.log().notice('The bank2 gradient is: {0:.3f}'.format(bank2_slope))
         self.log().notice('The bank3 gradient is: {0:.3f}'.format(bank3_slope))
         self.log().notice('The bank4 gradient is: {0:.3f}'.format(bank4_slope))
+        self.log().notice('The fit chi2 is: {0:.3f}'.format(chi2))
         return wavelength, pixel_offsets, bank_offsets, bank_slopes
 
     def _prettify(self, elem):
