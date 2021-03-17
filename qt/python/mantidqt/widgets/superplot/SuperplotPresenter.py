@@ -40,6 +40,7 @@ class SuperplotPresenter:
         self._model.delWorkspace(name)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
+        self._updatePlot()
 
     def _updatePlot(self):
         """

@@ -41,6 +41,8 @@ class SuperplotModel:
         """
         if name in self._workspaces:
             self._workspaces.remove(name)
+            self._plottedData = [(n, i) for (n, i) in self._plottedData
+                                 if n != name]
 
     def getWorkspaces(self):
         """
