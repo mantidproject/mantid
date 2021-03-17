@@ -29,7 +29,7 @@ namespace DataObjects {
 
 /** Structure describing a single-crystal peak. The peak is described
  * by the physical detector position (determined either from detector
- * infomation or calculated from Q-lab) and inital/final energy
+ * information or calculated from Q-lab) and initial/final energy
  * (calculated from Q-lab or provided wavelength)
  *
  */
@@ -85,9 +85,9 @@ public:
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
 
-  void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
+  void setInstrument(const Geometry::Instrument_const_sptr &inst);
   Geometry::IDetector_const_sptr getDetector() const override;
-  Geometry::Instrument_const_sptr getInstrument() const override;
+  Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 

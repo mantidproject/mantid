@@ -60,9 +60,7 @@ public:
   void setDetectorID(int) override;
   int getDetectorID() const override;
 
-  void setInstrument(const Geometry::Instrument_const_sptr &) override;
   Geometry::IDetector_const_sptr getDetector() const override;
-  Geometry::Instrument_const_sptr getInstrument() const override;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 

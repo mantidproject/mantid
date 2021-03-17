@@ -168,14 +168,15 @@ Peak::Peak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
       m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
-  setInstrument(ipeak.getInstrument());
-  detid_t id = ipeak.getDetectorID();
-  if (id >= 0) {
+  const auto *peak = dynamic_cast<const Peak *>(&ipeak);
+  if (!peak)
+    throw std::invalid_argument(
+        "Cannot construct a Peak from this non-Peak object");
+  setInstrument(peak->getInstrument());
+  detid_t id = peak->getDetectorID();
+  if (id >= 0)
     setDetectorID(id);
-  }
-  if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
-    this->m_detIDs = peak->m_detIDs;
-  }
+  this->m_detIDs = peak->m_detIDs;
 }
 
 //----------------------------------------------------------------------------------------------
