@@ -211,8 +211,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         separated_cs = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            sigma_z_nsf = mtd[ws][entry_no]
-            sigma_z_sf = mtd[ws][entry_no+1]
+            sigma_z_sf = mtd[ws][entry_no]
+            sigma_z_nsf = mtd[ws][entry_no+1]
             total_cs = mtd[ws][entry_no].name() + '_Total'
             nuclear_cs = mtd[ws][entry_no].name() + '_Coherent'
             incoherent_cs = mtd[ws][entry_no].name() + '_Incoherent'
@@ -227,13 +227,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=data_incoherent, OutputWorkspace=incoherent_cs)
                 separated_cs.append(incoherent_cs)
             elif nMeasurements == 6 or nMeasurements == 10:
-                sigma_y_nsf = mtd[ws][entry_no+2]
-                sigma_y_sf = mtd[ws][entry_no+3]
-                sigma_x_nsf = mtd[ws][entry_no+4]
-                sigma_x_sf = mtd[ws][entry_no+5]
+                sigma_y_sf = mtd[ws][entry_no+2]
+                sigma_y_nsf = mtd[ws][entry_no+3]
+                sigma_x_sf = mtd[ws][entry_no+4]
+                sigma_x_nsf = mtd[ws][entry_no+5]
                 average_magnetic_cs = mtd[ws][entry_no].name() + '_AverageMagnetic'
-                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
                 sf_magnetic_cs = mtd[ws][entry_no].name() + '_SFMagnetic'
+                nsf_magnetic_cs = mtd[ws][entry_no].name() + '_NSFMagnetic'
                 if nMeasurements == 6 and user_method == 'XYZ':
                     # Total cross-section:
                     data_total = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
@@ -312,10 +312,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     magnetic_sf_cos2alpha = (-1) * c0_t2_m4 * sigma_x_sf - c0_t2_p2 * sigma_y_sf - mc0_t4_p2 * sigma_z_sf
                     magnetic_nsf_sin2alpha = c4_t2_m4 * sigma_xpy_nsf + c4_t2_p2 * sigma_xmy_nsf + mc4_t4_p2 * sigma_z_nsf
                     magnetic_sf_sin2alpha = (-1) * c4_t2_m4 * sigma_xpy_sf - c4_t2_p2 * sigma_xmy_sf - mc4_t4_p2 * sigma_z_sf
-                    tmp_names.add('magnetic_nsf_cos2alpha')
                     tmp_names.add('magnetic_sf_cos2alpha')
-                    tmp_names.add('magnetic_nsf_sin2alpha')
+                    tmp_names.add('magnetic_nsf_cos2alpha')
                     tmp_names.add('magnetic_sf_sin2alpha')
+                    tmp_names.add('magnetic_nsf_sin2alpha')
 
                     data_nsf_magnetic = magnetic_nsf_cos2alpha * cos_2alpha \
                         + magnetic_nsf_sin2alpha * sin_2alpha
