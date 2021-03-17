@@ -216,7 +216,7 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
     std::string const &parameter) {
   auto const newValue = m_view->parameterValue(parameter);
 
-  for (auto const &rowIndex : m_view->allRows()) {
+  for (auto const &rowIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     auto const equivalentParameter =
@@ -233,7 +233,7 @@ void FitScriptGeneratorPresenter::handleAttributeChanged(
     std::string const &attribute) {
   auto const newValue = m_view->attributeValue(attribute);
 
-  for (auto const &rowIndex : m_view->allRows()) {
+  for (auto const &rowIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
@@ -243,7 +243,7 @@ void FitScriptGeneratorPresenter::handleAttributeChanged(
 
 void FitScriptGeneratorPresenter::handleParameterTieChanged(
     std::string const &parameter, std::string const &tie) {
-  for (auto const &rowIndex : m_view->allRows()) {
+  for (auto const &rowIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
@@ -256,7 +256,7 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
 
 void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
     std::string const &parameter) {
-  for (auto const &rowIndex : m_view->allRows()) {
+  for (auto const &rowIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->removeParameterConstraint(workspaceName, workspaceIndex,
@@ -268,7 +268,7 @@ void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
 
 void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
     std::string const &functionIndex, std::string const &constraint) {
-  for (auto const &rowIndex : m_view->allRows()) {
+  for (auto const &rowIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     auto const equivalentFunctionIndex =
