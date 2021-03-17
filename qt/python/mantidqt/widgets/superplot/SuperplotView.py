@@ -116,6 +116,18 @@ class SuperplotView(QWidget):
         """
         return self._bottomView.workspaceSlider.value()
 
+    def checkHoldButton(self, state):
+        """
+        Set the check state of the hold button. This function does not trigger
+        the button signals.
+
+        Args:
+            state (bool): check state
+        """
+        self._bottomView.holdButton.blockSignals(True)
+        self._bottomView.holdButton.setChecked(state)
+        self._bottomView.holdButton.blockSignals(False)
+
     def setSpectrumSliderMax(self, length):
         """
         Set the max value of the spectrum slider.

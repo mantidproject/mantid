@@ -53,7 +53,14 @@ class SuperplotPresenter:
         currentWs = mtd[currentWsName]
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
         self._view.setSpectrumSliderPosition(0)
-        self._view.plotData([(currentWsName, 0)])
+        plottedData = self._model.getPlottedData()
+        currentSpectrumIndex = self._view.getSpectrumSliderPosition()
+        if (currentWsName, currentSpectrumIndex) in plottedData:
+            self._view.checkHoldButton(True)
+        else:
+            self._view.checkHoldButton(False)
+            plottedData.append((currentWsName, currentSpectrumIndex))
+        self._view.plotData(plottedData)
 
     def onSpectrumSliderMoved(self, value):
         """
@@ -63,10 +70,17 @@ class SuperplotPresenter:
             value (int): slider position
         """
         wsIndex = self._view.getWorkspaceSliderPosition()
+        spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
         currentWsName = names[wsIndex]
         currentWs = mtd[currentWsName]
-        self._view.plotData([(currentWsName, value)])
+        plottedData = self._model.getPlottedData()
+        if (currentWsName, spectrumIndex) in plottedData:
+            self._view.checkHoldButton(True)
+        else:
+            self._view.checkHoldButton(False)
+            plottedData.append((currentWsName, value))
+        self._view.plotData(plottedData)
 
     def onHoldButtonToggled(self, state):
         """

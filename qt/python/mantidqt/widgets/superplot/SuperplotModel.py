@@ -63,3 +63,12 @@ class SuperplotModel:
             self._plottedData.remove((workspace, spectrum))
         else:
             self._plottedData.append((workspace, spectrum))
+
+    def getPlottedData(self):
+        """
+        Get the plotted data.
+
+        Returns:
+            list(tuple(str, int)): list of workspace, spectrum index pairs
+        """
+        return [data for data in self._plottedData]
