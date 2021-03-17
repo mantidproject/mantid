@@ -340,12 +340,10 @@ void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateParameterTie(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     std::string const &parameter, std::string const &tie) {
-  auto const equivalentParameter = m_model->getEquivalentFunctionIndexForDomain(
-      workspaceName, workspaceIndex, parameter);
-  auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
-      workspaceName, workspaceIndex, parameter, tie);
-
   try {
+    auto const [equivalentParameter, equivalentTie] =
+        convertFunctionIndexOfParameterTie(workspaceName, workspaceIndex,
+                                           parameter, tie);
     m_model->updateParameterTie(workspaceName, workspaceIndex,
                                 equivalentParameter, equivalentTie);
   } catch (std::invalid_argument const &ex) {
@@ -409,6 +407,17 @@ void FitScriptGeneratorPresenter::updateFunctionForDomainInModel(
 std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
   return m_view->applyFunctionChangesToAll() ? m_view->allRows()
                                              : m_view->selectedRows();
+}
+
+std::tuple<std::string, std::string>
+FitScriptGeneratorPresenter::convertFunctionIndexOfParameterTie(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &parameter, std::string const &tie) const {
+  auto const equivalentParameter = m_model->getEquivalentFunctionIndexForDomain(
+      workspaceName, workspaceIndex, parameter);
+  auto const equivalentTie = m_model->getEquivalentParameterTieForDomain(
+      workspaceName, workspaceIndex, parameter, tie);
+  return {equivalentParameter, equivalentTie};
 }
 
 void FitScriptGeneratorPresenter::checkForWarningMessages() {

@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <QStringList>
@@ -112,6 +113,10 @@ private:
                                       std::string const &function);
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
+
+  std::tuple<std::string, std::string> convertFunctionIndexOfParameterTie(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &parameter, std::string const &tie) const;
 
   void checkForWarningMessages();
 
