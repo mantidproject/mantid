@@ -63,7 +63,7 @@ public:
         .WillOnce(Return(new FakeHistoSubscriber()))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)));
 
-    KafkaHistoStreamDecoder testInstance(mockBroker, "", "", "", "", "");
+    KafkaHistoStreamDecoder testInstance(mockBroker, "", "", "", "");
     KafkaTestThreadHelper<KafkaHistoStreamDecoder> testHolder(
         std::move(testInstance));
 
