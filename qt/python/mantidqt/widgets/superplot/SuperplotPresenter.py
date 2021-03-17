@@ -41,15 +41,15 @@ class SuperplotPresenter:
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
 
-    def onWorkspaceSliderMoved(self, value):
+    def _changeCurrentWorkspace(self, wsIndex):
         """
-        Triggered when the workspace slider moved.
+        Change the current workspace on the view.
 
         Args:
-            value (int): slider value
+            index (int): workspace index
         """
-        names = self._model.getWorkspaces()
-        currentWsName = names[value]
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[wsIndex]
         currentWs = mtd[currentWsName]
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
         self._view.setSpectrumSliderPosition(0)
@@ -61,6 +61,26 @@ class SuperplotPresenter:
             self._view.checkHoldButton(False)
             plottedData.append((currentWsName, currentSpectrumIndex))
         self._view.plotData(plottedData)
+
+    def onWorkspaceSliderMoved(self, position):
+        """
+        Triggered when the workspace slider moved.
+
+        Args:
+            value (int): slider value
+        """
+        self._view.setWorkspaceSpinBoxValue(position)
+        self._changeCurrentWorkspace(value)
+
+    def onWorkspaceSpinBoxChanged(self, value):
+        """
+        Triggered when the workspace spinbox changed.
+
+        Args:
+            value (int): spinbox value
+        """
+        self._view.setWorkspaceSliderPosition(value)
+        self._changeCurrentWorkspace(value)
 
     def onSpectrumSliderMoved(self, value):
         """
