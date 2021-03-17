@@ -41,20 +41,16 @@ class SuperplotPresenter:
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
 
-    def _changeCurrentWorkspace(self, wsIndex):
+    def _updatePlot(self):
         """
-        Change the current workspace on the view.
-
-        Args:
-            index (int): workspace index
+        Update the plot. This function overplots the memorized data with the
+        currently selected workspace and spectrum index.
         """
-        workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[wsIndex]
-        currentWs = mtd[currentWsName]
-        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(0)
-        plottedData = self._model.getPlottedData()
+        currentWorkspaceIndex = self._view.getWorkspaceSliderPosition()
         currentSpectrumIndex = self._view.getSpectrumSliderPosition()
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[currentWorkspaceIndex]
+        plottedData = self._model.getPlottedData()
         if (currentWsName, currentSpectrumIndex) in plottedData:
             self._view.checkHoldButton(True)
         else:
@@ -70,7 +66,12 @@ class SuperplotPresenter:
             value (int): slider value
         """
         self._view.setWorkspaceSpinBoxValue(position)
-        self._changeCurrentWorkspace(value)
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[position]
+        currentWs = mtd[currentWsName]
+        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(0)
+        self._updatePlot()
 
     def onWorkspaceSpinBoxChanged(self, value):
         """
@@ -80,7 +81,12 @@ class SuperplotPresenter:
             value (int): spinbox value
         """
         self._view.setWorkspaceSliderPosition(value)
-        self._changeCurrentWorkspace(value)
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[value]
+        currentWs = mtd[currentWsName]
+        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(0)
+        self._updatePlot()
 
     def onSpectrumSliderMoved(self, value):
         """
