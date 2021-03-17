@@ -293,6 +293,10 @@ std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
   return m_dataTable->selectedRows();
 }
 
+FitDomainIndex FitScriptGeneratorView::currentRow() const {
+  return m_dataTable->currentRow();
+}
+
 bool FitScriptGeneratorView::hasLoadedData() const {
   return m_dataTable->hasLoadedData();
 }

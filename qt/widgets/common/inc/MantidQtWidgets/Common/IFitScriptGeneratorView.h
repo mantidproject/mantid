@@ -68,6 +68,7 @@ public:
 
   [[nodiscard]] virtual std::vector<FitDomainIndex> allRows() const = 0;
   [[nodiscard]] virtual std::vector<FitDomainIndex> selectedRows() const = 0;
+  [[nodiscard]] virtual FitDomainIndex currentRow() const = 0;
 
   [[nodiscard]] virtual bool hasLoadedData() const = 0;
 

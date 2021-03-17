@@ -137,25 +137,11 @@ void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
 }
 
 void FitScriptGeneratorPresenter::handleStartXChanged() {
-  auto const selectedRows = m_view->selectedRows();
-  if (!selectedRows.empty()) {
-    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
-    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
-    auto const startX = m_view->startX(selectedRows[0]);
-
-    updateStartX(workspaceName, workspaceIndex, startX);
-  }
+  updateDomainXRange<&FitScriptGeneratorPresenter::updateStartX>();
 }
 
 void FitScriptGeneratorPresenter::handleEndXChanged() {
-  auto const selectedRows = m_view->selectedRows();
-  if (!selectedRows.empty()) {
-    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
-    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
-    auto const endX = m_view->endX(selectedRows[0]);
-
-    updateEndX(workspaceName, workspaceIndex, endX);
-  }
+  updateDomainXRange<&FitScriptGeneratorPresenter::updateEndX>();
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
@@ -350,8 +336,9 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
 
 void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
                                                WorkspaceIndex workspaceIndex,
-                                               double startX) {
-  if (!m_model->updateStartX(workspaceName, workspaceIndex, startX)) {
+                                               FitDomainIndex domainIndex) {
+  if (!m_model->updateStartX(workspaceName, workspaceIndex,
+                             m_view->startX(domainIndex))) {
     m_view->resetSelection();
     m_view->displayWarning("The StartX provided must be within the x limits of "
                            "its workspace, and less than the EndX.");
@@ -360,23 +347,12 @@ void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
 
 void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
                                              WorkspaceIndex workspaceIndex,
-                                             double endX) {
-  if (!m_model->updateEndX(workspaceName, workspaceIndex, endX)) {
+                                             FitDomainIndex domainIndex) {
+  if (!m_model->updateEndX(workspaceName, workspaceIndex,
+                           m_view->endX(domainIndex))) {
     m_view->resetSelection();
     m_view->displayWarning("The EndX provided must be within the x limits of "
                            "its workspace, and greater than the StartX.");
-  }
-}
-
-template <void (IFitScriptGeneratorModel::*func)(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-    std::string const &function)>
-void FitScriptGeneratorPresenter::updateDomainFunctions(
-    std::string const &function) {
-  for (auto const &domainIndex : getRowIndices()) {
-    auto const workspaceName = m_view->workspaceName(domainIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-    (m_model->*func)(workspaceName, workspaceIndex, function);
   }
 }
 
@@ -393,6 +369,31 @@ void FitScriptGeneratorPresenter::updateParameterTie(
                                 equivalentParameter, equivalentTie);
   } catch (std::invalid_argument const &ex) {
     m_warnings.emplace_back(ex.what());
+  }
+}
+
+template <void (FitScriptGeneratorPresenter::*func)(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    FitDomainIndex domainIndex)>
+void FitScriptGeneratorPresenter::updateDomainXRange() {
+  if (m_view->hasLoadedData()) {
+    auto const domainIndex = m_view->currentRow();
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+
+    (this->*func)(workspaceName, workspaceIndex, domainIndex);
+  }
+}
+
+template <void (IFitScriptGeneratorModel::*func)(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &function)>
+void FitScriptGeneratorPresenter::updateDomainFunctions(
+    std::string const &function) {
+  for (auto const &domainIndex : getRowIndices()) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    (m_model->*func)(workspaceName, workspaceIndex, function);
   }
 }
 

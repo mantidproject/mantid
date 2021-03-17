@@ -57,6 +57,7 @@ public:
 
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] FitDomainIndex currentRow() const;
 
   bool hasLoadedData() const;
 

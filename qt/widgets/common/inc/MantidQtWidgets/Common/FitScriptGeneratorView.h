@@ -56,6 +56,7 @@ public:
 
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
+  [[nodiscard]] FitDomainIndex currentRow() const override;
 
   [[nodiscard]] bool hasLoadedData() const override;
 

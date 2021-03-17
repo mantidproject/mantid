@@ -229,6 +229,14 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
   return rowIndices;
 }
 
+FitDomainIndex FitScriptGeneratorDataTable::currentRow() const {
+  if (hasLoadedData())
+    return selectedRows()[0];
+
+  throw std::runtime_error(
+      "There is no currentRow as data has not been loaded yet.");
+}
+
 bool FitScriptGeneratorDataTable::hasLoadedData() const {
   return this->rowCount() > 0;
 }

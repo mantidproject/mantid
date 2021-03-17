@@ -82,22 +82,27 @@ private:
                     WorkspaceIndex workspaceIndex, double startX, double endX);
 
   void updateStartX(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, double startX);
+                    WorkspaceIndex workspaceIndex, FitDomainIndex domainIndex);
   void updateEndX(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex, double endX);
+                  WorkspaceIndex workspaceIndex, FitDomainIndex domainIndex);
 
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
 
-  [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
-
-  void checkForWarningMessages();
+  template <void (FitScriptGeneratorPresenter::*func)(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      FitDomainIndex domainIndex)>
+  void updateDomainXRange();
 
   template <void (IFitScriptGeneratorModel::*func)(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       std::string const &function)>
   void updateDomainFunctions(std::string const &function);
+
+  [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
+
+  void checkForWarningMessages();
 
   std::vector<std::string> m_warnings;
 
