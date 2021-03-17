@@ -23,6 +23,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -1004,8 +1005,9 @@ QString ComponentInfoController::displayNonDetectorInfo(
 }
 
 QString
-ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *peak) {
+ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
+  auto peak = dynamic_cast<Mantid::DataObjects::Peak *>(ipeak);
   auto instrument = peak->getInstrument();
   auto sample = instrument->getSample()->getPos();
   auto source = instrument->getSource()->getPos();
@@ -1067,7 +1069,7 @@ void ComponentInfoController::displayComparePeaksInfo(
 
 void ComponentInfoController::displayAlignPeaksInfo(
     const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+    const Mantid::Geometry::IPeak *ipeak) {
 
   using Mantid::Kernel::V3D;
 
@@ -1079,6 +1081,7 @@ void ComponentInfoController::displayAlignPeaksInfo(
 
   // find projection of beam direction onto plane
   // this is so we always orientate to a common reference direction
+  auto peak = dynamic_cast<const Mantid::DataObjects::Peak *>(ipeak);
   const auto instrument = peak->getInstrument();
   const auto samplePos = instrument->getSample()->getPos();
   const auto sourcePos = instrument->getSource()->getPos();

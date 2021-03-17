@@ -118,27 +118,10 @@ int LeanElasticPeak::getDetectorID() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Set the instrument (and save the source/sample pos).
- * Call setDetectorID AFTER this call.
- *
- */
-void LeanElasticPeak::setInstrument(const Geometry::Instrument_const_sptr &) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak::setInstrument(): Can't set instrument on "
-      "LeanElasticPeak");
-}
-
-//----------------------------------------------------------------------------------------------
 /** Return a shared ptr to the detector at center of peak. */
 Geometry::IDetector_const_sptr LeanElasticPeak::getDetector() const {
   throw Exception::NotImplementedError(
       "LeanElasticPeak::getDetector(): Has no detector ID");
-}
-
-/** Return a shared ptr to the instrument for this peak. */
-Geometry::Instrument_const_sptr LeanElasticPeak::getInstrument() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak::setInstrument(): Has no instrument");
 }
 
 /** Return a shared ptr to the reference frame for this peak. */
