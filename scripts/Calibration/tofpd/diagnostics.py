@@ -95,13 +95,13 @@ def __get_regions(x):
     i = 0
     for start, stop in zip(lower, upper):
         if i == 0:
-            regions.append((int(np.min(x)), start))
+            regions.append((int(np.min(x)), int(start-1)))
         else:
-            regions.append((upper[i-1], start))
+            regions.append((int(upper[i-1]+1), int(start-1)))
         i = i + 1
     # Add ending region if there was atleast one region found:
     if i > 0:
-        regions.append((upper[i-1], int(np.max(x))))
+        regions.append((int(upper[i-1]+1), int(np.max(x))))
     return regions
 
 
@@ -394,7 +394,7 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     return mtd[outputname]
 
 
-def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0), threshold=0.01):
+def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drange=(0,0), threshold=0.01):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
@@ -411,9 +411,6 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0), threshold=0.01)
 
     if not mtd.doesExist(str(wksp)):
         raise ValueError("Could not find provided workspace in ADS")
-
-    if mask_ws:
-        mask_ws = mtd[str(mask_ws)]
 
     fig, ax = plt.subplots()
     ax.set_xlabel("det IDs")
@@ -454,12 +451,21 @@ def plot_peakd(wksp, peak_positions, mask_ws=None, drange=(0,0), threshold=0.01)
         stddevs.append(np.std(y_val[cut_id[0]:cut_id[1]]))
 
         # Draw vertical lines between detector regions
-        if not regions:
+        if plot_regions and not regions:
             regions = __get_regions(x[cut_id[0]:cut_id[1]])
             for region in regions:
                 ax.axvline(x=region[0])
                 ax.axvline(x=region[1])
-                region_cnts.append(__get_bad_counts(y[region[0]:region[1]], means[len(means)-1]))
+                det_start = single.yIndexOfX(region[0])
+                det_end = single.yIndexOfX(region[1])
+                cnt = __get_bad_counts(y[det_start:det_end], means[len(means)-1])
+                region_cnts.append(cnt)
+                if show_bad_cnt:
+                    mid_region = 0.5 * (region[1] - region[0])
+                    text = ax.annotate("{}".format(cnt), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
+                                       clip_on=True)
+                    width = text.get_window_extent(renderer=fig.canvas.get_renderer()).width
+                    text.set_x(region[0] + mid_region - 0.5 * width)
 
         ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
