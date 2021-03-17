@@ -175,37 +175,30 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
     std::string const &function) {
-  auto const rowIndices = getRowIndices();
-
-  if (!rowIndices.empty()) {
-    removeFunctionForDomains(function, rowIndices);
+  if (m_view->hasLoadedData()) {
+    updateDomainFunctions<&IFitScriptGeneratorModel::removeFunction>(function);
     handleSelectionChanged();
   }
 }
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  auto const rowIndices = getRowIndices();
-
-  if (rowIndices.empty()) {
+  if (m_view->hasLoadedData()) {
+    try {
+      updateDomainFunctions<&IFitScriptGeneratorModel::addFunction>(function);
+    } catch (std::invalid_argument const &ex) {
+      m_view->displayWarning(ex.what());
+    }
+  } else {
     m_view->displayWarning("Data needs to be loaded before adding a function.");
     m_view->clearFunction();
-    return;
-  }
-
-  try {
-    addFunctionForDomains(function, rowIndices);
-  } catch (std::invalid_argument const &ex) {
-    m_view->displayWarning(ex.what());
   }
 }
 
 void FitScriptGeneratorPresenter::handleFunctionReplaced(
     std::string const &function) {
-  auto const rowIndices = getRowIndices();
-
-  if (!rowIndices.empty()) {
-    setFunctionForDomains(function, rowIndices);
+  if (m_view->hasLoadedData()) {
+    updateDomainFunctions<&IFitScriptGeneratorModel::setFunction>(function);
   } else {
     m_view->displayWarning("Data needs to be loaded before adding a function.");
     m_view->clearFunction();
@@ -375,33 +368,15 @@ void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
   }
 }
 
-void FitScriptGeneratorPresenter::removeFunctionForDomains(
-    std::string const &function,
-    std::vector<FitDomainIndex> const &domainIndices) {
-  for (auto const &domainIndex : domainIndices) {
+template <void (IFitScriptGeneratorModel::*func)(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &function)>
+void FitScriptGeneratorPresenter::updateDomainFunctions(
+    std::string const &function) {
+  for (auto const &domainIndex : getRowIndices()) {
     auto const workspaceName = m_view->workspaceName(domainIndex);
     auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-    m_model->removeFunction(workspaceName, workspaceIndex, function);
-  }
-}
-
-void FitScriptGeneratorPresenter::addFunctionForDomains(
-    std::string const &function,
-    std::vector<FitDomainIndex> const &domainIndices) {
-  for (auto const &domainIndex : domainIndices) {
-    auto const workspaceName = m_view->workspaceName(domainIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-    m_model->addFunction(workspaceName, workspaceIndex, function);
-  }
-}
-
-void FitScriptGeneratorPresenter::setFunctionForDomains(
-    std::string const &function,
-    std::vector<FitDomainIndex> const &domainIndices) {
-  for (auto const &domainIndex : domainIndices) {
-    auto const workspaceName = m_view->workspaceName(domainIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-    m_model->setFunction(workspaceName, workspaceIndex, function);
+    (m_model->*func)(workspaceName, workspaceIndex, function);
   }
 }
 

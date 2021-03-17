@@ -58,6 +58,8 @@ public:
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
+  bool hasLoadedData() const;
+
   [[nodiscard]] QString selectedDomainFunctionPrefix() const;
 
   void removeDomain(std::string const &workspaceName,

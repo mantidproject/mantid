@@ -57,6 +57,8 @@ public:
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
 
+  [[nodiscard]] bool hasLoadedData() const override;
+
   [[nodiscard]] double
   parameterValue(std::string const &parameter) const override;
   [[nodiscard]] Mantid::API::IFunction::Attribute

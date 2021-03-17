@@ -293,6 +293,10 @@ std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
   return m_dataTable->selectedRows();
 }
 
+bool FitScriptGeneratorView::hasLoadedData() const {
+  return m_dataTable->hasLoadedData();
+}
+
 double
 FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
   return m_functionTreeView->getParameter(QString::fromStdString(parameter));

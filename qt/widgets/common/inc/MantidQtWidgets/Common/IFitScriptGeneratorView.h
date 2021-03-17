@@ -69,6 +69,8 @@ public:
   [[nodiscard]] virtual std::vector<FitDomainIndex> allRows() const = 0;
   [[nodiscard]] virtual std::vector<FitDomainIndex> selectedRows() const = 0;
 
+  [[nodiscard]] virtual bool hasLoadedData() const = 0;
+
   [[nodiscard]] virtual double
   parameterValue(std::string const &parameter) const = 0;
   [[nodiscard]] virtual Mantid::API::IFunction::Attribute

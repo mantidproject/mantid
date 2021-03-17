@@ -86,14 +86,6 @@ private:
   void updateEndX(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex, double endX);
 
-  void
-  removeFunctionForDomains(std::string const &function,
-                           std::vector<FitDomainIndex> const &domainIndices);
-  void addFunctionForDomains(std::string const &function,
-                             std::vector<FitDomainIndex> const &domainIndices);
-  void setFunctionForDomains(std::string const &function,
-                             std::vector<FitDomainIndex> const &domainIndices);
-
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
@@ -101,6 +93,11 @@ private:
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 
   void checkForWarningMessages();
+
+  template <void (IFitScriptGeneratorModel::*func)(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &function)>
+  void updateDomainFunctions(std::string const &function);
 
   std::vector<std::string> m_warnings;
 

@@ -229,6 +229,10 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
   return rowIndices;
 }
 
+bool FitScriptGeneratorDataTable::hasLoadedData() const {
+  return this->rowCount() > 0;
+}
+
 QString FitScriptGeneratorDataTable::selectedDomainFunctionPrefix() const {
   auto const rows = selectedRows();
   if (rows.empty())

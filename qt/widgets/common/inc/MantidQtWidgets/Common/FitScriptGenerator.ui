@@ -148,13 +148,13 @@
            <widget class="QPushButton" name="pbSelectedDomains">
             <property name="minimumSize">
              <size>
-              <width>98</width>
+              <width>100</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>98</width>
+              <width>100</width>
               <height>16777215</height>
              </size>
             </property>
@@ -170,13 +170,13 @@
            <widget class="QPushButton" name="pbAllDomains">
             <property name="minimumSize">
              <size>
-              <width>98</width>
+              <width>100</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>98</width>
+              <width>100</width>
               <height>16777215</height>
              </size>
             </property>
