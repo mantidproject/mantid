@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/Peak.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 
 #include <QFontMetrics>
