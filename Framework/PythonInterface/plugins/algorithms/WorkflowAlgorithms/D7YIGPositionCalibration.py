@@ -65,7 +65,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The name of the workspace containing the entire YIG scan.')
 
-        self.declareProperty(FileProperty('YIGPeaksFile', '',
+        self.declareProperty(FileProperty('YIGPeaksFile', 'D7_YIG_peaks.xml',
                                           action=FileAction.Load,
                                           extensions=['.xml']),
                              doc='The file name with all YIG peaks in d-spacing.')
