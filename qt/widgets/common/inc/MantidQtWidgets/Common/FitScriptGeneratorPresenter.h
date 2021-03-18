@@ -100,6 +100,14 @@ private:
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
 
+  void removeParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &parameter);
+  void updateParameterConstraint(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 std::string const &functionIndex,
+                                 std::string const &constraint);
+
   void updateFunctionInViewFromModel(FitDomainIndex domainIndex);
 
   template <void (FitScriptGeneratorPresenter::*func)(
@@ -121,12 +129,8 @@ private:
   void updateFunctionForDomainInModel(FitDomainIndex domainIndex,
                                       std::string const &function);
 
-  template <typename T,
-            void (FitScriptGeneratorPresenter::*func)(
-                std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-                std::string const &functionComponent, T newValue)>
-  void updateFunctionComponent(std::string const &functionComponent,
-                               T newValue);
+  template <typename Function, typename... Args>
+  void updateFunctionComponent(Function &&func, Args... arguments);
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 
