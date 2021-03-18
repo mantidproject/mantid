@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
@@ -87,6 +88,14 @@ private:
   void updateEndX(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex, FitDomainIndex domainIndex);
 
+  void updateParameterValue(std::string const &workspaceName,
+                            WorkspaceIndex workspaceIndex,
+                            std::string const &parameter, double newValue);
+  void updateAttributeValue(std::string const &workspaceName,
+                            WorkspaceIndex workspaceIndex,
+                            std::string const &fullAttribute,
+                            Mantid::API::IFunction::Attribute const &newValue);
+
   void updateParameterTie(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex,
                           std::string const &parameter, std::string const &tie);
@@ -111,6 +120,13 @@ private:
       std::string const &function)>
   void updateFunctionForDomainInModel(FitDomainIndex domainIndex,
                                       std::string const &function);
+
+  template <typename T,
+            void (FitScriptGeneratorPresenter::*func)(
+                std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                std::string const &functionComponent, T newValue)>
+  void updateFunctionComponent(std::string const &functionComponent,
+                               T newValue);
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 

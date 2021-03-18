@@ -174,31 +174,18 @@ void FitScriptGeneratorPresenter::handleFunctionReplaced(
 
 void FitScriptGeneratorPresenter::handleParameterChanged(
     std::string const &parameter) {
-  auto const newValue = m_view->parameterValue(parameter);
-
-  for (auto const &rowIndex : getRowIndices()) {
-    auto const workspaceName = m_view->workspaceName(rowIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    auto const equivalentParameter =
-        m_model->getEquivalentFunctionIndexForDomain(workspaceName,
-                                                     workspaceIndex, parameter);
-    m_model->updateParameterValue(workspaceName, workspaceIndex,
-                                  equivalentParameter, newValue);
-  }
+  updateFunctionComponent<double,
+                          &FitScriptGeneratorPresenter::updateParameterValue>(
+      parameter, m_view->parameterValue(parameter));
 
   handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleAttributeChanged(
     std::string const &attribute) {
-  auto const newValue = m_view->attributeValue(attribute);
-
-  for (auto const &rowIndex : getRowIndices()) {
-    auto const workspaceName = m_view->workspaceName(rowIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
-                                  newValue);
-  }
+  updateFunctionComponent<IFunction::Attribute const &,
+                          &FitScriptGeneratorPresenter::updateAttributeValue>(
+      attribute, m_view->attributeValue(attribute));
 }
 
 void FitScriptGeneratorPresenter::handleParameterTieChanged(
@@ -337,6 +324,22 @@ void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
   }
 }
 
+void FitScriptGeneratorPresenter::updateParameterValue(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &parameter, double newValue) {
+  auto const equivalentParameter = m_model->getEquivalentFunctionIndexForDomain(
+      workspaceName, workspaceIndex, parameter);
+  m_model->updateParameterValue(workspaceName, workspaceIndex,
+                                equivalentParameter, newValue);
+}
+
+void FitScriptGeneratorPresenter::updateAttributeValue(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &fullAttribute, IFunction::Attribute const &newValue) {
+  m_model->updateAttributeValue(workspaceName, workspaceIndex, fullAttribute,
+                                newValue);
+}
+
 void FitScriptGeneratorPresenter::updateParameterTie(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     std::string const &parameter, std::string const &tie) {
@@ -402,6 +405,20 @@ void FitScriptGeneratorPresenter::updateFunctionForDomainInModel(
   auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
 
   (m_model->*func)(workspaceName, workspaceIndex, function);
+}
+
+template <typename T,
+          void (FitScriptGeneratorPresenter::*func)(
+              std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+              std::string const &functionComponent, T newValue)>
+void FitScriptGeneratorPresenter::updateFunctionComponent(
+    std::string const &functionComponent, T newValue) {
+  for (auto const &rowIndex : getRowIndices()) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+
+    (this->*func)(workspaceName, workspaceIndex, functionComponent, newValue);
+  }
 }
 
 std::vector<FitDomainIndex> FitScriptGeneratorPresenter::getRowIndices() const {
