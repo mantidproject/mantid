@@ -1141,6 +1141,7 @@ TMDE(void MDGridBox)::integrateSphere(
   //   R: peak radius
   //   r: inner radius (useful for defining peak background)
   //   d: distance computed with radiusTransfor
+  // all distances are compared with their squared form
   // ---------------------------------------------------------------------------
   // We are checking all corners of each box to see if
   //    ! all corners are within the integration volume (sphere/ellipsoid/donut)
