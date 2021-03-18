@@ -6,6 +6,7 @@ class MemoryPresenter(object):
     def __init__(self, view):
 
         self.view = view
+        self.view.memory_bar.setValue(100)
         self.update_memory_usage()
 
         self.timer = QTimer()
