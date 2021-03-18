@@ -9,7 +9,6 @@
 #include "MantidDataObjects/BasePeak.h"
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"

@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -41,7 +43,7 @@ const std::string FindUBUsingMinMaxD::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingMinMaxD::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -82,18 +84,17 @@ void FindUBUsingMinMaxD::exec() {
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1;
 
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws)
     throw std::runtime_error("Could not read the peaks workspace");
 
-  std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   q_vectors.reserve(n_peaks);
 
-  for (size_t i = 0; i < n_peaks; i++)
-    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+  for (int i = 0; i < n_peaks; i++)
+    q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   double error =

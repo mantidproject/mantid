@@ -104,10 +104,10 @@ public:
   const Mantid::Geometry::PeakShape &getPeakShape() const override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape *shape);
+  void setPeakShape(Mantid::Geometry::PeakShape *shape) override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape);
+  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) override;
 
   /// Assignment
   BasePeak &operator=(const BasePeak &other);

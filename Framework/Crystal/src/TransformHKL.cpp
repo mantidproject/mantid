@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/TransformHKL.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -33,7 +35,7 @@ const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -70,7 +72,7 @@ void TransformHKL::init() {
 /** Execute the algorithm.
  */
 void TransformHKL::exec() {
-  PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
   }
@@ -126,21 +128,21 @@ void TransformHKL::exec() {
   ws->mutableSample().setOrientedLattice(
       std::make_unique<OrientedLattice>(o_lattice));
 
-  std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  int n_peaks = ws->getNumberPeaks();
 
   // transform all the HKLs and record the new HKL
   // and q-vectors for peaks ORIGINALLY indexed
   int num_indexed = 0;
   std::vector<V3D> miller_indices;
   std::vector<V3D> q_vectors;
-  for (size_t i = 0; i < n_peaks; i++) {
-    V3D hkl(peaks[i].getHKL());
-    V3D ihkl(peaks[i].getIntHKL());
-    peaks[i].setIntHKL(hkl_tran * ihkl);
+  for (int i = 0; i < n_peaks; i++) {
+    IPeak &peak = ws->getPeak(i);
+    V3D hkl(peak.getHKL());
+    V3D ihkl(peak.getIntHKL());
+    peak.setIntHKL(hkl_tran * ihkl);
     miller_indices.emplace_back(hkl_tran * ihkl);
-    peaks[i].setHKL(hkl_tran * hkl);
-    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+    peak.setHKL(hkl_tran * hkl);
+    q_vectors.emplace_back(peak.getQSampleFrame());
     num_indexed++;
   }
 

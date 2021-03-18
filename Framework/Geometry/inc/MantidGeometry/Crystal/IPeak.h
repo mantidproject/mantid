@@ -104,6 +104,8 @@ public:
   virtual double getL2() const = 0;
 
   virtual const Mantid::Geometry::PeakShape &getPeakShape() const = 0;
+  virtual void setPeakShape(Mantid::Geometry::PeakShape *shape) = 0;
+  virtual void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) = 0;
 
   virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
   virtual double getAbsorptionWeightedPathLength() const = 0;

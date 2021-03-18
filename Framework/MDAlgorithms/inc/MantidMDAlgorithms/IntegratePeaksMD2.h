@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -95,8 +96,7 @@ private:
   std::vector<Kernel::V3D> E1Vec;
 
   /// Check if peaks overlap
-  void checkOverlap(int i,
-                    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+  void checkOverlap(int i, const Mantid::API::IPeaksWorkspace_sptr &peakWS,
                     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
                     double radius);
 };
