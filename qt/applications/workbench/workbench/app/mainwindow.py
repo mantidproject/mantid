@@ -177,6 +177,7 @@ class MainWindow(QMainWindow):
         from workbench.plugins.memorywidget import MemoryWidget
         self.memorywidget = MemoryWidget(self)
         self.memorywidget.register_plugin()
+        self.memorywidget.setMaximumHeight(70)
         self.widgets.append(self.memorywidget)
 
         # set the link between the algorithm and workspace widget
@@ -478,11 +479,9 @@ class MainWindow(QMainWindow):
         plot_selector = self.plot_selector
 
         # If more than two rows are needed in a column,
-        # arrange_layout function needs to be revisited for
-        # the hegiht_fractions to be applied correctly.
+        # arrange_layout function needs to be revisited.
         # In the first column, there are three widgets in two rows
         # as the algorithm_selector and plot_selector are tabified.
-        # Currently, the arrange_layout function does not use width-fraction.
         default_layout = {
             'widgets': [
                 # column 0
@@ -492,16 +491,6 @@ class MainWindow(QMainWindow):
                 # column 2
                 [[memorywidget], [logmessages]]
             ],
-            # 'width-fraction': [
-            #     0.25,  # column 0 width
-            #     0.50,  # column 1 width
-            #     0.25
-            # ],  # column 2 width
-            'height-fraction': [
-                [0.5, 0.5],  # column 0 row heights
-                [1.0],  # column 1 row heights
-                [0.05, 0.95]
-            ]  # column 2 row heights
         }
 
         size = self.size()  # Preserve size on reset
@@ -512,7 +501,6 @@ class MainWindow(QMainWindow):
         """Arrange the layout of the child widgets according to the supplied layout"""
         self.prep_window_for_reset()
         widgets_layout = layout['widgets']
-        widgets_height_fractions = layout['height-fraction']
         with widget_updates_disabled(self):
             # flatten list
             widgets = [item for column in widgets_layout for row in column for item in row]
@@ -524,21 +512,11 @@ class MainWindow(QMainWindow):
                 first, second = widgets[i], widgets[i + 1]
                 self.splitDockWidget(first.dockwidget, second.dockwidget, Qt.Horizontal)
             # now arrange the rows
-
-            idx_column = -1
             for column in widgets_layout:
-                idx_column += 1
-                height_fractions = widgets_height_fractions[idx_column]
                 for i in range(len(column) - 1):
                     first_row, second_row = column[i], column[i + 1]
-                    height_fraction_first_row, height_fraction_second_row = height_fractions[i], \
-                        height_fractions[i+1]
                     self.splitDockWidget(first_row[0].dockwidget, second_row[0].dockwidget,
                                          Qt.Vertical)
-                    height = first_row[0].dockwidget.rect().height()
-                    self.resizeDocks((first_row[0].dockwidget, second_row[0].dockwidget), \
-                        (height_fraction_first_row*height, height_fraction_second_row*height), \
-                        Qt.Vertical)
 
             # and finally tabify those in the same position
             for column in widgets_layout:
