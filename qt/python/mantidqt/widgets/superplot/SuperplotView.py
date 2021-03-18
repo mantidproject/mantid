@@ -5,9 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from .SuperplotPresenter import SuperplotPresenter
-
-from mantid.plots.plotfunctions import plot, get_plot_fig
 
 from qtpy.QtWidgets import QDockWidget, QWidget
 from qtpy import uic
@@ -40,12 +37,10 @@ class SuperplotView(QWidget):
     _presenter = None
     _sideView = None
     _bottomView = None
-    _canvas = None
 
-    def __init__(self, canvas, parent=None):
+    def __init__(self, presenter, parent=None):
         super().__init__(parent)
-        self._canvas = canvas
-        self._presenter = SuperplotPresenter(self)
+        self._presenter = presenter
         self._sideView = SuperplotViewSide(self)
         self._bottomView = SuperplotViewBottom(self)
 
@@ -238,14 +233,3 @@ class SuperplotView(QWidget):
             int: spinbox value
         """
         return self._bottomView.spectrumSpinBox.value()
-
-    def plotData(self, data):
-        """
-        Plot a list of workspace, spectrum pairs.
-
-        Args:
-            data (list(tuple(str, int))): list of ws, spectrum number pairs
-        """
-        figure, _ = get_plot_fig(fig=self._canvas.figure)
-        for i in data:
-            plot([i[0]], spectrum_nums=[i[1] + 1], overplot=True, fig=figure)

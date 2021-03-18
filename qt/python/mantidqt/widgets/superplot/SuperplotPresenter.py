@@ -5,19 +5,29 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from .SuperplotView import SuperplotView
 from .SuperplotModel import SuperplotModel
 
 from mantid.api import mtd
+from mantid.plots.plotfunctions import plot, get_plot_fig
 
 
 class SuperplotPresenter:
 
     _view = None
     _model = None
+    _canvas = None
 
-    def __init__(self, view):
-        self._view = view
+    def __init__(self, canvas, parent=None):
+        self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
+        self._canvas = canvas
+
+    def getSideView(self):
+        return self._view.getSideWidget()
+
+    def getBottomView(self):
+        return self._view.getBottomWidget()
 
     def onAddButtonClicked(self):
         """
@@ -59,7 +69,10 @@ class SuperplotPresenter:
         else:
             self._view.checkHoldButton(False)
             plottedData.append((currentWsName, currentSpectrumIndex))
-        self._view.plotData(plottedData)
+
+        figure, _ = get_plot_fig(fig=self._canvas.figure)
+        for i in plottedData:
+            plot([i[0]], spectrum_nums=[i[1] + 1], overplot=True, fig=figure)
 
     def onWorkspaceSelectionChanged(self, index):
         """

@@ -394,9 +394,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         else:
             self.superplot = Superplot(self.canvas, self.window)
             self.window.addDockWidget(Qt.LeftDockWidgetArea,
-                                      self.superplot.getSideWidget())
+                                      self.superplot.getSideView())
             self.window.addDockWidget(Qt.BottomDockWidgetArea,
-                                      self.superplot.getBottomWidget())
+                                      self.superplot.getBottomView())
 
     def handle_fit_browser_close(self):
         """
