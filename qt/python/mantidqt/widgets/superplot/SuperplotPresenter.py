@@ -80,11 +80,11 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[index]
         currentWs = mtd[currentWsName]
-        currenSpectrum = self._model.getSpectrum(currentWsName)
+        currentSpectrumIndex = self._model.getSpectrum(currentWsName)
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(currenSpectrum)
+        self._view.setSpectrumSliderPosition(currentSpectrumIndex)
         self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(currenSpectrum)
+        self._view.setSpectrumSpinBoxValue(currentSpectrumIndex)
 
     def _updatePlot(self):
         """
