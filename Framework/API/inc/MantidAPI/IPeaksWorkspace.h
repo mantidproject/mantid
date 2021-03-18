@@ -177,6 +177,9 @@ public:
   virtual int peakInfoNumber(const Kernel::V3D &qLabFrame,
                              bool labCoords) const = 0;
 
+  //---------------------------------------------------------------------------------------------
+  virtual void saveNexus(::NeXus::File *file) const = 0;
+
   std::string convention;
 
 protected:
