@@ -7,9 +7,14 @@
 from qtpy import QtWidgets, PYQT4, QtCore
 from Muon.GUI.Common.utilities import table_utils
 
-HEADERS = ["Period Number", "Name", "Total Frames"]
+HEADERS = ["Period Number", "Name", "Frames", "Total Frames"]
 HEADER_STYLE = "QHeaderView { font-weight: bold; }"
-COLUMN_COUNT = 3
+COLUMN_COUNT = 4
+HEADER_COLUMN_MAP = {"Period Number": 0,
+                     "Name": 1,
+                     "Frames": 2,
+                     "Total Frames": 3}
+PERIOD_INFO_NOT_FOUND = "Not found"
 
 
 class MuonPeriodInfoWidget(QtWidgets.QWidget):
@@ -40,12 +45,13 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
             else:
                 self.label.setText("Number of period cycles not found")
 
-    def add_period_to_table(self, name, total_frames):
+    def add_period_to_table(self, name, frames, total_frames):
         row_num = self._num_rows()
         self.table.insertRow(row_num)
-        self.table.setItem(row_num, 0, self._new_text_widget(str(row_num + 1)))  # Set period number
-        self.table.setItem(row_num, 1, self._new_text_widget(name))  # Set name
-        self.table.setItem(row_num, 2, self._new_text_widget(total_frames))  # Set name
+        self.table.setItem(row_num, HEADER_COLUMN_MAP["Period Number"], self._new_text_widget(str(row_num + 1)))  # Set period number
+        self.table.setItem(row_num, HEADER_COLUMN_MAP["Name"], self._new_text_widget(name))  # Set name
+        self.table.setItem(row_num, HEADER_COLUMN_MAP["Frames"], self._new_text_widget(frames))  # Set frames
+        self.table.setItem(row_num, HEADER_COLUMN_MAP["Total Frames"], self._new_text_widget(total_frames))  # Set total frames
 
     def _new_text_widget(self, text):
         new_widget = table_utils.ValidatedTableItem(lambda text: True)

@@ -12,7 +12,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget
+from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget, HEADER_COLUMN_MAP, PERIOD_INFO_NOT_FOUND
 
 
 class GroupingTabPresenter(object):
@@ -287,9 +287,33 @@ class GroupingTabPresenter(object):
 
     def _add_period_info_to_widget(self):
         self.period_info_widget.number_of_sequences = self._model._data.periods_info[0]
-        total_frames = self._model._data.periods_info[2].split(';')
-        for index, name in enumerate(self._model._data.periods_info[1].split(';')):
-            self.period_info_widget.add_period_to_table(name, total_frames[index])
+        names = self._model._data.periods_info[HEADER_COLUMN_MAP["Name"]].split(';')
+        frames = self._model._data.periods_info[HEADER_COLUMN_MAP["Frames"]].split(';')
+        total_frames = self._model._data.periods_info[HEADER_COLUMN_MAP["Total Frames"]].split(';')
+        names, frames, total_frames, count = self._fix_up_period_info_lists(names, frames, total_frames)
+        for i in range(count):
+            self.period_info_widget.add_period_to_table(names[i], frames[i], total_frames[i])
+
+    def _fix_up_period_info_lists(self, names, frames, total_frames):
+        # First find number of periods
+        count = max(len(names), len(frames), len(total_frames))
+        # Then make sure lists are correct size
+        if len(names) != count:
+            if names[0] == "":
+                names = [PERIOD_INFO_NOT_FOUND] * count
+            else:
+                names += [PERIOD_INFO_NOT_FOUND] * count-len(names)
+        if len(frames) != count:
+            if frames[0] == "":
+                frames = [PERIOD_INFO_NOT_FOUND] * count
+            else:
+                frames += [PERIOD_INFO_NOT_FOUND] * count - len(frames)
+        if len(total_frames) != count:
+            if total_frames[0] == "":
+                total_frames = [PERIOD_INFO_NOT_FOUND] * count
+            else:
+                total_frames += [PERIOD_INFO_NOT_FOUND] * count - len(total_frames)
+        return names, frames, total_frames, count
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
