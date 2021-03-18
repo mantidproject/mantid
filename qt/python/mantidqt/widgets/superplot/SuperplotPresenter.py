@@ -23,6 +23,27 @@ class SuperplotPresenter:
         self._model = SuperplotModel()
         self._canvas = canvas
 
+        #initial state
+        figure = self._canvas.figure
+        axes = figure.gca()
+        artists = axes.get_tracked_artists()
+        for artist in artists[:-1]:
+            ws, specNum = axes.get_artists_workspace_and_spec_num(artist)
+            self._model.addWorkspace(ws.name())
+            self._model.toggleData(ws.name(), specNum)
+        ws, specNum = axes.get_artists_workspace_and_spec_num(artists[-1])
+        self._model.addWorkspace(ws.name())
+        self._model.setSpectrum(ws.name(), specNum)
+        names = self._model.getWorkspaces()
+        self._view.setWorkspacesList(names)
+        self._view.setWorkspaceSliderPosition(len(artists) - 1)
+        self._view.setWorkspaceSpinBoxValue(len(artists) - 1)
+        self._view.setSpectrumSliderMax(ws.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(specNum)
+        self._view.setSpectrumSpinBoxMax(ws.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(specNum)
+        self._view.setSelectedWorkspace(len(artists) - 1)
+
     def getSideView(self):
         return self._view.getSideWidget()
 
