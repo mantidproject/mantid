@@ -86,6 +86,22 @@ class SuperplotPresenter:
         self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
         self._view.setSpectrumSpinBoxValue(currentSpectrumIndex)
 
+    def _updateHoldButton(self, wsIndex, spIndex):
+        """
+        Update the hold button state.
+
+        Args:
+            wsIndex (int): current workspace index
+            spindex (int): current spectrum index
+        """
+        plottedData = self._model.getPlottedData()
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[wsIndex]
+        if (currentWsName, spIndex) in plottedData:
+            self._view.checkHoldButton(True)
+        else:
+            self._view.checkHoldButton(False)
+
     def _updatePlot(self):
         """
         Update the plot. This function overplots the memorized data with the
@@ -96,10 +112,7 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[currentWorkspaceIndex]
         plottedData = self._model.getPlottedData()
-        if (currentWsName, currentSpectrumIndex) in plottedData:
-            self._view.checkHoldButton(True)
-        else:
-            self._view.checkHoldButton(False)
+        if (currentWsName, currentSpectrumIndex) not in plottedData:
             plottedData.append((currentWsName, currentSpectrumIndex))
 
         figure, _ = get_plot_fig(fig=self._canvas.figure)
@@ -116,6 +129,7 @@ class SuperplotPresenter:
         self._view.setWorkspaceSliderPosition(index)
         self._view.setWorkspaceSpinBoxValue(index)
         self._changeCurrentWorkspace(index)
+        self._updateHoldButton(index, self._view.getSpectrumSliderPosition())
         self._updatePlot()
 
     def onWorkspaceSliderMoved(self, position):
@@ -127,6 +141,8 @@ class SuperplotPresenter:
         """
         self._view.setWorkspaceSpinBoxValue(position)
         self._view.setSelectedWorkspace(position)
+        self._changeCurrentWorkspace(position)
+        self._updateHoldButton(position, self._view.getSpectrumSliderPosition())
         self._updatePlot()
 
     def onWorkspaceSpinBoxChanged(self, value):
@@ -139,6 +155,7 @@ class SuperplotPresenter:
         self._view.setWorkspaceSliderPosition(value)
         self._view.setSelectedWorkspace(value)
         self._changeCurrentWorkspace(value)
+        self._updateHoldButton(value, self._view.getSpectrumSliderPosition())
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
@@ -153,6 +170,7 @@ class SuperplotPresenter:
         currentWsIndex = self._view.getWorkspaceSliderPosition()
         currentWsName = workspaceNames[currentWsIndex]
         self._model.setSpectrum(currentWsName, position)
+        self._updateHoldButton(currentWsIndex, position)
         self._updatePlot()
 
     def onSpectrumSpinBoxChanged(self, value):
@@ -167,6 +185,7 @@ class SuperplotPresenter:
         currentWsIndex = self._view.getWorkspaceSliderPosition()
         currentWsName = workspaceNames[currentWsIndex]
         self._model.setSpectrum(currentWsName, value)
+        self._updateHoldButton(currentWsIndex, value)
         self._updatePlot()
 
     def onHoldButtonToggled(self, state):
