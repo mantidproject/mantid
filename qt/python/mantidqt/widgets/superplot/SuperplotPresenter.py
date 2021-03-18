@@ -76,6 +76,16 @@ class SuperplotPresenter:
         self._view.setWorkspacesList(names)
         self._updatePlot()
 
+    def _changeCurrentWorkspace(self, index):
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[index]
+        currentWs = mtd[currentWsName]
+        currenSpectrum = self._model.getSpectrum(currentWsName)
+        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(currenSpectrum)
+        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(currenSpectrum)
+
     def _updatePlot(self):
         """
         Update the plot. This function overplots the memorized data with the
@@ -105,14 +115,7 @@ class SuperplotPresenter:
         """
         self._view.setWorkspaceSliderPosition(index)
         self._view.setWorkspaceSpinBoxValue(index)
-        workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[index]
-        currentWs = mtd[currentWsName]
-        currenSpectrum = self._model.getSpectrum(currentWsName)
-        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(currenSpectrum)
-        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(currenSpectrum)
+        self._changeCurrentWorkspace(index)
         self._updatePlot()
 
     def onWorkspaceSliderMoved(self, position):
@@ -123,14 +126,7 @@ class SuperplotPresenter:
             value (int): slider value
         """
         self._view.setWorkspaceSpinBoxValue(position)
-        workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[position]
-        currentWs = mtd[currentWsName]
-        currenSpectrum = self._model.getSpectrum(currentWsName)
-        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(currenSpectrum)
-        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(currenSpectrum)
+        self._view.setSelectedWorkspace(position)
         self._updatePlot()
 
     def onWorkspaceSpinBoxChanged(self, value):
@@ -141,14 +137,8 @@ class SuperplotPresenter:
             value (int): spinbox value
         """
         self._view.setWorkspaceSliderPosition(value)
-        workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[value]
-        currentWs = mtd[currentWsName]
-        currenSpectrum = self._model.getSpectrum(currentWsName)
-        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(currenSpectrum)
-        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(currenSpectrum)
+        self._view.setSelectedWorkspace(value)
+        self._changeCurrentWorkspace(value)
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
