@@ -162,7 +162,7 @@ class IPeakTest(unittest.TestCase):
 
     def test_get_l2(self):
         expected_l2 = 0.26279
-        self.assertAlmostEqual(self._peak.getL2(), expected_l2, places=5)
+        self.assertAlmostEqual(self._peak.getL2(), expected_l2, places=4)
 
     def test_set_modulation_vector(self):
         test_vector = V3D(0.5, 0, 0.2)
