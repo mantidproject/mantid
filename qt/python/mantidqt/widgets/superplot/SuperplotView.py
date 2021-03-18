@@ -66,16 +66,6 @@ class SuperplotView(QWidget):
     def getBottomWidget(self):
         return self._bottomView
 
-    def hide(self):
-        super().hide()
-        self._sideView.hide()
-        self._bottomView.hide()
-
-    def show(self):
-        super().show()
-        self._sideView.show()
-        self._bottomView.show()
-
     def setSelectedWorkspace(self, index):
         """
         Select a specific workspace in the workspace list. This function does
