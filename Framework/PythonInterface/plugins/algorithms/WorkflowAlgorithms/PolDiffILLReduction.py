@@ -356,6 +356,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             Divide(LHSWorkspace='nominator',
                    RHSWorkspace='denominator',
                    OutputWorkspace=tmp_name)
+            mtd[tmp_name].setYUnitLabel("{}".format("Polarizing efficiency"))
             tmp_names.append(tmp_name)
             if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
