@@ -1272,17 +1272,19 @@ TMDE(void MDGridBox)::integrateSphere(
     //     This case is very difficult to pin-point precisely,
     //     but we can safely find boxes satisfy the following
     //     criteria
-    //        d - r_box > r_peak
+    //        dmin  > r_peak
     //     where
-    //        d: distance bewteen peak center and box center
-    //        r_box: equivalent radius of box (half box diagnal)
+    //        dmin: the minimum distance bewteen peak center and 
+    //              - box center
+    //              - eight box corners (assuming 3D)
     //        r_peak: equivalent radisu of peak
     //     [a.2] box in the donut hole of peak
     //     Similar as above, but we check the inner radius this time
-    //        d + r_box < r_peak_inner
+    //        dmax < r_peak_inner
     //     where
-    //        d: distance bewteen peak center and box center
-    //        r_box: equivalent radius of box (half box diagnal)
+    //        dmax: the maximum distance bewteen peak center and
+    //              - box center
+    //              - eight box corners (assuming 3D)
     //        r_peak_inner: equivalent inner radius of peak
     // - [b] box and peak has overlap
     //   - [b.0] box is enveloped by the peak
@@ -1306,9 +1308,7 @@ TMDE(void MDGridBox)::integrateSphere(
       // Use the integrated sum of signal in the box
       signal += box->getSignal();
       errorSquared += box->getErrorSquared();
-
       // debugmsg << "case[b.0]\n";
-
     } else {
       // assume we need to recusively search the children of current box
       // NOTE: both [b.1] and [b.2] invoke recursive search
