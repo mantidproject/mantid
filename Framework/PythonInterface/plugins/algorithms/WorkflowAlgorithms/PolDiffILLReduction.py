@@ -337,7 +337,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         flipper_corr_ws = 'flipper_corr_ws'
         CreateSingleValuedWorkspace(DataValue=(2*flipper_eff-1), OutputWorkspace=flipper_corr_ws)
         nMeasurementsPerPOL = 2
-        tmp_names = []
+        pol_eff_names = []
+        flip_ratio_names = []
         names_to_delete = [flipper_corr_ws]
         index = 0
 
@@ -345,9 +346,20 @@ class PolDiffILLReduction(PythonAlgorithm):
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
-            ws_00 = mtd[ws][entry_no].name()
-            ws_01 = mtd[ws][entry_no-1].name()
-            tmp_name = '{0}_{1}_{2}'.format(ws[2:], mtd[ws_00].getRun().getLogData('POL.actual_state').value, index)
+            ws_00 = mtd[ws][entry_no].name() # spin-flip
+            ws_01 = mtd[ws][entry_no-1].name() # no spin-flip
+            pol_eff_name = '{0}_{1}_{2}'.format(ws[2:],
+                                                mtd[ws_00].getRun().getLogData('POL.actual_state').value,
+                                                index)
+            flip_ratio_name = 'flip_ratio_{0}_{1}_{2}'.format(ws[2:],
+                                                              mtd[ws_00].getRun().getLogData('POL.actual_state').value,
+                                                              index)
+            # calculates the simple flipping ratio
+            Divide(LHSWorkspace=ws_00,
+                   RHSWorkspace=ws_01,
+                   OutputWorkspace=flip_ratio_name)
+            mtd[flip_ratio_name].setYUnitLabel("{}".format("Flipping ratio"))
+            flip_ratio_names.append(flip_ratio_name)
             Minus(LHSWorkspace=ws_00, RHSWorkspace=ws_01, OutputWorkspace='nominator')
             ws_00_corr = ws_00 + '_corr'
             names_to_delete.append(ws_00_corr)
@@ -355,9 +367,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             Plus(LHSWorkspace=ws_00_corr, RHSWorkspace=ws_01, OutputWorkspace='denominator')
             Divide(LHSWorkspace='nominator',
                    RHSWorkspace='denominator',
-                   OutputWorkspace=tmp_name)
-            mtd[tmp_name].setYUnitLabel("{}".format("Polarizing efficiency"))
-            tmp_names.append(tmp_name)
+                   OutputWorkspace=pol_eff_name)
+            mtd[pol_eff_name].setYUnitLabel("{}".format("Polarizing efficiency"))
+            pol_eff_names.append(pol_eff_name)
             if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
                 index += 1
             elif self._method_data_structure == 'XYZ' and entry_no % 6 == 5:
@@ -365,10 +377,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             elif self._method_data_structure == '10p' and entry_no % 10 == 9:
                 index += 1
         names_to_delete += ['nominator', 'denominator']
-        GroupWorkspaces(InputWorkspaces=tmp_names, OutputWorkspace='tmp')
+        tmp_group_name = '{0}_tmp'.format(ws)
+        GroupWorkspaces(InputWorkspaces=pol_eff_names, OutputWorkspace=tmp_group_name)
+        names_to_delete.append(ws)
         DeleteWorkspaces(WorkspaceList=names_to_delete)
-        DeleteWorkspace(Workspace=ws)
-        RenameWorkspace(InputWorkspace='tmp', OutputWorkspace=ws)
+        RenameWorkspace(InputWorkspace=tmp_group_name, OutputWorkspace=ws)
+        GroupWorkspaces(InputWorkspaces=flip_ratio_names, OutputWorkspace='flipping_ratios')
         return ws
 
     def _detector_analyser_energy_efficiency(self, ws):
