@@ -248,11 +248,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
 
-        # superplot
-        self.superplot = Superplot(canvas, self.window)
-        self.window.addDockWidget(Qt.LeftDockWidgetArea, self.superplot.getSideWidget())
-        self.window.addDockWidget(Qt.BottomDockWidgetArea, self.superplot.getBottomWidget())
-        self.superplot.hide()
+        self.superplot = None
+
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
@@ -391,10 +388,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def superplot_toggle(self):
         """Toggle superplot dockwidgets on/off"""
-        if self.superplot.isVisible():
+        if self.superplot:
             self.superplot.hide()
+            self.superplot = None
         else:
-            self.superplot.show()
+            self.superplot = Superplot(self.canvas, self.window)
+            self.window.addDockWidget(Qt.LeftDockWidgetArea,
+                                      self.superplot.getSideWidget())
+            self.window.addDockWidget(Qt.BottomDockWidgetArea,
+                                      self.superplot.getBottomWidget())
 
     def handle_fit_browser_close(self):
         """
