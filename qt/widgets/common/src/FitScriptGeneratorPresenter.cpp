@@ -158,39 +158,37 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
     std::string const &function) {
-  updateFunctionForDomainsInModel<&IFitScriptGeneratorModel::removeFunction>(
-      function);
+  updateFunctionStructure(&FitScriptGeneratorPresenter::removeFunction,
+                          function);
 }
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  updateFunctionForDomainsInModel<&IFitScriptGeneratorModel::addFunction>(
-      function);
+  updateFunctionStructure(&FitScriptGeneratorPresenter::addFunction, function);
 }
 
 void FitScriptGeneratorPresenter::handleFunctionReplaced(
     std::string const &function) {
-  updateFunctionForDomainsInModel<&IFitScriptGeneratorModel::setFunction>(
-      function);
+  updateFunctionStructure(&FitScriptGeneratorPresenter::setFunction, function);
 }
 
 void FitScriptGeneratorPresenter::handleParameterChanged(
     std::string const &parameter) {
-  updateFunctionComponent(&FitScriptGeneratorPresenter::updateParameterValue,
-                          parameter, m_view->parameterValue(parameter));
+  updateFunctionsInModel(&FitScriptGeneratorPresenter::updateParameterValue,
+                         parameter, m_view->parameterValue(parameter));
   handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleAttributeChanged(
     std::string const &attribute) {
-  updateFunctionComponent(&FitScriptGeneratorPresenter::updateAttributeValue,
-                          attribute, m_view->attributeValue(attribute));
+  updateFunctionsInModel(&FitScriptGeneratorPresenter::updateAttributeValue,
+                         attribute, m_view->attributeValue(attribute));
 }
 
 void FitScriptGeneratorPresenter::handleParameterTieChanged(
     std::string const &parameter, std::string const &tie) {
-  updateFunctionComponent(&FitScriptGeneratorPresenter::updateParameterTie,
-                          parameter, tie);
+  updateFunctionsInModel(&FitScriptGeneratorPresenter::updateParameterTie,
+                         parameter, tie);
 
   checkForWarningMessages();
   setGlobalTies(m_model->getGlobalTies());
@@ -199,14 +197,14 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
 
 void FitScriptGeneratorPresenter::handleParameterConstraintRemoved(
     std::string const &parameter) {
-  updateFunctionComponent(
+  updateFunctionsInModel(
       &FitScriptGeneratorPresenter::removeParameterConstraint, parameter);
   handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleParameterConstraintChanged(
     std::string const &functionIndex, std::string const &constraint) {
-  updateFunctionComponent(
+  updateFunctionsInModel(
       &FitScriptGeneratorPresenter::updateParameterConstraint, functionIndex,
       constraint);
   handleSelectionChanged();
@@ -353,6 +351,24 @@ void FitScriptGeneratorPresenter::updateParameterConstraint(
                                      equivalentFunctionIndex, constraint);
 }
 
+void FitScriptGeneratorPresenter::removeFunction(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &function) {
+  m_model->removeFunction(workspaceName, workspaceIndex, function);
+}
+
+void FitScriptGeneratorPresenter::addFunction(std::string const &workspaceName,
+                                              WorkspaceIndex workspaceIndex,
+                                              std::string const &function) {
+  m_model->addFunction(workspaceName, workspaceIndex, function);
+}
+
+void FitScriptGeneratorPresenter::setFunction(std::string const &workspaceName,
+                                              WorkspaceIndex workspaceIndex,
+                                              std::string const &function) {
+  m_model->setFunction(workspaceName, workspaceIndex, function);
+}
+
 void FitScriptGeneratorPresenter::updateFunctionInViewFromModel(
     FitDomainIndex domainIndex) {
   auto const workspaceName = m_view->workspaceName(domainIndex);
@@ -372,37 +388,22 @@ void FitScriptGeneratorPresenter::updateXLimitForDomain(GetX &&getX,
   }
 }
 
-template <void (IFitScriptGeneratorModel::*func)(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-    std::string const &function)>
-void FitScriptGeneratorPresenter::updateFunctionForDomainsInModel(
-    std::string const &function) {
+template <typename UpdateFunction>
+void FitScriptGeneratorPresenter::updateFunctionStructure(
+    UpdateFunction &&updateFunction, std::string const &function) {
   if (m_view->hasLoadedData()) {
-    for (auto const &domainIndex : getRowIndices()) {
-      updateFunctionForDomainInModel<func>(domainIndex, function);
-    }
+    updateFunctionsInModel(updateFunction, function);
   } else {
     m_view->displayWarning("Data needs to be loaded using Add Workspace.");
     m_view->clearFunction();
   }
 }
 
-template <void (IFitScriptGeneratorModel::*func)(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-    std::string const &function)>
-void FitScriptGeneratorPresenter::updateFunctionForDomainInModel(
-    FitDomainIndex domainIndex, std::string const &function) {
-  auto const workspaceName = m_view->workspaceName(domainIndex);
-  auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
-
-  (m_model->*func)(workspaceName, workspaceIndex, function);
-}
-
-template <typename Function, typename... Args>
-void FitScriptGeneratorPresenter::updateFunctionComponent(Function &&func,
-                                                          Args... arguments) {
+template <typename UpdateFunction, typename... Args>
+void FitScriptGeneratorPresenter::updateFunctionsInModel(
+    UpdateFunction &&updateFunction, Args... arguments) {
   for (auto const &rowIndex : getRowIndices()) {
-    invokeFunctionForDomain(rowIndex, func, arguments...);
+    invokeFunctionForDomain(rowIndex, updateFunction, arguments...);
   }
 }
 

@@ -108,23 +108,26 @@ private:
                                  std::string const &functionIndex,
                                  std::string const &constraint);
 
+  void removeFunction(std::string const &workspaceName,
+                      WorkspaceIndex workspaceIndex,
+                      std::string const &function);
+  void addFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex, std::string const &function);
+  void setFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex, std::string const &function);
+
   void updateFunctionInViewFromModel(FitDomainIndex domainIndex);
 
   template <typename GetX, typename UpdateX>
   void updateXLimitForDomain(GetX &&getX, UpdateX &&updateX);
 
-  template <void (IFitScriptGeneratorModel::*func)(
-      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      std::string const &function)>
-  void updateFunctionForDomainsInModel(std::string const &function);
-  template <void (IFitScriptGeneratorModel::*func)(
-      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      std::string const &function)>
-  void updateFunctionForDomainInModel(FitDomainIndex domainIndex,
-                                      std::string const &function);
+  template <typename UpdateFunction>
+  void updateFunctionStructure(UpdateFunction &&updateFunction,
+                               std::string const &function);
 
-  template <typename Function, typename... Args>
-  void updateFunctionComponent(Function &&func, Args... arguments);
+  template <typename UpdateFunction, typename... Args>
+  void updateFunctionsInModel(UpdateFunction &&updateFunction,
+                              Args... arguments);
 
   template <typename Function, typename... Args>
   void invokeFunctionForDomain(FitDomainIndex domainIndex, Function &&func,
