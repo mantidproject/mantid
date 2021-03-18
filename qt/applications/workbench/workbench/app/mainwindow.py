@@ -178,10 +178,9 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.workspacewidget)
 
         self.set_splash("Loading memory widget")
-        from workbench.plugins.memorywidget import MemoryWidget
+        from workbench.plugins.memorywidget.memorywidget import MemoryWidget
         self.memorywidget = MemoryWidget(self)
         self.memorywidget.register_plugin()
-        self.memorywidget.setMaximumHeight(70)
         self.widgets.append(self.memorywidget)
 
         # set the link between the algorithm and workspace widget
