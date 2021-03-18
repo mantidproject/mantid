@@ -9,9 +9,9 @@
 #
 from qtpy.QtWidgets import QVBoxLayout
 
-from workbench.plugins.base import PluginWidget
-from workbench.plugins.memoryview import MemoryView
-from workbench.plugins.memorypresenter import MemoryPresenter
+from ..base import PluginWidget
+from ..memorywidget.memoryview import MemoryView
+from ..memorywidget.memorypresenter import MemoryPresenter
 
 
 class MemoryWidget(PluginWidget):
@@ -26,6 +26,9 @@ class MemoryWidget(PluginWidget):
 
         self.setLayout(layout)
         self.setWindowTitle(self.get_plugin_title())
+        # 70 is chosen as a good value after testing
+        # how it looks for different values
+        self.setMaximumHeight(70)  
 
     # ----------------- Plugin API --------------------
 

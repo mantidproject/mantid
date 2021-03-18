@@ -161,8 +161,8 @@ set(TEST_FILES
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py
-    workbench/plugins/test/test_memoryinfo.py
-    workbench/plugins/test/test_memorypresenter.py
+    workbench/plugins/test/test_memorywidget/test_memoryinfo.py
+    workbench/plugins/test/test_memorywidget/test_memorypresenter.py
     workbench/plugins/test/test_workspacewidget.py
     workbench/utils/test/test_workspacehistorygeneration.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
