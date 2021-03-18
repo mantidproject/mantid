@@ -77,4 +77,15 @@ Bugfixes
 ########
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
 
+LeanElasticPeak
+###############
+
+A new Peak concept has been create, a LeanElasticPeak where the
+instrument is not included as part of Peak. The only requirement for
+this peak is a Q-sample vector. There are a number of modifications
+made to facilitate this.
+
+- New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a  :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+
 :ref:`Release 6.1.0 <v6.1.0>`
