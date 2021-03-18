@@ -35,6 +35,8 @@ Each peak object contains several pieces of information. Not all of them are nec
 * Row/column of detector (only for :ref:`RectangularDetectors <RectangularDetector>` )
 * An integration shape (see below)
 
+.. _the-peak-shape:
+
 The Peak Shape
 ~~~~~~~~~~~~~~~
 
