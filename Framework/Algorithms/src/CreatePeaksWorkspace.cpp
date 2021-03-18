@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/System.h"
@@ -32,7 +33,7 @@ void CreatePeaksWorkspace::init() {
       "in this workspace.");
   declareProperty("NumberOfPeaks", 1,
                   "Number of dummy peaks to initially create.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -47,7 +48,11 @@ void CreatePeaksWorkspace::exec() {
 
   ExperimentInfo_sptr ei;
 
-  auto out = std::make_shared<PeaksWorkspace>();
+  IPeaksWorkspace_sptr out;
+  if (instWS)
+    out = std::make_shared<PeaksWorkspace>();
+  else
+    out = std::make_shared<LeanElasticPeaksWorkspace>();
   setProperty("OutputWorkspace", out);
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 
@@ -67,13 +72,19 @@ void CreatePeaksWorkspace::exec() {
     }
   }
 
-  if (instMDWS || ei) {
-    Progress progress(this, 0.0, 1.0, NumberOfPeaks);
+  Progress progress(this, 0.0, 1.0, NumberOfPeaks);
 
-    // Create some default peaks
+  if (instMDWS || ei) {
+    // Create some default Peaks
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(Peak(out->getInstrument(),
                         out->getInstrument()->getDetectorIDs(true)[0], 1.0));
+      progress.report();
+    }
+  } else {
+    // Create some default LeanElasticPeaks
+    for (int i = 0; i < NumberOfPeaks; i++) {
+      out->addPeak(LeanElasticPeak());
       progress.report();
     }
   }

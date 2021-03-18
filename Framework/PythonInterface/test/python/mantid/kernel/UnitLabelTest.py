@@ -33,13 +33,6 @@ class UnitLabelTest(unittest.TestCase):
         self.assertTrue(isinstance(str(label), str))
         self.assertEqual("MyLabel", str(label))
 
-    def test_unicode_function_produces_unicode_string_from_label_py2(self):
-        if sys.version_info[0] < 3:
-            label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
-            self.assertTrue(isinstance(unicode(label), str))
-            self.assertEqual(u"\u03bcs", unicode(label))
-        else:
-            pass
 
 if __name__ == '__main__':
     unittest.main()

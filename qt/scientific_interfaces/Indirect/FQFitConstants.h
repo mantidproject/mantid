@@ -34,7 +34,8 @@ static const std::map<std::string, std::string> widthFits{
           "name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}}};
 
 static const std::map<std::string, std::string> EISFFits{
-    {{std::string("EISFDiffCylinder"),
+    {{"None", ""},
+     {std::string("EISFDiffCylinder"),
       std::string(
           "name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)")},
      {std::string("EISFDiffSphere"),
@@ -44,7 +45,8 @@ static const std::map<std::string, std::string> EISFFits{
                   "constraints=(A>0, Rmin>0, Rmax>0)")}}};
 
 static const std::map<std::string, std::string> AllFits{
-    {{std::string("ChudleyElliot"),
+    {{"None", ""},
+     {std::string("ChudleyElliot"),
       std::string(
           "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
      {std::string("HallRoss"),

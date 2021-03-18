@@ -379,10 +379,6 @@ void ExperimentPresenter::updateViewFromModel() {
   // Reconnect settings change notifications
   m_view->connectExperimentSettingsWidgets();
 }
-
-void ExperimentPresenter::notifyAllWorkspacesDeleted() {
-  m_view->refreshFloodWorkspaceList();
-}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

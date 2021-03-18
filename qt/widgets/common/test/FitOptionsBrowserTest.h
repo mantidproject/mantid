@@ -52,6 +52,26 @@ public:
       m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
   }
 
+  void
+  test_that_setting_the_fitting_mode_to_sequential_will_then_return_the_sequential_fitting_mode() {
+    m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
+
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
+
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(),
+                     FittingMode::SEQUENTIAL);
+  }
+
+  void
+  test_that_setting_the_fitting_mode_to_simultaneous_will_then_return_the_simultaneous_fitting_mode() {
+    m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr);
+
+    m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SIMULTANEOUS);
+
+    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getCurrentFittingType(),
+                     FittingMode::SIMULTANEOUS);
+  }
+
 private:
   std::size_t m_numberOfTries;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;

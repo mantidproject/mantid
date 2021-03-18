@@ -23,7 +23,6 @@ from mantid.api import IEventWorkspace
 import SANSUtility as su
 import os
 import copy
-import sys
 
 logger = Logger("ISISReducer")
 
@@ -61,7 +60,7 @@ class ReductionStateTransferer(object):
                 reducer.settings["events.binning"] = copy.deepcopy(self.rc.settings["events.binning"])
 
         # Get wavelength limits
-        reducer.to_Q.w_cut  = self.rc.to_Q.w_cut
+        reducer.to_Q.w_cut = self.rc.to_Q.w_cut
 
         # Get Q limits
         reducer.to_Q.binning = self.rc.to_Q.binning
@@ -83,8 +82,10 @@ class ReductionStateTransferer(object):
         reducer.transmission_calculator.fit_settings = copy.deepcopy(self.rc.transmission_calculator.fit_settings)
 
         # Set front detector scale, shift and q range
-        reducer.instrument.getDetector('FRONT').rescaleAndShift = copy.deepcopy(self.rc.instrument.getDetector('FRONT').rescaleAndShift)
-        reducer.instrument.getDetector('FRONT').mergeRange = copy.deepcopy(self.rc.instrument.getDetector('FRONT').mergeRange)
+        reducer.instrument.getDetector('FRONT').rescaleAndShift = copy.deepcopy(
+            self.rc.instrument.getDetector('FRONT').rescaleAndShift)
+        reducer.instrument.getDetector('FRONT').mergeRange = copy.deepcopy(
+            self.rc.instrument.getDetector('FRONT').mergeRange)
 
         # Set Gravity and extra length
         reducer.to_Q._use_gravity = self.rc.to_Q._use_gravity
@@ -144,18 +145,6 @@ class ReductionStateTransferer(object):
         reducer._slices_def = copy.deepcopy(self.rc._slices_def)
         reducer._slice_index = copy.deepcopy(self.rc._slice_index)
 
-
-################################################################################
-# Avoid a bug with deepcopy in python 2.6, details and workaround here:
-# http://bugs.python.org/issue1515
-if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-    import types
-
-    def _deepcopy_method(x, memo):
-        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
-
-    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
-################################################################################
 
 ## Version number
 __version__ = '0.0'
@@ -414,7 +403,7 @@ class ISISReducer(Reducer):
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
 
         # At this point we need to check if the IDF associated with the
-        self._match_IDF(run = run)
+        self._match_IDF(run=run)
 
         # ensure that when you set sample, you start with no can, transmission previously used.
         self._clean_loaded_data()
@@ -621,7 +610,8 @@ class ISISReducer(Reducer):
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
         # are current being used for saving CanSAS (ticket #6929)
         if self.__transmission_sample:
-            unfitted_transmission_workspace_name = su.get_unfitted_transmission_workspace_name(self.__transmission_sample)
+            unfitted_transmission_workspace_name = su.get_unfitted_transmission_workspace_name(
+                self.__transmission_sample)
             AddSampleLog(Workspace=self.output_wksp, LogName="Transmission",
                          LogText=unfitted_transmission_workspace_name)
         if self.__transmission_can:
@@ -924,7 +914,7 @@ class ISISReducer(Reducer):
                 # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
 
-    def _get_correct_instrument(self, instrument_name, idf_path = None):
+    def _get_correct_instrument(self, instrument_name, idf_path=None):
         '''
         Creates an ISIS instrument based on the name and the chosen idf_path
         @param instrument_name: the name of the instrument

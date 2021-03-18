@@ -174,7 +174,10 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         Handles a workspace being deleted from ads by removing the workspace from the plot
         :param workspace: workspace 2D object
         """
-        workspace_name = workspace.name()
+        if isinstance(workspace, str):
+            workspace_name = workspace
+        else:
+            workspace_name = workspace.name()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         if workspace_name in plotted_workspaces:
             self._figure_presenter.remove_workspace_from_plot(workspace)

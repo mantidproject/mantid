@@ -112,7 +112,7 @@ void ParameterTie::set(const std::string &expr) {
   m_expression.append(start, end);
 }
 
-double ParameterTie::eval() {
+double ParameterTie::eval(bool setParameterValue) {
   double res = 0;
   try {
     for (std::map<double *, ParameterReference>::const_iterator it =
@@ -125,7 +125,8 @@ double ParameterTie::eval() {
     throw std::runtime_error("Error in expression: " + e.GetMsg());
   }
 
-  setParameter(res);
+  if (setParameterValue)
+    setParameter(res);
 
   return res;
 }

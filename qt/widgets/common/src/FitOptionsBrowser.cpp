@@ -49,7 +49,7 @@ namespace MantidWidgets {
  * @param parent :: The parent widget.
  * @param fitType :: The type of the underlying fitting algorithm.
  */
-FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
+FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingMode fitType)
     : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr),
       m_decimals(6), m_fittingType(fitType) {
   // create m_browser
@@ -115,12 +115,13 @@ void FitOptionsBrowser::createBrowser() {
 void FitOptionsBrowser::initFittingTypeProp() {
   m_fittingTypeProp = m_enumManager->addProperty("Fitting");
   QStringList types;
-  types << "Simultaneous"
-        << "Sequential";
+  types << "Sequential"
+        << "Simultaneous";
   m_enumManager->setEnumNames(m_fittingTypeProp, types);
-  if (m_fittingType == SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     m_browser->addProperty(m_fittingTypeProp);
-  } else if (m_fittingType == Simultaneous || m_fittingType == Sequential) {
+  } else if (m_fittingType == FittingMode::SIMULTANEOUS ||
+             m_fittingType == FittingMode::SEQUENTIAL) {
     this->lockCurrentFittingType(m_fittingType);
   }
 }
@@ -131,14 +132,15 @@ void FitOptionsBrowser::initFittingTypeProp() {
 void FitOptionsBrowser::createProperties() {
   initFittingTypeProp();
   createCommonProperties();
-  if (m_fittingType == Simultaneous ||
-      m_fittingType == SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SIMULTANEOUS ||
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSimultaneousFitProperties();
   }
-  if (m_fittingType == Sequential ||
-      m_fittingType == SimultaneousAndSequential) {
+  if (m_fittingType == FittingMode::SEQUENTIAL ||
+      m_fittingType == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS) {
     createSequentialFitProperties();
   }
+  switchFitType();
 }
 
 void FitOptionsBrowser::createCommonProperties() {
@@ -248,16 +250,17 @@ void FitOptionsBrowser::createSimultaneousFitProperties() {
 
 void FitOptionsBrowser::createSequentialFitProperties() {
   // Create FitType property, a property of algorithm PlotPeakByLogValue
-  m_fitType = m_enumManager->addProperty("Fit Type");
+  m_plotPeakByLogValueFitType = m_enumManager->addProperty("Fit Type");
   {
     QStringList types;
     types << "Sequential"
           << "Individual";
-    m_enumManager->setEnumNames(m_fitType, types);
-    m_enumManager->setValue(m_fitType, 0);
-    addProperty("FitType", m_fitType, &FitOptionsBrowser::getStringEnumProperty,
+    m_enumManager->setEnumNames(m_plotPeakByLogValueFitType, types);
+    m_enumManager->setValue(m_plotPeakByLogValueFitType, 0);
+    addProperty("FitType", m_plotPeakByLogValueFitType,
+                &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
-    m_sequentialProperties << m_fitType;
+    m_sequentialProperties << m_plotPeakByLogValueFitType;
   }
 
   // Create OutputWorkspace property
@@ -405,8 +408,8 @@ void FitOptionsBrowser::updateMinimizer() {
  * Switch the current fit type according to the value in the FitType property.
  */
 void FitOptionsBrowser::switchFitType() {
-  auto fitType = m_enumManager->value(m_fittingTypeProp);
-  if (fitType == 0) {
+  const auto fittingMode = getCurrentFittingType();
+  if (fittingMode == FittingMode::SIMULTANEOUS) {
     displayNormalFitProperties();
   } else {
     displaySequentialFitProperties();
@@ -423,6 +426,7 @@ void FitOptionsBrowser::displayNormalFitProperties() {
   foreach (QtProperty *prop, m_sequentialProperties) {
     m_browser->removeProperty(prop);
   }
+  emit changedToSimultaneousFitting();
 }
 
 /**
@@ -713,19 +717,21 @@ void FitOptionsBrowser::loadSettings(const QSettings &settings) {
  * Get the current fitting type, ie which algorithm to use:
  *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
  */
-FitOptionsBrowser::FittingType
-FitOptionsBrowser::getCurrentFittingType() const {
+FittingMode FitOptionsBrowser::getCurrentFittingType() const {
   auto value = m_enumManager->value(m_fittingTypeProp);
-  return static_cast<FitOptionsBrowser::FittingType>(value);
+  return static_cast<FittingMode>(value);
 }
 
 /**
  * Set the current fitting type, ie which algorithm to use:
  *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
  */
-void FitOptionsBrowser::setCurrentFittingType(
-    FitOptionsBrowser::FittingType fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+void FitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
+  if (fitType == FittingMode::SIMULTANEOUS) {
+    m_enumManager->setValue(m_fittingTypeProp, 1);
+  } else {
+    m_enumManager->setValue(m_fittingTypeProp, 0);
+  }
 }
 
 /**
@@ -733,9 +739,8 @@ void FitOptionsBrowser::setCurrentFittingType(
  * option.
  * @param fitType :: Fitting type to lock the browser in.
  */
-void FitOptionsBrowser::lockCurrentFittingType(
-    FitOptionsBrowser::FittingType fitType) {
-  m_enumManager->setValue(m_fittingTypeProp, fitType);
+void FitOptionsBrowser::lockCurrentFittingType(FittingMode fitType) {
+  setCurrentFittingType(fitType);
   m_fittingTypeProp->setEnabled(false);
 }
 

@@ -38,20 +38,30 @@ Bugfixes
 - New caching feature is added to :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to speed up calculation using same sample and container.
 - New property `CleanCache` in algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
 - New options "cache directory" and "clean cache" in the Advanced Setup tab of the SNS Powder Reduction interface
+- Correct unit to TOF for ``_tof_xye`` files output for PEARL, when the focusing mode is set to *all*.
 - Use caching for Va in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`.
 - Improve algorithm :ref:`FitPeaks <algm-FitPeaks>` to enable it to fit with multiple peaks in same spectrum with Back-to-back Exponential function starting from user specified parameters.
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has additional property, ``DeltaRagged``, which allows using :ref:`RebinRagged <algm-RebinRagged>` to bin each spectrum differently.
 - Allow a different number of spectra for absorption correction division of PEARL data. This allows ``create_vanadium`` to work for a non-standard dataset.
-
+- Saved filenames for summed empty workspaces now include spline properties to avoid long_mode confusion when focussing.
 
 Engineering Diffraction
 -----------------------
+
 - New IDF for upgraded VULCAN instrument
+
+Improvements
+############
+
+- BackToBackExponential fitting parameters read from .xml file and output to .prm file for GSAS-II.
+- The Engineering Diffraction interface can now be saved as part of a project file, and can save/restore in the event of a crash as part of the general project save system.
 
 Single Crystal Diffraction
 --------------------------
 - New version of algorithm :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` provides more accurate calibration results for CORELLI instrument.
 - Modified some logs in output workspace from :ref:`LoadWANDSCD <algm-LoadWANDSCD>` to be TimeSeriesProperty so they work with :ref:`SetGoniometer <algm-SetGoniometer>`.
+- :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to integrate ellipsoids around estimated centroid instead of nominal position.
+- :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` has option to determine ellipsoid covariance iteratively and to use the estimated standard deviation rather than scale the major axis of the ellipsoid to the spherical radius.
 
 Improvements
 ############
@@ -74,5 +84,16 @@ Known Defects
 Bugfixes
 ########
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` no longer returns null calibration outputs.
+
+LeanElasticPeak
+###############
+
+A new Peak concept has been create, a LeanElasticPeak where the
+instrument is not included as part of Peak. The only requirement for
+this peak is a Q-sample vector. There are a number of modifications
+made to facilitate this.
+
+- New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a  :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 
 :ref:`Release 6.1.0 <v6.1.0>`
