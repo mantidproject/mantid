@@ -37,13 +37,13 @@ class SuperplotPresenter:
         self._model.setSpectrum(ws.name(), specNum)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
-        self._view.setWorkspaceSliderPosition(len(artists) - 1)
-        self._view.setWorkspaceSpinBoxValue(len(artists) - 1)
-        self._view.setSpectrumSliderMax(ws.getNumberHistograms() - 1)
+        self._view.setWorkspaceSliderPosition(len(artists))
+        self._view.setWorkspaceSpinBoxValue(len(artists))
+        self._view.setSpectrumSliderMax(ws.getNumberHistograms())
         self._view.setSpectrumSliderPosition(specNum)
-        self._view.setSpectrumSpinBoxMax(ws.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxMax(ws.getNumberHistograms())
         self._view.setSpectrumSpinBoxValue(specNum)
-        self._view.setSelectedWorkspace(len(artists) - 1)
+        self._view.setSelectedWorkspace(len(artists))
 
     def getSideView(self):
         return self._view.getSideWidget()
@@ -61,7 +61,7 @@ class SuperplotPresenter:
         names = self._model.getWorkspaces()
         selectedWs = self._view.getSelectedWorkspace()
         self._view.setWorkspacesList(names)
-        self._view.setSelectedWorkspace(names.index(selectedWs))
+        self._view.setSelectedWorkspace(names.index(selectedWs) + 1)
 
     def onDelButtonClicked(self):
         """
@@ -78,7 +78,7 @@ class SuperplotPresenter:
 
     def _changeCurrentWorkspace(self, index):
         workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[index]
+        currentWsName = workspaceNames[index - 1]
         currentWs = mtd[currentWsName]
         currentSpectrumIndex = self._model.getSpectrum(currentWsName)
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
@@ -96,7 +96,7 @@ class SuperplotPresenter:
         """
         plottedData = self._model.getPlottedData()
         workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[wsIndex]
+        currentWsName = workspaceNames[wsIndex - 1]
         if (currentWsName, spIndex) in plottedData:
             self._view.checkHoldButton(True)
         else:
@@ -110,14 +110,14 @@ class SuperplotPresenter:
         currentWorkspaceIndex = self._view.getWorkspaceSliderPosition()
         currentSpectrumIndex = self._view.getSpectrumSliderPosition()
         workspaceNames = self._model.getWorkspaces()
-        currentWsName = workspaceNames[currentWorkspaceIndex]
+        currentWsName = workspaceNames[currentWorkspaceIndex - 1]
         plottedData = self._model.getPlottedData()
         if (currentWsName, currentSpectrumIndex) not in plottedData:
             plottedData.append((currentWsName, currentSpectrumIndex))
 
         figure, _ = get_plot_fig(fig=self._canvas.figure)
         for i in plottedData:
-            plot([i[0]], spectrum_nums=[i[1] + 1], overplot=True, fig=figure)
+            plot([i[0]], spectrum_nums=[i[1]], overplot=True, fig=figure)
 
     def onWorkspaceSelectionChanged(self, index):
         """
@@ -126,6 +126,7 @@ class SuperplotPresenter:
         Args:
             index (int): index of the selected workspace
         """
+        index = index + 1
         self._view.setWorkspaceSliderPosition(index)
         self._view.setWorkspaceSpinBoxValue(index)
         self._changeCurrentWorkspace(index)
@@ -168,7 +169,7 @@ class SuperplotPresenter:
         self._view.setSpectrumSpinBoxValue(position)
         workspaceNames = self._model.getWorkspaces()
         currentWsIndex = self._view.getWorkspaceSliderPosition()
-        currentWsName = workspaceNames[currentWsIndex]
+        currentWsName = workspaceNames[currentWsIndex - 1]
         self._model.setSpectrum(currentWsName, position)
         self._updateHoldButton(currentWsIndex, position)
         self._updatePlot()
@@ -183,7 +184,7 @@ class SuperplotPresenter:
         self._view.setSpectrumSliderPosition(value)
         workspaceNames = self._model.getWorkspaces()
         currentWsIndex = self._view.getWorkspaceSliderPosition()
-        currentWsName = workspaceNames[currentWsIndex]
+        currentWsName = workspaceNames[currentWsIndex - 1]
         self._model.setSpectrum(currentWsName, value)
         self._updateHoldButton(currentWsIndex, value)
         self._updatePlot()
@@ -199,4 +200,4 @@ class SuperplotPresenter:
         wsIndex = self._view.getWorkspaceSliderPosition()
         spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
-        self._model.toggleData(names[wsIndex], spectrumIndex)
+        self._model.toggleData(names[wsIndex - 1], spectrumIndex)
