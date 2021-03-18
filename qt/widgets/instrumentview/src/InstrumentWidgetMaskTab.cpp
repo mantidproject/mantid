@@ -764,10 +764,9 @@ void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
         m_instrWidget->getSurface()->setCurrentPoint(name, p);
       }
     }
-    // when the user validates the edit of the field, the view is immediatly
-    // updated this way
-    m_instrWidget->updateInstrumentView();
   }
+  // when the user validates the field's edit, the view is immediatly updated
+  m_instrWidget->updateInstrumentView();
   m_instrWidget->update();
 }
 
