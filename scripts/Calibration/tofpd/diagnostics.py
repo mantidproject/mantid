@@ -413,8 +413,11 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
         raise ValueError("Could not find provided workspace in ADS")
 
     fig, ax = plt.subplots()
-    ax.set_xlabel("det IDs")
-    ax.set_ylabel("rel strain")
+    ax.set_xlabel("detector IDs")
+    if len(peaks) > 1:
+        ax.set_xlabel("rel strain")
+    else:
+        ax.set_ylabel("rel strain (peak {})".format(peaks[0]))
 
     # Hold the mean and stddev for each peak to compute total at end
     means = []
@@ -431,7 +434,6 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
 
     # Plot data for each peak position
     for peak in peaks:
-        print("Processing peak position {}".format(peak))
         single = extract_peak_info(wksp, 'single', peak)
 
         # get x and y arrays from single peak ws
@@ -443,9 +445,22 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
 
         # skip if y was entirely nans
         if len(y_val) == 0:
+            print("No valid y-data was found for peak {}, so it will be skipped".format(peak))
             continue
 
-        cut_id = (single.yIndexOfX(drange[0]), single.yIndexOfX(drange[1]))
+        try:
+            dstart = single.yIndexOfX(drange[0])
+        except:
+            # If detector id not valid, find next closest range
+            dstart = single.yIndexOfX(int(x.searchsorted(drange[0])) - 1)
+            print("Specified starting detector range was not valid, adjusted to detID={}".format(dstart))
+        try:
+            dend = single.yIndexOfX(drange[1])
+        except:
+            dend = single.yIndexOfX(int(x.searchsorted(drange[1])))
+            print("Specified ending detector range was not valid, adjusted to detID={}".format(dend))
+
+        cut_id = (dstart, dend)
 
         means.append(np.mean(y_val[cut_id[0]:cut_id[1]]))
         stddevs.append(np.std(y_val[cut_id[0]:cut_id[1]]))
@@ -458,14 +473,12 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
                 ax.axvline(x=region[1])
                 det_start = single.yIndexOfX(region[0])
                 det_end = single.yIndexOfX(region[1])
-                cnt = __get_bad_counts(y[det_start:det_end], means[len(means)-1])
+                cnt = __get_bad_counts(y[det_start:det_end], means[len(means)-1], band=threshold)
                 region_cnts.append(cnt)
                 if show_bad_cnt:
                     mid_region = 0.5 * (region[1] - region[0])
-                    text = ax.annotate("{}".format(cnt), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
-                                       clip_on=True)
-                    width = text.get_window_extent(renderer=fig.canvas.get_renderer()).width
-                    text.set_x(region[0] + mid_region - 0.5 * width)
+                    ax.annotate("{}".format(cnt), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
+                                clip_on=True, ha="center")
 
         ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None", label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
@@ -487,8 +500,8 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
     ax.axhline(total_mean - band, color="black", ls="--")
 
     # Add mean and stddev text annotations
-    stat_str = "Mean = {:0.6f} Stdev = {:0.6f}".format(total_mean, total_stddev)
-    plt_text = pltbox.AnchoredText(stat_str, loc="upper center", frameon=False)
+    stat_str = "Mean = {:0.6f} Stdev = {:1.5e}".format(total_mean, total_stddev)
+    plt_text = pltbox.AnchoredText(stat_str, loc="upper center", frameon=True)
     ax.add_artist(plt_text)
 
     plt.show()
