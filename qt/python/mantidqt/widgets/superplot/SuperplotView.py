@@ -178,12 +178,15 @@ class SuperplotView(QWidget):
 
     def setSpectrumSliderPosition(self, position):
         """
-        Set the spectrum slider position.
+        Set the spectrum slider position. This function does not trigger any
+        QSlider signals.
 
         Args:
             position (int): position
         """
-        self._bottomView.spectrumSlider.setValue(position)
+        self._bottomView.spectrumSlider.blockSignals(True)
+        self._bottomView.spectrumSlider.setSliderPosition(position)
+        self._bottomView.spectrumSlider.blockSignals(False)
 
     def getSpectrumSliderPosition(self):
         """
