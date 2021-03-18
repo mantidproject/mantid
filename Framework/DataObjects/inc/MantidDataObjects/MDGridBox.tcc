@@ -1135,12 +1135,43 @@ TMDE(void MDGridBox)::integrateSphere(
     API::CoordTransform &radiusTransform, const coord_t radiusSquared,
     signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
     const bool useOnePercentBackgroundCorrection) const {
-  // We start by looking at the vertices at every corner of every box contained,
-  // to see which boxes are partially contained/fully contained.
+
+  // --------
+  // Overview
+  //   R: peak radius
+  //   r: inner radius (useful for defining peak background)
+  //   d: distance computed with radiusTransfor
+  // ---------------------------------------------------------------------------
+  // We are checking all corners of each box to see if
+  //    ! all corners are within the integration volume (sphere/ellipsoid/donut)
+  //       -> we reach the base case, add box_signal and error to the container
+  //          (signal, errorSquared)
+  //    ! at least one corner is within the integration volume
+  //       -> recursively perform the same corner check for all its child boxes
+  //          util we reach the base case
+  //    ! no corner is within the integration volume
+  //       -> compute distance (d) between peak center and
+  //          [a] box center
+  //          [b] box corners
+  //          if d_min > R: box completely outside the integration volume, skip
+  //                        it and its children to save computing time
+  //          if d_max < r: box completely falls into the donut hole, skip it
+  //                        and its children to save computing time
+  //          others: recursively search the child boxes as the current box is
+  //                  partially overlapping with the integration volume, in
+  //                  otherwords, some of its child box is within the regio
+  //                  (base case), and some of its child box is outside the
+  //                  integration volume.
 
   // One entry with the # of vertices in this box contained; start at 0.
   auto verticesContained = new size_t[numBoxes];
   memset(verticesContained, 0, numBoxes * sizeof(size_t));
+
+  // Setup caches for distances dmax and dmin
+  auto distmaxs = new coord_t[numBoxes];
+  memset(distmaxs, 0.0, numBoxes * sizeof(coord_t));
+  auto distmins = new coord_t[numBoxes];
+  memset(distmins, 65535.0, numBoxes * sizeof(coord_t));
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
@@ -1185,6 +1216,16 @@ TMDE(void MDGridBox)::integrateSphere(
     // Is this vertex contained?
     coord_t out[nd];
     radiusTransform.apply(vertexCoord, out);
+
+    // Figure out which box this vertex belongs to so that we can track the
+    // maximum and minimum distance bewteen box corners and peak center
+    size_t boxLinearID =
+        Kernel::Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
+    if (out[0] > distmaxs[boxLinearID])
+      distmaxs[boxLinearID] = out[0];
+    if (out[0] < distmins[boxLinearID])
+      distmins[boxLinearID] = out[0];
+
     if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
       // Yes, this vertex is contained within the integration volume!
       //        std::cout << "vertex at " << vertexCoord[0] << ", " <<
@@ -1228,126 +1269,69 @@ TMDE(void MDGridBox)::integrateSphere(
   }
 
   // OK, we've done all the vertices. Now we go through and check each box.
-  // size_t numFullyContained = 0;
-  // size_t numPartiallyContained = 0;
   for (size_t i = 0; i < numBoxes; ++i) {
     API::IMDNode *box = m_Children[i];
 
-    // compute characteristics of this child box
-    // Let's get the box center
-    coord_t boxCenter[nd];
-    box->getCenter(boxCenter);
-
-    // Calculate the equivalent distance bewteen box center
-    // and peak center
-    // NOTE: peak center is embedded in radiusTransform
-    // NOTE: using sqrt here to make the physics easy to
-    //       understand, also getting it done right is more
-    //       important than getting it done fast.
-    coord_t out[nd];
-    radiusTransform.apply(boxCenter, out);
-    double distBoxcntrPkcntr = std::sqrt(out[0]);
-    double r_box = std::sqrt(diagonalSquared) / 2;
-    double r_pk = std::sqrt(radiusSquared);
-    double r_pk_inner = std::sqrt(innerRadiusSquared);
-
-    // Debug
-    // std::ostringstream debugmsg;
-    // debugmsg << "Box center: ( ";
-    // for (size_t d = 0; d < nd; d++) {
-    //   debugmsg << boxCenter[d] << " ";
-    // }
-    // debugmsg << ")\n";
-    // //
-    // debugmsg << "-- contains vertes: " << verticesContained[i] << "\n"
-    //          << "-- distBoxcntrPkcntr = " << distBoxcntrPkcntr << "\n"
-    //          << "-- r_box = " << r_box << "\n"
-    //          << "-- r_pk = " << r_pk << "\n"
-    //          << "-- r_pk_inner = " << r_pk_inner << "\n";
-
-    // DEV_NOTE:
-    // There are four possible relations between peak and box
-    // - [a] box and peak has no overlap
-    //     [a.1] box outside of peak
-    //     This case is very difficult to pin-point precisely,
-    //     but we can safely find boxes satisfy the following
-    //     criteria
-    //        dmin  > r_peak
-    //     where
-    //        dmin: the minimum distance bewteen peak center and 
-    //              - box center
-    //              - eight box corners (assuming 3D)
-    //        r_peak: equivalent radisu of peak
-    //     [a.2] box in the donut hole of peak
-    //     Similar as above, but we check the inner radius this time
-    //        dmax < r_peak_inner
-    //     where
-    //        dmax: the maximum distance bewteen peak center and
-    //              - box center
-    //              - eight box corners (assuming 3D)
-    //        r_peak_inner: equivalent inner radius of peak
-    // - [b] box and peak has overlap
-    //   - [b.0] box is enveloped by the peak
-    //             -> add to process list (signal, errorSquared)
-    //   - [b.1] peak is enveloped by the box (box too big)
-    //             -> recursively search the children of
-    //                the current box
-    //                --> box has children (repeat the process recursively)
-    //                --> box has no children (end of tree, ERROR)
-    //                    !!! this means the peak falls below the finest grid
-    //                    !!! resolution, therefore there is nothing we can do
-    //   - [b.2] box and peak are partially overlap
-    //             -> recursively search the children of
-    //                the current box
-    //                --> box has children (repeat the process recursively)
-    //                --> box has no childre, we have to accept the fact
-    //                    !!! some uncentainty is present due to discretization
-    //
+    // First, check if we have reached the base case where the box is completely
+    // enveloped by the peak
     if (verticesContained[i] >= maxVertices) {
-      // case [b.0]
       // Use the integrated sum of signal in the box
       signal += box->getSignal();
       errorSquared += box->getErrorSquared();
-      // debugmsg << "case[b.0]\n";
-    } else {
-      // assume we need to recusively search the children of current box
-      // NOTE: both [b.1] and [b.2] invoke recursive search
-      bool searchSubBox = true;
-
-      // check if it is case [a]
-      // NOTE: for case [a], we don't need to do the recursive search
-      if (verticesContained[i] == 0) {
-        // case [a.1]
-        if (distBoxcntrPkcntr - r_box > r_pk){
-          searchSubBox = false;
-          // debugmsg << "case[a.1]\n";
-        }
-        // case [a.2]
-        if (distBoxcntrPkcntr + r_box < r_pk_inner) {
-          searchSubBox = false;
-          // debugmsg << "case[a.2]\n";
-        }
-      }
-
-      // do the recursive search if needed
-      // NOTE: for cases [b.1] and [b.2]
-      if (searchSubBox){
-        box->integrateSphere(radiusTransform, radiusSquared, signal,
-                             errorSquared, innerRadiusSquared,
-                             useOnePercentBackgroundCorrection);
-        // debugmsg << "!!recusively search children\n";
-      }
-      // debugmsg << "\n";
-      // std::cout << debugmsg.str();
+      continue; // move on to next
     }
-  } // (for each box)
 
-  //    std::cout << "Depth " << this->getDepth() << " with " <<
-  //    numFullyContained << " fully contained; " << numPartiallyContained << "
-  //    partial. Signal = " << signal <<"\n";
+    // Second, check if there is at least one vertex in the integration volume,
+    // and kick off recursive search until we reach the base case
+    if (verticesContained[i] > 0) {
+      box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
+                           innerRadiusSquared,
+                           useOnePercentBackgroundCorrection);
+      continue;
+    }
+
+    // Last, no vertices in the integration volume, and here are the
+    // possiblities
+    //  - Large box envelop the peak -> kick off recursive search
+    //  - Box run across the donut shaped integration region -> kick off
+    //  recursive search
+    //
+    //  - Box is completely isolated from peak (dmin > R) -> stop search and
+    //  move on
+    //  - Tiny box falls into the donut hole (dmax < r) -> stop search and move
+    //  on
+
+    // add box center to the check
+    // NOTE: checking corner alone is not sufficient to cover the case where the
+    //       box encapsulate the peak, which is why we need to add box center
+    //       to the fold
+    coord_t boxCenter[nd];
+    box->getCenter(boxCenter);
+    coord_t out[nd];
+    radiusTransform.apply(boxCenter, out);
+    if (out[0] > distmaxs[i])
+      distmaxs[i] = out[0];
+    if (out[0] < distmins[i])
+      distmins[i] = out[0];
+    // Box is completely isolated from peak
+    if (distmins[i] > radiusSquared) {
+      continue;
+    }
+    // Tiny box falls into the donut hole
+    if (distmaxs[i] < innerRadiusSquared) {
+      continue;
+    }
+    // Kick off recursive search for the other cases
+    box->integrateSphere(radiusTransform, radiusSquared, signal,
+                         errorSquared, innerRadiusSquared,
+                         useOnePercentBackgroundCorrection);
+
+  } // (for each box)
 
   delete[] verticesContained;
   delete[] boxMightTouch;
+  delete[] distmaxs;
+  delete[] distmins;
 }
 
 //-----------------------------------------------------------------------------------------------
