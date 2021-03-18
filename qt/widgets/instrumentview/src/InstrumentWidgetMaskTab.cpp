@@ -624,10 +624,11 @@ void InstrumentWidgetMaskTab::shapeChanged() {
   m_userEditing =
       false; // this prevents resetting shape properties by doubleChanged(...)
   RectF rect = m_instrWidget->getSurface()->getCurrentBoundingRect();
-  m_doubleManager->setValue(m_left, rect.x0());
-  m_doubleManager->setValue(m_top, rect.y0());
-  m_doubleManager->setValue(m_right, rect.x1());
-  m_doubleManager->setValue(m_bottom, rect.y1());
+
+  m_doubleManager->setValue(m_left, std::min(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_top, std::max(rect.y0(), rect.y1()));
+  m_doubleManager->setValue(m_right, std::max(rect.x0(), rect.x1()));
+  m_doubleManager->setValue(m_bottom, std::min(rect.y0(), rect.y1()));
   for (QMap<QtProperty *, QString>::iterator it = m_doublePropertyMap.begin();
        it != m_doublePropertyMap.end(); ++it) {
     m_doubleManager->setValue(
@@ -731,12 +732,21 @@ void InstrumentWidgetMaskTab::saveShapesToTable() const {
 void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
   if (!m_userEditing)
     return;
+
   if (prop == m_left || prop == m_top || prop == m_right || prop == m_bottom) {
-    QRectF rect(
-        QPointF(m_doubleManager->value(m_left), m_doubleManager->value(m_top)),
-        QPointF(m_doubleManager->value(m_right),
-                m_doubleManager->value(m_bottom)));
+    m_userEditing = false;
+    double x0 = std::min(m_doubleManager->value(m_left),
+                         m_doubleManager->value(m_right));
+    double x1 = std::max(m_doubleManager->value(m_left),
+                         m_doubleManager->value(m_right));
+    double y0 = std::min(m_doubleManager->value(m_top),
+                         m_doubleManager->value(m_bottom));
+    double y1 = std::max(m_doubleManager->value(m_top),
+                         m_doubleManager->value(m_bottom));
+
+    QRectF rect(QPointF(x0, y0), QPointF(x1, y1));
     m_instrWidget->getSurface()->setCurrentBoundingRect(RectF(rect));
+
   } else {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty()) {
