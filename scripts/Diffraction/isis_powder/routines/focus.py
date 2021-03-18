@@ -78,6 +78,10 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
+    # convert back to TOF based on engineered detector positions
+    mantid.ApplyDiffCal(InstrumentWorkspace=focused_ws,
+                        ClearCalibration=True)
+
     calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
                                                      input_workspace=focused_ws,
                                                      perform_vanadium_norm=perform_vanadium_norm,
