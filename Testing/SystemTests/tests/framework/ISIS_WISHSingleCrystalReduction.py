@@ -64,7 +64,8 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
         BasicPeak = namedtuple('Peak', ('DetID', 'BankName', 'h', 'k', 'l'))
         expected = BasicPeak(DetID=9202086, BankName='WISHpanel09', h=-5.0, k=-1.0, l=-7.0)
         expected_peak_found = False
-        for i in self._filtered.rowCount():  # iterate of the table representation of the PeaksWorkspace
+        peak_count = self._filtered.rowCount()
+        for i in range(peak_count):  # iterate of the table representation of the PeaksWorkspace
             peak_row = self._filtered.row(i)
             peak = BasicPeak(**{k: peak_row[k] for k in BasicPeak._fields})
             if peak == expected:

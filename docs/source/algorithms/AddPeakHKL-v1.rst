@@ -47,7 +47,7 @@ Usage
    print('Peak wavelength {}'.format(round(peak['Wavelength'], 4)))
    print('Peak detector id {}'.format(peak['DetID']))
    print('Peak run number {}'.format(peak['RunNumber']))
-   print('Peak HKL [{},{},{}]'.format(peak['h'], peak['k'], peak['l']))
+   print('Peak HKL [{},{},{}]'.format(int(peak['h']), int(peak['k']), int(peak['l'])))
 
 Output:
 
