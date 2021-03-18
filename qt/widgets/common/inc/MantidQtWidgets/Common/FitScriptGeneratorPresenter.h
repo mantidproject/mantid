@@ -84,9 +84,9 @@ private:
                     WorkspaceIndex workspaceIndex, double startX, double endX);
 
   void updateStartX(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, FitDomainIndex domainIndex);
+                    WorkspaceIndex workspaceIndex, double startX);
   void updateEndX(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex, FitDomainIndex domainIndex);
+                  WorkspaceIndex workspaceIndex, double endX);
 
   void updateParameterValue(std::string const &workspaceName,
                             WorkspaceIndex workspaceIndex,
@@ -110,14 +110,8 @@ private:
 
   void updateFunctionInViewFromModel(FitDomainIndex domainIndex);
 
-  template <void (FitScriptGeneratorPresenter::*func)(
-      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      FitDomainIndex domainIndex)>
-  void updateXLimitForDomainInModel();
-  template <void (FitScriptGeneratorPresenter::*func)(
-      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-      FitDomainIndex domainIndex)>
-  void updateXLimitForDomainInModel(FitDomainIndex domainIndex);
+  template <typename GetX, typename UpdateX>
+  void updateXLimitForDomain(GetX &&getX, UpdateX &&updateX);
 
   template <void (IFitScriptGeneratorModel::*func)(
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
@@ -131,6 +125,10 @@ private:
 
   template <typename Function, typename... Args>
   void updateFunctionComponent(Function &&func, Args... arguments);
+
+  template <typename Function, typename... Args>
+  void invokeFunctionForDomain(FitDomainIndex domainIndex, Function &&func,
+                               Args... arguments);
 
   [[nodiscard]] std::vector<FitDomainIndex> getRowIndices() const;
 
