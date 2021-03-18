@@ -580,6 +580,14 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   return detectorDir * distance;
 }
 
+double Peak::getValueByColName(std::string name) const {
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if (name == "detid")
+    return double(this->getDetectorID());
+  else
+    return BasePeak::getValueByColName(name);
+}
+
 /** After creating a peak using the Q in the lab frame,
  * the detPos is set to the direction of the detector (but the detector is
  *unknown)

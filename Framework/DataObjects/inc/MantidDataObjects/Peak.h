@@ -133,6 +133,8 @@ public:
   /// Get the approximate position of a peak that falls off the detectors
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
+  double getValueByColName(std::string colName) const override;
+
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam,
                     const Geometry::InstrumentRayTracer &tracer);

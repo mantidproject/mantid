@@ -100,13 +100,13 @@ class IPeakTest(unittest.TestCase):
         wavelength = 1.9
         expected_tof = 4112.53
         self._peak.setWavelength(wavelength)
-        self.assertEqual(self._peak.getTOF(), expected_tof, places=2)
+        self.assertAlmostEqual(self._peak.getTOF(), expected_tof, places=2)
 
     def test_get_d_spacing(self):
         wavelength = 1.9
         expected_d = 0.973
         self._peak.setWavelength(wavelength)
-        self.assertEqual(self._peak.getDSpacing(), expected_d, places=3)
+        self.assertAlmostEqual(self._peak.getDSpacing(), expected_d, places=3)
 
     def test_set_initial_energy(self):
         initial_energy = 10.0
@@ -162,7 +162,7 @@ class IPeakTest(unittest.TestCase):
 
     def test_get_l2(self):
         expected_l2 = 0.26279
-        self.assertEqual(self._peak.getL2(), expected_l2, places=5)
+        self.assertAlmostEqual(self._peak.getL2(), expected_l2, places=5)
 
     def test_set_modulation_vector(self):
         test_vector = V3D(0.5, 0, 0.2)
