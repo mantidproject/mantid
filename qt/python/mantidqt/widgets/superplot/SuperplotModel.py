@@ -16,12 +16,18 @@ class SuperplotModel:
     _workspaces = None
 
     """
+    Correspondance between workspace and current spectra.
+    """
+    _spectra = None
+
+    """
     List of plotted workspace, spectrum index pairs.
     """
     _plottedData = None
 
     def __init__(self):
         self._workspaces = list()
+        self._spectra = dict()
         self._plottedData = list()
 
     def addWorkspace(self, name):
@@ -38,8 +44,10 @@ class SuperplotModel:
             names = mtd[name].getNames()
             for name in names:
                 self._workspaces.append(name)
+                self._spectra[name] = 0
         else:
             self._workspaces.append(name)
+            self._spectra[name] = 0
 
     def delWorkspace(self, name):
         """
@@ -50,8 +58,31 @@ class SuperplotModel:
         """
         if name in self._workspaces:
             self._workspaces.remove(name)
+            del self._spectra[name]
             self._plottedData = [(n, i) for (n, i) in self._plottedData
                                  if n != name]
+
+    def setSpectrum(self, name, num):
+        """
+        Set the current spectrum of a managed workspace.
+
+        Args:
+            name (str): name of the workspace
+            num (int): index of the spectrum
+        """
+        self._spectra[name] = num
+
+    def getSpectrum(self, name):
+        """
+        Get the current spectrum of a managed workspace.
+
+        Args:
+            name (str): name of the workspace
+
+        Returns:
+            int: index of the spectrum
+        """
+        return self._spectra[name]
 
     def getWorkspaces(self):
         """

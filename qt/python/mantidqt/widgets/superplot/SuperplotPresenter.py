@@ -30,6 +30,7 @@ class SuperplotPresenter:
         for artist in artists[:-1]:
             ws, specNum = axes.get_artists_workspace_and_spec_num(artist)
             self._model.addWorkspace(ws.name())
+            self._model.setSpectrum(ws.name(), specNum)
             self._model.toggleData(ws.name(), specNum)
         ws, specNum = axes.get_artists_workspace_and_spec_num(artists[-1])
         self._model.addWorkspace(ws.name())
@@ -107,10 +108,11 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[index]
         currentWs = mtd[currentWsName]
+        currenSpectrum = self._model.getSpectrum(currentWsName)
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSliderPosition(currenSpectrum)
         self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(0)
+        self._view.setSpectrumSpinBoxValue(currenSpectrum)
         self._updatePlot()
 
     def onWorkspaceSliderMoved(self, position):
@@ -124,10 +126,11 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[position]
         currentWs = mtd[currentWsName]
+        currenSpectrum = self._model.getSpectrum(currentWsName)
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSliderPosition(currenSpectrum)
         self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(0)
+        self._view.setSpectrumSpinBoxValue(currenSpectrum)
         self._updatePlot()
 
     def onWorkspaceSpinBoxChanged(self, value):
@@ -141,10 +144,11 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[value]
         currentWs = mtd[currentWsName]
+        currenSpectrum = self._model.getSpectrum(currentWsName)
         self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSliderPosition(currenSpectrum)
         self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
-        self._view.setSpectrumSpinBoxValue(0)
+        self._view.setSpectrumSpinBoxValue(currenSpectrum)
         self._updatePlot()
 
     def onSpectrumSliderMoved(self, position):
@@ -155,6 +159,10 @@ class SuperplotPresenter:
             position (int): slider position
         """
         self._view.setSpectrumSpinBoxValue(position)
+        workspaceNames = self._model.getWorkspaces()
+        currentWsIndex = self._view.getWorkspaceSliderPosition()
+        currentWsName = workspaceNames[currentWsIndex]
+        self._model.setSpectrum(currentWsName, position)
         self._updatePlot()
 
     def onSpectrumSpinBoxChanged(self, value):
@@ -165,6 +173,10 @@ class SuperplotPresenter:
             value (int): spinbox value
         """
         self._view.setSpectrumSliderPosition(value)
+        workspaceNames = self._model.getWorkspaces()
+        currentWsIndex = self._view.getWorkspaceSliderPosition()
+        currentWsName = workspaceNames[currentWsIndex]
+        self._model.setSpectrum(currentWsName, value)
         self._updatePlot()
 
     def onHoldButtonToggled(self, state):
