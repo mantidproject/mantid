@@ -27,9 +27,8 @@ def from_normal_to_critical(critical, currentValue, newValue)->bool:
 def from_critical_to_normal(critical, currentValue, newValue)->bool:
     return (currentValue >= critical and newValue < critical)
 
+
 class MemoryView(QWidget):
-
-
     def __init__(self, parent):
         super(MemoryView, self).__init__(parent)
 
