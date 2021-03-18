@@ -463,8 +463,213 @@ LeanElasticPeaksWorkspace::getColumn(size_t index) const {
   return m_columns[index];
 }
 
-void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *) const {
-  throw Exception::NotImplementedError("");
+void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
+
+  // Number of Peaks
+  const size_t np(m_peaks.size());
+
+  // Column vectors for peaks table
+  std::vector<double> H(np);
+  std::vector<double> K(np);
+  std::vector<double> L(np);
+  std::vector<double> intensity(np);
+  std::vector<double> sigmaIntensity(np);
+  std::vector<double> binCount(np);
+  std::vector<double> waveLength(np);
+  std::vector<double> scattering(np);
+  std::vector<double> dSpacing(np);
+  std::vector<int> runNumber(np);
+  std::vector<int> peakNumber(np);
+  std::vector<double> tbar(np);
+  std::vector<double> goniometerMatrix(9 * np);
+  std::vector<std::string> shapes(np);
+
+  // Populate column vectors
+  size_t maxShapeJSONLength = 0;
+  for (size_t i = 0; i < np; i++) {
+    LeanElasticPeak p = m_peaks[i];
+    H[i] = p.getH();
+    K[i] = p.getK();
+    L[i] = p.getL();
+    intensity[i] = p.getIntensity();
+    sigmaIntensity[i] = p.getSigmaIntensity();
+    binCount[i] = p.getBinCount();
+    waveLength[i] = p.getWavelength();
+    scattering[i] = p.getScattering();
+    dSpacing[i] = p.getDSpacing();
+    runNumber[i] = p.getRunNumber();
+    peakNumber[i] = p.getPeakNumber();
+    tbar[i] = p.getAbsorptionWeightedPathLength();
+    {
+      Matrix<double> gm = p.getGoniometerMatrix();
+      goniometerMatrix[9 * i] = gm[0][0];
+      goniometerMatrix[9 * i + 1] = gm[1][0];
+      goniometerMatrix[9 * i + 2] = gm[2][0];
+      goniometerMatrix[9 * i + 3] = gm[0][1];
+      goniometerMatrix[9 * i + 4] = gm[1][1];
+      goniometerMatrix[9 * i + 5] = gm[2][1];
+      goniometerMatrix[9 * i + 6] = gm[0][2];
+      goniometerMatrix[9 * i + 7] = gm[1][2];
+      goniometerMatrix[9 * i + 8] = gm[2][2];
+    }
+    const std::string shapeJSON = p.getPeakShape().toJSON();
+    shapes[i] = shapeJSON;
+    if (shapeJSON.size() > maxShapeJSONLength) {
+      maxShapeJSONLength = shapeJSON.size();
+    }
+  }
+
+  // Start Peaks Workspace in Nexus File
+  const std::string specifyInteger = "An integer";
+  const std::string specifyDouble = "A double";
+  const std::string specifyString = "A string";
+  file->makeGroup("peaks_workspace", "NXentry",
+                  true); // For when peaksWorkspace can be loaded
+
+  // Coordinate system
+  file->writeData("coordinate_system", static_cast<uint32_t>(m_coordSystem));
+
+  // Write out the Qconvention
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string m_QConvention = this->getConvention();
+  file->putAttr("QConvention", m_QConvention);
+
+  // H column
+  file->writeData("column_1", H);
+  file->openData("column_1");
+  file->putAttr("name", "H");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // K column
+  file->writeData("column_2", K);
+  file->openData("column_2");
+  file->putAttr("name", "K");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // L column
+  file->writeData("column_3", L);
+  file->openData("column_3");
+  file->putAttr("name", "L");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Intensity column
+  file->writeData("column_4", intensity);
+  file->openData("column_4");
+  file->putAttr("name", "Intensity");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Sigma Intensity column
+  file->writeData("column_5", sigmaIntensity);
+  file->openData("column_5");
+  file->putAttr("name", "Sigma Intensity");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Bin Count column
+  file->writeData("column_6", binCount);
+  file->openData("column_6");
+  file->putAttr("name", "Bin Count");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Wave Length Column
+  file->writeData("column_7", waveLength);
+  file->openData("column_7");
+  file->putAttr("name", "Wave Length");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Scattering Column
+  file->writeData("column_8", scattering);
+  file->openData("column_8");
+  file->putAttr("name", "Scattering");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // D Spacing Column
+  file->writeData("column_9", dSpacing);
+  file->openData("column_9");
+  file->putAttr("name", "D Spacing");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Run Number column
+  file->writeData("column_10", runNumber);
+  file->openData("column_10");
+  file->putAttr("name", "Run Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Peak Number column
+  file->writeData("column_11", peakNumber);
+  file->openData("column_11");
+  file->putAttr("name", "Peak Number");
+  file->putAttr("interpret_as", specifyInteger);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // TBar column
+  file->writeData("column_12", tbar);
+  file->openData("column_12");
+  file->putAttr("name", "TBar");
+  file->putAttr("interpret_as", specifyDouble);
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Goniometer Matrix Column
+  std::vector<int> array_dims;
+  array_dims.emplace_back(static_cast<int>(m_peaks.size()));
+  array_dims.emplace_back(9);
+  file->writeData("column_13", goniometerMatrix, array_dims);
+  file->openData("column_13");
+  file->putAttr("name", "Goniometer Matrix");
+  file->putAttr("interpret_as", "A matrix of 3x3 doubles");
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->closeData();
+
+  // Shape
+  std::vector<int64_t> dims;
+  dims.emplace_back(np);
+  dims.emplace_back(static_cast<int>(maxShapeJSONLength));
+  const std::string name = "column_14";
+  file->makeData(name, NeXus::CHAR, dims, false);
+  file->openData(name);
+
+  auto toNexus = new char[maxShapeJSONLength * np];
+  for (size_t ii = 0; ii < np; ii++) {
+    std::string rowStr = shapes[ii];
+    for (size_t ic = 0; ic < rowStr.size(); ic++)
+      toNexus[ii * maxShapeJSONLength + ic] = rowStr[ic];
+    for (size_t ic = rowStr.size();
+         ic < static_cast<size_t>(maxShapeJSONLength); ic++)
+      toNexus[ii * maxShapeJSONLength + ic] = ' ';
+  }
+
+  file->putData((void *)(toNexus));
+
+  delete[] toNexus;
+  file->putAttr("units", "Not known"); // Units may need changing when known
+  file->putAttr("name", "Shape");
+  file->putAttr("interpret_as", specifyString);
+  file->closeData();
+
+  // QLab & QSample are calculated and do not need to be saved
+
+  file->closeGroup(); // end of peaks workpace
 }
 
 /**
