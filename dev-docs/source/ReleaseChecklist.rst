@@ -24,8 +24,8 @@ are responsible for ensuring that the work gets done.
 * :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` - Person responsible 
   for making sure that manual testing has been performed. They will ensure Mantid meets 
   quality requirements before delivery in consultation with the *Release Manager*.
-* :ref:`Release Editor <release-editor-checklist>` - Person responsible for editing the 
-  release notes and giving them a common language, layout, and collecting images.
+* :ref:`Release Editor <release-editor-checklist>` - Person responsible for ensuring the 
+  release notes are edited to give them a common language, layout, and illustrative images.
 * :ref:`Release Manager <release-manager-checklist>` - Person in charge of the go/no go 
   decision of the release. The main task is to reiterate the timeline and be the collection 
   point for information between all of the *Local Project Managers*.
@@ -70,10 +70,6 @@ Monday then the names of the days will have to be changed.
 | | **Monday**,                   | Release Day               | Blocker bug fixes, Testing, Release Notes,    | | :ref:`Release Manager <release-manager-checklist>`                     |
 | | Release Day                   |                           | Maintenance Tasks & Next release development  | | :ref:`Technical Release Manager <technical-release-manager-checklist>` |
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
-
-.. note::
-   We used to release on a Friday, but changed to a Monday as support was not available 
-   over the weekend in case issues were raised with the newly released version.
 
 .. _local-project-managers-checklist:
 
@@ -135,6 +131,9 @@ Wednesday, 2 weeks & 3 days
 ---------------------------
 
 *  Create issues for people to neaten up the release notes and add images etc.
+*  Ensure an image for the release is found to highlight the main changes for this 
+   release. This can be a collage of images if there is not a big 'headline' feature
+   or change.
 
 Tuesday, 4 days
 ---------------
@@ -176,8 +175,7 @@ Monday, 3 weeks
 
 **Clearing the project board**
 
-Go through the Zenhub project board for the release milestone (not the sprint 
-milestone), ensuring that:
+Go through the issues for the release milestone (not the sprint milestone), ensuring that:
 
 *  All issues are intended for the release.
 *  Any new issues are triaged on a daily basis, and allocated to staff.
