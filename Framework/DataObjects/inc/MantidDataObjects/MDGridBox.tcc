@@ -18,8 +18,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/math/special_functions/round.hpp>
 #include <boost/optional.hpp>
-#include <ostream>
 #include <iostream>
+#include <ostream>
 
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
 // This is okay (though would be better if it were for only that function
@@ -1323,9 +1323,8 @@ TMDE(void MDGridBox)::integrateSphere(
       continue;
     }
     // Kick off recursive search for the other cases
-    box->integrateSphere(radiusTransform, radiusSquared, signal,
-                         errorSquared, innerRadiusSquared,
-                         useOnePercentBackgroundCorrection);
+    box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
+                         innerRadiusSquared, useOnePercentBackgroundCorrection);
 
   } // (for each box)
 

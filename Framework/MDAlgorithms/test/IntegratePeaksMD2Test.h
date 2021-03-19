@@ -563,7 +563,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algC.initialize())
     TS_ASSERT(algC.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
-    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
     TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
@@ -580,7 +581,7 @@ public:
 
     // Major axis along x
     double fail_val = 0.013;
-    std::vector< double > radii = {0.05, fail_val, fail_val };
+    std::vector<double> radii = {0.05, fail_val, fail_val};
 
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
@@ -594,7 +595,6 @@ public:
     double ellipVol = (4.0 / 3.0) * M_PI * static_cast<double>(numEvents) *
                       std::accumulate(radii.begin(), radii.end(), 1.0,
                                       std::multiplies<double>());
-
 
     doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
           "NoFit", 0.0, true, false);
