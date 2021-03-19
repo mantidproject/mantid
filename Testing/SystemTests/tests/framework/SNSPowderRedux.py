@@ -84,7 +84,8 @@ class PG3Analysis(systemtesting.MantidSystemTest):
                            LowResRef=15000, RemovePromptPulseWidth=50,
                            Binning=-0.0004, BinInDspace=True, FilterBadPulses=95,
                            SaveAs="gsas and fullprof and pdfgetn", OutputDirectory=savedir,
-                           FinalDataUnits="dSpacing")
+                           FinalDataUnits="dSpacing",
+                           CleanCache=True)
 
         # load output gsas file and the golden one
         LoadGSS(Filename="PG3_4844.gsa", OutputWorkspace="PG3_4844")

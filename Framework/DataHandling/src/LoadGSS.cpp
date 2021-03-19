@@ -438,8 +438,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename, boo
   }
 
   // build instrument geometry
-  createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath, detectorIDs, totalflightpaths,
-                           twothetas);
+  createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
+                           detectorIDs, totalflightpaths, twothetas, difcs);
 
   return outputWorkspace;
 }
@@ -467,10 +467,11 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 //----------------------------------------------------------------------------------------------
 /** Create the instrument geometry with Instrument
  */
-void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
-                                       const double &primaryflightpath, const std::vector<int> &detectorids,
-                                       const std::vector<double> &totalflightpaths,
-                                       const std::vector<double> &twothetas) {
+void LoadGSS::createInstrumentGeometry(
+    const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
+    const double &primaryflightpath, const std::vector<int> &detectorids,
+    const std::vector<double> &totalflightpaths,
+    const std::vector<double> &twothetas, const std::vector<double> &difcs) {
   // Check Input
   if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()) {
     g_log.warning("Cannot create geometry, because the numbers of L2 and Polar "
@@ -533,7 +534,13 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
 
   } // ENDFOR (i: spectrum)
   workspace->setInstrument(instrument);
-}
 
+  auto &paramMap = workspace->instrumentParameters();
+  for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
+    auto detector = workspace->getDetector(i);
+    paramMap.addDouble(detector->getComponentID(), "DIFC", difcs[i]);
+  }
+}
 } // namespace DataHandling
+
 } // namespace Mantid
