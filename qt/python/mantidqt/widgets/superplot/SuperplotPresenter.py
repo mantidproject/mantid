@@ -17,11 +17,13 @@ class SuperplotPresenter:
     _view = None
     _model = None
     _canvas = None
+    _lastPlot = None
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
+        self._lastPlot = None
 
         #initial state
         figure = self._canvas.figure
@@ -105,19 +107,34 @@ class SuperplotPresenter:
     def _updatePlot(self):
         """
         Update the plot. This function overplots the memorized data with the
-        currently selected workspace and spectrum index.
+        currently selected workspace and spectrum index. It keeps a memory of
+        the last plot and removes it if is not part of the memorised data.
         """
         currentWorkspaceIndex = self._view.getWorkspaceSliderPosition()
         currentSpectrumIndex = self._view.getSpectrumSliderPosition()
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[currentWorkspaceIndex - 1]
         plottedData = self._model.getPlottedData()
-        if (currentWsName, currentSpectrumIndex) not in plottedData:
-            plottedData.append((currentWsName, currentSpectrumIndex))
 
-        figure, _ = get_plot_fig(fig=self._canvas.figure)
-        for i in plottedData:
-            plot([i[0]], spectrum_nums=[i[1]], overplot=True, fig=figure)
+        figure = self._canvas.figure
+        axes = figure.gca()
+
+        if self._lastPlot is None:
+            get_plot_fig(fig=self._canvas.figure)
+            for (ws, sp) in plottedData:
+                plot([ws], spectrum_nums=[sp], overplot=True, fig=figure)
+                self._lastPlot = (ws, sp)
+        elif self._lastPlot not in plottedData:
+            def fn(artist):
+                ws, sp = axes.get_artists_workspace_and_spec_num(artist)
+                return (ws.name(), sp) == self._lastPlot
+            axes.remove_artists_if(fn)
+            axes.relim()
+            self._canvas.draw_idle()
+        if (currentWsName, currentSpectrumIndex) not in plottedData:
+            plot([currentWsName], spectrum_nums=[currentSpectrumIndex],
+                 overplot=True, fig=figure)
+            self._lastPlot = (currentWsName, currentSpectrumIndex)
 
     def onWorkspaceSelectionChanged(self, index):
         """
@@ -201,3 +218,4 @@ class SuperplotPresenter:
         spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
         self._model.toggleData(names[wsIndex - 1], spectrumIndex)
+        self._lastPlot = (names[wsIndex - 1], spectrumIndex)
