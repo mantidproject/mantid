@@ -296,9 +296,3 @@ class GroupingTabModel(object):
 
     def get_periods(self, name):
         return self._groups_and_pairs[name].periods
-
-    def get_period_labels(self):
-        return self._data.period_labels
-
-    def get_num_period_cycles(self):
-        return self._data.num_period_cycles
