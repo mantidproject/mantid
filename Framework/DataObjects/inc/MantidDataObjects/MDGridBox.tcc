@@ -1218,43 +1218,39 @@ TMDE(void MDGridBox)::integrateSphere(
     coord_t out[nd];
     radiusTransform.apply(vertexCoord, out);
 
-    // Figure out which box this vertex belongs to so that we can track the
-    // maximum and minimum distance bewteen box corners and peak center
-    size_t boxLinearID =
-        Kernel::Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
-    if (out[0] > distmaxs[boxLinearID])
-      distmaxs[boxLinearID] = out[0];
-    if (out[0] < distmins[boxLinearID])
-      distmins[boxLinearID] = out[0];
-
-    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
-      // Yes, this vertex is contained within the integration volume!
-      //        std::cout << "vertex at " << vertexCoord[0] << ", " <<
-      //        vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
-
-      // This vertex is shared by up to 2^nd adjacent boxes (left-right along
-      // each dimension).
-      for (size_t neighb = 0; neighb < maxVertices; ++neighb) {
-        // The index of the box is the same as the vertex, but maybe - 1 in each
-        // possible combination of dimensions
-        bool badIndex = false;
-        // Build the index of the neighbor
-        for (size_t d = 0; d < nd; d++) {
-          boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >>
-                                          d); //(this does a bitwise and mask,
-          // shifted back to 1 to subtract 1
-          // to the dimension)
-          // Taking advantage of the fact that unsigned(0)-1 = some large
-          // POSITIVE number.
-          if (boxIndex[d] >= split[d]) {
-            badIndex = true;
-            break;
-          }
+    // This vertex is shared by up to 2^nd adjacent boxes (left-right along
+    // each dimension).
+    for (size_t neighb = 0; neighb < maxVertices; ++neighb) {
+      // The index of the box is the same as the vertex, but maybe - 1 in each
+      // possible combination of dimensions
+      bool badIndex = false;
+      // Build the index of the neighbor
+      for (size_t d = 0; d < nd; d++) {
+        boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >>
+                                        d); //(this does a bitwise and mask,
+        // shifted back to 1 to subtract 1
+        // to the dimension)
+        // Taking advantage of the fact that unsigned(0)-1 = some large
+        // POSITIVE number.
+        if (boxIndex[d] >= split[d]) {
+          badIndex = true;
+          break;
         }
-        if (!badIndex) {
-          // Convert to linear index
-          size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
-              nd, boxIndex, indexMaker);
+      }
+      // Figure out which box this vertex belongs to so that we can track the
+      // maximum and minimum distance bewteen box corners and peak center
+      if (!badIndex) {
+        // Convert to linear index
+        size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+            nd, boxIndex, indexMaker);
+        // Track the maximum and minimum distance bewteen box corners
+        // and peak center
+        if (out[0] > distmaxs[linearIndex])
+          distmaxs[linearIndex] = out[0];
+        if (out[0] < distmins[linearIndex])
+          distmins[linearIndex] = out[0];
+        // Check if we need to increment the counter
+        if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
           // So we have one more vertex touching this box that is contained in
           // the integration volume. Whew!
           verticesContained[linearIndex]++;
