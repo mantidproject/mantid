@@ -10,13 +10,12 @@ from Muon.GUI.Common.muon_base import MuonBase
 
 class MuonDiff(MuonBase):
     """
-        Simple structure to store information on a difference.
-
-        - The name is set at initialization and after that cannot be changed.
-        - The difference has two properies positive and negative used in the calculation
-        - The difference can be between two groups or two pairs only
-        - The workspace associated to the difference can be set, but must be of type MuonWorkspaceWrapper.
-        """
+    Simple structure to store information on a difference.
+    - The name is set at initialization and after that cannot be changed.
+    - The difference has two properies positive and negative used in the calculation
+    - The difference can be between two groups or two pairs only
+    - The workspace associated to the difference can be set, but must be of type MuonWorkspaceWrapper.
+    """
 
     def __init__(self, diff_name, positive, negative, group_or_pair="group", periods=[1]):
         super(MuonDiff, self).__init__(diff_name, periods)

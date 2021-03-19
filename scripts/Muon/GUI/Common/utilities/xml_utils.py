@@ -130,12 +130,7 @@ def load_grouping_from_XML(filename):
 
     for i, pair_name in enumerate(pair_names):
         if pair_periods:
-            pair_periods_converted = []
-            for p in pair_periods[i]:
-                try:
-                    pair_periods_converted += [int(p)]
-                except ValueError:
-                    continue
+            pair_periods_converted = _convert_periods_to_int(pair_periods[i])
         else:
             pair_periods_converted = [1]
 
@@ -147,12 +142,7 @@ def load_grouping_from_XML(filename):
 
     for i, diff_name in enumerate(diff_names):
         if diff_periods:
-            diff_periods_converted = []
-            for p in diff_periods[i]:
-                try:
-                    diff_periods_converted += [int(p)]
-                except ValueError:
-                    continue
+            diff_periods_converted = _convert_periods_to_int(diff_periods[i])
         else:
             diff_periods_converted = [1]
         diffs += [MuonDiff(diff_name, diff_groups[i][0], diff_groups[i][1], diff_groups[i][2], diff_periods_converted)]
@@ -197,3 +187,16 @@ def _get_pairs_from_XML(root):
             except AttributeError:
                 pass
     return names, groups, alphas, periods
+
+
+def _convert_periods_to_int(periods):
+    converted_periods = []
+    if periods:
+        for p in periods:
+            try:
+                converted_periods += [int(p)]
+            except ValueError:
+                continue
+    else:
+        converted_periods = [1]
+    return converted_periods
