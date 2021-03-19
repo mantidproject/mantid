@@ -9,7 +9,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -77,7 +79,7 @@ private:
   void findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Output PeaksWorkspace
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
+  Mantid::API::IPeaksWorkspace_sptr peakWS;
 
   /// Estimated radius of peaks. Boxes closer than this are rejected
   coord_t peakRadiusSquared;
