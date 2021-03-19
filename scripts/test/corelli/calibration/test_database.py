@@ -13,7 +13,7 @@ from os import path, remove
 import pathlib
 import shutil
 import tempfile
-from typing import List, Optional
+from typing import List
 import unittest
 
 from mantid import AnalysisDataService, config
@@ -342,10 +342,10 @@ class TestCorelliDatabase(unittest.TestCase):
             r"""create a database with mock calibration files"""
             dir_path = tempfile.mkdtemp()
             path = pathlib.Path(dir_path)
-            for day_stamp in day_stamps:
-                file_path = path / f'calibration_corelli_{day_stamp}.nxs.h5'
+            for daystamp in day_stamps:
+                file_path = path / f'calibration_corelli_{daystamp}.nxs.h5'
                 with open(str(file_path), 'w') as fp:
-                    pass  # the calibration file is empty :)
+                    fp.write('mock')
             try:
                 yield dir_path
             finally:
