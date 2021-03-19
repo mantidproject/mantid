@@ -336,19 +336,24 @@ The plot shown above can be generated from the following script:
                                          infotype='dspacing')
     strain = diagnostics.collect_peaks('diag_dspacing', 'strain', donor='diag_fitted')
 
-    fig, ax = diagnostics.plot_peakd('strain', 1.2615, drange=(0, 200000))
+    fig, ax = diagnostics.plot_peakd('strain', 1.2615, drange=(0, 200000), plot_regions=True, show_bad_cnt=True)
+
+To plot the relative strain for multiple peaks, an array of positions can be passed instead of a single value.
+For example, using ``peakpositions`` in place of ``1.2615`` in the above example results in the relative strain for
+all peaks being plotted as shown below.
+
+.. figure:: /images/VULCAN_relstrain_all.png
 
 The vertical lines shown in the plot are drawn between detector regions and can be used to report the
 count of bad pixels found in each region. The solid vertical line indicates the start of a region,
 while the dashed vertical line indicates the end of a region. The vertical lines can be turned off
 with ``plot_regions=False`` and displaying the number of bad counts for each region can also be disabled
-with ``show_bad_cnt=False``.
+with ``show_bad_cnt=False``. When ``plot_regions=False`` but ``show_bad_cnt=True``, a single count of bad
+pixels over the entire range is shown at the bottom center of the plot.
 
 As seen in the above example, the x-range of the plot can be narrowed down using the ``drange`` option,
 which accepts a tuple of the starting detector ID and ending detector ID to plot.
 
 To adjust the horizontal bars above and below the mean, a percent can be passed to the ``threshold`` option.
-
-To plot the relative strain for multiple peaks, an array of positions can be passed instead of a single value.
 
 .. categories:: Calibration

@@ -105,8 +105,10 @@ def __get_regions(x):
     return regions
 
 
-def __get_bad_counts(y, mean, band=0.01):
+def __get_bad_counts(y, mean=None, band=0.01):
     # Counts pixels in y that are outside of +/- mean*band
+    if not mean:
+        mean = np.mean(y)
     top = mean + mean * band
     bot = mean - mean * band
     return len(y[(y > top) | (y < bot)])
@@ -398,13 +400,20 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
-    :param peak_positions: List of peak positions
+    :param peak_positions: List of peak positions, or single peak position
+    :param plot_regions: Whether to show vertical lines indicating detector regions
+    :param show_bad_cnt: Whether to display number of pixels that fall outside of threshold from mean
+    :param drange: A tuple of the minimum and maximum detector ID to plot
+    :param threshold: The fraction of the mean to display horizontal bars at +/- the mean
     :return: plot, plot axes
     """
+
+    ylabel = "rel strain"
 
     peaks = peak_positions
     if isinstance(peak_positions, float):
         peaks = [peak_positions]
+        ylabel += " (peak {})".format(peaks[0])
 
     if len(peaks) == 0:
         raise ValueError("Expected one or more peak positions")
@@ -414,26 +423,27 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
 
     fig, ax = plt.subplots()
     ax.set_xlabel("detector IDs")
-    if len(peaks) > 1:
-        ax.set_xlabel("rel strain")
-    else:
-        ax.set_ylabel("rel strain (peak {})".format(peaks[0]))
+    ax.set_ylabel(ylabel)
 
     # Hold the mean and stddev for each peak to compute total at end
     means = []
     stddevs = []
+    lens = []
 
     ax.set_prop_cycle(color=colormap_as_plot_color(len(peaks), cmap=plt.get_cmap("jet")))
 
     regions = []
     region_cnts = []
+    plotted_peaks = []
 
     # Use full detector range if not specified
-    if drange == (0, 0):
-        drange = (0, int(np.max(mtd[str(wksp)].detectorInfo().detectorIDs())))
+    max_detid = int(np.max(mtd[str(wksp)].detectorInfo().detectorIDs()))
+    if drange == (0, 0) or drange > (0, max_detid):
+        drange = (0, max_detid)
 
     # Plot data for each peak position
     for peak in peaks:
+        print("Processing peak position {}".format(peak))
         single = extract_peak_info(wksp, 'single', peak)
 
         # get x and y arrays from single peak ws
@@ -443,44 +453,40 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
         # filter out any nans
         y_val = y[~np.isnan(y)]
 
-        # skip if y was entirely nans
-        if len(y_val) == 0:
-            print("No valid y-data was found for peak {}, so it will be skipped".format(peak))
-            continue
-
         try:
             dstart = single.yIndexOfX(drange[0])
-        except:
+        except ValueError:
             # If detector id not valid, find next closest range
             dstart = single.yIndexOfX(int(x.searchsorted(drange[0])) - 1)
             print("Specified starting detector range was not valid, adjusted to detID={}".format(dstart))
         try:
             dend = single.yIndexOfX(drange[1])
-        except:
+        except ValueError:
             dend = single.yIndexOfX(int(x.searchsorted(drange[1])))
             print("Specified ending detector range was not valid, adjusted to detID={}".format(dend))
 
         cut_id = (dstart, dend)
 
+        # skip if y was entirely nans or detector slice yields empty region
+        if len(y_val) == 0 or len(y_val[cut_id[0]:cut_id[1]]) == 0:
+            print("No valid y-data was found for peak {}, so it will be skipped".format(peak))
+            continue
+
+        lens.append(len(y_val[cut_id[0]:cut_id[1]]))
         means.append(np.mean(y_val[cut_id[0]:cut_id[1]]))
         stddevs.append(np.std(y_val[cut_id[0]:cut_id[1]]))
 
         # Draw vertical lines between detector regions
-        if plot_regions and not regions:
+        if not regions:
             regions = __get_regions(x[cut_id[0]:cut_id[1]])
-            for region in regions:
-                ax.axvline(x=region[0])
-                ax.axvline(x=region[1])
-                det_start = single.yIndexOfX(region[0])
-                det_end = single.yIndexOfX(region[1])
-                cnt = __get_bad_counts(y[det_start:det_end], means[len(means)-1], band=threshold)
-                region_cnts.append(cnt)
-                if show_bad_cnt:
-                    mid_region = 0.5 * (region[1] - region[0])
-                    ax.annotate("{}".format(cnt), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
-                                clip_on=True, ha="center")
+            if plot_regions:
+                for region in regions:
+                    ax.axvline(x=region[0], lw=0.5, color="black")
+                    ax.axvline(x=region[1], lw=0.5, color="black", ls="--")
+        plotted_peaks.append(peak)
 
-        ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None", label="{:0.6f}".format(peak))
+        ax.plot(x[cut_id[0]:cut_id[1]], y[cut_id[0]:cut_id[1]], marker="x", linestyle="None",
+                label="{:0.6f}".format(peak))
         ax.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
     # If every peak had nans, raise error
@@ -488,9 +494,31 @@ def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drang
         raise RuntimeError("No valid peak data was found for provided peak positions")
 
     # Calculate total mean and stddev of all peaks
-    total_mean = np.mean(means)
-    total_stddev = np.std(stddevs)
+    total_mean = np.sum(np.asarray(means) * np.asarray(lens)) / np.sum(lens)
+    sq_sum = np.sum(lens * (np.power(stddevs, 2) + np.power(means, 2)))
+    total_stddev = np.sqrt((sq_sum / np.sum(lens)) - total_mean ** 2)
 
+    # Get bad counts in regions over all peaks using the total mean
+    if show_bad_cnt and regions:
+        region_cnts = [0] * len(regions)
+        for peak in plotted_peaks:
+            single = extract_peak_info(wksp, 'single', peak)
+            y = single.dataY(0)
+            for i in range(len(regions)):
+                det_start = single.yIndexOfX(regions[i][0])
+                det_end = single.yIndexOfX(regions[i][1])
+                region_cnts[i] += __get_bad_counts(y[det_start:det_end], mean=total_mean, band=threshold)
+
+        # Display the bad counts for each region, or the overall count
+        if plot_regions:
+            for i in range(len(regions)):
+                mid_region = regions[i][0] + 0.5 * (regions[i][1] - regions[i][0])
+                ax.annotate("{}".format(region_cnts[i]), xy=(mid_region, 0.05), xycoords=('data', 'axes fraction'),
+                            clip_on=True, ha="center")
+        else:
+            overall_cnt = int(np.sum(region_cnts))
+            ax.annotate("{}".format(overall_cnt), xy=(0.5, 0.05), xycoords=('axes fraction', 'axes fraction'),
+                        clip_on=True, ha="center")
     # Draw solid line at mean
     ax.axhline(total_mean, color="black", lw=2.5)  # default lw=1.5
 

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from mantid.api import mtd
 from mantid.simpleapi import CompareWorkspaces, DeleteWorkspaces, LoadNexusProcessed, UnGroupWorkspace
 from Calibration.tofpd import diagnostics
 
