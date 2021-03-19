@@ -1170,11 +1170,9 @@ TMDE(void MDGridBox)::integrateSphere(
 
   // Setup caches for distances dmax and dmin
   auto distmaxs = new coord_t[numBoxes];
+  memset(distmaxs, 0, numBoxes * sizeof(coord_t));
   auto distmins = new coord_t[numBoxes];
-  for (size_t i = 0; i < numBoxes; ++i) {
-    distmaxs[i] = 0.0;
-    distmins[i] = 1e16;
-  }
+  memset(distmins, 65535, numBoxes * sizeof(coord_t));
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
