@@ -102,7 +102,7 @@ class HB2AReduceTest(unittest.TestCase):
             os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.dat")))
         # Test for saving GSAS data file.
         HB2AReduce_ws = HB2AReduce(
-            'HB2A_exp0660_scan0016.dat',
+            'HB2A_exp0735_scan0016.dat',
             Vanadium='HB2A_exp0644_scan0018.dat',
             IndividualDetectors=True,
             OutputFormat='GSAS',
