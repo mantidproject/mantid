@@ -322,8 +322,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
         # Caching options
-        self._cache_dirs = [os.path.abspath(me.strip()) for me in self.getProperty("CacheDir").value.split(',')]
-        self._cache_dir = self._cache_dirs[0] if self._cache_dirs else ""
+        cache_dir_string = self.getProperty('CacheDir').value  # comma-delimited string representation of list
+        if bool(cache_dir_string):
+            self._cache_dirs = [os.path.abspath(me.strip()) for me in cache_dir_string.split(',')]
+            self._cache_dir = self._cache_dirs[0] if self._cache_dirs else ""
+        else:
+            self._cache_dirs = []
+            self._cache_dir = ""
         self._clean_cache = self.getProperty("CleanCache").value
 
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
