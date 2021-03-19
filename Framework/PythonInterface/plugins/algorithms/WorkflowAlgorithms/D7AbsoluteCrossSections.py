@@ -155,6 +155,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
 
+        self.declareProperty('ClearCache', True,
+                             doc='Whether or not to delete intermediate workspaces.')
+
     def _data_structure_helper(self, ws):
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         measurements = set()
@@ -537,7 +540,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-                DeleteWorkspace(det_efficiency_ws)
+                if self.getProperty('ClearCache').value:
+                    DeleteWorkspace(det_efficiency_ws)
             else:
                 CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
         else:
@@ -550,7 +554,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if normalisation_method != 'None':
                 det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
                 output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
-                DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
+                if self.getProperty('ClearCache').value:
+                    DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
             else:
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         self._set_units(output_ws, nMeasurements)
