@@ -164,6 +164,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
+        self.declareProperty('AbsoluteNormalisation', True,
+                             doc='Whether or not to perform normalisation to absolute units.')
+
         self.declareProperty(name="SelfAttenuationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Numerical", "MonteCarlo", "User"]),
@@ -660,12 +663,14 @@ class PolDiffILLReduction(PythonAlgorithm):
                 to_remove.append(ws_name)
             # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
             # and normalised to 0.404 barns times the number of moles of V:
-            Divide(LHSWorkspace=norm_name, RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
+            if self.getProperty('AbsoluteNormalisation').value:
+                Divide(LHSWorkspace=norm_name, RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
             if self.getPropertyValue('OutputTreatment') == 'Average':
                 self._merge_polarisations(ws, average_detectors=True)
-            Divide(LHSWorkspace=norm_name, RHSWorkspace=ws, OutputWorkspace=ws)
+            if self.getProperty('AbsoluteNormalisation').value:
+                Divide(LHSWorkspace=norm_name, RHSWorkspace=ws, OutputWorkspace=ws)
         DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
@@ -676,6 +681,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
 
         for entry in mtd[ws]:
+            if not self.getProperty('AbsoluteNormalisation').value:
+                unit = 'Intensity'
+                unit_symbol = ''
             entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
