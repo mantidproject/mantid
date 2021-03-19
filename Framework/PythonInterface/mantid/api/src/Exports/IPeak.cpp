@@ -59,12 +59,6 @@ void export_IPeak() {
   register_ptr_to_python<IPeak *>();
 
   class_<IPeak, boost::noncopyable>("IPeak", no_init)
-      .def("getDetectorID", &IPeak::getDetectorID, arg("self"),
-           "Get the ID of the :class:`~mantid.geometry.Detector` at the center "
-           "of the peak")
-      .def("setDetectorID", &IPeak::setDetectorID, (arg("self"), arg("det_id")),
-           "Set the :class:`~mantid.geometry.Detector` ID and look up and "
-           "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
       .def("getIntMNP", &IPeak::getIntMNP, arg("self"),

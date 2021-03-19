@@ -165,8 +165,7 @@ Peak::Peak(const Peak &other)
  * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
-    : BasePeak(ipeak), m_detectorID(ipeak.getDetectorID()),
-      m_initialEnergy(ipeak.getInitialEnergy()),
+    : BasePeak(ipeak), m_initialEnergy(ipeak.getInitialEnergy()),
       m_finalEnergy(ipeak.getFinalEnergy()) {
   const auto *peak = dynamic_cast<const Peak *>(&ipeak);
   if (!peak)
@@ -579,6 +578,14 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   const auto distance =
       object->shape()->distance(Geometry::Track(samplePos, detectorDir));
   return detectorDir * distance;
+}
+
+double Peak::getValueByColName(std::string name) const {
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  if (name == "detid")
+    return double(this->getDetectorID());
+  else
+    return BasePeak::getValueByColName(name);
 }
 
 /** After creating a peak using the Q in the lab frame,
