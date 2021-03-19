@@ -109,7 +109,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         for ws in self.focus_results:
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-7
+        self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
