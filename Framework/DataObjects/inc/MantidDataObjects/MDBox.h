@@ -15,7 +15,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace DataObjects {

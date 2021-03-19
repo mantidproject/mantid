@@ -17,7 +17,6 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include <boost/optional.hpp>
 #include <iosfwd>
 #include <mutex>
 

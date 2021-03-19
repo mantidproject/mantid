@@ -9,7 +9,6 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include <algorithm>
-#include <boost/optional.hpp>
 #include <functional>
 #include <memory>
 #include <string>

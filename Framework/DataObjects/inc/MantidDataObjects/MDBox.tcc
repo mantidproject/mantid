@@ -12,7 +12,6 @@
 #include "MantidKernel/DiskBuffer.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
-#include <boost/optional.hpp>
 #include <cmath>
 #include <numeric>
 
