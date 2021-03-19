@@ -12,8 +12,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include <iostream>
-
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::API::CoordTransform;

@@ -13,7 +13,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <Poco/File.h>
-#include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

@@ -18,7 +18,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/math/special_functions/round.hpp>
 #include <boost/optional.hpp>
-#include <iostream>
 #include <ostream>
 
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
