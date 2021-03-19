@@ -245,7 +245,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     # Magnetic component
                     data_nsf_magnetic = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
                     data_sf_magnetic = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
-                    data_average_magnetic = 0.5 * (data_nsf_magnetic + data_sf_magnetic)
+                    data_average_magnetic = WeightedMean(InputWorkspace1=data_nsf_magnetic,
+                                                         InputWorkspace2=data_sf_magnetic)
                     # Nuclear coherent component
                     data_nuclear = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
                                     - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
