@@ -244,13 +244,25 @@ void FindPeaksMD::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Extract needed data from the workspace's experiment info */
-void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
-                                     const IMDWorkspace_sptr &ws) {
+void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei) {
   // Instrument associated with workspace
   inst = ei->getInstrument();
   // Find the run number
   m_runNumber = ei->getRunNumber();
 
+  // Find the goniometer rotation matrix
+  m_goniometer =
+      Mantid::Kernel::Matrix<double>(3, 3, true); // Default IDENTITY matrix
+  try {
+    m_goniometer = ei->mutableRun().getGoniometerMatrix();
+  } catch (std::exception &e) {
+    g_log.warning() << "Error finding goniometer matrix. It will not be set in "
+                       "the peaks found.\n";
+    g_log.warning() << e.what() << '\n';
+  }
+}
+
+void FindPeaksMD::checkWorkspaceDims(const IMDWorkspace_sptr &ws) {
   // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
   std::string dim0 = ws->getDimension(0)->getName();
   if (dim0 == "H") {
@@ -264,17 +276,6 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
   else
     throw std::runtime_error(
         "Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
-
-  // Find the goniometer rotation matrix
-  m_goniometer =
-      Mantid::Kernel::Matrix<double>(3, 3, true); // Default IDENTITY matrix
-  try {
-    m_goniometer = ei->mutableRun().getGoniometerMatrix();
-  } catch (std::exception &e) {
-    g_log.warning() << "Error finding goniometer matrix. It will not be set in "
-                       "the peaks found.\n";
-    g_log.warning() << e.what() << '\n';
-  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -298,6 +299,17 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
     g_log.notice() << "Error creating peak at " << Q << " because of '"
                    << e.what() << "'. Peak will be skipped.\n";
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create and add a LeanElasticPeak to the output workspace
+ *
+ * @param Q :: Q_lab or Q_sample, depending on workspace
+ * @param binCount :: bin count to give to the peak.
+ */
+void FindPeaksMD::addLeanElasticPeak(const V3D &Q, const double binCount) {
+  auto p = this->createLeanElasticPeak(Q, binCount);
+  peakWS->addPeak(*p);
 }
 
 /**
@@ -358,6 +370,26 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
   return p;
 }
 
+/**
+ * Creates a Peak object from Q & bin count
+ * */
+std::shared_ptr<DataObjects::LeanElasticPeak>
+FindPeaksMD::createLeanElasticPeak(const Mantid::Kernel::V3D &Q,
+                                   const double binCount) {
+  std::shared_ptr<DataObjects::LeanElasticPeak> p;
+  if (dimType == QSAMPLE) {
+    p = std::make_shared<LeanElasticPeak>(Q);
+
+  } else {
+    throw std::invalid_argument(
+        "Cannot find peaks unless the dimension is QSAMPLE");
+  }
+
+  p->setBinCount(binCount);
+  // Save the run number found before.
+  p->setRunNumber(m_runNumber);
+  return p;
+}
 //----------------------------------------------------------------------------------------------
 /** Integrate the peaks of the workspace using parameters saved in the algorithm
  * class
@@ -500,50 +532,10 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   uint16_t nexp = ws->getNumExperimentInfo();
 
-  if (nexp == 0)
-    throw std::runtime_error(
-        "No instrument was found in the MDEventWorkspace. Cannot find peaks.");
-
-  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
-    this->readExperimentInfo(ei, std::dynamic_pointer_cast<IMDWorkspace>(ws));
-
-    Geometry::InstrumentRayTracer tracer(inst);
-    // Copy the instrument, sample, run to the peaks workspace.
-    peakWS->copyExperimentInfoFrom(ei.get());
-
+  if (nexp == 0) {
     // --- Convert the "boxes" to peaks ----
     for (auto box : peakBoxes) {
-      //  If no events from this experimental contribute to the box then skip
-      if (nexp > 1) {
-        auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
-        const std::vector<MDE> &events = mdbox->getEvents();
-        if (std::none_of(events.cbegin(), events.cend(),
-                         [&iexp, &nexp](MDE event) {
-                           return event.getRunIndex() == iexp ||
-                                  event.getRunIndex() >= nexp;
-                         }))
-          continue;
-      }
-
-      // If multiple goniometers than use the average one from the
-      // events in the box, that matches this runIndex, this assumes
-      // the events are added in same order as the goniometers
-      if (ei->run().getNumGoniometers() > 1) {
-        const std::vector<MDE> &events =
-            dynamic_cast<MDBox<MDE, nd> *>(box)->getEvents();
-        double sum = 0;
-        double count = 0;
-        for (const auto &event : events) {
-          if (event.getRunIndex() == iexp) {
-            sum += event.getGoniometerIndex();
-            count++;
-          }
-        }
-        m_goniometer = ei->mutableRun().getGoniometerMatrix(lrint(sum / count));
-      }
       // The center of the box = Q in the lab frame
-
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
       box->calculateCentroid(boxCenter);
@@ -554,42 +546,107 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Q of the centroid of the box
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
-      // The "bin count" used will be the box density or the number of events in
-      // the box
+      // The "bin count" used will be the box density.
       double binCount = box->getSignalNormalized() * m_densityScaleFactor;
       if (isMDEvent)
         binCount = static_cast<double>(box->getNPoints());
 
-      try {
-        auto p = this->createPeak(Q, binCount, tracer);
-        if (m_addDetectors) {
-          auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
-          if (!mdBox) {
-            throw std::runtime_error("Failed to cast box to MDBoxBase");
-          }
-          addDetectors(*p, *mdBox);
-        }
-        if (p->getDetectorID() != -1) {
-          if (m_edge > 0) {
-            if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
-                           m_edge))
-              peakWS->addPeak(*p);
-            ;
-          } else {
-            peakWS->addPeak(*p);
-          }
-          g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
-                              << Q[1] << ", " << Q[2] << "\n";
-        }
-      } catch (std::exception &e) {
-        g_log.notice() << "Error creating peak at " << Q << " because of '"
-                       << e.what() << "'. Peak will be skipped.\n";
-      }
+      // Create the peak
+      addLeanElasticPeak(Q, binCount);
 
-      // Report progress for each box found.
+      // Report progres for each box found.
       prog->report("Adding Peaks");
 
     } // for each box found
+  } else {
+    for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
+      this->readExperimentInfo(ei);
+
+      Geometry::InstrumentRayTracer tracer(inst);
+      // Copy the instrument, sample, run to the peaks workspace.
+      peakWS->copyExperimentInfoFrom(ei.get());
+
+      // --- Convert the "boxes" to peaks ----
+      for (auto box : peakBoxes) {
+        //  If no events from this experimental contribute to the box then skip
+        if (nexp > 1) {
+          auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
+          const std::vector<MDE> &events = mdbox->getEvents();
+          if (std::none_of(events.cbegin(), events.cend(),
+                           [&iexp, &nexp](MDE event) {
+                             return event.getRunIndex() == iexp ||
+                                    event.getRunIndex() >= nexp;
+                           }))
+            continue;
+        }
+
+        // If multiple goniometers than use the average one from the
+        // events in the box, that matches this runIndex, this assumes
+        // the events are added in same order as the goniometers
+        if (ei->run().getNumGoniometers() > 1) {
+          const std::vector<MDE> &events =
+              dynamic_cast<MDBox<MDE, nd> *>(box)->getEvents();
+          double sum = 0;
+          double count = 0;
+          for (const auto &event : events) {
+            if (event.getRunIndex() == iexp) {
+              sum += event.getGoniometerIndex();
+              count++;
+            }
+          }
+          m_goniometer =
+              ei->mutableRun().getGoniometerMatrix(lrint(sum / count));
+        }
+        // The center of the box = Q in the lab frame
+
+#ifndef MDBOX_TRACK_CENTROID
+        coord_t boxCenter[nd];
+        box->calculateCentroid(boxCenter);
+#else
+        const coord_t *boxCenter = box->getCentroid();
+#endif
+
+        // Q of the centroid of the box
+        V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
+
+        // The "bin count" used will be the box density or the number of events
+        // in the box
+        double binCount = box->getSignalNormalized() * m_densityScaleFactor;
+        if (isMDEvent)
+          binCount = static_cast<double>(box->getNPoints());
+
+        try {
+          auto p = this->createPeak(Q, binCount, tracer);
+          if (m_addDetectors) {
+            auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
+            if (!mdBox) {
+              throw std::runtime_error("Failed to cast box to MDBoxBase");
+            }
+            addDetectors(*p, *mdBox);
+          }
+          if (p->getDetectorID() != -1) {
+            if (m_edge > 0) {
+              if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
+                             m_edge))
+                peakWS->addPeak(*p);
+              ;
+            } else {
+              peakWS->addPeak(*p);
+            }
+            g_log.information() << "Add new peak with Q-center = " << Q[0]
+                                << ", " << Q[1] << ", " << Q[2] << "\n";
+          }
+        } catch (std::exception &e) {
+          g_log.notice() << "Error creating peak at " << Q << " because of '"
+                         << e.what() << "'. Peak will be skipped.\n";
+        }
+
+        // Report progress for each box found.
+        prog->report("Adding Peaks");
+
+      } // for each box found
+    }
   }
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
                  << '\n';
@@ -696,18 +753,7 @@ void FindPeaksMD::findPeaksHisto(
     }
   }
 
-  if (ws->getNumExperimentInfo() == 0)
-    throw std::runtime_error(
-        "No instrument was found in the workspace. Cannot find peaks.");
-
-  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
-    this->readExperimentInfo(ei, std::dynamic_pointer_cast<IMDWorkspace>(ws));
-    Geometry::InstrumentRayTracer tracer(inst);
-
-    // Copy the instrument, sample, run to the peaks workspace.
-    peakWS->copyExperimentInfoFrom(ei.get());
-
+  if (ws->getNumExperimentInfo() == 0) {
     // --- Convert the "boxes" to peaks ----
     for (auto index : peakBoxes) {
       // The center of the box = Q in the lab frame
@@ -720,35 +766,75 @@ void FindPeaksMD::findPeaksHisto(
       double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
       // Create the peak
-      addPeak(Q, binCount, tracer);
+      addLeanElasticPeak(Q, binCount);
 
       // Report progres for each box found.
       prog->report("Adding Peaks");
 
     } // for each box found
+  } else {
+    for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
+      this->readExperimentInfo(ei);
+      Geometry::InstrumentRayTracer tracer(inst);
+
+      // Copy the instrument, sample, run to the peaks workspace.
+      peakWS->copyExperimentInfoFrom(ei.get());
+
+      // --- Convert the "boxes" to peaks ----
+      for (auto index : peakBoxes) {
+        // The center of the box = Q in the lab frame
+        VMD boxCenter = ws->getCenter(index);
+
+        // Q of the centroid of the box
+        V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
+
+        // The "bin count" used will be the box density.
+        double binCount =
+            ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
+
+        // Create the peak
+        addPeak(Q, binCount, tracer);
+
+        // Report progres for each box found.
+        prog->report("Adding Peaks");
+
+      } // for each box found
+    }
   }
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
                  << '\n';
-}
+} // namespace MDAlgorithms
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindPeaksMD::exec() {
 
-  bool AppendPeaks = getProperty("AppendPeaks");
-
-  // Output peaks workspace, create if needed
-  peakWS = getProperty("OutputWorkspace");
-  if (!peakWS || !AppendPeaks)
-    peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
-
   // The MDEventWorkspace as input
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
+  checkWorkspaceDims(inWS);
   MDHistoWorkspace_sptr inMDHW =
       std::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
   IMDEventWorkspace_sptr inMDEW =
       std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+
+  bool AppendPeaks = getProperty("AppendPeaks");
+
+  uint16_t nexp = 0;
+  if (inMDHW)
+    nexp = inMDHW->getNumExperimentInfo();
+  else if (inMDEW)
+    nexp = inMDEW->getNumExperimentInfo();
+
+  // Output peaks workspace, create if needed
+  peakWS = getProperty("OutputWorkspace");
+  if (!peakWS || !AppendPeaks) {
+    if (nexp == 0)
+      peakWS = LeanElasticPeaksWorkspace_sptr(new LeanElasticPeaksWorkspace());
+    else
+      peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
+  }
 
   // Other parameters
   double PeakDistanceThreshold = getProperty("PeakDistanceThreshold");

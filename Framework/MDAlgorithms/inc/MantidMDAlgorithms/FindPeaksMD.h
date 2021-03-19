@@ -60,17 +60,24 @@ private:
   void exec() override;
 
   /// Read member variables from experiment info
-  void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei,
-                          const Mantid::API::IMDWorkspace_sptr &ws);
+  void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei);
+  void checkWorkspaceDims(const Mantid::API::IMDWorkspace_sptr &ws);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
   void addPeak(const Mantid::Kernel::V3D &Q, const double binCount,
                const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
+  void addLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount);
+
+  /// Adds a peak based on Q, bin count
   std::shared_ptr<DataObjects::Peak>
   createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
              const Geometry::InstrumentRayTracer &tracer);
+
+  /// Adds a peak based on Q, bin count
+  std::shared_ptr<DataObjects::LeanElasticPeak>
+  createLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount);
 
   /// Run find peaks on an MDEventWorkspace
   template <typename MDE, size_t nd>
