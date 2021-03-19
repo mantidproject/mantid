@@ -559,11 +559,24 @@ public:
 
   void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol_LongEllipse() {
 
-    // Test an ellipsoid against theoretical vol
-    size_t numEvents = 2000000;
-    V3D pos(0.0, 0.0, 0.0); // peak position
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING(algC.initialize())
+    TS_ASSERT(algC.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "2"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.execute());
+    TS_ASSERT(algC.isExecuted());
 
-    createMDEW();
+    // Test an ellipsoid against theoretical vol
+    size_t numEvents = 200000;
+    V3D pos(0.0, 0.0, 0.0); // peak position
 
     // Major axis along x
     double fail_val = 0.013;
