@@ -1160,7 +1160,7 @@ TMDE(void MDGridBox)::integrateSphere(
   //                        and its children to save computing time
   //          others: recursively search the child boxes as the current box is
   //                  partially overlapping with the integration volume, in
-  //                  otherwords, some of its child box is within the regio
+  //                  otherwords, some of its child box is within the region
   //                  (base case), and some of its child box is outside the
   //                  integration volume.
 
@@ -1170,9 +1170,11 @@ TMDE(void MDGridBox)::integrateSphere(
 
   // Setup caches for distances dmax and dmin
   auto distmaxs = new coord_t[numBoxes];
-  memset(distmaxs, 0.0, numBoxes * sizeof(coord_t));
   auto distmins = new coord_t[numBoxes];
-  memset(distmins, 65535.0, numBoxes * sizeof(coord_t));
+  for (size_t i = 0; i < numBoxes; ++i) {
+    distmaxs[i] = 0.0;
+    distmins[i] = 1e16;
+  }
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
