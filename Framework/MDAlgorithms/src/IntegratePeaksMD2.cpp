@@ -649,9 +649,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
       }
       ws->getBox()->integrateSphere(
-        getRadiusSq, static_cast<coord_t>(adaptiveRadius * adaptiveRadius),
-        signal, errorSquared, 0.0 /* innerRadiusSquared */,
-        useOnePercentBackgroundCorrection);
+          getRadiusSq,
+          static_cast<coord_t>(PeakRadiusVector[i] * PeakRadiusVector[i]),
+          signal, errorSquared, 0.0 /* innerRadiusSquared */,
+          useOnePercentBackgroundCorrection);
       //
     } else {
       CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
