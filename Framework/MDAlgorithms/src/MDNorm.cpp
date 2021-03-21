@@ -30,6 +30,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -476,6 +477,7 @@ void MDNorm::exec() {
   this->setProperty("OutputDataWorkspace", outputDataWS);
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
+  std::cout << "[GLOBAL] Number of Exp Info = " << m_numExptInfos << "\n";
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
        expInfoIndex++) {
@@ -1136,6 +1138,33 @@ void MDNorm::cacheDimensionXValues() {
   }
 }
 
+inline Mantid::Kernel::DblMatrix MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
+                                const Geometry::SymmetryOperation &so) {
+    // Make it to a method!
+    DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
+    DblMatrix soMatrix(3, 3);
+    auto v = so.transformHKL(V3D(1, 0, 0));
+    soMatrix.setColumn(0, v);
+    v = so.transformHKL(V3D(0, 1, 0));
+    soMatrix.setColumn(1, v);
+    v = so.transformHKL(V3D(0, 0, 1));
+    soMatrix.setColumn(2, v);
+    soMatrix.Invert();
+    DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
+    Qtransform.Invert();
+
+    // ...................................................................................
+    std::cout << "[UNDERSTAND 1B] m_W = " << "\n";
+    m_W.print();
+    std::cout << "[......... ..] R =   " << "\n";
+    R.print();
+    std::cout << "[........  ..] Qtransform = " << "\n";
+    Qtransform.print();
+    std::cout << "[UNDERSTAND 1B] m_W = " << "\n";
+
+    return Qtransform;
+}
+
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
@@ -1155,19 +1184,28 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
       currentExptInfo.getLog("MDNorm_high"));
   highValues = (*highValuesLog)();
+  // ...................................................................................
+  //  std::cout << "[UNDERSTAND 1] high low values size = " << lowValues.size() << "\n";
+  //  for (auto i = 0; i < lowValues.size(); ++i)
+  //      std::cout << lowValues[i] << ", " << highValues[i] << "\n";
 
-  DblMatrix R = currentExptInfo.run().getGoniometerMatrix();
-  DblMatrix soMatrix(3, 3);
-  auto v = so.transformHKL(V3D(1, 0, 0));
-  soMatrix.setColumn(0, v);
-  v = so.transformHKL(V3D(0, 1, 0));
-  soMatrix.setColumn(1, v);
-  v = so.transformHKL(V3D(0, 0, 1));
-  soMatrix.setColumn(2, v);
-  soMatrix.Invert();
-  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-  Qtransform.Invert();
+//  // Make it to a method!
+//  DblMatrix R = currentExptInfo.run().getGoniometerMatrix();
+//  DblMatrix soMatrix(3, 3);
+//  auto v = so.transformHKL(V3D(1, 0, 0));
+//  soMatrix.setColumn(0, v);
+//  v = so.transformHKL(V3D(0, 1, 0));
+//  soMatrix.setColumn(1, v);
+//  v = so.transformHKL(V3D(0, 0, 1));
+//  soMatrix.setColumn(2, v);
+//  soMatrix.Invert();
+//  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
+//  Qtransform.Invert();
+
+  DblMatrix Qtransform = calQTransform(currentExptInfo, so);
+
   const double protonCharge = currentExptInfo.run().getProtonCharge();
+  // ... add a background protonCharge per expInfo
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mappings
@@ -1201,11 +1239,15 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);
   }
+  // ...................................................................................
+  std::cout << "[UNDERSTAND 3] Number of loops (detectors) = " << ndets << " thread safe = " << safe << "\n";
+
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
 
+  // Skip: non-existing detector, monitor and masked detector
   if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
       spectrumInfo.isMasked(i)) {
     continue;
@@ -1227,18 +1269,31 @@ for (int64_t i = 0; i < ndets; i++) {
       continue;
     }
   }
+  // [VZ QUESTION] Only diffraction can have masked detector in flux???
 
   // Intersections
+  // Confirm: same for sample and background
   this->calculateIntersections(intersections, theta, phi, Qtransform,
                                lowValues[i], highValues[i]);
+  // ...................................................................................
+  std::cout << "[INFO]  Detector " << i << " intersection is empty: " << intersections.empty() << "\n";
+  // ...................................................................................
+  // [VZ QUESTION]
+
+
   if (intersections.empty())
     continue;
   // Get solid angle for this contribution
   double solid = protonCharge;
+  // [VZ QUESTION] double background_solid = backgroundProtonCharge;
   if (haveSA) {
     solid =
         solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
   }
+
+  // ...................................................................................
+  std::cout << "[INFO] Am I diffraction? " << m_diffraction << "\n";
+
   if (m_diffraction) {
     // -- calculate integrals for the intersection --
     // momentum values at intersections
@@ -1254,14 +1309,19 @@ for (int64_t i = 0; i < ndets; i++) {
     // points in spectrum sp
     // of workspace integrFlux. The result is stored in yValues
     calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+    // [VZ QUESTION] Shall background be duplicated here?
+    // ... ...
   }
 
   // Compute final position in HKL
   // pre-allocate for efficiency and copy non-hkl dim values into place
+  // [VZ QUESTION] pos and posNew are instrument geometry related.
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
 
   auto intersectionsBegin = intersections.begin();
+  // ...................................................................................
+  std::cout << "[INFO]  Detector " << i  << " Number of intersecton = " << intersections.size() << "\n";
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
     const auto &curIntSec = *it;
     const auto &prevIntSec = *(it - 1);
@@ -1289,19 +1349,25 @@ for (int64_t i = 0; i < ndets; i++) {
       auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
       // signal = integral between two consecutive intersections
       signal = (yValues[k] - yValues[k - 1]) * solid;
+
+      // [VZ QUESTION] Background mimic: signal_background...with backgroundSolid
+
     } else {
       // transform kf to energy transfer
       pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
       // signal = energy distance between two consecutive intersections *solid
       // angle *PC
       signal = solid * delta;
+      // [VZ QUESTION] duplicate to backgroundSignal;
     }
     m_transformation.multiplyPoint(pos, posNew);
+    // [VZ QUESTION] is linIndex common to both sample and background?
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
       continue;
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
                              std::plus<signal_t>());
+    // [VZ QUESTION] mimic for backgroundSingal to backgroundSignalArray
   }
 
   prog->report();
@@ -1314,9 +1380,11 @@ if (m_accumulate) {
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
       m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  // [VZ QUESTION] mimic for background
 } else {
   std::copy(signalArray.cbegin(), signalArray.cend(),
             m_normWS->mutableSignalArray());
+  // [VZ QUESTION] mimic
 }
 m_accumulate = true;
 }

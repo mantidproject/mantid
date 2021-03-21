@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -56,6 +57,8 @@ private:
   void calcIntegralsForIntersections(const std::vector<double> &xValues,
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
+
+  Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo, const Geometry::SymmetryOperation &so);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
