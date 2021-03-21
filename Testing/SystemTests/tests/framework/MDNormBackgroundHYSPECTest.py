@@ -25,8 +25,12 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
         return ['HYS_13656_event.nxs','HYS_13657_event.nxs','HYS_13658_event.nxs']
 
     def runTest(self):
+        """ This is the old way to do MDNorm to sample, background and finally clean background from sample
+        Now it serves as a benchmark to generate expected result for enhanced MDNorm
+        """
         config.setFacility('SNS')
-        Load(Filename='HYS_13656-13658',OutputWorkspace='sum')
+
+        Load(Filename='HYS_13656',OutputWorkspace='sum')
         SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
         GenerateEventsFilter(InputWorkspace='sum',
                              OutputWorkspace='splboth',
@@ -70,11 +74,12 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                     MinValues='-11,-11,-11,-25',
                     MaxValues='11,11,11,49')
         DeleteWorkspace("split")
-        DeleteWorkspace("reduced")
+        # DeleteWorkspace("reduced")
         DeleteWorkspace("PreprocessedDetectorsWS")
         DeleteWorkspace("TOFCorrectWS")
+
         MergeMD(InputWorkspaces='md', OutputWorkspace='merged')
-        DeleteWorkspace("md")
+
         MDNorm(InputWorkspace='merged',
                Dimension0Name='QDimension1',
                Dimension0Binning='-5,0.05,5',
@@ -88,9 +93,50 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputWorkspace='result',
                OutputDataWorkspace='dataMD',
                OutputNormalizationWorkspace='normMD')
-        DeleteWorkspace("dataMD")
-        DeleteWorkspace("normMD")
-        DeleteWorkspace("merged")
+
+        # Prepare background workspace
+        # old way - use reduced_1 as the background
+        dgs_data=CloneWorkspace('reduced_1')
+        data_MDE=mtd['merged']
+
+        if mtd.doesExist('background_MDE'):
+            DeleteWorkspace('background_MDE')
+
+        for i in range(data_MDE.getNumExperimentInfo()):
+            phi, chi, omega = data_MDE.getExperimentInfo(i).run().getGoniometer().getEulerAngles('YZY')
+            AddSampleLogMultiple(Workspace=dgs_data,
+                                 LogNames='phi, chi, omega',
+                                 LogValues='{},{},{}'.format(phi,chi,omega))
+            SetGoniometer(Workspace=dgs_data, Goniometers='Universal')
+            ConvertToMD(InputWorkspace=dgs_data,
+                        QDimensions='Q3D',
+                        dEAnalysisMode='Direct',
+                        Q3DFrames="Q_sample",
+                        MinValues='-11,-11,-11,-25',
+                        MaxValues='11,11,11,49',
+                        PreprocDetectorsWS='-',
+                        OverwriteExisting=False,
+                        OutputWorkspace='background_MDE')
+
+        MDNorm(InputWorkspace='background_MDE',
+               Dimension0Name='QDimension1',
+               Dimension0Binning='-5,0.05,5',
+               Dimension1Name='QDimension2',
+               Dimension1Binning='-5,0.05,5',
+               Dimension2Name='DeltaE',
+               Dimension2Binning='-2,2',
+               Dimension3Name='QDimension0',
+               Dimension3Binning='-0.5,0.5',
+               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+               OutputWorkspace='backgroundMDH',
+               OutputDataWorkspace='background_dataMD',
+               OutputNormalizationWorkspace='background_normMD')
+        
+        clean_data=MinusMD('result','backgroundMDH')
+        SaveMD(InputWorkspace='result', Filename='/tmp/result.nxs')
+        SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background.nxs')
+        SaveMD(InputWorkspace='background_MDE', Filename='/tmp/background_data.nxs')
+
 
     def validate(self):
         self.tolerance = 1e-8
