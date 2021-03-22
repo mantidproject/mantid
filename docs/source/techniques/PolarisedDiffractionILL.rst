@@ -407,7 +407,7 @@ Container-only keys:
 - *ContainerChemicalFormula*
 - *ContainerDensity*
 
-Beam-only keys:
+Optional beam-only keys, if not user-defined will be automatically defined to be larger than the sample dimensions:
 
 - *BeamHeight*
 - *BeamWidth*

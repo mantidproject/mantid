@@ -60,7 +60,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             geometry_type = self.getPropertyValue('SampleGeometry')
             required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
             if geometry_type != 'None':
-                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity',
+                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'ContainerDensity',
                                   'ContainerChemicalFormula']
             if geometry_type == 'FlatPlate':
                 required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
@@ -68,7 +68,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if geometry_type == 'Cylinder':
                 required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
-                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
+                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius',
+                                  'ContainerOuterRadius']
 
             if self.getPropertyValue('SelfAttenuationMethod') == 'MonteCarlo':
                 required_keys += ['EventsPerPoint']
@@ -86,7 +87,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
 
-        options = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
+        options = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz',
+                   'Vanadium', 'Sample']
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -462,20 +464,26 @@ class PolDiffILLReduction(PythonAlgorithm):
         attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
         sample_geometry_type = self.getPropertyValue('SampleGeometry')
         kwargs = dict()
-        kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
-        kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
+        if 'BeamWidth' in self._sampleAndEnvironmentProperties: # else depends on the sample geometry
+            kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
         kwargs['SampleDensityType'] = 'Number Density'
         kwargs['SampleNumberDensityUnit'] = 'Formula Units'
         kwargs['ContainerDensityType'] = 'Number Density'
         kwargs['ContainerNumberDensityUnit'] = 'Formula Units'
         kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['SampleDensity'].value
         kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
+        if 'BeamHeight' in self._sampleAndEnvironmentProperties:
+            kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
+        else:
+            kwargs['BeamHeight'] = kwargs['Height'] * 1.1 # slightly larger than the sample
         kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['SampleChemicalFormula'].value
         if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
             kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerChemicalFormula'].value
             kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
         if sample_geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleWidth'] * 1.1
             kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
             kwargs['SampleAngle'] = self._sampleAndEnvironmentProperties['SampleAngle'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
@@ -484,11 +492,15 @@ class PolDiffILLReduction(PythonAlgorithm):
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
         elif sample_geometry_type == 'Cylinder':
             kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['SampleRadius'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleRadius'] * 1.1
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
         elif sample_geometry_type == 'Annulus':
             kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['SampleInnerRadius'].value
             kwargs['SampleOuterRadius'] = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
+            if 'BeamWidth' not in kwargs:
+                kwargs['BeamWidth'] = kwargs['SampleOuterRadius'] * 1.1
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
