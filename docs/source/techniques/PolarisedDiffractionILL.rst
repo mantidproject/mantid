@@ -102,11 +102,18 @@ It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7Y
 .. code-block:: python
 
    approximate_wavelength = '3.1' # Angstrom
-   D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
-                            YIGPeaksFile='D7_YIG_peaks.xml',
-                            MinimalDistanceBetweenPeaks=1.5, BankOffsets=[0,0,0],
-                            MaskedBinsRange=[-50, -25, 15], FittingMethod='None', ClearCache=False,
-                            FitOutputWorkspace='fitting_test')
+   D7YIGPositionCalibration(
+		Filenames='402652:403041',
+   #		InputWorkspace='conjoined_input_fitting_test',
+		ApproximateWavelength=approximate_wavelength,
+		YIGPeaksFile='D7_YIG_peaks.xml',
+		MinimalDistanceBetweenPeaks=1.5,
+		BraggPeakWidth=1.5,
+		BankOffsets=[0,0,0],
+		MaskedBinsRange=[-50, -25, 15],
+		FittingMethod='None',
+		ClearCache=False,
+		FitOutputWorkspace='fitting_test')
 
 
 **Example - D7YIGPositionCalibration - calibration at the shortest wavelength**
@@ -196,7 +203,7 @@ Transmission
         OutputWorkspace='quartz_transmission',
         AbsorberTransmissionInputWorkspace='cadmium_ws_1',
         BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        ProcessAs='Transmission'
     )
     print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
 
@@ -240,7 +247,8 @@ where :math:`f_{p}` is the flipper efficiency, currently assumed to be 1.0, and 
 and background-subtracted data with flipper states off and on respectively.
 
 The output is given in as a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the number of measured polarisation directions.
-Each workspace in the group contains a single value of the polariser-analyser efficiency per detector.
+Each workspace in the group contains a single value of the polariser-analyser efficiency per detector. The flipping ratios are also available for inspection
+in a :ref:`WorkspaceGroup <WorkspaceGroup>` named `flipping_ratios`.
 
 Workflow diagram and working example
 ------------------------------------
@@ -400,7 +408,7 @@ Sample-only keys:
 - *Height*
 
 The first three keys need to be always defined, so that the number of moles of the sample can be calculated, to ensure proper data normalisation.
-All of the density parameters are number density in formula units.
+All of the density parameters are **number density in formula units**.
 
 Container-only keys:
 
@@ -481,6 +489,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
                            'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
                            'ContainerInnerRadius':1.99, 'EventsPerPoint':1000}
 
+    calibration_file='D7_YIG_calibration.xml' # example calibration file
 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
@@ -552,6 +561,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         SelfAttenuationMethod='MonteCarlo',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=vanadium_dictionary,
+        InstrumentCalibration=calibration_file,
         ProcessAs='Vanadium'
     )
     print("The vanadium reduction output contains {} entry with {} spectra and {} bin.".format(mtd['vanadium_ws'].getNumberOfEntries(),
@@ -665,6 +675,7 @@ Sample normalisation
                          'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
                          'ContainerInnerRadius':1.99, 'ElementSize':0.5}
 
+    calibration_file = 'D7_YIG_calibration.xml'
 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
@@ -734,6 +745,8 @@ Sample normalisation
         OutputTreatment='Sum',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=vanadium_dictionary,
+        AbsoluteNormalisation=True,
+        InstrumentCalibration=calibration_file,
         ProcessAs='Vanadium'
     )
     # Sample transmission
@@ -754,8 +767,9 @@ Sample normalisation
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
-        SelfAttenuationMethod='Numerical',
         OutputTreatment='Individual',
+        InstrumentCalibration=calibration_file,
+        SelfAttenuationMethod='Numerical',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=sample_dictionary,
 	ProcessAs='Sample'
@@ -770,14 +784,14 @@ Sample normalisation
         CrossSectionSeparationMethod='None',
         NormalisationMethod='Vanadium',
         VanadiumInputWorkspace='vanadium_ws',
-        OutputTreatment='Individual',
+        OutputTreatment='Sum',
         OutputUnits='TwoTheta',
         ScatteringAngleBinSize=1.0, # degrees
         SampleAndEnvironmentProperties=sample_dictionary,
         AbsoluteUnitsNormalisation=False
     )
 
-    print("The normalised sample data contains {} entries with {} spectra and {} bins.".format(mtd['sample_norm'].getNumberOfEntries(),
+    print("The normalised sample data contains {} entries with {} spectrum and {} bins.".format(mtd['sample_norm'].getNumberOfEntries(),
 	      mtd['sample_norm'][0].getNumberHistograms(), mtd['sample_norm'][0].blocksize()))
 
 
@@ -787,7 +801,7 @@ Output:
 
    Sample transmission is 0.962
    The reduced sample data contains 12 entries with 132 spectra and 1 bins.
-   The normalised sample data contains 12 entries with 1 spectra and 132 bins.
+   The normalised sample data contains 6 entries with 1 spectrum and 134 bins.
 
 .. testcleanup:: ExPolarisedDifffractionSampleFull
 
