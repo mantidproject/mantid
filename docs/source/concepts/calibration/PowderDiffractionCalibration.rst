@@ -295,8 +295,8 @@ A mask can also be applied with a ``MaskWorkspace`` to hide pixels from the plot
 Relative Strain
 ###############
 
-Plotting the relative strain of the d-spacing for a peak to the nominal d value can be used as
-another method to check the calibration consistency at the pixel level. The relative strain
+Plotting the relative strain of the d-spacing for a peak to the nominal d value (:math:`\frac{observed}{expected}`)
+can be used as another method to check the calibration consistency at the pixel level. The relative strain
 is plotted along the Y-axis for each detector pixel, with the mean and standard deviation reported
 on the plot. A solid black line is drawn at the mean, and two dashed lines are drawn above and below
 the mean by a threshold percentage (one percent of the mean by default). This can be used to determine

@@ -4,17 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from mantid.plots.resampling_image.samplingimage import imshow_sampling
-from mantid.plots.datafunctions import get_axes_labels
-from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
-from mantid.plots.utility import colormap_as_plot_color
-from mantid.api import WorkspaceFactory
+from typing import Union
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from matplotlib.collections import PatchCollection
 import matplotlib.offsetbox as pltbox
 import numpy as np
+
+from mantid.api import WorkspaceFactory
+from mantid.dataobjects import TableWorkspace, Workspace2D
+from mantid.plots.datafunctions import get_axes_labels
+from mantid.plots.resampling_image.samplingimage import imshow_sampling
+from mantid.plots.utility import colormap_as_plot_color
+from mantid.simpleapi import CalculateDIFC, LoadDiffCal, mtd
 
 
 # Diamond peak positions in d-space which may differ from actual sample
@@ -84,24 +86,33 @@ def _get_difc_ws(wksp, instr_ws=None):
     return difc_ws
 
 
-def __get_regions(x):
-    # Returns a list of tuples with start,stop indices
-    # indicating a detector region
+def __get_regions(x: np.ndarray):
+    """
+    Find the beginning and end of all sequences in x
+    Ex: [1, 2, 3, 5, 6, 8, 9] will return [(1, 3), (5, 6), (8, 9)]
+    :param x: Array of detector IDs (in ascending order)
+    :return: List of tuples with start,stop indices to mark detector regions
+    """
     regions = []
-    lower = np.asarray((x+1)[:-1], dtype=int)
-    upper = np.asarray((x-1)[1:], dtype=int)
-    gaps = lower<=upper
+    # Compute a +/- 1 shift in indices and compare them to find gaps in the sequence
+    lower = np.asarray((x + 1)[:-1], dtype=int)
+    upper = np.asarray((x - 1)[1:], dtype=int)
+    gaps = lower <= upper
     lower, upper = lower[gaps], upper[gaps]
     i = 0
+    # Use the start and stop of each gap to find sequential regions instead
     for start, stop in zip(lower, upper):
         if i == 0:
-            regions.append((int(np.min(x)), int(start-1)))
+            # Starting edge case - the start of x until the start of the first gap
+            regions.append((int(np.min(x)), int(start - 1)))
         else:
-            regions.append((int(upper[i-1]+1), int(start-1)))
+            # Mark the region between the end of the previous gap and the start of the next gap
+            regions.append((int(upper[i - 1] + 1), int(start - 1)))
         i = i + 1
-    # Add ending region if there was atleast one region found:
+    # Add ending region if there was at least one region found:
     if i > 0:
-        regions.append((int(upper[i-1]+1), int(np.max(x))))
+        # Ending edge case: the end of the last gap until the end of the input
+        regions.append((int(upper[i - 1] + 1), int(np.max(x))))
     return regions
 
 
@@ -265,20 +276,23 @@ def difc_plot2d(calib_new, calib_old=None, instr_ws=None, mask=None, vrange=(0,1
     return fig, ax
 
 
-def __calculate_strain(obs, exp: np.ndarray):
-    return np.asarray(list(obs.values())[1:-2]) / exp
+def __calculate_strain(obs: dict, exp: np.ndarray):
+    """Computes the fraction of observed d-spacing values to expected (diamond) peak positions"""
+    return __calculate_dspacing(obs) / exp
 
 
-def __calculate_difference(obs, exp: np.ndarray):
-    obs_ndarray = np.asarray(list(obs.values())[1:-2])
-    return np.abs(obs_ndarray - exp) / exp
+def __calculate_difference(obs: dict, exp: np.ndarray):
+    """Calculate the difference between d-spacing values and expected d-spacing values"""
+    return np.abs(__calculate_dspacing(obs) - exp) / exp
 
 
-def __calculate_dspacing(obs):
+def __calculate_dspacing(obs: dict):
+    """Extract the dspacing values from a row in output dspace table workspace from PDCalibration"""
+    # Trim the table row since this is from the output of PDCalibration, so remove detid, chisq and normchisq columns
     return np.asarray(list(obs.values())[1:-2])
 
 
-def __create_outputws(donor, numSpec, numPeaks):
+def __create_outputws(donor: Union[str, Workspace2D], numSpec, numPeaks):
     '''The resulting workspace needs to be added to the ADS'''
     # convert the d-space table to a Workspace2d
     if donor:
@@ -291,7 +305,17 @@ def __create_outputws(donor, numSpec, numPeaks):
     return output
 
 
-def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
+def collect_peaks(wksp: Union[str, TableWorkspace], outputname: str, donor: Union[str, Workspace2D] = None,
+                  infotype: str = 'strain'):
+    """
+    Calculate different types of information for each peak position in wksp and create a new Workspace2D
+    where each column is a peak position and each row is the info for each workspace index in donor
+    :param wksp: Input TableWorkspace (i.e, dspacing table from PDCalibration)
+    :param outputname: Name of the Workspace2D to create with the information
+    :param donor: Name of the donor Workspace2D, used to create the shape of the output
+    :param infotype: 'strain', 'difference', or 'dpsacing' to specify which kind of data to output
+    :return: Created Workspace2D with fractional difference, relative difference, or dspacing values
+    """
     if infotype not in ['strain', 'difference', 'dspacing']:
         raise ValueError('Do not know how to calculate "{}"'.format(infotype))
 
@@ -321,8 +345,19 @@ def collect_peaks(wksp, outputname: str, donor=None, infotype: str = 'strain'):
     return mtd[outputname]
 
 
-def collect_fit_result(wksp, outputname: str, peaks, donor=None, infotype: str = 'centre', chisq_max: float = 1.e4):
-    '''This assumes that the input is sorted by wsindex then peakindex'''
+def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks, donor: Union[str, Workspace2D] = None,
+                       infotype: str = 'centre', chisq_max: float = 1.e4):
+    """
+    Extracts different information about fit results from a TableWorkspace and places into a Workspace2D
+    This assumes that the input is sorted by wsindex then peakindex
+    :param wksp: Input TableWorkspace from PDCalibration or FitPeaks (should have infotype as a column)
+    :param outputname: Name of output Workspace2D created
+    :param peaks: Array of peak positions
+    :param donor: Optional Workspace2D to use to determine output size
+    :param infotype: Type of fit information to extract ("centre", "width", "height", or "intensity")
+    :param chisq_max: Max chisq value that should be included in output, data gets set to nan if above this
+    :return: Created Workspace2D with infotype extracted from wksp
+    """
     KNOWN_COLUMNS = ['centre', 'width', 'height', 'intensity']
     if infotype not in KNOWN_COLUMNS:
         raise ValueError(f'Do not know how to extract "{infotype}"')
@@ -353,14 +388,14 @@ def collect_fit_result(wksp, outputname: str, peaks, donor=None, infotype: str =
     mtd.addOrReplace(outputname, output)
 
 
-def extract_peak_info(wksp, outputname: str, peak_position: float):
-    '''
+def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_position: float):
+    """
     Extract information about a single peak from a Workspace2D. The input workspace is expected to have
     common x-axis of observed d-spacing. The y-values and errors are extracted.
 
     The output workspace will be a single spectra with the x-axis being the detector-id. The y-values
     and errors are extracted from the input workspace.
-    '''
+    """
     # confirm that the input is a workspace pointer
     wksp = mtd[str(wksp)]
     numSpec = wksp.getNumberHistograms()
@@ -396,7 +431,8 @@ def extract_peak_info(wksp, outputname: str, peak_position: float):
     return mtd[outputname]
 
 
-def plot_peakd(wksp, peak_positions, plot_regions=True, show_bad_cnt=True, drange=(0,0), threshold=0.01):
+def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True, show_bad_cnt=True, drange=(0, 0),
+               threshold=0.01):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
