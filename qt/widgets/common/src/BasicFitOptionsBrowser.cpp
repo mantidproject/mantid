@@ -8,9 +8,6 @@
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IFuncMinimizer.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -18,25 +15,46 @@
 
 #include <QVBoxLayout>
 
+namespace {
+
+using namespace Mantid::API;
+
+static int DEFAULT_MAX_ITERATIONS = 500;
+static QString DEFAULT_MINIMIZER = "Levenberg-Marquardt";
+static QStringList EVALUATION_TYPES = {"CentrePoint", "Histogram"};
+static QStringList FITTING_MODES = {"Sequential", "Simultaneous"};
+
+QStringList convertToQStringList(std::vector<std::string> const &vec) {
+  QStringList list;
+  std::transform(
+      vec.cbegin(), vec.cend(), std::back_inserter(list),
+      [](std::string const &str) { return QString::fromStdString(str); });
+  return list;
+}
+
+QStringList minimizers() {
+  return convertToQStringList(FuncMinimizerFactory::Instance().getKeys());
+}
+
+QStringList costFunctions() {
+  return convertToQStringList(CostFunctionFactory::Instance().getKeys());
+}
+
+int defaultMinimizerIndex() {
+  auto const index = minimizers().indexOf(DEFAULT_MINIMIZER);
+  return index >= 0 ? index : 0;
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- * @param fitType :: The type of the underlying fitting algorithm.
- */
-BasicFitOptionsBrowser::BasicFitOptionsBrowser(QWidget *parent,
-                                               FittingMode fitType)
-    : QWidget(parent), m_fittingTypeProp(nullptr), m_minimizer(nullptr),
-      m_decimals(6), m_fittingType(fitType) {
-  // create m_browser
+BasicFitOptionsBrowser::BasicFitOptionsBrowser(QWidget *parent)
+    : QWidget(parent), m_fittingMode(nullptr), m_maxIterations(nullptr),
+      m_minimizer(nullptr), m_costFunction(nullptr), m_evaluationType(nullptr) {
   createBrowser();
   createProperties();
-
-  auto *layout = new QVBoxLayout(this);
-  layout->addWidget(m_browser);
-  layout->setContentsMargins(0, 0, 0, 0);
 }
 
 BasicFitOptionsBrowser::~BasicFitOptionsBrowser() {
@@ -44,116 +62,85 @@ BasicFitOptionsBrowser::~BasicFitOptionsBrowser() {
   m_browser->unsetFactoryForManager(m_enumManager);
 }
 
-/**
- * Create the Qt property browser and set up property managers.
- */
 void BasicFitOptionsBrowser::createBrowser() {
-  /* Create property managers: they create, own properties, get and set values
-   */
   m_intManager = new QtIntPropertyManager(this);
   m_enumManager = new QtEnumPropertyManager(this);
 
-  // create editor factories
   auto *spinBoxFactory = new QtSpinBoxFactory(this);
   auto *comboBoxFactory = new QtEnumEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
-  // assign factories to property managers
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
 
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(enumChanged(QtProperty *)));
+
+  auto *layout = new QVBoxLayout(this);
+  layout->addWidget(m_browser);
+  layout->setContentsMargins(0, 0, 0, 0);
 }
 
-/**
- * @brief Initialize the fitting type property. Show in the browser
- * only if user can switch fit type.
- */
-void BasicFitOptionsBrowser::initFittingTypeProp() {
-  m_fittingTypeProp = m_enumManager->addProperty("Fitting Mode");
-  QStringList types;
-  types << "Sequential"
-        << "Simultaneous";
-  m_enumManager->setEnumNames(m_fittingTypeProp, types);
-  m_browser->addProperty(m_fittingTypeProp);
-}
-
-/**
- * Create browser's QtProperties
- */
 void BasicFitOptionsBrowser::createProperties() {
-  initFittingTypeProp();
-  createCommonProperties();
-  switchFitType();
+  createFittingModeProperty();
+  createMaxIterationsProperty();
+  createMinimizerProperty();
+  createCostFunctionProperty();
+  createEvaluationTypeProperty();
 }
 
-void BasicFitOptionsBrowser::createCommonProperties() {
-  // Create MaxIterations property
+void BasicFitOptionsBrowser::createFittingModeProperty() {
+  m_fittingMode = m_enumManager->addProperty("Fitting Mode");
+  m_enumManager->setEnumNames(m_fittingMode, FITTING_MODES);
+  m_browser->addProperty(m_fittingMode);
+
+  emitFittingModeChanged();
+}
+
+void BasicFitOptionsBrowser::createMaxIterationsProperty() {
   m_maxIterations = m_intManager->addProperty("Max Iterations");
-  {
-    m_intManager->setValue(m_maxIterations, 500);
-    m_intManager->setMinimum(m_maxIterations, 0);
-    m_browser->addProperty(m_maxIterations);
 
-    addProperty("MaxIterations", m_maxIterations,
-                &BasicFitOptionsBrowser::getIntProperty,
-                &BasicFitOptionsBrowser::setIntProperty);
-  }
+  m_intManager->setValue(m_maxIterations, DEFAULT_MAX_ITERATIONS);
+  m_intManager->setMinimum(m_maxIterations, 0);
+  m_browser->addProperty(m_maxIterations);
 
-  // Set up the minimizer property.
+  addProperty("MaxIterations", m_maxIterations,
+              &BasicFitOptionsBrowser::getIntProperty,
+              &BasicFitOptionsBrowser::setIntProperty);
+}
+
+void BasicFitOptionsBrowser::createMinimizerProperty() {
   m_minimizer = m_enumManager->addProperty("Minimizer");
-  {
-    // Get names of registered minimizers from the factory
-    std::vector<std::string> minimizerOptions =
-        Mantid::API::FuncMinimizerFactory::Instance().getKeys();
-    QStringList minimizers;
-    for (auto &minimizerOption : minimizerOptions) {
-      minimizers << QString::fromStdString(minimizerOption);
-    }
 
-    m_enumManager->setEnumNames(m_minimizer, minimizers);
-    int i =
-        m_enumManager->enumNames(m_minimizer).indexOf("Levenberg-Marquardt");
-    if (i >= 0) {
-      m_enumManager->setValue(m_minimizer, i);
-    }
-    m_browser->addProperty(m_minimizer);
-    addProperty("Minimizer", m_minimizer,
-                &BasicFitOptionsBrowser::getStringEnumProperty,
-                &BasicFitOptionsBrowser::setStringEnumProperty);
-  }
+  m_enumManager->setEnumNames(m_minimizer, minimizers());
+  m_enumManager->setValue(m_minimizer, defaultMinimizerIndex());
+  m_browser->addProperty(m_minimizer);
 
-  // Create cost function property
+  addProperty("Minimizer", m_minimizer,
+              &BasicFitOptionsBrowser::getStringEnumProperty,
+              &BasicFitOptionsBrowser::setStringEnumProperty);
+}
+
+void BasicFitOptionsBrowser::createCostFunctionProperty() {
   m_costFunction = m_enumManager->addProperty("Cost Function");
-  {
-    // Get names of registered cost functions from the factory
-    std::vector<std::string> costOptions =
-        Mantid::API::CostFunctionFactory::Instance().getKeys();
-    QStringList costFunctions;
-    // Store them in the m_minimizer enum property
-    for (auto &costOption : costOptions) {
-      costFunctions << QString::fromStdString(costOption);
-    }
-    m_enumManager->setEnumNames(m_costFunction, costFunctions);
-    m_browser->addProperty(m_costFunction);
-    addProperty("CostFunction", m_costFunction,
-                &BasicFitOptionsBrowser::getStringEnumProperty,
-                &BasicFitOptionsBrowser::setStringEnumProperty);
-  }
 
-  // Create EvaluationType property
+  m_enumManager->setEnumNames(m_costFunction, costFunctions());
+  m_browser->addProperty(m_costFunction);
+
+  addProperty("CostFunction", m_costFunction,
+              &BasicFitOptionsBrowser::getStringEnumProperty,
+              &BasicFitOptionsBrowser::setStringEnumProperty);
+}
+
+void BasicFitOptionsBrowser::createEvaluationTypeProperty() {
   m_evaluationType = m_enumManager->addProperty("Evaluation Type");
-  {
-    QStringList evaluationTypes;
-    evaluationTypes << "CentrePoint"
-                    << "Histogram";
-    m_enumManager->setEnumNames(m_evaluationType, evaluationTypes);
-    m_browser->addProperty(m_evaluationType);
-    addProperty("EvaluationType", m_evaluationType,
-                &BasicFitOptionsBrowser::getStringEnumProperty,
-                &BasicFitOptionsBrowser::setStringEnumProperty);
-  }
+
+  m_enumManager->setEnumNames(m_evaluationType, EVALUATION_TYPES);
+  m_browser->addProperty(m_evaluationType);
+
+  addProperty("EvaluationType", m_evaluationType,
+              &BasicFitOptionsBrowser::getStringEnumProperty,
+              &BasicFitOptionsBrowser::setStringEnumProperty);
 }
 
 void BasicFitOptionsBrowser::addProperty(
@@ -165,11 +152,6 @@ void BasicFitOptionsBrowser::addProperty(
   m_setters[prop] = setter;
 }
 
-/**
- * Set a new value to a Fit's property.
- * @param name :: The name of a Fit's property.
- * @param value :: The new value as a string.
- */
 void BasicFitOptionsBrowser::setProperty(const QString &name,
                                          const QString &value) {
   if (!m_propertyNameMap.contains(name)) {
@@ -181,88 +163,76 @@ void BasicFitOptionsBrowser::setProperty(const QString &name,
   (this->*f)(prop, value);
 }
 
-/**
- * Update the browser when an enum property changes.
- * @param prop :: Property that changed its value.
- */
+QString BasicFitOptionsBrowser::getProperty(const QString &name) const {
+  if (!m_propertyNameMap.contains(name)) {
+    throw std::runtime_error("Property " + name.toStdString() +
+                             " isn't supported by the browser.");
+  }
+  auto prop = m_propertyNameMap[name];
+  auto f = m_getters[prop];
+  return (this->*f)(prop);
+}
+
 void BasicFitOptionsBrowser::enumChanged(QtProperty *prop) {
-  if (prop == m_fittingTypeProp) {
-    switchFitType();
+  if (prop == m_fittingMode) {
+    emitFittingModeChanged();
   }
 }
 
-/**
- * Switch the current fit type according to the value in the FitType property.
- */
-void BasicFitOptionsBrowser::switchFitType() {
-  const auto fittingMode = getCurrentFittingType();
-  if (fittingMode == FittingMode::SIMULTANEOUS) {
-    emit changedToSimultaneousFitting();
-  } else {
+void BasicFitOptionsBrowser::emitFittingModeChanged() {
+  switch (getFittingMode()) {
+  case FittingMode::SEQUENTIAL:
     emit changedToSequentialFitting();
+    return;
+  case FittingMode::SIMULTANEOUS:
+    emit changedToSimultaneousFitting();
+    return;
+  default:
+    throw std::runtime_error(
+        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
   }
 }
 
-/**
- * Get the value of an integer algorithm property.
- * @param prop :: The corresponding QtProperty.
- */
+void BasicFitOptionsBrowser::setIntProperty(QtProperty *prop,
+                                            QString const &value) {
+  m_intManager->setValue(prop, value.toInt());
+}
+
 QString BasicFitOptionsBrowser::getIntProperty(QtProperty *prop) const {
   return QString::number(m_intManager->value(prop));
 }
 
-/**
- * Set a new value of an integer algorithm property.
- * @param prop :: The corresponding QtProperty.
- * @param value :: The new value.
- */
-void BasicFitOptionsBrowser::setIntProperty(QtProperty *prop,
-                                            const QString &value) {
-  m_intManager->setValue(prop, value.toInt());
-}
-
-/**
- * Get the value of a string algorithm property with predefined set of values.
- * @param prop :: The corresponding QtProperty.
- */
-QString BasicFitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
-  int i = m_enumManager->value(prop);
-  if (i < 0)
-    return "";
-  return m_enumManager->enumNames(prop)[i];
-}
-
-/**
- * Set a new value of a string algorithm property with predefined set of values.
- * @param prop :: The corresponding QtProperty.
- * @param value :: The new value.
- */
 void BasicFitOptionsBrowser::setStringEnumProperty(QtProperty *prop,
-                                                   const QString &value) {
-  int i = m_enumManager->enumNames(prop).indexOf(value);
+                                                   QString const &value) {
+  auto const i = m_enumManager->enumNames(prop).indexOf(value);
   if (i >= 0)
     m_enumManager->setValue(prop, i);
 }
 
-/**
- * Get the current fitting type, ie which algorithm to use:
- *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
- */
-FittingMode BasicFitOptionsBrowser::getCurrentFittingType() const {
-  auto value = m_enumManager->value(m_fittingTypeProp);
-  return static_cast<FittingMode>(value);
+QString BasicFitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
+  auto const i = m_enumManager->value(prop);
+  if (i >= 0)
+    return m_enumManager->enumNames(prop)[i];
+  return "";
 }
 
-/**
- * Set the current fitting type, ie which algorithm to use:
- *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
- */
-void BasicFitOptionsBrowser::setCurrentFittingType(FittingMode fitType) {
-  if (fitType == FittingMode::SIMULTANEOUS) {
-    m_enumManager->setValue(m_fittingTypeProp, 1);
-  } else {
-    m_enumManager->setValue(m_fittingTypeProp, 0);
+void BasicFitOptionsBrowser::setFittingMode(FittingMode fittingMode) {
+  switch (fittingMode) {
+  case FittingMode::SEQUENTIAL:
+    m_enumManager->setValue(m_fittingMode, 0);
+    return;
+  case FittingMode::SIMULTANEOUS:
+    m_enumManager->setValue(m_fittingMode, 1);
+    return;
+  default:
+    throw std::invalid_argument(
+        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
   }
+}
+
+FittingMode BasicFitOptionsBrowser::getFittingMode() const {
+  auto const value = m_enumManager->value(m_fittingMode);
+  return static_cast<FittingMode>(value);
 }
 
 } // namespace MantidWidgets

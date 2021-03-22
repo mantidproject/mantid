@@ -66,8 +66,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(
       m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(
-          nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)) {
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(nullptr)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
@@ -145,18 +144,14 @@ void FitScriptGeneratorView::setFitBrowserOptions(
 }
 
 void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
-  if (fittingMode == FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)
-    throw std::invalid_argument(
-        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
-
-  m_fitOptionsBrowser->setCurrentFittingType(fittingMode);
+  m_fitOptionsBrowser->setFittingMode(fittingMode);
 }
 
 void FitScriptGeneratorView::subscribePresenter(
     IFitScriptGeneratorPresenter *presenter) {
   m_presenter = presenter;
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               m_fitOptionsBrowser->getCurrentFittingType());
+                               m_fitOptionsBrowser->getFittingMode());
 }
 
 void FitScriptGeneratorView::onRemoveClicked() {
