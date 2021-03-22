@@ -1074,8 +1074,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
 
   const double tolerance = getProperty("Tolerance");
   for (int i = 0; i < tws1->getNumberPeaks(); i++) {
-    const IPeak &peak1 = tws1->getPeak(i);
-    const IPeak &peak2 = tws2->getPeak(i);
+    const Peak &peak1 = tws1->getPeak(i);
+    const Peak &peak2 = tws2->getPeak(i);
     for (size_t j = 0; j < tws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = tws1->getColumn(j);
       std::string name = col->name();

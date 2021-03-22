@@ -98,7 +98,7 @@ public:
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
-  double getValueByColName(std::string colName) const;
+  virtual double getValueByColName(std::string colName) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;

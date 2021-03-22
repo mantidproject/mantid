@@ -100,24 +100,6 @@ void LeanElasticPeak::setWavelength(double wavelength) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Set the detector ID of the pixel at the centre of the peak and look up and
- * cache values related to it. It also adds it to the list of contributing
- * detectors for this peak but does NOT remove the old centre.
- */
-void LeanElasticPeak::setDetectorID(int) {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak::setDetectorID(): Can't set detectorID on "
-      "LeanElasticPeak");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get the ID of the detector at the center of the peak  */
-int LeanElasticPeak::getDetectorID() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak::getDetectorID(): no detector ID on LeanElasticPeak");
-}
-
-//----------------------------------------------------------------------------------------------
 /** Return a shared ptr to the detector at center of peak. */
 Geometry::IDetector_const_sptr LeanElasticPeak::getDetector() const {
   throw Exception::NotImplementedError(

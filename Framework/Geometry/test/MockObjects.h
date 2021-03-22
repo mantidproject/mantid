@@ -64,8 +64,6 @@ Mock IPeak
 ------------------------------------------------------------*/
 class MockIPeak : public Mantid::Geometry::IPeak {
 public:
-  MOCK_CONST_METHOD0(getDetectorID, int());
-  MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
   MOCK_CONST_METHOD0(getReferenceFrame,
                      std::shared_ptr<const Geometry::ReferenceFrame>());

@@ -57,9 +57,6 @@ public:
   // Construct a peak from a reference to the interface
   explicit LeanElasticPeak(const Geometry::IPeak &ipeak);
 
-  void setDetectorID(int) override;
-  int getDetectorID() const override;
-
   Geometry::IDetector_const_sptr getDetector() const override;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
