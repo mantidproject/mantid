@@ -22,15 +22,33 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     _sampleAndEnvironmentProperties = None
 
     @staticmethod
-    def _max_value_per_detector(ws):
+    def _max_value_per_detector(ws, one_per_detector=True):
+        CloneWorkspace(InputWorkspace=ws, OutputWorkspace=ws+'_clone')
         if isinstance(mtd[ws], WorkspaceGroup):
             max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
                                          mtd[ws].getNumberOfEntries()))
+            err_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
+                                         mtd[ws].getNumberOfEntries()))
             for entry_no, entry in enumerate(mtd[ws]):
                 max_values[:, entry_no] = entry.extractY().T
+                err_values[:, entry_no] = entry.extractE().T
         else:
             max_values = mtd[ws].extractY().T
-        return np.amax(max_values, axis=1)
+            err_values = mtd[ws].extractE().T
+        max_values = max_values.flatten()
+        err_values = err_values.flatten()
+        if one_per_detector:
+            indices = np.argmax(max_values, axis=1)
+            values = np.zeros(shape=len(indices))
+            errors = np.zeros(shape=len(indices))
+            for index_no, index in enumerate(indices):
+                values[index_no] = max_values[index]
+                errors[index_no] = err_values[index]
+        else:
+            index = np.argmax(max_values)
+            values = max_values[index]
+            errors = err_values[index]
+        return values, errors
 
     @staticmethod
     def _set_as_distribution(ws):
@@ -371,11 +389,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 normFactor = self._sampleAndEnvironmentProperties['NMoles'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
-                normalisationFactors = self._max_value_per_detector(cross_section_ws)
-                dataE = np.sqrt(normalisationFactors)
+                normalisationFactors, factorErrors = self._max_value_per_detector(cross_section_ws,
+                                                                                  one_per_detector=False)
                 entry0 = mtd[cross_section_ws][0]
-                CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=entry0.getNumberHistograms(), OutputWorkspace=norm_ws)
+                CreateSingleValuedWorkspace(DataValue=normalisationFactors, ErrorValue=factorErrors,
+                                            OutputWorkspace=norm_ws)
                 mtd[norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
                 mtd[norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
             to_clean.append(norm_ws)
@@ -403,11 +421,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
                     else:
-                        normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws].name())
-                        dataE = np.sqrt(normalisationFactors)
-                        if len(normalisationFactors) == 1:
-                            CreateSingleValuedWorkspace(DataValue=normalisationFactors[0],
-                                                        ErrorValue=dataE[0],
+                        normalisationFactors, dataE = self._max_value_per_detector(mtd[cross_section_ws].name(),
+                                                                                   one_per_detector=False)
+                        if isinstance(normalisationFactors, float):
+                            CreateSingleValuedWorkspace(DataValue=normalisationFactors,
+                                                        ErrorValue=dataE,
                                                         OutputWorkspace='normalisation_ws')
                         else:
                             CreateWorkspace(dataX=mtd[cross_section_ws][1].readX(0), dataY=normalisationFactors,
@@ -433,11 +451,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         norm_ws = 'norm_ws'
         # relative normalisation is always performed
         relative_norm_ws = sample_ws + '_relative_norm'
-        relative_norm_factor = self._max_value_per_detector(sample_ws)
-        dataE = np.sqrt(relative_norm_factor)
+        relative_norm_factor, dataE = self._max_value_per_detector(sample_ws, one_per_detector=False)
         entry0 = mtd[sample_ws][0]
-        CreateWorkspace(dataX=entry0.readX(0), dataY=relative_norm_factor, dataE=dataE,
-                        NSpec=entry0.getNumberHistograms(), OutputWorkspace=relative_norm_ws)
+        CreateSingleValuedWorkspace(DataValue=relative_norm_factor, ErrorValue=dataE,
+                                    OutputWorkspace=relative_norm_ws)
         mtd[relative_norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
         mtd[relative_norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
 
