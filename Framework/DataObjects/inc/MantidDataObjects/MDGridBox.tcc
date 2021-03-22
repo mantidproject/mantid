@@ -1167,8 +1167,12 @@ TMDE(void MDGridBox)::integrateSphere(
   std::vector<size_t> verticesContained(numBoxes, 0);
 
   // Setup caches for distances dmax and dmin
-  std::vector<coord_t> distmins(numBoxes, radiusSquared + 1);
-  std::vector<coord_t> distmaxs(numBoxes, 0.0);
+  auto distmaxs = new coord_t[numBoxes];
+  memset(distmaxs, 0, numBoxes * sizeof(coord_t));
+  auto distmins = new coord_t[numBoxes];
+  memset(distmins, 65535, numBoxes * sizeof(coord_t));
+  // std::vector<coord_t> distmins(numBoxes, radiusSquared + 1);
+  // std::vector<coord_t> distmaxs(numBoxes, 0.0);
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
@@ -1318,6 +1322,9 @@ TMDE(void MDGridBox)::integrateSphere(
                          innerRadiusSquared, useOnePercentBackgroundCorrection);
 
   } // (for each box)
+
+  delete[] distmaxs;
+  delete[] distmins;
 }
 
 //-----------------------------------------------------------------------------------------------
