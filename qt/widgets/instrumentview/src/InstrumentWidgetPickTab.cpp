@@ -974,7 +974,26 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
     const QString counts = integrated == InstrumentActor::INVALID_VALUE
                                ? "N/A"
                                : QString::number(integrated);
-    text += "Counts: " + counts + '\n';
+    text += "Pixel counts: " + counts + '\n';
+
+    // Display tube counts if the tube selection tool is active.
+    if (m_tab->getSelectionType() == InstrumentWidgetPickTab::Tube) {
+      int64_t tubeCounts = 0;
+
+      auto tube = componentInfo.parent(index);
+      auto tubeDetectors = componentInfo.detectorsInSubtree(tube);
+
+      for (auto detector : tubeDetectors) {
+        if (componentInfo.isDetector(detector)) {
+          const double pixelCounts = actor.getIntegratedCounts(detector);
+          if (pixelCounts != InstrumentActor::INVALID_VALUE) {
+            tubeCounts += static_cast<int64_t>(pixelCounts);
+          }
+        }
+      }
+      text += "Tube counts: " + QString::number(tubeCounts) + '\n';
+    }
+
     // display info about peak overlays
     text += actor.getParameterInfo(index);
   }

@@ -7,6 +7,7 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
+Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
@@ -16,12 +17,8 @@ New and Improved
 - Add a checkbox to freeze the rotation in the instrument viewer in Full 3D mode.
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
+- Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
 - Added memory widget to display total memory usage
-
-
-
-
-
 
 Bugfixes
 --------

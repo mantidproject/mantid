@@ -12,7 +12,8 @@ from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
-from Muon.GUI.Common.muon_group import MuonDiff, MuonGroup
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
