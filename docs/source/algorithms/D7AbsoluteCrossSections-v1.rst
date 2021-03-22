@@ -159,7 +159,7 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
-   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
@@ -176,7 +176,7 @@ Output:
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 105.8
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170.0
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 
