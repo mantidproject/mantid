@@ -15,6 +15,9 @@ New and Improved
 - When a workspace is renamed it now updates the relevant plot labels with the new workspace name.
 - Add a checkbox to freeze the rotation in the instrument viewer in Full 3D mode.
 
+
+- Added memory widget to display total memory usage
+
 Bugfixes
 --------
 
