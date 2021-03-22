@@ -28,21 +28,23 @@ class SuperplotPresenter:
         axes = figure.gca()
         artists = axes.get_tracked_artists()
         for artist in artists[:-1]:
-            ws, specNum = axes.get_artists_workspace_and_spec_num(artist)
+            ws, specIndex = \
+                    axes.get_artists_workspace_and_workspace_index(artist)
             self._model.addWorkspace(ws.name())
-            self._model.setSpectrum(ws.name(), specNum)
-            self._model.toggleData(ws.name(), specNum)
-        ws, specNum = axes.get_artists_workspace_and_spec_num(artists[-1])
+            self._model.setSpectrum(ws.name(), specIndex)
+            self._model.toggleData(ws.name(), specIndex)
+        ws, specIndex = \
+                axes.get_artists_workspace_and_workspace_index(artists[-1])
         self._model.addWorkspace(ws.name())
-        self._model.setSpectrum(ws.name(), specNum)
+        self._model.setSpectrum(ws.name(), specIndex)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
         self._view.setWorkspaceSliderPosition(len(artists))
         self._view.setWorkspaceSpinBoxValue(len(artists))
-        self._view.setSpectrumSliderMax(ws.getNumberHistograms())
-        self._view.setSpectrumSliderPosition(specNum)
-        self._view.setSpectrumSpinBoxMax(ws.getNumberHistograms())
-        self._view.setSpectrumSpinBoxValue(specNum)
+        self._view.setSpectrumSliderMax(ws.getNumberHistograms() - 1)
+        self._view.setSpectrumSliderPosition(specIndex)
+        self._view.setSpectrumSpinBoxMax(ws.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxValue(specIndex)
         self._view.setSelectedWorkspace(len(artists))
 
     def getSideView(self):
@@ -122,9 +124,9 @@ class SuperplotPresenter:
         axes = axes[0]
         axes.clear()
         for wsName, sp in plottedData:
-            axes.plot(mtd[wsName], specNum=sp)
+            axes.plot(mtd[wsName], wkspIndex=sp)
         if (currentWsName, currentSpectrumIndex) not in plottedData:
-            axes.plot(mtd[currentWsName], specNum=currentSpectrumIndex)
+            axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
 
         axes.relim()
         axes.legend()
