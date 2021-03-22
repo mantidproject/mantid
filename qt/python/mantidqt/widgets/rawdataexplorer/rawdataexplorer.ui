@@ -1,95 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>RDExp</class>
+ <widget class="QWidget" name="RDExp">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>521</width>
+    <width>365</width>
     <height>709</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QTreeView" name="fileTree">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>100</y>
-     <width>501</width>
-     <height>601</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="targetType">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>70</y>
-     <width>401</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="accumulate">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>70</y>
-     <width>101</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Accumulate</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="repositoryPath">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>401</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="instrumentSelector">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>241</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="previewType">
-   <property name="geometry">
-    <rect>
-     <x>270</x>
-     <y>40</y>
-     <width>241</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="browse">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>10</y>
-     <width>91</width>
-     <height>25</height>
-    </rect>
-   </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0" rowspan="4" colspan="2">
+    <layout class="QHBoxLayout" name="selection_layout"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="InstrumentSelector" name="instrumentSelector"/>
+   </item>
+   <item row="13" column="0" colspan="2">
+    <widget class="QTreeView" name="fileTree">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLineEdit" name="repositoryPath"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="browse">
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QComboBox" name="targetType"/>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="accumulate">
+       <property name="text">
+        <string>Accumulate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="previewType"/>
+   </item>
+  </layout>
+  <action name="actionBrowse">
    <property name="text">
     <string>Browse</string>
    </property>
-  </widget>
+   <property name="toolTip">
+    <string>Browse directories</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>mantidqt.widgets.instrumentselector</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>accumulate</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>accumulate</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>133</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>133</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
