@@ -9,6 +9,7 @@ set(
   src/AlgorithmSelectorWidget.cpp
   src/AlternateCSPythonLexer.cpp
   src/ConvolutionFunctionModel.cpp
+  src/BasicFitOptionsBrowser.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DataSelector.cpp
@@ -158,6 +159,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
+  inc/MantidQtWidgets/Common/BasicFitOptionsBrowser.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
   inc/MantidQtWidgets/Common/DataSelector.h

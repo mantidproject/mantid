@@ -12,7 +12,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
-#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
+#include "MantidQtWidgets/Common/BasicFitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
@@ -135,7 +135,7 @@ private:
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionTreeView> m_functionTreeView;
-  std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
+  std::unique_ptr<BasicFitOptionsBrowser> m_fitOptionsBrowser;
   Ui::FitScriptGenerator m_ui;
 };
 

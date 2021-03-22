@@ -66,7 +66,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(
       m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
-      m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
+      m_fitOptionsBrowser(std::make_unique<BasicFitOptionsBrowser>(
           nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS)) {
   m_ui.setupUi(this);
 
