@@ -7,10 +7,10 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -59,14 +59,33 @@ private:
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
   // new
-  void calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
-                                              std::vector<double> &xValues,
-                                              std::vector<double> &yValues,
-                                              const API::MatrixWorkspace &integrFlux,
-                                              const size_t &wsIdx);
+  void calcDiffractionIntersectionIntegral(
+      std::vector<std::array<double, 4>> &intersections,
+      std::vector<double> &xValues, std::vector<double> &yValues,
+      const API::MatrixWorkspace &integrFlux, const size_t &wsIdx);
 
   // new
-  Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo, const Geometry::SymmetryOperation &so);
+  Mantid::Kernel::DblMatrix
+  calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
+                const Geometry::SymmetryOperation &so);
+
+  //  // new
+  //  void calcSingleIntersectionNorm(const std::vector<std::array<double,
+  //  4>>::iterator &intersectionsBegin,
+  //                                  const std::vector<std::array<double,
+  //                                  4>>::iterator &it,
+  //                                   double &solid,
+  //                                   std::vector<double> &yValues,
+  //                                   const size_t &vmdDims,
+  //                                   std::vector<coord_t> &pos,
+  //                                   std::vector<coord_t> &posNew,
+  //                                  std::vector<std::atomic<signal_t>>
+  //                                  &signalArray);
+  void calcSingleIntersectionNorm(
+      const std::vector<std::array<double, 4>> &intersections,
+      const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
+      std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
+      std::vector<std::atomic<signal_t>> &signalArray);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;

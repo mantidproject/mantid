@@ -458,6 +458,7 @@ void MDNorm::exec() {
   m_beamDir = normalize(m_samplePos - source->getPos());
   if ((m_inputWS->getNumDims() > 3) &&
       (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
+    // DeltaE in input MDE: it cannot be diffraction!
     m_diffraction = false;
     if (exptInfoZero.run().hasProperty("Ei")) {
       Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
@@ -1138,53 +1139,146 @@ void MDNorm::cacheDimensionXValues() {
   }
 }
 
-inline Mantid::Kernel::DblMatrix MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
-                                const Geometry::SymmetryOperation &so) {
-    // Make it to a method!
-    DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
-    DblMatrix soMatrix(3, 3);
-    auto v = so.transformHKL(V3D(1, 0, 0));
-    soMatrix.setColumn(0, v);
-    v = so.transformHKL(V3D(0, 1, 0));
-    soMatrix.setColumn(1, v);
-    v = so.transformHKL(V3D(0, 0, 1));
-    soMatrix.setColumn(2, v);
-    soMatrix.Invert();
-    DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-    Qtransform.Invert();
+inline Mantid::Kernel::DblMatrix
+MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
+                      const Geometry::SymmetryOperation &so) {
+  // Make it to a method!
+  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
+  DblMatrix soMatrix(3, 3);
+  auto v = so.transformHKL(V3D(1, 0, 0));
+  soMatrix.setColumn(0, v);
+  v = so.transformHKL(V3D(0, 1, 0));
+  soMatrix.setColumn(1, v);
+  v = so.transformHKL(V3D(0, 0, 1));
+  soMatrix.setColumn(2, v);
+  soMatrix.Invert();
+  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
+  Qtransform.Invert();
 
-    // ...................................................................................
-    std::cout << "[UNDERSTAND 1B] m_W = " << "\n";
-    m_W.print();
-    std::cout << "[......... ..] R =   " << "\n";
-    R.print();
-    std::cout << "[........  ..] Qtransform = " << "\n";
-    Qtransform.print();
-    std::cout << "[UNDERSTAND 1B] m_W = " << "\n";
+  // ...................................................................................
+  std::cout << "[UNDERSTAND 1B] m_W = "
+            << "\n";
+  m_W.print();
+  std::cout << "[......... ..] R =   "
+            << "\n";
+  R.print();
+  std::cout << "[........  ..] Qtransform = "
+            << "\n";
+  Qtransform.print();
+  std::cout << "[UNDERSTAND 1B] m_W = "
+            << "\n";
 
-    return Qtransform;
+  return Qtransform;
 }
 
-inline void MDNorm::calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
-                                            std::vector<double> &xValues,
-                                            std::vector<double> &yValues,
-                                            const API::MatrixWorkspace &integrFlux,
-                                            const size_t &wsIdx) {
-    // -- calculate integrals for the intersection --
-    // momentum values at intersections
-    auto intersectionsBegin = intersections.begin();
-    // copy momenta to xValues
-    xValues.resize(intersections.size());
-    yValues.resize(intersections.size());
-    auto x = xValues.begin();
-    for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-      *x = (*it)[3];
+/**
+ * Calculate the diffraction MDE's intersection integral of a certain
+ * detector/spectru
+ * @param intersections: vector of intersections
+ * @param xValues: empty vector for X values
+ * @param yValues: empty vector of Y values (output)
+ * @param integrFlux: integral flux workspace
+ * @param wsIdx: workspace index
+ */
+inline void MDNorm::calcDiffractionIntersectionIntegral(
+    std::vector<std::array<double, 4>> &intersections,
+    std::vector<double> &xValues, std::vector<double> &yValues,
+    const API::MatrixWorkspace &integrFlux, const size_t &wsIdx) {
+  // -- calculate integrals for the intersection --
+  // momentum values at intersections
+  auto intersectionsBegin = intersections.begin();
+  // copy momenta to xValues
+  xValues.resize(intersections.size());
+  yValues.resize(intersections.size());
+  auto x = xValues.begin();
+  for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+    *x = (*it)[3];
+  }
+  // calculate integrals at momenta from xValues by interpolating between
+  // points in spectrum sp
+  // of workspace integrFlux. The result is stored in yValues
+  calcIntegralsForIntersections(xValues, integrFlux, wsIdx, yValues);
+  // [VZ QUESTION] Shall background be duplicated here? (Answer: No)
+}
+
+/**
+ * Calculate the normalization of 2 adjacent intersections of 1 specific
+ * detector in 1 specific SpectrumInfo/ExperimentInfo
+ * @param intersectionsBegin
+ * @param it
+ * @param solid
+ * @param yValues
+ * @param vmdDims
+ */
+inline void MDNorm::calcSingleIntersectionNorm(
+    const std::vector<std::array<double, 4>> &intersections,
+    const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
+    std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
+    std::vector<std::atomic<signal_t>> &signalArray) {
+
+  auto intersectionsBegin = intersections.begin();
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+
+    // The full vector isn't used so compute only what is necessary
+    // If the difference between 2 adjacent intersection is trivial, no
+    // intersection normalization is to be calculated
+    double delta, eps;
+    if (m_diffraction) {
+      // diffraction
+      delta = curIntSec[3] - prevIntSec[3];
+      eps = 1e-7;
+    } else {
+      // inelastic
+      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
+              energyToK;
+      eps = 1e-10;
     }
-    // calculate integrals at momenta from xValues by interpolating between
-    // points in spectrum sp
-    // of workspace integrFlux. The result is stored in yValues
-    calcIntegralsForIntersections(xValues, integrFlux, wsIdx, yValues);
-    // [VZ QUESTION] Shall background be duplicated here?
+    if (delta < eps)
+      continue; //  return; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
+                   prevIntSec.data(), pos.begin(),
+                   [](const double rhs, const double lhs) {
+                     return static_cast<coord_t>(0.5 * (rhs + lhs));
+                   });
+    signal_t signal;
+    if (m_diffraction) {
+      // Diffraction
+      // index of the current intersection
+      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+      // signal = integral between two consecutive intersections
+      signal = (yValues[k] - yValues[k - 1]) * solid;
+
+      // [VZ QUESTION] Background mimic: signal_background...with
+      // backgroundSolid
+
+    } else {
+      // Inelastic
+      // transform kf to energy transfer
+      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      // signal = energy distance between two consecutive intersections *solid
+      // angle *PC
+      signal = solid * delta;
+      // [VZ QUESTION] duplicate to backgroundSignal;
+    }
+
+    // Find the coordiate of the new position after transformation
+    m_transformation.multiplyPoint(pos, posNew);
+    // [VZ QUESTION] is linIndex common to both sample and background?
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue; //  return; // not found
+
+    // set the calculated signal to
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
+    // [VZ QUESTION] mimic for backgroundSingal to backgroundSignalArray
+  }
+  return;
 }
 
 /**
@@ -1246,7 +1340,8 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
     safe = Kernel::threadSafe(*integrFlux);
   }
   // ...................................................................................
-  std::cout << "[UNDERSTAND 3] Number of loops (detectors) = " << ndets << " thread safe = " << safe << "\n";
+  std::cout << "[UNDERSTAND 3] Number of loops (detectors) = " << ndets
+            << " thread safe = " << safe << "\n";
 
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
@@ -1282,10 +1377,10 @@ for (int64_t i = 0; i < ndets; i++) {
   this->calculateIntersections(intersections, theta, phi, Qtransform,
                                lowValues[i], highValues[i]);
   // ...................................................................................
-  std::cout << "[INFO]  Detector " << i << " intersection is empty: " << intersections.empty() << "\n";
+  //  std::cout << "[INFO]  Detector " << i
+  //            << " intersection is empty: " << intersections.empty() << "\n";
   // ...................................................................................
   // [VZ QUESTION]
-
 
   if (intersections.empty())
     continue;
@@ -1297,29 +1392,10 @@ for (int64_t i = 0; i < ndets; i++) {
         solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
   }
 
-  // ...................................................................................
-  std::cout << "[INFO] Am I diffraction? " << m_diffraction << "\n";
-
   if (m_diffraction) {
     // -- calculate integrals for the intersection --
-//    // momentum values at intersections
-//    auto intersectionsBegin = intersections.begin();
-//    // copy momenta to xValues
-//    xValues.resize(intersections.size());
-//    yValues.resize(intersections.size());
-//    auto x = xValues.begin();
-//    for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-//      *x = (*it)[3];
-//    }
-//    // calculate integrals at momenta from xValues by interpolating between
-//    // points in spectrum sp
-//    // of workspace integrFlux. The result is stored in yValues
-//    calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
-//    // [VZ QUESTION] Shall background be duplicated here?
-//    // ... ...
-
-    calcDiffractionIntersectionIntegral(intersections, xValues, yValues, *integrFlux, wsIdx);
-
+    calcDiffractionIntersectionIntegral(intersections, xValues, yValues,
+                                        *integrFlux, wsIdx);
   }
 
   // Compute final position in HKL
@@ -1328,56 +1404,19 @@ for (int64_t i = 0; i < ndets; i++) {
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
 
-  auto intersectionsBegin = intersections.begin();
+  // auto intersectionsBegin = intersections.begin();
   // ...................................................................................
-  std::cout << "[INFO]  Detector " << i  << " Number of intersecton = " << intersections.size() << "\n";
-  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-    const auto &curIntSec = *it;
-    const auto &prevIntSec = *(it - 1);
-    // the full vector isn't used so compute only what is necessary
-    double delta, eps;
-    if (m_diffraction) {
-      delta = curIntSec[3] - prevIntSec[3];
-      eps = 1e-7;
-    } else {
-      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
-              energyToK;
-      eps = 1e-10;
-    }
-    if (delta < eps)
-      continue; // Assume zero contribution if difference is small
-    // Average between two intersections for final position
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
-                   prevIntSec.data(), pos.begin(),
-                   [](const double rhs, const double lhs) {
-                     return static_cast<coord_t>(0.5 * (rhs + lhs));
-                   });
-    signal_t signal;
-    if (m_diffraction) {
-      // index of the current intersection
-      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-      // signal = integral between two consecutive intersections
-      signal = (yValues[k] - yValues[k - 1]) * solid;
+  //  std::cout << "[INFO]  Detector " << i
+  //            << " Number of intersecton = " << intersections.size() << "\n";
 
-      // [VZ QUESTION] Background mimic: signal_background...with backgroundSolid
+  calcSingleIntersectionNorm(intersections, solid, yValues, vmdDims, pos,
+                             posNew, signalArray);
 
-    } else {
-      // transform kf to energy transfer
-      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
-      // signal = energy distance between two consecutive intersections *solid
-      // angle *PC
-      signal = solid * delta;
-      // [VZ QUESTION] duplicate to backgroundSignal;
-    }
-    m_transformation.multiplyPoint(pos, posNew);
-    // [VZ QUESTION] is linIndex common to both sample and background?
-    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-    if (linIndex == size_t(-1))
-      continue;
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
-                             std::plus<signal_t>());
-    // [VZ QUESTION] mimic for backgroundSingal to backgroundSignalArray
-  }
+  //  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+  //    calcSingleIntersectionNorm(intersectionsBegin, it, solid, yValues,
+  //    vmdDims,
+  //                               pos, posNew, signalArray);
+  //  }
 
   prog->report();
 
