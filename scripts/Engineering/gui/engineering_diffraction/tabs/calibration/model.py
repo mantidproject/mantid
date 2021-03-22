@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
-    EditInstrumentGeometry, ConvertUnits, Load
+    EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, EnggEstimateFocussedBackground, RebinToWorkspace, Divide
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -25,6 +25,8 @@ CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
+NORTH_BANK_CAL = "EnginX_NorthBank.cal"
+SOUTH_BANK_CAL = "EnginX_NorthBank.cal"
 
 
 class CalibrationModel(object):
@@ -51,16 +53,16 @@ class CalibrationModel(object):
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
             full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
-            output = self.run_calibration(sample_workspace,
-                                          vanadium_path,
-                                          bank,
-                                          spectrum_numbers,
-                                          full_calib_ws=full_calib)
+            output, sample_raw = self.run_calibration(sample_workspace,
+                                                      vanadium_path,
+                                                      bank,
+                                                      spectrum_numbers,
+                                                      full_calib_ws=full_calib)
         else:
-            output = self.run_calibration(sample_workspace, vanadium_path, bank, spectrum_numbers)
+            output, sample_raw = self.run_calibration(sample_workspace, vanadium_path, bank, spectrum_numbers)
         if plot_output:
             # TODO determine output to plot
-            #self._plot_vanadium_curves()
+            self._plot_vanadium_curves()
             for i in range(len(output)):
                 if spectrum_numbers:
                     bank_name = "cropped"
@@ -78,11 +80,11 @@ class CalibrationModel(object):
                 self._plot_tof_fit_single_bank_or_custom(bank)
             else:
                 self._plot_tof_fit_single_bank_or_custom("cropped")
-        difa = [i.DIFA for i in output]
-        difc = [i.DIFC for i in output]
-        tzero = [i.TZERO for i in output]
+        difa = [row['difa'] for row in output] # TODO these aren't right
+        difc = [row['difc'] for row in output]
+        tzero = [row['tzero'] for row in output]
 
-        bk2bk_params = self.extract_b2b_params(sample_workspace)
+        bk2bk_params = self.extract_b2b_params(sample_raw)
 
         params_table = []
 
@@ -110,7 +112,7 @@ class CalibrationModel(object):
             params_north += [NorthBank.getNumberParameter(param_name)[0]]
             params_south += [SouthBank.getNumberParameter(param_name)[0]]
 
-        return [params_north,params_south]
+        return [params_north, params_south]
 
     def load_existing_gsas_parameters(self, file_path):
         if not path.exists(file_path):
@@ -174,7 +176,6 @@ class CalibrationModel(object):
 
     @staticmethod
     def _generate_tof_fit_workspace(difa, difc, tzero, bank):
-        # TODO this function errors with current input
         bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank))
 
         x_val = []
@@ -254,6 +255,27 @@ class CalibrationModel(object):
         def run_pd_calibration(kwargs_to_pass):
             return PDCalibration(**kwargs_to_pass)
 
+        def focus_and_normalise(ws_d, ws_van_d, cal_file):
+            # focus sample
+            focused_sample = DiffractionFocussing(InputWorkspace=ws_d, GroupingFileName=cal_file)
+
+            # focus van data
+            focused_van = DiffractionFocussing(InputWorkspace=ws_van_d, GroupingFileName=cal_file)
+            background_van = EnggEstimateFocussedBackground(InputWorkspace=focused_van, NIterations='15', XWindow=0.03)
+
+            # normalise by focused vanadium
+            bg_rebinned = RebinToWorkspace(WorkspaceToRebin=background_van, WorkspaceToMatch=focused_sample)
+            normalised = Divide(LHSWorkspace=focused_sample, RHSWorkspace=bg_rebinned)
+
+            # edit instrument geometry so we can convert units
+            EditInstrumentGeometry(Workspace=normalised, L2='1.5', Polar='90', InstrumentName='ENGIN-X')
+            tof_focused = ConvertUnits(InputWorkspace=normalised, Target='TOF')
+
+            return tof_focused
+
+        # need to clone the data as PDCalibration rebins
+        sample_raw = CloneWorkspace(InputWorkspace=sample_ws)
+
         # TODO get peak positions from EnggUtils as in EnggCal
         dpks = (2.705702376, 1.913220892, 1.631600313, 1.352851554, 1.104598643)
 
@@ -275,52 +297,65 @@ class CalibrationModel(object):
         cal_initial = run_pd_calibration(kwargs)[0]
 
         ws_van = Load(vanadium_workspace)
-        NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)  # or van curves? or neither
+        NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
         ws_van_d = AlignDetectors(InputWorkspace=ws_van, CalibrationWorkspace=cal_initial)
 
-        # sensitivity correction
+        # sensitivity correction for van
         nbins = ws_van.blocksize()
         ws_van_int = Integration(InputWorkspace=ws_van)
         ws_van_int /= nbins
 
-        ws_van_d /= ws_van_int  # TODO this produces lots of warnings about division by zero
+        ws_van_d /= ws_van_int
 
-        # focus van data
-
-        focused = DiffractionFocussing(InputWorkspace=ws_van_d, GroupingFileName='/home/tom/dev/stfc/scripts/dummy.cal')
-        # TODO get detector groupings from Engg
-        # ue groupings dependent on bank (n/s)
-
-        # normalise to focused vanadium
-
-        EditInstrumentGeometry(Workspace=focused, L2='1.5', Polar='90', InstrumentName='ENGIN-X')
-        ConvertUnits(InputWorkspace=focused, OutputWorkspace=focused, Target='TOF')
-
-        # final calibration of focused data
+        # sensitivity correction for sample
+        sample = CloneWorkspace(sample_raw)
+        NormaliseByCurrent(InputWorkspace=sample, OutputWorkspace=sample)
+        ws_d = AlignDetectors(InputWorkspace=sample, CalibrationWorkspace=cal_initial)
+        ws_d /= ws_van_int
 
         dpks_final = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
-		1.241461538, 1.210027059,1.104598643, 1.04142562, 0.956610446,
-		0.914694494, 0.901900955, 0.855618487]
+                      1.241461538, 1.210027059, 1.104598643, 1.04142562, 0.956610446,
+                      0.914694494, 0.901900955, 0.855618487]
         # TODO again get this from EnggUtils
+        kwargs = {
+            "PeakPositions": dpks_final,
+            "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
+            "PeakWindow": 0.04,
+            "MinimumPeakHeight": 0.5,
+            "PeakFunction": 'BackToBackExponential',
+            "CalibrationParameters": 'DIFC+TZERO+DIFA',
+        }
+        cal_output = list()
 
-        cal = PDCalibration(InputWorkspace=focused,
-                      TofBinning=[15500, -0.0003, 52000],  # using a finer binning now have better stats
-                      PeakPositions=dpks_final,
-                      PeakWindow=0.04,  # reduce this a bit as fitting peaks at lower d-spacing
-                      MinimumPeakHeight=0.5,
-                      PeakFunction='BackToBackExponential',
-                      CalibrationParameters='DIFC+TZERO+DIFA',  # use DIFA as well now
-                      OutputCalibrationTable='cal_North',
-                      DiagnosticWorkspaces='diag_North')
-                      #UseChiSq=True)
-        cal_table = cal[0]
-        n_rows = cal_table.rowCount()
-        output = dict()
-        for row_no in range(n_rows):
-            row = cal_table.row(row_no)
-            current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}  # difc, difa, tzero
-            output[row_no] = current_fit_params
-        return output
+        if spectrum_numbers is None:
+            if bank == 1 or bank is None:
+                focused_North = focus_and_normalise(ws_d, ws_van_d, NORTH_BANK_CAL)
+                # final calibration of focused data
+                kwargs["InputWorkspace"] = focused_North
+                kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_1'
+                kwargs["DiagnosticWorkspaces"] = 'diag_North'
+
+                cal_north = run_pd_calibration(kwargs)[0]
+                cal_output.append(cal_north)
+
+            if bank == 2 or bank is None:
+                focused_South = focus_and_normalise(ws_d, ws_van_d, SOUTH_BANK_CAL)
+                # final calibration of focused data
+                kwargs["InputWorkspace"] = focused_South
+                kwargs["OutputCalibrationTable"] = 'engggui_calibration_bank_2'
+                kwargs["DiagnosticWorkspaces"] = 'diag_South'
+
+                cal_north = run_pd_calibration(kwargs)[0]
+                cal_output.append(cal_north)
+        else:
+            pass
+
+        output = list()
+        for bank_cal in cal_output:
+            row = bank_cal.row(0)
+            current_fit_params = {'difc': row['difc'], 'difa': row['difa'], 'tzero': row['tzero']}
+            output.append(current_fit_params)
+        return output, sample_raw
 
     def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
