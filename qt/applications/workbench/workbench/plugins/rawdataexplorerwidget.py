@@ -24,10 +24,10 @@ class RawDataExplorer(PluginWidget):
     def __init__(self, parent):
         super(RawDataExplorer, self).__init__(parent)
 
-        raw_data_explorer_presenter = RawDataExplorerPresenter()
+        self.raw_data_explorer_presenter = RawDataExplorerPresenter()
 
         # layout
-        self.raw_data_explorer_widget = raw_data_explorer_presenter.view
+        self.raw_data_explorer_widget = self.raw_data_explorer_presenter.view
         layout = QVBoxLayout()
         layout.addWidget(self.raw_data_explorer_widget)
         self.setLayout(layout)
