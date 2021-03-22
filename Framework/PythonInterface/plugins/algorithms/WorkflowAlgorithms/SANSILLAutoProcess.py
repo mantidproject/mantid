@@ -357,8 +357,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('SensitivityWithOffsets', False,
                              'Whether the sensitivity data has been measured with different horizontal offsets.')
 
-        # flake8: noqa: C901
-        def PyExec(self):
+    # flake8: noqa: C901
+    def PyExec(self):
 
         self.setUp()
         outputs = []
