@@ -106,8 +106,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
         transmission = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Transmission')
         vanadium = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Vanadium')
-        reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or), LogicOperator.Or)
-        scan = EnabledWhenProperty(reduction, EnabledWhenProperty(absorber, container, LogicOperator.Or), LogicOperator.Or)
+        reduction = EnabledWhenProperty(quartz, EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
+                                        LogicOperator.Or)
+        scan = EnabledWhenProperty(reduction, EnabledWhenProperty(absorber, container, LogicOperator.Or),
+                                   LogicOperator.Or)
 
         self.declareProperty(WorkspaceGroupProperty('AbsorberInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -131,7 +133,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The name of the absorber transmission input workspace.')
 
-        self.setPropertySettings('AbsorberTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam, LogicOperator.Or))
+        self.setPropertySettings('AbsorberTransmissionInputWorkspace', EnabledWhenProperty(transmission, beam,
+                                                                                           LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionInputWorkspace', '',
                                                      direction=Direction.Input,
@@ -206,7 +209,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
+                                                                               PropertyCriterion.IsEqualTo, 'Sum'))
 
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
@@ -264,8 +268,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                                    + "The provided input does not fit in any of these measurement types.")
 
     def _merge_polarisations(self, ws, average_detectors=False):
-        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either by using SumOverlappingTubes
-        or averaging entries for each detector depending on the status of the sumOverDetectors flag."""
+        """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
+        by using SumOverlappingTubes or averaging entries for each detector depending on the status
+        of the sumOverDetectors flag."""
         pol_directions = set()
         numors = set()
         for name in mtd[ws].getNames():
@@ -292,7 +297,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                     DeleteWorkspace(Workspace=norm_name)
                 else:
                     SumOverlappingTubes(','.join(list_pol), OutputWorkspace=name,
-                                        OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
+                                        OutputType='1D',
+                                        ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
                                         Normalise=True, HeightAxis='-0.1,0.1')
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
@@ -452,7 +458,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
-            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = \
+                joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
         if 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
