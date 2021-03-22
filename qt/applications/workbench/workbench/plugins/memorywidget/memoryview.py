@@ -21,11 +21,11 @@ QProgressBar::chunk {
 }
 """
 
-def from_normal_to_critical(critical, currentValue, newValue)->bool:
-    return (currentValue < critical and newValue >= critical)
+def from_normal_to_critical(critical, current_value, new_value)->bool:
+    return (current_value < critical and new_value >= critical)
 
-def from_critical_to_normal(critical, currentValue, newValue)->bool:
-    return (currentValue >= critical and newValue < critical)
+def from_critical_to_normal(critical, current_value, new_value)->bool:
+    return (current_value >= critical and new_value < critical)
 
 
 class MemoryView(QWidget):
@@ -35,20 +35,20 @@ class MemoryView(QWidget):
         self.critical = 90
         self.memory_bar = QProgressBar(self)
 
-    def set_bar_color(self, currentValue, newValue):
-        if (from_normal_to_critical(self.critical, currentValue, newValue)):
+    def set_bar_color(self, current_value, new_value):
+        if (from_normal_to_critical(self.critical, current_value, new_value)):
             self.memory_bar.setStyleSheet(CRITICAL_STYLE)
-        elif (from_critical_to_normal(self.critical, currentValue, newValue)):
+        elif (from_critical_to_normal(self.critical, current_value, new_value)):
             self.memory_bar.setStyleSheet(NORMAL_STYLE)
         else:
             pass
 
-    def set_value(self, newValue, mem_used, mem_avail):
+    def set_value(self, new_value, mem_used, mem_avail):
         # newValue is the mem_used_percent(int)
-        currentValue = self.memory_bar.value()
-        if currentValue != newValue:
-            self.set_bar_color(currentValue, newValue)
-            self.memory_bar.setValue(newValue)
+        current_value = self.memory_bar.value()
+        if current_value != new_value:
+            self.set_bar_color(current_value, new_value)
+            self.memory_bar.setValue(new_value)
             display_str = "%3.1f"%mem_used + "/" + "%3.1f"%mem_avail + " GB " + \
-                        "(" + "%d"%newValue+"%" +")"
+                        "(" + "%d"%new_value+"%" +")"
             self.memory_bar.setFormat(display_str)
