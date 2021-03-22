@@ -53,6 +53,9 @@ class SuperplotPresenter:
     def getBottomView(self):
         return self._view.getBottomWidget()
 
+    def close(self):
+        self._view.close()
+
     def onAddButtonClicked(self):
         """
         Triggered when the add button is pressed. This function adds the
