@@ -288,11 +288,17 @@ class HB2AReduce(PythonAlgorithm):
                 "GSAS": 'gss',
             }[self.getProperty('OutputFormat').value]
             outputbase = os.path.join(outputdir, outputfn)
-            _outputfunc(
-                InputWorkspace=outWS,
-                Filename=f"{outputbase}.{_outputext}",
-                SplitFiles=False,
-            )
+            if self.getProperty('OutputFormat').value == "GSAS":
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    Filename=f"{outputbase}.{_outputext}",
+                )
+            else:
+                _outputfunc(
+                    InputWorkspace=outWS,
+                    Filename=f"{outputbase}.{_outputext}",
+                    SplitFiles=False,
+                )
 
     def get_detector_mask(self, exp, indir):
         """Returns an anode mask"""
