@@ -116,6 +116,7 @@ class SuperplotView(QWidget):
         self._sideView.workspacesList.addItems(names)
         self._bottomView.workspaceSlider.setMaximum(len(names))
         self._bottomView.workspaceSpinBox.setMaximum(len(names))
+        self._sideView.workspacesList.setCurrentRow(len(names) - 1)
 
     def setWorkspaceSliderPosition(self, position):
         """
