@@ -26,13 +26,9 @@ class InstrumentRayTracer;
 class MANTID_GEOMETRY_DLL IPeak {
 public:
   virtual ~IPeak() = default;
-
-  virtual void setInstrument(const Geometry::Instrument_const_sptr &inst) = 0;
-
-  virtual int getDetectorID() const = 0;
-  virtual void setDetectorID(int m_DetectorID) = 0;
   virtual Geometry::IDetector_const_sptr getDetector() const = 0;
-  virtual Geometry::Instrument_const_sptr getInstrument() const = 0;
+  virtual std::shared_ptr<const Geometry::ReferenceFrame>
+  getReferenceFrame() const = 0;
 
   virtual int getRunNumber() const = 0;
   virtual void setRunNumber(int m_RunNumber) = 0;
@@ -60,9 +56,6 @@ public:
 
   virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
-  virtual bool findDetector() = 0;
-  virtual bool findDetector(const InstrumentRayTracer &tracer) = 0;
-
   virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
                                boost::optional<double> detectorDistance) = 0;
   virtual void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
@@ -113,6 +106,8 @@ public:
   virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
   virtual double getAbsorptionWeightedPathLength() const = 0;
 };
+
+using IPeak_uptr = std::unique_ptr<IPeak>;
 
 } // namespace Geometry
 } // namespace Mantid

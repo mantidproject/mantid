@@ -73,7 +73,7 @@ public:
    */
   bool customSort() const override { return true; }
 
-  void sort(std::vector<std::pair<std::string, bool>> &criteria) override;
+  void sort(std::vector<ColumnAndDirection> &criteria) override;
 
   int getNumberPeaks() const override;
   std::string getConvention() const override;
@@ -95,11 +95,16 @@ public:
   createPeak(const Kernel::V3D &Position,
              const Kernel::SpecialCoordinateSystem &frame) const override;
 
+  std::unique_ptr<Geometry::IPeak>
+  createPeakQSample(const Kernel::V3D &position) const override;
+
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
   std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Kernel::V3D &HKL) const override;
+
+  std::unique_ptr<Geometry::IPeak> createPeak() const override;
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -124,7 +129,7 @@ public:
   // ==================================
   /// Number of columns in the workspace.
   size_t columnCount() const override {
-    return static_cast<int>(columns.size());
+    return static_cast<int>(m_columns.size());
   }
 
   /// Number of rows in the workspace.
@@ -157,7 +162,7 @@ public:
   //---------------------------------------------------------------------------------------------
   /// Returns a vector of all column names.
   std::vector<std::string> getColumnNames() const override {
-    return this->columnNames;
+    return this->m_columnNames;
   }
   /// This is always threadsafe
   bool threadSafe() const override { return true; }
@@ -180,9 +185,6 @@ private:
   void initColumns();
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
-  /// Create a peak from a QSample position
-  std::unique_ptr<Geometry::IPeak>
-  createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -264,13 +266,13 @@ private:
   // ==================================
 
   /** Vector of Peak contained within. */
-  std::vector<Peak> peaks;
+  std::vector<Peak> m_peaks;
 
   /** Column shared pointers. */
-  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn<Peak>>> m_columns;
 
   /** Column names */
-  std::vector<std::string> columnNames;
+  std::vector<std::string> m_columnNames;
 
   /// Coordinates
   Kernel::SpecialCoordinateSystem m_coordSystem;

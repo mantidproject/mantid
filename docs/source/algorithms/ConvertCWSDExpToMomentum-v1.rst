@@ -170,10 +170,10 @@ Usage
   print('Output MDEventWorkspace has {} events.'.format(mdws.getNEvents()))
   peakws = mtd['PeakTable']
   print('There are {} peaks found in output MDWorkspace'.format(peakws.getNumberPeaks()))
-  peak = peakws.getPeak(0)
-  qsample = peak.getQSampleFrame()
+  peak = peakws.row(0)
+  qsample = peak['QSample']
   print('In Q-sample frame, center of peak 0 is at ({:.5f}, {:.5f}, {:.5f}) at detector with ID {}'.
-      format(qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID()))
+      format(qsample.X(), qsample.Y(), qsample.Z(), peak['DetID']))
     
 .. testcleanup::  ExConvertHB3AToMDVirtualInstrument
 
@@ -214,10 +214,10 @@ Output:
   print('Output MDEventWorkspace has {} events.'.format(mdws.getNEvents()))
   peakws = mtd['PeakTable']
   print('There are {} peaks found in output MDWorkspace'.format(peakws.getNumberPeaks()))
-  peak = peakws.getPeak(0)
-  qsample = peak.getQSampleFrame()
+  peak = peakws.row(0)
+  qsample = peak['QSample']
   print('In Q-sample frame, center of peak 0 is at ({:.5f}, {:.5f}, {:.5f}) at detector with ID {}'.
-      format(qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID()))
+      format(qsample.X(), qsample.Y(), qsample.Z(), peak['DetID']))
     
 .. testcleanup::  ExConvertHB3AToMDCopyInstrument
 

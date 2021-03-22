@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"

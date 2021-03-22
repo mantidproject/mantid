@@ -100,8 +100,14 @@ public:
   /// @param name of fit function to show help for
   void showFitFunctionHelp(const QString &name = QString());
 
-  /// @param name of interface to show help for
-  void showCustomInterfaceHelp(const QString &name);
+  /**
+   * @param name of interface to show help for
+   * @param area - folder for documentation in the interfaces directory
+   * @param section - section in the html document
+   **/
+  void showCustomInterfaceHelp(const QString &name,
+                               const QString &area = QString(),
+                               const QString &section = QString());
 
   /// @param url of web page to open in browser
   void showWebPage(const QString &url);

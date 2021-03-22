@@ -34,11 +34,15 @@ public:
     m_dataSearchDirs = ConfigService::Instance().getDataSearchDirs();
 
     m_instName = ConfigService::Instance().getString("default.instrument");
+
+    ConfigService::Instance().setString("default.facility", "ISIS");
   }
 
   void tearDown() override {
 
     ConfigService::Instance().setDataSearchDirs(m_dataSearchDirs);
+
+    ConfigService::Instance().setString("default.facility", " ");
 
     ConfigService::Instance().setString("default.instrument", m_instName);
 

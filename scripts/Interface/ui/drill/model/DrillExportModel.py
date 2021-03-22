@@ -14,6 +14,7 @@ from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 
 import re
+import os
 
 
 class DrillExportModel:
@@ -110,8 +111,8 @@ class DrillExportModel:
         if not criteria:
             return True
 
-        processingAlgo = mtd[ws].getHistory().lastAlgorithm()
         try:
+            processingAlgo = mtd[ws].getHistory().lastAlgorithm()
             params = re.findall("%[a-zA-Z]*%", criteria)
             for param in params:
                 value = processingAlgo.getPropertyValue(param[1:-1])
@@ -178,34 +179,53 @@ class DrillExportModel:
 
     def run(self, sample):
         """
-        Run the export algorithms on a workspace. If the provided workspace is
-        a groupworkspace, the export algorithms will be run on each member of
-        the group.
+        Run the export algorithms on a sample. For each export algorithm, the
+        function will try to validate the criteria (using _validCriteria()) on
+        the output workspace that corresponds to the sample. If the criteria are
+        valid, the export will be run on all workspaces whose name contains the
+        sample name.
 
         Args:
-            workspaceName (str): name of the workspace
+            sample (DrillSample): sample to be exported
         """
         exportPath = config.getString("defaultsave.directory")
+        if not exportPath:
+            exportPath = os.getcwd()
         workspaceName = sample.getOutputName()
 
+        try:
+            outputWs = mtd[workspaceName]
+            if isinstance(outputWs, WorkspaceGroup):
+                names = outputWs.getNames()
+                outputWs = names[0]
+            else:
+                outputWs = workspaceName
+        except:
+            return
+
         tasks = list()
-        for wsName in mtd.getObjectNames():
-            if ((workspaceName in wsName)
-                    and (not isinstance(mtd[wsName], WorkspaceGroup))):
-                for a,s in self._exportAlgorithms.items():
-                    if s:
-                        if not self._validCriteria(wsName, a):
-                            logger.notice("Export of {} with {} was skipped "
-                                          "because the workspace is not "
-                                          "compatible.".format(wsName, a))
-                            continue
-                        filename = exportPath + wsName \
-                                   + RundexSettings.EXPORT_ALGO_EXTENSION[a]
-                        name = wsName + ":" + filename
-                        if wsName not in self._exports:
-                            self._exports[wsName] = set()
-                        self._exports[wsName].add(filename)
-                        task = DrillTask(name, a, InputWorkspace=wsName,
-                                         FileName=filename)
-                        tasks.append(task)
+        for algo,active in self._exportAlgorithms.items():
+            if not active:
+                continue
+            if not self._validCriteria(outputWs, algo):
+                logger.notice("Export of sample {} with {} was skipped "
+                              "because workspaces are not compatible."
+                              .format(outputWs, algo))
+                continue
+
+            for wsName in mtd.getObjectNames(contain=workspaceName):
+                if isinstance(mtd[wsName], WorkspaceGroup):
+                    continue
+
+                filename = os.path.join(
+                        exportPath,
+                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                name = wsName + ":" + filename
+                if wsName not in self._exports:
+                    self._exports[wsName] = set()
+                self._exports[wsName].add(filename)
+                task = DrillTask(name, algo, InputWorkspace=wsName,
+                                 FileName=filename)
+                tasks.append(task)
+
         self._pool.addProcesses(tasks)

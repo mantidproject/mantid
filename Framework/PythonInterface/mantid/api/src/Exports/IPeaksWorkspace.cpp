@@ -54,6 +54,15 @@ IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
   // Python will manage the object
   return peak.release();
 }
+
+/// Create a peak via it's QSample value from a list or numpy array
+IPeak *createPeakQSample(IPeaksWorkspace &self, const object &data) {
+  auto peak = self.createPeakQSample(
+      Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+  // Python will manage it
+  return peak.release();
+}
+
 /// Create a peak via it's QLab value from a list or numpy array
 void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
 
@@ -76,7 +85,6 @@ public:
     // Create a map of string -> setter functions
     // Each function will extract the given value from the passed python type.
     m_setterMap = {{"RunNumber", setterFunction(&IPeak::setRunNumber)},
-                   {"DetID", setterFunction(&IPeak::setDetectorID)},
                    {"h", setterFunction(&IPeak::setH)},
                    {"k", setterFunction(&IPeak::setK)},
                    {"l", setterFunction(&IPeak::setL)},
@@ -136,7 +144,7 @@ private:
   /**
    * Wrap a setter function on a IPeak with the bpl::extract function.
    *
-   * This is a specilization of the templated function to handle the
+   * This is a specialization of the templated function to handle the
    * 2 parameter signature of V3D setter functions.
    *
    * @param func A pointer to a member function to wrap.
@@ -265,6 +273,10 @@ void export_IPeaksWorkspace() {
            return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the QLab "
            "frame, detector-sample distance explicitly provided")
+      .def("createPeakQSample", createPeakQSample, (arg("self"), arg("data")),
+           return_value_policy<manage_new_object>(),
+           "Create a Peak and return it from its coordinates in the QSample "
+           "frame")
       .def("createPeakHKL", createPeakHKL, (arg("self"), arg("data")),
            return_value_policy<manage_new_object>(),
            "Create a Peak and return it from its coordinates in the HKL frame")

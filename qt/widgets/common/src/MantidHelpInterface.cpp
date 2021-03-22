@@ -56,14 +56,18 @@ void MantidHelpInterface::showFitFunction(const QString &name) {
 }
 
 void MantidHelpInterface::showCustomInterface(const std::string &name,
+                                              const std::string &area,
                                               const std::string &section) {
   UNUSED_ARG(name);
+  UNUSED_ARG(area);
   UNUSED_ARG(section);
 }
 
 void MantidHelpInterface::showCustomInterface(const QString &name,
+                                              const QString &area,
                                               const QString &section) {
   UNUSED_ARG(name);
+  UNUSED_ARG(area);
   UNUSED_ARG(section);
 }
 
