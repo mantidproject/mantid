@@ -7,7 +7,7 @@
 from qtpy import QtWidgets, PYQT4, QtCore
 from Muon.GUI.Common.utilities import table_utils
 
-HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Frames"]
+HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames"]
 HEADER_STYLE = "QHeaderView { font-weight: bold; }"
 COLUMN_COUNT = 6
 HEADER_COLUMN_MAP = {"Period Number": 0,
@@ -15,20 +15,23 @@ HEADER_COLUMN_MAP = {"Period Number": 0,
                      "Type": 2,
                      "DAQ Number": 3,
                      "Frames": 4,
-                     "Total Frames": 5}
+                     "Total Good Frames": 5}
 CONTEXT_MAP = {"Name": 1,
                "Type": 2,
                "Frames": 3,
-               "Total Frames": 4}
+               "Total Good Frames": 4}
 PERIOD_INFO_NOT_FOUND = "Not found"
 DWELL_STRING = "-"
 DAQ = "1"
 DWELL = "2"
+CYCLES_NOT_FOUND = "Number of period cycles not found"
 
 
 class MuonPeriodInfoWidget(QtWidgets.QWidget):
     """
     This is a simple widget used by the Muon GUI's to display additional information about periods of a run.
+
+    - Number of sequences is a string value
     """
 
     def __init__(self, parent=None):
@@ -36,7 +39,7 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
 
         self._label = None
         self._table = None
-        self._number_of_sequences = 0
+        self._number_of_sequences = None
         self._daq_count = 0
 
         # Create layout
@@ -47,28 +50,28 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
         return self._number_of_sequences
 
     @number_of_sequences.setter
-    def number_of_sequences(self, value):
+    def number_of_sequences(self, value: str):
         self._number_of_sequences = value
         if self._label:
             if value:
                 self._label.setText("Run contains " + value + " cycles of periods")
             else:
-                self._label.setText("Number of period cycles not found")
+                self._label.setText(CYCLES_NOT_FOUND)
 
-    def add_period_to_table(self, name, type, frames, total_frames):
+    def add_period_to_table(self, name, period_type, frames, total_frames):
         row_num = self._num_rows()
         self._table.insertRow(row_num)
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Period Number"], self._new_text_widget(str(row_num + 1)))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Name"], self._new_text_widget(name))
-        if type == DAQ:
+        if period_type == DAQ:
             self._daq_count += 1
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Type"], self._new_text_widget("DAQ"))
             self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(str(self._daq_count)))
-        elif type == DWELL:
+        elif period_type == DWELL:
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Type"], self._new_text_widget("DWELL"))
             self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(DWELL_STRING))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Frames"], self._new_text_widget(frames))
-        self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Frames"], self._new_text_widget(total_frames))
+        self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Good Frames"], self._new_text_widget(total_frames))
 
     def is_empty(self):
         if self._num_rows() > 0:
@@ -77,7 +80,7 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
 
     def clear(self):
         self._daq_count = 0
-        self.number_of_sequences = 0 # Use setter here to reset label
+        self.number_of_sequences = None  # Use setter here to reset label
         for row in reversed(range(self._num_rows())):
             self._table.removeRow(row)
 
@@ -91,11 +94,14 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
         return self._table.rowCount()
 
     def _create_layout(self):
-        self._label = QtWidgets.QLabel("Run contains 0 cycles of periods")
+        self._label = QtWidgets.QLabel(CYCLES_NOT_FOUND)
         self._table = QtWidgets.QTableWidget(0, COLUMN_COUNT, parent=self)
         self._table.setHorizontalHeaderLabels(HEADERS)
         self._table.horizontalHeader().setStyleSheet(HEADER_STYLE)
         self._table.verticalHeader().setVisible(False)
+        header = self._table.horizontalHeader()
+        for i in range(COLUMN_COUNT):
+            header.setSectionResizeMode(i, QtWidgets.QHeaderView.ResizeToContents)
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self._label)
         self.layout.addWidget(self._table)

@@ -291,7 +291,7 @@ class GroupingTabPresenter(object):
         names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(';')
         types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(';')
         frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(';')
-        total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Frames"]].split(';')
+        total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(';')
         names, types, frames, total_frames, count = self._fix_up_period_info_lists(names, types, frames, total_frames)
         for i in range(count):
             self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i])
