@@ -291,7 +291,7 @@ class HB2AReduce(PythonAlgorithm):
             if self.getProperty('OutputFormat').value == "GSAS":
                 _outputfunc(
                     InputWorkspace=outWS,
-                    Filename=f"{outputbase}.{_outputext}",
+                    OutputFilename=f"{outputbase}.{_outputext}",
                 )
             else:
                 _outputfunc(
