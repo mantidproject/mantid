@@ -54,10 +54,18 @@ private:
                               const double theta, const double phi,
                               const Kernel::DblMatrix &transform,
                               double lowvalue, double highvalue);
+
   void calcIntegralsForIntersections(const std::vector<double> &xValues,
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
+  // new
+  void calcDiffractionIntersectionIntegral(std::vector<std::array<double, 4>> &intersections,
+                                              std::vector<double> &xValues,
+                                              std::vector<double> &yValues,
+                                              const API::MatrixWorkspace &integrFlux,
+                                              const size_t &wsIdx);
 
+  // new
   Mantid::Kernel::DblMatrix calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo, const Geometry::SymmetryOperation &so);
 
   /// Normalization workspace
