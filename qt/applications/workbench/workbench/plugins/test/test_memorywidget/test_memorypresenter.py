@@ -18,13 +18,15 @@ from unittest import mock
 class MemoryPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(MemoryView)
+        self.mock_view_internals()
+        self.presenter = MemoryPresenter(self.view)
 
+    def mock_view_internals(self):
         self.view.critical = 90
         self.view.memory_bar = mock.Mock()
+        self.view.memory_bar.value.return_value = 0
         self.view.set_bar_color = mock.Mock()
         self.view.set_value = mock.Mock()
-
-        self.presenter = MemoryPresenter(self.view)
 
     def test_presenter(self):
         self.assertTrue(from_normal_to_critical(self.presenter.view.critical,
@@ -38,6 +40,7 @@ class MemoryPresenterTest(unittest.TestCase):
                         95, 75))
 
         self.assertEqual(self.presenter.view.set_value.call_count, 1)
+        self.assertEqual(self.presenter.view.set_bar_color.call_count, 1)
 
         self.presenter.update_memory_usage()
         self.assertEqual(self.presenter.view.set_value.call_count, 2)
