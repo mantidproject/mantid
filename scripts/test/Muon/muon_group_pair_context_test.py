@@ -7,7 +7,8 @@
 import unittest
 
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.muon_group import MuonGroup, MuonDiff
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
@@ -222,8 +223,8 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
         self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
         self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
-        self.assertEquals(self.context.diffs[0].forward_group, 'long1')
-        self.assertEquals(self.context.diffs[0].backward_group, 'long2')
+        self.assertEquals(self.context.diffs[0].positive, 'long1')
+        self.assertEquals(self.context.diffs[0].negative, 'long2')
         self.assertEquals(self.context.selected, 'long1')
 
     def test_get_group_pair_name_and_run_from_workspace_name(self):
