@@ -9,7 +9,7 @@ from .SuperplotView import SuperplotView
 from .SuperplotModel import SuperplotModel
 
 from mantid.api import mtd
-from mantid.plots.plotfunctions import plot, get_plot_fig
+from mantid.plots.axesfunctions import plot
 
 
 class SuperplotPresenter:
@@ -17,13 +17,11 @@ class SuperplotPresenter:
     _view = None
     _model = None
     _canvas = None
-    _lastPlot = None
 
     def __init__(self, canvas, parent=None):
         self._view = SuperplotView(self, parent)
         self._model = SuperplotModel()
         self._canvas = canvas
-        self._lastPlot = None
 
         #initial state
         figure = self._canvas.figure
@@ -120,24 +118,17 @@ class SuperplotPresenter:
         plottedData = self._model.getPlottedData()
 
         figure = self._canvas.figure
-        axes = figure.gca()
-
-        if self._lastPlot is None:
-            get_plot_fig(fig=self._canvas.figure)
-            for (ws, sp) in plottedData:
-                plot([ws], spectrum_nums=[sp], overplot=True, fig=figure)
-                self._lastPlot = (ws, sp)
-        elif self._lastPlot not in plottedData:
-            def fn(artist):
-                ws, sp = axes.get_artists_workspace_and_spec_num(artist)
-                return (ws.name(), sp) == self._lastPlot
-            axes.remove_artists_if(fn)
-            axes.relim()
-            self._canvas.draw_idle()
+        axes = figure.get_axes()
+        axes = axes[0]
+        axes.clear()
+        for wsName, sp in plottedData:
+            axes.plot(mtd[wsName], specNum=sp)
         if (currentWsName, currentSpectrumIndex) not in plottedData:
-            plot([currentWsName], spectrum_nums=[currentSpectrumIndex],
-                 overplot=True, fig=figure)
-            self._lastPlot = (currentWsName, currentSpectrumIndex)
+            axes.plot(mtd[currentWsName], specNum=currentSpectrumIndex)
+
+        axes.relim()
+        axes.legend()
+        self._canvas.draw_idle()
 
     def onWorkspaceSelectionChanged(self, index):
         """
@@ -221,4 +212,3 @@ class SuperplotPresenter:
         spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
         self._model.toggleData(names[wsIndex - 1], spectrumIndex)
-        self._lastPlot = (names[wsIndex - 1], spectrumIndex)
