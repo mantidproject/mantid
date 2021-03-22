@@ -11,7 +11,13 @@ set_matplotlib_backend()  # must be called before anything tries to use matplotl
 from HFIR_4Circle_Reduction import reduce4circleGUI  # noqa
 
 app, within_mantid = get_qapplication()
-reducer = reduce4circleGUI.MainWindow()  # the main ui class in this file
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+reducer = reduce4circleGUI.MainWindow(parent, flags)  # the main ui class in this file
 reducer.show()
 if not within_mantid:
     sys.exit(app.exec_())
