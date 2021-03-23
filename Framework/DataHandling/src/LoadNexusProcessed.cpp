@@ -1746,9 +1746,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
       // try standard PeakWorkspace first
       return loadPeaksEntry(mtd_entry);
     } catch (std::exception &err) {
-      g_log.notice("Standard PeakWorkspace Load failed");
-      g_log.information(err.what());
-      g_log.notice("¯\\_(ツ)_/¯ LeanElasticPeakWorkspace?");
       return loadLeanElasticPeaksEntry(mtd_entry);
     }
   }
