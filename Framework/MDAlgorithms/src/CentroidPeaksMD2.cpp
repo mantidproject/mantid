@@ -15,8 +15,6 @@
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 
-using Mantid::DataObjects::PeaksWorkspace;
-
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -85,7 +83,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Get a direct ref to that peak.
       IPeak &p = peakWS->getPeak(i);
       Peak *peak = dynamic_cast<Peak *>(&p);
-      double detectorDistance;
+      double detectorDistance = 0.;
       if (peak)
         detectorDistance = p.getL2();
 
