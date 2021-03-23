@@ -92,16 +92,16 @@ public:
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
 
-  IPeak_uptr createPeak(const Kernel::V3D &Position,
-                        const Kernel::SpecialCoordinateSystem &frame) const override;
+  IPeak_uptr
+  createPeak(const Kernel::V3D &Position,
+             const Kernel::SpecialCoordinateSystem &frame) const override;
 
   IPeak_uptr createPeakQSample(const Kernel::V3D &position) const override;
 
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  IPeak_uptr
-  createPeakHKL(const Kernel::V3D &HKL) const override;
+  IPeak_uptr createPeakHKL(const Kernel::V3D &HKL) const override;
 
   IPeak_uptr createPeak() const override;
 
