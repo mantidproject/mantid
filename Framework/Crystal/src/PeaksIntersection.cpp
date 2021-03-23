@@ -11,7 +11,6 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <variant>
 #include <boost/function.hpp>
 
 using namespace Mantid::API;
@@ -79,7 +78,6 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   PeaksWorkspace_sptr ws = this->getProperty("InputWorkspace");
 
   m_peakRadius = this->getProperty("PeakRadius");
-
 
   boost::function<V3D(Peak *)> coordFrameFunc;
   coordFrameFunc = &Peak::getHKL;
