@@ -430,7 +430,7 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     mtd.addOrReplace(outputname, single)
     return mtd[outputname]
 
-
+# flake8: noqa: C901
 def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True, show_bad_cnt=True, drange=(0, 0),
                threshold=0.01):
     """
@@ -469,7 +469,6 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True,
     ax.set_prop_cycle(color=colormap_as_plot_color(len(peaks), cmap=plt.get_cmap("jet")))
 
     regions = []
-    region_cnts = []
     plotted_peaks = []
 
     # Use full detector range if not specified
@@ -502,7 +501,11 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True,
             dend = single.yIndexOfX(int(x.searchsorted(drange[1])))
             print("Specified ending detector range was not valid, adjusted to detID={}".format(dend))
 
-        cut_id = (dstart, dend)
+        if dstart <= dend:
+            cut_id = (dstart, dend)
+        else:
+            # Switch range if the start point is larger
+            cut_id = (dend, dstart)
 
         # skip if y was entirely nans or detector slice yields empty region
         if len(y_val) == 0 or len(y_val[cut_id[0]:cut_id[1]]) == 0:
