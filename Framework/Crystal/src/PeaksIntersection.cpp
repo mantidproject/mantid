@@ -16,9 +16,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::DataObjects::Peak;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
-using Mantid::DataObjects::Peak;
 
 namespace Mantid {
 namespace Crystal {
