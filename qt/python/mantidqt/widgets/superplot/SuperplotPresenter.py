@@ -10,10 +10,13 @@ from .SuperplotModel import SuperplotModel
 
 from mantid.api import mtd
 from mantid.plots.axesfunctions import plot
+from mantid.plots.utility import MantidAxType
 
 
 class SuperplotPresenter:
 
+    BIN_MODE_TEXT = "Bin"
+    SPECTRUM_MODE_TEXT = "Spectrum"
     _view = None
     _model = None
     _canvas = None
@@ -42,6 +45,13 @@ class SuperplotPresenter:
         self._view.setWorkspaceSliderPosition(len(names))
         self._view.setWorkspaceSpinBoxValue(len(names))
         self._view.setSelectedWorkspace(len(names))
+        self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                      self.BIN_MODE_TEXT])
+
+        if ws.blocksize() > 1:
+            self._view.setMode(self.SPECTRUM_MODE_TEXT)
+        else:
+            self._view.setMode(self.BIN_MODE_TEXT)
         self._changeCurrentWorkspace(len(names))
 
     def getSideView(self):
@@ -96,9 +106,14 @@ class SuperplotPresenter:
         currentWsName = workspaceNames[index - 1]
         currentWs = mtd[currentWsName]
         currentSpectrumIndex = self._model.getSpectrum(currentWsName)
-        self._view.setSpectrumSliderMax(currentWs.getNumberHistograms() - 1)
+        mode = self._view.getMode()
+        if mode == self.SPECTRUM_MODE_TEXT:
+            maximum = currentWs.getNumberHistograms()
+        else:
+            maximum = currentWs.blocksize()
+        self._view.setSpectrumSliderMax(maximum - 1)
         self._view.setSpectrumSliderPosition(currentSpectrumIndex)
-        self._view.setSpectrumSpinBoxMax(currentWs.getNumberHistograms() - 1)
+        self._view.setSpectrumSpinBoxMax(maximum - 1)
         self._view.setSpectrumSpinBoxValue(currentSpectrumIndex)
 
     def _updateHoldButton(self, wsIndex, spIndex):
@@ -128,15 +143,23 @@ class SuperplotPresenter:
         workspaceNames = self._model.getWorkspaces()
         currentWsName = workspaceNames[currentWorkspaceIndex - 1]
         plottedData = self._model.getPlottedData()
+        mode = self._view.getMode()
 
         figure = self._canvas.figure
         axes = figure.get_axes()
         axes = axes[0]
         axes.clear()
         for wsName, sp in plottedData:
-            axes.plot(mtd[wsName], wkspIndex=sp)
+            if self._model.isSpectrumMode():
+                axes.plot(mtd[wsName], wkspIndex=sp)
+            else:
+                axes.plot(mtd[wsName], wkspIndex=sp, axis=MantidAxType.BIN)
         if (currentWsName, currentSpectrumIndex) not in plottedData:
-            axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
+            if mode == self.SPECTRUM_MODE_TEXT:
+                axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
+            else:
+                axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex,
+                          axis=MantidAxType.BIN)
 
         figure.tight_layout()
         axes.relim()
@@ -224,7 +247,39 @@ class SuperplotPresenter:
         wsIndex = self._view.getWorkspaceSliderPosition()
         spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
+        mode = self._view.getMode()
         if state:
             self._model.addData(names[wsIndex - 1], spectrumIndex)
+            if mode == self.SPECTRUM_MODE_TEXT:
+                self._model.setSpectrumMode()
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT])
+            else:
+                self._model.setBinMode()
+                self._view.setAvailableModes([self.BIN_MODE_TEXT])
         else:
             self._model.removeData(names[wsIndex - 1], spectrumIndex)
+            if not self._model.isBinMode() and not self._model.isSpectrumMode():
+                self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
+                                              self.BIN_MODE_TEXT])
+                self._view.setMode(mode)
+
+    def onModeChanged(self, mode):
+        """
+        Triggered when the selected mode changed in the view.
+
+        Args:
+            mode (str): new mode
+        """
+        wsIndex = self._view.getWorkspaceSliderPosition()
+        workspaceNames = self._model.getWorkspaces()
+        currentWsName = workspaceNames[wsIndex - 1]
+        currentWs = mtd[currentWsName]
+        if mode == self.SPECTRUM_MODE_TEXT:
+            maximum = currentWs.getNumberHistograms()
+        else:
+            maximum = currentWs.blocksize()
+        self._view.setSpectrumSliderMax(maximum - 1)
+        self._view.setSpectrumSliderPosition(0)
+        self._view.setSpectrumSpinBoxMax(maximum - 1)
+        self._view.setSpectrumSpinBoxValue(0)
+        self._updatePlot()

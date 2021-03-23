@@ -25,10 +25,16 @@ class SuperplotModel:
     """
     _plottedData = None
 
+    """
+    Plot mode (bins or spectra).
+    """
+    _plotMode = None
+
     def __init__(self):
         self._workspaces = list()
         self._spectra = dict()
         self._plottedData = list()
+        self._plotMode = None
 
     def addWorkspace(self, name):
         """
@@ -93,6 +99,36 @@ class SuperplotModel:
         """
         return [name for name in self._workspaces]
 
+    def setBinMode(self):
+        """
+        Set the plot mode to 'bins'.
+        """
+        self._plotMode = "bin"
+
+    def setSpectrumMode(self):
+        """
+        Set the plot mode to 'spectra'.
+        """
+        self._plotMode = "spectrum"
+
+    def isBinMode(self):
+        """
+        Return true if the plot mode is 'bins'.
+
+        Returns:
+            bool: True if 'bins' mode
+        """
+        return self._plotMode == "bin"
+
+    def isSpectrumMode(self):
+        """
+        Return true if the plot mode is 'spectra'.
+
+        Returns:
+            bool: True if 'spectra' mode
+        """
+        return self._plotMode == "spectrum"
+
     def addData(self, workspace, spectrum):
         """
         Add a workspace, spectrum index pair from the plotted data.
@@ -112,6 +148,8 @@ class SuperplotModel:
             spectrum (int): index of the spectrum
         """
         self._plottedData.remove((workspace, spectrum))
+        if not self._plottedData:
+            self._plotMode = None
 
     def getPlottedData(self):
         """

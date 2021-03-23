@@ -60,6 +60,8 @@ class SuperplotView(QWidget):
                 self._presenter.onSpectrumSliderMoved)
         bottom.spectrumSpinBox.valueChanged.connect(
                 self._presenter.onSpectrumSpinBoxChanged)
+        bottom.modeComboBox.currentTextChanged.connect(
+                self._presenter.onModeChanged)
 
     def getSideWidget(self):
         return self._sideView
@@ -232,3 +234,35 @@ class SuperplotView(QWidget):
             int: spinbox value
         """
         return self._bottomView.spectrumSpinBox.value()
+
+    def setAvailableModes(self, modes):
+        """
+        Set available modes in the mode combobox.
+
+        Args:
+            modes (list(str)): list of modes
+        """
+        self._bottomView.modeComboBox.blockSignals(True)
+        self._bottomView.modeComboBox.clear()
+        self._bottomView.modeComboBox.addItems(modes)
+        self._bottomView.modeComboBox.blockSignals(False)
+
+    def setMode(self, mode):
+        """
+        Set the selected mode. This method does not trigegr any combobox signal.
+
+        Args:
+            mode (str): mode
+        """
+        self._bottomView.modeComboBox.blockSignals(True)
+        self._bottomView.modeComboBox.setCurrentText(mode)
+        self._bottomView.modeComboBox.blockSignals(False)
+
+    def getMode(self):
+        """
+        Get the selected mode from the combobox.
+
+        Returns:
+            str: mode
+        """
+        return self._bottomView.modeComboBox.currentText()

@@ -48,18 +48,7 @@
      </widget>
     </item>
     <item row="1" column="3">
-     <widget class="QComboBox" name="comboBox_2">
-      <item>
-       <property name="text">
-        <string>Spectrum</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Bins</string>
-       </property>
-      </item>
-     </widget>
+     <widget class="QComboBox" name="modeComboBox"/>
     </item>
     <item row="1" column="0" colspan="2">
      <widget class="QSlider" name="spectrumSlider">
