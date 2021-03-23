@@ -121,7 +121,7 @@ public:
   void setInitialEnergy(double m_initialEnergy) override;
   void setFinalEnergy(double m_finalEnergy) override;
 
-  virtual Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const;
   virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;

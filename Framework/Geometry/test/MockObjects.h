@@ -122,7 +122,6 @@ public:
   MOCK_CONST_METHOD0(getBankName, std::string());
   MOCK_CONST_METHOD0(getRow, int());
   MOCK_CONST_METHOD0(getCol, int());
-  MOCK_CONST_METHOD0(getDetPos, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getL1, double());
   MOCK_CONST_METHOD0(getL2, double());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());

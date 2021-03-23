@@ -11,6 +11,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <variant>
 #include <boost/function.hpp>
 
 using namespace Mantid::API;
@@ -79,14 +80,15 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
   m_peakRadius = this->getProperty("PeakRadius");
 
-  // Find the coordinate frame to use an set up boost function for this.
-  boost::function<V3D(IPeak *)> coordFrameFunc = &IPeak::getHKL;
+
+  boost::function<V3D(Peak *)> coordFrameFunc;
+  coordFrameFunc = &Peak::getHKL;
   if (coordinateFrame == detectorSpaceFrame()) {
     coordFrameFunc = &Peak::getDetectorPosition;
   } else if (coordinateFrame == qLabFrame()) {
-    coordFrameFunc = &IPeak::getQLabFrame;
+    coordFrameFunc = &Peak::getQLabFrame;
   } else if (coordinateFrame == qSampleFrame()) {
-    coordFrameFunc = &IPeak::getQSampleFrame;
+    coordFrameFunc = &Peak::getQSampleFrame;
   }
 
   // Create the faces.

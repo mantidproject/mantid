@@ -71,17 +71,17 @@ class SaveHKLCW(PythonAlgorithm):
             if directionCosines:
                 U = peak_ws.sample().getOrientedLattice().getU()
                 sample_pos = peak_ws.getInstrument().getSample().getPos()
-                q_reverse_incident = peak_ws.getInstrument().getSource().getPos() - sample_pos
-                q_reverse_incident = np.array(q_reverse_incident) / q_reverse_incident.norm()
+                source_pos = peak_ws.getInstrument().getSource().getPos()
+                ki_n = (sample_pos - source_pos).norm()  # direction of incident wavevector
 
             for p in peak_ws:
                 if directionCosines:
                     R = p.getGoniometerMatrix()
                     RU = np.dot(R, U)
-                    q_diffracted = p.getDetPos() - sample_pos
-                    q_diffracted = np.array(q_diffracted) / q_diffracted.norm()
-                    dir_cos_1 = np.dot(RU.T, q_reverse_incident)
-                    dir_cos_2 = np.dot(RU.T, q_diffracted)
+                    ki = ki_n * (2 * np.pi / p.getWavelength())
+                    kf_n = (ki + p.getQLabFrame()).norm()  # direction of scattered wavevector
+                    dir_cos_1 = np.dot(RU.T, -ki_n)  # notice ki direction is reversed
+                    dir_cos_2 = np.dot(RU.T, kf_n)
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n"
                         .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
