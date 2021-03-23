@@ -1214,7 +1214,7 @@ inline void MDNorm::calcDiffractionIntersectionIntegral(
  * @param solid: proton charge
  * @param yValues: original signal values
  * @param vmdDims: MD dimensions
- * @param pos: positions
+ * @param pos: positions from intersections for memory efficiency
  * @param posNew: transformed positions
  * @param signalArray: (output) signals
  */
