@@ -94,7 +94,6 @@ public:
   virtual int getRow() const = 0;
   virtual int getCol() const = 0;
 
-  virtual Mantid::Kernel::V3D getDetPos() const = 0;
   virtual double getL1() const = 0;
   virtual double getL2() const = 0;
 

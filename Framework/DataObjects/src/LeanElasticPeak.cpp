@@ -257,13 +257,6 @@ void LeanElasticPeak::setInitialEnergy(double) {
 }
 
 // -------------------------------------------------------------------------------------
-/** Return the detector position vector */
-Mantid::Kernel::V3D LeanElasticPeak::getDetPos() const {
-  throw Exception::NotImplementedError(
-      "LeanElasticPeak has no detector information");
-}
-
-// -------------------------------------------------------------------------------------
 /** Return the sample position vector */
 Mantid::Kernel::V3D LeanElasticPeak::getSamplePos() const {
   throw Exception::NotImplementedError(
