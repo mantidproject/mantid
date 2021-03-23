@@ -1160,14 +1160,6 @@ LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry) {
         double val = nxDouble[r];
         peakWS->getPeak(r).setWavelength(val);
       }
-    } else if (str == "column_9") {
-      NXDouble nxDouble = nx_tw.openNXDouble(str);
-      nxDouble.load();
-
-      for (int r = 0; r < numberPeaks; r++) {
-        double val = nxDouble[r];
-        peakWS->getPeak(r).setWavelength(val);
-      }
     } else if (str == "column_10") {
       NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
