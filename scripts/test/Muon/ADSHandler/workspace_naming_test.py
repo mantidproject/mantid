@@ -73,7 +73,7 @@ class WorkspaceNamingTest(unittest.TestCase):
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'True'
         filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 
-        load_result, run_number, filename, psi_data = load_workspace_from_filename(filepath)
+        load_result, run_number, filename, psi_data, _ = load_workspace_from_filename(filepath)
 
         context = setup_context()
         context.gui_context.update({'RebinType': 'None'})

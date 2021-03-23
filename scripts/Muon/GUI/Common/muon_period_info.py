@@ -65,7 +65,9 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
     def daq_count(self):
         return self._daq_count
 
-    def add_period_to_table(self, name, period_type, frames, total_frames, counts):
+    def add_period_to_table(self, name=PERIOD_INFO_NOT_FOUND, period_type=PERIOD_INFO_NOT_FOUND,
+                            frames=PERIOD_INFO_NOT_FOUND, total_frames=PERIOD_INFO_NOT_FOUND,
+                            counts=PERIOD_INFO_NOT_FOUND):
         row_num = self._num_rows()
         self._table.insertRow(row_num)
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Period Number"], self._new_text_widget(str(row_num + 1)))

@@ -13,6 +13,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
@@ -71,7 +72,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
-        self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234, False))
+        self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234, False,
+                                                                          EMPTY_PERIOD_INFO_LIST))
         self.view.warning_popup = mock.Mock()
         self.view.disable_load_buttons = mock.Mock()
         self.view.enable_load_buttons = mock.Mock()
@@ -96,7 +98,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def test_load_current_run_loads_run_into_model(self):
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "currentRun.nxs"
-                                                                                       , False))
+                                                                                       , False, EMPTY_PERIOD_INFO_LIST))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -110,7 +112,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
-                                                                                       False))
+                                                                                       False, EMPTY_PERIOD_INFO_LIST))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -132,7 +134,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         # set up previous data
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
-                                                                                       False))
+                                                                                       False, EMPTY_PERIOD_INFO_LIST))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
@@ -155,7 +157,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 9999, "9999.nxs",
-                                                                                       False))
+                                                                                       False, EMPTY_PERIOD_INFO_LIST))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -173,7 +175,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         # set up current run
         workspace = self.create_fake_workspace()
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
-                                                                                       False))
+                                                                                       False, EMPTY_PERIOD_INFO_LIST))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)

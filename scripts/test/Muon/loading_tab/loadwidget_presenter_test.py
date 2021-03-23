@@ -18,6 +18,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
@@ -89,22 +90,22 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=[filename])
-        self.load_mock.return_value = (workspace, run, filename, False)
-        self.load_run_mock.return_value = (workspace, run, filename, False)
+        self.load_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
+        self.load_run_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
 
     def mock_loading_from_current_run(self, workspace, filename, run):
         file_utils.get_current_run_filename = mock.Mock(return_value=filename)
-        self.load_run_mock.return_value = (workspace, run, filename, False)
-        self.load_mock.return_value = (workspace, run, filename, False)
+        self.load_run_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
+        self.load_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
 
     def mock_user_input_single_run(self, workspace, filename, run):
         self.load_run_view.get_run_edit_text = mock.Mock(return_value=str(run))
-        self.load_run_mock.return_value = (workspace, run, filename, False)
-        self.load_mock.return_value = (workspace, run, filename, False)
+        self.load_run_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
+        self.load_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
 
     def mock_user_input_single_file(self, workspace, filename, run):
-        self.load_run_mock.return_value = (workspace, run, filename, False)
-        self.load_mock.return_value = (workspace, run, filename, False)
+        self.load_run_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
+        self.load_mock.return_value = (workspace, run, filename, False, EMPTY_PERIOD_INFO_LIST)
 
         self.load_file_view.get_file_edit_text = mock.Mock(
             return_value=filename)

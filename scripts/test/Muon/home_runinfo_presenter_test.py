@@ -36,7 +36,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
 
     def test_runinfo_correct(self):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
-        ws, run, filename, _ = load_utils.load_workspace_from_filename(file_path)
+        ws, run, filename, _, _ = load_utils.load_workspace_from_filename(file_path)
         self.data_context._loaded_data.remove_data(run=run)
         self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
         self.data_context.current_runs = [[22725]]
@@ -51,7 +51,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
                                 'GoodFrames:88540', 'CountsperGoodFrame:226.753',
                                 'CountsperGoodFrameperdet:3.543', 'AverageTemperature(K):19.69992',
                                 'SampleTemperature(K):1.0', 'SampleMagneticField(G):100.0',
-                                'NumberofPeriods:1']
+                                'NumberofDAQPeriods:1']
 
         self.assertEqual(str(self.view.run_info_box.toPlainText()).replace(' ', '').splitlines(), expected_string_list)
 

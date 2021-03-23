@@ -17,6 +17,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
@@ -77,8 +78,10 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:\\dir1\\EMU0001234.nxs"])
         self.workspace_mock = self.create_fake_workspace(1)
-        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
-        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
+        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False,
+                                       EMPTY_PERIOD_INFO_LIST)
+        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False,
+                                           EMPTY_PERIOD_INFO_LIST)
 
         self.presenter.load_file_widget.on_browse_button_clicked()
         self.context.update_current_data = mock.MagicMock(return_value=([], []))

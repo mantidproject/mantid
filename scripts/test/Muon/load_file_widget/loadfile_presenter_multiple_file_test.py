@@ -13,6 +13,7 @@ from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 
 
 class IteratorWithException:
@@ -79,7 +80,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
     def mock_loading_multiple_files_from_browse(self, runs, workspaces, filenames):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=filenames)
         psi_data = [False] * len(filenames)
-        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, psi_data)
+        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, psi_data, EMPTY_PERIOD_INFO_LIST)
 
     def create_fake_workspace(self, name):
         workspace_mock = mock.MagicMock()
@@ -103,7 +104,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                                                          [1234, 1234],
                                                                                          ["C:/dir1/file1.nxs",
                                                                                           "C:/dir2/file2.nxs"],
-                                                                                         [False, False]))
+                                                                                         [False, False],
+                                                                                         EMPTY_PERIOD_INFO_LIST))
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
@@ -120,7 +122,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
                                                                                          [1234, 1234],
                                                                                          ["C:/dir1/file1.nxs",
                                                                                           "C:/dir2/file2.nxs"],
-                                                                                         [False, False]))
+                                                                                         [False, False],
+                                                                                         EMPTY_PERIOD_INFO_LIST))
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir2/file1.nxs;C:/dir2/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
@@ -137,7 +140,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.load_utils_patcher.side_effect = zip([workspace_1, workspace_2],
                                                   [1234, 1234],
                                                   ["C:/dir1/file1.nxs", "C:/dir1/file2.nxs"],
-                                                  [False, False])
+                                                  [False, False],
+                                                  EMPTY_PERIOD_INFO_LIST)
         self.view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:/dir1/file1.nxs", "C:/dir1/file2.nxs"])
 
@@ -156,7 +160,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         workspace_2 = self.create_fake_workspace(2)
         self.load_utils_patcher.side_effect = zip([workspace_1, workspace_2], [1234, 1234],
                                                   ["C:/dir1/file1.nxs", "C:/dir1/file2.nxs"],
-                                                  [False, False])
+                                                  [False, False],
+                                                  EMPTY_PERIOD_INFO_LIST)
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir1/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
@@ -190,7 +195,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.load_utils_patcher.side_effect = zip([workspace_1, workspace_2],
                                                   [1234, 1235],
                                                   ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"],
-                                                  [False, False])
+                                                  [False, False],
+                                                  EMPTY_PERIOD_INFO_LIST)
         self.view.set_file_edit("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
 
         self.presenter.handle_file_changed_by_user()
@@ -220,7 +226,8 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         workspace_2 = self.create_fake_workspace(2)
         self.load_utils_patcher.side_effect = zip([workspace_2, workspace_1], [1235, 1234],
                                                   ["C:/dir1/file2.nxs", "C:/dir1/file1.nxs"],
-                                                  [False, False])
+                                                  [False, False],
+                                                  EMPTY_PERIOD_INFO_LIST)
         self.view.set_file_edit("C:/dir1/file2.nxs;C:/dir1/file1.nxs")
 
         self.presenter.handle_file_changed_by_user()

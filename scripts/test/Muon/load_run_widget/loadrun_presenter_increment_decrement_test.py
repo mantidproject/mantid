@@ -15,6 +15,7 @@ from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.general_test_helpers import EMPTY_PERIOD_INFO_LIST
 
 
 @start_qapplication
@@ -62,7 +63,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self._loaded_workspace = {'MainFieldDirection': 'transverse'}
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=(self._loaded_workspace, self._loaded_run, self._loaded_filename, False))
+            return_value=(self._loaded_workspace, self._loaded_run,
+                          self._loaded_filename, False, EMPTY_PERIOD_INFO_LIST))
         self.view.set_run_edit_text(str(self._loaded_run))
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
@@ -115,7 +117,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
+            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False, EMPTY_PERIOD_INFO_LIST))
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
@@ -131,7 +133,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False))
+            return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename, False, EMPTY_PERIOD_INFO_LIST))
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)

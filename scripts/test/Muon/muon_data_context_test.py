@@ -21,7 +21,7 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        self.load_result, self.run_number, self.filename, _ = load_workspace_from_filename(self.filepath)
+        self.load_result, self.run_number, self.filename, _, _ = load_workspace_from_filename(self.filepath)
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'
