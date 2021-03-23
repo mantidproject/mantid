@@ -25,7 +25,6 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -1214,18 +1213,23 @@ public:
     lpws->addPeak(pk2);
 
     // save the lean elastic peak workspace to temp
-    NexusTestHelper nexusHelper(true);
-    nexusHelper.createFile("testLoadLeanElasticPeaksWorkspace.nxs");
-    lpws->saveNexus(nexusHelper.file.get());
+    std::string filename = "testLoadLeanElasticPeaksWorkspace.nxs";
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", lpws);
+    save.setPropertyValue("Filename", filename);
+    save.execute();
 
     // load it back with the loader
     LoadNexusProcessed load;
     load.initialize();
-    load.setProperty("Filename", nexusHelper.filename);
-    load.setProperty("OutputWorkspace", "lpws_loaded");
+    load.setProperty("Filename", filename);
+    load.setProperty("OutputWorkspace", "outws");
     load.execute();
-    auto lpws_loaded = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(
-        AnalysisDataService::Instance().retrieve("lpws_loaded"));
+
+    auto lpws_loaded =
+        AnalysisDataService::Instance().retrieveWS<LeanElasticPeaksWorkspace>(
+            "outws");
 
     // confirm that the peaks are the same in original
     // and the loaded lean elastic peak workspace
@@ -1258,6 +1262,9 @@ public:
                     1e-5);
     TS_ASSERT_DELTA(lpws->getPeak(1).getQLabFrame().Z(), pk2.getQLabFrame().Z(),
                     1e-5);
+
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
 private:
