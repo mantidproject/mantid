@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
@@ -1134,45 +1135,11 @@ TMDE(void MDGridBox)::integrateSphere(
     API::CoordTransform &radiusTransform, const coord_t radiusSquared,
     signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
     const bool useOnePercentBackgroundCorrection) const {
-
-  // --------
-  // Overview
-  //   R: peak radius
-  //   r: inner radius (useful for defining peak background)
-  //   d: distance computed with radiusTransfor
-  // all distances are compared with their squared form
-  // ---------------------------------------------------------------------------
-  // We are checking all corners of each box to see if
-  //    ! all corners are within the integration volume (sphere/ellipsoid/donut)
-  //       -> we reach the base case, add box_signal and error to the container
-  //          (signal, errorSquared)
-  //    ! at least one corner is within the integration volume
-  //       -> recursively perform the same corner check for all its child boxes
-  //          util we reach the base case
-  //    ! no corner is within the integration volume
-  //       -> compute distance (d) between peak center and
-  //          [a] box center
-  //          [b] box corners
-  //          if d_min > R: box completely outside the integration volume, skip
-  //                        it and its children to save computing time
-  //          if d_max < r: box completely falls into the donut hole, skip it
-  //                        and its children to save computing time
-  //          others: recursively search the child boxes as the current box is
-  //                  partially overlapping with the integration volume, in
-  //                  otherwords, some of its child box is within the region
-  //                  (base case), and some of its child box is outside the
-  //                  integration volume.
+  // We start by looking at the vertices at every corner of every box contained,
+  // to see which boxes are partially contained/fully contained.
 
   // One entry with the # of vertices in this box contained; start at 0.
   std::vector<size_t> verticesContained(numBoxes, 0);
-
-  // Setup caches for distances dmax and dmin
-  auto distmaxs = new coord_t[numBoxes];
-  memset(distmaxs, 0, numBoxes * sizeof(coord_t));
-  auto distmins = new coord_t[numBoxes];
-  memset(distmins, 65535, numBoxes * sizeof(coord_t));
-  // std::vector<coord_t> distmins(numBoxes, radiusSquared + 1);
-  // std::vector<coord_t> distmaxs(numBoxes, 0.0);
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
@@ -1216,40 +1183,34 @@ TMDE(void MDGridBox)::integrateSphere(
     // Is this vertex contained?
     coord_t out[nd];
     radiusTransform.apply(vertexCoord, out);
+    if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
+      // Yes, this vertex is contained within the integration volume!
+      //        std::cout << "vertex at " << vertexCoord[0] << ", " <<
+      //        vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
 
-    // This vertex is shared by up to 2^nd adjacent boxes (left-right along
-    // each dimension).
-    for (size_t neighb = 0; neighb < maxVertices; ++neighb) {
-      // The index of the box is the same as the vertex, but maybe - 1 in each
-      // possible combination of dimensions
-      bool badIndex = false;
-      // Build the index of the neighbor
-      for (size_t d = 0; d < nd; d++) {
-        boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >>
-                                        d); //(this does a bitwise and mask,
-        // shifted back to 1 to subtract 1
-        // to the dimension)
-        // Taking advantage of the fact that unsigned(0)-1 = some large
-        // POSITIVE number.
-        if (boxIndex[d] >= split[d]) {
-          badIndex = true;
-          break;
+      // This vertex is shared by up to 2^nd adjacent boxes (left-right along
+      // each dimension).
+      for (size_t neighb = 0; neighb < maxVertices; ++neighb) {
+        // The index of the box is the same as the vertex, but maybe - 1 in each
+        // possible combination of dimensions
+        bool badIndex = false;
+        // Build the index of the neighbor
+        for (size_t d = 0; d < nd; d++) {
+          boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >>
+                                          d); //(this does a bitwise and mask,
+          // shifted back to 1 to subtract 1
+          // to the dimension)
+          // Taking advantage of the fact that unsigned(0)-1 = some large
+          // POSITIVE number.
+          if (boxIndex[d] >= split[d]) {
+            badIndex = true;
+            break;
+          }
         }
-      }
-      // Figure out which box this vertex belongs to so that we can track the
-      // maximum and minimum distance bewteen box corners and peak center
-      if (!badIndex) {
-        // Convert to linear index
-        size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
-            nd, boxIndex, indexMaker);
-        // Track the maximum and minimum distance bewteen box corners
-        // and peak center
-        if (out[0] > distmaxs[linearIndex])
-          distmaxs[linearIndex] = out[0];
-        if (out[0] < distmins[linearIndex])
-          distmins[linearIndex] = out[0];
-        // Check if we need to increment the counter
-        if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
+        if (!badIndex) {
+          // Convert to linear index
+          size_t linearIndex = Kernel::Utils::NestedForLoop::GetLinearIndex(
+              nd, boxIndex, indexMaker);
           // So we have one more vertex touching this box that is contained in
           // the integration volume. Whew!
           verticesContained[linearIndex]++;
@@ -1264,7 +1225,22 @@ TMDE(void MDGridBox)::integrateSphere(
         Kernel::Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
   }
 
-  // OK, we've done all the vertices. Now we go through and check each box.
+  // NOTE:
+  //    The following section is just trying to uncover the peak center so that
+  //    we can compute the distance bewteen peak center and box center correctly
+  //    without worrying about the skew coming from coordTransformDistnace.
+  auto tmpRadiusTransform =
+      dynamic_cast<CoordTransformDistance *>(&radiusTransform);
+  if (tmpRadiusTransform == nullptr) {
+    throw std::runtime_error(
+        "radiusTransform has to be CoordTransformDistance");
+  }
+  auto peakCenter = tmpRadiusTransform->getCenter();
+  double peakRadius = std::sqrt(radiusSquared);
+  double peakInnerRadius = std::sqrt(innerRadiusSquared);
+
+  // OK, we've done counting all the vertices.
+  // Now let's go through and check each box.
   for (size_t i = 0; i < numBoxes; ++i) {
     API::IMDNode *box = m_Children[i];
 
@@ -1286,45 +1262,61 @@ TMDE(void MDGridBox)::integrateSphere(
       continue;
     }
 
-    // Last, no vertices in the integration volume, and here are the
-    // possiblities
-    //  - Large box envelop the peak -> kick off recursive search
-    //  - Box run across the donut shaped integration region -> kick off
-    //  recursive search
-    //
-    //  - Box is completely isolated from peak (dmin > R) -> stop search and
-    //  move on
-    //  - Tiny box falls into the donut hole (dmax < r) -> stop search and move
-    //  on
-
-    // add box center to the check
-    // NOTE: checking corner alone is not sufficient to cover the case where the
-    //       box encapsulate the peak, which is why we need to add box center
-    //       to the fold
+    // Last, no vertices in the integration volume
+    //  -- there are only two cases (see below) where we can
+    //     skip the box and its children, and it requires
+    //     the knowledge of how box and peak are spatially
+    //     positioned in Euclidian space.
+    // NOTE:
+    //  For ellipsoid, we are using the long semi-axis, which
+    //  means we will inevitablly search some empty boxes, but
+    //  this is by design as we do not want to miss any box
+    //  that might contain events we need to collect.
     coord_t boxCenter[nd];
     box->getCenter(boxCenter);
-    coord_t out[nd];
-    radiusTransform.apply(boxCenter, out);
-    if (out[0] > distmaxs[i])
-      distmaxs[i] = out[0];
-    if (out[0] < distmins[i])
-      distmins[i] = out[0];
-    // Box is completely isolated from peak
-    if (distmins[i] > radiusSquared) {
+    double distPeakCenterToBoxCenter = 0.0;
+    for (size_t i = 0; i < nd; ++i) {
+      distPeakCenterToBoxCenter +=
+          (boxCenter[i] - peakCenter[i]) * (boxCenter[i] - peakCenter[i]);
+    }
+    distPeakCenterToBoxCenter = std::sqrt(distPeakCenterToBoxCenter);
+    double boxRadius = std::sqrt(diagonalSquared);
+
+    //  - Box is completely isolated from peak
+    //        distPeakCenterToBoxCenter - peakRadius > boxRadius
+    //    -> stop search and move on
+    if (distPeakCenterToBoxCenter - peakRadius > boxRadius) {
+      // Debug output
+      // std::ostringstream debugmsg;
+      // debugmsg << "R_peak = " << peakRadius << "\n"
+      //          << "R_box = " << boxRadius << "\n"
+      //          << "Peak Center: ";
+      // for (size_t i = 0; i < nd; ++i) {
+      //   debugmsg << peakCenter[i] << ",";
+      // }
+      // debugmsg << "\n"
+      //          << "Box center: ";
+      // for (size_t i = 0; i < nd; ++i) {
+      //   debugmsg << boxCenter[i] << ",";
+      // }
+      // debugmsg << "\n"
+      //          << "distPeakCenterToBoxCenter = " << distPeakCenterToBoxCenter
+      //          << "\n";
+      // std::cout << debugmsg.str();
       continue;
     }
-    // Tiny box falls into the donut hole
-    if (distmaxs[i] < innerRadiusSquared) {
+    //  - Tiny box falls into the donut hole
+    //        distPeakCenterToBoxCenter + boxRadius < peakInnerRadius
+    //    -> stop search and move on
+    if (peakInnerRadius > 0 &&
+        distPeakCenterToBoxCenter + boxRadius < peakInnerRadius) {
       continue;
     }
-    // Kick off recursive search for the other cases
+    //  - All other cases, we need to refine the box, i.e. recursively
+    //    search the child box
     box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared,
                          innerRadiusSquared, useOnePercentBackgroundCorrection);
-
   } // (for each box)
-
-  delete[] distmaxs;
-  delete[] distmins;
 }
 
 //-----------------------------------------------------------------------------------------------
