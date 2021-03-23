@@ -6,20 +6,20 @@ from ..memorywidget.memoryinfo import get_memory_info
 class MemoryPresenter(object):
     def __init__(self, view):
         self.view = view
+        self.timer = QTimer()
         self.update_memory_usage()
         self.set_bar_color_at_start()
         self.update_at_regular_intervals()
 
     def update_at_regular_intervals(self):
-        self.timer = QTimer()
         self.timer.timeout.connect(self.update_memory_usage)
         self.timer.start(10)
 
     def set_bar_color_at_start(self):
         current_value = self.view.memory_bar.value()
-        if (current_value >= 90):
+        if current_value >= 90:
             self.view.set_bar_color(0, current_value)
-        elif (current_value < 90):
+        elif current_value < 90:
             self.view.set_bar_color(100, current_value)
         else:
             pass

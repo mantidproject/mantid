@@ -18,5 +18,6 @@ class MemoryInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(mem_used_percent, int))
         self.assertTrue(0 <= mem_used_percent <= 100)
 
+
 if __name__ == "__main__":
     unittest.main()

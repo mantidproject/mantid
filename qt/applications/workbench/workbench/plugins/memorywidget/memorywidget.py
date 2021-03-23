@@ -20,7 +20,7 @@ class MemoryWidget(PluginWidget):
 
         self.view = view if view else MemoryView(self)
         self.presenter = MemoryPresenter(self.view)
-        
+
         layout = QVBoxLayout()
         layout.addWidget(self.view.memory_bar)
 
@@ -28,7 +28,7 @@ class MemoryWidget(PluginWidget):
         self.setWindowTitle(self.get_plugin_title())
         # 70 is chosen as a good value after testing
         # how it looks for different values
-        self.setMaximumHeight(70)  
+        self.setMaximumHeight(70)
 
     # ----------------- Plugin API --------------------
 
