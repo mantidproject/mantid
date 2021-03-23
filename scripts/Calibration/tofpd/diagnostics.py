@@ -575,3 +575,44 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     plt.show()
 
     return fig, ax
+
+def plot_corr(tof_ws):
+    """
+    Plots Pearson correlation coefficient for each detector
+    :param tof_ws: Workspace returned from collect_fit_result
+    :return: plot, plot axes
+    """
+    if not mtd.doesExist(str(tof_ws)):
+        raise ValueError("Could not find the provided workspace in ADS")
+
+    tof_ws = mtd[str(tof_ws)]
+
+    detTOF = tof_ws.getNumberHistograms()
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("det IDs")
+    ax.set_ylabel("Pearson correlation coefficient (TOF, d)")
+
+    r_vals = []
+    detID = []
+    for det in range(detTOF):
+        # Get Pearson correlation coefficient for each detector
+        x = tof_ws.dataY(det)
+        y = tof_ws.dataX(det)
+
+        mask = np.logical_not(np.isnan(x))
+        if np.sum(mask) > 1:
+            r, p = np.corrcoef(x[mask], y[mask])
+            r_vals.append(r[1])
+        else:
+            r_vals.append(np.nan)
+
+        # Get detector ID for this spectrum
+        detector = tof_ws.detectorInfo().detectorIDs()[det]
+        detID.append(detector)
+
+    ax.plot(detID, r_vals, marker="x", linestyle="None")
+
+    plt.show()
+
+    return fig, ax
