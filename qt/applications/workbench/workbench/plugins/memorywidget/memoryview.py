@@ -21,11 +21,13 @@ QProgressBar::chunk {
 }
 """
 
-def from_normal_to_critical(critical, current_value, new_value)->bool:
-    return (current_value < critical and new_value >= critical)
 
-def from_critical_to_normal(critical, current_value, new_value)->bool:
-    return (current_value >= critical and new_value < critical)
+def from_normal_to_critical(critical, current_value, new_value) -> bool:
+    return current_value < critical <= new_value
+
+
+def from_critical_to_normal(critical, current_value, new_value) -> bool:
+    return current_value >= critical > new_value
 
 
 class MemoryView(QWidget):
@@ -36,9 +38,9 @@ class MemoryView(QWidget):
         self.memory_bar = QProgressBar(self)
 
     def set_bar_color(self, current_value, new_value):
-        if (from_normal_to_critical(self.critical, current_value, new_value)):
+        if from_normal_to_critical(self.critical, current_value, new_value):
             self.memory_bar.setStyleSheet(CRITICAL_STYLE)
-        elif (from_critical_to_normal(self.critical, current_value, new_value)):
+        elif from_critical_to_normal(self.critical, current_value, new_value):
             self.memory_bar.setStyleSheet(NORMAL_STYLE)
         else:
             pass
@@ -49,6 +51,6 @@ class MemoryView(QWidget):
         if current_value != new_value:
             self.set_bar_color(current_value, new_value)
             self.memory_bar.setValue(new_value)
-            display_str = "%3.1f"%mem_used + "/" + "%3.1f"%mem_avail + " GB " + \
-                        "(" + "%d"%new_value+"%" +")"
+            display_str = "%3.1f" % mem_used + "/" + "%3.1f" % mem_avail + " GB " \
+                          + "(" + "%d" % new_value + "%" + ")"
             self.memory_bar.setFormat(display_str)

@@ -31,7 +31,7 @@ class MemoryPresenterTest(unittest.TestCase):
     def test_presenter(self):
         self.assertTrue(from_normal_to_critical(self.presenter.view.critical,
                         75, 95))
-        self.assertFalse(from_critical_to_normal(self.presenter.view.critical, 
+        self.assertFalse(from_critical_to_normal(self.presenter.view.critical,
                          75, 95))
 
         self.assertFalse(from_normal_to_critical(self.presenter.view.critical,
