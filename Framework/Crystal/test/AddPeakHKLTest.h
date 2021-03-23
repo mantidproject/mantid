@@ -96,7 +96,7 @@ public:
     IPeaksWorkspace_sptr ws_out = alg.getProperty("Workspace");
 
     // Get the peak just added.
-    auto peak = dynamic_cast<const Peak&>(ws_out->getPeak(0));
+    auto peak = dynamic_cast<const Peak &>(ws_out->getPeak(0));
     /*
      Now we check we have made a self - consistent peak
      */
