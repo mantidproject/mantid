@@ -19,6 +19,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/Peak.h"
@@ -94,13 +95,13 @@ void IntegratePeaksMD2::init() {
       "peak.\n"
       "If smaller than PeakRadius, no background measurement is done.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                          Direction::Output),
+      std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -263,18 +264,19 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 "to have 3 dimensions only.");
 
   /// Peak workspace to integrate
-  Mantid::DataObjects::PeaksWorkspace_sptr inPeakWS =
-      getProperty("PeaksWorkspace");
+  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
 
   /// Output peaks workspace, create if needed
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
-      getProperty("OutputWorkspace");
+  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
   // This only fails in the unit tests which say that MaskBTP is not registered
   try {
-    runMaskDetectors(inPeakWS, "Tube", "edges");
-    runMaskDetectors(inPeakWS, "Pixel", "edges");
+    PeaksWorkspace_sptr p = std::dynamic_pointer_cast<PeaksWorkspace>(inPeakWS);
+    if (p) {
+      runMaskDetectors(p, "Tube", "edges");
+      runMaskDetectors(p, "Pixel", "edges");
+    }
   } catch (...) {
     g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                 "edge for IntegrateIfOnEdge option");
@@ -500,13 +502,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // define the radius squared for a sphere intially
       CoordTransformDistance getRadiusSq(nd, center, dimensionsUsed);
       // set spherical shape
-      if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-        PeakShape *sphereShape = new PeakShapeSpherical(
-            PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
-            BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
-            this->version());
-        shapeablePeak->setPeakShape(sphereShape);
-      }
+      PeakShape *sphereShape = new PeakShapeSpherical(
+          PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
+          BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
+          this->version());
+      p.setPeakShape(sphereShape);
       const double scaleFactor = pow(PeakRadiusVector[i], 3) /
                                  (pow(BackgroundOuterRadiusVector[i], 3) -
                                   pow(BackgroundInnerRadiusVector[i], 3));
@@ -591,27 +591,22 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             bgErrorSquared *= scaleFactor * scaleFactor;
           }
           // set peak shape
-          if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-            // get radii in same proprtion as eigenvalues
-            auto max_stdev =
-                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-            std::vector<double> peakRadii(3, 0.0);
-            std::vector<double> backgroundInnerRadii(3, 0.0);
-            std::vector<double> backgroundOuterRadii(3, 0.0);
-            for (size_t irad = 0; irad < peakRadii.size(); irad++) {
-              auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
-              peakRadii[irad] = PeakRadiusVector[i] * scale;
-              backgroundInnerRadii[irad] =
-                  BackgroundInnerRadiusVector[i] * scale;
-              backgroundOuterRadii[irad] =
-                  BackgroundOuterRadiusVector[i] * scale;
-            }
-            PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
-                eigenvects, peakRadii, backgroundInnerRadii,
-                backgroundOuterRadii, CoordinatesToUse, this->name(),
-                this->version(), translation);
-            shapeablePeak->setPeakShape(ellipsoidShape);
+          // get radii in same proprtion as eigenvalues
+          auto max_stdev =
+              pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
+          std::vector<double> peakRadii(3, 0.0);
+          std::vector<double> backgroundInnerRadii(3, 0.0);
+          std::vector<double> backgroundOuterRadii(3, 0.0);
+          for (size_t irad = 0; irad < peakRadii.size(); irad++) {
+            auto scale = pow(eigenvals[irad], 0.5) / max_stdev;
+            peakRadii[irad] = PeakRadiusVector[i] * scale;
+            backgroundInnerRadii[irad] = BackgroundInnerRadiusVector[i] * scale;
+            backgroundOuterRadii[irad] = BackgroundOuterRadiusVector[i] * scale;
           }
+          PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
+              eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
+              CoordinatesToUse, this->name(), this->version(), translation);
+          p.setPeakShape(ellipsoidShape);
         } else {
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
@@ -668,37 +663,34 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             bgErrorSquared *= scaleFactor * scaleFactor;
           }
           // set peak shape
-          if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
-            // get radii in same proprtion as eigenvalues
-            auto max_stdev =
-                pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
-            auto max_stdev_inner =
-                pow(*std::max_element(eigenvals_background_inner.begin(),
-                                      eigenvals_background_inner.end()),
-                    0.5);
-            auto max_stdev_outer =
-                pow(*std::max_element(eigenvals_background_outer.begin(),
-                                      eigenvals_background_outer.end()),
-                    0.5);
-            std::vector<double> peakRadii(3, 0.0);
-            std::vector<double> backgroundInnerRadii(3, 0.0);
-            std::vector<double> backgroundOuterRadii(3, 0.0);
-            for (size_t irad = 0; irad < peakRadii.size(); irad++) {
-              peakRadii[irad] =
-                  PeakRadiusVector[i] * pow(eigenvals[irad], 0.5) / max_stdev;
-              backgroundInnerRadii[irad] =
-                  BackgroundInnerRadiusVector[i] *
-                  pow(eigenvals_background_inner[irad], 0.5) / max_stdev_inner;
-              backgroundOuterRadii[irad] =
-                  BackgroundOuterRadiusVector[i] *
-                  pow(eigenvals_background_outer[irad], 0.5) / max_stdev_outer;
-            }
-            PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
-                eigenvects, peakRadii, backgroundInnerRadii,
-                backgroundOuterRadii, CoordinatesToUse, this->name(),
-                this->version());
-            shapeablePeak->setPeakShape(ellipsoidShape);
+          // get radii in same proprtion as eigenvalues
+          auto max_stdev =
+              pow(*std::max_element(eigenvals.begin(), eigenvals.end()), 0.5);
+          auto max_stdev_inner =
+              pow(*std::max_element(eigenvals_background_inner.begin(),
+                                    eigenvals_background_inner.end()),
+                  0.5);
+          auto max_stdev_outer =
+              pow(*std::max_element(eigenvals_background_outer.begin(),
+                                    eigenvals_background_outer.end()),
+                  0.5);
+          std::vector<double> peakRadii(3, 0.0);
+          std::vector<double> backgroundInnerRadii(3, 0.0);
+          std::vector<double> backgroundOuterRadii(3, 0.0);
+          for (size_t irad = 0; irad < peakRadii.size(); irad++) {
+            peakRadii[irad] =
+                PeakRadiusVector[i] * pow(eigenvals[irad], 0.5) / max_stdev;
+            backgroundInnerRadii[irad] =
+                BackgroundInnerRadiusVector[i] *
+                pow(eigenvals_background_inner[irad], 0.5) / max_stdev_inner;
+            backgroundOuterRadii[irad] =
+                BackgroundOuterRadiusVector[i] *
+                pow(eigenvals_background_outer[irad], 0.5) / max_stdev_outer;
           }
+          PeakShape *ellipsoidShape = new PeakShapeEllipsoid(
+              eigenvects, peakRadii, backgroundInnerRadii, backgroundOuterRadii,
+              CoordinatesToUse, this->name(), this->version());
+          p.setPeakShape(ellipsoidShape);
         }
       }
       // spherical integration of signal
@@ -1315,7 +1307,7 @@ void IntegratePeaksMD2::runMaskDetectors(
 }
 
 void IntegratePeaksMD2::checkOverlap(
-    int i, const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    int i, const IPeaksWorkspace_sptr &peakWS,
     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
   IPeak &p1 = peakWS->getPeak(i);

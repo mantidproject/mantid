@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -16,6 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+using Mantid::API::IPeaksWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::Crystal::IndexPeaks;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
@@ -112,7 +115,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
 }
 
 std::unique_ptr<IndexPeaks>
-indexPeaks(const PeaksWorkspace_sptr &peaksWS,
+indexPeaks(const IPeaksWorkspace_sptr &peaksWS,
            const std::unordered_map<std::string, std::string> &arguments) {
   auto alg = std::make_unique<IndexPeaks>();
   alg->setChild(true);
@@ -652,6 +655,30 @@ public:
       TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
                        std::invalid_argument &)
     }
+  }
+
+  void test_LeanElasticPeak() {
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    auto ws =
+        std::make_shared<Mantid::DataObjects::LeanElasticPeaksWorkspace>();
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(Mantid::DataObjects::LeanElasticPeak(
+        Mantid::Kernel::V3D(2 * M_PI, 0, 0), 1.));
+    ws->addPeak(Mantid::DataObjects::LeanElasticPeak(
+        Mantid::Kernel::V3D(0, 4 * M_PI, 0), 1.));
+
+    auto alg = indexPeaks(ws, {});
+    TS_ASSERT(alg->isExecuted())
+    int numberIndexed = alg->getProperty("NumIndexed");
+    TS_ASSERT_EQUALS(numberIndexed, 2)
+
+    TS_ASSERT_DELTA(ws->getPeak(0).getH(), 1, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getK(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getL(), 0, 1e-9)
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getH(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getK(), 2, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getL(), 0, 1e-9)
   }
 
 private:

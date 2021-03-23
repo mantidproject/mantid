@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/ShowPossibleCells.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -25,7 +27,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
-  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -51,7 +53,7 @@ void ShowPossibleCells::init() {
 /** Execute the algorithm.
  */
 void ShowPossibleCells::exec() {
-  PeaksWorkspace_const_sptr ws = this->getProperty("PeaksWorkspace");
+  IPeaksWorkspace_const_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
   }

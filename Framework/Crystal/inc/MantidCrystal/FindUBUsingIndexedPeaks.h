@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
@@ -48,7 +48,7 @@ private:
   void exec() override;
   void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
-  bool isPeakIndexed(const DataObjects::Peak &peak);
+  bool isPeakIndexed(const Geometry::IPeak &peak);
 };
 
 } // namespace Crystal
