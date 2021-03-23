@@ -483,6 +483,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> tbar(np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
+  std::vector<double> qlabs(3 * np);
 
   // Populate column vectors
   size_t maxShapeJSONLength = 0;
@@ -516,6 +517,11 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
     shapes[i] = shapeJSON;
     if (shapeJSON.size() > maxShapeJSONLength) {
       maxShapeJSONLength = shapeJSON.size();
+    }
+    {
+      qlabs[3 * i + 0] = p.getQLabFrame().X();
+      qlabs[3 * i + 1] = p.getQLabFrame().Y();
+      qlabs[3 * i + 2] = p.getQLabFrame().Z();
     }
   }
 
@@ -667,7 +673,16 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   file->putAttr("interpret_as", specifyString);
   file->closeData();
 
-  // QLab & QSample are calculated and do not need to be saved
+  // Qlab
+  std::vector<int> qlab_dims;
+  qlab_dims.emplace_back(static_cast<int>(m_peaks.size()));
+  qlab_dims.emplace_back(9);
+  file->writeData("column_15", qlabs, qlab_dims);
+  file->openData("column_15");
+  file->putAttr("name", "Q LabFrame");
+  file->putAttr("interpret_as", "A vector of 3 doubles");
+  file->putAttr("units", "angstrom^-1");
+  file->closeData();
 
   file->closeGroup(); // end of peaks workpace
 }

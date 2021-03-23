@@ -18,6 +18,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
@@ -974,6 +975,258 @@ void LoadNexusProcessed::loadV3DColumn(
   }
 }
 
+/**
+ * @brief Load LeanElasticPeakWorkspace
+ *
+ * @param entry
+ * @return API::Workspace_sptr
+ */
+API::Workspace_sptr
+LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry) {
+  g_log.notice("Load as LeanElasticPeaks");
+
+  // API::IPeaksWorkspace_sptr workspace;
+  API::ITableWorkspace_sptr tWorkspace;
+  // PeaksWorkspace_sptr workspace;
+  tWorkspace = Mantid::API::WorkspaceFactory::Instance().createTable(
+      "LeanElasticPeaksWorkspace");
+
+  IPeaksWorkspace_sptr peakWS =
+      std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(tWorkspace);
+
+  NXData nx_tw = entry.openNXData("peaks_workspace");
+
+  int columnNumber = 1;
+  int numberPeaks = 0;
+  std::vector<std::string> columnNames;
+  do {
+    std::string str = "column_" + std::to_string(columnNumber);
+
+    NXInfo info = nx_tw.getDataSetInfo(str);
+    if (info.stat == NX_ERROR) {
+      // Assume we done last column of table
+      break;
+    }
+
+    // store column names
+    columnNames.emplace_back(str);
+
+    // determine number of peaks
+    // here we assume that a peaks_table has always one column of doubles
+
+    if (info.type == NX_FLOAT64) {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      std::string columnTitle = nxDouble.attributes("name");
+      if (!columnTitle.empty() && numberPeaks == 0) {
+        numberPeaks = nxDouble.dim0();
+      }
+    }
+
+    columnNumber++;
+
+  } while (true);
+
+  // Get information from all but data group
+  std::string parameterStr;
+  // Hop to the right point /mantid_workspace_1
+  try {
+    m_nexusFile->openPath(entry.path()); // This is
+  } catch (std::runtime_error &re) {
+    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+                             "Nexus processed file. "
+                             "This path is wrong: " +
+                             entry.path() +
+                             ". Lower level error description: " + re.what());
+  }
+  try {
+    // This loads logs, sample, and instrument.
+    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"),
+                                    m_nexusFile.get(), parameterStr);
+    // Populate the instrument parameters in this workspace
+    peakWS->readParameterMap(parameterStr);
+  } catch (std::exception &e) {
+    g_log.information("Error loading Instrument section of nxs file");
+    g_log.information(e.what());
+  }
+
+  // Coordinates - Older versions did not have the separate field but used a log
+  // value
+  const std::string peaksWSName = "peaks_workspace";
+  try {
+    m_nexusFile->openGroup(peaksWSName, "NXentry");
+  } catch (std::runtime_error &re) {
+    throw std::runtime_error(
+        "Error while opening a peaks workspace in a Nexus processed file. "
+        "Cannot open gropu " +
+        peaksWSName + ". Lower level error description: " + re.what());
+  }
+  try {
+    uint32_t loadCoord(0);
+    m_nexusFile->readData("coordinate_system", loadCoord);
+    peakWS->setCoordinateSystem(
+        static_cast<Kernel::SpecialCoordinateSystem>(loadCoord));
+  } catch (::NeXus::Exception &) {
+    // Check for a log value
+    auto logs = peakWS->logs();
+    if (logs->hasProperty("CoordinateSystem")) {
+      auto *prop = dynamic_cast<PropertyWithValue<int> *>(
+          logs->getProperty("CoordinateSystem"));
+      if (prop) {
+        int value((*prop)());
+        peakWS->setCoordinateSystem(
+            static_cast<Kernel::SpecialCoordinateSystem>(value));
+      }
+    }
+  }
+
+  std::string m_QConvention = "Inelastic";
+  try {
+    m_nexusFile->getAttr("QConvention", m_QConvention);
+  } catch (std::exception &) {
+  }
+
+  // peaks_workspace
+  m_nexusFile->closeGroup();
+
+  // Change convention of loaded file to that in Preferen
+  double qSign = 1.0;
+  std::string convention = ConfigService::Instance().getString("Q.convention");
+  if (convention != m_QConvention)
+    qSign = -1.0;
+
+  for (int r = 0; r < numberPeaks; r++) {
+    // Create individual LeanElasticPeak
+    const auto goniometer = peakWS->run().getGoniometer();
+    LeanElasticPeak peak;
+    peak.setGoniometerMatrix(goniometer.getR());
+    peak.setRunNumber(peakWS->getRunNumber());
+    peakWS->addPeak(std::move(peak));
+  }
+
+  for (const auto &str : columnNames) {
+    if (str == "column_1") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = qSign * nxDouble[r];
+        peakWS->getPeak(r).setH(val);
+      }
+    } else if (str == "column_2") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = qSign * nxDouble[r];
+        peakWS->getPeak(r).setK(val);
+      }
+    } else if (str == "column_3") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = qSign * nxDouble[r];
+        peakWS->getPeak(r).setL(val);
+      }
+    } else if (str == "column_4") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setIntensity(val);
+      }
+    } else if (str == "column_5") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setSigmaIntensity(val);
+      }
+    } else if (str == "column_6") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setBinCount(val);
+      }
+    } else if (str == "column_7") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setWavelength(val);
+      }
+    } else if (str == "column_9") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setWavelength(val);
+      }
+    } else if (str == "column_10") {
+      NXInt nxInt = nx_tw.openNXInt(str);
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        if (ival != -1)
+          peakWS->getPeak(r).setRunNumber(ival);
+      }
+    } else if (str == "column_11") {
+      NXInt nxInt = nx_tw.openNXInt(str);
+      nxInt.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        int ival = nxInt[r];
+        peakWS->getPeak(r).setPeakNumber(ival);
+      }
+    } else if (str == "column_12") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+
+      for (int r = 0; r < numberPeaks; r++) {
+        double val = nxDouble[r];
+        peakWS->getPeak(r).setAbsorptionWeightedPathLength(val);
+      }
+    } else if (str == "column_13") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      Kernel::Matrix<double> gm(3, 3, false);
+      int k = 0;
+      for (int r = 0; r < numberPeaks; r++) {
+        for (int j = 0; j < 9; j++) {
+          double val = nxDouble[k];
+          k++;
+          gm[j % 3][j / 3] = val;
+        }
+        peakWS->getPeak(r).setGoniometerMatrix(gm);
+      }
+    } else if (str == "column_15") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      V3D qlab;
+      for (int i = 0; i < numberPeaks; ++i) {
+        qlab = V3D(nxDouble[i * 3], nxDouble[i * 3 + 1], nxDouble[i * 3 + 2]);
+        peakWS->getPeak(i).setQLabFrame(qlab, 0.0);
+      }
+    }
+
+    // After all columns read set IntHKL
+    for (int r = 0; r < numberPeaks; r++) {
+      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(),
+                       peakWS->getPeak(r).getL());
+      peakWS->getPeak(r).setIntHKL(intHKL);
+    }
+  }
+
+  return std::static_pointer_cast<API::Workspace>(peakWS);
+}
+
 //-------------------------------------------------------------------------------------------------
 /**
  * Load peaks
@@ -1497,7 +1750,15 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   }
 
   if (mtd_entry.containsGroup("peaks_workspace")) {
-    return loadPeaksEntry(mtd_entry);
+    try {
+      // try standard PeakWorkspace first
+      return loadPeaksEntry(mtd_entry);
+    } catch (std::exception &err) {
+      g_log.notice("Standard PeakWorkspace Load failed");
+      g_log.information(err.what());
+      g_log.notice("¯\\_(ツ)_/¯ LeanElasticPeakWorkspace?");
+      return loadLeanElasticPeaksEntry(mtd_entry);
+    }
   }
 
   // Determine workspace type and name of group containing workspace
