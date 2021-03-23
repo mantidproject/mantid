@@ -132,7 +132,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWorkspace))
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak *peak = ws->getPeakPtr(i);
+    Peak *peak = dynamic_cast<Peak*>(ws->getPeakPtr(i));
     V3D peakCenter = coordFrameFunc(peak);
 
     if (i % frequency == 0)
