@@ -18,6 +18,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
+using Mantid::DataObjects::Peak;
 
 namespace Mantid {
 namespace Crystal {
@@ -81,7 +82,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   // Find the coordinate frame to use an set up boost function for this.
   boost::function<V3D(IPeak *)> coordFrameFunc = &IPeak::getHKL;
   if (coordinateFrame == detectorSpaceFrame()) {
-    coordFrameFunc = &IPeak::getDetectorPosition;
+    coordFrameFunc = &Peak::getDetectorPosition;
   } else if (coordinateFrame == qLabFrame()) {
     coordFrameFunc = &IPeak::getQLabFrame;
   } else if (coordinateFrame == qSampleFrame()) {

@@ -96,8 +96,7 @@ public:
     IPeaksWorkspace_sptr ws_out = alg.getProperty("Workspace");
 
     // Get the peak just added.
-    const IPeak &peak = ws_out->getPeak(0);
-
+    auto peak = dynamic_cast<const Peak&>(ws_out->getPeak(0));
     /*
      Now we check we have made a self - consistent peak
      */
@@ -113,7 +112,7 @@ public:
     TSM_ASSERT_EQUALS("This detector id does not match what we expect from the "
                       "instrument definition",
                       1, detector->getID());
-    TSM_ASSERT_EQUALS("Thie detector position is wrong", detectorPos,
+    TSM_ASSERT_EQUALS("This detector position is wrong", detectorPos,
                       detector->getPos());
     TSM_ASSERT_EQUALS("Goniometer has not been set properly", goniometer.getR(),
                       peak.getGoniometerMatrix());
