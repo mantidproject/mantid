@@ -9,10 +9,17 @@
     Script used to start the DGS reduction GUI from MantidPlot
 """
 import os
+import sys
 
 from reduction_application import ReductionGUI
 
-reducer = ReductionGUI(instrument_list=["PG3", "NOM", "VULCAN"])
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+reducer = ReductionGUI(parent, flags, instrument_list=["PG3", "NOM", "VULCAN"])
 if reducer.setup_layout(load_last=True):
 
     # Set up reduction configuration from previous usage
