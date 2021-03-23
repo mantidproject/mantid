@@ -12,6 +12,7 @@ if(ENABLE_WORKBENCH)
                      SIP_SRCS _instrumentview.sip
                      PYQT_VERSION 5
                      LINK_LIBS
+                       DataObjects
                        ${common_link_libs}
                        MantidQtWidgetsInstrumentViewQt5
                        MantidQtWidgetsCommonQt5

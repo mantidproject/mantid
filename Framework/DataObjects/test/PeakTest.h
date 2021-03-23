@@ -222,7 +222,7 @@ public:
     TS_ASSERT_EQUALS(p.getValueByColName("K"), p.getK());
     TS_ASSERT_EQUALS(p.getValueByColName("L"), p.getL());
     TS_ASSERT_EQUALS(p.getValueByColName("RunNumber"), p.getRunNumber());
-    TS_ASSERT_EQUALS(p.getValueByColName("DetId"), p.getDetectorID())
+    TS_ASSERT_EQUALS(p.getValueByColName("DetID"), p.getDetectorID())
     TS_ASSERT_THROWS_ANYTHING(p.getValueByColName("bankname"));
   }
 

@@ -9,7 +9,6 @@
 #include "MantidDataObjects/BasePeak.h"
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -29,7 +28,7 @@ namespace DataObjects {
 
 /** Structure describing a single-crystal peak. The peak is described
  * by the physical detector position (determined either from detector
- * infomation or calculated from Q-lab) and inital/final energy
+ * information or calculated from Q-lab) and initial/final energy
  * (calculated from Q-lab or provided wavelength)
  *
  */
@@ -79,22 +78,18 @@ public:
        const Geometry::Instrument_const_sptr &inst,
        boost::optional<double> detectorDistance = boost::none);
 
-  void setDetectorID(int id) override;
-  int getDetectorID() const override;
+  void setDetectorID(int id);
+  int getDetectorID() const;
   void addContributingDetID(const int id);
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
 
-  void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
+  void setInstrument(const Geometry::Instrument_const_sptr &inst);
   Geometry::IDetector_const_sptr getDetector() const override;
-  Geometry::Instrument_const_sptr getInstrument() const override;
+  Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
 
-  /*
-  bool findDetector() override;
-  bool findDetector(const Geometry::InstrumentRayTracer &tracer) override;
-  */
   bool findDetector();
   bool findDetector(const Geometry::InstrumentRayTracer &tracer);
 
@@ -136,6 +131,8 @@ public:
 
   /// Get the approximate position of a peak that falls off the detectors
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
+
+  double getValueByColName(std::string colName) const override;
 
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam,

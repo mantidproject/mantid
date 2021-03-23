@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/CalculatePeaksHKL.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -76,6 +77,33 @@ public:
 
       TS_ASSERT_EQUALS(expectedHKL, peak.getHKL());
     }
+  }
+
+  void test_Execute_LeanElasticPeaks() {
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(2, 0, 0), 1.));
+    ws->addPeak(LeanElasticPeak(Mantid::Kernel::V3D(0, 4, 0), 1.));
+
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("ws", ws);
+
+    CalculatePeaksHKL alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("PeaksWorkspace", "ws");
+    alg.execute();
+    int numberIndexed = alg.getProperty("NumIndexed");
+    TS_ASSERT_EQUALS(numberIndexed, ws->getNumberPeaks());
+
+    TS_ASSERT_DELTA(ws->getPeak(0).getH(), M_1_PI, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getK(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(0).getL(), 0, 1e-9)
+
+    TS_ASSERT_DELTA(ws->getPeak(1).getH(), 0, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getK(), M_2_PI, 1e-9)
+    TS_ASSERT_DELTA(ws->getPeak(1).getL(), 0, 1e-9)
   }
 
   // Don't index peaks that are already indexed.

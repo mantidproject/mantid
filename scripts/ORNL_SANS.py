@@ -8,8 +8,15 @@
 """
     Script used to start the HFIR SANS reduction gui from Mantidplot
 """
+import sys
 from reduction_application import ReductionGUI
 
-reducer = ReductionGUI(instrument_list=["BIOSANS", "GPSANS", "EQSANS"])
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+reducer = ReductionGUI(parent, flags, instrument_list=["BIOSANS", "GPSANS", "EQSANS"])
 if reducer.setup_layout(load_last=True):
     reducer.show()

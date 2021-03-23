@@ -25,7 +25,10 @@ using namespace Mantid::API;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::Geometry::IPeak_uptr;
 using namespace Mantid::DataObjects;
+using Mantid::DataObjects::Peak;
+using Mantid::DataObjects::Peak_uptr;
 using Mantid::Types::Event::TofEvent;
 
 namespace {
@@ -35,7 +38,8 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
                       EventWorkspace_sptr &eventWS,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
-  auto peak = peaksWS->createPeakHKL(peakHKL);
+  IPeak_uptr ipeak = peaksWS->createPeakHKL(peakHKL);
+  Peak_uptr peak(dynamic_cast<Peak *>(ipeak.release()));
   peaksWS->addPeak(*peak);
   const auto detectorId = peak->getDetectorID();
   const auto tofExact = peak->getTOF();
@@ -78,7 +82,9 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
     auto detId = detectorId;
     do {
       step_perp[ivect] += 0.02;
-      auto pk = peaksWS->createPeak(Q + eigvects[ivect] * step_perp[ivect]);
+      auto q = Q + eigvects[ivect] * step_perp[ivect];
+      IPeak_uptr ipk = peaksWS->createPeak(q);
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       detId = pk->getDetectorID();
     } while (detId == detectorId);
   }
@@ -87,7 +93,8 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   for (int istep = -1; istep < 2; istep += 2) {
     for (size_t ivect = 0; ivect < step_perp.size(); ivect++) {
       auto q = Q + eigvects[ivect] * step_perp[ivect] * istep;
-      auto pk = peaksWS->createPeak(q);
+      IPeak_uptr ipk = peaksWS->createPeak(q);
+      Peak_uptr pk(dynamic_cast<Peak *>(ipk.release()));
       // add event
       auto detId = pk->getDetectorID();
       EventList &el = eventWS->getSpectrum(detId - totalNPixels);

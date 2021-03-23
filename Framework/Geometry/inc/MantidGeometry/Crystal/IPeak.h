@@ -26,13 +26,7 @@ class InstrumentRayTracer;
 class MANTID_GEOMETRY_DLL IPeak {
 public:
   virtual ~IPeak() = default;
-
-  virtual void setInstrument(const Geometry::Instrument_const_sptr &inst) = 0;
-
-  virtual int getDetectorID() const = 0;
-  virtual void setDetectorID(int m_DetectorID) = 0;
   virtual Geometry::IDetector_const_sptr getDetector() const = 0;
-  virtual Geometry::Instrument_const_sptr getInstrument() const = 0;
   virtual std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const = 0;
 
@@ -108,6 +102,8 @@ public:
   virtual double getL2() const = 0;
 
   virtual const Mantid::Geometry::PeakShape &getPeakShape() const = 0;
+  virtual void setPeakShape(Mantid::Geometry::PeakShape *shape) = 0;
+  virtual void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) = 0;
 
   virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
   virtual double getAbsorptionWeightedPathLength() const = 0;

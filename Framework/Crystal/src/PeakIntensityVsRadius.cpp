@@ -203,7 +203,7 @@ void PeakIntensityVsRadius::exec() {
         outWS2->mutableX(i)[step] = radius;
       }
       // Retrieve the integrated workspace
-      PeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
+      IPeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
       for (int i = 0; i < outPeaks->getNumberPeaks(); i++) {
         auto wi = size_t(i); // workspace index in output
         Geometry::IPeak &p = outPeaks->getPeak(i);

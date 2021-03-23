@@ -7,6 +7,7 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
+Added Floating/On Top setting for all the windows that are opened by workbench (plots, interfaces, etc.)
 
 - New plot interactions: Double click a legend to hide it, double click a curve to open it in the plot config dialog.
 - It is now possible to overplot bin data from the matrix workspace view.
@@ -21,6 +22,8 @@ New and Improved
 - Added an algorithm ProfileChiSquared1D to profile chi squared after a fit. This can be used
   to find better estimates of parameter errors.
 
+- Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
+  
 Bugfixes
 --------
 
@@ -29,6 +32,7 @@ Bugfixes
 - For the elliptical shell of integrated peaks, the background is correct when plotting with varying background thicknesses
 - Fixed a bug which occurred when switching to a log scale in sliceviewer with negative data.
 - Fixed a bug that use wrong help links in certain interfaces
+- Fixed a bug that would not let the user input the bounding box of a shape in the instrument viewer.
 
 - If the facility in Mantid.user.properties is empty, it is consistently reflected as empty in the GUI
 - First time dialog box will not appear recurrently, if user selected their choice of facility

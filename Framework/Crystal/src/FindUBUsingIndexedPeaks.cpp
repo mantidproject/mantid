@@ -5,8 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -26,7 +27,7 @@ const int MIN_INDEXED_PEAKS = 3;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Input Peaks Workspace");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
@@ -39,9 +40,8 @@ void FindUBUsingIndexedPeaks::init() {
 /** Execute the algorithm.
  */
 void FindUBUsingIndexedPeaks::exec() {
-  PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
-  const auto &peaks = ws->getPeaks();
-  const size_t n_peaks = ws->getNumberPeaks();
+  IPeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+  const int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   std::vector<V3D> hkl_vectors;
@@ -60,7 +60,8 @@ void FindUBUsingIndexedPeaks::exec() {
 
   size_t indexed_count = 0;
   std::unordered_set<int> run_numbers;
-  for (const Peak &peak : peaks) {
+  for (int i = 0; i < n_peaks; i++) {
+    const IPeak &peak = ws->getPeak(i);
     run_numbers.insert(peak.getRunNumber());
     V3D hkl(peak.getIntHKL());
     V3D mnp(peak.getIntMNP());
@@ -109,8 +110,9 @@ void FindUBUsingIndexedPeaks::exec() {
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
 
-    std::transform(peaks.begin(), peaks.end(), std::back_inserter(q_vectors),
-                   [](const auto &peak) { return peak.getQSampleFrame(); });
+    for (int i = 0; i < n_peaks; i++) {
+      q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
+    }
 
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     int sate_indexed = 0;
@@ -124,11 +126,13 @@ void FindUBUsingIndexedPeaks::exec() {
         std::vector<V3D> run_mnp_vectors;
         size_t run_indexed = 0;
 
-        for (Peak peak : peaks)
+        for (int i = 0; i < n_peaks; i++) {
+          const IPeak &peak = ws->getPeak(i);
           if (peak.getRunNumber() == run) {
             if (isPeakIndexed(peak))
               run_indexed++;
           }
+        }
 
         g_log.notice() << "Number of Indexed Peaks in Run " << run << " is "
                        << run_indexed << "\n";
@@ -138,7 +142,8 @@ void FindUBUsingIndexedPeaks::exec() {
         run_mnp_vectors.reserve(run_indexed);
         run_fhkl_vectors.reserve(run_indexed);
 
-        for (const Peak &peak : peaks) {
+        for (int i = 0; i < n_peaks; i++) {
+          const IPeak &peak = ws->getPeak(i);
           if (peak.getRunNumber() == run) {
             V3D hkl(peak.getIntHKL());
             V3D mnp(peak.getIntMNP());
@@ -225,7 +230,7 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
                    << " error: " << o_lattice.getVecErr(i) << "\n";
   }
 }
-bool FindUBUsingIndexedPeaks::isPeakIndexed(const Peak &peak) {
+bool FindUBUsingIndexedPeaks::isPeakIndexed(const IPeak &peak) {
   const V3D hkl(peak.getIntHKL());
   const V3D mnp(peak.getIntMNP());
   return (IndexingUtils::ValidIndex(hkl, 1.0) ||
