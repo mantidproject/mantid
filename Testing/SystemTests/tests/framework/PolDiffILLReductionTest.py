@@ -52,6 +52,13 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum'], 'Vanadium')
 
+    def d7_reduction_test_vanadium_average(self):
+        PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            OutputTreatment='Average')
+        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
+
     def d7_reduction_test_vanadium_full_reduction(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
@@ -288,6 +295,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         self.d7_reduction_test_vanadium_individual()
+        self.d7_reduction_test_vanadium_average()
         self.d7_reduction_test_vanadium_sum()
         self.d7_reduction_test_vanadium_full_reduction()
         self.d7_reduction_test_vanadium_individual_flat_plate_numerical()
