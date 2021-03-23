@@ -45,5 +45,6 @@ class MemoryPresenterTest(unittest.TestCase):
         self.presenter.update_memory_usage()
         self.assertEqual(self.presenter.view.set_value.call_count, 2)
 
+
 if __name__ == "__main__":
     unittest.main()
