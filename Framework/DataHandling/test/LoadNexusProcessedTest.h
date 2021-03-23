@@ -1221,7 +1221,7 @@ public:
     // load it back with the loader
     LoadNexusProcessed load;
     load.initialize();
-    load.setProperty("Filename", nexusHelper.file.get());
+    load.setProperty("Filename", nexusHelper.filename);
     load.setProperty("OutputWorkspace", "lpws_loaded");
     load.execute();
     auto lpws_loaded = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(
