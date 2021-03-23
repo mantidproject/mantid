@@ -27,7 +27,6 @@ DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)
   setValidator(new QDoubleValidator(mgr->minimum(property),
                                     mgr->maximum(property), 20, this));
   connect(this, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  // double val = mgr->value(property);
   setValue(mgr->value(property));
 }
 
@@ -36,11 +35,16 @@ DoubleEditor::~DoubleEditor() {}
 void DoubleEditor::setValue(const double &d) { setText(formatValue(d)); }
 
 void DoubleEditor::updateProperty() {
+  if (!this->isModified())
+    return;
+  // Ignore second signal if two were triggered by pressing the Enter key
+  // see https://bugreports.qt.io/browse/QTBUG-40
+  this->setModified(false);
+
   auto mgr =
       dynamic_cast<QtDoublePropertyManager *>(m_property->propertyManager());
-  if (mgr) {
+  if (mgr)
     mgr->setValue(m_property, text().toDouble());
-  }
 }
 
 /**

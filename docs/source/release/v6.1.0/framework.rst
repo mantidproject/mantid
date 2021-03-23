@@ -58,5 +58,6 @@ Bugfixes
 ########
 
 - Fix problem with dictionary parameters on :ref:`SetSample <algm-SetSample>` algorithm when running from the algorithm dialog
+- Fix segmentation fault when running :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` algorithm on Ubuntu without a material defined on one of the sample\environment shapes
 
 :ref:`Release 6.1.0 <v6.1.0>`

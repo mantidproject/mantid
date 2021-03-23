@@ -98,16 +98,16 @@ public:
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
 
-  double getValueByColName(std::string colName) const;
+  virtual double getValueByColName(std::string colName) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape *shape);
+  void setPeakShape(Mantid::Geometry::PeakShape *shape) override;
 
   /// Set the PeakShape
-  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape);
+  void setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) override;
 
   /// Assignment
   BasePeak &operator=(const BasePeak &other);

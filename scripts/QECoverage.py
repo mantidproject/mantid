@@ -9,7 +9,13 @@ from mantidqt.gui_helper import get_qapplication
 from QECoverage.QECoverageGUI import QECoverageGUI
 
 app, within_mantid = get_qapplication()
-mainForm = QECoverageGUI()
+if 'workbench' in sys.modules:
+    from workbench.config import get_window_config
+
+    parent, flags = get_window_config()
+else:
+    parent, flags = None, None
+mainForm = QECoverageGUI(parent, flags)
 mainForm.show()
 if not within_mantid:
     sys.exit(app.exec_())

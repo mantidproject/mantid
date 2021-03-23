@@ -38,9 +38,7 @@ public:
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(0, 0, 0))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D())
 
-    TS_ASSERT_THROWS(p.getDetectorID(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetector(), const Exception::NotImplementedError &)
-    TS_ASSERT_THROWS(p.getInstrument(), const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPosition(),
                      const Exception::NotImplementedError &)
     TS_ASSERT_THROWS(p.getDetectorPositionNoCheck(),
@@ -334,8 +332,6 @@ public:
     TS_ASSERT_EQUALS(leanpeak.getBinCount(), 90);
 
     TS_ASSERT_THROWS(leanpeak.getDetector(),
-                     const Exception::NotImplementedError &)
-    TS_ASSERT_THROWS(leanpeak.getInstrument(),
                      const Exception::NotImplementedError &)
   }
 };

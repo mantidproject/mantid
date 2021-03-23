@@ -92,6 +92,11 @@ public:
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
   }
 
+  void test_loadTOF_SHARP() {
+    checkLoader("ILL/SHARP/000102", "LoadILLTOF"); // single-channel
+    checkLoader("ILL/SHARP/000103", "LoadILLTOF");
+  }
+
   void test_loadReflectometry_D17() {
     checkLoader("ILL/D17/317370", "LoadILLReflectometry");
   }
