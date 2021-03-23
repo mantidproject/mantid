@@ -1245,7 +1245,7 @@ inline void MDNorm::calcSingleDetectorNorm(
       eps = 1e-10;
     }
     if (delta < eps)
-      continue;  // Assume zero contribution if difference is small
+      continue; // Assume zero contribution if difference is small
 
     // Average between two intersections for final position
     // [Task 89] Sample and background have same 'pos[]'
@@ -1318,7 +1318,8 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
   // [Task 89]
-  // const double protonChargeBkgd = (m_background != nullptr)? m_background.getExpInfo(0).run().getProtonCharge() : 0;
+  // const double protonChargeBkgd = (m_background != nullptr)?
+  // m_background.getExpInfo(0).run().getProtonCharge() : 0;
 
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
@@ -1404,10 +1405,10 @@ for (int64_t i = 0; i < ndets; i++) {
   double solid = protonCharge;
   // [Task 89] double bkgdSolid = protonChargeBkgd;
   if (haveSA) {
-    double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
+    double solid_angle_factor =
+        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
     //  solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0]
-    solid =
-       solid_angle_factor * protonCharge;
+    solid = solid_angle_factor * protonCharge;
     // [Task 89] bkgdSolid = solid_angle_factor * protonChargeBkgd;
   }
 
@@ -1428,8 +1429,9 @@ for (int64_t i = 0; i < ndets; i++) {
   //  std::cout << "[INFO]  Detector " << i
   //            << " Number of intersecton = " << intersections.size() << "\n";
 
-  calcSingleDetectorNorm(intersections, solid, yValues, vmdDims, pos, posNew,
-                         signalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
+  calcSingleDetectorNorm(
+      intersections, solid, yValues, vmdDims, pos, posNew,
+      signalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
 
   prog->report();
 
@@ -1443,17 +1445,18 @@ if (m_accumulate) {
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
   // [Task 89] Process background
   //  std::transform(
-  //      bkgdSignalArray.cbegin(), bkgdSignalArray.cend(), m_bkgdNormWS->getSignalArray(),
-  //      m_bkgdNormWS->mutableSignalArray(),
-  //      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  //      bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+  //      m_bkgdNormWS->getSignalArray(), m_bkgdNormWS->mutableSignalArray(),
+  //      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b;
+  //      });
 
 } else {
   // First time, init
   std::copy(signalArray.cbegin(), signalArray.cend(),
             m_normWS->mutableSignalArray());
   // [Task 89]
-//  std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
-//            m_bkgdNormWS->mutableSignalArray());
+  //  std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+  //            m_bkgdNormWS->mutableSignalArray());
 }
 m_accumulate = true;
 }
