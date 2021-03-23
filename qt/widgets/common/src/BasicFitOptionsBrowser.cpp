@@ -26,6 +26,7 @@ static QStringList FITTING_MODES = {"Sequential", "Simultaneous"};
 
 QStringList convertToQStringList(std::vector<std::string> const &vec) {
   QStringList list;
+  list.reserve(static_cast<int>(vec.size()));
   std::transform(
       vec.cbegin(), vec.cend(), std::back_inserter(list),
       [](std::string const &str) { return QString::fromStdString(str); });
@@ -94,7 +95,7 @@ void BasicFitOptionsBrowser::createFittingModeProperty() {
   m_enumManager->setEnumNames(m_fittingMode, FITTING_MODES);
   m_browser->addProperty(m_fittingMode);
 
-  emitFittingModeChanged();
+  emit fittingModeChanged(getFittingMode());
 }
 
 void BasicFitOptionsBrowser::createMaxIterationsProperty() {
@@ -104,7 +105,7 @@ void BasicFitOptionsBrowser::createMaxIterationsProperty() {
   m_intManager->setMinimum(m_maxIterations, 0);
   m_browser->addProperty(m_maxIterations);
 
-  addProperty("MaxIterations", m_maxIterations,
+  addProperty("Max Iterations", m_maxIterations,
               &BasicFitOptionsBrowser::getIntProperty,
               &BasicFitOptionsBrowser::setIntProperty);
 }
@@ -127,7 +128,7 @@ void BasicFitOptionsBrowser::createCostFunctionProperty() {
   m_enumManager->setEnumNames(m_costFunction, costFunctions());
   m_browser->addProperty(m_costFunction);
 
-  addProperty("CostFunction", m_costFunction,
+  addProperty("Cost Function", m_costFunction,
               &BasicFitOptionsBrowser::getStringEnumProperty,
               &BasicFitOptionsBrowser::setStringEnumProperty);
 }
@@ -138,81 +139,70 @@ void BasicFitOptionsBrowser::createEvaluationTypeProperty() {
   m_enumManager->setEnumNames(m_evaluationType, EVALUATION_TYPES);
   m_browser->addProperty(m_evaluationType);
 
-  addProperty("EvaluationType", m_evaluationType,
+  addProperty("Evaluation Type", m_evaluationType,
               &BasicFitOptionsBrowser::getStringEnumProperty,
               &BasicFitOptionsBrowser::setStringEnumProperty);
 }
 
-void BasicFitOptionsBrowser::addProperty(
-    const QString &name, QtProperty *prop,
-    QString (BasicFitOptionsBrowser::*getter)(QtProperty *) const,
-    void (BasicFitOptionsBrowser::*setter)(QtProperty *, const QString &)) {
+void BasicFitOptionsBrowser::addProperty(std::string const &name,
+                                         QtProperty *prop,
+                                         PropertyGetter getter,
+                                         PropertySetter setter) {
   m_propertyNameMap[name] = prop;
   m_getters[prop] = getter;
   m_setters[prop] = setter;
 }
 
-void BasicFitOptionsBrowser::setProperty(const QString &name,
-                                         const QString &value) {
-  if (!m_propertyNameMap.contains(name)) {
-    throw std::runtime_error("Property " + name.toStdString() +
-                             " isn't supported by the browser.");
-  }
-  auto prop = m_propertyNameMap[name];
-  auto f = m_setters[prop];
+void BasicFitOptionsBrowser::setProperty(std::string const &name,
+                                         std::string const &value) {
+  auto const prop = getQtPropertyFor(name);
+  auto const f = m_setters[prop];
   (this->*f)(prop, value);
 }
 
-QString BasicFitOptionsBrowser::getProperty(const QString &name) const {
+std::string BasicFitOptionsBrowser::getProperty(std::string const &name) const {
+  auto const prop = getQtPropertyFor(name);
+  auto const f = m_getters[prop];
+  return (this->*f)(prop);
+}
+
+QtProperty *
+BasicFitOptionsBrowser::getQtPropertyFor(std::string const &name) const {
   if (!m_propertyNameMap.contains(name)) {
-    throw std::runtime_error("Property " + name.toStdString() +
+    throw std::runtime_error("Property " + name +
                              " isn't supported by the browser.");
   }
-  auto prop = m_propertyNameMap[name];
-  auto f = m_getters[prop];
-  return (this->*f)(prop);
+  return m_propertyNameMap[name];
 }
 
 void BasicFitOptionsBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_fittingMode) {
-    emitFittingModeChanged();
-  }
-}
-
-void BasicFitOptionsBrowser::emitFittingModeChanged() {
-  switch (getFittingMode()) {
-  case FittingMode::SEQUENTIAL:
-    emit changedToSequentialFitting();
-    return;
-  case FittingMode::SIMULTANEOUS:
-    emit changedToSimultaneousFitting();
-    return;
-  default:
-    throw std::runtime_error(
-        "Fitting mode must be SEQUENTIAL or SIMULTANEOUS.");
+    emit fittingModeChanged(getFittingMode());
   }
 }
 
 void BasicFitOptionsBrowser::setIntProperty(QtProperty *prop,
-                                            QString const &value) {
-  m_intManager->setValue(prop, value.toInt());
+                                            std::string const &value) {
+  m_intManager->setValue(prop, QString::fromStdString(value).toInt());
 }
 
-QString BasicFitOptionsBrowser::getIntProperty(QtProperty *prop) const {
-  return QString::number(m_intManager->value(prop));
+std::string BasicFitOptionsBrowser::getIntProperty(QtProperty *prop) const {
+  return QString::number(m_intManager->value(prop)).toStdString();
 }
 
 void BasicFitOptionsBrowser::setStringEnumProperty(QtProperty *prop,
-                                                   QString const &value) {
-  auto const i = m_enumManager->enumNames(prop).indexOf(value);
+                                                   std::string const &value) {
+  auto const i =
+      m_enumManager->enumNames(prop).indexOf(QString::fromStdString(value));
   if (i >= 0)
     m_enumManager->setValue(prop, i);
 }
 
-QString BasicFitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
+std::string
+BasicFitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
   auto const i = m_enumManager->value(prop);
   if (i >= 0)
-    return m_enumManager->enumNames(prop)[i];
+    return m_enumManager->enumNames(prop)[i].toStdString();
   return "";
 }
 
@@ -231,8 +221,7 @@ void BasicFitOptionsBrowser::setFittingMode(FittingMode fittingMode) {
 }
 
 FittingMode BasicFitOptionsBrowser::getFittingMode() const {
-  auto const value = m_enumManager->value(m_fittingMode);
-  return static_cast<FittingMode>(value);
+  return static_cast<FittingMode>(m_enumManager->value(m_fittingMode));
 }
 
 } // namespace MantidWidgets

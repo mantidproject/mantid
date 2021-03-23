@@ -122,8 +122,7 @@ private slots:
   void onGlobalParametersChanged(QStringList const &globalParameters);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
-  void onChangeToSequentialFitting();
-  void onChangeToSimultaneousFitting();
+  void onFittingModeChanged(FittingMode fittingMode);
 
 private:
   void connectUiSignals();

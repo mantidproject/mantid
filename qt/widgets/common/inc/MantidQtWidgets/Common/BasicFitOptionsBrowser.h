@@ -31,6 +31,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON BasicFitOptionsBrowser : public QWidget {
   Q_OBJECT
 
+  using PropertySetter = void (BasicFitOptionsBrowser::*)(QtProperty *,
+                                                          std::string const &);
+  using PropertyGetter =
+      std::string (BasicFitOptionsBrowser::*)(QtProperty *) const;
+
 public:
   BasicFitOptionsBrowser(QWidget *parent = nullptr);
   ~BasicFitOptionsBrowser();
@@ -38,12 +43,11 @@ public:
   void setFittingMode(FittingMode fittingMode);
   FittingMode getFittingMode() const;
 
-  void setProperty(const QString &name, const QString &value);
-  QString getProperty(const QString &name) const;
+  void setProperty(std::string const &name, std::string const &value);
+  std::string getProperty(std::string const &name) const;
 
 signals:
-  void changedToSequentialFitting();
-  void changedToSimultaneousFitting();
+  void fittingModeChanged(FittingMode fittingMode);
 
 private slots:
   void enumChanged(QtProperty *prop);
@@ -57,19 +61,16 @@ private:
   void createCostFunctionProperty();
   void createEvaluationTypeProperty();
 
-  void emitFittingModeChanged();
+  void addProperty(std::string const &name, QtProperty *prop,
+                   PropertyGetter getter, PropertySetter setter);
 
-  void addProperty(const QString &name, QtProperty *prop,
-                   QString (BasicFitOptionsBrowser::*getter)(QtProperty *)
-                       const,
-                   void (BasicFitOptionsBrowser::*setter)(QtProperty *,
-                                                          const QString &));
+  void setIntProperty(QtProperty *prop, std::string const &value);
+  std::string getIntProperty(QtProperty *prop) const;
 
-  void setIntProperty(QtProperty *prop, QString const &value);
-  QString getIntProperty(QtProperty *prop) const;
+  void setStringEnumProperty(QtProperty *prop, std::string const &value);
+  std::string getStringEnumProperty(QtProperty *prop) const;
 
-  void setStringEnumProperty(QtProperty *prop, QString const &value);
-  QString getStringEnumProperty(QtProperty *prop) const;
+  QtProperty *getQtPropertyFor(std::string const &name) const;
 
   /// Property managers
   QtIntPropertyManager *m_intManager;
@@ -85,16 +86,12 @@ private:
   /// Qt property browser which displays properties
   QtTreePropertyBrowser *m_browser;
 
-  using SetterType = void (BasicFitOptionsBrowser::*)(QtProperty *,
-                                                      const QString &);
-  using GetterType = QString (BasicFitOptionsBrowser::*)(QtProperty *) const;
-
   /// Maps algorithm property name to the QtProperty
-  QMap<QString, QtProperty *> m_propertyNameMap;
-  /// Store for the properties setter methods
-  QMap<QtProperty *, SetterType> m_setters;
-  /// Store for the properties getter methods
-  QMap<QtProperty *, GetterType> m_getters;
+  QMap<std::string, QtProperty *> m_propertyNameMap;
+  /// Store for the property setter methods
+  QMap<QtProperty *, PropertySetter> m_setters;
+  /// Store for the property getter methods
+  QMap<QtProperty *, PropertyGetter> m_getters;
 };
 
 } // namespace MantidWidgets

@@ -123,10 +123,8 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
           SLOT(onFunctionHelpRequested()));
 
-  connect(m_fitOptionsBrowser.get(), SIGNAL(changedToSequentialFitting()), this,
-          SLOT(onChangeToSequentialFitting()));
-  connect(m_fitOptionsBrowser.get(), SIGNAL(changedToSimultaneousFitting()),
-          this, SLOT(onChangeToSimultaneousFitting()));
+  connect(m_fitOptionsBrowser.get(), SIGNAL(fittingModeChanged(FittingMode)),
+          this, SLOT(onFittingModeChanged(FittingMode)));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -140,7 +138,8 @@ void FitScriptGeneratorView::connectUiSignals() {
 void FitScriptGeneratorView::setFitBrowserOptions(
     QMap<QString, QString> const &fitOptions) {
   for (auto it = fitOptions.constBegin(); it != fitOptions.constEnd(); ++it)
-    m_fitOptionsBrowser->setProperty(it.key(), it.value());
+    m_fitOptionsBrowser->setProperty(it.key().toStdString(),
+                                     it.value().toStdString());
 }
 
 void FitScriptGeneratorView::setFittingMode(FittingMode fittingMode) {
@@ -238,14 +237,8 @@ void FitScriptGeneratorView::onFunctionHelpRequested() {
         QString::fromStdString(function->name()));
 }
 
-void FitScriptGeneratorView::onChangeToSequentialFitting() {
-  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::SEQUENTIAL);
-}
-
-void FitScriptGeneratorView::onChangeToSimultaneousFitting() {
-  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged,
-                               FittingMode::SIMULTANEOUS);
+void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
+  m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, fittingMode);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
