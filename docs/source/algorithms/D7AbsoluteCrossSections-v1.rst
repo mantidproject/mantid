@@ -164,7 +164,7 @@ Usage
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
                            SampleAndEnvironmentProperties=sampleProperties,
-                           OutputWorkspace='xyz')
+                           OutputTreatment='Sum', OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
