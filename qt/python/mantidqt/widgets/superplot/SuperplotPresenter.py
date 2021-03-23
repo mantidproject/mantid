@@ -39,10 +39,10 @@ class SuperplotPresenter:
         self._model.setSpectrum(ws.name(), specIndex)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
-        self._view.setWorkspaceSliderPosition(len(artists))
-        self._view.setWorkspaceSpinBoxValue(len(artists))
-        self._view.setSelectedWorkspace(len(artists))
-        self._changeCurrentWorkspace(len(artists))
+        self._view.setWorkspaceSliderPosition(len(names))
+        self._view.setWorkspaceSpinBoxValue(len(names))
+        self._view.setSelectedWorkspace(len(names))
+        self._changeCurrentWorkspace(len(names))
 
     def getSideView(self):
         return self._view.getSideWidget()
