@@ -439,7 +439,7 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True,
     :param peak_positions: List of peak positions, or single peak position
     :param plot_regions: Whether to show vertical lines indicating detector regions
     :param show_bad_cnt: Whether to display number of pixels that fall outside of threshold from mean
-    :param drange: A tuple of the minimum and maximum detector ID to plot
+    :param drange: A tuple of the minimum and maximum detector ID to plot, plots full range if (0,0) or out of bounds
     :param threshold: The fraction of the mean to display horizontal bars at +/- the mean
     :return: plot, plot axes
     """
@@ -476,6 +476,7 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True,
     max_detid = int(np.max(mtd[str(wksp)].detectorInfo().detectorIDs()))
     if drange == (0, 0) or drange > (0, max_detid):
         drange = (0, max_detid)
+        print("Specified drange out of bounds, using {}".format(drange))
 
     # Plot data for each peak position
     for peak in peaks:
