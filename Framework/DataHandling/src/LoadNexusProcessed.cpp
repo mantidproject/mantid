@@ -1745,7 +1745,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     try {
       // try standard PeakWorkspace first
       return loadPeaksEntry(mtd_entry);
-    } catch (std::exception &err) {
+    } catch (std::exception &) {
       return loadLeanElasticPeaksEntry(mtd_entry);
     }
   }
