@@ -5,8 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -18,9 +21,6 @@ DECLARE_ALGORITHM(CombinePeaksWorkspaces)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::PeaksWorkspace;
-using DataObjects::PeaksWorkspace_const_sptr;
-using DataObjects::PeaksWorkspace_sptr;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {
@@ -36,13 +36,13 @@ const std::string CombinePeaksWorkspaces::category() const {
 /** Initialises the algorithm's properties.
  */
 void CombinePeaksWorkspaces::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "LHSWorkspace", "", Direction::Input),
                   "The first set of peaks.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The combined peaks list.");
 
@@ -63,8 +63,8 @@ void CombinePeaksWorkspaces::init() {
 /** Executes the algorithm.
  */
 void CombinePeaksWorkspaces::exec() {
-  PeaksWorkspace_const_sptr LHSWorkspace = getProperty("LHSWorkspace");
-  PeaksWorkspace_const_sptr RHSWorkspace = getProperty("RHSWorkspace");
+  IPeaksWorkspace_const_sptr LHSWorkspace = getProperty("LHSWorkspace");
+  IPeaksWorkspace_const_sptr RHSWorkspace = getProperty("RHSWorkspace");
 
   const bool CombineMatchingPeaks = getProperty("CombineMatchingPeaks");
 
@@ -80,11 +80,11 @@ void CombinePeaksWorkspaces::exec() {
   }
 
   // Copy the first workspace to our output workspace
-  PeaksWorkspace_sptr output(LHSWorkspace->clone());
+  IPeaksWorkspace_sptr output(LHSWorkspace->clone());
   // Get hold of the peaks in the second workspace
-  auto &rhsPeaks = RHSWorkspace->getPeaks();
+  const int rhs_n_peaks = RHSWorkspace->getNumberPeaks();
 
-  Progress progress(this, 0.0, 1.0, rhsPeaks.size());
+  Progress progress(this, 0.0, 1.0, rhs_n_peaks);
 
   // Combine modulation vectors
   // Currently, the lattice can only support up to 3 modulation vectors. If any
@@ -147,8 +147,8 @@ void CombinePeaksWorkspaces::exec() {
   if (!CombineMatchingPeaks) {
     // Loop over the peaks in the second workspace, appending each one to the
     // output
-    for (const auto &rhsPeak : rhsPeaks) {
-      output->addPeak(rhsPeak);
+    for (int i = 0; i < rhs_n_peaks; i++) {
+      output->addPeak(RHSWorkspace->getPeak(i));
       progress.report();
     }
   } else // Check for matching peaks
@@ -157,18 +157,21 @@ void CombinePeaksWorkspaces::exec() {
 
     // Get hold of the peaks in the first workspace as we'll need to examine
     // them
-    auto &lhsPeaks = LHSWorkspace->getPeaks();
+    const int lhs_n_peaks = LHSWorkspace->getNumberPeaks();
+    std::vector<V3D> q_vectors;
+    for (int i = 0; i < lhs_n_peaks; i++)
+      q_vectors.emplace_back(LHSWorkspace->getPeak(i).getQSampleFrame());
 
     // Loop over the peaks in the second workspace, appending ones that don't
     // match any in first workspace
-    for (const auto &currentPeak : rhsPeaks) {
+    for (int j = 0; j < rhs_n_peaks; j++) {
+      const Geometry::IPeak &currentPeak = RHSWorkspace->getPeak(j);
       // Now have to go through the first workspace checking for matches
       // Not doing anything clever as peaks workspace are typically not large -
       // just a linear search
       bool match = false;
-      for (const auto &lhsPeak : lhsPeaks) {
-        const V3D deltaQ =
-            currentPeak.getQSampleFrame() - lhsPeak.getQSampleFrame();
+      for (int i = 0; i < lhs_n_peaks; i++) {
+        const V3D deltaQ = currentPeak.getQSampleFrame() - q_vectors[i];
         if (deltaQ.nullVector(
                 Tolerance)) // Using a V3D method that does the job
         {

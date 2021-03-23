@@ -129,6 +129,9 @@ public:
   MOCK_CONST_METHOD0(getDetectorPosition, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
+  MOCK_METHOD1(setPeakShape, void(Mantid::Geometry::PeakShape *shape));
+  MOCK_METHOD1(setPeakShape,
+               void(Mantid::Geometry::PeakShape_const_sptr shape));
 };
 } // namespace
 GNU_DIAG_ON_SUGGEST_OVERRIDE

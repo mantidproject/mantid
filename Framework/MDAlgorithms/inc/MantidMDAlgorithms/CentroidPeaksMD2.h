@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
