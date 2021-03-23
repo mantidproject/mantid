@@ -62,13 +62,15 @@ private:
   /// Read member variables from experiment info
   void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei);
   void checkWorkspaceDims(const Mantid::API::IMDWorkspace_sptr &ws);
+  void determineOutputPeakType(const std::string peakType, const uint16_t nexp);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
   void addPeak(const Mantid::Kernel::V3D &Q, const double binCount,
                const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  void addLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount);
+  void addLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+                          const bool useGoniometer = false);
 
   /// Adds a peak based on Q, bin count
   std::shared_ptr<DataObjects::Peak>
@@ -77,7 +79,8 @@ private:
 
   /// Adds a peak based on Q, bin count
   std::shared_ptr<DataObjects::LeanElasticPeak>
-  createLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount);
+  createLeanElasticPeak(const Mantid::Kernel::V3D &Q, const double binCount,
+                        const bool useGoniometer = false);
 
   /// Run find peaks on an MDEventWorkspace
   template <typename MDE, size_t nd>
@@ -130,6 +133,8 @@ private:
   static const std::string volumeNormalization;
   /// NumberOfEventNormalization
   static const std::string numberOfEventsNormalization;
+
+  bool m_leanElasticPeak = false;
 };
 
 } // namespace MDAlgorithms

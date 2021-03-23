@@ -226,7 +226,10 @@ void FindPeaksMD::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "CalculateGoniometerForCW",
                           Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
-
+  std::vector<std::string> peakTypes = {"Automatic", "Peak", "LeanElasticPeak"};
+  declareProperty("OutputPeakType", "Automatic",
+                  std::make_shared<StringListValidator>(peakTypes),
+                  "Type of Peak in OutputWorkspace");
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
@@ -278,6 +281,23 @@ void FindPeaksMD::checkWorkspaceDims(const IMDWorkspace_sptr &ws) {
         "Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
 }
 
+void FindPeaksMD::determineOutputPeakType(const std::string peakType,
+                                          const uint16_t nexp) {
+  // This method will be expanded later to check a property on the
+  // input workspace which can specify a default peak type for that
+  // instrument.
+  m_leanElasticPeak = false;
+  if (peakType == "Automatic") {
+    if (nexp == 0)
+      m_leanElasticPeak = true;
+  } else if (peakType == "LeanElasticPeak") {
+    m_leanElasticPeak = true;
+  } else { // Peak
+    if (nexp == 0)
+      throw std::runtime_error("Cannot create Peak output with 0 expInfo");
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Create and add a Peak to the output workspace
  *
@@ -307,8 +327,9 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
  */
-void FindPeaksMD::addLeanElasticPeak(const V3D &Q, const double binCount) {
-  auto p = this->createLeanElasticPeak(Q, binCount);
+void FindPeaksMD::addLeanElasticPeak(const V3D &Q, const double binCount,
+                                     const bool useGoniometer) {
+  auto p = this->createLeanElasticPeak(Q, binCount, useGoniometer);
   peakWS->addPeak(*p);
 }
 
@@ -335,9 +356,9 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
         if (inst->hasParameter("wavelength")) {
           wavelength = inst->getNumberParameter("wavelength").at(0);
         } else {
-          throw std::runtime_error(
-              "Could not get wavelength, neither Wavelength algorithm property "
-              "set nor instrument wavelength parameter");
+          throw std::runtime_error("Could not get wavelength, neither "
+                                   "Wavelength algorithm property "
+                                   "set nor instrument wavelength parameter");
         }
       }
 
@@ -375,11 +396,14 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
  * */
 std::shared_ptr<DataObjects::LeanElasticPeak>
 FindPeaksMD::createLeanElasticPeak(const Mantid::Kernel::V3D &Q,
-                                   const double binCount) {
+                                   const double binCount,
+                                   const bool useGoniometer) {
   std::shared_ptr<DataObjects::LeanElasticPeak> p;
   if (dimType == QSAMPLE) {
-    p = std::make_shared<LeanElasticPeak>(Q);
-
+    if (useGoniometer)
+      p = std::make_shared<LeanElasticPeak>(Q, m_goniometer);
+    else
+      p = std::make_shared<LeanElasticPeak>(Q);
   } else {
     throw std::invalid_argument(
         "Cannot find peaks unless the dimension is QSAMPLE");
@@ -391,8 +415,8 @@ FindPeaksMD::createLeanElasticPeak(const Mantid::Kernel::V3D &Q,
   return p;
 }
 //----------------------------------------------------------------------------------------------
-/** Integrate the peaks of the workspace using parameters saved in the algorithm
- * class
+/** Integrate the peaks of the workspace using parameters saved in the
+ * algorithm class
  * @param ws ::  MDEventWorkspace to integrate
  */
 template <typename MDE, size_t nd>
@@ -616,30 +640,34 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         if (isMDEvent)
           binCount = static_cast<double>(box->getNPoints());
 
-        try {
-          auto p = this->createPeak(Q, binCount, tracer);
-          if (m_addDetectors) {
-            auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
-            if (!mdBox) {
-              throw std::runtime_error("Failed to cast box to MDBoxBase");
+        if (m_leanElasticPeak) {
+          addLeanElasticPeak(Q, binCount, true);
+        } else {
+          try {
+            auto p = this->createPeak(Q, binCount, tracer);
+            if (m_addDetectors) {
+              auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
+              if (!mdBox) {
+                throw std::runtime_error("Failed to cast box to MDBoxBase");
+              }
+              addDetectors(*p, *mdBox);
             }
-            addDetectors(*p, *mdBox);
-          }
-          if (p->getDetectorID() != -1) {
-            if (m_edge > 0) {
-              if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
-                             m_edge))
+            if (p->getDetectorID() != -1) {
+              if (m_edge > 0) {
+                if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
+                               m_edge))
+                  peakWS->addPeak(*p);
+                ;
+              } else {
                 peakWS->addPeak(*p);
-              ;
-            } else {
-              peakWS->addPeak(*p);
+              }
+              g_log.information() << "Add new peak with Q-center = " << Q[0]
+                                  << ", " << Q[1] << ", " << Q[2] << "\n";
             }
-            g_log.information() << "Add new peak with Q-center = " << Q[0]
-                                << ", " << Q[1] << ", " << Q[2] << "\n";
+          } catch (std::exception &e) {
+            g_log.notice() << "Error creating peak at " << Q << " because of '"
+                           << e.what() << "'. Peak will be skipped.\n";
           }
-        } catch (std::exception &e) {
-          g_log.notice() << "Error creating peak at " << Q << " because of '"
-                         << e.what() << "'. Peak will be skipped.\n";
         }
 
         // Report progress for each box found.
@@ -794,7 +822,10 @@ void FindPeaksMD::findPeaksHisto(
             ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
         // Create the peak
-        addPeak(Q, binCount, tracer);
+        if (m_leanElasticPeak)
+          addLeanElasticPeak(Q, binCount, true);
+        else
+          addPeak(Q, binCount, tracer);
 
         // Report progres for each box found.
         prog->report("Adding Peaks");
@@ -827,10 +858,15 @@ void FindPeaksMD::exec() {
   else if (inMDEW)
     nexp = inMDEW->getNumExperimentInfo();
 
+  std::string peakType = getProperty("OutputPeakType");
+
+  determineOutputPeakType(peakType, nexp);
+
   // Output peaks workspace, create if needed
   peakWS = getProperty("OutputWorkspace");
+
   if (!peakWS || !AppendPeaks) {
-    if (nexp == 0)
+    if (m_leanElasticPeak)
       peakWS = LeanElasticPeaksWorkspace_sptr(new LeanElasticPeaksWorkspace());
     else
       peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
@@ -889,12 +925,27 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr inMDEW =
       std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+  MDHistoWorkspace_sptr inMDHW =
+      std::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
 
   if (useNumberOfEventsNormalization && !inMDEW) {
     result["PeakFindingStrategy"] = "The NumberOfEventsNormalization selection "
                                     "can only be used with an MDEventWorkspace "
                                     "as the input.";
   }
+
+  uint16_t nexp = 0;
+  if (inMDHW)
+    nexp = inMDHW->getNumExperimentInfo();
+  else if (inMDEW)
+    nexp = inMDEW->getNumExperimentInfo();
+
+  std::string peakType = getProperty("OutputPeakType");
+
+  if (peakType == "Peak" && nexp == 0)
+    result["OutputPeakType"] =
+        "The InputWorkspace doesn't contain any experiment information so the "
+        "OutputPeakType cannot be Peak.";
 
   return result;
 }
