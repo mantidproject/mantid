@@ -1202,9 +1202,9 @@ LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry) {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       V3D qlab;
-      for (int i = 0; i < numberPeaks; ++i) {
-        qlab = V3D(nxDouble[i * 3], nxDouble[i * 3 + 1], nxDouble[i * 3 + 2]);
-        peakWS->getPeak(i).setQLabFrame(qlab, 0.0);
+      for (int r = 0; r < numberPeaks; ++r) {
+        qlab = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peakWS->getPeak(r).setQLabFrame(qlab, 0.0);
       }
     }
 
