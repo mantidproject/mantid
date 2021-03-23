@@ -252,7 +252,7 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
     try {
       auto peakFull = dynamic_cast<Mantid::DataObjects::Peak &>(peak);
       pos = peakFull.getDetPos();
-    } catch (std::bad_cast&) {
+    } catch (std::bad_cast &) {
       g_log.error("Cannot create markers for this type of peak");
       return;
     }
