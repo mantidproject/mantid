@@ -7,24 +7,27 @@
 from qtpy import QtWidgets, PYQT4, QtCore
 from Muon.GUI.Common.utilities import table_utils
 
-HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames"]
+HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames", "Counts"]
 HEADER_STYLE = "QHeaderView { font-weight: bold; }"
-COLUMN_COUNT = 6
+COLUMN_COUNT = 7
 HEADER_COLUMN_MAP = {"Period Number": 0,
                      "Name": 1,
                      "Type": 2,
                      "DAQ Number": 3,
                      "Frames": 4,
-                     "Total Good Frames": 5}
+                     "Total Good Frames": 5,
+                     "Counts": 6}
 CONTEXT_MAP = {"Name": 1,
                "Type": 2,
                "Frames": 3,
-               "Total Good Frames": 4}
+               "Total Good Frames": 4,
+               "Counts": 5}
 PERIOD_INFO_NOT_FOUND = "Not found"
-DWELL_STRING = "-"
+NOT_DAQ_STRING = "-"
 DAQ = "1"
 DWELL = "2"
 CYCLES_NOT_FOUND = "Number of period cycles not found"
+INFO_DELIM = ';'
 
 
 class MuonPeriodInfoWidget(QtWidgets.QWidget):
@@ -58,7 +61,11 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
             else:
                 self._label.setText(CYCLES_NOT_FOUND)
 
-    def add_period_to_table(self, name, period_type, frames, total_frames):
+    @property
+    def daq_count(self):
+        return self._daq_count
+
+    def add_period_to_table(self, name, period_type, frames, total_frames, counts):
         row_num = self._num_rows()
         self._table.insertRow(row_num)
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Period Number"], self._new_text_widget(str(row_num + 1)))
@@ -67,9 +74,11 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
             self._daq_count += 1
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Type"], self._new_text_widget("DAQ"))
             self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(str(self._daq_count)))
+            self._table.setItem(row_num, HEADER_COLUMN_MAP["Counts"], self._new_text_widget(counts))
         elif period_type == DWELL:
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Type"], self._new_text_widget("DWELL"))
-            self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(DWELL_STRING))
+            self._table.setItem(row_num, HEADER_COLUMN_MAP["DAQ Number"], self._new_text_widget(NOT_DAQ_STRING))
+            self._table.setItem(row_num, HEADER_COLUMN_MAP["Counts"], self._new_text_widget(NOT_DAQ_STRING))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Frames"], self._new_text_widget(frames))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Good Frames"], self._new_text_widget(total_frames))
 

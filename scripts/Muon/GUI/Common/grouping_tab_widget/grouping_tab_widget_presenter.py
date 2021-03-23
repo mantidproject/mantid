@@ -12,7 +12,7 @@ from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
-from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget, CONTEXT_MAP, PERIOD_INFO_NOT_FOUND
+from Muon.GUI.Common.muon_period_info import MuonPeriodInfoWidget, CONTEXT_MAP, PERIOD_INFO_NOT_FOUND, INFO_DELIM
 
 
 class GroupingTabPresenter(object):
@@ -288,39 +288,27 @@ class GroupingTabPresenter(object):
 
     def _add_period_info_to_widget(self):
         self.period_info_widget.number_of_sequences = self._model._data.periods_info[0]
-        names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(';')
-        types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(';')
-        frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(';')
-        total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(';')
-        names, types, frames, total_frames, count = self._fix_up_period_info_lists(names, types, frames, total_frames)
+        names = self._model._data.periods_info[CONTEXT_MAP["Name"]].split(INFO_DELIM)
+        types = self._model._data.periods_info[CONTEXT_MAP["Type"]].split(INFO_DELIM)
+        frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(INFO_DELIM)
+        total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(INFO_DELIM)
+        counts = self._model._data.periods_info[CONTEXT_MAP["Counts"]].split(INFO_DELIM)
+        names, types, frames, total_frames, counts, count = self._fix_up_period_info_lists([names, types, frames, total_frames, counts])
         for i in range(count):
-            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i])
+            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i], counts[self.period_info_widget.daq_count])
 
-    def _fix_up_period_info_lists(self, names, types, frames, total_frames):
+    def _fix_up_period_info_lists(self, info_list):
         # First find number of periods
-        count = max(len(names), len(frames), len(total_frames))
+        lengths_list = [len(i) for i in info_list]
+        count = max(lengths_list)
         # Then make sure lists are correct size
-        if len(names) != count:
-            if names[0] == "":
-                names = [PERIOD_INFO_NOT_FOUND] * count
-            else:
-                names += [PERIOD_INFO_NOT_FOUND] * count-len(names)
-        if len(types) != count:
-            if types[0] == "":
-                types = [PERIOD_INFO_NOT_FOUND] * count
-            else:
-                types += [PERIOD_INFO_NOT_FOUND] * count-len(types)
-        if len(frames) != count:
-            if frames[0] == "":
-                frames = [PERIOD_INFO_NOT_FOUND] * count
-            else:
-                frames += [PERIOD_INFO_NOT_FOUND] * count - len(frames)
-        if len(total_frames) != count:
-            if total_frames[0] == "":
-                total_frames = [PERIOD_INFO_NOT_FOUND] * count
-            else:
-                total_frames += [PERIOD_INFO_NOT_FOUND] * count - len(total_frames)
-        return names, types, frames, total_frames, count
+        for info in info_list:
+            if len(info) != count:
+                if info[0] == "":
+                    info = [PERIOD_INFO_NOT_FOUND] * count
+                else:
+                    info += [PERIOD_INFO_NOT_FOUND] * (count-len(info))
+        return *info_list, count
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
