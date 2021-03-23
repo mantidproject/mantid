@@ -171,8 +171,6 @@ public:
     TS_ASSERT(oldLogFileGivesCorrectWarning(oldLogText));
   }
 
-
-
   void test_log_file_has_error() {
     std::string logFileText("2007-11-16T13:25:48 i1 0 \n"
                             "2007-11-16T13:29:36 str1  a\n"
@@ -355,6 +353,8 @@ private:
     loadAlg.initialize();
     loadAlg.setPropertyValue("Filename", oldLogFile.getFileName());
     loadAlg.setProperty("Workspace", ws);
+    // We want to see what the exception message is.
+    loadAlg.setRethrows(true);
 
     // LoadLog algorithm should throw exception with an error message that
     // contains ""

@@ -29,6 +29,7 @@
 #include <fstream> // used to get ifstream
 #include <sstream>
 #include <utility>
+#include <regex>
 
 using Mantid::Types::Core::DateAndTime;
 
@@ -141,6 +142,13 @@ void LoadLog::exec() {
   if (names.size() > 1) {
     throw std::invalid_argument(
         "More than one log name provided. Invalid ISIS log file.");
+  }
+
+  // If it's an old log file (pre-2007), then it is not currently supported.
+  if (isOldDateTimeFormat(logFileStream)) {
+    throw std::invalid_argument(
+        "File " + m_filename +
+        " cannot be read because it has an old unsupported format.");
   }
 
   int colNum = static_cast<int>(getProperty("NumberOfColumns"));
@@ -489,6 +497,27 @@ bool LoadLog::isAscii(const std::string &filename) {
  */
 bool LoadLog::isDateTimeString(const std::string &str) const {
   return Types::Core::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
+}
+
+/**
+ * Check whether the string is consistent with the old log file
+ * date-time format, for example:
+ * Fri 31-JAN-2003 11:28:15
+ * Wed  9-FEB-2005 09:47:01
+ * @param str :: The string to test
+ * @return true if the format matches the old log file format.
+*/
+bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
+  // extract first line of file
+  std::string firstLine;
+  Mantid::Kernel::Strings::extractToEOL(logFileStream, firstLine);
+  // reset file back to the beginning
+  logFileStream.seekg(0);
+
+  std::regex oldDateFormat(
+      R"([A-Z][a-z]{2} [ 1-3]\d-[A-Z]{3}-\d{4} \d{2}:\d{2}:\d{2})");
+
+  return std::regex_match(firstLine.substr(0, 24), oldDateFormat);
 }
 
 /**
