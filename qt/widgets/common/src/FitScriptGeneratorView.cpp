@@ -72,6 +72,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
   m_ui.splitterVertical->addWidget(m_functionTreeView.get());
   m_ui.splitterVertical->addWidget(m_fitOptionsBrowser.get());
+  m_ui.splitterVertical->setSizes({360, 120});
 
   setFittingMode(fittingMode);
   setFitBrowserOptions(fitOptions);

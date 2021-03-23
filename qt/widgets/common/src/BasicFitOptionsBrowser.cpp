@@ -73,6 +73,7 @@ void BasicFitOptionsBrowser::createBrowser() {
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
+  m_browser->setMinimumHeight(110);
 
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(enumChanged(QtProperty *)));
