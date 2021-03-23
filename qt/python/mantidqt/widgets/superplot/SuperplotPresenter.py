@@ -32,7 +32,7 @@ class SuperplotPresenter:
                     axes.get_artists_workspace_and_workspace_index(artist)
             self._model.addWorkspace(ws.name())
             self._model.setSpectrum(ws.name(), specIndex)
-            self._model.toggleData(ws.name(), specIndex)
+            self._model.addData(ws.name(), specIndex)
         ws, specIndex = \
                 axes.get_artists_workspace_and_workspace_index(artists[-1])
         self._model.addWorkspace(ws.name())
@@ -224,4 +224,7 @@ class SuperplotPresenter:
         wsIndex = self._view.getWorkspaceSliderPosition()
         spectrumIndex = self._view.getSpectrumSliderPosition()
         names = self._model.getWorkspaces()
-        self._model.toggleData(names[wsIndex - 1], spectrumIndex)
+        if state:
+            self._model.addData(names[wsIndex - 1], spectrumIndex)
+        else:
+            self._model.removeData(names[wsIndex - 1], spectrumIndex)

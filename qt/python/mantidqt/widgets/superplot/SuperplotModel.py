@@ -93,18 +93,25 @@ class SuperplotModel:
         """
         return [name for name in self._workspaces]
 
-    def toggleData(self, workspace, spectrum):
+    def addData(self, workspace, spectrum):
         """
-        Add or remove a workspace, spectrum index pair from the plotted data.
+        Add a workspace, spectrum index pair from the plotted data.
 
         Args:
             workspaces (str): name of the workspace
-            spectrum (int): spectrum index
+            spectrum (int): index of the spectrum
         """
-        if (workspace, spectrum) in self._plottedData:
-            self._plottedData.remove((workspace, spectrum))
-        else:
-            self._plottedData.append((workspace, spectrum))
+        self._plottedData.append((workspace, spectrum))
+
+    def removeData(self, workspace, spectrum):
+        """
+        Remove a workspace, spectrum index pair from the plotted data.
+
+        Args:
+            workspaces (str): name of the workspace
+            spectrum (int): index of the spectrum
+        """
+        self._plottedData.remove((workspace, spectrum))
 
     def getPlottedData(self):
         """
