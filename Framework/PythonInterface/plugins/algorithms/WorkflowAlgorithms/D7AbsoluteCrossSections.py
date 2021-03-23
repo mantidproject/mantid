@@ -397,8 +397,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 mtd[norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
                 mtd[norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
             to_clean.append(norm_ws)
-            Divide(LHSWorkspace=cross_section_ws,
-                   RHSWorkspace=norm_ws,
+            Divide(LHSWorkspace=norm_ws,
+                   RHSWorkspace=cross_section_ws,
                    OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':

@@ -683,13 +683,13 @@ class PolDiffILLReduction(PythonAlgorithm):
             # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
             # and normalised to 0.404 barns times the number of moles of V:
             if self.getProperty('AbsoluteNormalisation').value:
-                Divide(LHSWorkspace=norm_name, RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
+                Divide(LHSWorkspace=tmp_name, RHSWorkspace=norm_name, OutputWorkspace=tmp_name)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
         else:
             if self.getPropertyValue('OutputTreatment') == 'Average':
                 self._merge_polarisations(ws, average_detectors=True)
             if self.getProperty('AbsoluteNormalisation').value:
-                Divide(LHSWorkspace=norm_name, RHSWorkspace=ws, OutputWorkspace=ws)
+                Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
         DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
