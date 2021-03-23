@@ -58,30 +58,17 @@ private:
   void calcIntegralsForIntersections(const std::vector<double> &xValues,
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
-  // new
+
   void calcDiffractionIntersectionIntegral(
       std::vector<std::array<double, 4>> &intersections,
       std::vector<double> &xValues, std::vector<double> &yValues,
       const API::MatrixWorkspace &integrFlux, const size_t &wsIdx);
 
-  // new
   Mantid::Kernel::DblMatrix
   calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
                 const Geometry::SymmetryOperation &so);
 
-  //  // new
-  //  void calcSingleIntersectionNorm(const std::vector<std::array<double,
-  //  4>>::iterator &intersectionsBegin,
-  //                                  const std::vector<std::array<double,
-  //                                  4>>::iterator &it,
-  //                                   double &solid,
-  //                                   std::vector<double> &yValues,
-  //                                   const size_t &vmdDims,
-  //                                   std::vector<coord_t> &pos,
-  //                                   std::vector<coord_t> &posNew,
-  //                                  std::vector<std::atomic<signal_t>>
-  //                                  &signalArray);
-  void calcSingleIntersectionNorm(
+  void calcSingleDetectorNorm(
       const std::vector<std::array<double, 4>> &intersections,
       const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
       std::vector<coord_t> &pos, std::vector<coord_t> &posNew,

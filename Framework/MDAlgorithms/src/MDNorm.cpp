@@ -1139,6 +1139,12 @@ void MDNorm::cacheDimensionXValues() {
   }
 }
 
+/**
+ * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
+ * @param currentExpInfo
+ * @param so
+ * @return
+ */
 inline Mantid::Kernel::DblMatrix
 MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
                       const Geometry::SymmetryOperation &so) {
@@ -1202,15 +1208,17 @@ inline void MDNorm::calcDiffractionIntersectionIntegral(
 }
 
 /**
- * Calculate the normalization of 2 adjacent intersections of 1 specific
- * detector in 1 specific SpectrumInfo/ExperimentInfo
- * @param intersectionsBegin
- * @param it
- * @param solid
- * @param yValues
- * @param vmdDims
+ * Calculate the normalization among intersections on a single detector
+ * in 1 specific SpectrumInfo/ExperimentInfo
+ * @param intersections: intersections
+ * @param solid: proton charge
+ * @param yValues: original signal values
+ * @param vmdDims: MD dimensions
+ * @param pos: positions
+ * @param posNew: transformed positions
+ * @param signalArray: (output) signals
  */
-inline void MDNorm::calcSingleIntersectionNorm(
+inline void MDNorm::calcSingleDetectorNorm(
     const std::vector<std::array<double, 4>> &intersections,
     const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
     std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
@@ -1237,24 +1245,24 @@ inline void MDNorm::calcSingleIntersectionNorm(
       eps = 1e-10;
     }
     if (delta < eps)
-      continue; //  return; // Assume zero contribution if difference is small
+      continue;  // Assume zero contribution if difference is small
 
     // Average between two intersections for final position
+    // [Task 89] Sample and background have same 'pos[]'
     std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
                    prevIntSec.data(), pos.begin(),
                    [](const double rhs, const double lhs) {
                      return static_cast<coord_t>(0.5 * (rhs + lhs));
                    });
     signal_t signal;
+    // [Task 89 signal_t bkgdSignal;
     if (m_diffraction) {
       // Diffraction
       // index of the current intersection
       auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
       // signal = integral between two consecutive intersections
       signal = (yValues[k] - yValues[k - 1]) * solid;
-
-      // [VZ QUESTION] Background mimic: signal_background...with
-      // backgroundSolid
+      // [Task 89] signalBkgd = (bkgdValues[k] - bkgdValues[k - 1]) * solidBkgd;
 
     } else {
       // Inelastic
@@ -1263,20 +1271,22 @@ inline void MDNorm::calcSingleIntersectionNorm(
       // signal = energy distance between two consecutive intersections *solid
       // angle *PC
       signal = solid * delta;
-      // [VZ QUESTION] duplicate to backgroundSignal;
+      // [Task 89] bkgdSignal = bkgdSolid * delta
     }
 
     // Find the coordiate of the new position after transformation
     m_transformation.multiplyPoint(pos, posNew);
-    // [VZ QUESTION] is linIndex common to both sample and background?
+    // [Task 89] Is linIndex common to both sample and background?
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))
-      continue; //  return; // not found
+      continue; // not found
 
     // set the calculated signal to
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
                              std::plus<signal_t>());
-    // [VZ QUESTION] mimic for backgroundSingal to backgroundSignalArray
+    // [Task 89]
+    // Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
+    //                          std::plus<signal_t>());
   }
   return;
 }
@@ -1287,7 +1297,7 @@ inline void MDNorm::calcSingleIntersectionNorm(
  * @param otherValues - values for dimensions other than Q or DeltaE
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
- * @param soIndex - the index of symmetry operation (for progress purposes)
+ * @param soIndex - the index of symmetry operation (for progress purposes only)
  */
 void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
                                     const Geometry::SymmetryOperation &so,
@@ -1302,21 +1312,25 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   highValues = (*highValuesLog)();
 
   // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
+  // in order to calculate intersections
   DblMatrix Qtransform = calQTransform(currentExptInfo, so);
 
+  // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
-  // [VZ] ... add a background protonCharge per expInfo
+  // [Task 89]
+  // const double protonChargeBkgd = (m_background != nullptr)? m_background.getExpInfo(0).run().getProtonCharge() : 0;
+
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
-  // Mappings
+  // Mappings: solid angle and flux workspaces' detector to ws_index map
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
-  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   if (solidAngleWS != nullptr) {
     haveSA = true;
   }
+  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   const detid2index_map solidAngDetToIdx =
       (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap()
                : detid2index_map();
@@ -1324,17 +1338,23 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
       (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap()
                       : detid2index_map();
 
+  // Define dimension, signal array
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
+  std::cout << "[INFO]  signal array size = " << signalArray.size() << "\n";
+
+  // Progress report
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
                                       0.3 + progStep * (1. + progIndex), ndets);
+
+  // muliple threading
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);
@@ -1360,7 +1380,8 @@ for (int64_t i = 0; i < ndets; i++) {
   // If the dtefctor is a group, this should be the ID of the first detector
   const auto detID = detector.getID();
 
-  // get the flux spectrum number
+  // get the flux spectrum number: this is for diffraction only!
+  // VZ: confirm with Andrei that only diffraction can have flux run
   size_t wsIdx = 0;
   if (m_diffraction) {
     auto index = fluxDetToIdx.find(detID);
@@ -1370,26 +1391,24 @@ for (int64_t i = 0; i < ndets; i++) {
       continue;
     }
   }
-  // [VZ QUESTION] Only diffraction can have masked detector in flux???
 
-  // Intersections
-  // Confirm: same for sample and background
+  // Intersections for sample and background if present
   this->calculateIntersections(intersections, theta, phi, Qtransform,
                                lowValues[i], highValues[i]);
-  // ...................................................................................
-  //  std::cout << "[INFO]  Detector " << i
-  //            << " intersection is empty: " << intersections.empty() << "\n";
-  // ...................................................................................
-  // [VZ QUESTION]
 
+  // No need to do normalization calculation if there is no intersection
   if (intersections.empty())
     continue;
+
   // Get solid angle for this contribution
   double solid = protonCharge;
-  // [VZ QUESTION] double background_solid = backgroundProtonCharge;
+  // [Task 89] double bkgdSolid = protonChargeBkgd;
   if (haveSA) {
+    double solid_angle_factor = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
+    //  solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0]
     solid =
-        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+       solid_angle_factor * protonCharge;
+    // [Task 89] bkgdSolid = solid_angle_factor * protonChargeBkgd;
   }
 
   if (m_diffraction) {
@@ -1409,14 +1428,8 @@ for (int64_t i = 0; i < ndets; i++) {
   //  std::cout << "[INFO]  Detector " << i
   //            << " Number of intersecton = " << intersections.size() << "\n";
 
-  calcSingleIntersectionNorm(intersections, solid, yValues, vmdDims, pos,
-                             posNew, signalArray);
-
-  //  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-  //    calcSingleIntersectionNorm(intersectionsBegin, it, solid, yValues,
-  //    vmdDims,
-  //                               pos, posNew, signalArray);
-  //  }
+  calcSingleDetectorNorm(intersections, solid, yValues, vmdDims, pos, posNew,
+                         signalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
 
   prog->report();
 
@@ -1428,11 +1441,19 @@ if (m_accumulate) {
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
       m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
-  // [VZ QUESTION] mimic for background
+  // [Task 89] Process background
+  //  std::transform(
+  //      bkgdSignalArray.cbegin(), bkgdSignalArray.cend(), m_bkgdNormWS->getSignalArray(),
+  //      m_bkgdNormWS->mutableSignalArray(),
+  //      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+
 } else {
+  // First time, init
   std::copy(signalArray.cbegin(), signalArray.cend(),
             m_normWS->mutableSignalArray());
-  // [VZ QUESTION] mimic
+  // [Task 89]
+//  std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+//            m_bkgdNormWS->mutableSignalArray());
 }
 m_accumulate = true;
 }
