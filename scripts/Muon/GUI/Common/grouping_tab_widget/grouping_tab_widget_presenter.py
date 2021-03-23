@@ -293,22 +293,24 @@ class GroupingTabPresenter(object):
         frames = self._model._data.periods_info[CONTEXT_MAP["Frames"]].split(INFO_DELIM)
         total_frames = self._model._data.periods_info[CONTEXT_MAP["Total Good Frames"]].split(INFO_DELIM)
         counts = self._model._data.periods_info[CONTEXT_MAP["Counts"]].split(INFO_DELIM)
-        names, types, frames, total_frames, counts, count = self._fix_up_period_info_lists([names, types, frames, total_frames, counts])
+        names, types, frames, total_frames, counts, count = self._fix_up_period_info_lists([names, types, frames,
+                                                                                            total_frames, counts])
         for i in range(count):
-            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i], counts[self.period_info_widget.daq_count])
+            self.period_info_widget.add_period_to_table(names[i], types[i], frames[i], total_frames[i],
+                                                        counts[self.period_info_widget.daq_count])
 
     def _fix_up_period_info_lists(self, info_list):
         # First find number of periods
         lengths_list = [len(i) for i in info_list]
         count = max(lengths_list)
         # Then make sure lists are correct size
-        for info in info_list:
+        for i, info in enumerate(info_list):
             if len(info) != count:
                 if info[0] == "":
-                    info = [PERIOD_INFO_NOT_FOUND] * count
+                    info_list[i] = [PERIOD_INFO_NOT_FOUND] * count
                 else:
-                    info += [PERIOD_INFO_NOT_FOUND] * (count-len(info))
-        return *info_list, count
+                    info_list[i] += [PERIOD_INFO_NOT_FOUND] * (count-len(info))
+        return (*info_list, count)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

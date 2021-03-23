@@ -22,6 +22,7 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
+from Muon.GUI.Common.muon_period_info import PERIOD_INFO_NOT_FOUND
 
 
 def pair_name():
@@ -306,6 +307,49 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
         self.assertEqual('long1 is used by: diff_1\n',
                          self.pairing_table_view.warning_popup.call_args_list[0][0][0])
+
+    def test_periods_button_no_data(self):
+        self.presenter._model.is_data_loaded = mock.Mock(return_value=False)
+        self.presenter._add_period_info_to_widget = mock.MagicMock()
+        self.presenter.period_info_widget.show = mock.MagicMock()
+        self.presenter.handle_period_information_button_clicked()
+
+        self.assertEqual(0, self.presenter._add_period_info_to_widget.call_count)
+        self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
+
+    def test_periods_button_data_added_successfully(self):
+        self.presenter._model.is_data_loaded = mock.Mock(return_value=True)
+        self.presenter._model._data.periods_info = ["70", "state 1;state 1 dwell", "1;2",
+                                                    "100;10", "1000;200", "25"]
+        self.presenter._add_period_info_to_widget = mock.MagicMock()
+        self.presenter.period_info_widget.show = mock.MagicMock()
+
+        self.presenter.handle_period_information_button_clicked()
+
+        self.assertEqual(1, self.presenter._add_period_info_to_widget.call_count)
+        self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
+
+    def test_periods_button_data_missing_added_successfully(self):
+        self.presenter._model.is_data_loaded = mock.Mock(return_value=True)
+        self.presenter._model._data.periods_info = ["70", "state 1;state 1 dwell", "",
+                                                    "100;10", "", ""]
+        self.presenter._add_period_info_to_widget = mock.MagicMock()
+        self.presenter.period_info_widget.show = mock.MagicMock()
+
+        self.presenter.handle_period_information_button_clicked()
+
+        self.assertEqual(1, self.presenter._add_period_info_to_widget.call_count)
+        self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
+
+    def test_period_info_corrected_as_expected(self):
+        info_list = [["state 1", "state 1 dwell"], [""], ["100", "10"], ["1000"], [""]]
+        expected_result = [["state 1", "state 1 dwell"], [PERIOD_INFO_NOT_FOUND, PERIOD_INFO_NOT_FOUND], ["100", "10"],
+                           ["1000", PERIOD_INFO_NOT_FOUND], [PERIOD_INFO_NOT_FOUND, PERIOD_INFO_NOT_FOUND]]
+
+        names, types, frames, total_frames, counts, count = self.presenter._fix_up_period_info_lists(info_list)
+        actual_result = [names, types, frames, total_frames, counts]
+        self.assertEqual(2, count)
+        self.assertEqual(expected_result, actual_result)
 
 
 if __name__ == '__main__':
