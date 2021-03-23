@@ -95,11 +95,6 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this,
           SLOT(onItemSelected()));
 
-  connect(m_ui.pbAllDomains, SIGNAL(clicked()), this,
-          SLOT(onAllDomainsClicked()));
-  connect(m_ui.pbSelectedDomains, SIGNAL(clicked()), this,
-          SLOT(onSelectedDomainsClicked()));
-
   connect(m_functionTreeView.get(),
           SIGNAL(functionRemovedString(QString const &)), this,
           SLOT(onFunctionRemoved(QString const &)));
@@ -184,16 +179,6 @@ void FitScriptGeneratorView::onCellChanged(int row, int column) {
 
 void FitScriptGeneratorView::onItemSelected() {
   m_presenter->notifyPresenter(ViewEvent::SelectionChanged);
-}
-
-void FitScriptGeneratorView::onAllDomainsClicked() {
-  m_ui.pbAllDomains->setChecked(true);
-  m_ui.pbSelectedDomains->setChecked(false);
-}
-
-void FitScriptGeneratorView::onSelectedDomainsClicked() {
-  m_ui.pbAllDomains->setChecked(false);
-  m_ui.pbSelectedDomains->setChecked(true);
 }
 
 void FitScriptGeneratorView::onFunctionRemoved(QString const &function) {
@@ -345,7 +330,7 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
 bool FitScriptGeneratorView::applyFunctionChangesToAll() const {
-  return m_ui.pbAllDomains->isChecked();
+  return m_ui.cbApplyFunctionChangesTo->currentText() == "All Domains";
 }
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }

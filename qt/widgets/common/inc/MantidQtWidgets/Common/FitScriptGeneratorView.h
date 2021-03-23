@@ -110,8 +110,6 @@ private slots:
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
   void onItemSelected();
-  void onAllDomainsClicked();
-  void onSelectedDomainsClicked();
   void onFunctionRemoved(QString const &function);
   void onFunctionAdded(QString const &function);
   void onFunctionReplaced(QString const &function);
