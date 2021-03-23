@@ -53,6 +53,19 @@ class SuperplotPresenter:
     def close(self):
         self._view.close()
 
+    def onVisibilityChanged(self, state):
+        """
+        Triggered when the visibility of the superplot widget changed. This
+        funcion rescale the figure to be sure that the axis and labels are not
+        hidden behind the dockwidgets.
+
+        Args:
+            state (bool): True if the widget is now visible
+        """
+        if state:
+            self._canvas.figure.tight_layout()
+            self._canvas.draw_idle()
+
     def onAddButtonClicked(self):
         """
         Triggered when the add button is pressed. This function adds the
@@ -125,6 +138,7 @@ class SuperplotPresenter:
         if (currentWsName, currentSpectrumIndex) not in plottedData:
             axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
 
+        figure.tight_layout()
         axes.relim()
         axes.legend()
         self._canvas.draw_idle()
