@@ -85,7 +85,7 @@ public:
   const std::set<int> &getContributingDetIDs() const;
 
   void setInstrument(const Geometry::Instrument_const_sptr &inst);
-  Geometry::IDetector_const_sptr getDetector() const override;
+  Geometry::IDetector_const_sptr getDetector() const;
   Geometry::Instrument_const_sptr getInstrument() const;
   std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const override;
@@ -98,8 +98,8 @@ public:
 
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
-  Mantid::Kernel::V3D getDetectorPosition() const override;
-  Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
+  Mantid::Kernel::V3D getDetectorPosition() const;
+  Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
 
   void setQSampleFrame(
       const Mantid::Kernel::V3D &QSampleFrame,

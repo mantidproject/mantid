@@ -26,7 +26,6 @@ class InstrumentRayTracer;
 class MANTID_GEOMETRY_DLL IPeak {
 public:
   virtual ~IPeak() = default;
-  virtual Geometry::IDetector_const_sptr getDetector() const = 0;
   virtual std::shared_ptr<const Geometry::ReferenceFrame>
   getReferenceFrame() const = 0;
 
@@ -51,8 +50,6 @@ public:
   virtual void setSamplePos(double samX, double samY, double samZ) = 0;
   virtual void setSamplePos(const Mantid::Kernel::V3D &XYZ) = 0;
   virtual Mantid::Kernel::V3D getSamplePos() const = 0;
-  virtual Mantid::Kernel::V3D getDetectorPosition() const = 0;
-  virtual Mantid::Kernel::V3D getDetectorPositionNoCheck() const = 0;
 
   virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
