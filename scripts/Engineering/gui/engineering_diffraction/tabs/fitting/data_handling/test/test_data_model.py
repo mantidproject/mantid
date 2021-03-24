@@ -22,12 +22,13 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_inst.getFullName.return_value = 'instrument'
         mock_prop = mock.MagicMock()
         mock_prop.value = 1  # bank-id
-        mock_log_data = mock.MagicMock()
-        mock_log_data.name = "LogName"
+        mock_log_data = [mock.MagicMock(), mock.MagicMock()]
+        mock_log_data[0].name = "LogName"
+        mock_log_data[1].name = "proton_charge"
         self.mock_run = mock.MagicMock()
         self.mock_run.getProtonCharge.return_value = 1.0
         self.mock_run.getProperty.return_value = mock_prop
-        self.mock_run.getLogData.return_value = [mock_log_data]
+        self.mock_run.getLogData.return_value = mock_log_data
         mock_spec_info = mock.MagicMock()
         mock_spec_info.l1.return_value = 50
         mock_spec_info.l2.return_value = 1.5
@@ -345,7 +346,7 @@ class TestFittingDataModel(unittest.TestCase):
         mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._log_workspaces if ws.name() == ws_name][0]
         self.model._log_values = {"name1": {}}
         self.model._log_names = ["LogName"]
-        self.mock_run.getLogData.return_value = []  # no logs present in ws
+        self.mock_run.getLogData.return_value = [self.mock_run.getLogData()[1]]  # only proton_charge
 
         self.model.add_log_to_table("name1", self.mock_ws, 3)
 

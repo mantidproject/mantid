@@ -136,21 +136,21 @@ class FittingDataModel(object):
                run.getProtonCharge(), ws.getTitle()]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
+        runLogs = [l.name for l in run.getLogData()]
         for log in self._log_names:
-            if log in self._log_values[ws_name]:
-                avg, stdev = self._log_values[ws_name][log]
-            else:
-                avg, stdev = full(2, nan)  # default unless value can be calculated
-                if log in [l.name for l in run.getLogData()]:
-                    try:
-                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                    except RuntimeError:
-                        # sometimes happens in old data if proton_charge log called something different
-                        logger.warning(
-                            f"Average value of log {log} could not be calculated for file {ws.name()}")
+            avg, stdev = full(2, nan)  # default unless value can be calculated
+            if "proton_charge" in runLogs:
+                if log in self._log_values[ws_name]:
+                    avg, stdev = self._log_values[ws_name][log]
                 else:
-                    logger.warning(f"File {ws.name()} does not contain log {log}")
-                self._log_values[ws_name][log] = [avg, stdev]
+                    if log in runLogs:
+                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    else:
+                        logger.warning(f"File {ws.name()} does not contain log {log}")
+                    self._log_values[ws_name][log] = [avg, stdev]
+            else:
+                logger.warning(
+                    f"Log value {log} could not be averaged as proton_charge not found in file {ws.name()}")
             self.write_table_row(ADS.retrieve(log), [avg, stdev], irow)
         self.update_log_group_name()
 
@@ -332,13 +332,13 @@ class FittingDataModel(object):
     def _convert_TOF_to_d(self, tof, ws_name):
         difa, difc, tzero = self._get_diff_constants(ws_name)
         if abs(difa) < 1E-10:
-            return (tof-tzero)/difc
+            return (tof - tzero) / difc
         else:
-            return (-difc + sqrt(difc**2 - 4*difa*(tzero-tof)))/(2*difa)
+            return (-difc + sqrt(difc ** 2 - 4 * difa * (tzero - tof))) / (2 * difa)
 
     def _convert_TOFerror_to_derror(self, tof_error, d, ws_name):
         difa, difc, _ = self._get_diff_constants(ws_name)
-        return tof_error/(2*difa*d + difc)
+        return tof_error / (2 * difa * d + difc)
 
     def _get_diff_constants(self, ws_name):
         """Subject to change when ws will be able to carry diff constant on ws object post calibration"""
