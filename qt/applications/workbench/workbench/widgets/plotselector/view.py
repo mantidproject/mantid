@@ -280,6 +280,7 @@ class PlotSelectorView(QWidget):
             widget = self.table_widget.cellWidget(row, Column.Name)
             if widget.plot_number == plot_number:
                 return row, widget
+        raise RuntimeError(f'Unable to find row and widget from plot_number {plot_number}')
 
     def remove_from_plot_list(self, plot_number):
         """
@@ -630,14 +631,14 @@ class PlotNameWidget(QWidget):
         self.hide_button = QPushButton(shown_icon, "")
         self.hide_button.setToolTip('Hide')
         self.hide_button.setFlat(True)
-        self.hide_button.setMaximumWidth(self.hide_button.iconSize().width() * 5 / 3)
+        self.hide_button.setMaximumWidth(int(self.hide_button.iconSize().width() * 5 / 3))
         self.hide_button.clicked.connect(self.toggle_visibility)
 
         rename_icon = get_icon('mdi.square-edit-outline')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setToolTip('Rename')
         self.rename_button.setFlat(True)
-        self.rename_button.setMaximumWidth(self.rename_button.iconSize().width() * 5 / 3)
+        self.rename_button.setMaximumWidth(int(self.rename_button.iconSize().width() * 5 / 3))
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.rename_button_toggled)
 
@@ -645,7 +646,7 @@ class PlotNameWidget(QWidget):
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setToolTip('Delete')
         self.close_button.setFlat(True)
-        self.close_button.setMaximumWidth(self.close_button.iconSize().width() * 5 / 3)
+        self.close_button.setMaximumWidth(int(self.close_button.iconSize().width() * 5 / 3))
         self.close_button.clicked.connect(lambda: self.close_pressed(self.plot_number))
 
         self.layout = QHBoxLayout()
