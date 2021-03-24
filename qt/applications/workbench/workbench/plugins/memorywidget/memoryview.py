@@ -8,6 +8,7 @@
 #
 #
 from qtpy.QtWidgets import QWidget, QProgressBar
+from qtpy.QtCore import Qt
 
 NORMAL_STYLE = """
 QProgressBar::chunk {
@@ -36,6 +37,7 @@ class MemoryView(QWidget):
 
         self.critical = 90
         self.memory_bar = QProgressBar(self)
+        self.memory_bar.setAlignment(Qt.AlignCenter)
 
     def set_bar_color(self, current_value, new_value):
         if from_normal_to_critical(self.critical, current_value, new_value):
