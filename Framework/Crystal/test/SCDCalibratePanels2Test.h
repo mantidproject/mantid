@@ -83,7 +83,7 @@ public:
                                     "Si 0 0 0 1.0 0.02")),
         dspacing_min(1.0), dspacing_max(10.0),   //
         wavelength_min(0.1), wavelength_max(10), //
-        omega_step(3.0),                         //
+        omega_step(6.0),                         //
         TOLERANCE_L(1e-6), // this calibration has intrinsic accuracy limit of
                            // 5mm for translation
         TOLERANCE_R(1e-5), // this calibration has intrinsic accuracy limit of
