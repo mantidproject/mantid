@@ -216,7 +216,7 @@ used.
     // this test checks that the root group of the output file in saveInstrument
     // has NXclass attribute of NXentry. as required by the Nexus file format.
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_nxentry_group_test_file.nxs");
     std::string destinationFile = fileResource.fullPath();
 
@@ -240,7 +240,7 @@ used.
     // this test checks that inside of the NXentry root group, the instrument
     // data is saved to a group of NXclass NXinstrument
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_nxinstrument_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -267,7 +267,7 @@ used.
     // NXInstrument group name is always written as "instrument" for legacy
     // compatibility reasons
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_instrument_name_test_file.nxs");
     auto destinationFile = fileResource.fullPath();
 
@@ -291,7 +291,7 @@ used.
     const auto &compInfo = *instr.first;
 
     // full H5 path to the NXinstrument group
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
 
     // assert no exception thrown on open of instrument group in file with
     // manually set name.
@@ -315,7 +315,7 @@ used.
     // same name, HDF5 will throw a group exception. In this test, we expect no
     // such exception to throw.
 
-    // RAII file resource for test file destination.
+    //  file resource for test file destination.
     FileResource fileResource("default_group_names_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -332,7 +332,7 @@ used.
     // this test checks that inside of the NXinstrument group, the the source
     // data is saved to a group of NXclass NXsource
 
-    // RAII file resource for test file destination.
+    //  file resource for test file destination.
     FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -390,7 +390,7 @@ used.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
     NexusFileReader tester(destinationFile);
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "basic_rect" /*instrument name*/};
 
     int numOfNXDetectors = tester.countNXgroup(path, NX_DETECTOR);
@@ -427,7 +427,7 @@ Instrument cache.
    indicating that saveinstrument has correctly written the orientation data.
    */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nxdetector_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -451,7 +451,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -489,7 +489,7 @@ Instrument cache.
     data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nx_monitor_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -512,7 +512,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -546,7 +546,7 @@ Instrument cache.
     saveinstrument has correctly written the location data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_location_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -569,7 +569,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -603,7 +603,7 @@ Instrument cache.
     indicating that saveinstrument has correctly written the orientation data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -626,7 +626,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -661,7 +661,7 @@ Instrument cache.
     transformation to file
     */
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("origin_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -685,7 +685,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -710,7 +710,7 @@ Instrument cache.
     const Quat someRotation(30, V3D(1, 0, 0)); // arbitrary
     const Quat bankRotation(0, V3D(0, 0, 1));  // set (angle) to zero
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -722,7 +722,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to access NXtransformations group with test utility
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -749,7 +749,7 @@ Instrument cache.
     file
     */
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("zero_nx_monitor_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -762,7 +762,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
@@ -792,7 +792,7 @@ Instrument cache.
     const V3D sourceLocation(-10, 0, 0);
     const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource inFileResource("zero_nx_source_rotation_file_test.hdf5");
     std::string destinationFile = inFileResource.fullPath();
 
@@ -804,7 +804,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
                        TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
@@ -831,7 +831,7 @@ Instrument cache.
     manually set offset.
     */
 
-    // create RAII file resource for testing
+    // create file resource for testing
     FileResource fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -858,7 +858,7 @@ Instrument cache.
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/};
@@ -919,7 +919,7 @@ Instrument cache.
     const Quat sourceRotation(90, V3D(0, 1, 0)); // arbitrary
     const V3D sourceLocation(0, 0, 0);           // set to zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("no_location_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -931,11 +931,11 @@ Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -956,7 +956,7 @@ Instrument cache.
     // assert that the NXsource depends on dataset 'orientation' in the
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsOrientation = tester.dataSetHasStrValue(
-        DEPENDS_ON, toNXPathString(transformationsPath) + "/" + ORIENTATION,
+        DEPENDS_ON, toH5PathString(transformationsPath) + "/" + ORIENTATION,
         sourcePath);
     TS_ASSERT(sourceDependencyIsOrientation);
 
@@ -985,7 +985,7 @@ Instrument cache.
     const V3D sourceLocation(0.0, 0.0, -10.0);          // arbitrary
     const Quat sourceRotation(0.0, V3D(0.0, 1.0, 0.0)); // set to zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("no_orientation_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -997,11 +997,11 @@ Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -1023,7 +1023,7 @@ Instrument cache.
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsLocation = tester.dataSetHasStrValue(
         DEPENDS_ON /*dataset name*/,
-        toNXPathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
+        toH5PathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
         sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsLocation);
 
@@ -1054,7 +1054,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, -10);         // arbitrary non-origin
     const Quat sourceRotation(45, V3D(0, 1, 0)); // arbitrary non-zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("both_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1066,12 +1066,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
@@ -1089,15 +1089,15 @@ Instrument cache.
 
     bool sourceDependencyIsOrientation =
         tester.dataSetHasStrValue(DEPENDS_ON /*dataset name*/,
-                                  toNXPathString(transformationsPath) + "/" +
+                                  toH5PathString(transformationsPath) + "/" +
                                       ORIENTATION /*value in dataset*/,
                                   sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsOrientation);
-    auto x = toNXPathString(transformationsPath) + "/" +
+    auto x = toH5PathString(transformationsPath) + "/" +
              LOCATION /*dAttribute value*/;
     bool orientationDependencyIsLocation = tester.hasAttributeInDataSet(
         ORIENTATION /*dataset name*/, DEPENDS_ON /*dAttribute name*/,
-        toNXPathString(transformationsPath) + "/" +
+        toH5PathString(transformationsPath) + "/" +
             LOCATION /*dAttribute value*/,
         transformationsPath
         /*where the dataset lives*/);
@@ -1125,7 +1125,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, 0);          // set to zero
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
-    // create RAII file resource for testing
+    // create file resource for testing
     FileResource fileResource("neither_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1137,12 +1137,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter

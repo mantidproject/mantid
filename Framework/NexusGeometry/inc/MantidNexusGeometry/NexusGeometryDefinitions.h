@@ -13,6 +13,7 @@
 namespace Mantid {
 namespace NexusGeometry {
 
+const int COMPRESSION_LEVEL = 1;
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 const std::vector<std::string> nexus_geometry_extensions = {".nxs", ".hdf5"};
@@ -35,6 +36,11 @@ const H5std_string TRANSLATION = "translation";
 const H5std_string ROTATION = "rotation";
 const H5std_string NO_DEPENDENCY = ".";
 const H5std_string LOCATION = "location";
+const H5std_string CYLINDERS = "cylinders";
+const H5std_string VERTICES = "vertices";
+const H5std_string FACES = "faces";
+const H5std_string DETECTOR_FACES = "detector_faces";
+const H5std_string WINDING_ORDER = "winding_order";
 const H5std_string ORIENTATION = "orientation";
 const H5std_string DEPENDS_ON = "depends_on";
 const H5std_string X_PIXEL_OFFSET = "x_pixel_offset";
