@@ -269,7 +269,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     if (bkgdWS->getNumDims() < 3) {
       // must have at least 3 dimensions
       errorMessage.emplace(
-          "BackgrounWorkspace",
+          "BackgroundWorkspace",
           "The input background workspace must be at least 3D");
     } else {
       // Check first 3 dimension for Q lab,
@@ -277,7 +277,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         if (bkgdWS->getDimension(i)->getMDFrame().name() !=
             Mantid::Geometry::QLab::QLabName) {
           errorMessage.emplace(
-              "BackgrounWorkspace",
+              "BackgroundWorkspace",
               "The input backgound workspace must be in Q_lab");
         }
       }
@@ -286,7 +286,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       if (inputWS->getNumDims() > 3) {
         if (bkgdWS->getNumDims() <= 3) {
           errorMessage.emplace(
-              "BackgrounWorkspace",
+              "BackgroundWorkspace",
               "The input background workspace must have at 4 dimensions when "
               "input workspace has more than 4 dimensions (inelastic case).");
         } else if (bkgdWS->getDimension(3)->getMDFrame().name() !=
@@ -481,7 +481,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       this->getProperty("TemporaryBackgroundDataWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempBkgdNormWS =
       this->getProperty("TemporaryBackgroundNormalizationWorkspace");
-  // check existing criteria
+  // check existing criteria: Background, TempBackgroundData and TempBackgroundNormalization must be specified
   if (tempBkgdDataWS && (!bkgdWS || !tempDataWS || !tempBkgdNormWS)) {
     errorMessage.emplace("TemporaryBackgroundDataWorkspace",
                          "TemporaryBackgroundDataWorkspace is specified but at "
@@ -490,6 +490,10 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     errorMessage.emplace("TemporaryBackgroundNormalizationWorkspace",
                          "TemporaryBackgroundNormalizationWorkspace is "
                          "specified but at least one of these is not.");
+  } else if (bkgdWS && tempDataWS && !tempBkgdDataWS) {
+    errorMessage.emplace("TemporaryDataWorkspace",
+                         "With Background is specifed and TemporaryDataWorkspace is specifed, "
+                         "TemporaryBackgroundDataWorkspace must be specified.");
   } else if (tempBkgdDataWS && tempNormWS) {
     // check when they both exist
     size_t numBkgdDataDims = tempBkgdDataWS->getNumDims();
