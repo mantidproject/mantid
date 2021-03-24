@@ -118,6 +118,10 @@ class WorkspaceCalculatorModel:
                                  and not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)):
                 log.error(multi_dim_err_msg)
                 err_msg = multi_dim_err_msg
+        if (self._md_lhs != self._md_rhs and (not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue)
+                                              and not isinstance(mtd[self._rhs_ws], WorkspaceSingleValue))):
+            log.error(multi_dim_err_msg)
+            err_msg = multi_dim_err_msg
         return err_msg == str(), err_msg
 
     def _validateSingleInput(self, ws, info):
@@ -145,6 +149,8 @@ class WorkspaceCalculatorModel:
         return True, ""
 
     def validateInputs(self, lhs_ws=None, rhs_ws=None, operation=None):
+        self._md_lhs = None # needed to reset MD checks
+        self._md_rhs = None
         if operation:
             self._operation = operation
         if lhs_ws:
