@@ -326,6 +326,8 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
  *
  * @param Q :: Q_lab or Q_sample, depending on workspace
  * @param binCount :: bin count to give to the peak.
+ * @param useGoniometer :: if to include set goniometer from the input workspace
+ * in the peak
  */
 void FindPeaksMD::addLeanElasticPeak(const V3D &Q, const double binCount,
                                      const bool useGoniometer) {
