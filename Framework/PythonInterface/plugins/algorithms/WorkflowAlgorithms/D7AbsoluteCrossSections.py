@@ -544,6 +544,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
 
+        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
+            unit = 'Normalized intensity'
+            unit_symbol = ''
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
                 entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
