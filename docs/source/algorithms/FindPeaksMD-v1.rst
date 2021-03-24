@@ -33,9 +33,10 @@ The algorithm proceeds in this way:
 
 -  This is repeated until we find up to MaxPeaks peaks.
 
-Each peak created is placed in the output
-:ref:`PeaksWorkspace <PeaksWorkspace>`, which can be a new workspace or
-replace the old one.
+Each peak created is placed in the output :ref:`PeaksWorkspace
+<PeaksWorkspace>` or :ref:`LeanElasticPeaksWorkspace
+<LeanElasticPeaksWorkspace>` (depending on the `OutputPeakType`
+option), which can be a new workspace or replace the old one.
 
 This algorithm works on a :ref:`MDHistoWorkspace <MDHistoWorkspace>`
 resulting from the :ref:`algm-BinMD` algorithm also. It works in the

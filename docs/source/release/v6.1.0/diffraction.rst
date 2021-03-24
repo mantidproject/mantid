@@ -87,7 +87,8 @@ this peak is a Q-sample vector. There are a number of modifications
 made to facilitate this.
 
 - New LeanElasticPeak and LeanElasticPeakWorkspace has been created :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`
-- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a  :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
+- :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to optionally create a :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>`.
 - These following other algorithms have either been made to work or confirmed to already work with the LeanElasticPeak:
 
    - :ref:`algm-AddPeakHKL`
@@ -101,6 +102,8 @@ made to facilitate this.
    - :ref:`algm-FindUBUsingMinMaxD`
    - :ref:`algm-IndexPeaks`
    - :ref:`algm-IntegratePeaksMD`
+   - :ref:`algm-LoadNexusProcessed`
+   - :ref:`algm-SaveNexusProcessed`
    - :ref:`algm-SelectCellOfType`
    - :ref:`algm-SelectCellWithForm`
    - :ref:`algm-ShowPossibleCells`
