@@ -59,8 +59,12 @@ private:
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
+  DataObjects::MDHistoWorkspace_sptr m_bkgdNormWS;
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
+  /// Input background workspace
+  API::IMDEventWorkspace_sptr m_backgroundWS;
+
   /// flag for reciprocal lattice units
   bool m_isRLU;
   /// The projection vectors

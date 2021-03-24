@@ -98,6 +98,10 @@ void MDNorm::init() {
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
 
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+                      "BackgroundWorkspace", "", Kernel::Direction::Input, PropertyMode::Optional),
+                  "An input MDEventWorkspace for background.  Must be in Q_lab frame.");
+
   // RLU and settings
   declareProperty("RLU", true,
                   "Use reciprocal lattice units. If false, use Q_sample");
@@ -199,8 +203,27 @@ void MDNorm::init() {
                   "An input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
+
+  // temporary background workspace
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryBackgroundDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate background from "
+                  "multiple background MDEventWorkspaces. If unspecified but BackgroundWorkspace is specified, a blank "
+                  "MDHistoWorkspace will be created.");
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryBackgroundNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate background normalization "
+                  "from multiple background MDEventWorkspaces. If unspecified but BackgroundWorkspace is specified, a blank "
+                  "MDHistoWorkspace will be created.");
+
   setPropertyGroup("TemporaryDataWorkspace", "Temporary workspaces");
   setPropertyGroup("TemporaryNormalizationWorkspace", "Temporary workspaces");
+  setPropertyGroup("TemporaryBackgroundDataWorkspace", "Temporary workspaces");
+  setPropertyGroup("TemporaryBackgroundNormalizationWorkspace", "Temporary workspaces");
+
+
 
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
@@ -233,6 +256,41 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       }
     }
   }
+
+  // Optional background input IMDE
+  Mantid::API::IMDEventWorkspace_sptr bkgdWS =
+          this->getProperty("BackgroundWorkspace");
+  if (bkgdWS) {
+      if (bkgdWS->getNumDims() < 3) {
+          // must have at least 3 dimensions
+          errorMessage.emplace("BackgrounWorkspace",
+                               "The input background workspace must be at least 3D");
+      } else {
+          // Check first 3 dimension for Q lab,
+          for (size_t i = 0; i < 3; i++) {
+            if (bkgdWS->getDimension(i)->getMDFrame().name() !=
+                Mantid::Geometry::QLab::QLabName) {
+              errorMessage.emplace("BackgrounWorkspace",
+                                   "The input backgound workspace must be in Q_lab");
+            }
+          }
+
+          // Check 4th dimension if input workspace is elastic
+          if (inputWS->getNumDims() > 3) {
+              if (bkgdWS->getNumDims() <= 3) {
+                  errorMessage.emplace("BackgrounWorkspace",
+                                       "The input background workspace must have at 4 dimensions when "
+                                       "input workspace has more than 4 dimensions (inelastic case).");
+              } else if (bkgdWS->getDimension(3)->getMDFrame().name() !=
+                         inputWS->getDimension(3)->getMDFrame().name()) {
+                  errorMessage.emplace("BackgroundWorkspace",
+                                       "The input background workspace 4th dimension must be DeltaE "
+                                       "for inelastic case.");
+              }
+          }
+      }
+  }
+
   // Check if the vanadium is available for diffraction
   bool diffraction = true;
   if ((inputWS->getNumDims() > 3) &&
@@ -408,6 +466,49 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
           "do not have the same number of dimensions");
     }
   }
+
+  // validate accumulated background workspaces
+  Mantid::API::IMDHistoWorkspace_sptr tempBkgdDataWS = this->getProperty("TemporaryBackgroundDataWorkspace");
+  Mantid::API::IMDHistoWorkspace_sptr tempBkgdNormWS = this->getProperty("TemporaryBackgroundNormalizationWorkspace");
+  // check existing criteria
+  if (tempBkgdDataWS && (!bkgdWS || !tempDataWS || !tempBkgdNormWS)) {
+      errorMessage.emplace("TemporaryBackgroundDataWorkspace",
+                           "TemporaryBackgroundDataWorkspace is specified but at least one of these is not.");
+  } else if (tempBkgdNormWS && (!bkgdWS || !tempNormWS || !tempBkgdDataWS)) {
+      errorMessage.emplace("TemporaryBackgroundNormalizationWorkspace",
+                           "TemporaryBackgroundNormalizationWorkspace is specified but at least one of these is not.");
+  } else if (tempBkgdDataWS && tempNormWS) {
+    // check when they both exist
+    size_t numBkgdDataDims = tempBkgdDataWS->getNumDims();
+    size_t numBkgdNormDims = tempBkgdNormWS->getNumDims();
+    size_t numDataDims = tempDataWS->getNumDims();
+    if (numBkgdDataDims == numBkgdNormDims && numBkgdDataDims == numDataDims) {
+        // On each dimension, compare min, max, NBins and name
+        for (size_t idim = 0; idim < numBkgdDataDims; ++idim) {
+            const auto dimB = tempBkgdDataWS->getDimension(idim);
+            const auto dimN = tempBkgdNormWS->getDimension(idim);
+            const auto dimD = tempDataWS->getDimension(idim);
+            if ((dimB->getMinimum() != dimN->getMinimum()) ||
+                (dimB->getMinimum() != dimD->getMinimum()) ||
+                (dimB->getMaximum() != dimN->getMaximum()) ||
+                (dimB->getMaximum() != dimD->getMaximum()) ||
+                (dimB->getNBins() != dimN->getNBins()) ||
+                (dimB->getNBins() != dimD->getNBins()) ||
+                (dimB->getName() != dimN->getName()) ||
+                (dimB->getName() != dimD->getName())) {
+                errorMessage.emplace("TemporaryBackgroundDataWorkspace",
+                                     "TemporaryBackgroundDataWorkspace, TemporaryBackgroundNormalizationWorkspace and TemporaryDataWorkspace "
+                                     "must have same minimum, maximum, number of bins and name.");
+                break;
+            }
+
+        }
+    } else {
+        errorMessage.emplace("TemporaryBackgroundDataWorkspace",
+                             "TemporaryBackgroundDataWorkspace, TemporaryBackgroundNormalizationWorkspace and TemporaryDataWorkspace must have same dimensions");
+    }
+  }
+
 
   return errorMessage;
 }
