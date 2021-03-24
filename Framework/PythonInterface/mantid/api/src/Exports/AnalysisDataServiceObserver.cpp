@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
@@ -15,26 +16,73 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
+namespace {
+    void observeAll(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeAll(turnOn);
+    }
+
+    void observeRename(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeRename(turnOn);
+    }
+
+    void observeAdd(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeAdd(turnOn);
+    }
+
+    void observeReplace(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeReplace(turnOn);
+    }
+
+    void observeDelete(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeDelete(turnOn);
+    }
+
+    void observeClear(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeClear(turnOn);
+    }
+
+    void observeGroup(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeGroup(turnOn);
+    }
+
+    void observeUnGroup(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeUnGroup(turnOn);
+    }
+
+    void observeGroupUpdate(AnalysisDataServiceObserver &self, bool turnOn) {
+      ReleaseGlobalInterpreterLock releaseGil;
+      self.observeGroupUpdate(turnOn);
+    }
+}
+
 void export_AnalysisDataServiceObserver() {
   boost::python::class_<AnalysisDataServiceObserver, bases<>, AnalysisDataServiceObserverAdapter, boost::noncopyable>(
       "AnalysisDataServiceObserver", "Observes AnalysisDataService notifications: all only")
-      .def("observeAll", &AnalysisDataServiceObserverAdapter::observeAll, (arg("self"), arg("on")),
+      .def("observeAll", &observeAll, (arg("self"), arg("on")),
            "Observe AnalysisDataService for any changes")
-      .def("observeAdd", &AnalysisDataServiceObserverAdapter::observeAdd, (arg("self"), arg("on")),
+      .def("observeAdd", &observeAdd, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a workspace being added")
-      .def("observeReplace", &AnalysisDataServiceObserverAdapter::observeReplace, (arg("self"), arg("on")),
+      .def("observeReplace", &observeReplace, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a workspace being replaced")
-      .def("observeDelete", &AnalysisDataServiceObserverAdapter::observeDelete, (arg("self"), arg("on")),
+      .def("observeDelete", &observeDelete, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a workspace being deleted")
-      .def("observeClear", &AnalysisDataServiceObserverAdapter::observeClear, (arg("self"), arg("on")),
+      .def("observeClear", &observeClear, (arg("self"), arg("on")),
            "Observe AnalysisDataService for it being cleared")
-      .def("observeRename", &AnalysisDataServiceObserverAdapter::observeRename, (arg("self"), arg("on")),
+      .def("observeRename", &observeRename, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a workspace being renamed")
-      .def("observeGroup", &AnalysisDataServiceObserverAdapter::observeGroup, (arg("self"), arg("on")),
+      .def("observeGroup", &observeGroup, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a group being added/made in the ADS")
-      .def("observeUnGroup", &AnalysisDataServiceObserverAdapter::observeUnGroup, (arg("self"), arg("on")),
+      .def("observeUnGroup", &observeUnGroup, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a group being removed from the ADS")
-      .def("observeGroupUpdate", &AnalysisDataServiceObserverAdapter::observeGroupUpdate, (arg("self"), arg("on")),
+      .def("observeGroupUpdate", &observeGroupUpdate, (arg("self"), arg("on")),
            "Observe AnalysisDataService for a group being updated by being "
            "added to or removed from");
 }
