@@ -360,6 +360,31 @@ by using the ``-c`` or ``--clean`` option, e.g.
 This is useful if some old data is left over from a previous run,
 where some tests were not cleanly exited.
 
+Processing test failures
+------------------------
+If any of the tests fail, a json file (FAILED-systemtests.json) containing information on the failed tests
+will be outputted. If the information was available, each entry in the file will contain the name of the failed test,
+the mismatch file generated and the name and location of the file it was compared against (the reference).
+The information can be used to automatically generate replacement references using the addTestData.py python script
+located in the Testing/SystemTests/scripts directory. It may be called as follows:
+
+.. code-block:: sh
+
+   python path_to_file/addTestData.py --testresults FAILED-systemtests.json --replacereferences
+
+Which does the following:
+
+-  computes the MD5 hash of each mismatch files
+
+-  stores each MD5 hash and replaces the old hash value with the newly generated value.
+
+-  renames the original data file to be its md5 sum
+
+-  tells the user to upload the new data files to the server.
+
+If the --replacereferences argument is omitted, it will leave the newly created hash files in the system tests
+save directory.
+
 Adding New Data & References Files
 ----------------------------------
 

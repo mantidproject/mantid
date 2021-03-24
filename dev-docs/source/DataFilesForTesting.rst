@@ -112,8 +112,9 @@ There are two places files may be found:
 Adding A New File(s)
 ####################
 
-A helper git command is defined called ``add-test-data``. It would be
-called like this:
+Test data can be added in two ways:
+
+1: Through a helper git command ``add-test-data``. It is called like this:
 
 .. code-block:: sh
 
@@ -130,6 +131,22 @@ This does the following:
 -  runs ``git add Testing/Data/UnitTest/INST12345.nxs.md5``
 -  tells the user to upload the file(s),
    ``d6948514d78db7fe251efb6cce4a9b83``, to the `remote store <https://testdata.mantidproject.org/ftp/external-data/upload>`_
+
+2: Using the python script addTestData.py in the Testing/SystemTest/scripts directory. It can be called a follows:
+
+.. code-block:: sh
+
+   python addTestData.py --inputfiles file1.nxs file2.nxs file3.nxs --targetdirectory Testing/Data/UnitTest/
+
+This does the following:
+
+-  computes the MD5 hash of each file
+
+-  stores the MD5 hash in a file filen.nxs.md5 and places the md5 hash file into the target directory
+
+-  renames the original data file to be its md5 sum
+
+-  tells the user to upload the file(s),
 
 **Notes:**
 

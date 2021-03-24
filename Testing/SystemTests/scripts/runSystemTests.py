@@ -9,7 +9,10 @@ import argparse
 import os
 import sys
 import time
+import json
 from multiprocessing import Process, Array, Manager, Value, Lock
+
+from addTestData import TestDataCreator
 
 # Prevents errors in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
@@ -24,7 +27,9 @@ DEFAULT_QT_API = "pyqt5"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
+REF_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "reference-directories.txt")
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
+OUTPUT_TEST_FAILURE_FILE = 'FAILED-systemtests.json'
 
 
 def kill_children(processes):
@@ -58,14 +63,14 @@ def main():
                         help="Arguments passed to executable for each test Default=[]")
     parser.add_argument("--frameworkLoc",
                         help="location of the system test framework (default=%s)" %
-                        DEFAULT_FRAMEWORK_LOC)
+                             DEFAULT_FRAMEWORK_LOC)
     parser.add_argument("--qt_api",
                         help="The qt version to use for the system test (default={0}).".format(DEFAULT_QT_API))
     parser.add_argument("--disablepropmake",
                         action="store_false",
                         dest="makeprop",
                         help="By default this will move your properties file out of the " +
-                        "way and create a new one. This option turns off this behavior.")
+                             "way and create a new one. This option turns off this behavior.")
     parser.add_argument(
         "-R",
         "--tests-regex",
@@ -82,7 +87,7 @@ def main():
                         dest="loglevel",
                         choices=loglevelChoices,
                         help="Set the log level for test running: [" + ', '.join(loglevelChoices) +
-                        "]")
+                             "]")
     parser.add_argument(
         "-j",
         "--parallel",
@@ -171,6 +176,10 @@ def main():
         with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
             save_dir = f_handle.read().strip()
 
+    reference_paths = ''
+    with open(REF_DIRS_LIST_PATH, 'r') as f_handle:
+        reference_paths = f_handle.read().strip()
+
     # Configure properties file
     mtdconf = systemtesting.MantidFrameworkConfig(loglevel=options.loglevel,
                                                   data_dirs=data_paths,
@@ -211,10 +220,12 @@ def main():
     if options.clean:
         print("Performing cleanup run")
 
-    # Cleanup any pre-existing XML reporter files
+    # Cleanup any pre-existing XML reporter and json test failure files
     entries = os.listdir(mtdconf.saveDir)
     for file in entries:
         if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+            os.remove(os.path.join(mtdconf.saveDir, file))
+        if file == OUTPUT_TEST_FAILURE_FILE:
             os.remove(os.path.join(mtdconf.saveDir, file))
 
     if not options.dry_run:
@@ -326,13 +337,13 @@ def main():
         if (skipped_tests > 0) and options.showskipped:
             print("\nSKIPPED:")
             for key in status_dict.keys():
-                if status_dict[key] == 'skipped':
+                if status_dict[key]['status'] == 'skipped':
                     print(key)
         if failed_tests > 0:
             print("\nFAILED:")
             for key in status_dict.keys():
-                if status_dict[key] == 'failed':
-                    print(key)
+                if status_dict[key]['status'] == 'failed':
+                    print(key, status_dict[key].get('mismatches', 'Unknown'))
 
         # Report global statistics on tests
         print()
@@ -346,8 +357,58 @@ def main():
                   (percent, '%', failed_tests, (total_tests - skipped_tests), skipped_tests))
         print('All tests passed? ' + str(success))
         print(banner)
+
+        test_mismatches = {key: status['mismatches'] for key, status in status_dict.items() if
+                           status['status'] == 'failed'}
+        output_file = output_failed_tests_information(test_mismatches, save_dir, data_paths, reference_paths)
+
         if not success:
             sys.exit(1)
+
+
+def output_failed_tests_information(test_mismatch_dict, mismatch_dir, external_data_dirs, ref_dirs):
+    failed_test_information = {'FailedTests': []}
+    data_dirs = external_data_dirs.split(';')
+    ref_dirs = ref_dirs.split(';')
+    for test_name, mismatch_files in test_mismatch_dict.items():
+        mismatch_paths = []
+        data_paths = []
+        ref_paths = []
+        for mismatch_filename in mismatch_files.split(';'):
+            reference_name = mismatch_filename.replace("-mismatch", "").strip()
+            mismatch_path = os.path.join(mismatch_dir, mismatch_filename.strip())
+            reference_content_link_name = reference_name + '.md5'
+            data_file_path = ''
+            for directory in data_dirs:
+                files = os.listdir(directory)
+                if next((True for x in files if x == reference_name), False):
+                    data_file_path = os.path.join(directory, reference_name)
+            ref_file_path = ''
+            for directory in ref_dirs:
+                files = os.listdir(directory)
+                if next((True for x in files if x == reference_content_link_name), False):
+                    ref_file_path = os.path.join(directory, reference_content_link_name)
+            mismatch_paths.append(mismatch_path)
+            data_paths.append(data_file_path)
+            ref_paths.append(ref_file_path)
+        failed_test_information['FailedTests'].append({
+            'TestName': test_name,
+            'MismatchFiles': mismatch_paths,
+            'ReferenceFiles': data_paths,
+            'ReferenceContentLinkFiles': ref_paths,
+            })
+    output_name = os.path.join(mismatch_dir, OUTPUT_TEST_FAILURE_FILE)
+    with open(output_name, 'w') as outfile:
+        json.dump(failed_test_information, outfile)
+    return output_name
+
+
+def create_content_files_from_failed_tests(output_file):
+    data_creator = TestDataCreator()
+    with open(output_file, 'r') as file:
+        json_data = json.load(file)
+        data_creator.process_test_failures(json_data)
+        data_creator.print_summary()
 
 
 if __name__ == "__main__":

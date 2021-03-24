@@ -31,6 +31,30 @@ set(SAVE_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(SAVE_DIR_FILE ${CMAKE_CURRENT_LIST_DIR}/defaultsave-directory.txt)
 file(WRITE ${SAVE_DIR_FILE} "${SAVE_DIR}")
 
+# Default reference
+# Reference search directories
+set(REF_DIRS "")
+# Input data
+set(SYSTEM_TEST_DATA_DIR ${PROJECT_SOURCE_DIR}/Testing/Data/SystemTest)
+list(APPEND REF_DIRS ${SYSTEM_TEST_DATA_DIR})
+list(APPEND REF_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
+# Reference results
+list(
+  APPEND
+    REF_DIRS
+    ${PROJECT_SOURCE_DIR}/Testing/SystemTests/tests/framework/reference)
+# Unit tests
+list(APPEND REF_DIRS ${PROJECT_SOURCE_DIR}/Testing/Data/UnitTest)
+# Doc tests
+list(APPEND REF_DIRS ${PROJECT_SOURCE_DIR}/Testing/Data/DocTest)
+
+# Output to file
+set(REF_DIRS_FILE ${CMAKE_CURRENT_LIST_DIR}/reference-directories.txt)
+# The quotes are important as CMake translates the list to a semicolon-separated
+# string
+file(WRITE ${REF_DIRS_FILE} "${REF_DIRS}")
+
+
 # Configure files for developers running tests
 set(SYSTEMTESTS_RUNNER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/runSystemTests.py)
 if(MSVC OR XCODE_VERSION)
