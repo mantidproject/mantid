@@ -481,7 +481,8 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       this->getProperty("TemporaryBackgroundDataWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempBkgdNormWS =
       this->getProperty("TemporaryBackgroundNormalizationWorkspace");
-  // check existing criteria: Background, TempBackgroundData and TempBackgroundNormalization must be specified
+  // check existing criteria: Background, TempBackgroundData and
+  // TempBackgroundNormalization must be specified
   if (tempBkgdDataWS && (!bkgdWS || !tempDataWS || !tempBkgdNormWS)) {
     errorMessage.emplace("TemporaryBackgroundDataWorkspace",
                          "TemporaryBackgroundDataWorkspace is specified but at "
@@ -491,9 +492,10 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
                          "TemporaryBackgroundNormalizationWorkspace is "
                          "specified but at least one of these is not.");
   } else if (bkgdWS && tempDataWS && !tempBkgdDataWS) {
-    errorMessage.emplace("TemporaryDataWorkspace",
-                         "With Background is specifed and TemporaryDataWorkspace is specifed, "
-                         "TemporaryBackgroundDataWorkspace must be specified.");
+    errorMessage.emplace(
+        "TemporaryDataWorkspace",
+        "With Background is specifed and TemporaryDataWorkspace is specifed, "
+        "TemporaryBackgroundDataWorkspace must be specified.");
   } else if (tempBkgdDataWS && tempNormWS) {
     // check when they both exist
     size_t numBkgdDataDims = tempBkgdDataWS->getNumDims();
