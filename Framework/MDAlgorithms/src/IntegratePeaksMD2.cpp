@@ -693,12 +693,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           p.setPeakShape(ellipsoidShape);
         }
       }
-      // spherical integration of signal
       ws->getBox()->integrateSphere(
           getRadiusSq,
           static_cast<coord_t>(PeakRadiusVector[i] * PeakRadiusVector[i]),
           signal, errorSquared, 0.0 /* innerRadiusSquared */,
           useOnePercentBackgroundCorrection);
+      //
     } else {
       CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 

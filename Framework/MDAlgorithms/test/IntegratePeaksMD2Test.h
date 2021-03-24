@@ -562,6 +562,58 @@ public:
                     ceil(0.002 * static_cast<double>(sphereInten)));
   }
 
+  void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol_LongEllipse() {
+
+    CreateMDWorkspace algC;
+    TS_ASSERT_THROWS_NOTHING(algC.initialize())
+    TS_ASSERT(algC.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Dimensions", "3"));
+    TS_ASSERT_THROWS_NOTHING(
+        algC.setProperty("Extents", "-0.5,0.5,-0.5,0.5,-0.5,0.5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Names", "h,k,l"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Units", "U,U,U"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("Frames", "HKL,HKL,HKL"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("SplitInto", "2"));
+    TS_ASSERT_THROWS_NOTHING(algC.setProperty("MaxRecursionDepth", "5"));
+    TS_ASSERT_THROWS_NOTHING(algC.setPropertyValue(
+        "OutputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(algC.execute());
+    TS_ASSERT(algC.isExecuted());
+
+    // Test an ellipsoid against theoretical vol
+    size_t numEvents = 200000;
+    V3D pos(0.0, 0.0, 0.0); // peak position
+
+    // Major axis along x
+    double fail_val = 0.013;
+    std::vector<double> radii = {0.05, fail_val, fail_val};
+
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+    peakWS->addPeak(Peak(inst, 1, 1.0, pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    double ellipVol = (4.0 / 3.0) * M_PI * static_cast<double>(numEvents) *
+                      std::accumulate(radii.begin(), radii.end(), 1.0,
+                                      std::multiplies<double>());
+
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_peaks_out", {0.0}, false, false,
+          "NoFit", 0.0, true, false);
+
+    PeaksWorkspace_sptr peakResult = std::dynamic_pointer_cast<PeaksWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "IntegratePeaksMD2Test_peaks_out"));
+    TS_ASSERT(peakResult);
+
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, ellipVol,
+                    ceil(0.05 * static_cast<double>(ellipVol)));
+  }
+
   void test_exec_EllipsoidRadii_NoBackground_SingleCount_Vol() {
     // Test an ellipsoid against theoretical vol
     size_t numEvents = 2000000;

@@ -80,7 +80,6 @@ Instrument Updates
 
 Known Defects
 #############
-- When using new ellipsoidal peak integration capability in :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`, some peak intensities are returned as zero. When using the default spherical integration, the same behavior is not observed.
 
 Bugfixes
 ########

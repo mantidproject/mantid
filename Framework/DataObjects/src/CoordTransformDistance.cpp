@@ -81,13 +81,23 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
       for (size_t d = 0; d < inD; d++) {
         // do dot prod with eigenvector
         coord_t dist = 0.0;
+        // calculate the covariance of the delta vector using
+        // the three eigen vector as the new base
         for (size_t dd = 0; dd < inD; dd++) {
           dist += static_cast<coord_t>(m_eigenvects[d][dd]) *
                   (inputVector[dd] - m_center[dd]);
         }
+
         distanceSquared += (dist * dist) *
                            static_cast<coord_t>(m_maxEigenval / m_eigenvals[d]);
       }
+      // debug output
+      // std::cout << "[CoordTransFormDistance]\n"
+      //           << "eigenvals:" << m_eigenvals[0] << "," << m_eigenvals[1]
+      //           << "," << m_eigenvals[2] << "\n"
+      //           << "peak_center:" << m_center[0] << "," << m_center[1] << ","
+      //           << m_center[2] << "\n"
+      //           << "distanceSquared = " << distanceSquared << "\n\n";
     } else {
       // nd spherical transform
       for (size_t d = 0; d < inD; d++) {
