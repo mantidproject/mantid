@@ -504,7 +504,7 @@ def new_figure_manager(num, *args, **kwargs):
 def new_figure_manager_given_figure(num, figure):
     """Create a new manager from a num & figure """
 
-    def _new_figure_manager_given_figure_impl(num, figure):
+    def _new_figure_manager_given_figure_impl(num: int, figure):
         """Create a new figure manager instance for the given figure.
         Forces all public and non-dunder method calls onto the QApplication thread.
         """
@@ -512,4 +512,4 @@ def new_figure_manager_given_figure(num, figure):
         return force_method_calls_to_qapp_thread(FigureManagerWorkbench(canvas, num))
 
     # figure manager & canvas must be created on the QApplication thread
-    return QAppThreadCall(_new_figure_manager_given_figure_impl)(num, figure)
+    return QAppThreadCall(_new_figure_manager_given_figure_impl)(int(num), figure)
