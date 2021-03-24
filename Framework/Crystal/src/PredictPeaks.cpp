@@ -10,6 +10,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
@@ -113,8 +115,8 @@ void PredictPeaks::init() {
                   "option only works if the sample of the input workspace has "
                   "a crystal structure assigned.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("HKLPeaksWorkspace", "", Direction::Input,
-                                                                      PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("HKLPeaksWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
                   "Optional: An input PeaksWorkspace with the HKL of the peaks "
                   "that we should predict. \n"
                   "The WavelengthMin/Max and Min/MaxDSpacing parameters are "
@@ -249,7 +251,7 @@ void PredictPeaks::exec() {
   ub = orientedLattice.getUB();
 
   std::vector<V3D> possibleHKLs;
-  PeaksWorkspace_sptr possibleHKLWorkspace = getProperty("HKLPeaksWorkspace");
+  IPeaksWorkspace_sptr possibleHKLWorkspace = getProperty("HKLPeaksWorkspace");
 
   if (!possibleHKLWorkspace) {
     fillPossibleHKLsUsingGenerator(orientedLattice, possibleHKLs);
@@ -344,11 +346,10 @@ void PredictPeaks::exec() {
   criteria.emplace_back("BankName", true);
   m_pw->sort(criteria);
 
-  auto &peaks = m_pw->getPeaks();
   for (int i = 0; i < static_cast<int>(m_pw->getNumberPeaks()); ++i) {
-    peaks[i].setPeakNumber(i);
+    m_pw->getPeak(i).setPeakNumber(i);
   }
-  setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+  setProperty<IPeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
 /**
@@ -357,28 +358,29 @@ void PredictPeaks::exec() {
  * @param allowedPeakCount :: number of candidate peaks found
  */
 void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
-  const bool usingExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
-  const auto &peaks = m_pw->getPeaks();
-  size_t offDetectorPeakCount = 0;
-  size_t onDetectorPeakCount = 0;
+  if (auto pw = std::dynamic_pointer_cast<PeaksWorkspace>(m_pw)) {
+    const bool usingExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    const auto &peaks = pw->getPeaks();
+    size_t offDetectorPeakCount = 0;
+    size_t onDetectorPeakCount = 0;
 
-  for (const auto &peak : peaks) {
-    if (peak.getDetectorID() == -1) {
-      offDetectorPeakCount++;
-    } else {
-      onDetectorPeakCount++;
+    for (const auto &peak : peaks) {
+      if (peak.getDetectorID() == -1) {
+        offDetectorPeakCount++;
+      } else {
+        onDetectorPeakCount++;
+      }
     }
+
+    g_log.notice() << "Out of " << allowedPeakCount << " allowed peaks within parameters, " << onDetectorPeakCount
+                   << " were found to hit a detector";
+    if (usingExtendedDetectorSpace) {
+      g_log.notice() << " and " << offDetectorPeakCount << " were found in "
+                     << "extended detector space.";
+    }
+
+    g_log.notice() << "\n";
   }
-
-  g_log.notice() << "Out of " << allowedPeakCount << " allowed peaks within parameters, " << onDetectorPeakCount
-                 << " were found to hit a detector";
-
-  if (usingExtendedDetectorSpace) {
-    g_log.notice() << " and " << offDetectorPeakCount << " were found in "
-                   << "extended detector space.";
-  }
-
-  g_log.notice() << "\n";
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -451,7 +453,7 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(const OrientedLattice &oriente
 }
 
 /// Fills possibleHKLs with all HKLs from the supplied PeaksWorkspace.
-void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(const PeaksWorkspace_sptr &peaksWorkspace,
+void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(const IPeaksWorkspace_sptr &peaksWorkspace,
                                                        std::vector<V3D> &possibleHKLs) const {
   possibleHKLs.clear();
   possibleHKLs.reserve(peaksWorkspace->getNumberPeaks());
