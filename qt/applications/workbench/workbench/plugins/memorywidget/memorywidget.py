@@ -22,13 +22,15 @@ class MemoryWidget(PluginWidget):
         self.presenter = MemoryPresenter(self.view)
 
         layout = QVBoxLayout()
+        self.view.memory_bar.setMinimumHeight(30)
         layout.addWidget(self.view.memory_bar)
 
         self.setLayout(layout)
         self.setWindowTitle(self.get_plugin_title())
-        # 70 is chosen as a good value after testing
-        # how it looks for different values
-        self.setMaximumHeight(70)
+        # The following are chosen as a good value after
+        # testing how it looks for different values
+        self.setMinimumHeight(50)
+        self.setMaximumHeight(55)
 
     # ----------------- Plugin API --------------------
 
