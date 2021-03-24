@@ -189,7 +189,7 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
   std::string aLine;
   if (Mantid::Kernel::Strings::extractToEOL(logFileStream, aLine)) {
     if (!isDateTimeString(aLine)) {
-      throw std::invalid_argument("File" + m_filename +
+      throw std::invalid_argument("File " + m_filename +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a two column file.");
     }
@@ -247,7 +247,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
 
   while (Mantid::Kernel::Strings::extractToEOL(logFileStream, str)) {
     if (!isDateTimeString(str) && !str.empty()) {
-      throw std::invalid_argument("File" + logFileName +
+      throw std::invalid_argument("File " + logFileName +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a file starting with DateTime String "
                                   "format.");
@@ -275,7 +275,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
 
     if (LoadLog::string != l_kind) {
       throw std::invalid_argument(
-          "ISIS log file contains unrecognised second column entries:" +
+          "ISIS log file contains unrecognised second column entries: " +
           logFileName);
     }
 
@@ -561,7 +561,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream,
   Mantid::Kernel::Strings::extractToEOL(logFileStream, str);
 
   if (!isDateTimeString(str)) {
-    throw std::invalid_argument("File" + logFileName +
+    throw std::invalid_argument("File " + logFileName +
                                 " is not a standard ISIS log file. Expected to "
                                 "be a file starting with DateTime String "
                                 "format.");
@@ -577,7 +577,7 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream,
 
   if (LoadLog::string != l_kind && LoadLog::number != l_kind) {
     throw std::invalid_argument(
-        "ISIS log file contains unrecognised second column entries:" +
+        "ISIS log file contains unrecognised second column entries: " +
         logFileName);
   }
 
