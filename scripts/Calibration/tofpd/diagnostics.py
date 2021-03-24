@@ -368,6 +368,7 @@ def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks,
             raise RuntimeError('did not find column "{}" in workspace "{}"'.format(name, str(wksp)))
 
     wsindex = np.asarray(wksp.column('wsindex'))
+    wsindex_unique = np.unique(wsindex)
     chi2 = np.asarray(wksp.column('chi2'))
     observable = np.asarray(wksp.column(infotype))
     # set values to nan where the chisq is too high
@@ -378,14 +379,15 @@ def collect_fit_result(wksp: Union[str, TableWorkspace], outputname: str, peaks,
     if donor:
         numSpec = mtd[str(donor)].getNumberHistograms()
     else:
-        numSpec = len(np.unique(wsindex))
+        numSpec = len(wsindex_unique)
     output = __create_outputws(donor, numSpec, numPeaks)
-    for i in np.unique(wsindex):
-        start = np.searchsorted(wsindex, i)
+    for i in range(len(wsindex_unique)):
+        start = int(np.searchsorted(wsindex, wsindex_unique[i]))
         i = int(i)  # to be compliant with mantid API
         output.setX(i, peaks)
         output.setY(i, observable[start:start+numPeaks])
     mtd.addOrReplace(outputname, output)
+    return mtd[outputname]
 
 
 def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_position: float):
@@ -431,8 +433,8 @@ def extract_peak_info(wksp: Union[str, Workspace2D], outputname: str, peak_posit
     return mtd[outputname]
 
 # flake8: noqa: C901
-def plot_peakd(wksp: Union[str, Workspace2D], peak_positions, plot_regions=True, show_bad_cnt=True, drange=(0, 0),
-               threshold=0.01):
+def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list], plot_regions=True, show_bad_cnt=True,
+               drange=(0, 0), threshold=0.01):
     """
     Plots peak d spacing value for each peak position in peaks
     :param wksp: Workspace returned from collect_peaks
