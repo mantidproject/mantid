@@ -49,6 +49,7 @@ InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *
   }
 
   fillTechniques(elem);
+  fillAcquistions(elem);
   fillLiveData(elem);
   fillZeroPadding(elem);
 }
@@ -178,6 +179,10 @@ const std::vector<LiveListenerInfo> &InstrumentInfo::liveListenerInfoList() cons
 /// Return list of techniques
 const std::set<std::string> &InstrumentInfo::techniques() const { return m_technique; }
 
+const std::set<std::string> &InstrumentInfo::acquisitions() const {
+  return m_acquistions;
+}
+
 /// Return the facility
 const FacilityInfo &InstrumentInfo::facility() const { return *m_facility; }
 
@@ -228,7 +233,7 @@ void InstrumentInfo::fillZeroPadding(const Poco::XML::Element *elem) {
   }
 }
 
-/// Called from constructor to fill live listener name
+/// Called from constructor to fill techniques list
 void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
   Poco::AutoPtr<Poco::XML::NodeList> pNL_technique = elem->getElementsByTagName("technique");
   unsigned long n = pNL_technique->length();
@@ -248,6 +253,30 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
 
   if (m_technique.empty()) {
     throw std::runtime_error("No technique is defined for instrument " + m_name);
+  }
+}
+
+/// Called from constructor to fill acquistions
+void InstrumentInfo::fillAcquistions(const Poco::XML::Element *elem) {
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_acquisition =
+      elem->getElementsByTagName("acquisition");
+  if (!pNL_acquisition)
+    return;
+
+  unsigned long total = pNL_acquisition->length();
+
+  for (unsigned long i = 0; i < total; ++i) {
+    Poco::AutoPtr<Poco::XML::NodeList> pNL =
+        pNL_acquisition->item(i)->childNodes();
+    if (pNL->length() > 0) {
+      auto *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
+      if (txt) {
+        const std::string &acq = txt->getData();
+        if (!acq.empty()) {
+          m_acquistions.insert(acq);
+        }
+      }
+    }
   }
 }
 
