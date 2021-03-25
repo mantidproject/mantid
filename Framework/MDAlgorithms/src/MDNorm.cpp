@@ -239,6 +239,9 @@ void MDNorm::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputBackgroundNormalizationWorkspace", "", Direction::Output, PropertyMode::Optional),
+                  "A name for the output background normalization MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -594,9 +597,24 @@ void MDNorm::exec() {
   }
   auto outputDataWS = binInputWS(symmetryOps);
 
+  // Background
+  m_backgroundWS = this->getProperty("BackgroundWorkspace");
+
   createNormalizationWS(*outputDataWS);
   this->setProperty("OutputNormalizationWorkspace", m_normWS);
   this->setProperty("OutputDataWorkspace", outputDataWS);
+
+  // Outputs for background related
+  if (m_backgroundWS) {
+    // auto outputBkgdWS = binBackgroundWS(symmetryOps);
+    // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with outputBkgdDataWS!
+    // [Task 88]
+    createBackgroundNormalizationWS(*outputDataWS);
+    this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
+    // TODO/FIXME [Task 88] Enable this
+    // this->setProperty("OutputDataWorkspace", outputBkgdWS);
+  }
+
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
   // loop over all experiment infos
@@ -855,9 +873,29 @@ void MDNorm::createNormalizationWS(
     m_normWS = dataWS.clone();
     m_normWS->setTo(0., 0., 0.);
   } else {
+    // Temp is given.  Accumulation mode is on
     m_accumulate = true;
   }
 }
+
+void MDNorm::createBackgroundNormalizationWS(
+    const DataObjects::MDHistoWorkspace &bkgdDataWS) {
+
+  // requiring background workspace is specified
+  if (!m_backgroundWS) {
+      return;
+  }
+
+  // Copy the MDHisto workspace, and change signals and errors to 0.
+  std::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryBackgroundNormalizationWorkspace");
+  m_bkgdNormWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!m_bkgdNormWS) {
+    m_bkgdNormWS = bkgdDataWS.clone();
+    m_bkgdNormWS->setTo(0., 0., 0.);
+  }
+}
+
 
 /**
  * Validates the TemporaryDataWorkspace has the same binning
