@@ -19,7 +19,10 @@
 namespace Mantid {
 namespace API {
 
-using PreviewRegister = std::map<std::string, std::map<std::string, std::map<std::string, IPreview_uptr>>>;
+using PreviewRegister = std::map<
+    std::string,
+    std::map<std::string,
+             std::map<std::string, std::map<std::string, IPreview_uptr>>>>;
 
 /** PreviewManager : Manages the raw data previews.
  */
@@ -28,8 +31,12 @@ public:
   PreviewManagerImpl() = default;
   PreviewManagerImpl(const PreviewManagerImpl &) = delete;
   PreviewManagerImpl &operator=(const PreviewManagerImpl &) = delete;
-  std::vector<std::string> getPreviews(const std::string &facility, const std::string &technique = "") const;
-  const IPreview &getPreview(const std::string &facility, const std::string &technique,
+  std::vector<std::string>
+  getPreviews(const std::string &facility, const std::string &technique = "",
+              const std::string &acquisition = "") const;
+  const IPreview &getPreview(const std::string &facility,
+                             const std::string &technique,
+                             const std::string &acquisition,
                              const std::string &preview) const;
   template <class T> void subscribe() {
     static_assert(std::is_base_of<IPreview, T>::value);
@@ -37,17 +44,26 @@ public:
     const auto facility = preview->facility();
     const auto technique = preview->technique();
     const auto name = preview->name();
-    if (checkPreview(facility, technique, name)) {
-      throw std::runtime_error("Preview with the same name is already registered for the same "
-                               "facility and technique.");
+
+    const auto acquisition = preview->acquisition();
+    if (checkPreview(facility, technique, acquisition, name)) {
+      throw std::runtime_error(
+          "Preview with the same name is already registered for the same "
+          "facility, technique and acquisition mode.");
     }
-    m_previews[facility][technique][name] = std::move(preview);
+    m_previews[facility][technique][acquisition][name] = std::move(preview);
   }
 
 private:
   bool checkFacility(const std::string &facility) const;
-  bool checkTechnique(const std::string &facility, const std::string &technique) const;
-  bool checkPreview(const std::string &facility, const std::string &technique, const std::string &preview) const;
+  bool checkTechnique(const std::string &facility,
+                      const std::string &technique) const;
+  bool checkAcquisition(const std::string &facility,
+                        const std::string &technique,
+                        const std::string &acquisition) const;
+  bool checkPreview(const std::string &facility, const std::string &technique,
+                    const std::string &acquisition,
+                    const std::string &preview) const;
   PreviewRegister m_previews;
 };
 
@@ -58,12 +74,13 @@ using PreviewManager = Mantid::Kernel::SingletonHolder<PreviewManagerImpl>;
 
 namespace Mantid {
 namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::PreviewManagerImpl>;
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::PreviewManagerImpl>;
 }
 } // namespace Mantid
 
-#define DECLARE_PREVIEW(classname)                                                                                     \
-  namespace {                                                                                                          \
-  Mantid::Kernel::RegistrationHelper                                                                                   \
-      register_preview_##classname(((Mantid::API::PreviewManager::Instance().subscribe<classname>()), 0));             \
+#define DECLARE_PREVIEW(classname)                                             \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_preview_##classname(             \
+      ((Mantid::API::PreviewManager::Instance().subscribe<classname>()), 0));  \
   }
