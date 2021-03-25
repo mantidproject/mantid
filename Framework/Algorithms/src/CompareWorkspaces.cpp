@@ -323,7 +323,7 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
   // Peaks workspaces
   // ==============================================================================
-  if (w1->id() == "PeaksWorkspace" && w2->id() == "PeaksWorkspace") {
+  if (w1->id() == "PeaksWorkspace" || w2->id() == "PeaksWorkspace") {
     // Check that both workspaces are the same type
     PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
     PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
@@ -346,7 +346,7 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
   // Lean Elastic Peaks workspaces
   // ==============================================================================
-  if (w1->id() == "LeanElasticPeaksWorkspace" &&
+  if (w1->id() == "LeanElasticPeaksWorkspace" ||
       w2->id() == "LeanElasticPeaksWorkspace") {
     auto lpws1 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w1);
     auto lpws2 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w2);
@@ -1088,14 +1088,16 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
     sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
     sortPeaks->setProperty("SortAscending", true);
     sortPeaks->executeAsChildAlg();
-    tws1 = sortPeaks->getProperty("OutputWorkspace");
+    IPeaksWorkspace_sptr tmp1 = sortPeaks->getProperty("OutputWorkspace");
+    tws1 = std::dynamic_pointer_cast<PeaksWorkspace>(tmp1);
 
     sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
     sortPeaks->setProperty("InputWorkspace", tws2);
     sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
     sortPeaks->setProperty("SortAscending", true);
     sortPeaks->executeAsChildAlg();
-    tws2 = sortPeaks->getProperty("OutputWorkspace");
+    IPeaksWorkspace_sptr tmp2 = sortPeaks->getProperty("OutputWorkspace");
+    tws2 = std::dynamic_pointer_cast<PeaksWorkspace>(tmp2);
   }
 
   const double tolerance = getProperty("Tolerance");
