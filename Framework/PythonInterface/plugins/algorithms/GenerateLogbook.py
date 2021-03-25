@@ -219,16 +219,16 @@ class GenerateLogbook(PythonAlgorithm):
         to perform and list of values."""
         while True:
             operation = [(ind, ind+1, op) for ind, op in enumerate(binary_operations)
-                         if op == operations[0] or op == operations[1]]
+                         if op in operations]
             if operation == list():
                 break
             ind1, ind2, op = operation[0]
             if op == "+":
                 new_val = values[ind1] + values[ind2]
             elif op == "-":
-                new_val = values[ind1] + values[ind2]
+                new_val = values[ind1] - values[ind2]
             elif op == "*":
-                new_val = values[ind1] + values[ind2]
+                new_val = values[ind1] * values[ind2]
             elif op == "//":
                 if values[ind2] == 0:
                     self.log().warning("Divisor is equal to 0.")
