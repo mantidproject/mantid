@@ -44,9 +44,9 @@ Usage
    data_directory = os.path.abspath(os.path.join(unit_test_data_dir, 'ILL/D7'))
 
    GenerateLogbook(Directory=data_directory,
-                    OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
-                    NumorRange=[396990,396993], OptionalHeaders='TOF',
-		    CustomEntries='entry0/acquisition_mode')
+                   OutputWorkspace='d7_logbook', Facility='ILL', Instrument='D7',
+                   NumorRange=[396990,396993], OptionalHeaders='TOF',
+                   CustomEntries='entry0/acquisition_mode')
    print("Number of numors in the logbook: {}".format(len(mtd['d7_logbook'].column(0))))
    print("Number of headers in the logbook: {}".format(len(mtd['d7_logbook'].row(0))))
 
@@ -56,6 +56,28 @@ Output:
 
    Number of numors in the logbook: 3
    Number of headers in the logbook: 8
+
+**Example - GenerateLogbook for ILL D11B rawdata with binary operations**
+
+.. testcode:: ExGenerateLogbook_D11B_binary_operations
+
+   data_dirs = config['datasearch.directories'].split(';')
+   unit_test_data_dir = [p for p in data_dirs if 'UnitTest' in p][0]
+   data_directory = os.path.abspath(os.path.join(unit_test_data_dir, 'ILL/D11B'))
+
+   GenerateLogbook(Directory=data_directory,
+	           OutputWorkspace='d11b_logbook', Facility='ILL', Instrument='D11B',
+		   NumorRange='000361,000362', CustomHeaders='TotalCountsDetAll',
+		   CustomEntries='/entry0/D11/Detector 1/detsum+/entry0/D11/Detector 2/detsum+/entry0/D11/Detector 3/detsum')
+   print("Number of numors in the logbook: {}".format(len(mtd['d11b_logbook'].column(0))))
+   print("Number of headers in the logbook: {}".format(len(mtd['d11b_logbook'].row(0))))
+
+Output:
+
+.. testoutput:: ExGenerateLogbook_D11B_binary_operations
+
+   Number of numors in the logbook: 2
+   Number of headers in the logbook: 13
 
 .. categories::
 
