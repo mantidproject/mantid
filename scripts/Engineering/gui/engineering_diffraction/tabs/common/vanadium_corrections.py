@@ -7,7 +7,7 @@
 from os import path
 from os import makedirs
 
-from mantid.simpleapi import logger, Load, EnggVanadiumCorrections, SaveNexus
+from mantid.simpleapi import logger, Load, SaveNexus, NormaliseByCurrent, Integration
 from mantid.simpleapi import AnalysisDataService as Ads
 
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -76,13 +76,14 @@ def _calculate_vanadium_correction(vanadium_path):
                      "Could not run Load algorithm with vanadium run number: "
                      + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
-    EnggVanadiumCorrections(VanadiumWorkspace=VANADIUM_INPUT_WORKSPACE_NAME,
-                            OutIntegrationWorkspace=INTEGRATED_WORKSPACE_NAME,
-                            OutCurvesWorkspace=CURVES_WORKSPACE_NAME)
+    van_ws = Ads.Instance().retrieve(VANADIUM_INPUT_WORKSPACE_NAME)
+    NormaliseByCurrent(InputWorkspace=van_ws, OutputWorkspace=van_ws)
+    # sensitivity correction for van
+    nbins = van_ws.blocksize()
+    ws_van_int = Integration(InputWorkspace=van_ws)
+    ws_van_int /= nbins
     Ads.remove(VANADIUM_INPUT_WORKSPACE_NAME)
-    integrated_workspace = Ads.Instance().retrieve(INTEGRATED_WORKSPACE_NAME)
-    curves_workspace = Ads.Instance().retrieve(CURVES_WORKSPACE_NAME)
-    return integrated_workspace, curves_workspace
+    return ws_van_int, None  # TODO curves
 
 
 def _save_correction_files(integration_workspace, integration_path, curves_workspace, curves_path):

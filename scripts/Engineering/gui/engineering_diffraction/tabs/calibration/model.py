@@ -48,6 +48,8 @@ class CalibrationModel(object):
         :param bank: Optional parameter to crop by bank
         :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
+        van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
+            vanadium_path, instrument, rb_num=rb_num)
         sample_workspace = path_handling.load_workspace(sample_path)
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
@@ -55,11 +57,16 @@ class CalibrationModel(object):
             full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
             output, sample_raw = self.run_calibration(sample_workspace,
                                                       vanadium_path,
+                                                      van_integration,
                                                       bank,
                                                       spectrum_numbers,
                                                       full_calib_ws=full_calib)
         else:
-            output, sample_raw = self.run_calibration(sample_workspace, vanadium_path, bank, spectrum_numbers)
+            output, sample_raw = self.run_calibration(sample_workspace,
+                                                      vanadium_path,
+                                                      van_integration,
+                                                      bank,
+                                                      spectrum_numbers)
         if plot_output:
             for i in range(len(output)):
                 if spectrum_numbers:
@@ -208,6 +215,7 @@ class CalibrationModel(object):
     def run_calibration(self,
                         sample_ws,
                         vanadium_workspace,
+                        van_integration,
                         bank,
                         spectrum_numbers,
                         full_calib_ws=None):
@@ -270,18 +278,13 @@ class CalibrationModel(object):
         NormaliseByCurrent(InputWorkspace=ws_van, OutputWorkspace=ws_van)
         ws_van_d = AlignDetectors(InputWorkspace=ws_van, CalibrationWorkspace=cal_initial)
 
-        # sensitivity correction for van
-        nbins = ws_van.blocksize()
-        ws_van_int = Integration(InputWorkspace=ws_van)
-        ws_van_int /= nbins
-
-        ws_van_d /= ws_van_int
+        ws_van_d /= van_integration
 
         # sensitivity correction for sample
         sample = CloneWorkspace(sample_raw)
         NormaliseByCurrent(InputWorkspace=sample, OutputWorkspace=sample)
         ws_d = AlignDetectors(InputWorkspace=sample, CalibrationWorkspace=cal_initial)
-        ws_d /= ws_van_int
+        ws_d /= van_integration
 
         dpks_final = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
                       1.241461538, 1.210027059, 1.104598643, 1.04142562, 0.956610446,
