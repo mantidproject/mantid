@@ -52,10 +52,6 @@ class SuperplotView(QWidget):
                 self._presenter.onWorkspaceSelectionChanged)
         bottom = self._bottomView
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
-        bottom.workspaceSlider.valueChanged.connect(
-                self._presenter.onWorkspaceSliderMoved)
-        bottom.workspaceSpinBox.valueChanged.connect(
-                self._presenter.onWorkspaceSpinBoxChanged)
         bottom.spectrumSlider.valueChanged.connect(
                 self._presenter.onSpectrumSliderMoved)
         bottom.spectrumSpinBox.valueChanged.connect(
@@ -117,53 +113,9 @@ class SuperplotView(QWidget):
         """
         self._sideView.workspacesList.clear()
         self._sideView.workspacesList.addItems(names)
-        self._bottomView.workspaceSlider.setMaximum(len(names))
-        self._bottomView.workspaceSpinBox.setMaximum(len(names))
         self._sideView.workspacesList.blockSignals(True)
         self._sideView.workspacesList.setCurrentRow(len(names) - 1)
         self._sideView.workspacesList.blockSignals(False)
-
-    def setWorkspaceSliderPosition(self, position):
-        """
-        Set the workspace slider position. This function does not trigger the
-        slider signals.
-
-        Args:
-            position (int): new slider position
-        """
-        self._bottomView.workspaceSlider.blockSignals(True)
-        self._bottomView.workspaceSlider.setSliderPosition(position)
-        self._bottomView.workspaceSlider.blockSignals(False)
-
-    def getWorkspaceSliderPosition(self):
-        """
-        Get the workspace slider position.
-
-        Returns:
-            int: slider position
-        """
-        return self._bottomView.workspaceSlider.value()
-
-    def setWorkspaceSpinBoxValue(self, value):
-        """
-        Set the workspace spinbox value. This function does not trigger the
-        spinbox signals.
-
-        Args:
-            value (int): new value
-        """
-        self._bottomView.workspaceSpinBox.blockSignals(True)
-        self._bottomView.workspaceSpinBox.setValue(value)
-        self._bottomView.workspaceSpinBox.blockSignals(False)
-
-    def getWorkspaceSpinBoxValue(self):
-        """
-        Get the workspace spinbox value.
-
-        Returns:
-            int: value
-        """
-        return self._bottomView.workspaceSpinBox.value()
 
     def checkHoldButton(self, state):
         """
