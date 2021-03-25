@@ -181,7 +181,6 @@ private:
 
   /// Static logger
   static Mantid::Kernel::Logger g_log;
-
 };
 
 } // namespace DataObjects

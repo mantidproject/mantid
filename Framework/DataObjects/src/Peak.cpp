@@ -155,8 +155,7 @@ Peak::Peak(const Peak &other)
     : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det),
       m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
       m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
-      detPos(other.detPos),
-      m_detIDs(other.m_detIDs) {}
+      detPos(other.detPos), m_detIDs(other.m_detIDs) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
