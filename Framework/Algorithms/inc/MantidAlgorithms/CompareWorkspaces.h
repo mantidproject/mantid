@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
@@ -103,6 +104,9 @@ private:
 
   void doPeaksComparison(DataObjects::PeaksWorkspace_sptr tws1,
                          DataObjects::PeaksWorkspace_sptr tws2);
+  void doLeanElasticPeaksComparison(
+      DataObjects::LeanElasticPeaksWorkspace_sptr tws1,
+      DataObjects::LeanElasticPeaksWorkspace_sptr tws2);
   void doTableComparison(const API::ITableWorkspace_const_sptr &tws1,
                          const API::ITableWorkspace_const_sptr &tws2);
   void doMDComparison(const API::Workspace_sptr &w1,

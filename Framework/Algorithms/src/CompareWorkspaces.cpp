@@ -16,6 +16,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -322,18 +323,43 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
   // Peaks workspaces
   // ==============================================================================
+  if (w1->id() == "PeaksWorkspace" && w2->id() == "PeaksWorkspace") {
+    // Check that both workspaces are the same type
+    PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
+    PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
 
-  // Check that both workspaces are the same type
-  PeaksWorkspace_sptr pws1 = std::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  PeaksWorkspace_sptr pws2 = std::dynamic_pointer_cast<PeaksWorkspace>(w2);
-  if ((pws1 && !pws2) || (!pws1 && pws2)) {
-    recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
-    return;
+    // if any one of the pointer is null, record the error
+    // -- meaning at least one of the input workspace cannot be casted
+    //    into peakworkspace
+    if ((pws1 && !pws2) || (!pws1 && pws2)) {
+      recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
+      return;
+    }
+
+    // Check some peak-based stuff when both pointers are not null
+    if (pws1 && pws2) {
+      doPeaksComparison(pws1, pws2);
+      return;
+    }
   }
-  // Check some peak-based stuff
-  if (pws1 && pws2) {
-    doPeaksComparison(pws1, pws2);
-    return;
+
+  // ==============================================================================
+  // Lean Elastic Peaks workspaces
+  // ==============================================================================
+  if (w1->id() == "LeanElasticPeaksWorkspace" &&
+      w2->id() == "LeanElasticPeaksWorkspace") {
+    auto lpws1 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w1);
+    auto lpws2 = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(w2);
+
+    if ((lpws1 && !lpws2) || (!lpws1 && lpws2)) {
+      recordMismatch(
+          "One workspace is a LeanElasticPeaksWorkspace and the other is not.");
+    }
+
+    if (lpws1 && lpws2) {
+      doLeanElasticPeaksComparison(lpws1, lpws2);
+      return;
+    }
   }
 
   // ==============================================================================
@@ -1123,6 +1149,91 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       } else if (name == "col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      }
+      if (std::fabs(s1 - s2) > tolerance) {
+        g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
+                      << ")\n";
+        recordMismatch("Data mismatch");
+        return;
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------------------------------------------
+void CompareWorkspaces::doLeanElasticPeaksComparison(
+    LeanElasticPeaksWorkspace_sptr tws1, LeanElasticPeaksWorkspace_sptr tws2) {
+  // Check some table-based stuff
+  if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
+    recordMismatch("Mismatched number of rows.");
+    return;
+  }
+  if (tws1->columnCount() != tws2->columnCount()) {
+    recordMismatch("Mismatched number of columns.");
+    return;
+  }
+
+  // sort the workspaces before comparing
+  auto sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+  sortPeaks->setProperty("InputWorkspace", tws1);
+  sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+  sortPeaks->setProperty("SortAscending", true);
+  sortPeaks->executeAsChildAlg();
+  IPeaksWorkspace_sptr ipws1 = sortPeaks->getProperty("OutputWorkspace");
+
+  sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+  sortPeaks->setProperty("InputWorkspace", tws2);
+  sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+  sortPeaks->setProperty("SortAscending", true);
+  sortPeaks->executeAsChildAlg();
+  IPeaksWorkspace_sptr ipws2 = sortPeaks->getProperty("OutputWorkspace");
+
+  const double tolerance = getProperty("Tolerance");
+  for (int i = 0; i < ipws1->getNumberPeaks(); i++) {
+    for (size_t j = 0; j < ipws1->columnCount(); j++) {
+      std::shared_ptr<const API::Column> col = ipws1->getColumn(j);
+      std::string name = col->name();
+      double s1 = 0.0;
+      double s2 = 0.0;
+      if (name == "runnumber") {
+        s1 = double(ipws1->getPeak(i).getRunNumber());
+        s2 = double(ipws2->getPeak(i).getRunNumber());
+      } else if (name == "h") {
+        s1 = ipws1->getPeak(i).getH();
+        s2 = ipws2->getPeak(i).getH();
+      } else if (name == "k") {
+        s1 = ipws1->getPeak(i).getK();
+        s2 = ipws2->getPeak(i).getK();
+      } else if (name == "l") {
+        s1 = ipws1->getPeak(i).getL();
+        s2 = ipws2->getPeak(i).getL();
+      } else if (name == "wavelength") {
+        s1 = ipws1->getPeak(i).getWavelength();
+        s2 = ipws2->getPeak(i).getWavelength();
+      } else if (name == "energy") {
+        s1 = ipws1->getPeak(i).getFinalEnergy();
+        s2 = ipws2->getPeak(i).getFinalEnergy();
+      } else if (name == "tof") {
+        s1 = ipws1->getPeak(i).getTOF();
+        s2 = ipws2->getPeak(i).getTOF();
+      } else if (name == "dspacing") {
+        s1 = ipws1->getPeak(i).getDSpacing();
+        s2 = ipws2->getPeak(i).getDSpacing();
+      } else if (name == "intens") {
+        s1 = ipws1->getPeak(i).getIntensity();
+        s2 = ipws2->getPeak(i).getIntensity();
+      } else if (name == "sigint") {
+        s1 = ipws1->getPeak(i).getSigmaIntensity();
+        s2 = ipws2->getPeak(i).getSigmaIntensity();
+      } else if (name == "bincount") {
+        s1 = ipws1->getPeak(i).getBinCount();
+        s2 = ipws2->getPeak(i).getBinCount();
+      } else if (name == "row") {
+        s1 = ipws1->getPeak(i).getRow();
+        s2 = ipws2->getPeak(i).getRow();
+      } else if (name == "col") {
+        s1 = ipws1->getPeak(i).getCol();
+        s2 = ipws2->getPeak(i).getCol();
       }
       if (std::fabs(s1 - s2) > tolerance) {
         g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
