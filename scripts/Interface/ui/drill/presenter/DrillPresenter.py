@@ -114,8 +114,8 @@ class DrillPresenter:
                                       "separated key=value pairs.")
                     return
                 try:
-                    name = option.split("=")[0]
-                    value = option.split("=")[1]
+                    name = option.split("=")[0].strip()
+                    value = option.split("=")[1].strip()
                 except:
                     self.onParamError(row, column, "Please provide semicolon "
                                       "separated key=value pairs.")
