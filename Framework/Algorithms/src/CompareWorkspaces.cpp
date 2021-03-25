@@ -1109,7 +1109,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
-      if (name == "runnumber") {
+      if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
       } else if (name == "detid") {
@@ -1124,25 +1124,25 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       } else if (name == "l") {
         s1 = peak1.getL();
         s2 = peak2.getL();
-      } else if (name == "wavelength") {
+      } else if (name == "Wavelength") {
         s1 = peak1.getWavelength();
         s2 = peak2.getWavelength();
-      } else if (name == "energy") {
+      } else if (name == "Energy") {
         s1 = peak1.getInitialEnergy();
         s2 = peak2.getInitialEnergy();
       } else if (name == "tof") {
         s1 = peak1.getTOF();
         s2 = peak2.getTOF();
-      } else if (name == "dspacing") {
+      } else if (name == "DSpacing") {
         s1 = peak1.getDSpacing();
         s2 = peak2.getDSpacing();
-      } else if (name == "intens") {
+      } else if (name == "Intens") {
         s1 = peak1.getIntensity();
         s2 = peak2.getIntensity();
-      } else if (name == "sigint") {
+      } else if (name == "SigInt") {
         s1 = peak1.getSigmaIntensity();
         s2 = peak2.getSigmaIntensity();
-      } else if (name == "bincount") {
+      } else if (name == "BinCount") {
         s1 = peak1.getBinCount();
         s2 = peak2.getBinCount();
       } else if (name == "row") {
@@ -1197,7 +1197,7 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
-      if (name == "runnumber") {
+      if (name == "RunNumber") {
         s1 = double(ipws1->getPeak(i).getRunNumber());
         s2 = double(ipws2->getPeak(i).getRunNumber());
       } else if (name == "h") {
@@ -1209,33 +1209,32 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(
       } else if (name == "l") {
         s1 = ipws1->getPeak(i).getL();
         s2 = ipws2->getPeak(i).getL();
-      } else if (name == "wavelength") {
+      } else if (name == "Wavelength") {
         s1 = ipws1->getPeak(i).getWavelength();
         s2 = ipws2->getPeak(i).getWavelength();
-      } else if (name == "energy") {
+      } else if (name == "Energy") {
         s1 = ipws1->getPeak(i).getFinalEnergy();
         s2 = ipws2->getPeak(i).getFinalEnergy();
-      } else if (name == "tof") {
-        s1 = ipws1->getPeak(i).getTOF();
-        s2 = ipws2->getPeak(i).getTOF();
-      } else if (name == "dspacing") {
+      } else if (name == "DSpacing") {
         s1 = ipws1->getPeak(i).getDSpacing();
         s2 = ipws2->getPeak(i).getDSpacing();
-      } else if (name == "intens") {
+      } else if (name == "Intens") {
         s1 = ipws1->getPeak(i).getIntensity();
         s2 = ipws2->getPeak(i).getIntensity();
-      } else if (name == "sigint") {
+      } else if (name == "SigInt") {
         s1 = ipws1->getPeak(i).getSigmaIntensity();
         s2 = ipws2->getPeak(i).getSigmaIntensity();
-      } else if (name == "bincount") {
+      } else if (name == "BinCount") {
         s1 = ipws1->getPeak(i).getBinCount();
         s2 = ipws2->getPeak(i).getBinCount();
-      } else if (name == "row") {
-        s1 = ipws1->getPeak(i).getRow();
-        s2 = ipws2->getPeak(i).getRow();
-      } else if (name == "col") {
-        s1 = ipws1->getPeak(i).getCol();
-        s2 = ipws2->getPeak(i).getCol();
+      } else if (name == "QLab") {
+        V3D q1 = ipws1->getPeak(i).getQLabFrame();
+        V3D q2 = ipws2->getPeak(i).getQLabFrame();
+        // using s1 here as the diff
+        for (int i = 0; i < 3; ++i) {
+          s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
+        }
+        s1 = std::sqrt(s1);
       }
       if (std::fabs(s1 - s2) > tolerance) {
         g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
