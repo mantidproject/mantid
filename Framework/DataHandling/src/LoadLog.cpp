@@ -504,7 +504,7 @@ bool LoadLog::isDateTimeString(const std::string &str) const {
  * date-time format, for example:
  * Fri 31-JAN-2003 11:28:15
  * Wed  9-FEB-2005 09:47:01
- * @param str :: The string to test
+ * @param logFileStream :: The file to test
  * @return true if the format matches the old log file format.
  */
 bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
