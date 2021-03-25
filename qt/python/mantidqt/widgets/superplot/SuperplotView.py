@@ -103,6 +103,8 @@ class SuperplotView(QWidget):
         """
         item = self._sideView.workspacesList.currentItem()
         if item:
+            if item.parent() is not None:
+                item = item.parent()
             return item.text(0)
         else:
             return None
@@ -121,6 +123,42 @@ class SuperplotView(QWidget):
             item = QTreeWidgetItem(self._sideView.workspacesList)
             item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
+
+    def setSpectraList(self, name, nums):
+        """
+        Set the list of spectrum index for a workspace in the list.
+
+        Args:
+            name (str): name of the workspace
+            nums (list(int)): list of the spectrum indexes
+        """
+        wsItem = self._sideView.workspacesList.findItems(name,
+                                                         Qt.MatchExactly, 0)[0]
+        wsItem.takeChildren()
+        for num in nums:
+            item = QTreeWidgetItem(wsItem)
+            item.setText(0, str(num))
+
+    def getSpectraList(self, name):
+        """
+        Get the list of spectrum indexes for a workspace in the list.
+
+        Args:
+            name (str): name of the workspace
+
+        Returns:
+            list(int): list of the spectrum indexes
+        """
+        wsItem = self._sideView.workspacesList.findItems(name, Qt.MatchExactly,
+                                                         0)
+        if wsItem:
+            wsItem = wsItem[0]
+        else:
+            return []
+        nums = list()
+        for i in range(wsItem.childCount()):
+            nums.append(int(wsItem.child(i).text(0)))
+        return nums
 
     def checkHoldButton(self, state):
         """
