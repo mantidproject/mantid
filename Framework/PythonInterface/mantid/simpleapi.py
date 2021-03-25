@@ -935,7 +935,7 @@ def set_properties(alg_object, *args, **kwargs):
                 alg_object.setPropertyValue(key, new_value.name())
             else:
                 alg_object.setProperty(key, new_value)
-        except RuntimeError as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(),
                                                               str(e))
             raise e.__class__(msg) from e
