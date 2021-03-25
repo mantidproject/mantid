@@ -125,8 +125,10 @@ void MuonNexusReader::readFromFile(const string &filename) {
 
   // Try to read in period information
   std::vector<std::string> periodInformation{
-      "period_sequences",        "period_labels",     "period_type",
-      "frames_period_requested", "frames_period_raw", "total_counts_period"};
+      "period_sequences",  "period_labels",
+      "period_type",       "frames_period_requested",
+      "frames_period_raw", "total_counts_period",
+      "period_output"};
   try {
     handle.openGroup("beam", "NXbeam");
     for (const auto &info : periodInformation) {
@@ -137,8 +139,8 @@ void MuonNexusReader::readFromFile(const string &filename) {
           handle.readData(info, temp);
           tempString = std::to_string(temp);
         } else if (info == "frames_period_requested" ||
-                   info == "frames_period_raw" ||
-                   info == "period_type") { // Int array data
+                   info == "frames_period_raw" || info == "period_type" ||
+                   info == "period_output") { // Int array data
           std::vector<int> temp;
           handle.readData(info, temp);
           for (const auto &value : temp)

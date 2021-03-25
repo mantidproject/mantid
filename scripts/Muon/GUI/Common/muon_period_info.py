@@ -7,21 +7,23 @@
 from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 
-HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames", "Counts"]
+HEADERS = ["Period Number", "Name", "Type", "DAQ Number", "Frames", "Total Good Frames", "Counts", "Tag"]
 HEADER_STYLE = "QHeaderView { font-weight: bold; }"
-COLUMN_COUNT = 7
+COLUMN_COUNT = 8
 HEADER_COLUMN_MAP = {"Period Number": 0,
                      "Name": 1,
                      "Type": 2,
                      "DAQ Number": 3,
                      "Frames": 4,
                      "Total Good Frames": 5,
-                     "Counts": 6}
+                     "Counts": 6,
+                     "Tag": 7}
 CONTEXT_MAP = {"Name": 1,
                "Type": 2,
                "Frames": 3,
                "Total Good Frames": 4,
-               "Counts": 5}
+               "Counts": 5,
+               "Tag": 6}
 PERIOD_INFO_NOT_FOUND = "Not found"
 NOT_DAQ_STRING = "-"
 DAQ = "1"
@@ -67,7 +69,7 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
 
     def add_period_to_table(self, name=PERIOD_INFO_NOT_FOUND, period_type=PERIOD_INFO_NOT_FOUND,
                             frames=PERIOD_INFO_NOT_FOUND, total_frames=PERIOD_INFO_NOT_FOUND,
-                            counts=PERIOD_INFO_NOT_FOUND):
+                            counts=PERIOD_INFO_NOT_FOUND, tag=PERIOD_INFO_NOT_FOUND):
         row_num = self._num_rows()
         self._table.insertRow(row_num)
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Period Number"], self._new_text_widget(str(row_num + 1)))
@@ -83,6 +85,11 @@ class MuonPeriodInfoWidget(QtWidgets.QWidget):
             self._table.setItem(row_num, HEADER_COLUMN_MAP["Counts"], self._new_text_widget(NOT_DAQ_STRING))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Frames"], self._new_text_widget(frames))
         self._table.setItem(row_num, HEADER_COLUMN_MAP["Total Good Frames"], self._new_text_widget(total_frames))
+        try:
+            tag = "{:04b}".format(int(tag))
+        except ValueError:
+            tag = PERIOD_INFO_NOT_FOUND
+        self._table.setItem(row_num, HEADER_COLUMN_MAP["Tag"], self._new_text_widget(tag))
 
     def is_empty(self):
         if self._num_rows() > 0:

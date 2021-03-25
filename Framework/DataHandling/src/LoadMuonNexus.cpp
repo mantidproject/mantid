@@ -108,7 +108,7 @@ void LoadMuonNexus::init() {
       std::make_unique<ArrayProperty<std::string>>("PeriodsInformation"),
       "An array of strings which hold period information. This array is in the "
       "format ['NumberOfSequences', 'Labels', 'Type', 'Frames', "
-      "'TotalFrames', 'Counts']. Empty "
+      "'TotalFrames', 'Counts', 'Tag,]. Empty "
       "strings "
       "show no value "
       "could be read from file.");

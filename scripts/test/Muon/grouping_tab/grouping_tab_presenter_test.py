@@ -320,7 +320,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_periods_button_data_added_successfully(self):
         self.presenter._model.is_data_loaded = mock.Mock(return_value=True)
         self.presenter._model._data.periods_info = ["70", "state 1;state 1 dwell", "1;2",
-                                                    "100;10", "1000;200", "25"]
+                                                    "100;10", "1000;200", "25", "1;2"]
         self.presenter._add_period_info_to_widget = mock.MagicMock()
         self.presenter.period_info_widget.show = mock.MagicMock()
 
@@ -332,7 +332,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_periods_button_data_missing_added_successfully(self):
         self.presenter._model.is_data_loaded = mock.Mock(return_value=True)
         self.presenter._model._data.periods_info = ["70", "state 1;state 1 dwell", "",
-                                                    "100;10", "", ""]
+                                                    "100;10", "", "", ""]
         self.presenter._add_period_info_to_widget = mock.MagicMock()
         self.presenter.period_info_widget.show = mock.MagicMock()
 
@@ -342,12 +342,13 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
 
     def test_period_info_corrected_as_expected(self):
-        info_list = [["state 1", "state 1 dwell"], [""], ["100", "10"], ["1000"], [""]]
+        info_list = [["state 1", "state 1 dwell"], [""], ["100", "10"], ["1000"], [""], ["1"]]
         expected_result = [["state 1", "state 1 dwell"], [PERIOD_INFO_NOT_FOUND, PERIOD_INFO_NOT_FOUND], ["100", "10"],
-                           ["1000", PERIOD_INFO_NOT_FOUND], [PERIOD_INFO_NOT_FOUND, PERIOD_INFO_NOT_FOUND]]
+                           ["1000", PERIOD_INFO_NOT_FOUND], [PERIOD_INFO_NOT_FOUND, PERIOD_INFO_NOT_FOUND],
+                           ["1", PERIOD_INFO_NOT_FOUND]]
 
-        names, types, frames, total_frames, counts, count = self.presenter._fix_up_period_info_lists(info_list)
-        actual_result = [names, types, frames, total_frames, counts]
+        names, types, frames, total_frames, counts, tags, count = self.presenter._fix_up_period_info_lists(info_list)
+        actual_result = [names, types, frames, total_frames, counts, tags]
         self.assertEqual(2, count)
         self.assertEqual(expected_result, actual_result)
 

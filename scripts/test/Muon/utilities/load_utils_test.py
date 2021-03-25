@@ -78,7 +78,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)
-        self.assertEqual(period_info, ["0", "Period 1", "1", "500", "88558", "20.076818"])
+        self.assertEqual(period_info, ["0", "Period 1", "1", "500", "88558", "20.076818", "0"])
         ConfigService.Instance().setString("default.facility", " ")
 
     def test_load_workspace_from_filename_for_file_path(self):
