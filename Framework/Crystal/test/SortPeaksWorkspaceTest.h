@@ -44,8 +44,9 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    PeaksWorkspace_sptr outWS =
-        AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
+    IPeaksWorkspace_sptr tmp =
+        AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(outWSName);
+    PeaksWorkspace_sptr outWS = std::dynamic_pointer_cast<PeaksWorkspace>(tmp);
 
     // Extract the sorted column values out into a containtainer.
     const size_t columnIndex = outWS->getColumnIndex(columnName);
@@ -187,7 +188,8 @@ public:
   }
 
   void test_modify_workspace_in_place() {
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr tmp = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    IPeaksWorkspace_sptr inWS = std::dynamic_pointer_cast<IPeaksWorkspace>(tmp);
 
     SortPeaksWorkspace alg;
     alg.setChild(true);
@@ -201,7 +203,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    PeaksWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    IPeaksWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Sorting should have happened in place. Output and input "
                       "workspaces should be the same.",
