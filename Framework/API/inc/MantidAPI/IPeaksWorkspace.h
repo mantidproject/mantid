@@ -118,6 +118,14 @@ public:
   createPeak(const Mantid::Kernel::V3D &position,
              const Mantid::Kernel::SpecialCoordinateSystem &frame) const = 0;
 
+  //---------------------------------------------------------------------------------------------
+  /** Create an instance of a Peak
+   * @param position :: enter of the peak in the sample frame
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Mantid::Geometry::IPeak>
+  createPeakQSample(const Mantid::Kernel::V3D &position) const = 0;
+
   /**
    * Create an instance of a peak using a V3D
    * @param HKL V3D
@@ -125,6 +133,12 @@ public:
    */
   virtual std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
+
+  /**
+   * Create an instance of a peak using default constructor
+   * @return a pointer to a new Peak object.
+   */
+  virtual std::unique_ptr<Geometry::IPeak> createPeak() const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
@@ -162,6 +176,9 @@ public:
   peakInfo(const Kernel::V3D &QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(const Kernel::V3D &qLabFrame,
                              bool labCoords) const = 0;
+
+  //---------------------------------------------------------------------------------------------
+  virtual void saveNexus(::NeXus::File *file) const = 0;
 
   std::string convention;
 

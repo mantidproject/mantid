@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -88,6 +89,16 @@ using removeTieByName = void (IFunction::*)(const std::string &);
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
+
+void setMatrixWorkspace(IFunction &self, const boost::python::object &workspace,
+                        int wi, float startX, float endX) {
+  Mantid::API::MatrixWorkspace_sptr matWS =
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::PythonInterface::ExtractSharedPtr<Mantid::API::Workspace>(
+              workspace)());
+  self.setMatrixWorkspace(matWS, wi, startX, endX);
+}
+
 } // namespace
 
 void export_IFunction() {
@@ -278,6 +289,11 @@ void export_IFunction() {
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
            "Get the number of domains.")
+
+      .def("setMatrixWorkspace", &setMatrixWorkspace,
+           (arg("self"), arg("workspace"), arg("wi"), arg("startX"),
+            arg("endX")),
+           "Set matrix workspace to parse Parameters.xml")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

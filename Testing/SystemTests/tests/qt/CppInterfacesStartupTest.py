@@ -6,6 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 
+# Must be imported after systemtesting to avoid an error.
+import sip
+
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
@@ -37,5 +40,11 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
             interface.setAttribute(Qt.WA_DeleteOnClose, True)
             interface.show()
             interface.close()
+
+            # Delete the interface manually because the destructor is not being called as expected on close (even with
+            # Qt.WA_DeleteOnClose set to True).
+            sip.delete(interface)
+            self.assertTrue(sip.isdeleted(interface))
+
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_name} interface: {ex}.")

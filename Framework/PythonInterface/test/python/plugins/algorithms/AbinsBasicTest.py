@@ -74,6 +74,10 @@ class AbinsBasicTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon", Scale=-0.2,
                           OutputWorkspace=self._workspace_name)
 
+        # unknown instrument
+        self.assertRaises(ValueError, Abins, VibrationalOrPhononFile=self._si2 + ".phonon",
+                          Instrument="UnknownInstrument", OutputWorkspace=self._workspace_name)
+
     # test if intermediate results are consistent
     def test_non_unique_elements(self):
         """Test scenario in which a user specifies non-unique elements (for example in squaricn that would be "C,C,H").
@@ -152,6 +156,20 @@ class AbinsBasicTest(unittest.TestCase):
 
         (result, messages) = CompareWorkspaces(wrk, ref, Tolerance=self._tolerance)
         self.assertEqual(result, True)
+
+    def test_lagrange_exists(self):
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=(self._squaricn + ".phonon"),
+              TemperatureInKelvin=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument="Lagrange",
+              Setting="Cu(331) (Lagrange)",
+              Atoms=self._atoms,
+              Scale=self._scale,
+              SumContributions=self._sum_contributions,
+              QuantumOrderEventsNumber=self._quantum_order_events_number,
+              ScaleByCrossSection=self._cross_section_factor,
+              OutputWorkspace="squaricn-lagrange")
 
     def test_exp(self):
         """

@@ -12,7 +12,8 @@ from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.difference_table_widget.difference_widget_presenter import DifferencePresenter
-from Muon.GUI.Common.muon_group import MuonDiff, MuonGroup
+from Muon.GUI.Common.muon_diff import MuonDiff
+from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from mantidqt.utils.observer_pattern import Observer
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
@@ -101,6 +102,12 @@ class DifferenceTablePresenterTest(unittest.TestCase):
 
     def test_that_view_is_initialized_as_empty(self):
         self.assert_view_empty()
+
+    def test_header_labels_set_correctly(self):
+        self.assertEqual('Group 1', self.presenter.group_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual('Group 2', self.presenter.group_view.diff_table.horizontalHeaderItem(3).text())
+        self.assertEqual('Pair 1', self.presenter.pair_view.diff_table.horizontalHeaderItem(2).text())
+        self.assertEqual('Pair 2', self.presenter.pair_view.diff_table.horizontalHeaderItem(3).text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : Adding and removing diffs

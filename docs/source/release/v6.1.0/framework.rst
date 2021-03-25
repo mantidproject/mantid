@@ -26,6 +26,7 @@ Algorithms
 Data Objects
 ------------
 
+- exposed ``geographicalAngles`` method on :py:obj:`mantid.api.SpectrumInfo`
 - :ref:`Run <mantid.api.Run>` has been modified to allow multiple goniometers to be stored.
 - :ref:`FileFinder <mantid.api.FileFinderImpl>` has been modified to improve search times when loading multiple runs on the same instrument.
 
@@ -59,5 +60,6 @@ Bugfixes
 ########
 
 - Fix problem with dictionary parameters on :ref:`SetSample <algm-SetSample>` algorithm when running from the algorithm dialog
+- Fix segmentation fault when running :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` algorithm on Ubuntu without a material defined on one of the sample\environment shapes
 
 :ref:`Release 6.1.0 <v6.1.0>`

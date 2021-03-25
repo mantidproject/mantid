@@ -68,7 +68,7 @@ public:
    *parameters) and time adjusted.
    */
   static DataObjects::Peak
-  createNewPeak(const Geometry::IPeak &peak_old,
+  createNewPeak(const DataObjects::Peak &peak_old,
                 const Geometry::Instrument_sptr &instrNew, double T0,
                 double L0);
 

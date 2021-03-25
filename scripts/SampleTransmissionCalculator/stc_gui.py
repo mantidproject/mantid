@@ -12,8 +12,10 @@ from SampleTransmissionCalculator.stc_presenter import SampleTransmissionCalcula
 
 
 class SampleTransmissionCalculator(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, window_flags=None):
         super(SampleTransmissionCalculator, self).__init__(parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
 
         view = SampleTransmissionCalculatorView(parent=self)
         self.setCentralWidget(view)

@@ -13,6 +13,13 @@ from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import d
 dir_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
 
 
+def _get_item_checked_mock(_, arg):
+    if arg == 2:
+        return True
+    elif arg == 3:
+        return False
+
+
 class FittingDataPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model = mock.create_autospec(data_model.FittingDataModel)
@@ -243,6 +250,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
     def test_handle_table_cell_changed_checkbox_ticked(self):
         mocked_table_item = mock.MagicMock()
+        self.view.get_item_checked.side_effect = _get_item_checked_mock
         mocked_table_item.checkState.return_value = 2
         self.view.get_table_item.return_value = mocked_table_item
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
@@ -298,10 +306,9 @@ class FittingDataPresenterTest(unittest.TestCase):
         # subtract background for first time
         self.view.get_item_checked.return_value = True  # determines is bgSubtract is checked or not
         self.view.read_bg_params_from_table.return_value = [True, 40, 800, False]
-        self.model.get_background_workspaces.return_value = None
+        self.model.get_bgsub_workspaces.return_value = {"name2": None}
         self.presenter._handle_table_cell_changed(1, 3)
-        self.model.do_background_subtraction.assert_called_with("name2", self.view.read_bg_params_from_table(0))
-        self.model.undo_background_subtraction.assert_not_called()
+        self.model.create_or_update_bgsub_ws.assert_called_with("name2", self.view.read_bg_params_from_table(0))
 
     def test_bgparam_changed_when_bgsub_False(self):
         # setup row
@@ -309,8 +316,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         # activate bg subtraction before background is made (nothing should happen)
         self.view.get_item_checked.return_value = False
         self.presenter._handle_table_cell_changed(1, 4)
-        self.model.do_background_subtraction.assert_not_called()
-        self.model.undo_background_subtraction.assert_not_called()
+        self.model.create_or_update_bgsub_ws.assert_not_called()
 
     def test_bgparam_changed_when_bgsub_True(self):
         # setup row
@@ -318,17 +324,16 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.get_item_checked.return_value = True
         self.model.get_bg_params.return_value = {"name2": [True, 40, 800, False]}
         self.view.read_bg_params_from_table.return_value = [True, 200, 800, False]
-        self.model.get_background_workspaces.return_value = self.model.get_loaded_workspaces()
+        self.model.get_bgsub_workspaces.return_value = self.model.get_loaded_workspaces()
         self.presenter._handle_table_cell_changed(1, 4)
-        self.model.do_background_subtraction.assert_called_once_with("name2", self.view.read_bg_params_from_table(0))
+        self.model.create_or_update_bgsub_ws.assert_called_once_with("name2", self.view.read_bg_params_from_table(0))
 
     def test_undo_bgsub(self):
         self._setup_bgsub_test()
         # untick background subtraction
         self.view.get_item_checked.return_value = False
         self.presenter._handle_table_cell_changed(1, 3)
-        self.model.do_background_subtraction.assert_not_called()
-        self.model.undo_background_subtraction.assert_called_once_with("name2")
+        self.model.create_or_update_bgsub_ws.assert_not_called()
 
     def test_inspect_bg_button_enables_and_disables(self):
         self.view.get_item_checked.return_value = False

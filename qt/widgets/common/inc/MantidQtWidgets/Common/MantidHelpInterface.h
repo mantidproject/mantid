@@ -40,8 +40,10 @@ public:
   virtual void showFitFunction(const std::string &name = std::string());
   virtual void showFitFunction(const QString &name);
   virtual void showCustomInterface(const std::string &name,
+                                   const std::string &area = std::string(),
                                    const std::string &section = std::string());
   virtual void showCustomInterface(const QString &name,
+                                   const QString &area = QString(),
                                    const QString &section = QString());
 
 public slots:

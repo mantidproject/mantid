@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -23,10 +25,10 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IndexPeaks)
 
-using DataObjects::Peak;
-using DataObjects::PeaksWorkspace;
-using DataObjects::PeaksWorkspace_sptr;
+using API::IPeaksWorkspace;
+using API::IPeaksWorkspace_sptr;
 using Geometry::IndexingUtils;
+using Geometry::IPeak;
 using Geometry::OrientedLattice;
 using Kernel::DblMatrix;
 using Kernel::Logger;
@@ -63,7 +65,7 @@ struct IndexPeaksArgs {
    * @return: SatelliteIndexingArgs
    */
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
-    const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
+    const IPeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
     const int maxOrderFromAlg = alg.getProperty(ModulationProperties::MaxOrder);
 
     // Init variables
@@ -115,7 +117,7 @@ struct IndexPeaksArgs {
                                   crossTermToUse}};
   }
 
-  PeaksWorkspace_sptr workspace;
+  IPeaksWorkspace_sptr workspace;
   const double mainTolerance;
   const bool roundHKLs;
   const bool commonUB;
@@ -268,7 +270,7 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
 
 /**
  * Index the main reflections on the workspace using the given UB matrix
- * @param peaksWS Workspace containing peaks
+ * @param peaks Vector of pointer to peaks
  * @param ub A UB matrix to define the the transform from Q_sample to hkl
  * @param tolerance If an index is within this tolerance of an integer then
  * accept it
@@ -278,7 +280,7 @@ indexSatellite(const V3D &mainHKL, const int maxOrder,
  * @return A CombinedIndexingStats detailing the output found
  */
 CombinedIndexingStats
-indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
+indexPeaks(const std::vector<IPeak *> &peaks, DblMatrix ub,
            const double mainTolerance, const bool roundHKLs,
            const bool optimizeUB,
            const Prop::SatelliteIndexingArgs &satelliteArgs) {
@@ -287,7 +289,6 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
   std::generate(
       std::begin(qSample), std::end(qSample),
       [&peaks, i = 0u]() mutable { return peaks[i++]->getQSampleFrame(); });
-
   if (optimizeUB) {
     ub = optimizeUBMatrix(ub, qSample, mainTolerance);
   }
@@ -386,7 +387,7 @@ void IndexPeaks::init() {
 
   // -- inputs --
   this->declareProperty(
-      std::make_unique<WorkspaceProperty<PeaksWorkspace_sptr::element_type>>(
+      std::make_unique<WorkspaceProperty<IPeaksWorkspace_sptr::element_type>>(
           Prop::PEAKSWORKSPACE, "", Direction::InOut),
       "Input Peaks Workspace");
 
@@ -436,7 +437,7 @@ void IndexPeaks::init() {
 std::map<std::string, std::string> IndexPeaks::validateInputs() {
   std::map<std::string, std::string> helpMsgs;
 
-  PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
+  IPeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
   } catch (std::runtime_error &) {
@@ -447,13 +448,9 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   // get all runs which have peaks in the table
   const bool commonUB = this->getProperty(Prop::COMMONUB);
   if (commonUB) {
-    const auto &allPeaks = ws->getPeaks();
     std::unordered_map<int, int> peaksPerRun;
-    auto it = allPeaks.cbegin();
-    while (peaksPerRun.size() < 2 && it != allPeaks.cend()) {
-      peaksPerRun[it->getRunNumber()] = 1;
-      ++it;
-    };
+    for (int i = 0; i < ws->getNumberPeaks(); i++)
+      peaksPerRun[ws->getPeak(i).getRunNumber()] = 1;
     if (peaksPerRun.size() < 2) {
       helpMsgs[Prop::COMMONUB] =
           "CommonUBForAll can only be True if there are peaks from more "
@@ -539,21 +536,20 @@ void IndexPeaks::exec() {
   const auto &sampleUB = lattice.getUB();
   if (args.commonUB) {
     // Use sample UB an all peaks regardless of run
-    std::vector<Peak *> allPeaksRef(args.workspace->getNumberPeaks());
-    std::transform(std::begin(args.workspace->getPeaks()),
-                   std::end(args.workspace->getPeaks()),
-                   std::begin(allPeaksRef), [](Peak &peak) { return &peak; });
+    std::vector<IPeak *> allPeaksRef;
+    allPeaksRef.reserve(args.workspace->getNumberPeaks());
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++) {
+      allPeaksRef.emplace_back(args.workspace->getPeakPtr(i));
+    }
     const bool optimizeUB{false};
     indexingInfo = indexPeaks(allPeaksRef, sampleUB, args.mainTolerance,
                               args.roundHKLs, optimizeUB, args.satellites);
   } else {
     // Use a UB optimized for each run
-    auto &allPeaks = args.workspace->getPeaks();
-    std::unordered_map<int, std::vector<Peak *>> peaksPerRun;
-    std::for_each(std::begin(allPeaks), std::end(allPeaks),
-                  [&peaksPerRun](Peak &peak) {
-                    peaksPerRun[peak.getRunNumber()].emplace_back(&peak);
-                  });
+    std::unordered_map<int, std::vector<IPeak *>> peaksPerRun;
+    for (int i = 0; i < args.workspace->getNumberPeaks(); i++)
+      peaksPerRun[args.workspace->getPeak(i).getRunNumber()].emplace_back(
+          args.workspace->getPeakPtr(i));
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
       const auto &peaks = runPeaks.second;

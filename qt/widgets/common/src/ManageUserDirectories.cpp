@@ -245,7 +245,7 @@ QListWidget *ManageUserDirectories::listWidget(QObject *sender) {
 
 /// Show the help for ManageUserDirectories
 void ManageUserDirectories::helpClicked() {
-  HelpWindow::showCustomInterface(nullptr, HELP_ID);
+  HelpWindow::showCustomInterface(nullptr, HELP_ID, "framework");
 }
 
 /// Close the dialog without saving the configuration
