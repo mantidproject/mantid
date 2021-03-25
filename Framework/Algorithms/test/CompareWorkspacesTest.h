@@ -17,6 +17,7 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -120,6 +121,23 @@ public:
         "Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty(
         "Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void test_LeanPeaksWorkspaceMatches() {
+    // generate a lean elastic peak workspace with two peaks
+    auto lpws = std::make_shared<LeanElasticPeaksWorkspace>();
+    // add peaks
+    LeanElasticPeak pk1(V3D(0.0, 0.0, 6.28319), 2.0);     // (100)
+    LeanElasticPeak pk2(V3D(6.28319, 0.0, 6.28319), 1.0); // (110)
+    lpws->addPeak(pk1);
+    lpws->addPeak(pk2);
+
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
+        "Workspace1", std::dynamic_pointer_cast<Workspace>(lpws)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty(
+        "Workspace2", std::dynamic_pointer_cast<Workspace>(lpws)));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
