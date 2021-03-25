@@ -14,7 +14,7 @@ from mantid.simpleapi import *
 
 import fnmatch
 import h5py
-import numpy
+import numpy as np
 import os
 import re
 
@@ -278,7 +278,7 @@ class GenerateLogbook(PythonAlgorithm):
                 progress.report("Filling logbook table...")
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
             with h5py.File(file_path, 'r') as f:
-                rowData = numpy.empty(n_entries, dtype=object)
+                rowData = np.empty(n_entries, dtype=object)
                 rowData[0] = str(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
                     if any(op in entry for op in operators):
@@ -300,7 +300,7 @@ class GenerateLogbook(PythonAlgorithm):
                                 self.log().warning(entry_not_found_msg.format(entry))
                                 break
                             else:
-                                if isinstance(data, numpy.bytes_):
+                                if isinstance(data, np.bytes_):
                                     if any(op in operators[1:] for op in binary_operations):
                                         self.log().warning("Only 'sum' operation is supported for string entries")
                                         values[0] = "N/A"
@@ -314,7 +314,13 @@ class GenerateLogbook(PythonAlgorithm):
                                                                                     operations=['*', '//'])
                         values, _ = self._perform_binary_operations(values, binary_operations,
                                                                     operations=['+', '-'])
-                        rowData[entry_no] = str(values[0]).strip()
+                        if isinstance(values, np.ndarray):
+                            tmp_data = ""
+                            for value in values[0]:
+                                tmp_data += str(value) + ','
+                            rowData[entry_no] = tmp_data[:-1]
+                        else:
+                            rowData[entry_no] = str(values[0]).strip()
                     else:
                         try:
                             entry, index = self._get_index(entry)
@@ -323,12 +329,12 @@ class GenerateLogbook(PythonAlgorithm):
                             rowData[entry_no] = "Not found"
                             self.log().warning(entry_not_found_msg.format(entry))
                         else:
-                            if isinstance(data, numpy.ndarray):
+                            if isinstance(data, np.ndarray):
                                 tmp_data = ""
                                 for array in data:
                                     tmp_data += ",".join(array)
                                 data = tmp_data
-                            elif isinstance(data, numpy.bytes_):
+                            elif isinstance(data, np.bytes_):
                                 data = data.decode('utf-8')
                                 data = data.replace(',', ';') # needed for CSV output
                             rowData[entry_no] = str(data).strip()
