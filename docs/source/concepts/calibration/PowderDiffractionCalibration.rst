@@ -364,7 +364,7 @@ in calibration. In theory, the relationship between (TOF, d-spacing) will always
 that is not always the case. This diagnostic plot primarily serves as a tool to ensure that the calibration makes sense,
 i.e., that a single DIFC parameter is enough to do the transformation. In the ideal case, all Pearson correlation
 coefficients will be close to 1. For more on Pearson correlation coefficients please see
-https://en.wikipedia.org/wiki/Pearson_correlation_coefficient. Below is an example plot for the Pearson correlation 
+`this wikipedia article <https://en.wikipedia.org/wiki/Pearson_correlation_coefficient>`_. Below is an example plot for the Pearson correlation 
 coefficient of (TOF, d-spacing).
 
 .. figure:: /images/VULCAN_pearsoncorr.png
