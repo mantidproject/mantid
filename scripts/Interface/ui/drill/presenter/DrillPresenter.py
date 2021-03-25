@@ -190,6 +190,10 @@ class DrillPresenter:
                     return value
 
             if re.match("^-{,1}\d+$", value):
+                if int(value) == 0:
+                    return value
+                if int(value) + i == 0:
+                    return value
                 return str(int(value) + i)
             suffix = re.search("\d+$", value)
             if suffix:
