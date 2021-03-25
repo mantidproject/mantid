@@ -13,7 +13,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, CloneWorkspace, Integration, DiffractionFocussing, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii, NormaliseByCurrent, AlignDetectors, \
     EditInstrumentGeometry, ConvertUnits, Load, GroupDetectors, EnggEstimateFocussedBackground, RebinToWorkspace, Divide
-from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
+from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file, default_ceria_expected_peaks
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -254,15 +254,10 @@ class CalibrationModel(object):
         # need to clone the data as PDCalibration rebins
         sample_raw = CloneWorkspace(InputWorkspace=sample_ws)
 
-        # TODO get peak positions from EnggUtils as in EnggCal
-        dpks = (2.705702376, 1.913220892, 1.631600313, 1.352851554, 1.104598643)
-
-        # TODO if full_calib_ws, PreviousCalibrationTable =
-
         kwargs = {
             "InputWorkspace": sample_ws,
-            "PeakPositions": dpks,
-            "TofBinning": [10000, -0.0005, 46000],  # TODO bung all this in constants as well
+            "PeakPositions": default_ceria_expected_peaks(),
+            "TofBinning": [10000, -0.0005, 46000],
             "PeakWindow": 0.03,
             "MinimumPeakHeight": 0.5,
             "PeakFunction": 'BackToBackExponential',
@@ -286,12 +281,8 @@ class CalibrationModel(object):
         ws_d = AlignDetectors(InputWorkspace=sample, CalibrationWorkspace=cal_initial)
         ws_d /= van_integration
 
-        dpks_final = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
-                      1.241461538, 1.210027059, 1.104598643, 1.04142562, 0.956610446,
-                      0.914694494, 0.901900955, 0.855618487]
-        # TODO again get this from EnggUtils
         kwargs = {
-            "PeakPositions": dpks_final,
+            "PeakPositions": default_ceria_expected_peaks(True),
             "TofBinning": [15500, -0.0003, 52000],  # using a finer binning now have better stats
             "PeakWindow": 0.04,
             "MinimumPeakHeight": 0.5,
@@ -322,6 +313,7 @@ class CalibrationModel(object):
                 cal_output.append(cal_north)
         else:
             pass
+            # TODO
 
         output = list()
         for bank_cal in cal_output:
