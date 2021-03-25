@@ -105,14 +105,14 @@ class GenerateLogbook(PythonAlgorithm):
 
     def _prepare_file_array(self):
         """Prepares a list containing the NeXus files in the specified directory."""
-        facility_name_len = 0
+        instrument_name_len = 0
         if self._facility != 'ILL':
-            facility_name_len = len(self._facility)
+            instrument_name_len = len(self._instrument)
 
         file_list = []
         for file in sorted(fnmatch.filter(os.listdir(self._data_directory), '*.nxs')):
             try:
-                numor = int(os.path.splitext(file[facility_name_len:])[0])
+                numor = int(os.path.splitext(file[instrument_name_len:])[0])
             except ValueError:
                 self.log().debug("File {} cannot be cast into an integer numor".format(file))
                 continue
