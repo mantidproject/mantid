@@ -587,29 +587,36 @@ def plot_corr(tof_ws):
 
     tof_ws = mtd[str(tof_ws)]
 
-    detTOF = tof_ws.getNumberHistograms()
+    numHist = tof_ws.getNumberHistograms()
 
-    fig, ax = plt.subplots()
-    ax.set_xlabel("det IDs")
-    ax.set_ylabel("Pearson correlation coefficient (TOF, d)")
+    # Create an array for Pearson corr coef
+    r_vals = np.empty((numHist,), dtype=float)
+    r_vals.fill(np.nan)
 
-    r_vals = []
-    detID = []
-    for det in range(detTOF):
+    # Create an array for detector IDs
+    detectors = tof_ws.detectorInfo().detectorIDs()
+    detID = np.empty((numHist,), dtype=float)
+    detID.fill(np.nan)
+
+    for workspaceIndex in range(numHist):
         # Get Pearson correlation coefficient for each detector
-        x = tof_ws.dataY(det)
-        y = tof_ws.dataX(det)
+        x = tof_ws.dataY(workspaceIndex)
+        y = tof_ws.dataX(workspaceIndex)
 
         mask = np.logical_not(np.isnan(x))
         if np.sum(mask) > 1:
             r, p = np.corrcoef(x[mask], y[mask])
-            r_vals.append(r[1])
+            # Use r[1] because the corr coef is always the off-diagonal element here
+            r_vals[workspaceIndex] = r[1]
         else:
-            r_vals.append(np.nan)
+            r_vals[workspaceIndex] = np.nan
 
         # Get detector ID for this spectrum
-        detector = tof_ws.detectorInfo().detectorIDs()[det]
-        detID.append(detector)
+        detID[workspaceIndex] = detectors[workspaceIndex]
+
+    fig, ax = plt.subplots()
+    ax.set_xlabel("det IDs")
+    ax.set_ylabel("Pearson correlation coefficient (TOF, d)")
 
     ax.plot(detID, r_vals, marker="x", linestyle="None")
 
