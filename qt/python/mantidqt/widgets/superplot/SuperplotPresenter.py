@@ -42,7 +42,7 @@ class SuperplotPresenter:
         self._model.setSpectrum(ws.name(), specIndex)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
-        self._view.setSelectedWorkspace(len(names))
+        self._view.setSelectedWorkspace(names[-1])
         self._view.setAvailableModes([self.SPECTRUM_MODE_TEXT,
                                       self.BIN_MODE_TEXT])
 
@@ -84,7 +84,8 @@ class SuperplotPresenter:
         names = self._model.getWorkspaces()
         selectedWs = self._view.getSelectedWorkspace()
         self._view.setWorkspacesList(names)
-        self._view.setSelectedWorkspace(names.index(selectedWs) + 1)
+        self._view.setSelectedWorkspace(name)
+        self._updatePlot()
 
     def onDelButtonClicked(self):
         """
@@ -97,6 +98,7 @@ class SuperplotPresenter:
         self._model.delWorkspace(name)
         names = self._model.getWorkspaces()
         self._view.setWorkspacesList(names)
+        self._view.setSelectedWorkspace(names[-1])
         self._updatePlot()
 
     def _changeCurrentWorkspace(self, name):
@@ -152,7 +154,7 @@ class SuperplotPresenter:
                 axes.plot(mtd[wsName], wkspIndex=sp)
             else:
                 axes.plot(mtd[wsName], wkspIndex=sp, axis=MantidAxType.BIN)
-        if (currentWsName, currentSpectrumIndex) not in plottedData:
+        if currentWsName is not None and (currentWsName, currentSpectrumIndex) not in plottedData:
             if mode == self.SPECTRUM_MODE_TEXT:
                 axes.plot(mtd[currentWsName], wkspIndex=currentSpectrumIndex)
             else:
@@ -164,7 +166,7 @@ class SuperplotPresenter:
         axes.legend()
         self._canvas.draw_idle()
 
-    def onWorkspaceSelectionChanged(self, index):
+    def onWorkspaceSelectionChanged(self):
         """
         Triggered when the selected workspace (in the workspace list) changed.
 

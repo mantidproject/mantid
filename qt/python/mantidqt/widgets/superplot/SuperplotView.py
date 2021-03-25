@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QWidget
+from qtpy.QtWidgets import QDockWidget, QWidget, QTreeWidgetItem
+from qtpy.QtCore import *
 from qtpy import uic
 
 import os
@@ -48,7 +49,7 @@ class SuperplotView(QWidget):
         side.visibilityChanged.connect(self._presenter.onVisibilityChanged)
         side.addButton.clicked.connect(self._presenter.onAddButtonClicked)
         side.delButton.clicked.connect(self._presenter.onDelButtonClicked)
-        side.workspacesList.currentRowChanged.connect(
+        side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.onWorkspaceSelectionChanged)
         bottom = self._bottomView
         bottom.holdButton.toggled.connect(self._presenter.onHoldButtonToggled)
@@ -69,7 +70,7 @@ class SuperplotView(QWidget):
         self._sideView.close()
         self._bottomView.close()
 
-    def setSelectedWorkspace(self, index):
+    def setSelectedWorkspace(self, name):
         """
         Select a specific workspace in the workspace list. This function does
         not raise any QList signals.
@@ -78,7 +79,10 @@ class SuperplotView(QWidget):
             index (int): new selection index
         """
         self._sideView.workspacesList.blockSignals(True)
-        self._sideView.workspacesList.setCurrentRow(index - 1)
+
+        item = self._sideView.workspacesList.findItems(name, Qt.MatchExactly, 0)[0]
+        if item:
+            self._sideView.workspacesList.setCurrentItem(item)
         self._sideView.workspacesList.blockSignals(False)
 
     def getSelectedWorkspace(self):
@@ -99,7 +103,7 @@ class SuperplotView(QWidget):
         """
         item = self._sideView.workspacesList.currentItem()
         if item:
-            return item.text()
+            return item.text(0)
         else:
             return None
 
@@ -111,10 +115,11 @@ class SuperplotView(QWidget):
         Args:
             names (list(str)): list if the workspace names
         """
-        self._sideView.workspacesList.clear()
-        self._sideView.workspacesList.addItems(names)
         self._sideView.workspacesList.blockSignals(True)
-        self._sideView.workspacesList.setCurrentRow(len(names) - 1)
+        self._sideView.workspacesList.clear()
+        for name in names:
+            item = QTreeWidgetItem(self._sideView.workspacesList)
+            item.setText(0, name)
         self._sideView.workspacesList.blockSignals(False)
 
     def checkHoldButton(self, state):
