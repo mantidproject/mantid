@@ -61,8 +61,6 @@ class CalibrationModel(object):
         else:
             output, sample_raw = self.run_calibration(sample_workspace, vanadium_path, bank, spectrum_numbers)
         if plot_output:
-            # TODO determine output to plot
-            self._plot_vanadium_curves()
             for i in range(len(output)):
                 if spectrum_numbers:
                     bank_name = "cropped"
@@ -145,34 +143,6 @@ class CalibrationModel(object):
 
         for row in params_table:
             workspace.addRow(row)
-
-    @staticmethod
-    def _plot_vanadium_curves():
-        van_curve_twin_ws = "__engggui_vanadium_curves_twin_ws"
-
-        if Ads.doesExist(van_curve_twin_ws):
-            DeleteWorkspace(van_curve_twin_ws)
-        CloneWorkspace(InputWorkspace="engggui_vanadium_curves", OutputWorkspace=van_curve_twin_ws)
-        van_curves_ws = Ads.retrieve(van_curve_twin_ws)
-
-        fig = plt.figure()
-        gs = gridspec.GridSpec(1, 2)
-        curve_plot_bank_1 = fig.add_subplot(gs[0], projection="mantid")
-        curve_plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
-
-        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=0)
-        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=1)
-        curve_plot_bank_1.plot(van_curves_ws, wkspIndex=2)
-        curve_plot_bank_1.set_title("Engg GUI Vanadium Curves Bank 1")
-        curve_plot_bank_1.legend(["Data", "Calc", "Diff"])
-
-        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=3)
-        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=4)
-        curve_plot_bank_2.plot(van_curves_ws, wkspIndex=5)
-        curve_plot_bank_2.set_title("Engg GUI Vanadium Curves Bank 2")
-        curve_plot_bank_2.legend(["Data", "Calc", "Diff"])
-
-        fig.show()
 
     @staticmethod
     def _generate_tof_fit_workspace(difa, difc, tzero, bank):
