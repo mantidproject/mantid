@@ -141,7 +141,17 @@ void PredictPeaks::init() {
   setPropertySettings("MaxDSpacing", makeSet());
   setPropertySettings("ReflectionCondition", makeSet());
 
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
+  std::vector<std::string> peakTypes = {"Peak", "LeanElasticPeak"};
+  declareProperty("OutputPeakType", "Peak", std::make_shared<StringListValidator>(peakTypes),
+                  "Type of Peak in OutputWorkspace");
+  declareProperty("CalculateWavelength", true,
+                  "When OutputPeakType is LeanElasticPeak you can choose to calculate the "
+                  "wavelength of the peak using the instrument and check it is in the "
+                  "valid range or alternatively just accept every peak and set the "
+                  "goniometer.");
+  setPropertySettings("CalculateWavelength", std::make_unique<EnabledWhenProperty>("OutputPeakType", IS_NOT_DEFAULT));
+
+  declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 
   declareProperty("PredictPeaksOutsideDetectors", false,
@@ -160,6 +170,8 @@ void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
   m_edge = this->getProperty("EdgePixels");
+  m_leanElasticPeak = (getPropertyValue("OutputPeakType") == "LeanElasticPeak");
+  bool leanElasticPeak_calculate_wl = getProperty("CalculateWavelength");
 
   ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
 
@@ -236,8 +248,11 @@ void PredictPeaks::exec() {
   checkBeamDirection();
 
   // Create the output
-  m_pw = std::make_shared<PeaksWorkspace>();
-
+  if (m_leanElasticPeak) {
+    m_pw = std::make_shared<LeanElasticPeaksWorkspace>();
+  } else {
+    m_pw = std::make_shared<PeaksWorkspace>();
+  }
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inputExperimentInfo.get());
 
@@ -272,7 +287,14 @@ void PredictPeaks::exec() {
 
   m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
-  if (getProperty("CalculateGoniometerForCW")) {
+  if (m_leanElasticPeak && !leanElasticPeak_calculate_wl) {
+    Kernel::Matrix<double> identityGoniometer(3, 3, true);
+    // identityGoniometer.identityMatrix();
+    // Geometry::Goniometer identityGoniometer();
+    for (auto &possibleHKL : possibleHKLs) {
+      calculateQAndAddToOutputLeanElastic(possibleHKL, ub, identityGoniometer);
+    }
+  } else if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
 
     double wavelength = getProperty("Wavelength");
@@ -571,6 +593,39 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
 
   // Only add peaks that hit the detector
   peak->setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  peak->setRunNumber(m_runNumber);
+  peak->setHKL(hkl * m_qConventionFactor);
+  peak->setIntHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
+    peak->setIntensity(m_sfCalculator->getFSquared(hkl));
+  }
+
+  // Add it to the workspace
+  m_pw->addPeak(*peak);
+}
+
+/**
+ * @brief Calculates Q from HKL and adds a peak to the output workspace
+ *
+ * This method takes HKL and uses the UB multiplied to calculate Q
+ * sample. It then creates a LeanElasticPeak-object using that
+ * Q-vector.
+ *
+ * @param hkl
+ * @param UB
+ * @param goniometerMatrix
+ */
+void PredictPeaks::calculateQAndAddToOutputLeanElastic(const V3D &hkl, const DblMatrix &UB,
+                                                       const DblMatrix &goniometerMatrix) {
+  // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+  // This is in inelastic convention: momentum transfer of the LATTICE!
+  // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
+  const auto q = UB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  auto peak = std::make_unique<LeanElasticPeak>(q);
+  peak->setGoniometerMatrix(goniometerMatrix);
+
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);

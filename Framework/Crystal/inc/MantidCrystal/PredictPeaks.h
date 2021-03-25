@@ -70,6 +70,10 @@ private:
   void calculateQAndAddToOutput(const Kernel::V3D &hkl, const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
+  void calculateQAndAddToOutputLeanElastic(const Kernel::V3D &hkl,
+					   const Kernel::DblMatrix &UB,
+					   const Kernel::DblMatrix &goniometerMatrix);
+
 private:
   /// Get the predicted detector direction from Q
   std::tuple<Kernel::V3D, double> getPeakParametersFromQ(const Kernel::V3D &q) const;
@@ -95,6 +99,7 @@ private:
   /// Output peaks workspace
   Mantid::API::IPeaksWorkspace_sptr m_pw;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
+  bool m_leanElasticPeak = false;
 
   double m_qConventionFactor;
 };
