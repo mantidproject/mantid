@@ -9,7 +9,7 @@ from mantid import config
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     ITableWorkspaceProperty, Progress, PythonAlgorithm
 from mantid.kernel import Direction, IntArrayOrderedPairsValidator, \
-    StringListValidator
+    StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 
 import fnmatch
@@ -40,17 +40,14 @@ class GenerateLogbook(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        if self.getProperty('Instrument').isDefault:
-            issues['Instrument'] = 'The instrument has to be defined.'
-        else:
-            instrument = self.getPropertyValue('Instrument')
-            ws_tmp = CreateSingleValuedWorkspace()
-            try:
-                LoadParameterFile(Workspace=ws_tmp, Filename=instrument + '_Parameters.xml')
-            except Exception as e:
-                self.log().error(str(e))
-                issues['Instrument'] = 'There is no parameter file for {} instrument.'.format(instrument)
-            DeleteWorkspace(Workspace=ws_tmp)
+        instrument = self.getPropertyValue('Instrument')
+        ws_tmp = CreateSingleValuedWorkspace()
+        try:
+            LoadParameterFile(Workspace=ws_tmp, Filename=instrument + '_Parameters.xml')
+        except Exception as e:
+            self.log().error(str(e))
+            issues['Instrument'] = 'There is no parameter file for {} instrument.'.format(instrument)
+        DeleteWorkspace(Workspace=ws_tmp)
 
         if not self.getProperty('CustomEntries').isDefault:
             custom_entries = self.getPropertyValue('CustomEntries')
@@ -85,6 +82,7 @@ class GenerateLogbook(PythonAlgorithm):
                              doc='Facility the data belongs to.')
 
         self.declareProperty('Instrument', '',
+                             validator=StringMandatoryValidator(),
                              direction=Direction.Input,
                              doc='Instrument the data has been collected with.')
 
