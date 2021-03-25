@@ -242,10 +242,12 @@ void PredictPeaks::exec() {
     gonioVec.emplace_back(DblMatrix(3, 3, true));
   }
 
-  setInstrumentFromInputWorkspace(inputExperimentInfo);
-  setRunNumberFromInputWorkspace(inputExperimentInfo);
-  setReferenceFrameAndBeamDirection();
-  checkBeamDirection();
+  if (!(m_leanElasticPeak && !leanElasticPeak_calculate_wl)) {
+    setInstrumentFromInputWorkspace(inputExperimentInfo);
+    setRunNumberFromInputWorkspace(inputExperimentInfo);
+    setReferenceFrameAndBeamDirection();
+    checkBeamDirection();
+  }
 
   // Create the output
   if (m_leanElasticPeak) {
@@ -285,7 +287,8 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+  if (!(m_leanElasticPeak && !leanElasticPeak_calculate_wl))
+    m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
   if (m_leanElasticPeak && !leanElasticPeak_calculate_wl) {
     Kernel::Matrix<double> identityGoniometer(3, 3, true);

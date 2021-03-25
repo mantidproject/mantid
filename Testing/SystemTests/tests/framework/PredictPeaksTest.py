@@ -76,6 +76,21 @@ class PredictPeaksTestTOPAZ(systemtesting.MantidSystemTest):
 
         self.assertTrue(simulationWorkspaceMatch[0])
 
+        # compare using LeanElasticPeak
+        leanelasticpeaks = PredictPeaks(simulationWorkspace,
+                                        WavelengthMin=0.5, WavelengthMax=6,
+                                        MinDSpacing=0.5, MaxDSpacing=10,
+                                        OutputPeakType='LeanElasticPeak')
+        self.assertEqual(peaks.getNumberPeaks(), leanelasticpeaks.getNumberPeaks())
+        # sorting is different, just compare peak [1, 0, 2]
+        peak102 = peaks.getPeak(117)
+        leanelasticpeak102 = leanelasticpeaks.getPeak(7)
+        self.assertDelta(peak102.getDSpacing(), leanelasticpeak102.getDSpacing(), 1e-9)
+        self.assertDelta(peak102.getWavelength(), leanelasticpeak102.getWavelength(), 1e-9)
+        self.assertDelta(peak102.getQSampleFrame()[0], leanelasticpeak102.getQSampleFrame()[0], 1e-9)
+        self.assertDelta(peak102.getQSampleFrame()[1], leanelasticpeak102.getQSampleFrame()[1], 1e-9)
+        self.assertDelta(peak102.getQSampleFrame()[2], leanelasticpeak102.getQSampleFrame()[2], 1e-9)
+
 
 class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
     expected_num_peaks = 546
@@ -136,3 +151,24 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         self.assertDelta(q_sample[0], 4.45402, 1e-5)
         self.assertDelta(q_sample[1], -0.419157, 1e-5)
         self.assertDelta(q_sample[2], 0.0906594, 1e-5)
+
+        # test predicting with LeanElasticPeak, filter any peak with 0 intensity
+        PredictPeaks("data",
+                     ReflectionCondition='B-face centred',
+                     OutputPeakType='LeanElasticPeak',
+                     CalculateWavelength=False,
+                     OutputWorkspace="leanelasticpeaks")
+
+        IntegratePeaksMD("data", "leanelasticpeaks", PeakRadius=0.1, OutputWorkspace="integrated_peaks")
+        filtered_peaks = FilterPeaks("integrated_peaks", FilterVariable='Intensity', FilterValue=0, Operator='>')
+
+        self.assertEqual(filtered_peaks.getNumberPeaks(), 66)
+        peak0 = filtered_peaks.getPeak(0)
+        self.assertDelta(peak0.getWavelength(), 0, 1e-5)
+        self.assertEqual(peak0.getH(), 0)
+        self.assertEqual(peak0.getK(), 0)
+        self.assertEqual(peak0.getL(), -14)
+        q_sample = peak0.getQSampleFrame()
+        self.assertDelta(q_sample[0], 4.45541, 1e-5)
+        self.assertDelta(q_sample[1], -0.420383, 1e-5)
+        self.assertDelta(q_sample[2], 0.0913072, 1e-5)
