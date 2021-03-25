@@ -413,7 +413,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              OutputWorkspace=stitched,
                              ScaleRHSWorkspace=True,
                              indexOfReference=self.stitch_reference_index)
-                outputs.append(stitched)
+                outputSamples.append(stitched)
             except RuntimeError as re:
                 self.log().warning("Unable to stitch automatically, consider "
                                    "stitching manually: " + str(re))
