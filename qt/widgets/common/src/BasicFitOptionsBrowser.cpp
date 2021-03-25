@@ -19,10 +19,10 @@ namespace {
 
 using namespace Mantid::API;
 
-static int DEFAULT_MAX_ITERATIONS = 500;
-static QString DEFAULT_MINIMIZER = "Levenberg-Marquardt";
-static QStringList EVALUATION_TYPES = {"CentrePoint", "Histogram"};
-static QStringList FITTING_MODES = {"Sequential", "Simultaneous"};
+int constexpr DEFAULT_MAX_ITERATIONS = 500;
+QString const DEFAULT_MINIMIZER = "Levenberg-Marquardt";
+QStringList const EVALUATION_TYPES = {"CentrePoint", "Histogram"};
+QStringList const FITTING_MODES = {"Sequential", "Simultaneous"};
 
 QStringList convertToQStringList(std::vector<std::string> const &vec) {
   QStringList list;
@@ -195,16 +195,19 @@ void BasicFitOptionsBrowser::setStringEnumProperty(QtProperty *prop,
                                                    std::string const &value) {
   auto const i =
       m_enumManager->enumNames(prop).indexOf(QString::fromStdString(value));
-  if (i >= 0)
-    m_enumManager->setValue(prop, i);
+  if (i < 0)
+    throw std::invalid_argument("An invalid property value was provided.");
+
+  m_enumManager->setValue(prop, i);
 }
 
 std::string
 BasicFitOptionsBrowser::getStringEnumProperty(QtProperty *prop) const {
   auto const i = m_enumManager->value(prop);
-  if (i >= 0)
-    return m_enumManager->enumNames(prop)[i].toStdString();
-  return "";
+  if (i < 0)
+    throw std::invalid_argument("An invalid property was provided.");
+
+  return m_enumManager->enumNames(prop)[i].toStdString();
 }
 
 void BasicFitOptionsBrowser::setFittingMode(FittingMode fittingMode) {
