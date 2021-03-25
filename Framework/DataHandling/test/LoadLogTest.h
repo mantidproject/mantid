@@ -370,5 +370,4 @@ private:
 
     return false;
   }
-
 };

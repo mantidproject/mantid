@@ -27,9 +27,9 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
+#include <regex>
 #include <sstream>
 #include <utility>
-#include <regex>
 
 using Mantid::Types::Core::DateAndTime;
 
@@ -506,7 +506,7 @@ bool LoadLog::isDateTimeString(const std::string &str) const {
  * Wed  9-FEB-2005 09:47:01
  * @param str :: The string to test
  * @return true if the format matches the old log file format.
-*/
+ */
 bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
   // extract first line of file
   std::string firstLine;
