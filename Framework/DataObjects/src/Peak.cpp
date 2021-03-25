@@ -155,13 +155,14 @@ Peak::Peak(const Peak &other)
     : BasePeak(other), m_inst(other.m_inst), m_det(other.m_det),
       m_detectorID(other.m_detectorID), m_initialEnergy(other.m_initialEnergy),
       m_finalEnergy(other.m_finalEnergy), sourcePos(other.sourcePos),
-      samplePos(other.samplePos), detPos(other.detPos),
+      detPos(other.detPos),
       m_detIDs(other.m_detIDs) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
  *
- * @param ipeak :: const reference to an IPeak object
+ * @param ipeak :: const reference to an IPeak object though actually
+ * referencing a Peak object.
  * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
@@ -320,7 +321,7 @@ void Peak::setInstrument(const Geometry::Instrument_const_sptr &inst) {
                                                "instrument");
 
   sourcePos = sourceObj->getPos();
-  samplePos = sampleObj->getPos();
+  m_samplePos = sampleObj->getPos();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -377,8 +378,8 @@ double Peak::getTOF() const {
 /** Calculate the scattering angle of the peak  */
 double Peak::getScattering() const {
   // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
+  V3D beamDir = m_samplePos - sourcePos;
+  V3D detDir = detPos - m_samplePos;
 
   return detDir.angle(beamDir);
 }
@@ -387,7 +388,7 @@ double Peak::getScattering() const {
 /** Calculate the azimuthal angle of the peak  */
 double Peak::getAzimuthal() const {
   // The detector is at 2 theta scattering angle
-  V3D detDir = detPos - samplePos;
+  V3D detDir = detPos - m_samplePos;
 
   return atan2(detDir.Y(), detDir.X());
 }
@@ -396,8 +397,8 @@ double Peak::getAzimuthal() const {
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double Peak::getDSpacing() const {
   // The detector is at 2 theta scattering angle
-  V3D beamDir = samplePos - sourcePos;
-  V3D detDir = detPos - samplePos;
+  V3D beamDir = m_samplePos - sourcePos;
+  V3D detDir = detPos - m_samplePos;
 
   double two_theta;
   try {
@@ -423,10 +424,10 @@ double Peak::getDSpacing() const {
  * */
 Mantid::Kernel::V3D Peak::getQLabFrame() const {
   // Normalized beam direction
-  V3D beamDir = samplePos - sourcePos;
+  V3D beamDir = m_samplePos - sourcePos;
   beamDir /= beamDir.norm();
   // Normalized detector direction
-  V3D detDir = (detPos - samplePos);
+  V3D detDir = (detPos - m_samplePos);
   detDir /= detDir.norm();
 
   // Energy in J of the neutron
@@ -550,7 +551,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
 
   // Use the given detector distance to find the detector position.
   if (detectorDistance.is_initialized()) {
-    detPos = samplePos + detectorDir * detectorDistance.get();
+    detPos = m_samplePos + detectorDir * detectorDistance.get();
     // We do not-update the detector as by manually setting the distance the
     // client seems to know better.
   } else {
@@ -576,7 +577,7 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
   }
   const auto object = std::dynamic_pointer_cast<const ObjComponent>(component);
   const auto distance =
-      object->shape()->distance(Geometry::Track(samplePos, detectorDir));
+      object->shape()->distance(Geometry::Track(m_samplePos, detectorDir));
   return detectorDir * distance;
 }
 
@@ -612,7 +613,7 @@ bool Peak::findDetector() {
  */
 bool Peak::findDetector(const InstrumentRayTracer &tracer) {
   // Scattered beam direction
-  const V3D beam = normalize(detPos - samplePos);
+  const V3D beam = normalize(detPos - m_samplePos);
 
   return findDetector(beam, tracer);
 }
@@ -680,28 +681,6 @@ double Peak::getEnergyTransfer() const {
   return getInitialEnergy() - getFinalEnergy();
 }
 
-/** Set sample position
- *
- * @ doubles x,y,z-> samplePos(x), samplePos(y), samplePos(z)
- */
-void Peak::setSamplePos(double samX, double samY, double samZ) {
-
-  this->samplePos[0] = samX;
-  this->samplePos[1] = samY;
-  this->samplePos[2] = samZ;
-}
-
-/** Set sample position
- *
- * @param XYZ :: vector x,y,z-> samplePos(x), samplePos(y), samplePos(z)
- */
-void Peak::setSamplePos(const Mantid::Kernel::V3D &XYZ) {
-
-  this->samplePos[0] = XYZ[0];
-  this->samplePos[1] = XYZ[1];
-  this->samplePos[2] = XYZ[2];
-}
-
 /** Set the final energy
  * @param m_finalEnergy :: final energy in meV   */
 void Peak::setFinalEnergy(double m_finalEnergy) {
@@ -719,16 +698,12 @@ void Peak::setInitialEnergy(double m_initialEnergy) {
 Mantid::Kernel::V3D Peak::getDetPos() const { return detPos; }
 
 // -------------------------------------------------------------------------------------
-/** Return the sample position vector */
-Mantid::Kernel::V3D Peak::getSamplePos() const { return samplePos; }
-
-// -------------------------------------------------------------------------------------
 /** Return the L1 flight path length (source to sample), in meters. */
-double Peak::getL1() const { return (samplePos - sourcePos).norm(); }
+double Peak::getL1() const { return (m_samplePos - sourcePos).norm(); }
 
 // -------------------------------------------------------------------------------------
 /** Return the L2 flight path length (sample to detector), in meters. */
-double Peak::getL2() const { return (detPos - samplePos).norm(); }
+double Peak::getL2() const { return (detPos - m_samplePos).norm(); }
 
 /**
  * @brief Assignement operator overload
@@ -744,7 +719,7 @@ Peak &Peak::operator=(const Peak &other) {
     m_initialEnergy = other.m_initialEnergy;
     m_finalEnergy = other.m_finalEnergy;
     sourcePos = other.sourcePos;
-    samplePos = other.samplePos;
+    m_samplePos = other.m_samplePos;
     detPos = other.detPos;
     m_detIDs = other.m_detIDs;
   }
