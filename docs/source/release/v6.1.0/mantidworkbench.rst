@@ -19,6 +19,7 @@ Added Floating/On Top setting for all the windows that are opened by workbench (
 - A new empty facility with empty instrument is the default facility now, and
   user has to select their choice of facility (including ISIS) and instrument for the first time
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
+- LoadLog algorithm will detect old unsupported log files and display a log message to inform the user.
   
 Bugfixes
 --------
