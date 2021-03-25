@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -1114,6 +1115,50 @@ public:
                      sphericalShape->backgroundOuterRadius().get());
     TS_ASSERT_EQUALS(backgroundInnerRadius,
                      sphericalShape->backgroundInnerRadius().get());
+  }
+
+  void test_exec_EllipsoidRadii_with_LeanElasticPeaks() {
+    // Test an ellipsoid against theoretical vol
+    const std::vector<double> radii = {0.4, 0.3, 0.2};
+    const V3D pos(0.0, 0.0, 0.0); // peak position
+    const int numEvents = 1000000;
+
+    createMDEW();
+    addUniform(numEvents, {std::make_pair(-0.5, 0.5), std::make_pair(-0.5, 0.5),
+                           std::make_pair(-0.5, 0.5)});
+
+    auto peakWS = std::make_shared<LeanElasticPeaksWorkspace>();
+    peakWS->addPeak(LeanElasticPeak(pos));
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks",
+                                                 peakWS);
+
+    doRun(radii, {0.0}, "IntegratePeaksMD2Test_Leanpeaks_out", {0.0}, true,
+          false, "NoFit", 0.0, true, false);
+
+    LeanElasticPeaksWorkspace_sptr peakResult =
+        std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(
+            AnalysisDataService::Instance().retrieve(
+                "IntegratePeaksMD2Test_Leanpeaks_out"));
+    TS_ASSERT(peakResult);
+
+    // the integrated intensity should end up around
+    // 4/3*PI*0.4*0.3*0.2*numEvents
+    double ellipInten = peakResult->getPeak(0).getIntensity();
+    TS_ASSERT_DELTA(ellipInten, 4. / 3. * M_PI * 0.4 * 0.3 * 0.2 * numEvents,
+                    25);
+
+    // Get the peak's shape
+    const PeakShape &shape = peakResult->getPeak(0).getPeakShape();
+    PeakShapeEllipsoid const *const ellipsoidShape =
+        dynamic_cast<PeakShapeEllipsoid *>(const_cast<PeakShape *>(&shape));
+
+    // Check the shape is what we expect
+    TSM_ASSERT("Wrong sort of peak", ellipsoidShape);
+
+    TS_ASSERT_DELTA(ellipsoidShape->abcRadii(), radii, 1e-9);
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[0], V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[1], V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(ellipsoidShape->directions()[2], V3D(0, 0, 1));
   }
 };
 

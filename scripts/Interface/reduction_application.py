@@ -53,8 +53,10 @@ from reduction_gui.settings.application_settings import GeneralSettings  # noqa
 
 
 class ReductionGUI(QMainWindow):
-    def __init__(self, instrument=None, instrument_list=None):
-        QMainWindow.__init__(self)
+    def __init__(self, parent=None, window_flags=None, instrument=None, instrument_list=None):
+        QMainWindow.__init__(self, parent)
+        if window_flags:
+            self.setWindowFlags(window_flags)
         self.ui = load_ui(__file__, 'ui/reduction_main.ui', baseinstance=self)
 
         if STARTUP_WARNING:
