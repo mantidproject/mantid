@@ -65,10 +65,10 @@ class D11B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d11_dir = 'ILL/D11'
+        d11b_dir = 'ILL/D11B'
         if 'ILL' in test_data_dir:
-            d11_dir = 'D11'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11_dir))
+            d11b_dir = 'D11B'
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d11b_dir))
 
     def cleanup(self):
         mtd.clear()
@@ -141,10 +141,10 @@ class D22B_GenerateLogbook_Test(systemtesting.MantidSystemTest):
 
         data_dirs = config['datasearch.directories'].split(';')
         test_data_dir = [p for p in data_dirs if 'SystemTest' in p][0]
-        d22_dir = 'ILL/D22'
+        d22b_dir = 'ILL/D22B'
         if 'ILL' in test_data_dir:
-            d22_dir = 'D22'
-        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22_dir))
+            d22b_dir = 'D22B'
+        self._data_directory = os.path.abspath(os.path.join(test_data_dir,  d22b_dir))
 
     def cleanup(self):
         mtd.clear()
