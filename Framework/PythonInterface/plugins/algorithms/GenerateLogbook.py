@@ -169,18 +169,24 @@ class GenerateLogbook(PythonAlgorithm):
             logbook_custom_entries = logbook_custom_entries.split(',')
             self._metadata_entries += logbook_custom_entries
             logbook_custom_headers = [""]*len(logbook_custom_entries)
+            operators = ["+", "-", "*", "//"]
             if self.getProperty('CustomHeaders').isDefault:
                 # derive headers from custom entries:
                 for entry_no, entry in enumerate(logbook_custom_entries):
-                    header = entry[entry.rfind('/')+1:]
-                    try: # check if the final '/' does not designate a data index to be read
-                        float(header)
-                    except ValueError:
-                        pass
-                    else:
-                        header = entry[entry.rfind('/', 0, entry.rfind('/')-1)+1:entry.rfind('/')]
+                    if any(op in entry for op in operators):
+                        list_entries, binary_operations = self._process_regex(entry)
+                        header = ""
+                        for split_entry_no, split_entry in enumerate(list_entries):
+                            # always use two strings around the final '/' for more informative header
+                            partial_header = split_entry[split_entry.rfind('/', 0,
+                                                                           split_entry.rfind('/') - 1) + 1:]
+                            header += partial_header
+                            header += binary_operations[split_entry_no]\
+                                if split_entry_no < len(binary_operations) else ""
                         logbook_custom_headers[entry_no] = header
-                    logbook_custom_headers[entry_no] = header
+                    else:
+                        # always use two strings around the final '/' for more informative header
+                        logbook_custom_headers[entry_no] = entry[entry.rfind('/', 0, entry.rfind('/') - 1) + 1:]
             else:
                 logbook_custom_headers = self.getPropertyValue('CustomHeaders')
                 logbook_custom_headers = logbook_custom_headers.split(',')
@@ -247,12 +253,24 @@ class GenerateLogbook(PythonAlgorithm):
             new_name = entry_name[:entry_name.rfind('/')]
         return new_name, index
 
+    @staticmethod
+    def _process_regex(entry):
+        regex_all = r'(\*)|(//)|(\+)|(\-)'
+        p = re.compile(regex_all)
+        list_entries = []
+        binary_operations = []
+        prev_pos = 0
+        for obj in p.finditer(entry):
+            list_entries.append(entry[prev_pos:obj.span()[0]])
+            prev_pos = obj.span()[1]
+            binary_operations.append(obj.group())
+        list_entries.append(entry[prev_pos:])  # add the last remaining file
+        return list_entries, binary_operations
+
     def _fill_logbook(self, logbook_ws, data_array, progress):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
         entry_not_found_msg = "The requested entry: {}, is not present in the raw data"
-        regex_all = r'(\*)|(//)|(\+)|(\-)'
-        p = re.compile(regex_all)
         operators = ["+","-","*","//"]
         cache_entries_ops = {}
 
@@ -268,16 +286,9 @@ class GenerateLogbook(PythonAlgorithm):
                     if any(op in entry for op in operators):
                         if entry in cache_entries_ops:
                             list_entries, binary_operations = cache_entries_ops[entry]
-                            binary_operations = list(binary_operations)
+                            binary_operations = binary_operations.copy()
                         else:
-                            list_entries = []
-                            binary_operations = []
-                            prev_pos = 0
-                            for obj in p.finditer(entry):
-                                list_entries.append(entry[prev_pos:obj.span()[0]])
-                                prev_pos = obj.span()[1]
-                                binary_operations.append(obj.group())
-                            list_entries.append(entry[prev_pos:]) # add the last remaining file
+                            list_entries, binary_operations = self._process_regex(entry)
                             cache_entries_ops[entry] = (list_entries, list(binary_operations))
                         # load all entries from the file
                         values = [0]*len(list_entries)
