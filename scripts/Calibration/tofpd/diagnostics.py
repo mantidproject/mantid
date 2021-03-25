@@ -575,3 +575,60 @@ def plot_peakd(wksp: Union[str, Workspace2D], peak_positions: Union[float, list]
     plt.show()
 
     return fig, ax
+
+
+def plot_peak_info(wksp: Union[str, TableWorkspace], peak_positions: Union[float, list], donor=None):
+    """
+    Generates a plot using the PeakParameter Workspace returned from FitPeaks to show peak information
+    (center, width, height, and intensity) for each bank at different peak positions.
+    :param wksp: Peak Parameter TableWorkspace returned from FitPeaks
+    :param peak_positions: List of peak positions to plot peak info at
+    :param donor: Optional donor Workspace2D to use for collect_fit_result
+    :return: plot, plot axes for each information type
+    """
+    wksp = mtd[str(wksp)]
+
+    if not mtd.doesExist(str(wksp)):
+        raise ValueError("Could not find provided workspace in ADS")
+
+    peaks = peak_positions
+    if isinstance(peak_positions, float):
+        peaks = [peak_positions]
+
+    if len(peaks) == 0:
+        raise ValueError("Expected one or more peak positions")
+
+    # Generate workspaces for each kind of peak info
+    center = collect_fit_result(wksp, 'center', peaks, donor=donor, infotype='centre')
+    width = collect_fit_result(wksp, 'width', peaks, donor=donor, infotype='width')
+    height = collect_fit_result(wksp, 'height', peaks, donor=donor, infotype='height')
+    intensity = collect_fit_result(wksp, 'intensity', peaks, donor=donor,
+        infotype='intensity')
+
+    nbanks = center.getNumberHistograms()
+    workspaces = [center, width, height, intensity]
+    labels = ['center', 'width', 'height', 'intensity']
+
+    fig, ax = plt.subplots(len(workspaces), 1, sharex="all")
+    for i in range(len(workspaces)):
+        ax[i].set_ylabel(labels[i])
+
+    # Show small ticks on x axis at peak positions
+    ax[-1].set_xticks(peaks, True)
+    ax[-1].set_xlabel(r"peak position ($\AA$)")
+
+    markers = ["x", ".", "^", "s", "d", "h", "p", "v"]
+    for i in range(nbanks):
+        for j in range(len(workspaces)):
+            x = workspaces[j].dataX(i)
+            data = workspaces[j].dataY(i)
+            # Cycle through marker list if there are too many banks
+            marker = i % len(markers)
+            ax[j].plot(x, data, marker=markers[marker], ls="None", label="bank{}".format(i))
+
+    ax[0].legend()
+    fig.tight_layout()
+
+    plt.show()
+
+    return fig, ax
