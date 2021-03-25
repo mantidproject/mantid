@@ -148,13 +148,101 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputDataWorkspace='background_dataMD',
                OutputNormalizationWorkspace='background_normMD')
 
+        # clean data
         clean_data = MinusMD('result', 'backgroundMDH')
         SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
-        SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm.nxs')
-        SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data.nxs')
-        SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background.nxs')
-        SaveMD(InputWorkspace='background_MDE', Filename='/tmp/background_data.nxs')
+        SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
+        SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
+        SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
+        SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
+
+        # 2nd round
+        clean_data = self.normalize_with_background('sum', 'clean2', (12., 15.),
+                                                    sample_temp_ws_names=('dataMD', 'normMD'),
+                                                    background_temp_ws_names=('background_dataMD', 'background_normMD'))
+
+        # @JESSE: Here is the difference
+        # save MD for 2nd round
+        # save
+        SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean_round2.nxs')
+        # SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
+        # SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
+        # SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
+        # SaveMD(InputWorkspace='background_dataMD', Filename='/tmp/background_data_round1.nxs')
+
+        # @JESSE: If LATER you set log value range from (10, 12) to (10, 15) on line 115,
+        # Then clean_data (on line 152) shall be same as clean_data on line 160 calculated in the current test setup
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result','MDNormHYSPEC.nxs'
+        return 'result', 'MDNormHYSPEC.nxs'
+
+    from typing import Tuple
+
+    def normalize_with_background(self, event_ws_name, output_ws_name, log_value_range: Tuple[float, float],
+                                  sample_temp_ws_names: Tuple[str, str],
+                                  background_temp_ws_names: Tuple[str, str]):
+        """Normalize MD with background
+
+        Parameters
+        ----------
+        event_ws_name
+        output_ws_name
+        log_value_range
+        sample_temp_ws_names: str, str
+            sample temporary data workspace, sample temporary normalization workspace
+        background_temp_ws_names
+            background temporary data workspace, background temporary normalization workspace
+
+        Returns
+        -------
+
+        """
+        # prepare sample MD
+        self.prepare_md(input_ws_name=event_ws_name, merged_md_name='merged',
+                        min_log_value=log_value_range[0], max_log_value=log_value_range[1])
+        # Prepare background workspace
+        # old way - use reduced_1 as the background
+        self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
+                                background_md='background_MDE')
+
+        # do MDNorm to sample data
+        MDNorm(InputWorkspace='merged',
+               Dimension0Name='QDimension1',
+               Dimension0Binning='-5,0.05,5',
+               Dimension1Name='QDimension2',
+               Dimension1Binning='-5,0.05,5',
+               Dimension2Name='DeltaE',
+               Dimension2Binning='-2,2',
+               Dimension3Name='QDimension0',
+               Dimension3Binning='-0.5,0.5',
+               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+               TemporaryDataWorkspace=sample_temp_ws_names[0],  # 'dataMD',
+               TemporaryNormalizationWorkspace=sample_temp_ws_names[1],  # 'normMD',
+               OutputWorkspace='result',
+               OutputDataWorkspace='dataMD',
+               OutputNormalizationWorkspace='normMD')
+
+        # do MDNorm to background
+        MDNorm(InputWorkspace='background_MDE',
+               Dimension0Name='QDimension1',
+               Dimension0Binning='-5,0.05,5',
+               Dimension1Name='QDimension2',
+               Dimension1Binning='-5,0.05,5',
+               Dimension2Name='DeltaE',
+               Dimension2Binning='-2,2',
+               Dimension3Name='QDimension0',
+               Dimension3Binning='-0.5,0.5',
+               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+               TemporaryDataWorkspace='backgroundMDH',
+               TemporaryNormalizationWorkspace=background_temp_ws_names[0],  # 'background_dataMD',
+               OutputWorkspace=background_temp_ws_names[1],
+               OutputDataWorkspace='background_dataMD',
+               OutputNormalizationWorkspace='background_normMD')
+
+        # clean
+        clean_md = MinusMD(LHSWorkspace='result',
+                           RHSWorkspace='backgroundMDH',
+                           OutputWorkspace=output_ws_name)
+
+        return clean_md
