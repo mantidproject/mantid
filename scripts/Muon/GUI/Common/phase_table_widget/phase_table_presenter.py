@@ -25,6 +25,7 @@ class PhaseTablePresenter(object):
         self.context = context
         self.current_alg = None
         self._phasequad_obj = None
+        self._new_table_name = ""
 
         self.group_change_observer = GenericObserver(self.update_current_groups_list)
         self.run_change_observer = GenericObserver(self.update_current_run_list)
@@ -61,9 +62,17 @@ class PhaseTablePresenter(object):
         if self.current_alg is not None:
             self.current_alg.cancel()
 
-    def handle_calulate_phase_table_clicked(self):
+    def handle_calculate_phase_table_clicked(self):
         self.update_model_from_view()
         self.disable_editing_notifier.notify_subscribers()
+
+        # Get name if wanting to use name
+        name = self.view.enter_phase_table_name()
+        if name is None:  # Have to specify None as empty string is valid
+            self.enable_editing_notifier.notify_subscribers()
+            return
+        self._new_table_name = name
+
         self.calculation_thread = self.create_calculation_thread()
 
         self.calculation_thread.threadWrapperSetUp(self.handle_phase_table_calculation_started,
@@ -206,7 +215,8 @@ class PhaseTablePresenter(object):
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
 
         parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
-                                                                     backward_group)
+                                                                 backward_group, new_name=self._new_table_name)
+        self._new_table_name = ""
 
         return parameters
 

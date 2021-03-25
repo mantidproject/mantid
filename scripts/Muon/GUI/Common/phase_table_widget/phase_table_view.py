@@ -224,6 +224,12 @@ class PhaseTableView(QtWidgets.QWidget):
         if ok:
             return new_pair_name
 
+    def enter_phase_table_name(self):
+        name, ok = QtWidgets.QInputDialog.getText(self, 'Phasetable Name', 'Enter the name of the new Phasetable \n'
+                                                                           '(leave blank to use the default name):')
+        if ok:
+            return name
+
     def enable_widget(self):
         for widget in self.children():
             if str(widget.objectName()) in CANCEL_BUTTON_NAMES:
