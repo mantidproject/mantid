@@ -26,7 +26,7 @@
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
-			<value val="61440" />
+			<value val="61441" />
 		</parameter>
 		<!-- Preferred scaling after normalisation to monitor counts. -->
 		<parameter name="scaling_after_monitor_normalisation">
