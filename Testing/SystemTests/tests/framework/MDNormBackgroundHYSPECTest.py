@@ -10,34 +10,27 @@
 System test for MDNorm
 """
 
-from mantid.simpleapi import *
+from mantid.simpleapi import (config, Load, SetGoniometer, GenerateEventsFilter, FilterEvents, DeleteWorkspace,
+                              DgsReduction, SetUB, CropWorkspaceForMDNorm, ConvertToMD, MergeMD,
+                              MDNorm, CloneWorkspace, AddSampleLogMultiple, mtd, SaveMD,
+                              MinusMD)
 import systemtesting
 
 
 class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
 
-    tolerance=1e-8
+    tolerance = 1e-8
 
-    def requiredMemoryMB(self):
-        return 5000
-
-    def requiredFiles(self):
-        return ['HYS_13656_event.nxs','HYS_13657_event.nxs','HYS_13658_event.nxs']
-
-    def runTest(self):
-        """ This is the old way to do MDNorm to sample, background and finally clean background from sample
-        Now it serves as a benchmark to generate expected result for enhanced MDNorm
-        """
-        config.setFacility('SNS')
-
-        Load(Filename='HYS_13656',OutputWorkspace='sum')
-        SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
-        GenerateEventsFilter(InputWorkspace='sum',
+    @staticmethod
+    def prepare_md(input_ws_name, merged_md_name, min_log_value, max_log_value):
+        # Filter
+        GenerateEventsFilter(InputWorkspace=input_ws_name,
                              OutputWorkspace='splboth',
                              InformationWorkspace='info',
                              UnitOfTime='Nanoseconds',
                              LogName='s1',
-                             MaximumLogValue=90,
+                             MinimumLogValue=min_log_value,
+                             MaximumLogValue=max_log_value,
                              LogValueInterval=1)
         FilterEvents(InputWorkspace='sum',
                      SplitterWorkspace='splboth',
@@ -46,9 +39,10 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                      GroupWorkspaces=True,
                      OutputWorkspaceIndexedFrom1=True,
                      OutputWorkspaceBaseName='split')
-        DeleteWorkspace('sum')
+        # Clean memory
         DeleteWorkspace('splboth')
         DeleteWorkspace('info')
+
         DgsReduction(SampleInputWorkspace='split',
                      SampleInputMonitorWorkspace='split_1',
                      IncidentEnergyGuess=50,
@@ -57,6 +51,9 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                      TibTofRangeStart=10400,
                      TibTofRangeEnd=12400,
                      OutputWorkspace='reduced')
+        # Clean memory
+        DeleteWorkspace('split')
+
         SetUB(Workspace='reduced',
               a=5.823,
               b=6.475,
@@ -73,32 +70,13 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                     OutputWorkspace='md',
                     MinValues='-11,-11,-11,-25',
                     MaxValues='11,11,11,49')
-        DeleteWorkspace("split")
-        # DeleteWorkspace("reduced")
-        DeleteWorkspace("PreprocessedDetectorsWS")
-        DeleteWorkspace("TOFCorrectWS")
 
-        MergeMD(InputWorkspaces='md', OutputWorkspace='merged')
+        MergeMD(InputWorkspaces='md', OutputWorkspace=merged_md_name)
 
-        MDNorm(InputWorkspace='merged',
-               Dimension0Name='QDimension1',
-               Dimension0Binning='-5,0.05,5',
-               Dimension1Name='QDimension2',
-               Dimension1Binning='-5,0.05,5',
-               Dimension2Name='DeltaE',
-               Dimension2Binning='-2,2',
-               Dimension3Name='QDimension0',
-               Dimension3Binning='-0.5,0.5',
-               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               OutputWorkspace='result',
-               OutputDataWorkspace='dataMD',
-               OutputNormalizationWorkspace='normMD')
-
-        # Prepare background workspace
-        # old way - use reduced_1 as the background
-        dgs_data=CloneWorkspace('reduced_1')
-        data_MDE=mtd['merged']
-
+    @staticmethod
+    def prepare_background(input_md, reference_sample_mde, background_md):
+        dgs_data = CloneWorkspace(input_md)
+        data_MDE = mtd[reference_sample_mde]
         if mtd.doesExist('background_MDE'):
             DeleteWorkspace('background_MDE')
 
@@ -116,8 +94,46 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                         MaxValues='11,11,11,49',
                         PreprocDetectorsWS='-',
                         OverwriteExisting=False,
-                        OutputWorkspace='background_MDE')
+                        OutputWorkspace=background_md)
 
+    def requiredMemoryMB(self):
+        return 5000
+
+    def requiredFiles(self):
+        return ['HYS_13656_event.nxs']
+
+    def runTest(self):
+        """ This is the old way to do MDNorm to sample, background and finally clean background from sample
+        Now it serves as a benchmark to generate expected result for enhanced MDNorm
+        """
+        # Set facility that load data
+        config.setFacility('SNS')
+        Load(Filename='HYS_13656', OutputWorkspace='sum')
+        SetGoniometer(Workspace='sum', Axis0='s1,0,1,0,1')
+
+        # prepare sample MD
+        self.prepare_md(input_ws_name='sum', merged_md_name='merged', min_log_value=10, max_log_value=12)
+        # Prepare background workspace
+        # old way - use reduced_1 as the background
+        self.prepare_background(input_md='reduced_1', reference_sample_mde='merged',
+                                background_md='background_MDE')
+
+        # do MDNorm to sample data
+        MDNorm(InputWorkspace='merged',
+               Dimension0Name='QDimension1',
+               Dimension0Binning='-5,0.05,5',
+               Dimension1Name='QDimension2',
+               Dimension1Binning='-5,0.05,5',
+               Dimension2Name='DeltaE',
+               Dimension2Binning='-2,2',
+               Dimension3Name='QDimension0',
+               Dimension3Binning='-0.5,0.5',
+               SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+               OutputWorkspace='result',
+               OutputDataWorkspace='dataMD',
+               OutputNormalizationWorkspace='normMD')
+
+        # do MDNorm to background
         MDNorm(InputWorkspace='background_MDE',
                Dimension0Name='QDimension1',
                Dimension0Binning='-5,0.05,5',
@@ -131,12 +147,13 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputWorkspace='backgroundMDH',
                OutputDataWorkspace='background_dataMD',
                OutputNormalizationWorkspace='background_normMD')
-        
-        clean_data=MinusMD('result','backgroundMDH')
-        SaveMD(InputWorkspace='result', Filename='/tmp/result.nxs')
+
+        clean_data = MinusMD('result', 'backgroundMDH')
+        SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
+        SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm.nxs')
+        SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data.nxs')
         SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background.nxs')
         SaveMD(InputWorkspace='background_MDE', Filename='/tmp/background_data.nxs')
-
 
     def validate(self):
         self.tolerance = 1e-8
