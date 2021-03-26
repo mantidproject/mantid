@@ -1112,7 +1112,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
-      } else if (name == "detid") {
+      } else if (name == "DetID") {
         s1 = double(peak1.getDetectorID());
         s2 = double(peak2.getDetectorID());
       } else if (name == "h") {
@@ -1130,7 +1130,7 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       } else if (name == "Energy") {
         s1 = peak1.getInitialEnergy();
         s2 = peak2.getInitialEnergy();
-      } else if (name == "tof") {
+      } else if (name == "TOF") {
         s1 = peak1.getTOF();
         s2 = peak2.getTOF();
       } else if (name == "DSpacing") {
@@ -1145,10 +1145,10 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
       } else if (name == "BinCount") {
         s1 = peak1.getBinCount();
         s2 = peak2.getBinCount();
-      } else if (name == "row") {
+      } else if (name == "Row") {
         s1 = peak1.getRow();
         s2 = peak2.getRow();
-      } else if (name == "col") {
+      } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
       }
@@ -1212,9 +1212,6 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(
       } else if (name == "Wavelength") {
         s1 = ipws1->getPeak(i).getWavelength();
         s2 = ipws2->getPeak(i).getWavelength();
-      } else if (name == "Energy") {
-        s1 = ipws1->getPeak(i).getFinalEnergy();
-        s2 = ipws2->getPeak(i).getFinalEnergy();
       } else if (name == "DSpacing") {
         s1 = ipws1->getPeak(i).getDSpacing();
         s2 = ipws2->getPeak(i).getDSpacing();
@@ -1230,6 +1227,14 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(
       } else if (name == "QLab") {
         V3D q1 = ipws1->getPeak(i).getQLabFrame();
         V3D q2 = ipws2->getPeak(i).getQLabFrame();
+        // using s1 here as the diff
+        for (int i = 0; i < 3; ++i) {
+          s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
+        }
+        s1 = std::sqrt(s1);
+      } else if (name == "QSample") {
+        V3D q1 = ipws1->getPeak(i).getQSampleFrame();
+        V3D q2 = ipws2->getPeak(i).getQSampleFrame();
         // using s1 here as the diff
         for (int i = 0; i < 3; ++i) {
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
