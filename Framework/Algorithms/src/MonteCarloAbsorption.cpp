@@ -448,7 +448,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
 /**
  * Create the beam profile. Currently only supports Rectangular or Circular. The
  * dimensions are either specified by those provided by `SetBeam` algorithm or
- * default to the width and height of the samples bounding box
+ * default to the width and height of the sample's bounding box
  * @param instrument A reference to the instrument object
  * @param sample A reference to the sample object
  * @return A new IBeamProfile object
@@ -478,6 +478,9 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
                                                    beamRadius);
     }
   } // revert to sample dimensions if no return by this point
+  if (!sample.getShape().hasValidShape())
+    throw std::invalid_argument(
+        "Cannot determine beam profile without a sample shape");
   const auto bbox = sample.getShape().getBoundingBox().width();
   beamWidth = bbox[frame->pointingHorizontal()];
   beamHeight = bbox[frame->pointingUp()];

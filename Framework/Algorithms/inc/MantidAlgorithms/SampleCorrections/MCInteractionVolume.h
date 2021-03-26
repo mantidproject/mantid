@@ -37,7 +37,6 @@ public:
                       const ScatteringPointVicinity pointsIn =
                           ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
 
-  const Geometry::BoundingBox &getBoundingBox() const override;
   const Geometry::BoundingBox getFullBoundingBox() const override;
   virtual TrackPair calculateBeforeAfterTrack(
       Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
