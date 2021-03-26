@@ -43,8 +43,13 @@ private:
   void
   createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
 
+  /// Bin(MD) input MDE workspace
   DataObjects::MDHistoWorkspace_sptr
   binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
+  /// build symmetry matrix
+  Mantid::Kernel::DblMatrix buildSymmetryMatrix(const Geometry::SymmetryOperation &so);
+
+
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
                                uint16_t expInfoIndex = 0) const;

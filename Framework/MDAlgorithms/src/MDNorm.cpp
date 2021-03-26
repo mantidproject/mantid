@@ -1074,6 +1074,19 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   }
 }
 
+inline DblMatrix MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &so) {
+    // calculate dimensions for binning
+    DblMatrix soMatrix(3, 3);
+    auto v = so.transformHKL(V3D(1, 0, 0));
+    soMatrix.setColumn(0, v);
+    v = so.transformHKL(V3D(0, 1, 0));
+    soMatrix.setColumn(1, v);
+    v = so.transformHKL(V3D(0, 0, 1));
+    soMatrix.setColumn(2, v);
+
+    return soMatrix;
+}
+
 /**
  * Runs the BinMD algorithm on the input to provide the output workspace
  * All slicing algorithm properties are passed along
@@ -1101,6 +1114,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     soMatrix.setColumn(1, v);
     v = so.transformHKL(V3D(0, 0, 1));
     soMatrix.setColumn(2, v);
+    // ... ...
 
     DblMatrix Qtransform;
     if (m_isRLU) {
