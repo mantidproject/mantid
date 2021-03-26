@@ -137,8 +137,8 @@ private:
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
-  QPushButton *m_peakAdd; ///< Button switching on peak creation mode
-  QPushButton *m_peakErase;  ///< Button switching on peak erase mode
+  QPushButton *m_peakAdd;     ///< Button switching on peak creation mode
+  QPushButton *m_peakErase;   ///< Button switching on peak erase mode
   QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
   QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
