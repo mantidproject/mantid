@@ -30,6 +30,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -585,6 +586,7 @@ void MDNorm::exec() {
   m_beamDir = normalize(m_samplePos - source->getPos());
   if ((m_inputWS->getNumDims() > 3) &&
       (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
+    // DeltaE in input MDE: it cannot be diffraction!
     m_diffraction = false;
     if (exptInfoZero.run().hasProperty("Ei")) {
       Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
@@ -618,6 +620,7 @@ void MDNorm::exec() {
   }
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
+  std::cout << "[GLOBAL] Number of Exp Info = " << m_numExptInfos << "\n";
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
        expInfoIndex++) {
@@ -1312,12 +1315,164 @@ void MDNorm::cacheDimensionXValues() {
 }
 
 /**
+ * Calculate QTransform = (R * UB * SymmetryOperation * m_W)^-1
+ * @param currentExpInfo
+ * @param so
+ * @return
+ */
+inline Mantid::Kernel::DblMatrix
+MDNorm::calQTransform(const ExperimentInfo &currentExpInfo,
+                      const Geometry::SymmetryOperation &so) {
+  // Make it to a method!
+  DblMatrix R = currentExpInfo.run().getGoniometerMatrix();
+  DblMatrix soMatrix(3, 3);
+  auto v = so.transformHKL(V3D(1, 0, 0));
+  soMatrix.setColumn(0, v);
+  v = so.transformHKL(V3D(0, 1, 0));
+  soMatrix.setColumn(1, v);
+  v = so.transformHKL(V3D(0, 0, 1));
+  soMatrix.setColumn(2, v);
+  soMatrix.Invert();
+  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
+  Qtransform.Invert();
+
+  // ...................................................................................
+  std::cout << "[UNDERSTAND 1B] m_W = "
+            << "\n";
+  m_W.print();
+  std::cout << "[......... ..] R =   "
+            << "\n";
+  R.print();
+  std::cout << "[........  ..] Qtransform = "
+            << "\n";
+  Qtransform.print();
+  std::cout << "[UNDERSTAND 1B] m_W = "
+            << "\n";
+
+  return Qtransform;
+}
+
+/**
+ * Calculate the diffraction MDE's intersection integral of a certain
+ * detector/spectru
+ * @param intersections: vector of intersections
+ * @param xValues: empty vector for X values
+ * @param yValues: empty vector of Y values (output)
+ * @param integrFlux: integral flux workspace
+ * @param wsIdx: workspace index
+ */
+inline void MDNorm::calcDiffractionIntersectionIntegral(
+    std::vector<std::array<double, 4>> &intersections,
+    std::vector<double> &xValues, std::vector<double> &yValues,
+    const API::MatrixWorkspace &integrFlux, const size_t &wsIdx) {
+  // -- calculate integrals for the intersection --
+  // momentum values at intersections
+  auto intersectionsBegin = intersections.begin();
+  // copy momenta to xValues
+  xValues.resize(intersections.size());
+  yValues.resize(intersections.size());
+  auto x = xValues.begin();
+  for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+    *x = (*it)[3];
+  }
+  // calculate integrals at momenta from xValues by interpolating between
+  // points in spectrum sp
+  // of workspace integrFlux. The result is stored in yValues
+  calcIntegralsForIntersections(xValues, integrFlux, wsIdx, yValues);
+  // [VZ QUESTION] Shall background be duplicated here? (Answer: No)
+}
+
+/**
+ * Calculate the normalization among intersections on a single detector
+ * in 1 specific SpectrumInfo/ExperimentInfo
+ * @param intersections: intersections
+ * @param solid: proton charge
+ * @param yValues: original signal values
+ * @param vmdDims: MD dimensions
+ * @param pos: positions from intersections for memory efficiency
+ * @param posNew: transformed positions
+ * @param signalArray: (output) signals
+ */
+inline void MDNorm::calcSingleDetectorNorm(
+    const std::vector<std::array<double, 4>> &intersections,
+    const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
+    std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
+    std::vector<std::atomic<signal_t>> &signalArray) {
+
+  auto intersectionsBegin = intersections.begin();
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+
+    // The full vector isn't used so compute only what is necessary
+    // If the difference between 2 adjacent intersection is trivial, no
+    // intersection normalization is to be calculated
+    double delta, eps;
+    if (m_diffraction) {
+      // diffraction
+      delta = curIntSec[3] - prevIntSec[3];
+      eps = 1e-7;
+    } else {
+      // inelastic
+      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
+              energyToK;
+      eps = 1e-10;
+    }
+    if (delta < eps)
+      continue; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    // [Task 89] Sample and background have same 'pos[]'
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
+                   prevIntSec.data(), pos.begin(),
+                   [](const double rhs, const double lhs) {
+                     return static_cast<coord_t>(0.5 * (rhs + lhs));
+                   });
+    signal_t signal;
+    // [Task 89 signal_t bkgdSignal;
+    if (m_diffraction) {
+      // Diffraction
+      // index of the current intersection
+      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+      // signal = integral between two consecutive intersections
+      signal = (yValues[k] - yValues[k - 1]) * solid;
+      // [Task 89] signalBkgd = (bkgdValues[k] - bkgdValues[k - 1]) * solidBkgd;
+
+    } else {
+      // Inelastic
+      // transform kf to energy transfer
+      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+      // signal = energy distance between two consecutive intersections *solid
+      // angle *PC
+      signal = solid * delta;
+      // [Task 89] bkgdSignal = bkgdSolid * delta
+    }
+
+    // Find the coordiate of the new position after transformation
+    m_transformation.multiplyPoint(pos, posNew);
+    // [Task 89] Is linIndex common to both sample and background?
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue; // not found
+
+    // set the calculated signal to
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
+    // [Task 89]
+    // Mantid::Kernel::AtomicOp(bkgdSignalArray[linIndex], bkgdSignal,
+    //                          std::plus<signal_t>());
+  }
+  return;
+}
+
+/**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
  * @param otherValues - values for dimensions other than Q or DeltaE
  * @param so - symmetry operation
  * @param expInfoIndex - current experiment info index
- * @param soIndex - the index of symmetry operation (for progress purposes)
+ * @param soIndex - the index of symmetry operation (for progress purposes only)
  */
 void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
                                     const Geometry::SymmetryOperation &so,
@@ -1331,29 +1486,27 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
       currentExptInfo.getLog("MDNorm_high"));
   highValues = (*highValuesLog)();
 
-  DblMatrix R = currentExptInfo.run().getGoniometerMatrix();
-  DblMatrix soMatrix(3, 3);
-  auto v = so.transformHKL(V3D(1, 0, 0));
-  soMatrix.setColumn(0, v);
-  v = so.transformHKL(V3D(0, 1, 0));
-  soMatrix.setColumn(1, v);
-  v = so.transformHKL(V3D(0, 0, 1));
-  soMatrix.setColumn(2, v);
-  soMatrix.Invert();
-  DblMatrix Qtransform = R * m_UB * soMatrix * m_W;
-  Qtransform.Invert();
+  // calculate Q transformation matrix (R * UB * SymmetryOperation * m_W)^-1
+  // in order to calculate intersections
+  DblMatrix Qtransform = calQTransform(currentExptInfo, so);
+
+  // get proton charges
   const double protonCharge = currentExptInfo.run().getProtonCharge();
+  // [Task 89]
+  // const double protonChargeBkgd = (m_background != nullptr)?
+  // m_background.getExpInfo(0).run().getProtonCharge() : 0;
+
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
-  // Mappings
+  // Mappings: solid angle and flux workspaces' detector to ws_index map
   const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
-  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   if (solidAngleWS != nullptr) {
     haveSA = true;
   }
+  API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   const detid2index_map solidAngDetToIdx =
       (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap()
                : detid2index_map();
@@ -1361,26 +1514,37 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
       (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap()
                       : detid2index_map();
 
+  // Define dimension, signal array
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
 
+  std::cout << "[INFO]  signal array size = " << signalArray.size() << "\n";
+
+  // Progress report
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
   auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
                                       0.3 + progStep * (1. + progIndex), ndets);
+
+  // muliple threading
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);
   }
+  // ...................................................................................
+  std::cout << "[UNDERSTAND 3] Number of loops (detectors) = " << ndets
+            << " thread safe = " << safe << "\n";
+
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
 
+  // Skip: non-existing detector, monitor and masked detector
   if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
       spectrumInfo.isMasked(i)) {
     continue;
@@ -1392,7 +1556,8 @@ for (int64_t i = 0; i < ndets; i++) {
   // If the dtefctor is a group, this should be the ID of the first detector
   const auto detID = detector.getID();
 
-  // get the flux spectrum number
+  // get the flux spectrum number: this is for diffraction only!
+  // VZ: confirm with Andrei that only diffraction can have flux run
   size_t wsIdx = 0;
   if (m_diffraction) {
     auto index = fluxDetToIdx.find(detID);
@@ -1403,81 +1568,45 @@ for (int64_t i = 0; i < ndets; i++) {
     }
   }
 
-  // Intersections
+  // Intersections for sample and background if present
   this->calculateIntersections(intersections, theta, phi, Qtransform,
                                lowValues[i], highValues[i]);
+
+  // No need to do normalization calculation if there is no intersection
   if (intersections.empty())
     continue;
+
   // Get solid angle for this contribution
   double solid = protonCharge;
+  // [Task 89] double bkgdSolid = protonChargeBkgd;
   if (haveSA) {
-    solid =
-        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+    double solid_angle_factor =
+        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0];
+    //  solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0]
+    solid = solid_angle_factor * protonCharge;
+    // [Task 89] bkgdSolid = solid_angle_factor * protonChargeBkgd;
   }
+
   if (m_diffraction) {
     // -- calculate integrals for the intersection --
-    // momentum values at intersections
-    auto intersectionsBegin = intersections.begin();
-    // copy momenta to xValues
-    xValues.resize(intersections.size());
-    yValues.resize(intersections.size());
-    auto x = xValues.begin();
-    for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-      *x = (*it)[3];
-    }
-    // calculate integrals at momenta from xValues by interpolating between
-    // points in spectrum sp
-    // of workspace integrFlux. The result is stored in yValues
-    calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+    calcDiffractionIntersectionIntegral(intersections, xValues, yValues,
+                                        *integrFlux, wsIdx);
   }
 
   // Compute final position in HKL
   // pre-allocate for efficiency and copy non-hkl dim values into place
+  // [VZ QUESTION] pos and posNew are instrument geometry related.
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
 
-  auto intersectionsBegin = intersections.begin();
-  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-    const auto &curIntSec = *it;
-    const auto &prevIntSec = *(it - 1);
-    // the full vector isn't used so compute only what is necessary
-    double delta, eps;
-    if (m_diffraction) {
-      delta = curIntSec[3] - prevIntSec[3];
-      eps = 1e-7;
-    } else {
-      delta = (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
-              energyToK;
-      eps = 1e-10;
-    }
-    if (delta < eps)
-      continue; // Assume zero contribution if difference is small
-    // Average between two intersections for final position
-    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
-                   prevIntSec.data(), pos.begin(),
-                   [](const double rhs, const double lhs) {
-                     return static_cast<coord_t>(0.5 * (rhs + lhs));
-                   });
-    signal_t signal;
-    if (m_diffraction) {
-      // index of the current intersection
-      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-      // signal = integral between two consecutive intersections
-      signal = (yValues[k] - yValues[k - 1]) * solid;
-    } else {
-      // transform kf to energy transfer
-      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
-      // signal = energy distance between two consecutive intersections *solid
-      // angle *PC
-      signal = solid * delta;
-    }
-    m_transformation.multiplyPoint(pos, posNew);
-    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-    if (linIndex == size_t(-1))
-      continue;
-    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
-                             std::plus<signal_t>());
-  }
+  // auto intersectionsBegin = intersections.begin();
+  // ...................................................................................
+  //  std::cout << "[INFO]  Detector " << i
+  //            << " Number of intersecton = " << intersections.size() << "\n";
+
+  calcSingleDetectorNorm(
+      intersections, solid, yValues, vmdDims, pos, posNew,
+      signalArray); // [Task 89] ADD solidBkgd, bkgdYValues, bkgdSignalArray
 
   prog->report();
 
@@ -1489,9 +1618,20 @@ if (m_accumulate) {
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
       m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+  // [Task 89] Process background
+  //  std::transform(
+  //      bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+  //      m_bkgdNormWS->getSignalArray(), m_bkgdNormWS->mutableSignalArray(),
+  //      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b;
+  //      });
+
 } else {
+  // First time, init
   std::copy(signalArray.cbegin(), signalArray.cend(),
             m_normWS->mutableSignalArray());
+  // [Task 89]
+  //  std::copy(bkgdSignalArray.cbegin(), bkgdSignalArray.cend(),
+  //            m_bkgdNormWS->mutableSignalArray());
 }
 m_accumulate = true;
 }

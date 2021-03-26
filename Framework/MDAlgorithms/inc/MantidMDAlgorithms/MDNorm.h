@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
@@ -61,9 +62,25 @@ private:
                               const double theta, const double phi,
                               const Kernel::DblMatrix &transform,
                               double lowvalue, double highvalue);
+
   void calcIntegralsForIntersections(const std::vector<double> &xValues,
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp, std::vector<double> &yValues);
+
+  void calcDiffractionIntersectionIntegral(
+      std::vector<std::array<double, 4>> &intersections,
+      std::vector<double> &xValues, std::vector<double> &yValues,
+      const API::MatrixWorkspace &integrFlux, const size_t &wsIdx);
+
+  Mantid::Kernel::DblMatrix
+  calQTransform(const Mantid::API::ExperimentInfo &currentExpInfo,
+                const Geometry::SymmetryOperation &so);
+
+  void calcSingleDetectorNorm(
+      const std::vector<std::array<double, 4>> &intersections,
+      const double &solid, std::vector<double> &yValues, const size_t &vmdDims,
+      std::vector<coord_t> &pos, std::vector<coord_t> &posNew,
+      std::vector<std::atomic<signal_t>> &signalArray);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;
