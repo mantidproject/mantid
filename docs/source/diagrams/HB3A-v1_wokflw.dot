@@ -86,7 +86,7 @@ digraph HB3AReduction {
   convert2HKL		-> mergeMD
   isOutputHKL		-> mergeMD [label="No"];
 
- 
+
   expScanMD		-> integratePeak
   peakWS		-> integratePeak
   maskWS		-> integratePeak

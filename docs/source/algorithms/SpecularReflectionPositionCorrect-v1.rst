@@ -11,7 +11,7 @@ Description
 
 Uses the specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` along with the Beam direction offeset to vertically shift the detectors into a corrected location.
 
-.. math:: 
+.. math::
 
    2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
 
@@ -38,7 +38,7 @@ Usage
    ws = LoadEmptyInstrument(instrument_def)
    inst = ws.getInstrument()
    ref_frame = inst.getReferenceFrame()
-   vertical_position = {ref_frame.pointingUpAxis(): 0, ref_frame.pointingAlongBeamAxis(): 1.0, ref_frame.pointingHorizontalAxis():0} 
+   vertical_position = {ref_frame.pointingUpAxis(): 0, ref_frame.pointingAlongBeamAxis(): 1.0, ref_frame.pointingHorizontalAxis():0}
    MoveInstrumentComponent(ws, 'point-detector',RelativePosition=False, **vertical_position)
    MoveInstrumentComponent(ws, 'some-surface-holder',RelativePosition=False,  X=0, Y= 0, Z=0)
 
@@ -49,11 +49,11 @@ Usage
    inst = corrected_ws.getInstrument()
    det_pos = inst.getComponentByName('point-detector').getPos()
    print(det_pos)
-   
+
 Output:
 
-.. testoutput:: SpecularReflectionPositionCorrectExample 
- 
+.. testoutput:: SpecularReflectionPositionCorrectExample
+
    [0,0.414214,1]
 
 .. categories::

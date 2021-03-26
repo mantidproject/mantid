@@ -10,10 +10,10 @@ staleLabel: Stale
 # Comment to post when marking an issue as stale. Set to `false` to disable
 markComment: >
   This issue has been automatically marked as stale because it has not had
-  recent activity. It will be closed in 7 days if no further activity occurs. 
+  recent activity. It will be closed in 7 days if no further activity occurs.
   If you feel this is incorrect please comment to keep it alive, with a reason
-  why. 
-   
+  why.
+
   To prevent closure, e.g. for long-term planning issues,
   add the "Never Stale" label.
 # Comment to post when closing a stale issue. Set to `false` to disable

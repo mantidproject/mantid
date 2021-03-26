@@ -8,7 +8,7 @@ This is a Python binding to the C++ class Mantid::API::ExperimentInfoValidator.
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.ExperimentInfoValidator 
+.. autoclass:: mantid.api.ExperimentInfoValidator
     :members:
     :undoc-members:
     :inherited-members:

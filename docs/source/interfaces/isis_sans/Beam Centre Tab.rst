@@ -88,10 +88,10 @@ therefore paramount.
 
 The following procedure seems to work:
 
-#. Load the most recent user (mask) file (or a proto-user file for 
+#. Load the most recent user (mask) file (or a proto-user file for
    the new User).
 
-#. Load a suitable SANS pattern (eg, the scattering from a calibration 
+#. Load a suitable SANS pattern (eg, the scattering from a calibration
    standard).
 
 #. 'Show Instrument' on the SANS run.

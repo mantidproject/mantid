@@ -11,7 +11,7 @@ Below are listed the current recommendations for which minimizers to use with Ma
 
 The above recommendations are based on the results presented in sections below.
 
-We are expanding the set of fitting problems we test against, which may, for example, 
+We are expanding the set of fitting problems we test against, which may, for example,
 provide enough evidence to recommend different minimizers for different subsets of neutron
 fitting problems in the future. And, we are constantly looking for new example, in
 particular, where a user has found a fitting difficult or slow.
@@ -73,7 +73,7 @@ function to drive the iterative process towards a local minimum.
 
 BFGS and the Levenberg-Marquardt algorithms belong to the second-order
 class of algorithms, in the sense that they use second-order
-information of the cost function (second-order partial derivatives of 
+information of the cost function (second-order partial derivatives of
 a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
@@ -130,7 +130,7 @@ the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2` (see
 :ref:`CalculateChiSquared <algm-CalculateChiSquared>` for full details
 and different variants).  Run time is measured as the time it takes to
 execute the :ref:`Fit <algm-Fit>` algorithm, i.e. the time it takes to
-fit one model with one set of initial values of the model parameters against 
+fit one model with one set of initial values of the model parameters against
 one dataset
 
 .. There would be two alternative for the errors:
@@ -150,7 +150,7 @@ following information:
 - Dataset in the form of any number of pairs :math:`x_i`, :math:`y_i` with optional :math:`y_i` error estimates
 - Function to fit, with parameters
 - Initial values (starting point) of the function parameters
-- Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
+- Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers
 
 The current problems have been obtained from the following sources:
 
@@ -229,7 +229,7 @@ and on the same system:
   using `GSL <https://www.gnu.org/software/gsl/>`__ version 1.16.
 
 References:
-             
+
 .. [Kelley1999] Kelley C.T. (1999). Iterative Methods for Optimization.
                 SIAM series in Applied Mathematics. Frontiers in Applied
                 Mathematics, vol. 18. ISBN: 978-0-898714-33-3.

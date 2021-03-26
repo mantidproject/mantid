@@ -55,7 +55,7 @@
         <widget class="QGroupBox" name="grpConnection">
          <property name="styleSheet">
           <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
-QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; }
 </string>
          </property>
          <property name="title">
@@ -100,7 +100,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
         <widget class="QGroupBox" name="groupBox">
          <property name="styleSheet">
           <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
-QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; }
 </string>
          </property>
          <property name="title">
@@ -216,7 +216,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           <widget class="QGroupBox" name="grpProcess">
            <property name="styleSheet">
             <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
-QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; }
 </string>
            </property>
            <property name="title">
@@ -309,7 +309,7 @@ p, li { white-space: pre-wrap; }
           <widget class="QGroupBox" name="grpPostProcessing">
            <property name="styleSheet">
             <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
-QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; }
 </string>
            </property>
            <property name="title">
@@ -405,7 +405,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
          </property>
          <property name="styleSheet">
           <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
-QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; }
 </string>
          </property>
          <property name="title">

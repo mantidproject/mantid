@@ -46,10 +46,10 @@ the plot and creating an empty plot (no data).
 
             self.figure = plt.figure()
             grid = QtWidgets.QVBoxLayout(self)
-            self.draw() 
+            self.draw()
             self.canvas = self.getWidget()
             grid.addWidget(self.canvas)
-            self.setLayout(grid) 
+            self.setLayout(grid)
 
         def draw(self):
             ax = self.figure.add_subplot(111)
@@ -66,7 +66,7 @@ the plot and creating an empty plot (no data).
         def addData(self, xvalues, yvalues, grid_lines, colour, marker):
             ax = self.draw()
             ax.grid(grid_lines)
-            ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--") 
+            ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")
             self.canvas.draw()
 
 The ``draw`` method creates the plot area without any data. The widget

@@ -17,7 +17,7 @@ public:
     {
         int n = 42;
         char x = 'x', y = 'y';
-        
+
         TSM_ASSERT( "String", false );
         TSM_ASSERT( n, false );
         TSM_ASSERT_EQUALS( "String", 2 + 2, 5 );

@@ -28,7 +28,7 @@ transition rate. This, along with the circle radius :math:`r`, conform
 the two fundamental fitting parameters of the structure factor
 :math:`S(Q,E)`:
 
-.. math:: 
+.. math::
 
    S(Q,E) \equiv = \int e^{-iEt/\hbar} I(Q,t) dt = A_0(Q,r) \delta (E) + \frac{1}{\pi} \sum_{l=1}^{N-1} A_l (Q,r) \frac{\hbar \tau_l^{-1}}{(\hbar \tau_l^{-1})^2+E^2}
 

@@ -24,8 +24,8 @@ inline unsigned swap_int(unsigned a)
     union { unsigned u; unsigned char c[4]; } temp;
     unsigned char ctemp;
     temp.u = a;
-    ctemp = temp.c[0]; temp.c[0] = temp.c[3]; temp.c[3] = ctemp; 
-    ctemp = temp.c[1]; temp.c[1] = temp.c[2]; temp.c[2] = ctemp; 
+    ctemp = temp.c[0]; temp.c[0] = temp.c[3]; temp.c[3] = ctemp;
+    ctemp = temp.c[1]; temp.c[1] = temp.c[2]; temp.c[2] = ctemp;
     return temp.u;
 }
 #endif

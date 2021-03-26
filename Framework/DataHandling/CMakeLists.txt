@@ -684,7 +684,7 @@ target_link_libraries(DataHandling
                       Catalog)
 
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling LINK_PRIVATE 
+  target_link_libraries(DataHandling LINK_PRIVATE
                         ${LIB3MF_LIBRARIES})
 endif()
 

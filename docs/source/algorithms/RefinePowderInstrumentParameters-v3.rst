@@ -21,18 +21,18 @@ FitPowderDiffPeaks().
 Introduction
 ############
 
-In order to do Rietveld refinement to experimental data, the diffractometer’s profile should be calibrated by the standards, such as LaB6 or Ni, 
-with known crystal structure and lattice parameters.  
+In order to do Rietveld refinement to experimental data, the diffractometer’s profile should be calibrated by the standards, such as LaB6 or Ni,
+with known crystal structure and lattice parameters.
 
-For POWGEN and NOMAD, the type of the instrument profile is back-to-back exponential function convoluted with 
+For POWGEN and NOMAD, the type of the instrument profile is back-to-back exponential function convoluted with
 pseudo voigt of thermal neutron and epithermal neutron.
-It means that each diffraction peak is a back-to-back exponential, 
+It means that each diffraction peak is a back-to-back exponential,
 
 .. math:: I\frac{AB}{2(A+B)}\left[ \exp \left( \frac{A[AS^2+2(x-X0)]}{2}\right) \mbox{erfc}\left( \frac{AS^2+(x-X0)}{S\sqrt{2}} \right) + \exp \left( \frac{B[BS^2-2(x-X0)]}{2} \right) \mbox{erfc} \left( \frac{[BS^2-(x-X0)]}{S\sqrt{2}} \right) \right].
 
 with peak parameter :math:`A`, :math:`B`, :math:`X_0` and :math:`S`
 
-And their corresponding peak parameters are functions described as 
+And their corresponding peak parameters are functions described as
 .. math::
 
    n_{cross} = \frac{1}{2} erfc(Width(xcross\cdot d^{-1}))
@@ -106,10 +106,10 @@ where
 Break down the problem
 ######################
 
-If we can do the single peak fitting on each single diffraction peak in a certain range, 
+If we can do the single peak fitting on each single diffraction peak in a certain range,
 then we can divide the optimization problem into 4 sub problems for :math:`X_0`, :math:`A`,
-:math:`B` and :math:`S`, with the constraint on :math:`n`, the ratio between thermal 
-and epi thermal neutrons. 
+:math:`B` and :math:`S`, with the constraint on :math:`n`, the ratio between thermal
+and epi thermal neutrons.
 
 The function to fit is
 
@@ -138,8 +138,8 @@ The coefficients in this function are strongly correlated to each other.
 Current Implementation
 ######################
 
-Only the parameters of the function for :math:`X_0` are fitted in 
-present implementation. 
+Only the parameters of the function for :math:`X_0` are fitted in
+present implementation.
 
 Refinement Algorithm
 ####################

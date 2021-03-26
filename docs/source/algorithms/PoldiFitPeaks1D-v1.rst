@@ -37,24 +37,24 @@ The following small usage example performs a peak fit on the sample data already
     raw_6904 = LoadSINQFile(Filename = "poldi2013n006904.hdf", Instrument = "POLDI")
     LoadInstrument(raw_6904, InstrumentName = "POLDI", RewriteSpectraMap=True)
     correlated_6904 = PoldiAutoCorrelation(raw_6904)
-    
+
     # Run peak search algorithm, store peaks in TableWorkspace
     peaks_6904 = PoldiPeakSearch(correlated_6904)
-    
+
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
                     OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904",
                     Version=1)
-                    
+
     print("There are {} plots available for inspection.".format(mtd['fit_plots_6904'].getNumberOfEntries()))
-    
+
 Output:
 
 .. testoutput:: ExSiliconPeakFit
 
     There are 14 plots available for inspection.
-    
+
 .. categories::
 
 .. sourcelink::

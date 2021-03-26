@@ -44,7 +44,7 @@ Usage
 
     import numpy as np
 
-    wsBase=CreateSampleWorkspace()    
+    wsBase=CreateSampleWorkspace()
     ws=CreateSampleWorkspace()
     noisyY =  np.array(ws.readY(0))
     noisyY[0]=1e20

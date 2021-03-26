@@ -25,7 +25,7 @@ approximations to the Voigt function exist making it palatable for
 fitting in a least-squares algorithm. The approximation used here is
 described in
 
--  A.B. McLean, C.E.J. Mitchell, and D.M. Swanston. *Implementation of an Efficient Analytical Approximation to the Voigt Function for Photoemission Lineshape Analysis.* Journal of Electron Spectroscopy and Related Phenomena **69.2** (1994): 125–132 
+-  A.B. McLean, C.E.J. Mitchell, and D.M. Swanston. *Implementation of an Efficient Analytical Approximation to the Voigt Function for Photoemission Lineshape Analysis.* Journal of Electron Spectroscopy and Related Phenomena **69.2** (1994): 125–132
    `doi:10.1016/0368-2048(94)02189-7  <http://dx.doi.org/10.1016/0368-2048(94)02189-7>`__
 
 The approximation uses a combination of 4 Lorentzians in two variables

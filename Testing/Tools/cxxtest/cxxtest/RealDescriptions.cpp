@@ -14,12 +14,12 @@
 
 #include <cxxtest/RealDescriptions.h>
 
-namespace CxxTest 
+namespace CxxTest
 {
     RealTestDescription::RealTestDescription()
     {
     }
-        
+
     RealTestDescription::RealTestDescription( List &argList,
                                               SuiteDescription &argSuite,
                                               unsigned argLine,
@@ -38,7 +38,7 @@ namespace CxxTest
         _testName = argTestName;
         attach( argList );
     }
-        
+
     bool RealTestDescription::setUp()
     {
         if ( !suite() )
@@ -103,7 +103,7 @@ namespace CxxTest
         _TS_CATCH_ABORT( {} )
             ___TSM_CATCH( file(), line(), "Exception thrown from test" );
     }
-        
+
     RealSuiteDescription::RealSuiteDescription() {}
     RealSuiteDescription::RealSuiteDescription( const char *argFile,
                                                 unsigned argLine,
@@ -122,7 +122,7 @@ namespace CxxTest
         _line = argLine;
         _suiteName = argSuiteName;
         _tests = &argTests;
-            
+
         attach( _suites );
     }
 
@@ -134,9 +134,9 @@ namespace CxxTest
     const TestDescription *RealSuiteDescription::firstTest() const { return (const RealTestDescription *)_tests->head(); }
     SuiteDescription *RealSuiteDescription::next() { return (RealSuiteDescription *)Link::next(); }
     const SuiteDescription *RealSuiteDescription::next() const { return (const RealSuiteDescription *)Link::next(); }
-        
+
     unsigned RealSuiteDescription::numTests() const { return _tests->size(); }
-    
+
     const TestDescription &RealSuiteDescription::testDescription( unsigned i ) const
     {
         return *(RealTestDescription *)_tests->nth( i );
@@ -146,7 +146,7 @@ namespace CxxTest
     {
         _tests->activateAll();
     }
-        
+
     bool RealSuiteDescription::leaveOnly( const char *testName )
     {
         for ( TestDescription *td = firstTest(); td != 0; td = td->next() ) {
@@ -155,9 +155,9 @@ namespace CxxTest
                 return true;
             }
         }
-        return false;        
+        return false;
     }
-        
+
     StaticSuiteDescription::StaticSuiteDescription() {}
     StaticSuiteDescription::StaticSuiteDescription( const char *argFile, unsigned argLine,
                                                     const char *argSuiteName, TestSuite &argSuite,
@@ -174,7 +174,7 @@ namespace CxxTest
         RealSuiteDescription::initialize( argFile, argLine, argSuiteName, argTests );
         doInitialize( argSuite );
     }
-        
+
     void StaticSuiteDescription::doInitialize( TestSuite &argSuite )
     {
         _suite = &argSuite;
@@ -218,17 +218,17 @@ namespace CxxTest
         _createLine = argCreateLine;
         _destroyLine = argDestroyLine;
     }
-        
+
     List &RealWorldDescription::suites()
     {
         return RealSuiteDescription::_suites;
     }
-        
+
     unsigned RealWorldDescription::numSuites( void ) const
     {
         return suites().size();
     }
-        
+
     unsigned RealWorldDescription::numTotalTests( void ) const
     {
         unsigned count = 0;
@@ -236,7 +236,7 @@ namespace CxxTest
             count += sd->numTests();
         return count;
     }
-        
+
     SuiteDescription *RealWorldDescription::firstSuite()
     {
         return (RealSuiteDescription *)suites().head();
@@ -274,7 +274,7 @@ namespace CxxTest
         }
         return false;
     }
-        
+
     bool RealWorldDescription::setUp()
     {
         for ( GlobalFixture *gf = GlobalFixture::firstGlobalFixture(); gf != 0; gf = gf->nextGlobalFixture() ) {

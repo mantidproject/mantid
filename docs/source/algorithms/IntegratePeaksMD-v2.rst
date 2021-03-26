@@ -68,8 +68,8 @@ the provided radii. Errors are also summed in quadrature.
 
 -  **AdaptiveQMultiplier** can be used for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
 
-   -  PeakRadius + AdaptiveQMultiplier * **|Q|** 
-   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** 
+   -  PeakRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**
    -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
 
 Background Subtraction
@@ -107,19 +107,19 @@ If BackgroundInnerRadius is left blank, then **BackgroundInnerRadius** =
 IntegrateIfOnEdge option
 ###################################
 
-Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument. 
+Edges for each bank or pack of tubes of the instrument are defined by masking the edges in the PeaksWorkspace instrument.
 e.g. For TOPAZ pixels 0 and 255 in both directions for the Rectangular Detector.
 Q in the lab frame for every peak is calculated, call it C
 For every point on the edge, the trajectory in reciprocal space is a straight line, going through:
 
 :math:`\vec{O}=(0,0,0)`
 
-Calculate a point at a fixed momentum, say k=1. 
+Calculate a point at a fixed momentum, say k=1.
 Q in the lab frame:
 
 :math:`\vec{E}=(-k*sin(\theta)*cos(\phi),-k*sin(\theta)*sin(\phi),k-k*cos(\phi))`
 
-Normalize E to 1: 
+Normalize E to 1:
 
 :math:`\vec{E}=\vec{E}*(1./\left|\vec{E}\right|)`
 
@@ -131,19 +131,19 @@ If:
 
 :math:`\left|dv\right|<PeakRadius`
 
-for the integration, one of the detector trajectories on the edge is too close to the peak 
+for the integration, one of the detector trajectories on the edge is too close to the peak
 This method is also applied to all masked pixels.  If there are masked pixels trajectories inside an integration volume, the peak must be rejected.
 
-   
+
 CorrectIfOnEdge option
 ###################################
 
-This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option  
-is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.  
+This is an extension of what was calculated for the IntegrateIfOnEdge option.  It will only be calculated if this option
+is true and the minimum dv is less than PeakRadius or BackgroundOuterRadius.
 
 For the background if
 
-:math:`\left|dv\right|_{min}<BackgroundOuterRadius` 
+:math:`\left|dv\right|_{min}<BackgroundOuterRadius`
 
 :math:`h = BackgroundOuterRadius - \left|dv\right|_{min}`
 
@@ -181,17 +181,17 @@ The integrated intensity is multiplied by the ratio of the volume of the sphere 
 :math:`I_{peakMultiplier} = V_{sphere} / (V_{sphere} - V_{cap})`
 
 
-   
+
 Usage
 ------
 
 **Example - IntegratePeaks:**
 
-User should provide its own 
+User should provide its own
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
 file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
-.. The code itself works but disabled from doc tests as takes too long to complete. 
+.. The code itself works but disabled from doc tests as takes too long to complete.
 .. .. testcode:: exIntegratePeaksMD
 
 .. code-block:: python
@@ -206,7 +206,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
               name= name[:8]
            row += "| {:8} ".format(name)
        print(row + "|")
-   
+
        for i in range(nRows):
            row = ""
            for name in tab_names:
@@ -228,9 +228,9 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
    peaks= IntegratePeaksMD(InputWorkspace='TOPAZ_3132_md', PeaksWorkspace='peaks',\
         PeakRadius=0.12, BackgroundOuterRadius=0.2, BackgroundInnerRadius=0.16,\
         OutputWorkspace='peaks')
-        
+
    # print the integration results
-   print_tableWS(peaks,10)   
+   print_tableWS(peaks,10)
 
 **Output:**
 

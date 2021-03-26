@@ -5,7 +5,7 @@ Workspaces in Scripts
 =====================
 
 
-The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and manage workspaces within Mantid. Behind the scenes, the Analysis Data Service or ADS is used to control these workspaces. 
+The :ref:`Workspaces Toolbox<WorkbenchWorkspaceToolbox>` is used to store and manage workspaces within Mantid. Behind the scenes, the Analysis Data Service or ADS is used to control these workspaces.
 
 Below are some examples of how to control workspaces with a script.
 
@@ -49,8 +49,8 @@ Required import:
     ws2 = CreateSampleWorkspace()
     ws3 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces([ws1,ws2,ws3])
-    
-    # or if you only have the names of the workspaces 
+
+    # or if you only have the names of the workspaces
     wsGroup = GroupWorkspaces(['ws1','ws2','ws3'])
 
 :ref:`Save a Workspace in a supported ASCII format <algm-SaveAscii>`:
@@ -71,10 +71,10 @@ Plot Spectra from a Workspace:
 
     # simple plot of 1 spectrum
     plotSpectrum(ws, 0)
-    
+
     # Plot of 3 spectra, and error bars
     plotSpectrum(ws, [0,1,2], error_bars=True)
-    
+
     # Waterfall plot from two workspaces, with two spectra from each
     plotSpectrum([ws1, ws2], [0,1], waterfall=True)
 
@@ -138,7 +138,7 @@ Useful links
 
 * :ref:`WorkingWithWorkspaces`
 * :ref:`More ADS options <mantid.api.AnalysisDataServiceImpl>`
-* :ref:`Analysis Data Service Explained <Analysis Data Service>` 
+* :ref:`Analysis Data Service Explained <Analysis Data Service>`
 
 
 Overall Example

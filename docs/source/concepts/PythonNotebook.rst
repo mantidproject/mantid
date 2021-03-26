@@ -30,7 +30,7 @@ Launch Jupyter Notebook:
    C:\MantidInstall\bin\mantidpython.bat notebook
 
 
-MacOS 
+MacOS
 -----
 
 Open Terminal.

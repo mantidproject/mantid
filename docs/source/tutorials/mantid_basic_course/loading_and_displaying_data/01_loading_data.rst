@@ -1,7 +1,7 @@
 .. _01_loading_data:
 
 ============
-Loading Data 
+Loading Data
 ============
 
 .. figure:: /images/ShowLoadandWorkspaceAreaInMantidWB.png
@@ -17,7 +17,7 @@ instrument:
    red), and select "File". This will open the Load Dialog window.
 #. Browse to the location of the file MAR11060.raw.
 
-   -  If you successfully added the "TrainingCourseData" directory 
+   -  If you successfully added the "TrainingCourseData" directory
       to the data search directories (see
       :ref:`getting_started`) then you can simply
       enter the filename "MAR11060.raw" in the File textbox.

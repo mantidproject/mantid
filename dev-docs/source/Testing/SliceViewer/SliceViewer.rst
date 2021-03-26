@@ -37,7 +37,7 @@ Data
 	from mantid.simpleapi import *
 
 	# SXD23767.raw is available in the TrainingCourseData from the downloads page
-	SXD23767 = Load(Filename='SXD23767.raw', LoadMonitors='Exclude') 
+	SXD23767 = Load(Filename='SXD23767.raw', LoadMonitors='Exclude')
 	# Set some UB with angles we can play with
 	SetUB(SXD23767, 1,1,2,90,90,120)
 	md_non_ortho = ConvertToDiffractionMDWorkspace(InputWorkspace='SXD23767', OutputDimensions='HKL')
@@ -49,11 +49,11 @@ Data
 
 - Create a PeaksWorkspace:
 
-  - Open instrument viewer by right-clicking on the workspace``SXD23767``. 
+  - Open instrument viewer by right-clicking on the workspace``SXD23767``.
   - On the *Pick* tab, select the |PickTabAddPeakButton.png| "Add a single crystal peak" button.
-  - Click on an intense bragg peak on the detectors, and then click on one or many of the intense peaks in the produced mini-plot. Repeat for a few different bragg peaks across the detectors. 
+  - Click on an intense bragg peak on the detectors, and then click on one or many of the intense peaks in the produced mini-plot. Repeat for a few different bragg peaks across the detectors.
   - Notice that this has produced a ``SingleCrystalPeakTable``.
-  - Rename the above workspace to ``peaks`` and in instrument viewer, select more peaks for a second peaksworkspace. 
+  - Rename the above workspace to ``peaks`` and in instrument viewer, select more peaks for a second peaksworkspace.
 
 - Create an Integrated PeaksWorkspace:
 
@@ -103,11 +103,11 @@ For the data types above:
 - Select the peak overlay button to choose which PeakWorkspace/s to overlay
 - Click on different peaks in the peak sorting table to display them
 - Try overlaying multiple peaks workspaces
-- Overlay Integrated peaks and observe the peak radius and background shell 
+- Overlay Integrated peaks and observe the peak radius and background shell
   (see *Calculations* section of :ref:`algm-IntegratePeaksMD`) as displayed in the image below.
 - Click on a column title in the peak table to sort by that value, such as ``DetID``
-- Zooming in on peaks, and check that the data and peak move together 
-- Repeat step 2. (Select Axes) with peaks shown 
+- Zooming in on peaks, and check that the data and peak move together
+- Repeat step 2. (Select Axes) with peaks shown
 - Peak overlay should not be shown for 2D data
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-peaksoverlay.png
@@ -118,7 +118,7 @@ For the data types above:
 5. Toolbar buttons for changing axis limits
 ###########################################
 
-- Home 
+- Home
 - Pan + Stretch
 - Zoom (dynamic rebinning to ``_svrebinned`` workspace) - both by selecting region with mouse and scrolling
 

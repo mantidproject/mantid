@@ -53,7 +53,7 @@ The data from all spectra can be obtained as a mutable multi-dimensional array i
     print(y.shape)
     print(e.shape)
 
-Since the *extract* methods return multi-dimensional numpy arrays. So to use  *extract* in a similar way to *read*, you need to `slice these arrays with indexing <https://numpy.org/doc/1.18/reference/arrays.indexing.html>`_. 
+Since the *extract* methods return multi-dimensional numpy arrays. So to use  *extract* in a similar way to *read*, you need to `slice these arrays with indexing <https://numpy.org/doc/1.18/reference/arrays.indexing.html>`_.
 
 E.g. instead of `ws.readX(5)` you should use:
 
@@ -79,7 +79,7 @@ This allows access to the individual bins in each spectrum. E.g. to sum the y-va
 	    sum_counts = 0
 	    # Inner loop. Loop over bins.
 	    for j in range(ws.blocksize()):
-	        sum_counts += y[j] 
+	        sum_counts += y[j]
 	    # Display spectrum number against sum_counts
 	    print("Spectrum Number: {0}, Total Counts: {1}".format(ws.getSpectrum(i).getSpectrumNo(), sum_counts))
 
@@ -87,7 +87,7 @@ This allows access to the individual bins in each spectrum. E.g. to sum the y-va
 Creating Output Workspaces
 ==========================
 
-We may perform some processing on the data arrays before creating our new workspace. 
+We may perform some processing on the data arrays before creating our new workspace.
 
 Creating a MatrixWorkspace
 --------------------------
@@ -105,7 +105,7 @@ E.g. Change the x-axis for TOF from microseconds to milliseconds:
     from mantid.plots._compatability import plotSpectrum
 
     # Load and Read data
-    ws = Load(Filename="HRP39182.RAW")	
+    ws = Load(Filename="HRP39182.RAW")
     x = ws.readX(0)
     y = ws.readY(0)
     e = ws.readE(0)
@@ -133,7 +133,7 @@ E.g. To read out the value in the first bin for each spectrum:
 .. code-block:: python
 
     ws = Load(Filename="GEM40979.RAW")
-    
+
     table = CreateEmptyTableWorkspace()
     table.addColumn('int', 'Spectrum Number')
     table.addColumn('double', 'First Bin Value')

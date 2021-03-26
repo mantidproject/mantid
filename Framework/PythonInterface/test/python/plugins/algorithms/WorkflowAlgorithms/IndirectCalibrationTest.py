@@ -20,7 +20,7 @@ class IndirectCalibrationTest(unittest.TestCase):
         self.assertEqual(cal_ws.getNumberHistograms(), 51)
         self.assertEqual(cal_ws.blocksize(), 1)
 
-    
+
     def test_logs(self):
         cal_ws = IndirectCalibration(InputFiles='IRS38633.raw',
                                             DetectorRange=[3,53],
@@ -30,8 +30,8 @@ class IndirectCalibrationTest(unittest.TestCase):
 
         self.assertEqual(cal_ws.getNumberHistograms(), 51)
         self.assertEqual(cal_ws.blocksize(), 1)
-        
+
         self.assertEqual(cal_ws.run().getProperty('current_period').value, 1)
-        
+
 if __name__ == "__main__":
 	unittest.main()
