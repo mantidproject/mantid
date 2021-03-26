@@ -239,9 +239,11 @@ void MDNorm::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
-                      "OutputBackgroundNormalizationWorkspace", "", Direction::Output, PropertyMode::Optional),
-                  "A name for the output background normalization MDHistoWorkspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>(
+          "OutputBackgroundNormalizationWorkspace", "", Direction::Output,
+          PropertyMode::Optional),
+      "A name for the output background normalization MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -607,14 +609,13 @@ void MDNorm::exec() {
   // Outputs for background related
   if (m_backgroundWS) {
     // auto outputBkgdWS = binBackgroundWS(symmetryOps);
-    // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with outputBkgdDataWS!
-    // [Task 88]
+    // TODO/FIXME - Implement binBackgroundWS and replace outputDataWS with
+    // outputBkgdDataWS! [Task 88]
     createBackgroundNormalizationWS(*outputDataWS);
     this->setProperty("OutputBackgroundNormalizationWorkspace", m_bkgdNormWS);
     // TODO/FIXME [Task 88] Enable this
     // this->setProperty("OutputDataWorkspace", outputBkgdWS);
   }
-
 
   m_numExptInfos = outputDataWS->getNumExperimentInfo();
   // loop over all experiment infos
@@ -883,7 +884,7 @@ void MDNorm::createBackgroundNormalizationWS(
 
   // requiring background workspace is specified
   if (!m_backgroundWS) {
-      return;
+    return;
   }
 
   // Copy the MDHisto workspace, and change signals and errors to 0.
@@ -895,7 +896,6 @@ void MDNorm::createBackgroundNormalizationWS(
     m_bkgdNormWS->setTo(0., 0., 0.);
   }
 }
-
 
 /**
  * Validates the TemporaryDataWorkspace has the same binning

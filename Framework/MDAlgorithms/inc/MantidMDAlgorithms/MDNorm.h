@@ -40,7 +40,8 @@ private:
   std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
-  void createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
+  void
+  createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
 
   DataObjects::MDHistoWorkspace_sptr
   binInputWS(const std::vector<Geometry::SymmetryOperation> &symmetryOps);
