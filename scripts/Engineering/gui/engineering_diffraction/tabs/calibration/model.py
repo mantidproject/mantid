@@ -222,8 +222,8 @@ class CalibrationModel(object):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
+        :param vanadium_workspace: The workspace with the vanadium data
         :param van_integration: The integration values from the vanadium corrections
-        :param van_curves: The curves from the vanadium corrections.
         :param full_calib_ws: Full pixel calibration of the detector (optional)
         :param bank: The bank to crop to, both if none.
         :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
@@ -249,7 +249,7 @@ class CalibrationModel(object):
             EditInstrumentGeometry(Workspace=normalised, L2='1.5', Polar='90', InstrumentName='ENGIN-X')
             tof_focused = ConvertUnits(InputWorkspace=normalised, Target='TOF')
 
-            return tof_focused
+            return tof_focused, focused_van
 
         # need to clone the data as PDCalibration rebins
         sample_raw = CloneWorkspace(InputWorkspace=sample_ws)
@@ -313,6 +313,10 @@ class CalibrationModel(object):
                 cal_output.append(cal_north)
         else:
             pass
+            # grouping ws from spectra numbers
+            # CreateMaskWorkspace?
+            # MaskSpectra/MaskDetectors investigate
+            #
             # TODO
 
         output = list()
