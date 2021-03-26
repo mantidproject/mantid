@@ -137,7 +137,7 @@ void CompareWorkspaces::init() {
                   "The name of the second input workspace.");
 
   declareProperty(
-      "Tolerance", 0.0,
+      "Tolerance", 1e-10,
       "The maximum amount by which values may differ between the workspaces.");
 
   declareProperty("CheckType", true,
@@ -1153,6 +1153,11 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
         s2 = peak2.getCol();
       }
       if (std::fabs(s1 - s2) > tolerance) {
+        g_log.debug(name);
+        g_log.debug() << "s1 = " << s1 << "\n"
+                      << "s2 = " << s2 << "\n"
+                      << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
+                      << "tolerance = " << tolerance << "\n";
         g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j
                       << ")\n";
         recordMismatch("Data mismatch");
