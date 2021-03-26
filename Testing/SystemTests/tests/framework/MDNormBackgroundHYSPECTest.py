@@ -17,7 +17,7 @@ from typing import Tuple
 import systemtesting
 
 
-class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
+class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
     tolerance = 1e-8
 
@@ -114,7 +114,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                Dimension3Name='QDimension0',
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               OutputWorkspace='result',
+               OutputWorkspace='reducedMD',
                OutputDataWorkspace='dataMD',
                OutputNormalizationWorkspace='normMD')
 
@@ -221,6 +221,11 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
         clean_data = r.OutputWorkspace
 
         SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
+
+        # MinusMD(LHSWorkspace='reducedMD',
+        #         RHSWorkspace='backgroundMDH',
+        #         OutputWorkspace='result')
+        # SaveMD(InputWorkspace='result', Filename='/tmp/clean.nxs')
         SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
         SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
         SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
@@ -247,7 +252,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result', 'MDNormHYSPEC.nxs'
+        return 'result', 'MDNormBackgroundHYSPEC.nxs'
 
     @staticmethod
     def prepare_single_exp_info_background(input_md_name, output_md_name, target_qframe='Q_lab'):
@@ -319,5 +324,31 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputBackgroundNormalizationWorkspace=background_temp_ws_names[1])
 
         clean_md = mtd['result']
+        #        OutputWorkspace='reducedMD',
+        #        OutputDataWorkspace='dataMD',
+        #        OutputNormalizationWorkspace='normMD')
+
+        # # do MDNorm to background
+        # MDNorm(InputWorkspace='background_MDE',
+        #        Dimension0Name='QDimension1',
+        #        Dimension0Binning='-5,0.05,5',
+        #        Dimension1Name='QDimension2',
+        #        Dimension1Binning='-5,0.05,5',
+        #        Dimension2Name='DeltaE',
+        #        Dimension2Binning='-2,2',
+        #        Dimension3Name='QDimension0',
+        #        Dimension3Binning='-0.5,0.5',
+        #        SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
+        #        TemporaryDataWorkspace=background_temp_ws_names[0],
+        #        TemporaryNormalizationWorkspace=background_temp_ws_names[0],  # 'background_dataMD',
+        #        OutputWorkspace='backgroundMDH',
+        #        OutputDataWorkspace='background_dataMD',
+        #        OutputNormalizationWorkspace='background_normMD')
+
+        # # clean
+        # clean_md = MinusMD(LHSWorkspace='reducedMD',
+        #                    RHSWorkspace='backgroundMDH',
+        #                    OutputWorkspace=output_ws_name)
+        # origin/SPEC59_MDNormBkgd_feature
 
         return clean_md
