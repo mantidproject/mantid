@@ -9,17 +9,15 @@
 """
 System test for MDNorm
 """
-
 from mantid.simpleapi import (config, Load, SetGoniometer, GenerateEventsFilter, FilterEvents, DeleteWorkspace,
                               DgsReduction, SetUB, CropWorkspaceForMDNorm, ConvertToMD, MergeMD,
                               MDNorm, CloneWorkspace, AddSampleLogMultiple, mtd, SaveMD,
                               MinusMD)
-import pytest
 from typing import Tuple
-# FIXME import systemtesting
+import systemtesting
 
 
-class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
+class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
 
     tolerance = 1e-8
 
@@ -151,7 +149,7 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
         :return:
         """
         # Test raise exception for wrong background MDE type
-        with pytest.raises(RuntimeError):
+        try:
             # Create background workspace in Q lab
             ConvertToMD(InputWorkspace='reduced_1',
                         QDimensions='Q3D',
@@ -176,6 +174,10 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
                    OutputNormalizationWorkspace='normMD')
 
             DeleteWorkspace(Workspace='bkgd_md')
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError(f'Expected failure due to Background MD in Q_sample.')
 
         return True
 
@@ -201,7 +203,7 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
 
         # Test new solutions
         r = MDNorm(InputWorkspace='merged',
-                   BackgroundWorkspace='bkgd_md',  # TODO Enable/Disable
+                   BackgroundWorkspace='bkgd_md',
                    Dimension0Name='QDimension1',
                    Dimension0Binning='-5,0.05,5',
                    Dimension1Name='QDimension2',
@@ -319,6 +321,3 @@ class MDNormHYSPECBackgroundTest:  # FIXME systemtesting.MantidSystemTest):
         clean_md = mtd['result']
 
         return clean_md
-
-
-MDNormHYSPECBackgroundTest().runTest()
