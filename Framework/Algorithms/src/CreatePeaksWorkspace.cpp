@@ -40,9 +40,9 @@ void CreatePeaksWorkspace::init() {
   // explicit control of output peak workspace tyep
   // Full: standar peak workspace
   // Lean: LeanElasticPeakWorkspace
-  const std::vector<std::string> peakworkspaceTypes{"Full", "Lean"};
+  const std::vector<std::string> peakworkspaceTypes{"Peak", "LeanElasticPeak"};
   declareProperty(
-      "OutputType", "Full",
+      "OutputType", "Peak",
       std::make_shared<StringListValidator>(peakworkspaceTypes),
       "Output peak workspace type, default to full peak workspace.");
 }
@@ -62,7 +62,7 @@ void CreatePeaksWorkspace::exec() {
   IPeaksWorkspace_sptr out;
   // By default, we generate a PeakWorkspace unless user explicitly
   // requires a LeanElasticPeakWorkspace
-  if (outputType == "Full") {
+  if (outputType == "Peak") {
     out = std::make_shared<PeaksWorkspace>();
     setProperty("OutputWorkspace", out);
 
@@ -93,7 +93,7 @@ void CreatePeaksWorkspace::exec() {
         progress.report();
       }
     }
-  } else if (outputType == "Lean") {
+  } else if (outputType == "LeanElasticPeak") {
     // use LeanElasticPeakWorkspace, which means no instrument related info
     out = std::make_shared<LeanElasticPeaksWorkspace>();
     setProperty("OutputWorkspace", out);

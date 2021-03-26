@@ -73,7 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "Lean"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "LeanElasticPeak"));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
