@@ -190,9 +190,9 @@ class DrillExportModel:
         """
         exportPath = config.getString("defaultsave.directory")
         if not exportPath:
-            logger.warning("Default save directory is not defined. There will "
-                           "be no export from DrILL until this parameter is "
-                           "set in Mantid settings.")
+            logger.warning("Default save directory is not defined. Please "
+                           "specify one in the data directories dialog to "
+                           "enable exports.")
             return
         workspaceName = sample.getOutputName()
 
