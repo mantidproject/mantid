@@ -242,11 +242,11 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peak->setIcon(QIcon(":/PickTools/selection-peak.png"));
   m_peak->setToolTip("Add single crystal peak");
 
-  m_peakSelect = new QPushButton();
-  m_peakSelect->setCheckable(true);
-  m_peakSelect->setAutoExclusive(true);
-  m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
-  m_peakSelect->setToolTip("Erase single crystal peak(s)");
+  m_peakErase = new QPushButton();
+  m_peakErase->setCheckable(true);
+  m_peakErase->setAutoExclusive(true);
+  m_peakErase->setIcon(QIcon(":/PickTools/eraser.png"));
+  m_peakErase->setToolTip("Erase single crystal peak(s)");
 
   m_peakCompare = new QPushButton();
   m_peakCompare->setCheckable(true);
@@ -272,7 +272,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_one, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
   toolBox->addWidget(m_peak, 1, 2);
-  toolBox->addWidget(m_peakSelect, 1, 3);
+  toolBox->addWidget(m_peakErase, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->addWidget(m_peakAlign, 1, 5);
   toolBox->setColumnStretch(8, 1);
@@ -281,7 +281,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
-  connect(m_peakSelect, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakErase, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakAlign, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -449,7 +449,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_activeTool->setText("Tool: Add a single crystal peak");
     surfaceMode = ProjectionSurface::AddPeakMode;
     plotType = DetectorPlotController::Single;
-  } else if (m_peakSelect->isChecked()) {
+  } else if (m_peakErase->isChecked()) {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
     surfaceMode = ProjectionSurface::ErasePeakMode;
@@ -721,8 +721,9 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
     break;
   case PeakCompare:
     m_peakCompare->setChecked(true);
+    break;
   case PeakErase:
-    m_peakSelect->setChecked(true);
+    m_peakErase->setChecked(true);
     break;
   case DrawRectangle:
     m_rectangle->setChecked(true);
@@ -841,7 +842,7 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_tube,         m_peak,           m_peakErase};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -867,7 +868,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_tube,         m_peak,           m_peakErase};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {
