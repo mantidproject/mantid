@@ -13,7 +13,7 @@ Loads an ASCII .hkl file to a PeaksWorkspace.
 
 HKL File Format
 ###############
-        
+
 File has same format that works successfully in GSAS and SHELX from
 ISAW:
 

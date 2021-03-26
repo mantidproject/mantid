@@ -3,7 +3,7 @@ diff --git a/pyport.h b/pyport.h
 +++ b/pyport.h
 @@ -657,6 +657,9 @@
  #endif
- 
+
  #ifdef _PY_PORT_CTYPE_UTF8_ISSUE
 +
 +#ifndef __cplusplus
@@ -18,9 +18,9 @@ diff --git a/pyport.h b/pyport.h
 -#endif
 +
 +#endif /* !__cplusplus */
-+	   
++
 +
 +#endif /* _PY_PORT_CTYPE_UTF8_ISSUE */
- 
- 
+
+
  /* Declarations for symbol visibility.

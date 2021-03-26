@@ -35,7 +35,7 @@ The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per st
 
     # The calculated data will be in 'data', WorkspaceIndex=1
     EvaluateFunction(fun, ws, OutputWorkspace='data')
-     
+
      # Change parameters slightly and fit to the reference data
     fun = 'name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44,ToleranceIntensity=0.002,B20=0.37,B22=3.9,B40=-0.03,B42=-0.1,B44=-0.12,'
     fun += 'f0.FWHM=2.2,f1.FWHM=1.8,f2.FWHM=2.1,'
@@ -44,7 +44,7 @@ The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per st
     # (set MaxIterations=0 to see the starting point)
     Fit(fun, 'data', WorkspaceIndex=1, Output='fit',MaxIterations=100, CostFunction='Unweighted least squares')
     # Using Unweighted least squares fit because the data has no errors.
-     
+
 .. attributes::
 
    Ion;String;Mandatory;An element name for a rare earth ion. Possible values are: Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb.
@@ -54,7 +54,7 @@ The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per st
    ToleranceIntensity;Double;:math:`10^{-3}`;Tolerance in intensity. If difference between intensities of two or more transitions is smaller than this value the transitions are considered degenerate.
    PeakShape;String;Lorentzian;A name of a function (peak type) to describe the shape of each peak. Currently Lorentzian (default) and Gaussian sre supported.
    FWHM;Double;0.0;The default full peak width at half maximum. If not set explicitly via function parameters the peaks will have this width (not fixed).
-   
+
 If the peak functions have any own attributes they can be accessed using the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 
 

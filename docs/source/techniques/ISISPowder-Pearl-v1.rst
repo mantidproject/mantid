@@ -115,7 +115,7 @@ The following parameters may also be optionally set:
 
 - :ref:`file_ext_pearl_isis-powder-diffraction-ref`
 - :ref:`suffix_pearl_isis-powder-diffraction-ref`
-  
+
 Example
 =======
 
@@ -150,8 +150,8 @@ Example
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
-  
-  pearl_example.create_cal(run_number=95671, 
+
+  pearl_example.create_cal(run_number=95671,
                            tt_mode="tt70",
                            long_mode=True,
                            calibration_mapping_file=cal_mapping_file)
@@ -684,11 +684,11 @@ set to the following:
 
   # Long mode OFF:
         create_cal_rebin_1_params: "100,-0.0006,19950"
-	
+
   # Long mode ON:
         create_cal_rebin_1_params: "20300,-0.0006,39990"
 
-	
+
 .. _create_cal_rebin_2_params_pearl_isis-powder-diffraction-ref:
 
 create_cal_rebin_2_params
@@ -715,7 +715,7 @@ set to the following:
 
   cross_corr_reference_spectra: 20
 
-  
+
 .. _cross_corr_ws_index_max_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_max
@@ -729,7 +729,7 @@ set to the following:
 
   cross_corr_ws_index_max: 1063
 
-  
+
 .. _cross_corr_ws_index_min_pearl_isis-powder-diffraction-ref:
 
 cross_corr_ws_index_min
@@ -743,7 +743,7 @@ set to the following:
 
   cross_corr_ws_index_min: 9
 
-  
+
 .. _cros_cor_x_max_pearl_isis-powder-diffraction-ref:
 
 cross_cor_x_max
@@ -879,7 +879,7 @@ is set to the following:
 
   get_det_offsets_x_max: -200
 
-  
+
 .. _get_det_offsets_x_min_pearl_isis-powder-diffraction-ref:
 
 get_det_offsets_x_min
@@ -891,7 +891,7 @@ is set to the following:
 .. code-block:: python
 
   get_det_offsets_x_min: -200
-		
+
 
 .. _monitor_lambda_crop_range_pearl_isis-powder-diffraction-ref:
 
@@ -952,7 +952,7 @@ On PEARL this is set to the following:
 
   monitor_mask_regions: [[3.45, 2.96, 2.1,  1.73],
                          [3.7,  3.2,  2.26, 1.98]]
-					
+
 .. _monitor_spectrum_number_pearl_isis-powder-diffraction-ref:
 
 monitor_spectrum_number
@@ -1028,7 +1028,7 @@ On PEARL this is set to the following:
 
   # Long mode OFF:
     spline_coefficient: 60
-    
+
   # Long mode ON:
     spline_coefficient: 5
 

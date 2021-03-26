@@ -18,7 +18,7 @@ Time dependence of the polarization function for a static muon interacting with 
 .. math:: P_z(t) = \frac{1}{2J+1}\left\{1+\sum^J_{m=-J+1}[\cos^2(2\alpha_m)+\sin^2(2\alpha_m)\cos(\lambda^+_m-\lambda^-_m)t]\right\},
 
 .. math:: P_x(t) = \frac{1}{2J+1}\sum^J_{m=-J} \{ \cos^2\alpha_{m+1}\sin^2\alpha_m\cos(\lambda_{m+1}^+-\lambda_m^+)t +\cos^2\alpha_{m+1}\cos^2\alpha_m\cos(\lambda_{m+1}^+-\lambda_m^-)t +\sin^2\alpha_{m+1}\sin^2\alpha_m\cos(\lambda_{m+1}^--\lambda_m^+)t +\sin^2\alpha_{m+1}\cos^2\alpha_m\cos(\lambda_{m+1}^--\lambda_m^-)t\},
-	
+
 .. math:: \lambda_m^\pm = \frac{1}{2}[\omega_Q(2m^2-2m+1)+\omega_D\pm W_m],
 
 .. math:: W_m = \{(\omega_D+\omega_Q)^2(2m-1)^2+\omega_D^2[J(J+1)-m(m-1)]\}^\frac{1}{2},
@@ -34,7 +34,7 @@ Time dependence of the polarization function for a static muon interacting with 
 and :math:`m` is the z-component of the total orbital quantum number.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

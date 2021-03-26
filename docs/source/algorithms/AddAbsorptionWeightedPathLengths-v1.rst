@@ -48,7 +48,7 @@ The algorithm for calculating the attenuation factor A proceeds as follows. For 
      from the selected position on the beam face to the scatter point
 
    * test for intersections of the track & sample object, giving the number of subsections
-     and corresponding distances within the object for each section, call them :math:`l_{1i}`. There will typically 
+     and corresponding distances within the object for each section, call them :math:`l_{1i}`. There will typically
      be a single intersection and subsection but for complex sample shapes it could in theory be more
 
    * form a second `Track` with the scatter position as the starting point and the direction defined by
@@ -79,10 +79,10 @@ Usage
     # load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
 
-    SetSample(peaks,Geometry={'Shape': 'Cylinder','Height': 5.0,'Radius': 1.0,'Center': [0.,0.,0.]}, 
+    SetSample(peaks,Geometry={'Shape': 'Cylinder','Height': 5.0,'Radius': 1.0,'Center': [0.,0.,0.]},
                               Material={'ChemicalFormula': 'V'})
 
-    # populate the t bar column in the peaks workspace                         
+    # populate the t bar column in the peaks workspace
     AddAbsorptionWeightedPathLengths(peaks)
 
     print("Tbar for first peak {:.11f} cm".format(peaks.getPeak(0).getAbsorptionWeightedPathLength()))

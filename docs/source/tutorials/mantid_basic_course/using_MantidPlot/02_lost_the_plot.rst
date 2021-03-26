@@ -4,7 +4,7 @@
 Have I lost the Plot?
 =====================
 
-If you've made it this far, then you already know how to Load Data, Execute an Algorithm on it, produce a Plot, open Slice Viewer or Instrument Viewer to Display your data and how to fit an appropriate model. 
+If you've made it this far, then you already know how to Load Data, Execute an Algorithm on it, produce a Plot, open Slice Viewer or Instrument Viewer to Display your data and how to fit an appropriate model.
 
 Behind the scenes, Plot and Workbench are very similar, so you can simply use your knowledge of Workbench if you decide (after discussing with your Instrument Scientist) to use Mantid Plot.
 
@@ -13,7 +13,7 @@ Here's some things worth looking out for:
 Where's the script Editor?
 --------------------------
 
-While this is front and centre in Workbench, in Plot you have to click the |ScriptEditorbutton.png| button in the top toolbar to open it. 
+While this is front and centre in Workbench, in Plot you have to click the |ScriptEditorbutton.png| button in the top toolbar to open it.
 
 If want to run a script here, then click Execute > "Execute All" or press "Ctrl+Enter".
 
@@ -40,7 +40,7 @@ Loading, basic Plotting, and Showing Data work the same as in Workbench. But...
 
 Using Algorithms and managing Workspaces within their Toolboxes (however rearranged) works the same way, although...
 
-- There is no Plots Toolbox in Mantid Plot. 
+- There is no Plots Toolbox in Mantid Plot.
 - The Messages Box is called the Results Box in Mantid Plot.
 
 .. |FittingButtonPlot.png| image:: /images/FittingButtonPlot.png

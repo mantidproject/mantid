@@ -48,9 +48,9 @@ Usage
 .. testcleanup:: SaveBankScatteringAngles
 
    os.remove(output_file)
-			
+
 Output:
-       
+
 .. testoutput:: SaveBankScatteringAngles
 
     File contents:

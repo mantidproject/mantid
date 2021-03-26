@@ -34,7 +34,7 @@ we then add the following penalty function to :math:`y_i^{cal}` if
 
 .. math:: p_i = C(x0_{min}-x0)
 
-where :math:`C` is a constant (default 1000). The penalty function when 
+where :math:`C` is a constant (default 1000). The penalty function when
 :math:`x0 > x0_{max}` takes the form:
 
 .. math:: p_i = C(x0-x0_{max})
@@ -45,7 +45,7 @@ If more than one constraint is defined, then for each violated
 constraint a penalty of the type defined above is added to the
 calculated fitting function.
 
-If the penalty C is not the default value of 1000, then the 
+If the penalty C is not the default value of 1000, then the
 constraint penalty value will be included whenever the function
 is converted to a string.  For example:
 

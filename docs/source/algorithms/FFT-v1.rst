@@ -19,9 +19,9 @@ inverse ("Backward").
 
 Note that it is assumed that the input data has the x origin in the
 middle of the x-value range. It means that for the data defined on
-an interval [A,B] the output :math:`F(\xi_k)` must be multiplied by 
+an interval [A,B] the output :math:`F(\xi_k)` must be multiplied by
 :math:`e^{-2\pi ix_0\xi_k}`, where :math:`x_0=\tfrac{1}{2}(A+B)` and
-:math:`\xi_k` is the frequency. This can be achieved by using the 
+:math:`\xi_k` is the frequency. This can be achieved by using the
 input parameter *Shift*, which applies a phase shift to the transform,
 or by setting *AutoShift* on to do this automatically.
 
@@ -202,7 +202,7 @@ Usage
 
 .. testcode:: FFTBackwards
 
-   #Create Sample Workspace 
+   #Create Sample Workspace
    ws = CreateSampleWorkspace(WorkspaceType = 'Event', NumBanks = 1, Function = 'Exp Decay', BankPixelWidth = 1, NumEvents = 100)
 
    #apply the FFT algorithm - note output is point data
@@ -216,7 +216,7 @@ Usage
 Output:
 
 .. testoutput:: FFTBackwards
-	
+
    DataX(0)[1] equals DataX(0)[99]? : True
    DataX(0)[10] equals DataX(0)[90]? : True
    DataX((0)[50] equals 0? : True
