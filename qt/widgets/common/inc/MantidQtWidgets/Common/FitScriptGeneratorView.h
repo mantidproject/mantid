@@ -56,6 +56,9 @@ public:
 
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
+  [[nodiscard]] FitDomainIndex currentRow() const override;
+
+  [[nodiscard]] bool hasLoadedData() const override;
 
   [[nodiscard]] double
   parameterValue(std::string const &parameter) const override;
@@ -76,7 +79,7 @@ public:
 
   void resetSelection() override;
 
-  bool isAddRemoveFunctionForAllChecked() const override;
+  bool applyFunctionChangesToAll() const override;
 
   void clearFunction() override;
   void setFunction(Mantid::API::IFunction_sptr const &function) const override;

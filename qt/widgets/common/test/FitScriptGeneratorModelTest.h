@@ -236,9 +236,10 @@ public:
     m_model->addWorkspaceDomain(m_wsName, m_wsIndex, m_startX, m_endX);
     m_model->addFunction(m_wsName, m_wsIndex, m_flatBackground->asString());
 
-    TS_ASSERT_THROWS(
-        m_model->addFunction(m_wsName, m_wsIndex, m_composite->asString()),
-        std::invalid_argument const &);
+    m_model->addFunction(m_wsName, m_wsIndex, m_composite->asString());
+
+    TS_ASSERT_EQUALS(m_model->getFunction(m_wsName, m_wsIndex)->asString(),
+                     m_flatBackground->asString());
   }
 
   void
