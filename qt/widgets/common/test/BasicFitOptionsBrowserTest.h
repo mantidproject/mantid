@@ -97,13 +97,10 @@ public:
   }
 
   void
-  test_that_setProperty_will_not_change_the_minimizer_if_provided_a_minimizer_that_does_not_exist() {
+  test_that_setProperty_will_throw_if_attempting_to_set_a_minimizer_that_does_not_exist() {
     auto const minimizer = "Bad Minimizer";
-
-    m_fitOptionsBrowser->setProperty("Minimizer", minimizer);
-
-    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getProperty("Minimizer"),
-                     "Levenberg-Marquardt");
+    TS_ASSERT_THROWS(m_fitOptionsBrowser->setProperty("Minimizer", minimizer),
+                     std::invalid_argument const &);
   }
 
   void test_that_setProperty_will_set_the_cost_function_as_expected() {
@@ -116,13 +113,11 @@ public:
   }
 
   void
-  test_that_setProperty_will_not_change_the_cost_function_if_provided_a_cost_function_that_does_not_exist() {
+  test_that_setProperty_will_throw_if_attempting_to_set_a_cost_function_that_does_not_exist() {
     auto const costFunction = "Bad Cost Function";
-
-    m_fitOptionsBrowser->setProperty("Cost Function", costFunction);
-
-    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getProperty("Cost Function"),
-                     "Least squares");
+    TS_ASSERT_THROWS(
+        m_fitOptionsBrowser->setProperty("Cost Function", costFunction),
+        std::invalid_argument const &);
   }
 
   void test_that_setProperty_will_set_the_evaluation_type_as_expected() {
@@ -135,13 +130,11 @@ public:
   }
 
   void
-  test_that_setProperty_will_not_change_the_evaluation_type_if_provided_a_evaluation_type_that_does_not_exist() {
+  test_that_setProperty_will_throw_if_attempting_to_set_a_evaluation_type_that_does_not_exist() {
     auto const evaluationType = "Bad Evaluation Type";
-
-    m_fitOptionsBrowser->setProperty("Evaluation Type", evaluationType);
-
-    TS_ASSERT_EQUALS(m_fitOptionsBrowser->getProperty("Evaluation Type"),
-                     "CentrePoint");
+    TS_ASSERT_THROWS(
+        m_fitOptionsBrowser->setProperty("Evaluation Type", evaluationType),
+        std::invalid_argument const &);
   }
 
 private:
