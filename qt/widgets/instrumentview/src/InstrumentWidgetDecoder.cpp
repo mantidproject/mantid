@@ -173,7 +173,7 @@ void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map,
   obj->m_free_draw->setChecked(map[QString("freeDraw")].toBool());
   obj->m_one->setChecked(map[QString("one")].toBool());
   obj->m_tube->setChecked(map[QString("tube")].toBool());
-  obj->m_peak->setChecked(map[QString("peak")].toBool());
+  obj->m_peakAdd->setChecked(map[QString("peakAdd")].toBool());
   obj->m_peakErase->setChecked(map[QString("peakErase")].toBool());
 }
 

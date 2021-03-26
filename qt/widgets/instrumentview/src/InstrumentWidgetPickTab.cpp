@@ -236,11 +236,11 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_edit->setIcon(QIcon(":/PickTools/selection-edit.png"));
   m_edit->setToolTip("Edit a shape");
 
-  m_peak = new QPushButton();
-  m_peak->setCheckable(true);
-  m_peak->setAutoExclusive(true);
-  m_peak->setIcon(QIcon(":/PickTools/selection-peak.png"));
-  m_peak->setToolTip("Add single crystal peak");
+  m_peakAdd = new QPushButton();
+  m_peakAdd->setCheckable(true);
+  m_peakAdd->setAutoExclusive(true);
+  m_peakAdd->setIcon(QIcon(":/PickTools/selection-peak.png"));
+  m_peakAdd->setToolTip("Add single crystal peak");
 
   m_peakErase = new QPushButton();
   m_peakErase->setCheckable(true);
@@ -271,7 +271,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
-  toolBox->addWidget(m_peak, 1, 2);
+  toolBox->addWidget(m_peakAdd, 1, 2);
   toolBox->addWidget(m_peakErase, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->addWidget(m_peakAlign, 1, 5);
@@ -280,7 +280,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
-  connect(m_peak, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_peakAdd, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakErase, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakCompare, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakAlign, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -313,7 +313,7 @@ void InstrumentWidgetPickTab::collapsePlotPanel() {
  * Returns true if the plot can be updated when the mouse moves over detectors
  */
 bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const {
-  return !m_peak->isChecked();
+  return !m_peakAdd->isChecked();
 }
 
 /**
@@ -444,7 +444,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
     if (plotType < DetectorPlotController::TubeSum) {
       plotType = DetectorPlotController::TubeSum;
     }
-  } else if (m_peak->isChecked()) {
+  } else if (m_peakAdd->isChecked()) {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
     surfaceMode = ProjectionSurface::AddPeakMode;
@@ -717,7 +717,7 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
     m_tube->setChecked(true);
     break;
   case PeakSelect:
-    m_peak->setChecked(true);
+    m_peakAdd->setChecked(true);
     break;
   case PeakCompare:
     m_peakCompare->setChecked(true);
@@ -842,7 +842,7 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakErase};
+      m_tube,         m_peakAdd,           m_peakErase};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -868,7 +868,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
   std::vector<QPushButton *> buttons{
       m_zoom,         m_edit,           m_ellipse,   m_rectangle,
       m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakErase};
+      m_tube,         m_peakAdd,           m_peakErase};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {
