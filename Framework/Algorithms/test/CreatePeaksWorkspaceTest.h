@@ -63,7 +63,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_exec_no_instr() {
+  void test_exec_leanElasticPeakWorkspace() {
     // Name of the output workspace.
     std::string outWSName("CreatePeaksWorkspaceTest_OutputWS2");
 
@@ -73,6 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfPeaks", 13));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputType", "Lean"));
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted());
 
