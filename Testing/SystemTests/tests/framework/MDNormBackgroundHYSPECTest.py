@@ -17,7 +17,7 @@ from mantid.simpleapi import (config, Load, SetGoniometer, GenerateEventsFilter,
 import systemtesting
 
 
-class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
+class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
 
     tolerance = 1e-8
 
@@ -129,7 +129,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                Dimension3Name='QDimension0',
                Dimension3Binning='-0.5,0.5',
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
-               OutputWorkspace='result',
+               OutputWorkspace='reducedMD',
                OutputDataWorkspace='dataMD',
                OutputNormalizationWorkspace='normMD')
 
@@ -149,8 +149,10 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputNormalizationWorkspace='background_normMD')
 
         # clean data
-        clean_data = MinusMD('result', 'backgroundMDH')
-        SaveMD(InputWorkspace=clean_data, Filename='/tmp/clean.nxs')
+        MinusMD(LHSWorkspace='reducedMD',
+                RHSWorkspace='backgroundMDH',
+                OutputWorkspace='result')
+        SaveMD(InputWorkspace='result', Filename='/tmp/clean.nxs')
         SaveMD(InputWorkspace='normMD', Filename='/tmp/sample_norm_round1.nxs')
         SaveMD(InputWorkspace='dataMD', Filename='/tmp/sample_data_round1.nxs')
         SaveMD(InputWorkspace='background_normMD', Filename='/tmp/normed_background_round1.nxs')
@@ -175,7 +177,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-8
-        return 'result', 'MDNormHYSPEC.nxs'
+        return 'result', 'MDNormBackgroundHYSPEC.nxs'
 
     from typing import Tuple
 
@@ -219,7 +221,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                SymmetryOperations='x,y,z;x,-y,z;x,y,-z;x,-y,-z',
                TemporaryDataWorkspace=sample_temp_ws_names[0],  # 'dataMD',
                TemporaryNormalizationWorkspace=sample_temp_ws_names[1],  # 'normMD',
-               OutputWorkspace='result',
+               OutputWorkspace='reducedMD',
                OutputDataWorkspace='dataMD',
                OutputNormalizationWorkspace='normMD')
 
@@ -241,7 +243,7 @@ class MDNormHYSPECBackgroundTest(systemtesting.MantidSystemTest):
                OutputNormalizationWorkspace='background_normMD')
 
         # clean
-        clean_md = MinusMD(LHSWorkspace='result',
+        clean_md = MinusMD(LHSWorkspace='reducedMD',
                            RHSWorkspace='backgroundMDH',
                            OutputWorkspace=output_ws_name)
 
