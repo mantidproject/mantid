@@ -162,7 +162,7 @@ Usage
          OutputWorkspace=f'si_reduced',
          Sum=True,
          )
-         
+
    # merged ws - group output ws
    WANDPowderReduction(
          InputWorkspace=[si1, si2],

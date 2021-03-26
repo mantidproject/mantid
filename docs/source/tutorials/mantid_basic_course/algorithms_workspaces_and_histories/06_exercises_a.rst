@@ -1,7 +1,7 @@
 .. _06_exercises_a:
 
 =========
-Exercises 
+Exercises
 =========
 
 Exercise 1
@@ -52,7 +52,7 @@ Exercise 2
 Exercise 3 - now you choose the OutputWorkspace names!
 ======================================================
 
-#. **Load** *HYS_11388_event.nxs* as in Exercise 1, but this time perform 
+#. **Load** *HYS_11388_event.nxs* as in Exercise 1, but this time perform
    the filtering as part of the Loading, by setting **FilterByTimeStart**\ =\ *4000*
 #. **SumSpectra** on your new workspace
 #. Use **RebinToWorkspace** to achieve the same binning as the existing

@@ -1,7 +1,7 @@
 .. _using_modules:
 
 =============
-Using Modules 
+Using Modules
 =============
 
 -  Functions allow blocks of code to be separated into reusable parts
@@ -28,7 +28,7 @@ Using Modules
        nvals = len(values)
        sum = 0.0
        for v in values:
-           sum += v 
+           sum += v
        return float(sum)/nvals
 
 -  To use this module from a user script we need to tell the script
@@ -40,7 +40,7 @@ Using Modules
 
    ## My script using the math module ##
    import mymath  # Note no .py
-    
+
    values = [2,4,6,8,10]
    print('Squares:')
    for v in values:
@@ -179,7 +179,7 @@ os.path
    print(os.path.dirname(fullpath))  # prints 'C:\Users\Files'
 
    # A userful function is expanduser which can expand the '~' token to a
-   # user's directory (Documents and Settings\username on WinXP  and 
+   # user's directory (Documents and Settings\username on WinXP  and
    # /home/username on Linux/OSX)
    print(os.path.expanduser('~/test')) # prints /home/[MYUSERNAME]/test on
                                       # this machine where [MYUSERNAME] is
@@ -269,9 +269,9 @@ Gives the output:
 .. testcode:: numpy2
 
    import numpy
-   a = numpy.array( [20, 30, 40, 50] ) 
-   b = numpy.arange( 4 ) 
-   c = a-b 
+   a = numpy.array( [20, 30, 40, 50] )
+   b = numpy.arange( 4 )
+   c = a-b
    print(c)
 
 Gives the output:

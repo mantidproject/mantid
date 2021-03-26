@@ -65,20 +65,20 @@ Usage
    # Create a workspace with 1 spectrum with five bins of width 10
    ws = CreateSampleWorkspace("Histogram",  NumBanks=1, BankPixelWidth=1, BinWidth=10, Xmax=50)
 
-   # Run algorithm  removing 2nd, 3rd bins and half of 4th bin. 
+   # Run algorithm  removing 2nd, 3rd bins and half of 4th bin.
    OutputWorkspace = RemoveBins( ws, 20, 35)
 
    # Show workspaces
    print("Before RemoveBins {}".format(ws.readY(0)))
    print("After RemoveBins {}".format(OutputWorkspace.readY(0)))
-   
+
 Output:
 
 .. testoutput:: ExRemoveBinsSimple
 
    Before RemoveBins [ 10.3   0.3   0.3   0.3   0.3]
    After RemoveBins [ 10.3    0.     0.     0.15   0.3 ]
-   
+
 .. categories::
 
 .. sourcelink::

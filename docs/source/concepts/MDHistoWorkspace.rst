@@ -153,8 +153,8 @@ Accessing the Data
    ws=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                               SignalInput=range(0,100),ErrorInput=range(0,100),\
                               NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-                                    
-   # To get the signal and error at a prticular position                            
+
+   # To get the signal and error at a prticular position
    index = ws.getLinearIndex(5,5)
    print(ws.signalAt(index))
    print(ws.errorSquaredAt(index))
@@ -194,7 +194,7 @@ The basic arithmetic operators are available from python. For example:
    A=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                                     SignalInput=range(0,100),ErrorInput=range(0,100),\
                                     NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-   B = A.clone() 
+   B = A.clone()
 
    # Creating a new workspace
    C = A + B
@@ -241,7 +241,7 @@ For example:
    A=CreateMDHistoWorkspace(Dimensionality=2,Extents='-3,3,-10,10', \
                                     SignalInput=range(0,100),ErrorInput=range(0,100),\
                                     NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
-   B = A.clone() 
+   B = A.clone()
 
    # Create boolean workspaces by comparisons
    C = A > B
@@ -259,7 +259,7 @@ For example:
 
 Using Boolean Masks
 ###################
-      
+
 The :ref:`SetMDUsingMask <algm-SetMDUsingMask>` algorithm allows you to modify
 the values in a MDHistoWorkspace using a mask created using the boolean
 operations above. See the :ref:`algorithm wiki page <algm-SetMDUsingMask>` for

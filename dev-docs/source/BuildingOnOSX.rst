@@ -13,7 +13,7 @@ Building on OS X
   :local:
 
 
-The minimum supported version of macOS is High Sierra (10.13). 
+The minimum supported version of macOS is High Sierra (10.13).
 
 These instructions are from the assumptions of a blank newly installed version of High Sierra using Homebrew for dependency management.
 
@@ -71,7 +71,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 
 .. code-block:: sh
 
-   python3 -m pip install setuptools==48.0.0  
+   python3 -m pip install setuptools==48.0.0
 
 10. Install python requirements
 

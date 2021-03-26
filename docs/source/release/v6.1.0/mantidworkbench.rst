@@ -23,7 +23,7 @@ Added Floating/On Top setting for all the windows that are opened by workbench (
   to find better estimates of parameter errors.
 
 - Instrument view: when in tube selection mode, the sum of pixel counts is now output to the selection pane.
-  
+
 Bugfixes
 --------
 

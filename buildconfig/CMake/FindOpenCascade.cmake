@@ -3,7 +3,7 @@
 # OPENCASCADE_LIBRARIES libraries to link against
 # OPENCASCADE_FOUND If false, do not try to use OPENCASCADE
 
-find_path ( OPENCASCADE_INCLUDE_DIR Standard.hxx 
+find_path ( OPENCASCADE_INCLUDE_DIR Standard.hxx
             PATHS /opt/OpenCASCADE/inc $ENV{CASROOT}/inc
             PATH_SUFFIXES opencascade oce
 )
@@ -84,15 +84,15 @@ set ( OPENCASCADE_LIBRARIES
         ${OPENCASCADE_LIB_TKGEOMALGO}
 )
 
-# handle the QUIETLY and REQUIRED arguments and set OPENCASCADE_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set OPENCASCADE_FOUND to TRUE if
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( OpenCascade DEFAULT_MSG OPENCASCADE_LIBRARIES OPENCASCADE_INCLUDE_DIR )
 
 mark_as_advanced ( OPENCASCADE_INCLUDE_DIR OPENCASCADE_LIBRARY_DIR
-                   OPENCASCADE_LIB_TKERNEL OPENCASCADE_LIB_TKBO 
+                   OPENCASCADE_LIB_TKERNEL OPENCASCADE_LIB_TKBO
                    OPENCASCADE_LIB_TKPRIM OPENCASCADE_LIB_TKMESH
-                   OPENCASCADE_LIB_TKBREP OPENCASCADE_LIB_TKTOPALGO 
+                   OPENCASCADE_LIB_TKBREP OPENCASCADE_LIB_TKTOPALGO
                    OPENCASCADE_LIB_TKMATH OPENCASCADE_LIB_TKG2D
                    OPENCASCADE_LIB_TKG3D OPENCASCADE_LIB_TKGEOMBASE
                    OPENCASCADE_LIB_TKGEOMALGO

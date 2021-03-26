@@ -11,15 +11,15 @@ Description
 -----------
 
 Measurements using polarized neutrons can be used to identify magnetic and nuclear contribution.
-In the case of coherent scattering, nuclear spins generally do not change the spin polarization 
+In the case of coherent scattering, nuclear spins generally do not change the spin polarization
 of the neutrons (non spin flip scattering).
 For magnetic scattering, the magnetization parallel to the neutron spin direction produces
 non spin flip scattering, while magnetization perpendicular to the spin direction will flip
 the neutron spin.
 
-When measuring spin flip and non spin flip cross sections, the finite capabilities of the instrument 
-will allow a certain percentage of the other component to leak through. This is denoted by the 
-flipping ratio :math:`F`. Using subscript "m" for measured and "c" for corrected, the corrected 
+When measuring spin flip and non spin flip cross sections, the finite capabilities of the instrument
+will allow a certain percentage of the other component to leak through. This is denoted by the
+flipping ratio :math:`F`. Using subscript "m" for measured and "c" for corrected, the corrected
 intensities for the spin flip (SF) and non spin flip (NSF) scattering are given by [1]_:
 
 .. math::
@@ -31,7 +31,7 @@ intensities for the spin flip (SF) and non spin flip (NSF) scattering are given 
 Given a multidimensional event workspace, this algorithm will output the workspace where events
 are multiplied by  :math:`F/(F-1)` (in ``OutputWorkspace1``) and by :math:`1/(F-1)` (in ``OutputWorkspace2``).
 Note however that the flipping ratio might be angle dependent. For example, in the case of
-type II superconductors, the flux lattice will depolarize the neutrons differently, depending 
+type II superconductors, the flux lattice will depolarize the neutrons differently, depending
 on the orientation of the neutron beam with respect to the superconducting planes. In this case
 one must use a formula that would use a different flipping ratio for each neutron, that
 depends on a goniometer angle. Assuming that we have a log value ``omega`` for the sample rotation,

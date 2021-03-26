@@ -20,7 +20,7 @@ where,
 
 :math:`t'=t-t_\text{off}` ,
 
-:math:`A_0` is the amplitude, 
+:math:`A_0` is the amplitude,
 
 :math:`\Delta` (MHz) is the relaxation rate,
 
@@ -31,7 +31,7 @@ H0 (G) is the local magnetic field,
 and :math:`t_\text{off}` (microsecs) is the time offset.
 
 .. plot::
-	
+
    from mantid.simpleapi import FunctionWrapper
    import matplotlib.pyplot as plt
    import numpy as np

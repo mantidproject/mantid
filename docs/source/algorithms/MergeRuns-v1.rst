@@ -178,7 +178,7 @@ Output:
 
    print("group_1 = [{},".format(group_1[0].readY(0)))
    print("           {}]".format(group_1[1].readY(0)))
-	      
+
    print("group_2 = [{},".format(group_2[0].readY(0)))
    print("           {}]".format(group_2[1].readY(0)))
 

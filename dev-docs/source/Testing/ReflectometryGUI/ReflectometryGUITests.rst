@@ -72,12 +72,12 @@ Generating Plots and the 'plot' button
 There are two plotting buttons at the top of the interface - they look like little plots.
 
 - Select a processed group:
-  
+
   - Plot the "unstitched" data; the left of the two plot buttons. This should produce a plot with two separate lines for the individual reduced runs.
   - Plot the "stitched" data; the right of the two buttons. This should produce a plot with a single line for the stitched output.
 
 - Select a processed row:
-  
+
   - Plot the "unstitched" data; the left of the two plot buttons. This should produce a plot with one lines for that reduced run.
   - Plot the "stitched" data; this should do nothing for a row.
 
@@ -90,7 +90,7 @@ Polarisation corrections settings are under the Settings tab in the interface. T
 - Switch to the Experiment Settings tab - the Polarisation corrections check box should be greyed out.
 - Switch back to Runs and set the instrument to POLREF, CRISP or OFFSPEC.
 - Switch back to Experiment Settings - the Polarisation corrections check box should now be enabled. Tick it and try processing something
-  
+
   - e.g. (this will require the archive) OFFSPEC run 44956, angle 0.4, transmission run 44937.
 
 Search for an RB Number
@@ -98,10 +98,10 @@ Search for an RB Number
 *You require a connection to the archives for this. Make sure the archive is mounted and is enabled in the Manage User Directories dialog.*.
 
 - Find an experiment number e.g. INTER 1120015. There are a number of ways to find other experiment numbers:
-  
+
   - the `JournalViewer <https://www.projectaten.com/jv>`__ provides an easy way to browse experiments
   - alternatively, in the archives, go to the ``\Instrument\logs\journal`` subdirectory of one of the instrument directories (named '**NDX{Instrument}**') and select an xml journal other than journal_main.xml. Look for a pair of ``experiment_identifier`` tags and note the number inside the tags. This is the RB number that the search functionality looks for.
-    
+
 - On the ISIS Reflectometry interface, change to the relevant instrument and enter the RB number in the Investigation Id textbox.
 - Hit search, and enter your ICat login details if required.
 - The search results list will fill with all the runs from ICat with that RB number.
@@ -117,7 +117,7 @@ Transfer Run Number and Transmission Runs
   - Runs with the same title will appear in the same group.
   - Runs in the same group with different angles will appear on different rows.
   - Runs in the same group with the same angle will be combined into the same row with the ``Run(s)`` field showing as a sum of all runs for that angle, e.g. ``13460+13462``.
-    
+
 - Click Transfer again with the same selection. If the runs are already in the table, nothing should happen, because duplicates should not be added.
 - Select some different runs and click Transfer. The new runs should be added to the table.
 

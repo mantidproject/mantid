@@ -25,11 +25,11 @@ Changes in this version
 -----------------------
 
 * `19110 <https://www.github.com/mantidproject/mantid/pull/19161>`__ Fixes bug when changing group in muon analysis.
-* `19129 <https://www.github.com/mantidproject/mantid/pull/19129>`__ New CNCS geometry. 
+* `19129 <https://www.github.com/mantidproject/mantid/pull/19129>`__ New CNCS geometry.
 * `19161 <https://www.github.com/mantidproject/mantid/pull/19161>`__ Fixes bug when plotting after simultaneous fit.
 
 
- 
+
 Summary of impact
 -----------------
 

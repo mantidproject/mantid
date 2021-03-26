@@ -79,7 +79,7 @@ Usage
     center = 0.0
     sigma = 0.01    #in meV
     startX = -0.1   #in meV
-    endX = 0.1 
+    endX = 0.1
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit

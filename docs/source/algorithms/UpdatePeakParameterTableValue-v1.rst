@@ -67,7 +67,7 @@ Usage
     print("Value before %.2f" % tablews.cell(0, 1))
 
     UpdatePeakParameterTableValue(tablews, Column="Value", ParameterNames=["A"], NewFloatValue=1.00)
-    
+
     print("Value after %.2f" % tablews.cell(0, 1))
 
 Output:

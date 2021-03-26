@@ -15,28 +15,28 @@ Roles
 #####
 
 The roles are defined in terms of person responsible.
-This does not mean that the person needs to do the jobs himself/herself, but that they 
+This does not mean that the person needs to do the jobs himself/herself, but that they
 are responsible for ensuring that the work gets done.
 
-* :ref:`Local Project Manager(s) <local-project-managers-checklist>` - People in charge 
-  of communicating with local development teams, facility management, and other people 
+* :ref:`Local Project Manager(s) <local-project-managers-checklist>` - People in charge
+  of communicating with local development teams, facility management, and other people
   at their sponsoring facility.
-* :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` - Person responsible 
-  for making sure that manual testing has been performed. They will ensure Mantid meets 
+* :ref:`Quality Assurance Manager <quality-assurance-manager-checklist>` - Person responsible
+  for making sure that manual testing has been performed. They will ensure Mantid meets
   quality requirements before delivery in consultation with the *Release Manager*.
-* :ref:`Release Editor <release-editor-checklist>` - Person responsible for ensuring the 
+* :ref:`Release Editor <release-editor-checklist>` - Person responsible for ensuring the
   release notes are edited to give them a common language, layout, and illustrative images.
-* :ref:`Release Manager <release-manager-checklist>` - Person in charge of the go/no go 
-  decision of the release. The main task is to reiterate the timeline and be the collection 
+* :ref:`Release Manager <release-manager-checklist>` - Person in charge of the go/no go
+  decision of the release. The main task is to reiterate the timeline and be the collection
   point for information between all of the *Local Project Managers*.
-* :ref:`Technical Release Manager <technical-release-manager-checklist>` - Person responsible 
+* :ref:`Technical Release Manager <technical-release-manager-checklist>` - Person responsible
   for technical tasks such as renaming branches, creating tags, configuring build servers.
 
 Timeline
 ########
 
-Releases are normally planned to occur on a Monday, therefore this page will refer 
-to days assuming that is correct. If the final release day is not planned to be 
+Releases are normally planned to occur on a Monday, therefore this page will refer
+to days assuming that is correct. If the final release day is not planned to be
 Monday then the names of the days will have to be changed.
 
 +---------------------------------+---------------------------+-----------------------------------------------+--------------------------------------------------------------------------+
@@ -76,7 +76,7 @@ Monday then the names of the days will have to be changed.
 Local Project Manager(s) Checklist
 ##################################
 
-**Role**: People in charge of communicating with local development teams, facility 
+**Role**: People in charge of communicating with local development teams, facility
 management, and other people at their sponsoring facility.
 
 Friday, 4 weeks & 1 day
@@ -102,21 +102,21 @@ Wednesday, 2 weeks & 3 days
 Quality Assurance Manager Checklist
 ###################################
 
-**Role**: Person responsible for making sure that manual testing has been performed. 
-They will ensure Mantid meets quality requirements before delivery in consultation 
+**Role**: Person responsible for making sure that manual testing has been performed.
+They will ensure Mantid meets quality requirements before delivery in consultation
 with the Release Manager.
 
 Monday, 3 weeks
 ---------------
 
-*  Ensure that Manual testing begins. The instructions for Manual testing are found 
+*  Ensure that Manual testing begins. The instructions for Manual testing are found
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
 Tuesday, 4 days
 ---------------
 
-*  It is likely that many changes have been made over the beta test period, therefore 
-   ensure the manual testing is redone following the instructions described `here 
+*  It is likely that many changes have been made over the beta test period, therefore
+   ensure the manual testing is redone following the instructions described `here
    <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
 .. _release-editor-checklist:
@@ -124,14 +124,14 @@ Tuesday, 4 days
 Release Editor Checklist
 ########################
 
-**Role**: Person responsible for editing the release notes and giving them a common 
+**Role**: Person responsible for editing the release notes and giving them a common
 language, layout, and collecting images.
 
 Wednesday, 2 weeks & 3 days
 ---------------------------
 
 *  Create issues for people to neaten up the release notes and add images etc.
-*  Ensure an image for the release is found to highlight the main changes for this 
+*  Ensure an image for the release is found to highlight the main changes for this
    release. This can be a collage of images if there is not a big 'headline' feature
    or change.
 
@@ -145,25 +145,25 @@ Tuesday, 4 days
 Release Manager Checklist
 #########################
 
-**Role**: Person in charge of the go/no go decision of the release. The main task 
-is to reiterate the timeline and be the collection point for information between 
+**Role**: Person in charge of the go/no go decision of the release. The main task
+is to reiterate the timeline and be the collection point for information between
 all of the Local Project Managers.
 
 Friday, 4 weeks & 1 day
 -----------------------
 
-*  Post on the *\#general* slack channel reminding developers of the impending 
+*  Post on the *\#general* slack channel reminding developers of the impending
    release and stating that they have only 5 days left before the code freeze.
-*  Send an email to beta test users explaining the dates for the testing, and 
-   stating they will have more detail on the start of the first day (cc the Local 
+*  Send an email to beta test users explaining the dates for the testing, and
+   stating they will have more detail on the start of the first day (cc the Local
    Project Manager(s) so they can organise a similar message at their facilities).
 
 Friday, 3 weeks & 1 day
 -----------------------
 
-*  Post on the *\#general* slack channel asking everyone to ensure they have moved 
-   any incomplete issues to the next milestone, stating the code freeze is in place, 
-   and warning developers that non-blocker issues will be moved from the milestone 
+*  Post on the *\#general* slack channel asking everyone to ensure they have moved
+   any incomplete issues to the next milestone, stating the code freeze is in place,
+   and warning developers that non-blocker issues will be moved from the milestone
    on Monday morning.
 *  Attempt to drive the pull requests for this milestone down to 0, in collaboration
    with the Local Project Managers.
@@ -179,33 +179,33 @@ Go through the issues for the release milestone (not the sprint milestone), ensu
 
 *  All issues are intended for the release.
 *  Any new issues are triaged on a daily basis, and allocated to staff.
-*  Issues that are not important for the release should be moved to a more 
-   appropriate milestone. Don't leave anything in the release milestone that is not 
+*  Issues that are not important for the release should be moved to a more
+   appropriate milestone. Don't leave anything in the release milestone that is not
    definitely for that release.
 
 **Maintenance**
 
 *  Present to the whole development team the maintenance tasks for this release period.
-*  Emphasize the order of work priorities as noted by the task priorities in this 
+*  Emphasize the order of work priorities as noted by the task priorities in this
    checklist. Maintenance tasks may need to be paused to work on tasks for the release.
 
 Wednesday, 2 weeks & 3 days
 ---------------------------
 
-*  Before sending an email to users regarding the beginning of beta testing, ensure that 
-   the Usage data *.zip file containing usage data is up-to-date. This is done by 
+*  Before sending an email to users regarding the beginning of beta testing, ensure that
+   the Usage data *.zip file containing usage data is up-to-date. This is done by
    downloading the current *.zip from sourceforge, adding any missing files, and
    resending it.
-*  Send an email to beta test users explaining where to download the installers and how 
-   to report issues (cc the Local Project Managers so they can organise a similar message 
+*  Send an email to beta test users explaining where to download the installers and how
+   to report issues (cc the Local Project Managers so they can organise a similar message
    at their facilities).
 
 Wednesday, 1 week & 3 days
 --------------------------
 
-*  Send a beta test reminder email to beta test users thanking them for there feedback so 
-   far and reminding them to feedback as soon as possible and not to send in a list of 
-   issues at the end of testing (cc the Local Project Managers so they can organise a 
+*  Send a beta test reminder email to beta test users thanking them for there feedback so
+   far and reminding them to feedback as soon as possible and not to send in a list of
+   issues at the end of testing (cc the Local Project Managers so they can organise a
    similar message at their facilities).
 
 Tuesday, 4 days
@@ -228,7 +228,7 @@ After the Technical Release Manager has finished their release day tasks:
   *  ``nobugs@nobugsconference.org``
   *  ``news@neutronsources.org``
   *  ``neutron@neutronsources.org``
-*  Also post the contents of the message to the *\#announcements* channel on 
+*  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
 *  Close the release milestone on github.
@@ -238,7 +238,7 @@ After the Technical Release Manager has finished their release day tasks:
 Technical Release Manager Checklist
 ###################################
 
-**Role**: Person responsible for technical tasks such as renaming branches, creating 
+**Role**: Person responsible for technical tasks such as renaming branches, creating
 tags, configuring build servers.
 
 Monday, 3 weeks
@@ -246,19 +246,19 @@ Monday, 3 weeks
 
 **Create the Release Branch (once most PR's are merged)**
 
-*  Ensure the `master build and system test 
+*  Ensure the `master build and system test
    <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
    jobs have passed for all build environments for this release.
-*  Run `open-release-testing 
+*  Run `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs by clicking ``Build Now``.
-*  Check the state of all open pull requests for this milestone and decide which 
-   should be kept for the release, liaise with the Release Manager on this. Move any 
-   pull requests not targeted for release out of the milestone. To update the base 
-   branches of these pull requests run `update-pr-base-branch.py 
+*  Check the state of all open pull requests for this milestone and decide which
+   should be kept for the release, liaise with the Release Manager on this. Move any
+   pull requests not targeted for release out of the milestone. To update the base
+   branches of these pull requests run `update-pr-base-branch.py
    <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
-*  Inform other developers that release-next has been created by posting to the 
-   *\#announcements* slack channel. You can use an adapted version of the 
+*  Inform other developers that release-next has been created by posting to the
+   *\#announcements* slack channel. You can use an adapted version of the
    following announcement:
 
   .. code
@@ -267,10 +267,10 @@ Monday, 3 weeks
 
 **Create Release Notes Skeleton**
 
-*  Create a skeleton set of release notes on master for the next version using the 
-   `python helper tool 
-   <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ 
-   and open a pull request to put them on ``master``. Make sure the 
+*  Create a skeleton set of release notes on master for the next version using the
+   `python helper tool
+   <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
+   and open a pull request to put them on ``master``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
 
 Monday, Release Day
@@ -280,15 +280,15 @@ Monday, Release Day
 
 Once the manual testing has passed (check with the Quality Assurance Manager):
 
-*  Check the release notes and remove the "Under Construction" paragraph on the main 
+*  Check the release notes and remove the "Under Construction" paragraph on the main
    index page.
 *  Disable release deploy jobs by building the
    `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
    job.
-*  On the ``release-next`` branch, update the git SHA for MSlice accordingly in 
+*  On the ``release-next`` branch, update the git SHA for MSlice accordingly in
    ``scripts/ExternalInterfaces/CMakeLists`` in case MSlice has to be updated.
-*  On the ``release-next`` branch, update major & minor versions accordingly in 
-   ``buildconfig/CMake/VersionNumber.cmake``. Also uncomment ``VERSION_PATCH`` and 
+*  On the ``release-next`` branch, update major & minor versions accordingly in
+   ``buildconfig/CMake/VersionNumber.cmake``. Also uncomment ``VERSION_PATCH`` and
    set it to ``0``.
 *  Merge ``release-next`` branch back to ``master``
 *  Comment out patch number on ``master`` branch
@@ -296,7 +296,7 @@ Once the manual testing has passed (check with the Quality Assurance Manager):
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 *  Draft a `new release <https://github.com/mantidproject/mantid/releases>`__ on
    GitHub. The new tag should be created based of the release branch in the form ``vX.Y.Z``
-*  After all of the packages have been smoke tested run the `release_deploy 
+*  After all of the packages have been smoke tested run the `release_deploy
    <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
    job to put the packages, with the exception of Windows, on Sourceforge.
 
@@ -315,25 +315,25 @@ Once the manual testing has passed (check with the Quality Assurance Manager):
 *  Kick off the build for ``mantidXY`` on RHEL7 for SNS:
    https://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
    ``XY``.
-* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for 
+* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for
   mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 **Generate DOI**
 
-This requires that a tag has been created for this release. This is done automatically 
+This requires that a tag has been created for this release. This is done automatically
 if a new `release <https://github.com/mantidproject/mantid/releases>`__ has been
 created on GitHub.
 
-*  Make sure that you have updated your local copy of git to grab the new tag. 
+*  Make sure that you have updated your local copy of git to grab the new tag.
    ``git fetch -p``
-*  If the script below fails you may need to update the authors list and push the 
-   updates to master. Look for ``authors.py`` in the ``tools/DOI`` directory. 
+*  If the script below fails you may need to update the authors list and push the
+   updates to master. Look for ``authors.py`` in the ``tools/DOI`` directory.
    It does not matter that these are not on the release branch.
 
 ``python tools/DOI/doi.py  --username=_____  X.Y.Z``
 
-*  Major/minor/patch version numbers must be supplied, as well as a username which can 
-   be found in the `Protected Information 
-   <https://www.mantidproject.org/Protected_Information>`__ section. The script will 
+*  Major/minor/patch version numbers must be supplied, as well as a username which can
+   be found in the `Protected Information
+   <https://www.mantidproject.org/Protected_Information>`__ section. The script will
    prompt for the password. Note that only MediaWiki admins have access rights to the page.
 *  A corresponding version tag must be present in the Mantid repo.

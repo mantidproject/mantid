@@ -27,7 +27,7 @@ namespace
   /**
    * Checks if two workspace shared pointers point to the same workspace
    */
-  bool isSameWorkspaceObject(Mantid::API::Workspace_sptr workspace1, 
+  bool isSameWorkspaceObject(Mantid::API::Workspace_sptr workspace1,
 		             Mantid::API::Workspace_sptr workspace2) {
     return workspace1 == workspace2;
   }
@@ -46,7 +46,7 @@ BOOST_PYTHON_MODULE(_api)
 
   // Workspace address comparison
   boost::python::def("isSameWorkspaceObject",
-		     &isSameWorkspaceObject, 
+		     &isSameWorkspaceObject,
 		     boost::python::args("workspace1", "workspace2"));
 
   try {

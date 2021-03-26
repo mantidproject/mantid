@@ -63,7 +63,7 @@ Output:
     0.0861
     0.0869
 
-    
+
 **Example - Create a transmission run, overriding some default parameters**
 
 .. testcode:: ExCreateTransWSAutoOverload
@@ -86,7 +86,7 @@ Output:
     0.086
     0.087
 
-    
+
 **Example - Create a transmission run from two runs**
 
 .. testcode:: ExCreateTransWSAutoTwo

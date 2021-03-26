@@ -36,7 +36,7 @@ Usage
 -----
 **Example - create cal file from GEM instrument**
 
-.. include:: ../usagedata-note.txt 
+.. include:: ../usagedata-note.txt
 
 .. testcode:: ExCreateCalFileByNamesSimple
 
@@ -46,7 +46,7 @@ Usage
    newFile = os.path.join(os.path.expanduser("~"), "output.cal")
 
    # Create test workspace. Normally just use reduced one
-   GEM = LoadEmptyInstrument(Filename="GEM_Definition.xml") 
+   GEM = LoadEmptyInstrument(Filename="GEM_Definition.xml")
 
    # Run the algorithm
    CreateCalFileByNames("GEM",newFile,"bank1,bank2,module1")
@@ -60,13 +60,13 @@ Output:
 .. testoutput:: ExCreateCalFileByNamesSimple
 
    File Exists: True
-   
+
 .. testcleanup:: ExCreateCalFileByNamesSimple
 
    os.remove( newFile )
 
 
-   
+
 .. categories::
 
 .. sourcelink::

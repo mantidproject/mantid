@@ -103,7 +103,7 @@ Plot and Edit
 
 #. Double-click on the *normalized* spectrum to plot it
 #. Right-click on *run_monitors_lambda_rebinned* and select Plot > Overplot Spectrum.
-#. Also, overplot with *run_lambda_summed* 
+#. Also, overplot with *run_lambda_summed*
 #. In the Options menu (Gear icon)
 #. Set the **x-upper-limit** to 4.5
 #. Set the **y-scale** to log
@@ -120,5 +120,5 @@ Generating a script from a plot
 
 :ref:`Solutions <02_pim_sol>`
 
-.. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+.. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

@@ -183,7 +183,7 @@ def deploy_python_framework(destination, host_python_exe,
   # remove Info.plist files so outer application controls app display name
   FileUtils.rm "#{bundle_py_home}/Resources/Info.plist"
   FileUtils.rm "#{bundle_py_home}/Resources/Python.app/Contents/Info.plist"
-  
+
   # remove site-packages symlink, copy brew python modules and pip install the rest
   src_site_packages = Pathname.new("#{host_py_home}/lib/python#{py_ver}/site-packages")
   bundle_site_packages = Pathname.new("#{bundle_py_home}/lib/python#{py_ver}/site-packages")
@@ -206,7 +206,7 @@ def deploy_python_framework(destination, host_python_exe,
   # add sitecustomize module
   FileUtils.cp SITECUSTOMIZE_FILE, bundle_site_packages,
                preserve: true
-  
+
   bundle_site_packages
 end
 
