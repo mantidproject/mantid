@@ -11,6 +11,7 @@
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -36,12 +37,22 @@ void CreatePeaksWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+  // explicit control of output peak workspace tyep
+  // Full: standar peak workspace
+  // Lean: LeanElasticPeakWorkspace
+  const std::vector<std::string> peakworkspaceTypes{"Full", "Lean"};
+  declareProperty(
+      "OutputType", "Full",
+      std::make_shared<StringListValidator>(peakworkspaceTypes),
+      "Output peak workspace type, default to full peak workspace.");
 }
 
 /** Execute the algorithm.
  */
 void CreatePeaksWorkspace::exec() {
-  Workspace_sptr instWS = this->getProperty("InstrumentWorkspace");
+  Workspace_sptr instWS = getProperty("InstrumentWorkspace");
+  const std::string outputType = getProperty("OutputType");
+  int NumberOfPeaks = getProperty("NumberOfPeaks");
 
   MultipleExperimentInfos_sptr instMDWS =
       std::dynamic_pointer_cast<MultipleExperimentInfos>(instWS);
@@ -49,45 +60,53 @@ void CreatePeaksWorkspace::exec() {
   ExperimentInfo_sptr ei;
 
   IPeaksWorkspace_sptr out;
-  if (instWS)
+  // By default, we generate a PeakWorkspace unless user explicitly
+  // requires a LeanElasticPeakWorkspace
+  if (outputType == "Full") {
     out = std::make_shared<PeaksWorkspace>();
-  else
-    out = std::make_shared<LeanElasticPeaksWorkspace>();
-  setProperty("OutputWorkspace", out);
-  int NumberOfPeaks = getProperty("NumberOfPeaks");
+    setProperty("OutputWorkspace", out);
 
-  if (instMDWS != nullptr) {
-    if (instMDWS->getNumExperimentInfo() > 0) {
-      out->setInstrument(instMDWS->getExperimentInfo(0)->getInstrument());
-      out->mutableRun().setGoniometer(
-          instMDWS->getExperimentInfo(0)->run().getGoniometer().getR(), false);
+    if (instMDWS != nullptr) {
+      if (instMDWS->getNumExperimentInfo() > 0) {
+        out->setInstrument(instMDWS->getExperimentInfo(0)->getInstrument());
+        out->mutableRun().setGoniometer(
+            instMDWS->getExperimentInfo(0)->run().getGoniometer().getR(),
+            false);
+      } else {
+        throw std::invalid_argument(
+            "InstrumentWorkspace has no ExperimentInfo");
+      }
     } else {
-      throw std::invalid_argument("InstrumentWorkspace has no ExperimentInfo");
+      ei = std::dynamic_pointer_cast<ExperimentInfo>(instWS);
+      if (ei) {
+        out->setInstrument(ei->getInstrument());
+        out->mutableRun().setGoniometer(ei->run().getGoniometer().getR(),
+                                        false);
+      }
     }
-  } else {
-    ei = std::dynamic_pointer_cast<ExperimentInfo>(instWS);
-    if (ei) {
-      out->setInstrument(ei->getInstrument());
-      out->mutableRun().setGoniometer(ei->run().getGoniometer().getR(), false);
+    if (instMDWS || ei) {
+      Progress progress(this, 0.0, 1.0, NumberOfPeaks);
+      // Create some default Peaks
+      for (int i = 0; i < NumberOfPeaks; i++) {
+        out->addPeak(Peak(out->getInstrument(),
+                          out->getInstrument()->getDetectorIDs(true)[0], 1.0));
+        progress.report();
+      }
     }
-  }
+  } else if (outputType == "Lean") {
+    // use LeanElasticPeakWorkspace, which means no instrument related info
+    out = std::make_shared<LeanElasticPeaksWorkspace>();
+    setProperty("OutputWorkspace", out);
 
-  Progress progress(this, 0.0, 1.0, NumberOfPeaks);
-
-  if (instMDWS || ei) {
-    // Create some default Peaks
-    for (int i = 0; i < NumberOfPeaks; i++) {
-      out->addPeak(Peak(out->getInstrument(),
-                        out->getInstrument()->getDetectorIDs(true)[0], 1.0));
-      progress.report();
-    }
-  } else {
-    // Create some default LeanElasticPeaks
+    Progress progress(this, 0.0, 1.0, NumberOfPeaks);
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(LeanElasticPeak());
       progress.report();
     }
+  } else {
+    throw std::invalid_argument("OutputType MUST be either Full or Lean!");
   }
+  // ALG END
 }
 
 } // namespace Algorithms
