@@ -80,8 +80,8 @@ Output:
 
 .. testoutput:: ExGenerateLogbook_D7_binary_operations
 
-   Number of numors in the logbook: 2
-   Number of headers in the logbook: 3
+   Number of numors in the logbook: 3
+   Number of headers in the logbook: 7
 
 .. testcleanup:: ExGenerateLogbook_D7_binary_operations
 
