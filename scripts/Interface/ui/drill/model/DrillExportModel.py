@@ -66,7 +66,7 @@ class DrillExportModel:
                     RundexSettings.EXPORT_ALGO_EXTENSION[a]
             try:
                 alg = AlgorithmManager.createUnmanaged(a)
-                self._exportDocs[a] = alg.getWikiSummary()
+                self._exportDocs[a] = alg.summary()
             except:
                 pass
         self._pool = DrillAlgorithmPool()
